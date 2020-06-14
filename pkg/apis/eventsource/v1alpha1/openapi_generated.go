@@ -167,7 +167,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 						},
 					},
 				},
-				Required: []string{"fqdn", "sharedAccessKeyName", "sharedAccessKey", "hubName"},
+				Required: []string{"fqdn", "hubName"},
 			},
 		},
 		Dependencies: []string{
@@ -1001,7 +1001,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"id", "webhook", "owner", "repository", "events", "apiToken"},
+				Required: []string{"id", "owner", "repository", "events"},
 			},
 		},
 		Dependencies: []string{
@@ -1078,7 +1078,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"webhook", "projectId", "event", "accessToken", "gitlabBaseURL"},
+				Required: []string{"projectId", "event", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{
@@ -1726,7 +1726,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 						},
 					},
 				},
-				Required: []string{"webhook", "topicArn", "region"},
+				Required: []string{"topicArn", "region"},
 			},
 		},
 		Dependencies: []string{
@@ -1879,7 +1879,6 @@ func schema_pkg_apis_eventsource_v1alpha1_SlackEventSource(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"webhook"},
 			},
 		},
 		Dependencies: []string{
@@ -1926,7 +1925,6 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 						},
 					},
 				},
-				Required: []string{"webhook"},
 			},
 		},
 		Dependencies: []string{
@@ -2013,7 +2011,6 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"webhook"},
 			},
 		},
 		Dependencies: []string{

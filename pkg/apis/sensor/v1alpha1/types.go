@@ -139,7 +139,7 @@ type SensorSpec struct {
 	Template Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
 	// Subscription refers to the modes of events subscriptions for the sensor.
 	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
-	Subscription *Subscription `json:"subscription" protobuf:"bytes,4,opt,name=subscription"`
+	Subscription *Subscription `json:"subscription,omitempty" protobuf:"bytes,4,opt,name=subscription"`
 	// Circuit is a boolean expression of dependency groups
 	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,opt,name=circuit"`
 	// +listType=dependencyGroups
@@ -288,12 +288,12 @@ type DataFilter struct {
 // Trigger is an action taken, output produced, an event created, a message sent
 type Trigger struct {
 	// Template describes the trigger specification.
-	Template *TriggerTemplate `json:"template" protobuf:"bytes,1,opt,name=template"`
+	Template *TriggerTemplate `json:"template,omitempty" protobuf:"bytes,1,opt,name=template"`
 	// +listType=templateParameters
 	// Parameters is the list of parameters applied to the trigger template definition
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
 	// Policy to configure backoff and execution criteria for the trigger
-	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,3,opt,name=policy"`
+	Policy *TriggerPolicy `json:"policy,omitempty" protobuf:"bytes,3,opt,name=policy"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.
@@ -348,7 +348,7 @@ type StandardK8STrigger struct {
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,1,opt,name=groupVersionResource"`
 	// Source of the K8 resource file(s)
-	Source *ArtifactLocation `json:"source" protobuf:"bytes,2,opt,name=source"`
+	Source *ArtifactLocation `json:"source,omitempty" protobuf:"bytes,2,opt,name=source"`
 	// Operation refers to the type of operation performed on the k8s resource.
 	// Default value is Create.
 	// +optional
@@ -378,7 +378,7 @@ type StandardK8STrigger struct {
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
 type ArgoWorkflowTrigger struct {
 	// Source of the K8 resource file(s)
-	Source *ArtifactLocation `json:"source" protobuf:"bytes,1,opt,name=source"`
+	Source *ArtifactLocation `json:"source,omitempty" protobuf:"bytes,1,opt,name=source"`
 	// Operation refers to the type of operation performed on the argo workflow resource.
 	// Default value is Submit.
 	// +optional
@@ -549,7 +549,7 @@ type SlackTrigger struct {
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
-	SlackToken *corev1.SecretKeySelector `json:"slackToken" protobuf:"bytes,2,opt,name=slackToken"`
+	SlackToken *corev1.SecretKeySelector `json:"slackToken,omitempty" protobuf:"bytes,2,opt,name=slackToken"`
 	// Namespace to read the password secret from.
 	// This is required if the password secret selector is specified.
 	// +optional
@@ -607,7 +607,7 @@ const (
 // TriggerParameter indicates a passed parameter to a service template
 type TriggerParameter struct {
 	// Src contains a source reference to the value of the parameter from a dependency
-	Src *TriggerParameterSource `json:"src" protobuf:"bytes,1,opt,name=src"`
+	Src *TriggerParameterSource `json:"src,omitempty" protobuf:"bytes,1,opt,name=src"`
 	// Dest is the JSONPath of a resource key.
 	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
 	// The -1 key can be used to append a value to an existing array.
@@ -687,7 +687,7 @@ func (in *StatusPolicy) GetAllow() []int {
 // SensorResources holds the metadata of the resources created for the sensor
 type SensorResources struct {
 	// Deployment holds the metadata of the deployment for the sensor
-	Deployment *metav1.ObjectMeta `json:"deployment" protobuf:"bytes,1,opt,name=deployment"`
+	Deployment *metav1.ObjectMeta `json:"deployment,omitempty" protobuf:"bytes,1,opt,name=deployment"`
 	// Service holds the metadata of the service for the sensor
 	// +optional
 	Service *metav1.ObjectMeta `json:"service,omitempty" protobuf:"bytes,2,opt,name=service"`
@@ -713,7 +713,7 @@ type SensorStatus struct {
 	// LastCycleTime is the time when last trigger cycle completed
 	LastCycleTime metav1.Time `json:"lastCycleTime" protobuf:"bytes,8,opt,name=lastCycleTime"`
 	// Resources refers to metadata of the resources created for the sensor
-	Resources *SensorResources `json:"resources" protobuf:"bytes,9,opt,name=resources"`
+	Resources *SensorResources `json:"resources,omitempty" protobuf:"bytes,9,opt,name=resources"`
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.
@@ -817,7 +817,7 @@ type GitArtifact struct {
 	// Remote to manage set of tracked repositories. Defaults to "origin".
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
-	Remote *GitRemoteConfig `json:"remote" protobuf:"bytes,10,opt,name=remote"`
+	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,10,opt,name=remote"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote
@@ -832,13 +832,13 @@ type GitRemoteConfig struct {
 
 // GitCreds contain reference to git username and password
 type GitCreds struct {
-	Username *corev1.SecretKeySelector `json:"username" protobuf:"bytes,1,opt,name=username"`
-	Password *corev1.SecretKeySelector `json:"password" protobuf:"bytes,2,opt,name=password"`
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
 }
 
 // Event represents the cloudevent received from a gateway.
 type Event struct {
-	Context *EventContext `json:"context" protobuf:"bytes,1,opt,name=context"`
+	Context *EventContext `json:"context,omitempty" protobuf:"bytes,1,opt,name=context"`
 	Data    []byte        `json:"data" protobuf:"bytes,2,opt,name=data"`
 }
 

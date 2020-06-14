@@ -749,9 +749,6 @@
     "io.argoproj.gateway.v1alpha1.GatewayResource": {
       "description": "GatewayResource holds the metadata about the gateway resources",
       "type": "object",
-      "required": [
-        "deployment"
-      ],
       "properties": {
         "deployment": {
           "description": "Metadata of the deployment for the gateway",
@@ -807,8 +804,7 @@
       "description": "GatewayStatus contains information about the status of a gateway.",
       "type": "object",
       "required": [
-        "phase",
-        "resources"
+        "phase"
       ],
       "properties": {
         "message": {
@@ -1059,7 +1055,6 @@
       "description": "ArgoWorkflowTrigger is the trigger for the Argo Workflow",
       "type": "object",
       "required": [
-        "source",
         "group",
         "version",
         "resource"
@@ -1276,7 +1271,6 @@
       "description": "Event represents the cloudevent received from a gateway.",
       "type": "object",
       "required": [
-        "context",
         "data"
       ],
       "properties": {
@@ -1451,10 +1445,6 @@
     "io.argoproj.sensor.v1alpha1.GitCreds": {
       "description": "GitCreds contain reference to git username and password",
       "type": "object",
-      "required": [
-        "username",
-        "password"
-      ],
       "properties": {
         "password": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -1862,9 +1852,6 @@
     "io.argoproj.sensor.v1alpha1.SensorResources": {
       "description": "SensorResources holds the metadata of the resources created for the sensor",
       "type": "object",
-      "required": [
-        "deployment"
-      ],
       "properties": {
         "deployment": {
           "description": "Deployment holds the metadata of the deployment for the sensor",
@@ -1881,8 +1868,7 @@
       "type": "object",
       "required": [
         "dependencies",
-        "triggers",
-        "subscription"
+        "triggers"
       ],
       "properties": {
         "circuit": {
@@ -1947,8 +1933,7 @@
       "required": [
         "phase",
         "triggerCycleStatus",
-        "lastCycleTime",
-        "resources"
+        "lastCycleTime"
       ],
       "properties": {
         "completedAt": {
@@ -1996,9 +1981,6 @@
     "io.argoproj.sensor.v1alpha1.SlackTrigger": {
       "description": "SlackTrigger refers to the specification of the slack notification trigger.",
       "type": "object",
-      "required": [
-        "slackToken"
-      ],
       "properties": {
         "channel": {
           "description": "Channel refers to which Slack channel to send slack message.",
@@ -2032,8 +2014,7 @@
       "required": [
         "group",
         "version",
-        "resource",
-        "source"
+        "resource"
       ],
       "properties": {
         "group": {
@@ -2174,10 +2155,6 @@
     "io.argoproj.sensor.v1alpha1.Trigger": {
       "description": "Trigger is an action taken, output produced, an event created, a message sent",
       "type": "object",
-      "required": [
-        "template",
-        "policy"
-      ],
       "properties": {
         "parameters": {
           "description": "Parameters is the list of parameters applied to the trigger template definition",
@@ -2201,7 +2178,6 @@
       "description": "TriggerParameter indicates a passed parameter to a service template",
       "type": "object",
       "required": [
-        "src",
         "dest"
       ],
       "properties": {

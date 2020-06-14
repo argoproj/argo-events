@@ -66,7 +66,7 @@ func getEventSource() *esv1alpha1.EventSource {
 			Name:      "fake-event-source",
 			Namespace: "fake-namespace",
 		},
-		Spec: &esv1alpha1.EventSourceSpec{
+		Spec: esv1alpha1.EventSourceSpec{
 			Webhook: map[string]esv1alpha1.Context{
 				"first-webhook": {
 					Endpoint: "/first-webhook",

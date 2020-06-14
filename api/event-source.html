@@ -547,6 +547,314 @@ EventSourceSpec
 <br/>
 <br/>
 <table>
+<tr>
+<td>
+<code>minio</code></br>
+<em>
+map[string]github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
+</em>
+</td>
+<td>
+<p>Minio event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>calendar</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.CalendarEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Calendar event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>file</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.FileEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource
+</a>
+</em>
+</td>
+<td>
+<p>File event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>resource</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.ResourceEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Resource event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>webhook</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.Context">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Context
+</a>
+</em>
+</td>
+<td>
+<p>Webhook event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>amqp</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource
+</a>
+</em>
+</td>
+<td>
+<p>AMQP event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>kafka</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Kafka event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>mqtt</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.MQTTEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource
+</a>
+</em>
+</td>
+<td>
+<p>MQTT event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nats</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource
+</a>
+</em>
+</td>
+<td>
+<p>NATS event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sns</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.SNSEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource
+</a>
+</em>
+</td>
+<td>
+<p>SNS event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sqs</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.SQSEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource
+</a>
+</em>
+</td>
+<td>
+<p>SQS event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>pubSub</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.PubSubEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource
+</a>
+</em>
+</td>
+<td>
+<p>PubSub eevnt sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>github</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.GithubEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Github event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>gitlab</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.GitlabEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Gitlab event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hdfs</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.HDFSEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource
+</a>
+</em>
+</td>
+<td>
+<p>HDFS event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>slack</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.SlackEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Slack event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>storageGrid</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.StorageGridEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource
+</a>
+</em>
+</td>
+<td>
+<p>StorageGrid event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureEventsHub</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource
+</a>
+</em>
+</td>
+<td>
+<p>AzureEventsHub event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>stripe</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.StripeEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Stripe event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>emitter</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.EmitterEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Emitter event source</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>redis</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.RedisEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Redis event source</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nsq</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.NSQEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource
+</a>
+</em>
+</td>
+<td>
+<p>NSQ event source</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>generic</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.GenericEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Generic event source</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>type</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType
+</em>
+</td>
+<td>
+<p>Type of the event source</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>

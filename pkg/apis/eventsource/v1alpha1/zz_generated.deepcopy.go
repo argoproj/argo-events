@@ -164,11 +164,7 @@ func (in *EventSource) DeepCopyInto(out *EventSource) {
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	in.Status.DeepCopyInto(&out.Status)
-	if in.Spec != nil {
-		in, out := &in.Spec, &out.Spec
-		*out = new(EventSourceSpec)
-		(*in).DeepCopyInto(*out)
-	}
+	in.Spec.DeepCopyInto(&out.Spec)
 	return
 }
 

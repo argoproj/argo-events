@@ -189,7 +189,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref common.ReferenceCallba
 						},
 					},
 				},
-				Required: []string{"deployment"},
 			},
 		},
 		Dependencies: []string{
@@ -311,7 +310,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 						},
 					},
 				},
-				Required: []string{"phase", "resources"},
+				Required: []string{"phase"},
 			},
 		},
 		Dependencies: []string{

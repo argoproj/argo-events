@@ -217,7 +217,7 @@ func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCal
 						},
 					},
 				},
-				Required: []string{"source", "group", "version", "resource"},
+				Required: []string{"group", "version", "resource"},
 			},
 		},
 		Dependencies: []string{
@@ -561,7 +561,7 @@ func schema_pkg_apis_sensor_v1alpha1_Event(ref common.ReferenceCallback) common.
 						},
 					},
 				},
-				Required: []string{"context", "data"},
+				Required: []string{"data"},
 			},
 		},
 		Dependencies: []string{
@@ -850,7 +850,6 @@ func schema_pkg_apis_sensor_v1alpha1_GitCreds(ref common.ReferenceCallback) comm
 						},
 					},
 				},
-				Required: []string{"username", "password"},
 			},
 		},
 		Dependencies: []string{
@@ -1561,7 +1560,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorResources(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"deployment"},
 			},
 		},
 		Dependencies: []string{
@@ -1687,7 +1685,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"dependencies", "triggers", "subscription"},
+				Required: []string{"dependencies", "triggers"},
 			},
 		},
 		Dependencies: []string{
@@ -1769,7 +1767,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"phase", "triggerCycleStatus", "lastCycleTime", "resources"},
+				Required: []string{"phase", "triggerCycleStatus", "lastCycleTime"},
 			},
 		},
 		Dependencies: []string{
@@ -1830,7 +1828,6 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"slackToken"},
 			},
 		},
 		Dependencies: []string{
@@ -1909,7 +1906,7 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"group", "version", "resource", "source"},
+				Required: []string{"group", "version", "resource"},
 			},
 		},
 		Dependencies: []string{
@@ -2136,7 +2133,6 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 						},
 					},
 				},
-				Required: []string{"template", "policy"},
 			},
 		},
 		Dependencies: []string{
@@ -2172,7 +2168,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref common.ReferenceCallba
 						},
 					},
 				},
-				Required: []string{"src", "dest"},
+				Required: []string{"dest"},
 			},
 		},
 		Dependencies: []string{

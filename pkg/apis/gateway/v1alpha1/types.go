@@ -170,7 +170,7 @@ type EventSourceRef struct {
 // GatewayResource holds the metadata about the gateway resources
 type GatewayResource struct {
 	// Metadata of the deployment for the gateway
-	Deployment *metav1.ObjectMeta `json:"deployment" protobuf:"bytes,1,opt,name=deployment"`
+	Deployment *metav1.ObjectMeta `json:"deployment,omitempty" protobuf:"bytes,1,opt,name=deployment"`
 	// Metadata of the service for the gateway
 	// +optional
 	Service *metav1.ObjectMeta `json:"service,omitempty" protobuf:"bytes,2,opt,name=service"`
@@ -188,7 +188,7 @@ type GatewayStatus struct {
 	// it records the states for the configurations of gateway.
 	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,4,rep,name=nodes"`
 	// Resources refers to the metadata about the gateway resources
-	Resources *GatewayResource `json:"resources" protobuf:"bytes,5,opt,name=resources"`
+	Resources *GatewayResource `json:"resources,omitempty" protobuf:"bytes,5,opt,name=resources"`
 }
 
 // NodeStatus describes the status for an individual node in the gateway configurations.
