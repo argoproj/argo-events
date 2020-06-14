@@ -46,6 +46,7 @@ type Router struct {
 	hook *gitlab.ProjectHook
 	// gitlabEventSource is the event source that contains configuration necessary to consume events from GitLab
 	gitlabEventSource *v1alpha1.GitlabEventSource
+	namespace         string
 }
 
 // cred stores the api access token
