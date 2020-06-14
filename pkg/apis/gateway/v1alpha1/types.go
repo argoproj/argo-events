@@ -51,7 +51,7 @@ type GatewayList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	// +listType=items
-	Items []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
+	Items []Gateway `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // GatewaySpec represents gateway specifications
@@ -62,7 +62,7 @@ type GatewaySpec struct {
 	// EventSourceRef refers to event-source that stores event source configurations for the gateway
 	EventSourceRef *EventSourceRef `json:"eventSourceRef,omitempty" protobuf:"bytes,2,opt,name=eventSourceRef"`
 	// Type is the type of gateway. Used as metadata.
-	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,3,opt,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,3,opt,name=type,casttype=github.com/argoproj/argo-events/pkg/apis/common.EventSourceType"`
 	// Service is the specifications of the service to expose the gateway
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
@@ -73,7 +73,7 @@ type GatewaySpec struct {
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 	// Replica is the gateway deployment replicas
-	Replica int32 `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
+	Replica int32 `json:"replica,omitempty" protobuf:"varint,7,opt,name=replica"`
 }
 
 // Template holds the information of a Gateway deployment template
@@ -91,7 +91,7 @@ type Template struct {
 	// +patchStrategy=merge
 	// +patchMergeKey=name
 	// +optional
-	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,4,opt,name=volumes"`
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,4,rep,name=volumes"`
 	// SecurityContext holds pod-level security attributes and common container settings.
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
@@ -101,7 +101,7 @@ type Template struct {
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,6,opt,name=affinity"`
 	// If specified, the pod's tolerations.
 	// +optional
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,7,opt,name=tolerations"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,7,rep,name=tolerations"`
 	// Spec holds the gateway deployment spec.
 	// DEPRECATED: Use Container instead.
 	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,8,opt,name=spec"`
@@ -109,8 +109,8 @@ type Template struct {
 
 // Metadata holds the annotations and labels of a gateway pod
 type Metadata struct {
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,opt,name=annotations"`
-	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,rep,name=annotations"`
+	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 }
 
 // Service holds the service information gateway exposes
@@ -140,27 +140,27 @@ type Subscribers struct {
 	// HTTP subscribers are HTTP endpoints to send events to.
 	// +listType=string
 	// +optional
-	HTTP []string `json:"http,omitempty" protobuf:"bytes,1,opt,name=http"`
+	HTTP []string `json:"http,omitempty" protobuf:"bytes,1,rep,name=http"`
 	// NATS refers to the subscribers over NATS protocol.
 	// +listType=NATSSubscriber
 	// +optional
-	NATS []NATSSubscriber `json:"nats,omitempty" protobuf:"bytes,2,opt,name=nats"`
+	NATS []NATSSubscriber `json:"nats,omitempty" protobuf:"bytes,2,rep,name=nats"`
 }
 
 // NATSSubscriber holds the context of subscriber over NATS.
 type NATSSubscriber struct {
 	// ServerURL refers to the NATS server URL.
-	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
+	ServerURL string `json:"serverURL" protobuf:"bytes,1,opt,name=serverURL"`
 	// Subject refers to the NATS subject name.
-	Subject string `json:"subject" protobuf:"bytes,2,name=subject"`
+	Subject string `json:"subject" protobuf:"bytes,2,opt,name=subject"`
 	// Name of the subscription. Must be unique.
-	Name string `json:"name" protobuf:"bytes,3,name=name"`
+	Name string `json:"name" protobuf:"bytes,3,opt,name=name"`
 }
 
 // EventSourceRef holds information about the EventSourceRef custom resource
 type EventSourceRef struct {
 	// Name of the event source
-	Name string `json:"name" protobuf:"bytes,1,name=name"`
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 	// Namespace of the event source
 	// Default value is the namespace where referencing gateway is deployed
 	// +optional
@@ -170,7 +170,7 @@ type EventSourceRef struct {
 // GatewayResource holds the metadata about the gateway resources
 type GatewayResource struct {
 	// Metadata of the deployment for the gateway
-	Deployment *metav1.ObjectMeta `json:"deployment" protobuf:"bytes,1,name=deployment"`
+	Deployment *metav1.ObjectMeta `json:"deployment" protobuf:"bytes,1,opt,name=deployment"`
 	// Metadata of the service for the gateway
 	// +optional
 	Service *metav1.ObjectMeta `json:"service,omitempty" protobuf:"bytes,2,opt,name=service"`
@@ -179,16 +179,16 @@ type GatewayResource struct {
 // GatewayStatus contains information about the status of a gateway.
 type GatewayStatus struct {
 	// Phase is the high-level summary of the gateway
-	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
+	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase,casttype=NodePhase"`
 	// StartedAt is the time at which this gateway was initiated
 	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 	// Message is a human readable string indicating details about a gateway in its phase
-	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
+	Message string `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
 	// Nodes is a mapping between a node ID and the node's status
 	// it records the states for the configurations of gateway.
-	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,5,rep,name=nodes"`
+	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,4,rep,name=nodes"`
 	// Resources refers to the metadata about the gateway resources
-	Resources *GatewayResource `json:"resources" protobuf:"bytes,6,opt,name=resources"`
+	Resources *GatewayResource `json:"resources" protobuf:"bytes,5,opt,name=resources"`
 }
 
 // NodeStatus describes the status for an individual node in the gateway configurations.
@@ -198,16 +198,16 @@ type NodeStatus struct {
 	// It is a hash of the node name
 	ID string `json:"id" protobuf:"bytes,1,opt,name=id"`
 	// Name is a unique name in the node tree used to generate the node ID
-	Name string `json:"name" protobuf:"bytes,3,opt,name=name"`
+	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
 	// DisplayName is the human readable representation of the node
-	DisplayName string `json:"displayName" protobuf:"bytes,5,opt,name=displayName"`
+	DisplayName string `json:"displayName" protobuf:"bytes,3,opt,name=displayName"`
 	// Phase of the node
-	Phase NodePhase `json:"phase" protobuf:"bytes,6,opt,name=phase"`
+	Phase NodePhase `json:"phase" protobuf:"bytes,4,opt,name=phase,casttype=NodePhase"`
 	// StartedAt is the time at which this node started
 	// +k8s:openapi-gen=false
-	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,7,opt,name=startedAt"`
+	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,5,opt,name=startedAt"`
 	// Message store data or something to save for configuration
-	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
+	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
 	// UpdateTime is the time when node(gateway configuration) was updated
-	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,9,opt,name=updateTime"`
+	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,7,opt,name=updateTime"`
 }

@@ -29,7 +29,7 @@ type S3Artifact struct {
 	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
 	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
 	// +listType=string
-	Events []string  `json:"events,omitempty" protobuf:"bytes,7,opt,name=events"`
+	Events []string  `json:"events,omitempty" protobuf:"bytes,7,rep,name=events"`
 	Filter *S3Filter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
