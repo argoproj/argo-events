@@ -21,7 +21,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
-	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -32,7 +31,7 @@ import (
 
 // watchControllerConfigMap watches updates to sensor controller configmap
 func (controller *Controller) watchControllerConfigMap() cache.Controller {
-	log.Info("watching controller config map updates")
+	controller.logger.Info("watching controller config map updates")
 	source := controller.newControllerConfigMapWatch()
 	_, ctrl := cache.NewInformer(
 		source,
@@ -41,19 +40,19 @@ func (controller *Controller) watchControllerConfigMap() cache.Controller {
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*corev1.ConfigMap); ok {
-					log.Info("detected configuration update. updating the controller configuration")
+					controller.logger.Info("detected configuration update. updating the controller configuration")
 					err := controller.updateConfig(cm)
 					if err != nil {
-						log.Errorf("update of controller configuration failed due to: %v", err)
+						controller.logger.Errorf("update of controller configuration failed due to: %v", err)
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*corev1.ConfigMap); ok {
-					log.Info("detected configuration update. updating the controller configuration")
+					controller.logger.Info("detected configuration update. updating the controller configuration")
 					err := controller.updateConfig(newCm)
 					if err != nil {
-						log.Errorf("update of controller configuration failed due to: %v", err)
+						controller.logger.Errorf("update of controller configuration failed due to: %v", err)
 					}
 				}
 			},
