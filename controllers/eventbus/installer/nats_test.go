@@ -212,12 +212,3 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 		assert.True(t, len(ss.Spec.VolumeClaimTemplates) > 0)
 	})
 }
-
-func contains(arr []string, str string) bool {
-	for _, a := range arr {
-		if a == str {
-			return true
-		}
-	}
-	return false
-}
