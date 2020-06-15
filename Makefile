@@ -149,7 +149,7 @@ kind-e2e:
 build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.23.8
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.26.0
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
