@@ -212,4 +212,3 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 		assert.True(t, len(ss.Spec.VolumeClaimTemplates) > 0)
 	})
 }
-
