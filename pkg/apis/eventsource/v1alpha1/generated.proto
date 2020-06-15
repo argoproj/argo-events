@@ -340,10 +340,10 @@ message GitlabEventSource {
   // Webhook holds configuration to run a http server
   optional Context webhook = 1;
 
-  // ProjectId is the id of project for which integration needs to setup
+  // ProjectID is the id of project for which integration needs to setup
   optional string projectId = 2;
 
-  // Event is a gitlab event to listen to.
+  // Events are gitlab event to listen to.
   // Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
   optional string event = 3;
 
@@ -714,6 +714,23 @@ message StorageGridEventSource {
 
   // Filter on object key which caused the notification.
   optional StorageGridFilter filter = 3;
+
+  // TopicArn
+  optional string topicArn = 4;
+
+  // Name of the bucket to register notifications for.
+  optional string bucket = 5;
+
+  // S3 region.
+  // Defaults to us-east-1
+  // +optional
+  optional string region = 6;
+
+  // Auth token for storagegrid api
+  optional k8s.io.api.core.v1.SecretKeySelector authToken = 7;
+
+  // ApiURL is the url of the storagegrid api.
+  optional string apiURL = 8;
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects
