@@ -69,18 +69,21 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	backoff := common.GetConnectionBackoff(amqpEventSource.ConnectionBackoff)
 	var conn *amqplib.Connection
 	if err := server.Connect(backoff, func() error {
-		var err error
 		if amqpEventSource.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS.CACertPath, amqpEventSource.TLS.ClientCertPath, amqpEventSource.TLS.ClientKeyPath)
 			if err != nil {
 				return errors.Wrap(err, "failed to get the tls configuration")
 			}
 			conn, err = amqplib.DialTLS(amqpEventSource.URL, tlsConfig)
+			if err != nil {
+				return err
+			}
 		} else {
+			var err error
 			conn, err = amqplib.Dial(amqpEventSource.URL)
-		}
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}); err != nil {

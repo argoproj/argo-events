@@ -88,12 +88,12 @@ func (sensorCtx *SensorContext) listenEventsOverHTTP() error {
 		eventBody, err := ioutil.ReadAll(request.Body)
 		if err != nil {
 			writer.WriteHeader(http.StatusBadRequest)
-			writer.Write([]byte("failed to parse the event"))
+			_, _ = writer.Write([]byte("failed to parse the event"))
 			return
 		}
 		if err := sensorCtx.handleEvent(eventBody); err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
-			writer.Write([]byte("failed to handle the event"))
+			_, _ = writer.Write([]byte("failed to handle the event"))
 			return
 		}
 	})
