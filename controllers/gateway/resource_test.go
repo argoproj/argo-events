@@ -140,10 +140,6 @@ func TestResource_BuildDeploymentResource(t *testing.T) {
 	}
 }
 
-func runBuildDeploymentResourceTest(t *testing.T, gatewayObj *v1alpha1.Gateway) {
-
-}
-
 func TestResource_CreateGatewayResourceNoTemplate(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -291,5 +287,4 @@ func TestResource_UpdateGatewayResource(t *testing.T) {
 			test.testFunc(t, metadata)
 		})
 	}
-
 }

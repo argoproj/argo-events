@@ -18,7 +18,6 @@ import (
 
 const (
 	testBusName        = "test-bus"
-	testNATSImage      = "test-image"
 	testStreamingImage = "test-steaming-image"
 	testNamespace      = "testNamespace"
 	testURL            = "http://test"
