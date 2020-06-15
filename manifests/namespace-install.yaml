@@ -187,16 +187,16 @@ spec:
         app: eventbus-controller
     spec:
       containers:
-      - env:
+      - args:
+        - --namespaced
+        env:
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: NATS_IMAGE
-          value: nats:2.1.7
         - name: NATS_STREAMING_IMAGE
           value: nats-streaming:0.17.0
-        image: argoproj/eventbus-controller:v0.15.0
+        image: argoproj/eventbus-controller:v0.16.0
         imagePullPolicy: Always
         name: eventbus-controller
       serviceAccountName: argo-events-sa
@@ -225,10 +225,10 @@ spec:
         - name: CONTROLLER_CONFIG_MAP
           value: gateway-controller-configmap
         - name: GATEWAY_CLIENT_IMAGE
-          value: argoproj/gateway-client:v0.15.0
+          value: argoproj/gateway-client:v0.16.0
         - name: GATEWAY_SERVER_IMAGE
-          value: argoproj/gateway-server:v0.15.0
-        image: argoproj/gateway-controller:v0.15.0
+          value: argoproj/gateway-server:v0.16.0
+        image: argoproj/gateway-controller:v0.16.0
         name: gateway-controller
       serviceAccountName: argo-events-sa
 ---
@@ -256,7 +256,7 @@ spec:
         - name: CONTROLLER_CONFIG_MAP
           value: sensor-controller-configmap
         - name: SENSOR_IMAGE
-          value: argoproj/sensor:v0.15.0
-        image: argoproj/sensor-controller:v0.15.0
+          value: argoproj/sensor:v0.16.0
+        image: argoproj/sensor-controller:v0.16.0
         name: sensor-controller
       serviceAccountName: argo-events-sa

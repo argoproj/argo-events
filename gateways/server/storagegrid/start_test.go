@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 )
@@ -128,32 +128,6 @@ func TestGenerateUUID(t *testing.T) {
 		u1 := generateUUID()
 		u2 := generateUUID()
 		convey.So(u1.String(), convey.ShouldNotEqual, u2.String())
-	})
-}
-
-func TestFilterEvent(t *testing.T) {
-	convey.Convey("Given a storage grid event, test whether it passes the filter", t, func() {
-		storageGridEventSource := &v1alpha1.StorageGridEventSource{
-			Webhook: &webhook.Context{
-				Endpoint: "/",
-				URL:      "testurl",
-				Port:     "8080",
-			},
-			Events: []string{
-				"ObjectCreated:Put",
-			},
-			Filter: &v1alpha1.StorageGridFilter{
-				Prefix: "hello-",
-				Suffix: ".txt",
-			},
-		}
-		var gridNotification *storageGridNotification
-		err := json.Unmarshal([]byte(notification), &gridNotification)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(gridNotification, convey.ShouldNotBeNil)
-
-		ok := filterEvent(gridNotification, storageGridEventSource)
-		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
 

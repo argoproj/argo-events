@@ -3,6 +3,6 @@ kind: Kustomization
 
 resources:
   - eventbus-crd.yaml
-  - eventsources-crd.yaml
+  - eventsource-crd.yaml
   - gateway-crd.yaml
   - sensor-crd.yaml

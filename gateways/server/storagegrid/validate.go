@@ -18,12 +18,13 @@ package storagegrid
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
@@ -61,6 +62,21 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 func validate(eventSource *v1alpha1.StorageGridEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
+	}
+	if eventSource.TopicArn == "" {
+		return fmt.Errorf("topic arn must be provided")
+	}
+	if eventSource.ApiURL == "" {
+		return fmt.Errorf("api url must be provided")
+	}
+	if eventSource.AuthToken == nil {
+		return fmt.Errorf("api auth token must be provided")
+	}
+	if eventSource.Bucket == "" {
+		return fmt.Errorf("bucket name must be provided")
+	}
+	if eventSource.Events == nil {
+		return fmt.Errorf("event types must be provided")
 	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }

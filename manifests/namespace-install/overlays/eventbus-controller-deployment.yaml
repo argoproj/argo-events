@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventbus-controller
+spec:
+  template:
+    spec:
+      containers:
+        - name: eventbus-controller
+          args:
+            - --namespaced

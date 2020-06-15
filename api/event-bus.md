@@ -560,6 +560,12 @@ Description
 
 <td>
 
+<p>
+
+NATS host url
+
+</p>
+
 </td>
 
 </tr>
@@ -573,6 +579,14 @@ Description
 </td>
 
 <td>
+
+<em>(Optional)</em>
+
+<p>
+
+Cluster ID for nats streaming, if it’s missing, treat it as NATS server
+
+</p>
 
 </td>
 
@@ -589,6 +603,14 @@ Description
 
 <td>
 
+<em>(Optional)</em>
+
+<p>
+
+Auth strategy, default to AuthStrategyNone
+
+</p>
+
 </td>
 
 </tr>
@@ -604,6 +626,14 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
 <td>
+
+<em>(Optional)</em>
+
+<p>
+
+Secret for auth
+
+</p>
 
 </td>
 
@@ -699,6 +729,20 @@ Size is the NATS StatefulSet size
 
 <td>
 
+<code>antiAffinity</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>persistence</code></br> <em>
 <a href="#argoproj.io/v1alpha1.PersistenceStrategy"> PersistenceStrategy
 </a> </em>
@@ -706,6 +750,8 @@ Size is the NATS StatefulSet size
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 </td>
 
@@ -737,6 +783,103 @@ PersistenceStrategy defines the strategy of persistence
 </p>
 
 </p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>storageClassName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Name of the StorageClass required by the claim. More info:
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1">https://kubernetes.io/docs/concepts/storage/persistent-volumes\#class-1</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>accessMode</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#persistentvolumeaccessmode-v1-core">
+Kubernetes core/v1.PersistentVolumeAccessMode </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Available access modes such as ReadWriteOnce, ReadWriteMany
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">https://kubernetes.io/docs/concepts/storage/persistent-volumes/\#access-modes</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>size</code></br> <em>
+k8s.io/apimachinery/pkg/api/resource.Quantity </em>
+
+</td>
+
+<td>
+
+<p>
+
+Volume size, e.g. 10Gi
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 <hr/>
 
