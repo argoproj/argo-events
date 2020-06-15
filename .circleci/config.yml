@@ -34,7 +34,6 @@ jobs:
       - run:
           name: Build Linux Artifact
           command: make all
-      - run: make test
       - run: make lint
       - persist_to_workspace:
           root: .
