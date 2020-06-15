@@ -74,12 +74,12 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - push_bin:
-          requires:
-            - build
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              # only recognise tags with semantic versioning e.g. v0.1.0
-              only: /^v\d+\.\d+\.\d+.*$/
+      #- push_bin:
+      #    requires:
+      #      - build
+      #    filters:
+      #      branches:
+      #        ignore: /.*/
+      #      tags:
+      #        # only recognise tags with semantic versioning e.g. v0.1.0
+      #        only: /^v\d+\.\d+\.\d+.*$/

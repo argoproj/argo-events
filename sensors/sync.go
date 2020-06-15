@@ -19,6 +19,7 @@ package sensors
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/sensors/types"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
