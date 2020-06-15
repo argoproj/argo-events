@@ -133,7 +133,7 @@ func (ct *CustomTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resour
 	}
 	parameters := ct.Trigger.Template.CustomTrigger.Parameters
 
-	if parameters != nil && len(parameters) > 0 {
+	if len(parameters) > 0 {
 		// only JSON formatted resource body is eligible for parameters
 		var temp map[string]interface{}
 		if err := json.Unmarshal(obj, &temp); err != nil {

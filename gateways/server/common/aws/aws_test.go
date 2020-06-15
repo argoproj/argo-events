@@ -89,7 +89,6 @@ func TestAWS(t *testing.T) {
 			session, err := GetAWSAssumeRoleCreds("moke-roleARN", "mock-region")
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(session, convey.ShouldNotBeNil)
-
 		})
 	})
 }

@@ -16,6 +16,8 @@ limitations under the License.
 package argo_workflow
 
 import (
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
-	"testing"
 )
 
 var sensorObj = &v1alpha1.Sensor{
