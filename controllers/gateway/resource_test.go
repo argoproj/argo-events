@@ -139,3 +139,152 @@ func TestResource_BuildDeploymentResource(t *testing.T) {
 		assert.NotNil(t, newDeployment.Annotations[common.AnnotationResourceSpecHash])
 	}
 }
+
+func TestResource_CreateGatewayResourceNoTemplate(t *testing.T) {
+	tests := []struct {
+		name       string
+		updateFunc func(ctx *gatewayContext)
+		testFunc   func(controller *Controller, ctx *gatewayContext, t *testing.T)
+	}{
+		{
+			name:       "gateway without deployment and service",
+			updateFunc: func(ctx *gatewayContext) {},
+			testFunc: func(controller *Controller, ctx *gatewayContext, t *testing.T) {
+				deploymentMetadata := ctx.gateway.Status.Resources.Deployment
+				serviceMetadata := ctx.gateway.Status.Resources.Service
+				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, deployment)
+				service, err := controller.k8sClient.CoreV1().Services(serviceMetadata.Namespace).Get(serviceMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, service)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			controller := newController()
+			ctx := newGatewayContext(gatewayObjNoTemplate.DeepCopy(), controller)
+			test.updateFunc(ctx)
+			err := ctx.createGatewayResources()
+			assert.Nil(t, err)
+			test.testFunc(controller, ctx, t)
+		})
+	}
+}
+
+func TestResource_CreateGatewayResource(t *testing.T) {
+	tests := []struct {
+		name       string
+		updateFunc func(ctx *gatewayContext)
+		testFunc   func(controller *Controller, ctx *gatewayContext, t *testing.T)
+	}{
+		{
+			name:       "gateway with deployment and service",
+			updateFunc: func(ctx *gatewayContext) {},
+			testFunc: func(controller *Controller, ctx *gatewayContext, t *testing.T) {
+				deploymentMetadata := ctx.gateway.Status.Resources.Deployment
+				serviceMetadata := ctx.gateway.Status.Resources.Service
+				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, deployment)
+				service, err := controller.k8sClient.CoreV1().Services(serviceMetadata.Namespace).Get(serviceMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, service)
+			},
+		},
+		{
+			name: "gateway with zero deployment replica",
+			updateFunc: func(ctx *gatewayContext) {
+				ctx.gateway.Spec.Replica = 0
+			},
+			testFunc: func(controller *Controller, ctx *gatewayContext, t *testing.T) {
+				deploymentMetadata := ctx.gateway.Status.Resources.Deployment
+				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, deployment)
+				assert.Equal(t, *deployment.Spec.Replicas, int32(1))
+			},
+		},
+		{
+			name: "gateway with empty service template",
+			updateFunc: func(ctx *gatewayContext) {
+				ctx.gateway.Spec.Service = nil
+			},
+			testFunc: func(controller *Controller, ctx *gatewayContext, t *testing.T) {
+				deploymentMetadata := ctx.gateway.Status.Resources.Deployment
+				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, deployment)
+				assert.Nil(t, ctx.gateway.Status.Resources.Service)
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			controller := newController()
+			ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
+			test.updateFunc(ctx)
+			err := ctx.createGatewayResources()
+			assert.Nil(t, err)
+			test.testFunc(controller, ctx, t)
+		})
+	}
+}
+
+func TestResource_UpdateGatewayResource(t *testing.T) {
+	controller := newController()
+	ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
+	err := ctx.createGatewayResources()
+	assert.Nil(t, err)
+
+	tests := []struct {
+		name       string
+		updateFunc func()
+		testFunc   func(t *testing.T, oldMetadata *v1alpha1.GatewayResource)
+	}{
+		{
+			name: "update deployment resource on gateway change",
+			updateFunc: func() {
+				ctx.gateway.Spec.Template.ServiceAccountName = "new-sa"
+			},
+			testFunc: func(t *testing.T, oldMetadata *v1alpha1.GatewayResource) {
+				currentMetadata := ctx.gateway.Status.Resources
+				deployment, err := controller.k8sClient.AppsV1().Deployments(currentMetadata.Deployment.Namespace).Get(currentMetadata.Deployment.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, deployment)
+				assert.NotEqual(t, deployment.Annotations[common.AnnotationResourceSpecHash], oldMetadata.Deployment.Annotations[common.AnnotationResourceSpecHash])
+				service, err := controller.k8sClient.CoreV1().Services(currentMetadata.Service.Namespace).Get(currentMetadata.Service.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, service)
+				assert.Equal(t, service.Annotations[common.AnnotationResourceSpecHash], oldMetadata.Service.Annotations[common.AnnotationResourceSpecHash])
+			},
+		},
+		{
+			name: "service deleted if gateway service spec is removed",
+			updateFunc: func() {
+				ctx.gateway.Spec.Service = nil
+			},
+			testFunc: func(t *testing.T, oldMetadata *v1alpha1.GatewayResource) {
+				currentMetadata := ctx.gateway.Status.Resources
+				deployment, err := controller.k8sClient.AppsV1().Deployments(currentMetadata.Deployment.Namespace).Get(currentMetadata.Deployment.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, deployment)
+				assert.Nil(t, ctx.gateway.Status.Resources.Service)
+				_, err = controller.k8sClient.CoreV1().Services(oldMetadata.Service.Namespace).Get(oldMetadata.Service.Name, metav1.GetOptions{})
+				assert.NotNil(t, err)
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			metadata := ctx.gateway.Status.Resources.DeepCopy()
+			test.updateFunc()
+			err := ctx.updateGatewayResources()
+			assert.Nil(t, err)
+			test.testFunc(t, metadata)
+		})
+	}
+}
