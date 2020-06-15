@@ -31,15 +31,9 @@ jobs:
             - go-dep-cache-{{ checksum "go.sum" }}-v4
             - go-dep-cache-
       - run: go get -u github.com/gobuffalo/packr/packr
-      #- run:
-      #    name: Build Linux Artifact
-      #    command: make all
       - run:
-          name: Lint
-          command: make lint
-      - run:
-          name: Check there are no changes after lint
-          command: git diff --exit-code
+          name: Build Linux Artifact
+          command: make all
       - persist_to_workspace:
           root: .
           paths:
