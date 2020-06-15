@@ -484,6 +484,11 @@ func (in *GitlabEventSource) DeepCopyInto(out *GitlabEventSource) {
 		*out = new(webhook.Context)
 		**out = **in
 	}
+	if in.Events != nil {
+		in, out := &in.Events, &out.Events
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.AccessToken != nil {
 		in, out := &in.AccessToken, &out.AccessToken
 		*out = new(v1.SecretKeySelector)

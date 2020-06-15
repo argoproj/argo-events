@@ -60,11 +60,11 @@ func validate(eventSource *v1alpha1.GitlabEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.ProjectId == "" {
+	if eventSource.ProjectID == "" {
 		return fmt.Errorf("project id can't be empty")
 	}
-	if eventSource.Event == "" {
-		return fmt.Errorf("event type can't be empty")
+	if eventSource.Events == nil {
+		return fmt.Errorf("events can't be empty")
 	}
 	if eventSource.GitlabBaseURL == "" {
 		return fmt.Errorf("gitlab base url can't be empty")
