@@ -8,7 +8,7 @@ spec:
   gitlab:
     example:
       # id of the project
-      projectId: "1"
+      projectID: "1"
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
@@ -21,14 +21,11 @@ spec:
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
         url: http://url-that-is-reachable-from-GitLab
-      # event to listen to
+      # events to listen to
       # Visit https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#events
-      event: PushEvents
-
-#      # Namespace where the api token secret live.
-#      # +Optional. Default to gateway's namespace.
-#      namespace: "argo-events"
-
+      events:
+        - PushEvents
+        - TagPushEvents
       # accessToken refers to K8s secret that stores the gitlab api token
       accessToken:
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
@@ -52,7 +49,8 @@ spec:
 #        serverCertPath: "some path in pod"
 #        # path to file that is mounted in gateway pod which contains private key
 #        serverKeyPath: "some path in pod"
-#      event: "PushEvents"
+#      events:
+#        - PushEvents
 #      accessToken:
 #        key: accesskey
 #        name: gitlab-access

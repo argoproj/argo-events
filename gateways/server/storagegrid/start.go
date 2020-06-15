@@ -18,6 +18,7 @@ package storagegrid
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -29,6 +30,7 @@ import (
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"
 )
@@ -48,6 +50,16 @@ var (
        <RequestId>` + generateUUID().String() + `</RequestId>
     </ResponseMetadata> 
 </PublishResponse>` + "\n"
+
+	notificationBodyTemplate = `
+<NotificationConfiguration>
+	<TopicConfiguration>
+	  <Id>%s</Id>
+	  <Topic>%s</Topic>
+	  %s
+	</TopicConfiguration>
+</NotificationConfiguration>
+` + "\n"
 )
 
 // set up the activation and inactivation channels to control the state of routes.
@@ -58,19 +70,6 @@ func init() {
 // generateUUID returns a new uuid
 func generateUUID() uuid.UUID {
 	return uuid.New()
-}
-
-// filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, eventSource *v1alpha1.StorageGridEventSource) bool {
-	if eventSource.Events == nil {
-		return true
-	}
-	for _, filterEvent := range eventSource.Events {
-		if notification.Message.Records[0].EventName == filterEvent {
-			return true
-		}
-	}
-	return false
 }
 
 // filterName filters object key based on configured prefix and/or suffix
@@ -160,7 +159,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	if filterEvent(notification, router.storageGridEventSource) && filterName(notification, router.storageGridEventSource) {
+	if filterName(notification, router.storageGridEventSource) {
 		logger.WithError(err).Errorln("new event received, dispatching event on route's data channel")
 		route.DataCh <- b
 		return
@@ -171,6 +170,127 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 // PostActivate performs operations once the route is activated and ready to consume requests
 func (router *Router) PostActivate() error {
+	eventSource := router.storageGridEventSource
+	route := router.route
+
+	authToken, err := common.GetSecretValue(router.k8sClient, router.namespace, eventSource.AuthToken)
+	if err != nil {
+		return err
+	}
+
+	registrationURL := common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
+
+	client := resty.New()
+
+	logger := route.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: route.EventSource.Name,
+			"registration-url":      registrationURL,
+			"bucket":                eventSource.Bucket,
+			"auth-secret-name":      eventSource.AuthToken.Name,
+			"api-url":               eventSource.ApiURL,
+		})
+
+	logger.Infoln("checking if the endpoint already exists...")
+
+	response, err := client.R().
+		SetHeader("Content-Type", common.MediaTypeJSON).
+		SetAuthToken(authToken).
+		SetResult(&getEndpointResponse{}).
+		SetError(&genericResponse{}).
+		Get(common.FormattedURL(eventSource.ApiURL, "/org/endpoints"))
+	if err != nil {
+		return err
+	}
+
+	if !response.IsSuccess() {
+		errObj := response.Error().(*genericResponse)
+		return fmt.Errorf("failed to list existing endpoints. reason: %s", errObj.Message.Text)
+	}
+
+	endpointResponse := response.Result().(*getEndpointResponse)
+
+	isURNExists := false
+
+	for _, endpoint := range endpointResponse.Data {
+		if endpoint.EndpointURN == eventSource.TopicArn {
+			logger.Infoln("endpoint with topic urn already exists, won't register duplicate endpoint")
+			isURNExists = true
+			break
+		}
+	}
+
+	if !isURNExists {
+		logger.Infoln("endpoint urn does not exist, registering a new endpoint")
+		newEndpoint := createEndpointRequest{
+			DisplayName: router.route.EventSource.Name,
+			EndpointURI: common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint),
+			EndpointURN: eventSource.TopicArn,
+			AuthType:    "anonymous",
+			InsecureTLS: true,
+		}
+
+		newEndpointBody, err := json.Marshal(&newEndpoint)
+		if err != nil {
+			return err
+		}
+
+		response, err := client.R().
+			SetHeader("Content-Type", common.MediaTypeJSON).
+			SetAuthToken(authToken).
+			SetBody(string(newEndpointBody)).
+			SetResult(&genericResponse{}).
+			SetError(&genericResponse{}).
+			Post(common.FormattedURL(eventSource.ApiURL, "/org/endpoints"))
+		if err != nil {
+			return err
+		}
+
+		if !response.IsSuccess() {
+			errObj := response.Error().(*genericResponse)
+			return fmt.Errorf("failed to register the endpoint. reason: %s", errObj.Message.Text)
+		}
+
+		logger.Infoln("successfully registered the endpoint")
+	}
+
+	logger.Infoln("registering notification configuration on storagegrid...")
+
+	var events []string
+	for _, event := range eventSource.Events {
+		events = append(events, fmt.Sprintf("<Event>%s</Event>", event))
+	}
+
+	eventXML := strings.Join(events, "\n")
+
+	notificationBody := fmt.Sprintf(notificationBodyTemplate, route.EventSource.Name, eventSource.TopicArn, eventXML)
+
+	notification := &storageGridNotificationRequest{
+		Notification: notificationBody,
+	}
+
+	notificationRequestBody, err := json.Marshal(notification)
+	if err != nil {
+		return err
+	}
+
+	response, err = client.R().
+		SetHeader("Content-Type", common.MediaTypeJSON).
+		SetAuthToken(authToken).
+		SetBody(string(notificationRequestBody)).
+		SetResult(&registerNotificationResponse{}).
+		SetError(&genericResponse{}).
+		Put(common.FormattedURL(eventSource.ApiURL, fmt.Sprintf("/org/containers/%s/notification", eventSource.Bucket)))
+	if err != nil {
+		return err
+	}
+
+	if !response.IsSuccess() {
+		errObj := response.Error().(*genericResponse)
+		return fmt.Errorf("failed to configure notification. reason %s\n", errObj.Message.Text)
+	}
+
+	logger.Infoln("successfully registered notification configuration on storagegrid")
 	return nil
 }
 
@@ -198,5 +318,7 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 	return webhook.ManageRoute(&Router{
 		route:                  route,
 		storageGridEventSource: storagegridEventSource,
+		k8sClient:              listener.K8sClient,
+		namespace:              listener.Namespace,
 	}, controller, eventStream)
 }

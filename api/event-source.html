@@ -1114,24 +1114,24 @@ github.com/argoproj/argo-events/gateways/server/common/webhook.Context
 </tr>
 <tr>
 <td>
-<code>projectId</code></br>
+<code>projectID</code></br>
 <em>
 string
 </em>
 </td>
 <td>
-<p>ProjectId is the id of project for which integration needs to setup</p>
+<p>ProjectID is the id of project for which integration needs to setup</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>event</code></br>
+<code>events</code></br>
 <em>
-string
+[]string
 </em>
 </td>
 <td>
-<p>Event is a gitlab event to listen to.
+<p>Events are gitlab event to listen to.
 Refer <a href="https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794">https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794</a>.</p>
 </td>
 </tr>
@@ -1173,18 +1173,6 @@ string
 </tr>
 <tr>
 <td>
-<code>namespace</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>Namespace refers to Kubernetes namespace which is used to retrieve access token from.</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>deleteHookOnFinish</code></br>
 <em>
 bool
@@ -1193,18 +1181,6 @@ bool
 <td>
 <em>(Optional)</em>
 <p>DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>allowDuplicate</code></br>
-<em>
-bool
-</em>
-</td>
-<td>
-<p>AllowDuplicate allows the gateway to register the same webhook integrations for multiple event source configurations.
-Defaults to false.</p>
 </td>
 </tr>
 </tbody>
@@ -2486,6 +2462,65 @@ StorageGridFilter
 </td>
 <td>
 <p>Filter on object key which caused the notification.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topicArn</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>TopicArn</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>bucket</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name of the bucket to register notifications for.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>region</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>S3 region.
+Defaults to us-east-1</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authToken</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>Auth token for storagegrid api</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>apiURL</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>ApiURL is the url of the storagegrid api.</p>
 </td>
 </tr>
 </tbody>
