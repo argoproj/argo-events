@@ -376,7 +376,7 @@ type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *Context `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
 	// ProjectID is the id of project for which integration needs to setup
-	ProjectID string `json:"projectId" protobuf:"bytes,2,opt,name=projectId"`
+	ProjectID string `json:"projectID" protobuf:"bytes,9,opt,name=projectID"`
 	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
 	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`

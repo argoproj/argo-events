@@ -1022,7 +1022,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Context"),
 						},
 					},
-					"projectId": {
+					"projectID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ProjectID is the id of project for which integration needs to setup",
 							Type:        []string{"string"},
@@ -1071,7 +1071,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"projectId", "events", "gitlabBaseURL"},
+				Required: []string{"projectID", "events", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{

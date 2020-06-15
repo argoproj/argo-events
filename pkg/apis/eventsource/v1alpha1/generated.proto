@@ -341,7 +341,7 @@ message GitlabEventSource {
   optional Context webhook = 1;
 
   // ProjectID is the id of project for which integration needs to setup
-  optional string projectId = 2;
+  optional string projectID = 9;
 
   // Events are gitlab event to listen to.
   // Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
