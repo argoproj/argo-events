@@ -69,7 +69,6 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	backoff := common.GetConnectionBackoff(amqpEventSource.ConnectionBackoff)
 	var conn *amqplib.Connection
 	if err := server.Connect(backoff, func() error {
-		var err error
 		if amqpEventSource.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS.CACertPath, amqpEventSource.TLS.ClientCertPath, amqpEventSource.TLS.ClientKeyPath)
 			if err != nil {
@@ -80,6 +79,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 				return err
 			}
 		} else {
+			var err error
 			conn, err = amqplib.Dial(amqpEventSource.URL)
 			if err != nil {
 				return err

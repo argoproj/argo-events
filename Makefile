@@ -17,7 +17,7 @@ override LDFLAGS += \
 #  docker image publishing options
 DOCKER_PUSH?=true
 IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=v0.15.0
+IMAGE_TAG?=v0.16.0
 BUILD_BINARY?=true
 
 ifeq (${DOCKER_PUSH},true)
@@ -165,7 +165,12 @@ kind-e2e:
 .PHONY: build-e2e-images
 build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image
 
+$(GOPATH)/bin/golangci-lint:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.26.0
+
 .PHONY: lint
-lint:
-	golangci-lint run --fix
+lint: $(GOPATH)/bin/golangci-lint
+	go mod tidy
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
+
 

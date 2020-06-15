@@ -121,7 +121,8 @@ func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 	t.Logger.WithField("channel", channel).Infoln("posting to channel...")
 	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
 	if err != nil {
-		return nil, err
+		t.Logger.WithField("channel", channel).Errorf("unable to post to channel...")
+		return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
 	}
 
 	t.Logger.WithField("message", message).WithField("channelID", channelID).WithField("timestamp", timestamp).Infoln("message successfully sent to channelID with timestamp")

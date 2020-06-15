@@ -125,12 +125,11 @@ func (router *Router) PostActivate() error {
 
 	logger := route.Logger.WithFields(map[string]interface{}{
 		common.LabelEventSource: route.EventSource.Name,
-		"event-type":            gitlabEventSource.Event,
-		"project-id":            gitlabEventSource.ProjectId,
+		"project-id":            gitlabEventSource.ProjectID,
 	})
 
 	logger.Infoln("retrieving the access token credentials...")
-	c, err := router.getCredentials(gitlabEventSource.AccessToken, gitlabEventSource.Namespace)
+	c, err := router.getCredentials(gitlabEventSource.AccessToken, router.namespace)
 	if err != nil {
 		return errors.Errorf("failed to get gitlab credentials. err: %+v", err)
 	}
@@ -143,51 +142,96 @@ func (router *Router) PostActivate() error {
 
 	formattedUrl := common.FormattedURL(gitlabEventSource.Webhook.URL, gitlabEventSource.Webhook.Endpoint)
 
-	// Get existing webhooks and check if the integration for same url and event type is already available
-	if !gitlabEventSource.AllowDuplicate {
-		hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(router.gitlabEventSource.ProjectId, &gitlab.ListProjectHooksOptions{})
-		if err != nil {
-			return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for project id %s", router.gitlabEventSource.ProjectId)
-		}
-
-		for _, hook := range hooks {
-			elem := reflect.ValueOf(hook).Elem().FieldByName(router.gitlabEventSource.Event)
-			if ok := elem.IsValid(); !ok {
-				return errors.Errorf("unknown event %s", router.gitlabEventSource.Event)
-			}
-			value := elem.Bool()
-
-			if value && hook.URL == formattedUrl {
-				logger.Infoln("webhook already exists, won't register it...")
-				return nil
-			}
-		}
-	}
-
-	opt := &gitlab.AddProjectHookOptions{
-		URL:                   &formattedUrl,
-		Token:                 &c.token,
-		EnableSSLVerification: &router.gitlabEventSource.EnableSSLVerification,
-	}
-
-	logger.Infoln("configuring the type of the GitLab event the hook must register against...")
-	elem := reflect.ValueOf(opt).Elem().FieldByName(router.gitlabEventSource.Event)
-	if ok := elem.IsValid(); !ok {
-		return errors.Errorf("unknown event %s", router.gitlabEventSource.Event)
-	}
-
-	iev := reflect.New(elem.Type().Elem())
-	reflect.Indirect(iev).SetBool(true)
-	elem.Set(iev)
-
-	logger.Infoln("creating project hook...")
-	hook, _, err := router.gitlabClient.Projects.AddProjectHook(router.gitlabEventSource.ProjectId, opt)
+	hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(gitlabEventSource.ProjectID, &gitlab.ListProjectHooksOptions{})
 	if err != nil {
-		return errors.Errorf("failed to add project hook. err: %+v", err)
+		return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for project id %s", router.gitlabEventSource.ProjectID)
 	}
 
-	router.hook = hook
-	logger.WithField("hook-id", hook.ID).Info("hook created for the project")
+	var existingHook *gitlab.ProjectHook
+	isAlreadyExists := false
+
+	for _, hook := range hooks {
+		if hook.URL == formattedUrl {
+			existingHook = hook
+			isAlreadyExists = true
+		}
+	}
+
+	defaultEventValue := false
+
+	editOpt := &gitlab.EditProjectHookOptions{
+		URL:                      &formattedUrl,
+		ConfidentialNoteEvents:   &defaultEventValue,
+		PushEvents:               &defaultEventValue,
+		IssuesEvents:             &defaultEventValue,
+		ConfidentialIssuesEvents: &defaultEventValue,
+		MergeRequestsEvents:      &defaultEventValue,
+		TagPushEvents:            &defaultEventValue,
+		NoteEvents:               &defaultEventValue,
+		JobEvents:                &defaultEventValue,
+		PipelineEvents:           &defaultEventValue,
+		WikiPageEvents:           &defaultEventValue,
+		EnableSSLVerification:    &router.gitlabEventSource.EnableSSLVerification,
+		Token:                    &c.token,
+	}
+
+	addOpt := &gitlab.AddProjectHookOptions{
+		URL:                      &formattedUrl,
+		Token:                    &c.token,
+		EnableSSLVerification:    &router.gitlabEventSource.EnableSSLVerification,
+		ConfidentialNoteEvents:   &defaultEventValue,
+		PushEvents:               &defaultEventValue,
+		IssuesEvents:             &defaultEventValue,
+		ConfidentialIssuesEvents: &defaultEventValue,
+		MergeRequestsEvents:      &defaultEventValue,
+		TagPushEvents:            &defaultEventValue,
+		NoteEvents:               &defaultEventValue,
+		JobEvents:                &defaultEventValue,
+		PipelineEvents:           &defaultEventValue,
+		WikiPageEvents:           &defaultEventValue,
+	}
+
+	var opt interface{}
+
+	opt = addOpt
+	if isAlreadyExists {
+		opt = editOpt
+	}
+
+	logger.Infoln("configuring the GitLab events for the hook...")
+
+	for _, event := range gitlabEventSource.Events {
+		elem := reflect.ValueOf(opt).Elem().FieldByName(event)
+		if ok := elem.IsValid(); !ok {
+			return errors.Errorf("unknown event %s", event)
+		}
+
+		iev := reflect.New(elem.Type().Elem())
+		reflect.Indirect(iev).SetBool(true)
+		elem.Set(iev)
+	}
+
+	var newHook *gitlab.ProjectHook
+
+	if !isAlreadyExists {
+		logger.Infoln("creating project hook...")
+		newHook, _, err = router.gitlabClient.Projects.AddProjectHook(router.gitlabEventSource.ProjectID, opt.(*gitlab.AddProjectHookOptions))
+		if err != nil {
+			return errors.Errorf("failed to add project hook. err: %+v", err)
+		}
+	} else {
+		logger.Infoln("project hook already exists, updating it...")
+		if existingHook == nil {
+			return errors.Errorf("existing hook contents are empty, unable to edit existing webhook")
+		}
+		newHook, _, err = router.gitlabClient.Projects.EditProjectHook(router.gitlabEventSource.ProjectID, existingHook.ID, opt.(*gitlab.EditProjectHookOptions))
+		if err != nil {
+			return errors.Errorf("failed to add project hook. err: %+v", err)
+		}
+	}
+
+	router.hook = newHook
+	logger.WithField("hook-id", newHook.ID).Info("hook registered for the project")
 	return nil
 }
 
@@ -199,12 +243,12 @@ func (router *Router) PostInactivate() error {
 	if gitlabEventSource.DeleteHookOnFinish {
 		logger := route.Logger.WithFields(map[string]interface{}{
 			common.LabelEventSource: route.EventSource.Name,
-			"project-id":            gitlabEventSource.ProjectId,
+			"project-id":            gitlabEventSource.ProjectID,
 			"hook-id":               router.hook.ID,
 		})
 
 		logger.Infoln("deleting project hook...")
-		if _, err := router.gitlabClient.Projects.DeleteProjectHook(router.gitlabEventSource.ProjectId, router.hook.ID); err != nil {
+		if _, err := router.gitlabClient.Projects.DeleteProjectHook(router.gitlabEventSource.ProjectID, router.hook.ID); err != nil {
 			return errors.Errorf("failed to delete hook. err: %+v", err)
 		}
 
@@ -227,15 +271,12 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
-	if gitlabEventSource.Namespace == "" {
-		gitlabEventSource.Namespace = listener.Namespace
-	}
-
 	route := webhook.NewRoute(gitlabEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{
 		route:             route,
 		k8sClient:         listener.K8sClient,
 		gitlabEventSource: gitlabEventSource,
+		namespace:         listener.Namespace,
 	}, controller, eventStream)
 }

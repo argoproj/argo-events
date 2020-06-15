@@ -26,6 +26,7 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -163,8 +164,11 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 		k8sTrigger.Logger.Infoln("updating the object...")
 
 		oldObj, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
-		if err != nil {
-			return nil, err
+		if err != nil && apierrors.IsNotFound(err) {
+			k8sTrigger.Logger.Infoln("object not found, creating the object...")
+			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+		} else if err != nil {
+			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
 		}
 
 		if err := mergo.Merge(oldObj, obj, mergo.WithOverride); err != nil {
@@ -175,6 +179,14 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 
 	case v1alpha1.Patch:
 		k8sTrigger.Logger.Infoln("patching the object...")
+
+		_, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
+		if err != nil && apierrors.IsNotFound(err) {
+			k8sTrigger.Logger.Infoln("object not found, creating the object...")
+			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+		} else if err != nil {
+			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
+		}
 
 		if k8sTrigger.Trigger.Template.K8s.PatchStrategy == "" {
 			k8sTrigger.Trigger.Template.K8s.PatchStrategy = k8stypes.MergePatchType

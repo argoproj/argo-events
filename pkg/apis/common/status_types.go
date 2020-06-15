@@ -21,7 +21,7 @@ const (
 type Condition struct {
 	// Condition type.
 	// +required
-	Type ConditionType `json:"type" protobuf:"bytes,1,opt,name=type,casttype=ConditionType"`
+	Type ConditionType `json:"type" protobuf:"bytes,1,opt,name=type"`
 	// Condition status, True, False or Unknown.
 	// +required
 	Status corev1.ConditionStatus `json:"status" protobuf:"bytes,2,opt,name=status,casttype=k8s.io/api/core/v1.ConditionStatus"`

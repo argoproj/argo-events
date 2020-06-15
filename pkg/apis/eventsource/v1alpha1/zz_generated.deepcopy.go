@@ -490,6 +490,11 @@ func (in *GitlabEventSource) DeepCopyInto(out *GitlabEventSource) {
 		*out = new(Context)
 		**out = **in
 	}
+	if in.Events != nil {
+		in, out := &in.Events, &out.Events
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.AccessToken != nil {
 		in, out := &in.AccessToken, &out.AccessToken
 		*out = new(v1.SecretKeySelector)
@@ -871,6 +876,11 @@ func (in *StorageGridEventSource) DeepCopyInto(out *StorageGridEventSource) {
 		in, out := &in.Filter, &out.Filter
 		*out = new(StorageGridFilter)
 		**out = **in
+	}
+	if in.AuthToken != nil {
+		in, out := &in.AuthToken, &out.AuthToken
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }

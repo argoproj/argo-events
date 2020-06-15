@@ -375,11 +375,11 @@ type GithubEventSource struct {
 type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *Context `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// ProjectId is the id of project for which integration needs to setup
-	ProjectId string `json:"projectId" protobuf:"bytes,2,opt,name=projectId"`
-	// Event is a gitlab event to listen to.
+	// ProjectID is the id of project for which integration needs to setup
+	ProjectID string `json:"projectId" protobuf:"bytes,2,opt,name=projectId"`
+	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
-	Event string `json:"event" protobuf:"bytes,3,opt,name=event"`
+	Event string `json:"events" protobuf:"bytes,3,opt,name=event"`
 	// AccessToken is reference to k8 secret which holds the gitlab api access information
 	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,4,opt,name=accessToken"`
 	// EnableSSLVerification to enable ssl verification
@@ -459,6 +459,18 @@ type StorageGridEventSource struct {
 	Events []string `json:"events,omitempty" protobuf:"bytes,2,rep,name=events"`
 	// Filter on object key which caused the notification.
 	Filter *StorageGridFilter `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
+	// TopicArn
+	TopicArn string `json:"topicArn" protobuf:"bytes,4,name=topicArn"`
+	// Name of the bucket to register notifications for.
+	Bucket string `json:"bucket" protobuf:"bytes,5,name=bucket"`
+	// S3 region.
+	// Defaults to us-east-1
+	// +optional
+	Region string `json:"region,omitempty" protobuf:"bytes,6,opt,name=region"`
+	// Auth token for storagegrid api
+	AuthToken *corev1.SecretKeySelector `json:"authToken" protobuf:"bytes,7,name=authToken"`
+	// ApiURL is the url of the storagegrid api.
+	ApiURL string `json:"apiURL" protobuf:"bytes,8,name=apiURL"`
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects
