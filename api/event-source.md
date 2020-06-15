@@ -2938,7 +2938,7 @@ ProjectID is the id of project for which integration needs to setup
 
 <td>
 
-<code>events</code></br> <em> string </em>
+<code>events</code></br> <em> \[\]string </em>
 
 </td>
 
@@ -3024,29 +3024,6 @@ GitlabBaseURL is the base URL for API requests to a custom endpoint
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve
-access token from.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>deleteHookOnFinish</code></br> <em> bool </em>
 
 </td>
@@ -3059,28 +3036,6 @@ access token from.
 
 DeleteHookOnFinish determines whether to delete the GitLab hook for the
 project once the event source is stopped.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>allowDuplicate</code></br> <em> bool </em>
-
-</td>
-
-<td>
-
-<p>
-
-AllowDuplicate allows the gateway to register the same webhook
-integrations for multiple event source configurations. Defaults to
-false.
 
 </p>
 

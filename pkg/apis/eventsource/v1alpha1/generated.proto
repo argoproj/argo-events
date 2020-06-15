@@ -345,7 +345,7 @@ message GitlabEventSource {
 
   // Events are gitlab event to listen to.
   // Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
-  optional string event = 3;
+  repeated string events = 3;
 
   // AccessToken is reference to k8 secret which holds the gitlab api access information
   optional k8s.io.api.core.v1.SecretKeySelector accessToken = 4;
@@ -357,18 +357,9 @@ message GitlabEventSource {
   // GitlabBaseURL is the base URL for API requests to a custom endpoint
   optional string gitlabBaseURL = 6;
 
-  // Namespace refers to Kubernetes namespace which is used to retrieve access token from.
-  // +optional
-  optional string namespace = 7;
-
   // DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.
   // +optional
   optional bool deleteHookOnFinish = 8;
-
-  // AllowDuplicate allows the gateway to register the same webhook integrations for multiple event source configurations.
-  // Defaults to false.
-  // +optional.
-  optional bool allowDuplicate = 9;
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
