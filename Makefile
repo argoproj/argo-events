@@ -148,7 +148,12 @@ kind-e2e:
 .PHONY: build-e2e-images
 build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image
 
+$(GOPATH)/bin/golangci-lint:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.23.8
+
 .PHONY: lint
-lint:
-	golangci-lint run --fix
+lint: $(GOPATH)/bin/golangci-lint
+	go mod tidy
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
+
 
