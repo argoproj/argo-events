@@ -153,12 +153,16 @@ manifests: crds
 	kustomize build manifests/cluster-install > manifests/install.yaml
 	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
 
+.PHONY: swagger
+swagger:
+	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
+
 .PHONY: codegen
 codegen: protos
 	go mod vendor
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
-	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
+	$(MAKE) swagger
 	./hack/update-api-docs.sh
 	rm -rf ./vendor
 	go mod tidy
