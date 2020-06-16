@@ -166,8 +166,9 @@ codegen: protos
 
 .PHONY: start
 start:
+	kustomize build --load_restrictor=none test/manifests > /tmp/argo-events.yaml
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kubectl -n argo-events apply -f manifests/namespace-install.yaml
+	kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f /tmp/argo-events.yaml
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 	kubens argo-events
 
