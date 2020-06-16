@@ -260,7 +260,7 @@ func schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"clusterId": {
+					"clusterID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Cluster ID for nats streaming, if it's missing, treat it as NATS server",
 							Type:        []string{"string"},

@@ -580,7 +580,7 @@ NATS host url
 
 <td>
 
-<code>clusterId</code></br> <em> string </em>
+<code>clusterID</code></br> <em> string </em>
 
 </td>
 
