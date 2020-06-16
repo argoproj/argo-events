@@ -3,7 +3,7 @@ package main
 import (
 	"io/ioutil"
 
-	"github.com/ghodss/yaml"
+	"sigs.k8s.io/yaml"
 )
 
 func cleanCRD(filename string) {
