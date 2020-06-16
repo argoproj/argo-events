@@ -70,7 +70,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing the event source...")
-	var kafkaEventSource v1alpha1.KafkaEventSource
+	var kafkaEventSource *v1alpha1.KafkaEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &kafkaEventSource); err != nil {
 		return errors.Wrapf(err, "failed to parse event source %s", eventSource.Name)
 	}
