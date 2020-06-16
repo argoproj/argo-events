@@ -56,11 +56,9 @@ func GetConnectionBackoff(backoff *apicommon.Backoff) *wait.Backoff {
 	if &backoff.Duration != nil {
 		result.Duration = backoff.Duration
 	}
-	if backoff.Factor != 0 {
-		result.Factor = backoff.Factor
-	}
-	if backoff.Jitter != 0 {
-		result.Jitter = backoff.Jitter
+	result.Factor, _ = backoff.Factor.Float64()
+	if backoff.Jitter != nil {
+		result.Jitter, _ = backoff.Jitter.Float64()
 	}
 	if backoff.Steps != 0 {
 		result.Steps = backoff.GetSteps()

@@ -36,6 +36,7 @@ const (
 
 // Gateway is the definition of a gateway resource
 // +genclient
+// +kubebuilder:resource:shortName=gw
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Gateway struct {
@@ -50,7 +51,7 @@ type Gateway struct {
 type GatewayList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	// +listType=items
+
 	Items []Gateway `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
@@ -67,7 +68,7 @@ type GatewaySpec struct {
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
 	// Subscribers holds the contexts of the subscribers/sinks to send events to.
-	// +listType=subscribers
+
 	// +optional
 	Subscribers *Subscribers `json:"subscribers,omitempty" protobuf:"bytes,5,opt,name=subscribers"`
 	// Port on which the gateway event source processor is running on.
@@ -138,11 +139,11 @@ type Service struct {
 
 type Subscribers struct {
 	// HTTP subscribers are HTTP endpoints to send events to.
-	// +listType=string
+
 	// +optional
 	HTTP []string `json:"http,omitempty" protobuf:"bytes,1,rep,name=http"`
 	// NATS refers to the subscribers over NATS protocol.
-	// +listType=NATSSubscriber
+
 	// +optional
 	NATS []NATSSubscriber `json:"nats,omitempty" protobuf:"bytes,2,rep,name=nats"`
 }

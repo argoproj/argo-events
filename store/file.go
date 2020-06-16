@@ -20,8 +20,9 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // FileReader implements the ArtifactReader interface for file artifacts

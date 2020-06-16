@@ -28,7 +28,7 @@ type S3Artifact struct {
 	Insecure  bool                      `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
 	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
 	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
-	// +listType=string
+
 	Events []string  `json:"events,omitempty" protobuf:"bytes,7,rep,name=events"`
 	Filter *S3Filter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }

@@ -201,13 +201,6 @@ Region is AWS region
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -225,13 +218,6 @@ construct the request payload.
 <td>
 
 <em>(Optional)</em>
-
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the trigger resource.
-
-</p>
 
 </td>
 
@@ -372,13 +358,6 @@ resource. Default value is Submit.
 </td>
 
 <td>
-
-<p>
-
-Parameters is the list of parameters to pass to resolved Argo Workflow
-object
-
-</p>
 
 </td>
 
@@ -596,7 +575,8 @@ Git repository hosting the artifact
 
 <td>
 
-<code>resource</code></br> <em> encoding/json.RawMessage </em>
+<code>resource</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Resource </em>
 
 </td>
 
@@ -1041,13 +1021,6 @@ gRPC server knows how to interpret.
 
 <td>
 
-<p>
-
-Parameters is the list of parameters that is applied to resolved custom
-trigger trigger object.
-
-</p>
-
 </td>
 
 </tr>
@@ -1063,13 +1036,6 @@ trigger trigger object.
 </td>
 
 <td>
-
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
 
 </td>
 
@@ -2526,13 +2492,6 @@ URL refers to the URL to send HTTP request to.
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the HTTP request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -2595,13 +2554,6 @@ for more info. Default value is POST.
 </td>
 
 <td>
-
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the HTTP trigger resource.
-
-</p>
 
 </td>
 
@@ -2939,13 +2891,6 @@ Partition to write data to.
 
 <td>
 
-<p>
-
-Parameters is the list of parameters that is applied to resolved Kafka
-trigger object.
-
-</p>
-
 </td>
 
 </tr>
@@ -3051,13 +2996,6 @@ TLS configuration for the Kafka producer.
 </td>
 
 <td>
-
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
 
 </td>
 
@@ -3305,13 +3243,6 @@ Name of the subject to put message on.
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -3327,13 +3258,6 @@ construct the request payload.
 </td>
 
 <td>
-
-<p>
-
-Parameters is the list of parameters that is applied to resolved NATS
-trigger object.
-
-</p>
 
 </td>
 
@@ -3886,13 +3810,6 @@ Name of the action/function.
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -3910,13 +3827,6 @@ construct the request payload.
 <td>
 
 <em>(Optional)</em>
-
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the trigger resource.
-
-</p>
 
 </td>
 
@@ -4872,13 +4782,6 @@ Description
 
 <em>(Optional)</em>
 
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the trigger resource.
-
-</p>
-
 </td>
 
 </tr>
@@ -5113,13 +5016,6 @@ Default value is Create.
 
 <td>
 
-<p>
-
-Parameters is the list of parameters that is applied to resolved K8s
-trigger object.
-
-</p>
-
 </td>
 
 </tr>
@@ -5240,14 +5136,6 @@ Description
 </td>
 
 <td>
-
-<p>
-
-Allow refers to the list of allowed response statuses. If the response
-status of the the trigger is within the list, the trigger will marked as
-successful else it will result in trigger failure.
-
-</p>
 
 </td>
 

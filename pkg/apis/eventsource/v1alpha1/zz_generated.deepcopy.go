@@ -34,7 +34,7 @@ func (in *AMQPEventSource) DeepCopyInto(out *AMQPEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -138,7 +138,7 @@ func (in *EmitterEventSource) DeepCopyInto(out *EmitterEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -556,7 +556,7 @@ func (in *KafkaEventSource) DeepCopyInto(out *KafkaEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -582,7 +582,7 @@ func (in *MQTTEventSource) DeepCopyInto(out *MQTTEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -608,7 +608,7 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -634,7 +634,7 @@ func (in *NSQEventSource) DeepCopyInto(out *NSQEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS

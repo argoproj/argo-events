@@ -21,16 +21,17 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	natslib "github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"github.com/argoproj/argo-events/sensors/types"
 )
 
 // SensorContext contains execution context for Sensor

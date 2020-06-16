@@ -21,11 +21,12 @@ import (
 	"testing"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/types"
-	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleEvent(t *testing.T) {

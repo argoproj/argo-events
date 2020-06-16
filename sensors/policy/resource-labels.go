@@ -17,11 +17,12 @@ limitations under the License.
 package policy
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ResourceLabels implements trigger policy based on the resource labels
@@ -32,19 +33,24 @@ type ResourceLabels struct {
 }
 
 func (rl *ResourceLabels) ApplyPolicy() error {
-	if rl.Trigger.Policy.K8s == nil || rl.Trigger.Policy.K8s.Labels == nil || &rl.Trigger.Policy.K8s.Backoff == nil {
+	from := rl.Trigger.Policy.K8s.Backoff
+	if rl.Trigger.Policy.K8s == nil || rl.Trigger.Policy.K8s.Labels == nil || &from == nil {
 		return nil
 	}
 
 	// check if success labels match with labels on object
 	completed := false
 
-	err := wait.ExponentialBackoff(wait.Backoff{
-		Duration: rl.Trigger.Policy.K8s.Backoff.Duration,
-		Factor:   rl.Trigger.Policy.K8s.Backoff.Factor,
-		Jitter:   rl.Trigger.Policy.K8s.Backoff.Jitter,
-		Steps:    int(rl.Trigger.Policy.K8s.Backoff.Steps),
-	}, func() (bool, error) {
+	backoff := wait.Backoff{
+		Duration: from.Duration,
+		Steps:    int(from.Steps),
+	}
+	backoff.Factor, _ = from.Factor.Float64()
+	if from.Jitter != nil {
+		jitter, _ := from.Jitter.Float64()
+		backoff.Jitter = jitter
+	}
+	err := wait.ExponentialBackoff(backoff, func() (bool, error) {
 		obj, err := rl.Client.Namespace(rl.Obj.GetNamespace()).Get(rl.Obj.GetName(), metav1.GetOptions{})
 		if err != nil {
 			return false, err

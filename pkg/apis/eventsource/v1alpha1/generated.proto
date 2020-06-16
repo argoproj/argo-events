@@ -88,8 +88,6 @@ message CalendarEventSource {
   // Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
   optional string interval = 2;
 
-  // ExclusionDates defines the list of DATE-TIME exceptions for recurring events.
-  // +listType=string
   repeated string exclusionDates = 3;
 
   // Timezone in which to run the schedule
@@ -163,6 +161,7 @@ message EmitterEventSource {
 
 // EventSource is the definition of a eventsource resource
 // +genclient
+// +kubebuilder:resource:shortName=es
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message EventSource {
@@ -178,7 +177,6 @@ message EventSource {
 message EventSourceList {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
-  // +listType=eventsource
   repeated EventSource items = 2;
 }
 
@@ -252,9 +250,6 @@ message EventSourceSpec {
 
   // Generic event source
   map<string, GenericEventSource> generic = 23;
-
-  // Type of the event source
-  optional string type = 24;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -295,8 +290,6 @@ message GithubEventSource {
   // Repository refers to GitHub repo name i.e. argo-events
   optional string repository = 4;
 
-  // Events refer to Github events to subscribe to which the gateway will subscribe
-  // +listType=string
   repeated string events = 5;
 
   // APIToken refers to a K8s secret containing github api token
@@ -372,8 +365,6 @@ message HDFSEventSource {
   // CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
   optional string checkInterval = 3;
 
-  // Addresses is accessible addresses of HDFS name nodes
-  // +listType=string
   repeated string addresses = 4;
 
   // HDFSUser is the user to access HDFS file system.
@@ -547,8 +538,6 @@ message RedisEventSource {
   // +optional
   optional int32 db = 4;
 
-  // Channels to subscribe to listen events.
-  // +listType=string
   repeated string channels = 5;
 
   // TLS configuration for the redis client.
@@ -697,10 +686,6 @@ message StorageGridEventSource {
   // Webhook holds configuration for a REST endpoint
   optional Context webhook = 1;
 
-  // Events are s3 bucket notification events.
-  // For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
-  // Note that storage grid notifications do not contain `s3:`
-  // +listType=string
   repeated string events = 2;
 
   // Filter on object key which caused the notification.
@@ -750,10 +735,6 @@ message StripeEventSource {
   // +optional
   optional string namespace = 4;
 
-  // EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
-  // More info at https://stripe.com/docs/api/events/list
-  // +optional
-  // +listType=string
   repeated string eventFilter = 5;
 }
 

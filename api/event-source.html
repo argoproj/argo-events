@@ -242,7 +242,6 @@ string
 </em>
 </td>
 <td>
-<p>ExclusionDates defines the list of DATE-TIME exceptions for recurring events.</p>
 </td>
 </tr>
 <tr>
@@ -844,17 +843,6 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Generic
 <p>Generic event source</p>
 </td>
 </tr>
-<tr>
-<td>
-<code>type</code></br>
-<em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType
-</em>
-</td>
-<td>
-<p>Type of the event source</p>
-</td>
-</tr>
 </table>
 </td>
 </tr>
@@ -1174,17 +1162,6 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Generic
 <p>Generic event source</p>
 </td>
 </tr>
-<tr>
-<td>
-<code>type</code></br>
-<em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType
-</em>
-</td>
-<td>
-<p>Type of the event source</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventSourceStatus">EventSourceStatus
@@ -1374,7 +1351,6 @@ string
 </em>
 </td>
 <td>
-<p>Events refer to Github events to subscribe to which the gateway will subscribe</p>
 </td>
 </tr>
 <tr>
@@ -1655,7 +1631,6 @@ string
 </em>
 </td>
 <td>
-<p>Addresses is accessible addresses of HDFS name nodes</p>
 </td>
 </tr>
 <tr>
@@ -2277,7 +2252,6 @@ int32
 </em>
 </td>
 <td>
-<p>Channels to subscribe to listen events.</p>
 </td>
 </tr>
 <tr>
@@ -2862,9 +2836,6 @@ Context
 </em>
 </td>
 <td>
-<p>Events are s3 bucket notification events.
-For more information on s3 notifications, follow <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations">https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations</a>
-Note that storage grid notifications do not contain <code>s3:</code></p>
 </td>
 </tr>
 <tr>
@@ -3057,9 +3028,6 @@ string
 </em>
 </td>
 <td>
-<em>(Optional)</em>
-<p>EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
-More info at <a href="https://stripe.com/docs/api/events/list">https://stripe.com/docs/api/events/list</a></p>
 </td>
 </tr>
 </tbody>

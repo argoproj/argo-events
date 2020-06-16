@@ -6,8 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // URLReader implements the ArtifactReader interface for urls

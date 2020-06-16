@@ -23,10 +23,11 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // KafkaTrigger describes the trigger to place messages on Kafka topic using a producer

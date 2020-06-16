@@ -37,6 +37,7 @@ message BusConfig {
 
 // EventBus is the definition of a eventbus resource
 // +genclient
+// +kubebuilder:resource:singular=eventbus,shortName=eb
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message EventBus {
@@ -52,7 +53,6 @@ message EventBus {
 message EventBusList {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
-  // +listType=eventbus
   repeated EventBus items = 2;
 }
 

@@ -48,13 +48,8 @@ message AWSLambdaTrigger {
   // Region is AWS region
   optional string region = 5;
 
-  // Payload is the list of key-value extracted from an event payload to construct the request payload.
-  // +listType=payloadParameters
   repeated TriggerParameter payload = 6;
 
-  // Parameters is the list of key-value extracted from event's payload that are applied to
-  // the trigger resource.
-  // +listType=triggerParameters
   // +optional
   repeated TriggerParameter parameters = 7;
 }
@@ -69,8 +64,6 @@ message ArgoWorkflowTrigger {
   // +optional
   optional string operation = 2;
 
-  // Parameters is the list of parameters to pass to resolved Argo Workflow object
-  // +listType=triggerParameters
   repeated TriggerParameter parameters = 3;
 
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
@@ -98,7 +91,7 @@ message ArtifactLocation {
   optional GitArtifact git = 6;
 
   // Resource is generic template for K8s resource
-  optional bytes resource = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Resource resource = 7;
 }
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password
@@ -144,12 +137,8 @@ message CustomTrigger {
   // Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
   map<string, string> spec = 5;
 
-  // Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
-  // +listType=triggerParameters
   repeated TriggerParameter parameters = 6;
 
-  // Payload is the list of key-value extracted from an event payload to construct the request payload.
-  // +listType=payloadParameters
   repeated TriggerParameter payload = 7;
 }
 
@@ -166,7 +155,6 @@ message DataFilter {
   // Type contains the JSON type of the data
   optional string type = 2;
 
-  // +listType=value
   // Value is the allowed string values for this key
   // Booleans are passed using strconv.ParseBool()
   // Numbers are parsed using as float64 using strconv.ParseFloat()
@@ -185,7 +173,6 @@ message DependencyGroup {
   // Name of the group
   optional string name = 1;
 
-  // +listType=dependencies
   // Dependencies of events
   repeated string dependencies = 2;
 }
@@ -247,7 +234,6 @@ message EventDependencyFilter {
   // Context filter constraints
   optional EventContext context = 3;
 
-  // +listType=data
   // Data filter constraints with escalation
   repeated DataFilter data = 4;
 }
@@ -313,7 +299,6 @@ message GitRemoteConfig {
   // Name of the remote to fetch from.
   optional string name = 1;
 
-  // +listType=urls
   // URLs the URLs of a remote repository. It must be non-empty. Fetch will
   // always use the first URL, while push will use all of them.
   repeated string urls = 2;
@@ -330,8 +315,6 @@ message HTTPTrigger {
   // URL refers to the URL to send HTTP request to.
   optional string url = 1;
 
-  // Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.
-  // +listType=atomic
   repeated TriggerParameter payload = 2;
 
   // TLS configuration for the HTTP client.
@@ -344,9 +327,6 @@ message HTTPTrigger {
   // +optional
   optional string method = 4;
 
-  // Parameters is the list of key-value extracted from event's payload that are applied to
-  // the HTTP trigger resource.
-  // +listType=atomic
   repeated TriggerParameter parameters = 5;
 
   // Timeout refers to the HTTP request timeout in seconds.
@@ -388,8 +368,6 @@ message KafkaTrigger {
   // Partition to write data to.
   optional int32 partition = 3;
 
-  // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
-  // +listType=triggerParameters
   repeated TriggerParameter parameters = 4;
 
   // RequiredAcks used in producer to tell the broker how many replica acknowledgements
@@ -412,8 +390,6 @@ message KafkaTrigger {
   // +optional
   optional TLSConfig tls = 8;
 
-  // Payload is the list of key-value extracted from an event payload to construct the request payload.
-  // +listType=payloadParameters
   repeated TriggerParameter payload = 9;
 
   // The partitioning key for the messages put on the Kafka topic.
@@ -439,12 +415,8 @@ message NATSTrigger {
   // Name of the subject to put message on.
   optional string subject = 2;
 
-  // Payload is the list of key-value extracted from an event payload to construct the request payload.
-  // +listType=payloadParameters
   repeated TriggerParameter payload = 3;
 
-  // Parameters is the list of parameters that is applied to resolved NATS trigger object.
-  // +listType=triggerParameters
   repeated TriggerParameter parameters = 4;
 
   // TLS configuration for the NATS producer.
@@ -512,13 +484,8 @@ message OpenWhiskTrigger {
   // Name of the action/function.
   optional string actionName = 5;
 
-  // Payload is the list of key-value extracted from an event payload to construct the request payload.
-  // +listType=payloadParameters
   repeated TriggerParameter payload = 6;
 
-  // Parameters is the list of key-value extracted from event's payload that are applied to
-  // the trigger resource.
-  // +listType=triggerParameters
   // +optional
   repeated TriggerParameter parameters = 7;
 }
@@ -526,6 +493,7 @@ message OpenWhiskTrigger {
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
+// +kubebuilder:resource:shortName=sn
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Sensor {
@@ -541,7 +509,6 @@ message Sensor {
 message SensorList {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
-  // +listType=items
   repeated Sensor items = 2;
 }
 
@@ -557,11 +524,9 @@ message SensorResources {
 
 // SensorSpec represents desired sensor state
 message SensorSpec {
-  // +listType=dependencies
   // Dependencies is a list of the events that this sensor is dependent on.
   repeated EventDependency dependencies = 1;
 
-  // +listType=triggers
   // Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
   repeated Trigger triggers = 2;
 
@@ -576,7 +541,6 @@ message SensorSpec {
   // Circuit is a boolean expression of dependency groups
   optional string circuit = 5;
 
-  // +listType=dependencyGroups
   // DependencyGroups is a list of the groups of events.
   repeated DependencyGroup dependencyGroups = 6;
 
@@ -625,9 +589,6 @@ message SensorStatus {
 
 // SlackTrigger refers to the specification of the slack notification trigger.
 message SlackTrigger {
-  // Parameters is the list of key-value extracted from event's payload that are applied to
-  // the trigger resource.
-  // +listType=triggerParameters
   // +optional
   repeated TriggerParameter parameters = 1;
 
@@ -661,8 +622,6 @@ message StandardK8STrigger {
   // +optional
   optional string operation = 3;
 
-  // Parameters is the list of parameters that is applied to resolved K8s trigger object.
-  // +listType=triggerParameters
   repeated TriggerParameter parameters = 4;
 
   // PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
@@ -687,9 +646,6 @@ message StandardK8STrigger {
 
 // StatusPolicy refers to the policy used to check the state of the trigger using response status
 message StatusPolicy {
-  // Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list,
-  // the trigger will marked as successful else it will result in trigger failure.
-  // +listType=allowedStatuses
   repeated int32 allow = 1;
 }
 
@@ -764,7 +720,6 @@ message Trigger {
   // Template describes the trigger specification.
   optional TriggerTemplate template = 1;
 
-  // +listType=templateParameters
   // Parameters is the list of parameters applied to the trigger template definition
   repeated TriggerParameter parameters = 2;
 
@@ -836,11 +791,9 @@ message TriggerPolicy {
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
 message TriggerSwitch {
-  // +listType=any
   // Any acts as a OR operator between dependencies
   repeated string any = 1;
 
-  // +listType=all
   // All acts as a AND operator between dependencies
   repeated string all = 2;
 }

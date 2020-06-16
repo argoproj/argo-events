@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -451,11 +452,9 @@ func TestApplyResourceParameters(t *testing.T) {
 		Data: []byte("{\"name\": {\"first\": \"test-deployment\"} }"),
 	}
 
-	data, _ := json.Marshal(deployment)
-	artifact := json.RawMessage{}
-	_ = json.Unmarshal(data, &artifact)
+	artifact := apicommon.NewResource(deployment)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: artifact,
+		Resource: &artifact,
 	}
 	id := obj.NodeID("fake-dependency")
 	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
