@@ -45,6 +45,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.9.5
 	github.com/hashicorp/go-retryablehttp v0.6.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20190818114111-108c894c2c0e // indirect
@@ -107,6 +108,7 @@ require (
 	k8s.io/kubernetes v1.17.5 // indirect
 	k8s.io/utils v0.0.0-20200327001022-6496210b90e8 // indirect
 	sigs.k8s.io/controller-runtime v0.5.4
+	sigs.k8s.io/controller-tools v0.2.5
 	sigs.k8s.io/yaml v1.2.0
 )
 

@@ -127,23 +127,6 @@ coverage:
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
 
-$(GOPATH)/bin/go-to-protobuf:
-	go get k8s.io/code-generator/cmd/go-to-protobuf@v0.16.7-beta.0
-	go mod tidy
-
-pkg/apis/common/generated.proto:  $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis/common -name '*.go' -not -name '*generated*')
-	$(GOPATH)/bin/go-to-protobuf \
-        --go-header-file=./hack/custom-boilerplate.go.txt \
-        --packages=github.com/argoproj/argo-events/pkg/apis/common \
-        --apimachinery-packages=+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1
-
-.PHONY: protos
-protos: $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis -name '*.go' -not -name '*generated*') pkg/apis/common/generated.proto
-	$(GOPATH)/bin/go-to-protobuf \
-        --go-header-file=./hack/custom-boilerplate.go.txt \
-        --packages=github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1,github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1,github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1,github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1 \
-        --apimachinery-packages=github.com/argoproj/argo-events/pkg/apis/common,+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1
-
 .PHONY: crds
 crds:
 	./hack/crdgen.sh
@@ -158,8 +141,9 @@ swagger:
 	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
 
 .PHONY: codegen
-codegen: protos
+codegen:
 	go mod vendor
+	./hack/generate-proto.sh
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
 	$(MAKE) swagger
