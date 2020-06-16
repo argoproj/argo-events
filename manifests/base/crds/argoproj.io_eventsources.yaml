@@ -10,11 +10,11 @@ spec:
     listKind: EventSourceList
     plural: eventsources
     shortNames:
-      - es
+    - es
     singular: eventsource
   scope: Namespaced
   version: v1alpha1
   versions:
-    - name: v1alpha1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: true
