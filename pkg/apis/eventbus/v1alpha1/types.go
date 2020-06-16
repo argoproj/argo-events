@@ -10,6 +10,7 @@ import (
 
 // EventBus is the definition of a eventbus resource
 // +genclient
+// +kubebuilder:resource:singular=eventbus,shortName=eb
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type EventBus struct {
@@ -24,7 +25,7 @@ type EventBus struct {
 type EventBusList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	// +listType=eventbus
+
 	Items []EventBus `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 

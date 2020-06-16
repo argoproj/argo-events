@@ -42,6 +42,7 @@ message EventSourceRef {
 
 // Gateway is the definition of a gateway resource
 // +genclient
+// +kubebuilder:resource:shortName=gw
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Gateway {
@@ -57,7 +58,6 @@ message Gateway {
 message GatewayList {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
-  // +listType=items
   repeated Gateway items = 2;
 }
 
@@ -87,8 +87,6 @@ message GatewaySpec {
   // +optional
   optional Service service = 4;
 
-  // Subscribers holds the contexts of the subscribers/sinks to send events to.
-  // +listType=subscribers
   // +optional
   optional Subscribers subscribers = 5;
 
@@ -190,13 +188,9 @@ message Service {
 }
 
 message Subscribers {
-  // HTTP subscribers are HTTP endpoints to send events to.
-  // +listType=string
   // +optional
   repeated string http = 1;
 
-  // NATS refers to the subscribers over NATS protocol.
-  // +listType=NATSSubscriber
   // +optional
   repeated NATSSubscriber nats = 2;
 }

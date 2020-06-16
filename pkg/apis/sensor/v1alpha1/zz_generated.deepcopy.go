@@ -529,7 +529,7 @@ func (in *K8SResourcePolicy) DeepCopyInto(out *K8SResourcePolicy) {
 			(*out)[key] = val
 		}
 	}
-	out.Backoff = in.Backoff
+	in.Backoff.DeepCopyInto(&out.Backoff)
 	return
 }
 

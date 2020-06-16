@@ -108,6 +108,7 @@ const (
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
+// +kubebuilder:resource:shortName=sn
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
@@ -122,16 +123,16 @@ type Sensor struct {
 type SensorList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	// +listType=items
+
 	Items []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // SensorSpec represents desired sensor state
 type SensorSpec struct {
-	// +listType=dependencies
+
 	// Dependencies is a list of the events that this sensor is dependent on.
 	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
-	// +listType=triggers
+
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 	// Template is the pod specification for the sensor
@@ -142,7 +143,7 @@ type SensorSpec struct {
 	Subscription *Subscription `json:"subscription,omitempty" protobuf:"bytes,4,opt,name=subscription"`
 	// Circuit is a boolean expression of dependency groups
 	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,opt,name=circuit"`
-	// +listType=dependencyGroups
+
 	// DependencyGroups is a list of the groups of events.
 	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,6,rep,name=dependencyGroups"`
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
@@ -218,7 +219,7 @@ type EventDependency struct {
 type DependencyGroup struct {
 	// Name of the group
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-	// +listType=dependencies
+
 	// Dependencies of events
 	Dependencies []string `json:"dependencies" protobuf:"bytes,2,rep,name=dependencies"`
 }
@@ -231,7 +232,7 @@ type EventDependencyFilter struct {
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 	// Context filter constraints
 	Context *EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
-	// +listType=data
+
 	// Data filter constraints with escalation
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,4,rep,name=data"`
 }
@@ -272,7 +273,7 @@ type DataFilter struct {
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
 	// Type contains the JSON type of the data
 	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type,casttype=JSONType"`
-	// +listType=value
+
 	// Value is the allowed string values for this key
 	// Booleans are passed using strconv.ParseBool()
 	// Numbers are parsed using as float64 using strconv.ParseFloat()
@@ -289,7 +290,7 @@ type DataFilter struct {
 type Trigger struct {
 	// Template describes the trigger specification.
 	Template *TriggerTemplate `json:"template,omitempty" protobuf:"bytes,1,opt,name=template"`
-	// +listType=templateParameters
+
 	// Parameters is the list of parameters applied to the trigger template definition
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
 	// Policy to configure backoff and execution criteria for the trigger
@@ -335,10 +336,10 @@ type TriggerTemplate struct {
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
 type TriggerSwitch struct {
-	// +listType=any
+
 	// Any acts as a OR operator between dependencies
 	Any []string `json:"any,omitempty" protobuf:"bytes,1,rep,name=any"`
-	// +listType=all
+
 	// All acts as a AND operator between dependencies
 	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
 }
@@ -354,7 +355,7 @@ type StandardK8STrigger struct {
 	// +optional
 	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,3,opt,name=operation,casttype=KubernetesResourceOperation"`
 	// Parameters is the list of parameters that is applied to resolved K8s trigger object.
-	// +listType=triggerParameters
+
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 	// PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
 	// possible values:
@@ -384,7 +385,7 @@ type ArgoWorkflowTrigger struct {
 	// +optional
 	Operation ArgoWorkflowOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation,casttype=ArgoWorkflowOperation"`
 	// Parameters is the list of parameters to pass to resolved Argo Workflow object
-	// +listType=triggerParameters
+
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
@@ -395,7 +396,7 @@ type HTTPTrigger struct {
 	// URL refers to the URL to send HTTP request to.
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 	// Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.
-	// +listType=atomic
+
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
 	// TLS configuration for the HTTP client.
 	// +optional
@@ -407,7 +408,7 @@ type HTTPTrigger struct {
 	Method string `json:"method,omitempty" protobuf:"bytes,4,opt,name=method"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the HTTP trigger resource.
-	// +listType=atomic
+
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,5,rep,name=parameters"`
 	// Timeout refers to the HTTP request timeout in seconds.
 	// Default value is 60 seconds.
@@ -458,11 +459,11 @@ type AWSLambdaTrigger struct {
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,5,opt,name=region"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
+
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
-	// +listType=triggerParameters
+
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
@@ -477,7 +478,7 @@ type KafkaTrigger struct {
 	// Partition to write data to.
 	Partition int32 `json:"partition" protobuf:"varint,3,opt,name=partition"`
 	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
-	// +listType=triggerParameters
+
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 	// RequiredAcks used in producer to tell the broker how many replica acknowledgements
 	// Defaults to 1 (Only wait for the leader to ack).
@@ -496,7 +497,7 @@ type KafkaTrigger struct {
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
+
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
 	// The partitioning key for the messages put on the Kafka topic.
 	// Defaults to broker url.
@@ -511,10 +512,10 @@ type NATSTrigger struct {
 	// Name of the subject to put message on.
 	Subject string `json:"subject" protobuf:"bytes,2,opt,name=subject"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
+
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,3,rep,name=payload"`
 	// Parameters is the list of parameters that is applied to resolved NATS trigger object.
-	// +listType=triggerParameters
+
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 	// TLS configuration for the NATS producer.
 	// +optional
@@ -534,10 +535,10 @@ type CustomTrigger struct {
 	// Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
 	Spec map[string]string `json:"spec" protobuf:"bytes,5,rep,name=spec"`
 	// Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
-	// +listType=triggerParameters
+
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
+
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
 }
 
@@ -545,7 +546,7 @@ type CustomTrigger struct {
 type SlackTrigger struct {
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
-	// +listType=triggerParameters
+
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
@@ -580,11 +581,11 @@ type OpenWhiskTrigger struct {
 	// Name of the action/function.
 	ActionName string `json:"actionName" protobuf:"bytes,5,opt,name=actionName"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
+
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
-	// +listType=triggerParameters
+
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
@@ -672,7 +673,7 @@ type K8SResourcePolicy struct {
 type StatusPolicy struct {
 	// Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list,
 	// the trigger will marked as successful else it will result in trigger failure.
-	// +listType=allowedStatuses
+
 	Allow []int32 `json:"allow" protobuf:"varint,1,rep,name=allow"`
 }
 
@@ -824,7 +825,7 @@ type GitArtifact struct {
 type GitRemoteConfig struct {
 	// Name of the remote to fetch from.
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-	// +listType=urls
+
 	// URLs the URLs of a remote repository. It must be non-empty. Fetch will
 	// always use the first URL, while push will use all of them.
 	URLS []string `json:"urls" protobuf:"bytes,2,rep,name=urls"`

@@ -1,15 +1,20 @@
+# This is an auto-generated file. DO NOT EDIT
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: eventbuses.argoproj.io
+  name: eventbus.argoproj.io
 spec:
   group: argoproj.io
   names:
     kind: EventBus
-    plural: eventbuses
-    singular: eventbus
     listKind: EventBusList
+    plural: eventbus
     shortNames:
       - eb
+    singular: eventbus
   scope: Namespaced
-  version: "v1alpha1"
+  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true

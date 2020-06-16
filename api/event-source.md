@@ -500,13 +500,6 @@ Interval is a string that describes an interval duration, e.g. 1s, 30m,
 
 <td>
 
-<p>
-
-ExclusionDates defines the list of DATE-TIME exceptions for recurring
-events.
-
-</p>
-
 </td>
 
 </tr>
@@ -2631,13 +2624,6 @@ Repository refers to GitHub repo name i.e. argo-events
 
 <td>
 
-<p>
-
-Events refer to Github events to subscribe to which the gateway will
-subscribe
-
-</p>
-
 </td>
 
 </tr>
@@ -3166,12 +3152,6 @@ the directory state, e.g. 1s, 30m, 2h… (defaults to 1m)
 </td>
 
 <td>
-
-<p>
-
-Addresses is accessible addresses of HDFS name nodes
-
-</p>
 
 </td>
 
@@ -4381,12 +4361,6 @@ DB to use. If not specified, default DB 0 will be used.
 
 <td>
 
-<p>
-
-Channels to subscribe to listen events.
-
-</p>
-
 </td>
 
 </tr>
@@ -5546,15 +5520,6 @@ Webhook holds configuration for a REST endpoint
 
 <td>
 
-<p>
-
-Events are s3 bucket notification events. For more information on s3
-notifications, follow
-<a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations">https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html\#notification-how-to-event-types-and-destinations</a>
-Note that storage grid notifications do not contain <code>s3:</code>
-
-</p>
-
 </td>
 
 </tr>
@@ -5918,16 +5883,6 @@ to read API key from APIKey K8s secret.
 </td>
 
 <td>
-
-<em>(Optional)</em>
-
-<p>
-
-EventFilter describes the type of events to listen to. If not specified,
-all types of events will be processed. More info at
-<a href="https://stripe.com/docs/api/events/list">https://stripe.com/docs/api/events/list</a>
-
-</p>
 
 </td>
 

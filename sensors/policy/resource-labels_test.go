@@ -56,6 +56,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	data, _ := json.Marshal(uObj)
 	artifact := json.RawMessage{}
 	_ = json.Unmarshal(data, &artifact)
+	jitter := json.Number("0.5")
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
@@ -79,8 +80,8 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 				Backoff: common.Backoff{
 					Steps:    2,
 					Duration: time.Second * 1,
-					Factor:   2,
-					Jitter:   0.5,
+					Factor:   "2",
+					Jitter:   &jitter,
 				},
 			},
 		},

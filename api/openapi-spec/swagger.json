@@ -734,8 +734,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Gateway"
-          },
-          "x-kubernetes-list-type": "items"
+          }
         },
         "kind": {
           "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
@@ -786,8 +785,6 @@
           "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Service"
         },
         "subscribers": {
-          "description": "Subscribers holds the contexts of the subscribers/sinks to send events to.",
-          "x-kubernetes-list-type": "subscribers",
           "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Subscribers"
         },
         "template": {
@@ -941,20 +938,16 @@
       "type": "object",
       "properties": {
         "http": {
-          "description": "HTTP subscribers are HTTP endpoints to send events to.",
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "string"
+          }
         },
         "nats": {
-          "description": "NATS refers to the subscribers over NATS protocol.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.NATSSubscriber"
-          },
-          "x-kubernetes-list-type": "NATSSubscriber"
+          }
         }
       }
     },
@@ -1026,20 +1019,16 @@
           "type": "string"
         },
         "parameters": {
-          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
-          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "region": {
           "description": "Region is AWS region",
@@ -1068,12 +1057,10 @@
           "type": "string"
         },
         "parameters": {
-          "description": "Parameters is the list of parameters to pass to resolved Argo Workflow object",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "resource": {
           "type": "string"
@@ -1178,20 +1165,16 @@
           "type": "string"
         },
         "parameters": {
-          "description": "Parameters is the list of parameters that is applied to resolved custom trigger trigger object.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
-          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "secure": {
           "description": "Secure refers to type of the connection between sensor to custom trigger gRPC",
@@ -1240,8 +1223,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "value"
+          }
         }
       }
     },
@@ -1258,8 +1240,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "dependencies"
+          }
         },
         "name": {
           "description": "Name of the group",
@@ -1369,8 +1350,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
-          },
-          "x-kubernetes-list-type": "data"
+          }
         },
         "name": {
           "description": "Name is the name of event filter",
@@ -1471,8 +1451,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "urls"
+          }
         }
       }
     },
@@ -1514,20 +1493,16 @@
           "type": "string"
         },
         "parameters": {
-          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "atomic"
+          }
         },
         "payload": {
-          "description": "Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "atomic"
+          }
         },
         "timeout": {
           "description": "Timeout refers to the HTTP request timeout in seconds. Default value is 60 seconds.",
@@ -1589,12 +1564,10 @@
           "format": "int32"
         },
         "parameters": {
-          "description": "Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "partition": {
           "description": "Partition to write data to.",
@@ -1606,12 +1579,10 @@
           "type": "string"
         },
         "payload": {
-          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "requiredAcks": {
           "description": "RequiredAcks used in producer to tell the broker how many replica acknowledgements Defaults to 1 (Only wait for the leader to ack).",
@@ -1660,20 +1631,16 @@
       ],
       "properties": {
         "parameters": {
-          "description": "Parameters is the list of parameters that is applied to resolved NATS trigger object.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
-          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "subject": {
           "description": "Name of the subject to put message on.",
@@ -1772,20 +1739,16 @@
           "type": "string"
         },
         "parameters": {
-          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
-          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "version": {
           "description": "Version for the API. Defaults to v1.",
@@ -1837,8 +1800,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Sensor"
-          },
-          "x-kubernetes-list-type": "items"
+          }
         },
         "kind": {
           "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
@@ -1880,16 +1842,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependency"
-          },
-          "x-kubernetes-list-type": "dependencies"
+          }
         },
         "dependencyGroups": {
           "description": "DependencyGroups is a list of the groups of events.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DependencyGroup"
-          },
-          "x-kubernetes-list-type": "dependencyGroups"
+          }
         },
         "errorOnFailedRound": {
           "description": "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails. Once sensor state is set to `error`, no further triggers will be processed.",
@@ -1922,8 +1882,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Trigger"
-          },
-          "x-kubernetes-list-type": "triggers"
+          }
         }
       }
     },
@@ -1995,12 +1954,10 @@
           "type": "string"
         },
         "parameters": {
-          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "slackToken": {
           "description": "SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.",
@@ -2029,12 +1986,10 @@
           "type": "string"
         },
         "parameters": {
-          "description": "Parameters is the list of parameters that is applied to resolved K8s trigger object.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "patchStrategy": {
           "description": "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
@@ -2060,13 +2015,11 @@
       ],
       "properties": {
         "allow": {
-          "description": "Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list, the trigger will marked as successful else it will result in trigger failure.",
           "type": "array",
           "items": {
             "type": "integer",
             "format": "int32"
-          },
-          "x-kubernetes-list-type": "allowedStatuses"
+          }
         }
       }
     },
@@ -2161,8 +2114,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "templateParameters"
+          }
         },
         "policy": {
           "description": "Policy to configure backoff and execution criteria for the trigger",
@@ -2251,16 +2203,14 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "all"
+          }
         },
         "any": {
           "description": "Any acts as a OR operator between dependencies",
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "any"
+          }
         }
       }
     },

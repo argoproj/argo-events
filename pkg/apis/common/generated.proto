@@ -32,10 +32,10 @@ message Backoff {
   optional int64 duration = 1;
 
   // Duration is multiplied by factor each iteration
-  optional double factor = 2;
+  optional string factor = 5;
 
   // The amount of jitter applied each iteration
-  optional double jitter = 3;
+  optional string jitter = 6;
 
   // Exit with error after this many steps
   optional int32 steps = 4;
@@ -79,7 +79,6 @@ message S3Artifact {
 
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
 
-  // +listType=string
   repeated string events = 7;
 
   optional S3Filter filter = 8;

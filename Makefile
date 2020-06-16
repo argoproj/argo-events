@@ -144,6 +144,15 @@ protos: $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis -name '*.go' -not -na
         --packages=github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1,github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1,github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1,github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1 \
         --apimachinery-packages=github.com/argoproj/argo-events/pkg/apis/common,+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1
 
+.PHONY: crds
+crds:
+	./hack/crdgen.sh
+
+.PHONY: manifests
+manifests: crds
+	kustomize build manifests/cluster-install > manifests/install.yaml
+	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
+
 .PHONY: codegen
 codegen: protos
 	go mod vendor
@@ -153,17 +162,14 @@ codegen: protos
 	./hack/update-api-docs.sh
 	rm -rf ./vendor
 	go mod tidy
+	$(MAKE) manifests
 
-.PHONY: e2e
-e2e:
-	./hack/e2e/run-e2e.sh
-
-.PHONY: kind-e2e
-kind-e2e:
-	./hack/e2e/kind-run-e2e.sh
-
-.PHONY: build-e2e-images
-build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image
+.PHONY: start
+start:
+	kubectl apply -f test/manifests/argo-events-ns.yaml
+	kubectl -n argo-events apply -f manifests/namespace-install.yaml
+	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
+	kubens argo-events
 
 $(GOPATH)/bin/golangci-lint:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.26.0
