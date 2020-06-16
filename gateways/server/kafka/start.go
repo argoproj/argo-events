@@ -90,11 +90,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			config.Net.TLS.Config = tlsConfig
 			config.Net.TLS.Enable = true
 		} else {
-                        consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, nil)
-                        if err != nil {
-                                return err
-                        }
-                }
+			consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, nil)
+			if err != nil {
+				return err
+			}
+		}
 
 		consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, config)
 		if err != nil {
