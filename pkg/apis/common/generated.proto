@@ -26,16 +26,21 @@ import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "common";
 
+// Amount represent a numeric amount.
+message Amount {
+  optional bytes value = 1;
+}
+
 // Backoff for an operation
 message Backoff {
   // Duration is the duration in nanoseconds
   optional int64 duration = 1;
 
   // Duration is multiplied by factor each iteration
-  optional string factor = 5;
+  optional Amount factor = 2;
 
   // The amount of jitter applied each iteration
-  optional string jitter = 6;
+  optional Amount jitter = 3;
 
   // Exit with error after this many steps
   optional int32 steps = 4;
