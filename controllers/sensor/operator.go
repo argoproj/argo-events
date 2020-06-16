@@ -19,12 +19,13 @@ package sensor
 import (
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 // the context of an operation on a sensor.

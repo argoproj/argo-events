@@ -1096,8 +1096,7 @@
         },
         "resource": {
           "description": "Resource is generic template for K8s resource",
-          "type": "string",
-          "format": "byte"
+          "$ref": "#/definitions/io.argoproj.common.Resource"
         },
         "s3": {
           "description": "S3 compliant artifact",

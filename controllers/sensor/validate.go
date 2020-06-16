@@ -22,9 +22,10 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
+	"github.com/pkg/errors"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it

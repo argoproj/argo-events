@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"encoding/json"
 	"fmt"
 	"hash/fnv"
 
@@ -760,7 +759,7 @@ type ArtifactLocation struct {
 	// Git repository hosting the artifact
 	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
 	// Resource is generic template for K8s resource
-	Resource json.RawMessage `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource,casttype=encoding/json.RawMessage"`
+	Resource *apicommon.Resource `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap

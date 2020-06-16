@@ -575,7 +575,8 @@ Git repository hosting the artifact
 
 <td>
 
-<code>resource</code></br> <em> encoding/json.RawMessage </em>
+<code>resource</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Resource </em>
 
 </td>
 

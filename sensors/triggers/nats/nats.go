@@ -21,11 +21,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	natslib "github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // NATSTrigger holds the context of the NATS trigger.

@@ -19,11 +19,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{

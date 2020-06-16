@@ -254,15 +254,14 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 					"resource": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Resource is generic template for K8s resource",
-							Type:        []string{"string"},
-							Format:      "byte",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Resource"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Resource", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
 	}
 }
 

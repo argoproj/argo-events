@@ -17,8 +17,9 @@ limitations under the License.
 package dependencies
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/gobwas/glob"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ResolveDependency resolves a dependency based on Event and gateway name

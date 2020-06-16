@@ -70,6 +70,11 @@ message Condition {
   optional string message = 5;
 }
 
+// Resource represent arbitrary structured data.
+message Resource {
+  optional bytes value = 1;
+}
+
 // S3Artifact contains information about an S3 connection and bucket
 message S3Artifact {
   optional string endpoint = 1;

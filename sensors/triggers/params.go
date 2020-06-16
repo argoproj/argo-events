@@ -23,14 +23,15 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	"github.com/argoproj/argo-events/common"
-	snctrl "github.com/argoproj/argo-events/controllers/sensor"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/argoproj/argo-events/common"
+	snctrl "github.com/argoproj/argo-events/controllers/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.

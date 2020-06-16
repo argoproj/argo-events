@@ -17,7 +17,6 @@ limitations under the License.
 package sensors
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -29,6 +28,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/argoproj/argo-events/sensors/types"
@@ -93,11 +93,9 @@ func TestProcessQueue(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "fake-deployment")
-	data, _ := json.Marshal(deployment)
-	artifact := json.RawMessage{}
-	_ = json.Unmarshal(data, &artifact)
+	artifact := apicommon.NewResource(deployment)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: artifact,
+		Resource: &artifact,
 	}
 
 	sensorCtx.processQueue(&types.Notification{

@@ -17,20 +17,21 @@ limitations under the License.
 package standard_k8s
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
 	k8stypes "k8s.io/apimachinery/pkg/types"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -77,11 +78,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	data, _ := json.Marshal(deployment)
-	artifact := json.RawMessage{}
-	_ = json.Unmarshal(data, &artifact)
+	artifact := apicommon.NewResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: artifact,
+		Resource: &artifact,
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
@@ -126,11 +125,9 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	data, _ := json.Marshal(deployment)
-	artifact := json.RawMessage{}
-	_ = json.Unmarshal(data, &artifact)
+	artifact := apicommon.NewResource(deployment)
 	fakeSensor.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: artifact,
+		Resource: &artifact,
 	}
 
 	fakeSensor.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
@@ -158,11 +155,9 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestStandardK8sTrigger_Execute(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	data, _ := json.Marshal(deployment)
-	artifact := json.RawMessage{}
-	_ = json.Unmarshal(data, &artifact)
+	artifact := apicommon.NewResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: artifact,
+		Resource: &artifact,
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)

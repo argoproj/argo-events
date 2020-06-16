@@ -19,9 +19,10 @@ package sensor
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

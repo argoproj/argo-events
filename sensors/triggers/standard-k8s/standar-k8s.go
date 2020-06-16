@@ -19,10 +19,6 @@ package standard_k8s
 import (
 	"fmt"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/policy"
-	"github.com/argoproj/argo-events/sensors/triggers"
-	"github.com/argoproj/argo-events/store"
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -35,6 +31,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
+	"github.com/argoproj/argo-events/sensors/triggers"
+	"github.com/argoproj/argo-events/store"
 )
 
 // StandardK8STrigger implements Trigger interface for standard Kubernetes resources

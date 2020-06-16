@@ -21,8 +21,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	json "encoding/json"
-
 	common "github.com/argoproj/argo-events/pkg/apis/common"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -133,8 +131,8 @@ func (in *ArtifactLocation) DeepCopyInto(out *ArtifactLocation) {
 	}
 	if in.Resource != nil {
 		in, out := &in.Resource, &out.Resource
-		*out = make(json.RawMessage, len(*in))
-		copy(*out, *in)
+		*out = new(common.Resource)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }

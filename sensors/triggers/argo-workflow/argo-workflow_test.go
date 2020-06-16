@@ -16,7 +16,6 @@ limitations under the License.
 package argo_workflow
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,6 +26,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -73,15 +73,13 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	un := newUnstructured("argoproj.io/v1alpha1", "Workflow", "fake", "test")
-	data, _ := json.Marshal(un)
-	artifact := json.RawMessage{}
-	_ = json.Unmarshal(data, &artifact)
+	artifact := apicommon.NewResource(un)
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake",
 			ArgoWorkflow: &v1alpha1.ArgoWorkflowTrigger{
 				Source: &v1alpha1.ArtifactLocation{
-					Resource: artifact,
+					Resource: &artifact,
 				},
 				Operation: "Submit",
 				GroupVersionResource: metav1.GroupVersionResource{

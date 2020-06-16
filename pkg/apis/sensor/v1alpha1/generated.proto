@@ -91,7 +91,7 @@ message ArtifactLocation {
   optional GitArtifact git = 6;
 
   // Resource is generic template for K8s resource
-  optional bytes resource = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Resource resource = 7;
 }
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password

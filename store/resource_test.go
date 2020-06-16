@@ -17,11 +17,12 @@ limitations under the License.
 package store
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 func TestNewResourceReader(t *testing.T) {
@@ -40,14 +41,12 @@ func TestNewResourceReader(t *testing.T) {
 				},
 			},
 		}
-		data, _ := json.Marshal(un)
-		artifact := json.RawMessage{}
-		_ = json.Unmarshal(data, &artifact)
-		reader, err := NewResourceReader(artifact)
+		artifact := common.NewResource(un)
+		reader, err := NewResourceReader(&artifact)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(reader, convey.ShouldNotBeNil)
 
-		data, err = reader.Read()
+		data, err := reader.Read()
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(data, convey.ShouldNotBeNil)
 	})
