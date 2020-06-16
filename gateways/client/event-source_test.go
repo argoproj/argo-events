@@ -74,7 +74,6 @@ func getEventSource() *esv1alpha1.EventSource {
 					Port:     "13000",
 				},
 			},
-			Type: apicommon.WebhookEvent,
 		},
 	}
 }

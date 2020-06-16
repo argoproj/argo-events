@@ -250,9 +250,6 @@ message EventSourceSpec {
 
   // Generic event source
   map<string, GenericEventSource> generic = 23;
-
-  // Type of the event source
-  optional string type = 24;
 }
 
 // EventSourceStatus holds the status of the event-source resource

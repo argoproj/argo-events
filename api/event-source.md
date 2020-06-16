@@ -1602,27 +1602,6 @@ Generic event source
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
-
-</td>
-
-<td>
-
-<p>
-
-Type of the event source
-
-</p>
-
-</td>
-
-</tr>
-
 </table>
 
 </td>
@@ -2200,27 +2179,6 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Gener
 <p>
 
 Generic event source
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
-
-</td>
-
-<td>
-
-<p>
-
-Type of the event source
 
 </p>
 

@@ -782,15 +782,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 							},
 						},
 					},
-					"type": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Type of the event source",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
-				Required: []string{"type"},
 			},
 		},
 		Dependencies: []string{

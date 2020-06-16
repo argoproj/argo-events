@@ -93,8 +93,6 @@ type EventSourceSpec struct {
 	NSQ map[string]NSQEventSource `json:"nsq,omitempty" protobuf:"bytes,22,rep,name=nsq"`
 	// Generic event source
 	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,23,rep,name=generic"`
-	// Type of the event source
-	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,24,opt,name=type,casttype=github.com/argoproj/argo-events/pkg/apis/common.EventSourceType"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
