@@ -1,8 +1,8 @@
 #!/bin/bash
 set -eu -o pipefail
 
-cd "$(dirname "$0")/.."
-
+source $(dirname $0)/library.sh
+ensure_vendor
 
 add_header() {
   cat "$1" | ./hack/auto-gen-msg.sh >tmp
@@ -10,11 +10,11 @@ add_header() {
 }
 
 if [ "$(command -v controller-gen)" = "" ]; then
-  go install sigs.k8s.io/controller-tools/cmd/controller-gen
+  go install ./vendor/sigs.k8s.io/controller-tools/cmd/controller-gen
 fi
 
-echo "Generating CRDs"
-controller-gen crd:trivialVersions=true,maxDescLen=0 paths=./pkg/apis/... output:dir=manifests/base/crds
+header "Generating CRDs"
+${GOPATH}/bin/controller-gen crd:trivialVersions=true,maxDescLen=0 paths=./pkg/apis/... output:dir=manifests/base/crds
 
 find manifests/base/crds -name 'argoproj.io*.yaml' | while read -r file; do
   echo "Patching ${file}"
