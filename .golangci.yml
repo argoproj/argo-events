@@ -1,5 +1,5 @@
 run:
-  deadline: 2m
+  timeout: 5m
   skip-dirs:
     - pkg/client
     - vendor
