@@ -553,185 +553,6 @@ triggered
 
 </table>
 
-<h3 id="argoproj.io/v1alpha1.Context">
-
-Context
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
-<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
-<a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
-<a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
-<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
-<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>,
-<a href="#argoproj.io/v1alpha1.StripeEventSource">StripeEventSource</a>)
-
-</p>
-
-<p>
-
-<p>
-
-Context holds a general purpose REST API context
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>endpoint</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-REST API endpoint
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>method</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Method is HTTP request method that indicates the desired action to be
-performed for a given resource. See RFC7231 Hypertext Transfer Protocol
-(HTTP/1.1): Semantics and Content
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>port</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Port on which HTTP server is listening for incoming events.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>url</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-URL is the url of the server.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>serverCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ServerCertPath refers the file that contains the cert.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>serverKeyPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ServerKeyPath refers the file that contains private key
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
 <h3 id="argoproj.io/v1alpha1.EmitterEventSource">
 
 EmitterEventSource
@@ -1170,8 +991,9 @@ Resource event sources
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Context
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext
 </a> </em>
 
 </td>
@@ -1754,8 +1576,9 @@ Resource event sources
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Context
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext
 </a> </em>
 
 </td>
@@ -2515,8 +2338,9 @@ Id is the webhook’s id
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-Context </a> </em>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
 
 </td>
 
@@ -2841,8 +2665,9 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-Context </a> </em>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
 
 </td>
 
@@ -4748,8 +4573,9 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-Context </a> </em>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
 
 </td>
 
@@ -5355,8 +5181,9 @@ Token for URL verification handshake
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-Context </a> </em>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
 
 </td>
 
@@ -5451,8 +5278,9 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-Context </a> </em>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
 
 </td>
 
@@ -5745,8 +5573,9 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
-Context </a> </em>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
 
 </td>
 
@@ -6063,6 +5892,185 @@ Path is relative path of object to watch with respect to the directory
 
 PathRegexp is regexp of relative path of object to watch with respect to
 the directory
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.WebhookContext">
+
+WebhookContext
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
+<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>,
+<a href="#argoproj.io/v1alpha1.StripeEventSource">StripeEventSource</a>)
+
+</p>
+
+<p>
+
+<p>
+
+WebhookContext holds a general purpose REST API context
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>endpoint</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+REST API endpoint
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>method</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Method is HTTP request method that indicates the desired action to be
+performed for a given resource. See RFC7231 Hypertext Transfer Protocol
+(HTTP/1.1): Semantics and Content
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>port</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Port on which HTTP server is listening for incoming events.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+URL is the url of the server.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerCertPath refers the file that contains the cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerKeyPath refers the file that contains private key
 
 </p>
 

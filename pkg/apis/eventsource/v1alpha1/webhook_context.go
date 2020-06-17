@@ -1,7 +1,7 @@
 package v1alpha1
 
-// Context holds a general purpose REST API context
-type Context struct {
+// WebhookContext holds a general purpose REST API context
+type WebhookContext struct {
 	// REST API endpoint
 	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
 	// Method is HTTP request method that indicates the desired action to be performed for a given resource.

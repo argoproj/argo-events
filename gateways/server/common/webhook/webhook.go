@@ -39,7 +39,7 @@ func NewController() *Controller {
 }
 
 // NewRoute returns a vanilla route
-func NewRoute(hookContext *v1alpha12.Context, logger *logrus.Logger, eventSource *gateways.EventSource) *Route {
+func NewRoute(hookContext *v1alpha12.WebhookContext, logger *logrus.Logger, eventSource *gateways.EventSource) *Route {
 	return &Route{
 		Context:     hookContext,
 		Logger:      logger,

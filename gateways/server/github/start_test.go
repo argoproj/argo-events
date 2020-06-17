@@ -63,7 +63,7 @@ func TestGetCredentials(t *testing.T) {
 		convey.So(secret, convey.ShouldNotBeNil)
 
 		githubEventSource := &v1alpha1.GithubEventSource{
-			Webhook: &v1alpha1.Context{
+			Webhook: &v1alpha1.WebhookContext{
 				Endpoint: "/push",
 				URL:      "http://webhook-gateway-svc",
 				Port:     "12000",
@@ -97,7 +97,7 @@ func TestRouteActiveHandler(t *testing.T) {
 		convey.Convey("Inactive route should return error", func() {
 			writer := &webhook.FakeHttpWriter{}
 			githubEventSource := &v1alpha1.GithubEventSource{
-				Webhook: &v1alpha1.Context{
+				Webhook: &v1alpha1.WebhookContext{
 					Endpoint: "/push",
 					URL:      "http://webhook-gateway-svc",
 					Port:     "12000",

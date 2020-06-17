@@ -67,7 +67,7 @@ func getEventSource() *esv1alpha1.EventSource {
 			Namespace: "fake-namespace",
 		},
 		Spec: esv1alpha1.EventSourceSpec{
-			Webhook: map[string]esv1alpha1.Context{
+			Webhook: map[string]esv1alpha1.WebhookContext{
 				"first-webhook": {
 					Endpoint: "/first-webhook",
 					Method:   http.MethodPost,
@@ -190,7 +190,7 @@ func TestSyncEventSources(t *testing.T) {
 
 	delete(eventSource.Spec.Webhook, "first-webhook")
 
-	eventSource.Spec.Webhook["second-webhook"] = esv1alpha1.Context{
+	eventSource.Spec.Webhook["second-webhook"] = esv1alpha1.WebhookContext{
 		Endpoint: "/second-webhook",
 		Method:   http.MethodPost,
 		Port:     "13000",

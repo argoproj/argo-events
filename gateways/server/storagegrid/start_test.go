@@ -82,7 +82,7 @@ var (
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		storageGridEventSource := &v1alpha1.StorageGridEventSource{
-			Webhook: &v1alpha1.Context{
+			Webhook: &v1alpha1.WebhookContext{
 				Endpoint: "/",
 				URL:      "testurl",
 				Port:     "8080",
@@ -135,7 +135,7 @@ func TestGenerateUUID(t *testing.T) {
 func TestFilterName(t *testing.T) {
 	convey.Convey("Given a storage grid event, test whether the object key passes the filter", t, func() {
 		storageGridEventSource := &v1alpha1.StorageGridEventSource{
-			Webhook: &v1alpha1.Context{
+			Webhook: &v1alpha1.WebhookContext{
 				Endpoint: "/",
 				URL:      "testurl",
 				Port:     "8080",

@@ -24,7 +24,7 @@ import (
 	v1alpha12 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
-var Hook = &v1alpha12.Context{
+var Hook = &v1alpha12.WebhookContext{
 	Endpoint: "/fake",
 	Port:     "12000",
 	URL:      "test-url",

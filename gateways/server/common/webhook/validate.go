@@ -24,7 +24,7 @@ import (
 )
 
 // ValidateWebhookContext validates a webhook context
-func ValidateWebhookContext(context *v1alpha12.Context) error {
+func ValidateWebhookContext(context *v1alpha12.WebhookContext) error {
 	if context == nil {
 		return fmt.Errorf("")
 	}

@@ -46,8 +46,8 @@ type Router interface {
 
 // Route contains general information about a route
 type Route struct {
-	// Context refers to the webhook context
-	Context *v1alpha12.Context
+	// WebhookContext refers to the webhook context
+	Context *v1alpha12.WebhookContext
 	// Logger to log stuff
 	Logger *logrus.Logger
 	// StartCh controls the

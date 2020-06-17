@@ -125,7 +125,7 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 
 	log.Info("started operating on the event source...")
 
-	var webhookEventSource *v1alpha12.Context
+	var webhookEventSource *v1alpha12.WebhookContext
 	if err := yaml.Unmarshal(eventSource.Value, &webhookEventSource); err != nil {
 		log.WithError(err).Error("failed to parse the event source")
 		return err

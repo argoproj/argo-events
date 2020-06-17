@@ -37,7 +37,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	var webhookEventSource *v1alpha12.Context
+	var webhookEventSource *v1alpha12.WebhookContext
 	if err := yaml.Unmarshal(eventSource.Value, &webhookEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the event source")
 		return &gateways.ValidEventSource{
@@ -59,7 +59,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validate(webhookEventSource *v1alpha12.Context) error {
+func validate(webhookEventSource *v1alpha12.WebhookContext) error {
 	if webhookEventSource == nil {
 		return common.ErrNilEventSource
 	}

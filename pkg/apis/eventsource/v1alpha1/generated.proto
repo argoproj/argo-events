@@ -99,28 +99,6 @@ message CalendarEventSource {
   optional bytes userPayload = 5;
 }
 
-// Context holds a general purpose REST API context
-message Context {
-  // REST API endpoint
-  optional string endpoint = 1;
-
-  // Method is HTTP request method that indicates the desired action to be performed for a given resource.
-  // See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-  optional string method = 2;
-
-  // Port on which HTTP server is listening for incoming events.
-  optional string port = 3;
-
-  // URL is the url of the server.
-  optional string url = 4;
-
-  // ServerCertPath refers the file that contains the cert.
-  optional string serverCertPath = 5;
-
-  // ServerKeyPath refers the file that contains private key
-  optional string serverKeyPath = 6;
-}
-
 // EmitterEventSource describes the event source for emitter
 // More info at https://emitter.io/develop/getting-started/
 message EmitterEventSource {
@@ -195,7 +173,7 @@ message EventSourceSpec {
   map<string, ResourceEventSource> resource = 4;
 
   // Webhook event sources
-  map<string, Context> webhook = 5;
+  map<string, WebhookContext> webhook = 5;
 
   // AMQP event sources
   map<string, AMQPEventSource> amqp = 6;
@@ -282,7 +260,7 @@ message GithubEventSource {
   optional int64 id = 1;
 
   // Webhook refers to the configuration required to run a http server
-  optional Context webhook = 2;
+  optional WebhookContext webhook = 2;
 
   // Owner refers to GitHub owner name i.e. argoproj
   optional string owner = 3;
@@ -331,7 +309,7 @@ message GithubEventSource {
 // GitlabEventSource refers to event-source related to Gitlab events
 message GitlabEventSource {
   // Webhook holds configuration to run a http server
-  optional Context webhook = 1;
+  optional WebhookContext webhook = 1;
 
   // ProjectID is the id of project for which integration needs to setup
   optional string projectID = 9;
@@ -591,7 +569,7 @@ message ResourceFilter {
 // SNSEventSource refers to event-source for AWS SNS related events
 message SNSEventSource {
   // Webhook configuration for http server
-  optional Context webhook = 1;
+  optional WebhookContext webhook = 1;
 
   // TopicArn
   optional string topicArn = 2;
@@ -674,7 +652,7 @@ message SlackEventSource {
   optional k8s.io.api.core.v1.SecretKeySelector token = 2;
 
   // Webhook holds configuration for a REST endpoint
-  optional Context webhook = 3;
+  optional WebhookContext webhook = 3;
 
   // Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
   // +optional
@@ -684,7 +662,7 @@ message SlackEventSource {
 // StorageGridEventSource refers to event-source for StorageGrid related events
 message StorageGridEventSource {
   // Webhook holds configuration for a REST endpoint
-  optional Context webhook = 1;
+  optional WebhookContext webhook = 1;
 
   repeated string events = 2;
 
@@ -721,7 +699,7 @@ message StorageGridFilter {
 // More info at https://stripe.com/docs/webhooks
 message StripeEventSource {
   // Webhook holds configuration for a REST endpoint
-  optional Context webhook = 1;
+  optional WebhookContext webhook = 1;
 
   // CreateWebhook if specified creates a new webhook programmatically.
   // +optional
@@ -759,5 +737,27 @@ message WatchPathConfig {
 
   // PathRegexp is regexp of relative path of object to watch with respect to the directory
   optional string pathRegexp = 3;
+}
+
+// WebhookContext holds a general purpose REST API context
+message WebhookContext {
+  // REST API endpoint
+  optional string endpoint = 1;
+
+  // Method is HTTP request method that indicates the desired action to be performed for a given resource.
+  // See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
+  optional string method = 2;
+
+  // Port on which HTTP server is listening for incoming events.
+  optional string port = 3;
+
+  // URL is the url of the server.
+  optional string url = 4;
+
+  // ServerCertPath refers the file that contains the cert.
+  optional string serverCertPath = 5;
+
+  // ServerKeyPath refers the file that contains private key
+  optional string serverKeyPath = 6;
 }
 

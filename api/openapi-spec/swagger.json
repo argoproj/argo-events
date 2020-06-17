@@ -421,42 +421,6 @@
         }
       }
     },
-    "io.argoproj.eventsource.v1alpha1.Context": {
-      "description": "Context holds a general purpose REST API context",
-      "type": "object",
-      "required": [
-        "endpoint",
-        "method",
-        "port",
-        "url"
-      ],
-      "properties": {
-        "endpoint": {
-          "description": "REST API endpoint",
-          "type": "string"
-        },
-        "method": {
-          "description": "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
-          "type": "string"
-        },
-        "port": {
-          "description": "Port on which HTTP server is listening for incoming events.",
-          "type": "string"
-        },
-        "serverCertPath": {
-          "description": "ServerCertPath refers the file that contains the cert.",
-          "type": "string"
-        },
-        "serverKeyPath": {
-          "description": "ServerKeyPath refers the file that contains private key",
-          "type": "string"
-        },
-        "url": {
-          "description": "URL is the url of the server.",
-          "type": "string"
-        }
-      }
-    },
     "io.argoproj.eventsource.v1alpha1.EmitterEventSource": {
       "description": "EmitterEventSource describes the event source for emitter More info at https://emitter.io/develop/getting-started/",
       "type": "object",
@@ -721,7 +685,7 @@
           "description": "Webhook event sources",
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Context"
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
           }
         }
       }
@@ -833,7 +797,7 @@
         },
         "webhook": {
           "description": "Webhook refers to the configuration required to run a http server",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Context"
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         },
         "webhookSecret": {
           "description": "WebhookSecret refers to K8s secret containing GitHub webhook secret https://developer.github.com/webhooks/securing/",
@@ -879,7 +843,7 @@
         },
         "webhook": {
           "description": "Webhook holds configuration to run a http server",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Context"
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         }
       }
     },
@@ -1263,7 +1227,7 @@
         },
         "webhook": {
           "description": "Webhook configuration for http server",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Context"
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         }
       }
     },
@@ -1355,7 +1319,7 @@
         },
         "webhook": {
           "description": "Webhook holds configuration for a REST endpoint",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Context"
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         }
       }
     },
@@ -1401,7 +1365,7 @@
         },
         "webhook": {
           "description": "Webhook holds configuration for a REST endpoint",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Context"
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         }
       }
     },
@@ -1445,7 +1409,7 @@
         },
         "webhook": {
           "description": "Webhook holds configuration for a REST endpoint",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Context"
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         }
       }
     },
@@ -1488,6 +1452,42 @@
         },
         "pathRegexp": {
           "description": "PathRegexp is regexp of relative path of object to watch with respect to the directory",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.WebhookContext": {
+      "description": "WebhookContext holds a general purpose REST API context",
+      "type": "object",
+      "required": [
+        "endpoint",
+        "method",
+        "port",
+        "url"
+      ],
+      "properties": {
+        "endpoint": {
+          "description": "REST API endpoint",
+          "type": "string"
+        },
+        "method": {
+          "description": "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
+          "type": "string"
+        },
+        "port": {
+          "description": "Port on which HTTP server is listening for incoming events.",
+          "type": "string"
+        },
+        "serverCertPath": {
+          "description": "ServerCertPath refers the file that contains the cert.",
+          "type": "string"
+        },
+        "serverKeyPath": {
+          "description": "ServerKeyPath refers the file that contains private key",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL is the url of the server.",
           "type": "string"
         }
       }
