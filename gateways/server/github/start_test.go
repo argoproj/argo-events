@@ -23,14 +23,15 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/v31/github"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 var (
@@ -62,7 +63,7 @@ func TestGetCredentials(t *testing.T) {
 		convey.So(secret, convey.ShouldNotBeNil)
 
 		githubEventSource := &v1alpha1.GithubEventSource{
-			Webhook: &webhook.Context{
+			Webhook: &v1alpha1.WebhookContext{
 				Endpoint: "/push",
 				URL:      "http://webhook-gateway-svc",
 				Port:     "12000",
@@ -96,7 +97,7 @@ func TestRouteActiveHandler(t *testing.T) {
 		convey.Convey("Inactive route should return error", func() {
 			writer := &webhook.FakeHttpWriter{}
 			githubEventSource := &v1alpha1.GithubEventSource{
-				Webhook: &webhook.Context{
+				Webhook: &v1alpha1.WebhookContext{
 					Endpoint: "/push",
 					URL:      "http://webhook-gateway-svc",
 					Port:     "12000",

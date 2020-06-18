@@ -82,7 +82,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	opt := &redis.Options{
 		Addr:     redisEventSource.HostAddress,
 		Password: password,
-		DB:       redisEventSource.DB,
+		DB:       int(redisEventSource.DB),
 	}
 
 	if redisEventSource.TLS != nil {

@@ -19,10 +19,6 @@ package standard_k8s
 import (
 	"fmt"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/policy"
-	"github.com/argoproj/argo-events/sensors/triggers"
-	"github.com/argoproj/argo-events/store"
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -35,9 +31,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
+	"github.com/argoproj/argo-events/sensors/triggers"
+	"github.com/argoproj/argo-events/store"
 )
 
-// StandardK8sTrigger implements Trigger interface for standard Kubernetes resources
+// StandardK8STrigger implements Trigger interface for standard Kubernetes resources
 type StandardK8sTrigger struct {
 	// K8sClient is kubernetes client
 	K8sClient kubernetes.Interface
@@ -53,7 +54,7 @@ type StandardK8sTrigger struct {
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
 }
 
-// NewStandardK8sTrigger returns a new StandardK8sTrigger
+// NewStandardK8sTrigger returns a new StandardK8STrigger
 func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *StandardK8sTrigger {
 	return &StandardK8sTrigger{
 		K8sClient:     k8sClient,

@@ -1,18 +1,22 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: eventbuses.argoproj.io
+  name: eventbus.argoproj.io
 spec:
   group: argoproj.io
   names:
     kind: EventBus
     listKind: EventBusList
-    plural: eventbuses
+    plural: eventbus
     shortNames:
     - eb
     singular: eventbus
   scope: Namespaced
   version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -29,6 +33,10 @@ spec:
     singular: eventsource
   scope: Namespaced
   version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -45,6 +53,10 @@ spec:
     singular: gateway
   scope: Namespaced
   version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -61,6 +73,10 @@ spec:
     singular: sensor
   scope: Namespaced
   version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -84,8 +100,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - create
   - delete
@@ -112,8 +128,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - create
   - delete
@@ -140,8 +156,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - get
   - list
@@ -179,8 +195,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - create
   - delete

@@ -18,15 +18,16 @@ package aws_lambda
 import (
 	"encoding/json"
 
-	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/policy"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
+
+	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // AWSLambdaTrigger refers to trigger that invokes AWS Lambda functions
@@ -134,6 +135,6 @@ func (t *AWSLambdaTrigger) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger resource")
 	}
 
-	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.Allow)
+	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.GetAllow())
 	return p.ApplyPolicy()
 }

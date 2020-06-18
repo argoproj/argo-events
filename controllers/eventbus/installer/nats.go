@@ -427,12 +427,12 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	clusterID := generateClusterID(i.eventBus)
 	svcName := generateServiceName(i.eventBus)
 	ssName := generateStatefulSetName(i.eventBus)
-	size := i.eventBus.Spec.NATS.Native.Size
-	if size < 3 {
-		size = 3
+	replicas := i.eventBus.Spec.NATS.Native.GetReplicas()
+	if replicas < 3 {
+		replicas = 3
 	}
 	peers := []string{}
-	for j := 0; j < size; j++ {
+	for j := 0; j < replicas; j++ {
 		peers = append(peers, fmt.Sprintf("\"%s-%s\"", ssName, strconv.Itoa(j)))
 	}
 	conf := fmt.Sprintf(`http: %s
@@ -540,7 +540,7 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 
 func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSecretName string) appv1.StatefulSetSpec {
 	// Streaming requires minimal size 3.
-	replicas := int32(i.eventBus.Spec.NATS.Native.Size)
+	replicas := i.eventBus.Spec.NATS.Native.Replicas
 	if replicas < 3 {
 		replicas = 3
 	}
@@ -635,8 +635,8 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		pvcName := generatePVCName(i.eventBus)
 		// Default volume size
 		volSize := apiresource.MustParse("5Gi")
-		if i.eventBus.Spec.NATS.Native.Persistence.Size != nil {
-			volSize = *i.eventBus.Spec.NATS.Native.Persistence.Size
+		if i.eventBus.Spec.NATS.Native.Persistence.VolumeSize != nil {
+			volSize = *i.eventBus.Spec.NATS.Native.Persistence.VolumeSize
 		}
 		// Default to ReadWriteOnce
 		accessMode := corev1.ReadWriteOnce

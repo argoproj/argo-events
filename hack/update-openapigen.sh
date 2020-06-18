@@ -18,6 +18,13 @@ VERSION="v1alpha1"
 
 cd "${FAKE_REPOPATH}"
 
+# Common
+go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
+    --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \
+    --input-dirs github.com/argoproj/argo-events/pkg/apis/common \
+    --output-package github.com/argoproj/argo-events/pkg/apis/common \
+    $@
+
 # Sensor
 go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \

@@ -24,17 +24,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 )
 
 func getGatewayContext() *GatewayContext {
@@ -66,15 +66,14 @@ func getEventSource() *esv1alpha1.EventSource {
 			Name:      "fake-event-source",
 			Namespace: "fake-namespace",
 		},
-		Spec: &esv1alpha1.EventSourceSpec{
-			Webhook: map[string]webhook.Context{
+		Spec: esv1alpha1.EventSourceSpec{
+			Webhook: map[string]esv1alpha1.WebhookContext{
 				"first-webhook": {
 					Endpoint: "/first-webhook",
 					Method:   http.MethodPost,
 					Port:     "13000",
 				},
 			},
-			Type: apicommon.WebhookEvent,
 		},
 	}
 }
@@ -191,7 +190,7 @@ func TestSyncEventSources(t *testing.T) {
 
 	delete(eventSource.Spec.Webhook, "first-webhook")
 
-	eventSource.Spec.Webhook["second-webhook"] = webhook.Context{
+	eventSource.Spec.Webhook["second-webhook"] = esv1alpha1.WebhookContext{
 		Endpoint: "/second-webhook",
 		Method:   http.MethodPost,
 		Port:     "13000",
