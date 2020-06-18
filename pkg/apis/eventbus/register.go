@@ -7,6 +7,6 @@ const (
 	// EventSource constants
 	Kind     string = "EventBus"
 	Singular string = "eventbus"
-	Plural   string = "eventbuses"
+	Plural   string = "eventbus"
 	FullName string = Plural + "." + Group
 )
