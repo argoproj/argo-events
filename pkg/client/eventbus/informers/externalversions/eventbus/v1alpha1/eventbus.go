@@ -32,7 +32,7 @@ import (
 )
 
 // EventBusInformer provides access to a shared informer and lister for
-// EventBuses.
+// EventBus.
 type EventBusInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() v1alpha1.EventBusLister
@@ -61,13 +61,13 @@ func NewFilteredEventBusInformer(client versioned.Interface, namespace string, r
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ArgoprojV1alpha1().EventBuses(namespace).List(options)
+				return client.ArgoprojV1alpha1().EventBus(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ArgoprojV1alpha1().EventBuses(namespace).Watch(options)
+				return client.ArgoprojV1alpha1().EventBus(namespace).Watch(options)
 			},
 		},
 		&eventbusv1alpha1.EventBus{},

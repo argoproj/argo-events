@@ -28,8 +28,8 @@ type FakeArgoprojV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeArgoprojV1alpha1) EventBuses(namespace string) v1alpha1.EventBusInterface {
-	return &FakeEventBuses{c, namespace}
+func (c *FakeArgoprojV1alpha1) EventBus(namespace string) v1alpha1.EventBusInterface {
+	return &FakeEventBus{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
