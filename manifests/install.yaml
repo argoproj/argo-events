@@ -100,8 +100,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - create
   - delete
@@ -128,8 +128,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - create
   - delete
@@ -156,8 +156,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - get
   - list
@@ -195,8 +195,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
-  - eventbuses
-  - eventbuses/finalizers
+  - eventbus
+  - eventbus/finalizers
   verbs:
   - create
   - delete
