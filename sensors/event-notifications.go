@@ -17,14 +17,15 @@ limitations under the License.
 package sensors
 
 import (
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/argoproj/argo-events/sensors/types"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // isEligibleForExecution determines whether the dependencies are met and triggers are eligible for execution

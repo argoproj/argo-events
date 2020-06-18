@@ -19,13 +19,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/nlopes/slack"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 type SlackTrigger struct {
@@ -119,6 +120,10 @@ func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 
 	t.Logger.WithField("channel", channel).Infoln("posting to channel...")
 	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
+	if err != nil {
+		t.Logger.WithField("channel", channel).Errorf("unable to post to channel...")
+		return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
+	}
 
 	t.Logger.WithField("message", message).WithField("channelID", channelID).WithField("timestamp", timestamp).Infoln("message successfully sent to channelID with timestamp")
 	t.Logger.Infoln("finished executing SlackTrigger")

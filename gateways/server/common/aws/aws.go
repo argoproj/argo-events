@@ -64,7 +64,6 @@ func GetAWSAssumeRoleCreds(roleARN, region string) (*session.Session, error) {
 
 // CreateAWSSession based on credentials settings return a aws session
 func CreateAWSSession(client kubernetes.Interface, namespace, region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
-
 	if roleARN != "" {
 		return GetAWSAssumeRoleCreds(roleARN, region)
 	}

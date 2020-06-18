@@ -20,8 +20,6 @@ import (
 	"fmt"
 
 	cd_v1alpha1 "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
-	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	rollouts_v1alpha1 "github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1"
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,6 +28,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+
+	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // NOTE: custom resources must be manually added here
@@ -61,7 +62,7 @@ type ArtifactReader interface {
 }
 
 // FetchArtifact from the location, decode it using explicit types, and unstructure it
-func FetchArtifact(reader ArtifactReader, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+func FetchArtifact(reader ArtifactReader, gvr metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
 	var err error
 	var obj []byte
 	obj, err = reader.Read()
@@ -97,7 +98,7 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, cl
 	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
 
-func decodeAndUnstructure(b []byte, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+func decodeAndUnstructure(b []byte, gvr metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
 	gvk := registry.KindFor(schema.GroupVersionResource{
 		Group:    gvr.Group,
 		Version:  gvr.Version,

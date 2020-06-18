@@ -127,28 +127,45 @@ coverage:
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
 
+.PHONY: crds
+crds:
+	./hack/crdgen.sh
+
+.PHONY: manifests
+manifests: crds
+	kustomize build manifests/cluster-install > manifests/install.yaml
+	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
+
+.PHONY: swagger
+swagger:
+	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
+
 .PHONY: codegen
 codegen:
 	go mod vendor
+	./hack/generate-proto.sh
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
-	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
+	$(MAKE) swagger
 	./hack/update-api-docs.sh
 	rm -rf ./vendor
 	go mod tidy
+	$(MAKE) manifests
 
-.PHONY: e2e
-e2e:
-	./hack/e2e/run-e2e.sh
+.PHONY: start
+start:
+	kustomize build --load_restrictor=none test/manifests > /tmp/argo-events.yaml
+	kubectl apply -f test/manifests/argo-events-ns.yaml
+	kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f /tmp/argo-events.yaml
+	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
+	kubens argo-events
 
-.PHONY: kind-e2e
-kind-e2e:
-	./hack/e2e/kind-run-e2e.sh
-
-.PHONY: build-e2e-images
-build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image
+$(GOPATH)/bin/golangci-lint:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.26.0
 
 .PHONY: lint
-lint:
-	golangci-lint run
+lint: $(GOPATH)/bin/golangci-lint
+	go mod tidy
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
+
 

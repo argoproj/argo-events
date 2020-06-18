@@ -17,10 +17,11 @@ limitations under the License.
 package sensors
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/types"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // processQueue processes events received on internal queue and updates the state of the node representing the event dependency

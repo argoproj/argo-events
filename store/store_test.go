@@ -20,10 +20,11 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 type FakeWorkflowArtifactReader struct{}
@@ -34,7 +35,7 @@ func (f *FakeWorkflowArtifactReader) Read() ([]byte, error) {
 
 func TestFetchArtifact(t *testing.T) {
 	reader := &FakeWorkflowArtifactReader{}
-	gvr := &metav1.GroupVersionResource{
+	gvr := metav1.GroupVersionResource{
 		Group:    "argoproj.io",
 		Version:  "v1alpha1",
 		Resource: "workflows",
@@ -61,7 +62,7 @@ func TestDecodeSensor(t *testing.T) {
 	b, err := ioutil.ReadFile("../examples/sensors/multi-trigger-sensor.yaml")
 	assert.Nil(t, err)
 
-	gvr := &metav1.GroupVersionResource{
+	gvr := metav1.GroupVersionResource{
 		Group:    v1alpha1.SchemaGroupVersionKind.Group,
 		Version:  v1alpha1.SchemaGroupVersionKind.Version,
 		Resource: v1alpha1.Resource("sensors").Resource,
@@ -72,7 +73,7 @@ func TestDecodeSensor(t *testing.T) {
 }
 
 func TestDecodeWorkflow(t *testing.T) {
-	gvr := &metav1.GroupVersionResource{
+	gvr := metav1.GroupVersionResource{
 		Group:    "argoproj.io",
 		Version:  "v1alpha1",
 		Resource: "workflows",
@@ -97,7 +98,7 @@ spec:
 `
 
 func TestDecodeDeploymentv1(t *testing.T) {
-	gvr := &metav1.GroupVersionResource{
+	gvr := metav1.GroupVersionResource{
 		Group:    "apps",
 		Version:  "v1",
 		Resource: "deployments",
@@ -148,7 +149,7 @@ var deploymentv1 = `
 `
 
 func TestDecodeJobv1(t *testing.T) {
-	gvr := &metav1.GroupVersionResource{
+	gvr := metav1.GroupVersionResource{
 		Group:    "batch",
 		Version:  "v1",
 		Resource: "jobs",
@@ -178,7 +179,7 @@ spec:
 `
 
 func TestDecodeUnsupported(t *testing.T) {
-	gvr := &metav1.GroupVersionResource{
+	gvr := metav1.GroupVersionResource{
 		Group:    "batch",
 		Version:  "v1",
 		Resource: "jobs",
@@ -215,7 +216,7 @@ spec:
 `
 
 func TestDecodeUnknown(t *testing.T) {
-	gvr := &metav1.GroupVersionResource{
+	gvr := metav1.GroupVersionResource{
 		Group:    "unknown",
 		Version:  "123",
 		Resource: "What??",

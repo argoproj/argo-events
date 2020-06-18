@@ -19,9 +19,10 @@ package dependencies
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestResolveDependency(t *testing.T) {

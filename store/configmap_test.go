@@ -1,14 +1,16 @@
 package store
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"testing"
+
 	wfv1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	"testing"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func TestConfigmapReader_Read(t *testing.T) {

@@ -23,11 +23,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/types"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 )
 
 func ApplyFilter(notification *types.Notification) error {

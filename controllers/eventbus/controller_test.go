@@ -18,7 +18,6 @@ import (
 
 const (
 	testBusName        = "test-bus"
-	testNATSImage      = "test-image"
 	testStreamingImage = "test-steaming-image"
 	testNamespace      = "testNamespace"
 	testURL            = "http://test"
@@ -39,10 +38,10 @@ var (
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
 				Native: &v1alpha1.NativeStrategy{
-					Size: 1,
-					Auth: &v1alpha1.AuthStrategyToken,
+					Replicas: 1,
+					Auth:     &v1alpha1.AuthStrategyToken,
 					Persistence: &v1alpha1.PersistenceStrategy{
-						Size: &volumeSize,
+						VolumeSize: &volumeSize,
 					},
 				},
 			},

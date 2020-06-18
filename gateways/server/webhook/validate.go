@@ -19,11 +19,13 @@ package webhook
 import (
 	"context"
 
+	"github.com/ghodss/yaml"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/ghodss/yaml"
+	v1alpha12 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // ValidateEventSource validates webhook event source
@@ -35,7 +37,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	var webhookEventSource *webhook.Context
+	var webhookEventSource *v1alpha12.WebhookContext
 	if err := yaml.Unmarshal(eventSource.Value, &webhookEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the event source")
 		return &gateways.ValidEventSource{
@@ -57,7 +59,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validate(webhookEventSource *webhook.Context) error {
+func validate(webhookEventSource *v1alpha12.WebhookContext) error {
 	if webhookEventSource == nil {
 		return common.ErrNilEventSource
 	}

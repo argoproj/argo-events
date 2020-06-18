@@ -19,11 +19,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -128,14 +129,14 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 func TestHTTPTrigger_ApplyPolicy(t *testing.T) {
 	trigger := getFakeHTTPTrigger()
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
 	response := &http.Response{StatusCode: 200}
 	err := trigger.ApplyPolicy(response)
 	assert.Nil(t, err)
 
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{300}},
 	}
 	err = trigger.ApplyPolicy(response)
 	assert.NotNil(t, err)

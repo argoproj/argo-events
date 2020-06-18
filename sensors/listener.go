@@ -23,15 +23,16 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/dependencies"
-	"github.com/argoproj/argo-events/sensors/types"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/dependencies"
+	"github.com/argoproj/argo-events/sensors/types"
 )
 
 // ListenEvents watches and handles events received from the gateway.
@@ -88,12 +89,12 @@ func (sensorCtx *SensorContext) listenEventsOverHTTP() error {
 		eventBody, err := ioutil.ReadAll(request.Body)
 		if err != nil {
 			writer.WriteHeader(http.StatusBadRequest)
-			writer.Write([]byte("failed to parse the event"))
+			_, _ = writer.Write([]byte("failed to parse the event"))
 			return
 		}
 		if err := sensorCtx.handleEvent(eventBody); err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
-			writer.Write([]byte("failed to handle the event"))
+			_, _ = writer.Write([]byte("failed to handle the event"))
 			return
 		}
 	})

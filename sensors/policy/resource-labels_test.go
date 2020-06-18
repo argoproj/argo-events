@@ -20,7 +20,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -28,6 +27,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic/fake"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
@@ -48,34 +50,35 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	uObj := newUnstructured("apps/v1", "Deployment", "fake", "test")
-
 	runtimeScheme := runtime.NewScheme()
 	client := fake.NewSimpleDynamicClient(runtimeScheme, uObj)
+	artifact := common.NewResource(uObj)
+	jitter := common.NewAmount("0.5")
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
-			K8s: &v1alpha1.StandardK8sTrigger{
-				GroupVersionResource: &metav1.GroupVersionResource{
+			K8s: &v1alpha1.StandardK8STrigger{
+				GroupVersionResource: metav1.GroupVersionResource{
 					Group:    "apps",
 					Resource: "deployments",
 					Version:  "v1",
 				},
 				Source: &v1alpha1.ArtifactLocation{
-					Resource: uObj,
+					Resource: &artifact,
 				},
 			},
 		},
 		Policy: &v1alpha1.TriggerPolicy{
-			K8s: &v1alpha1.K8sResourcePolicy{
+			K8s: &v1alpha1.K8SResourcePolicy{
 				ErrorOnBackoffTimeout: true,
 				Labels: map[string]string{
 					"complete": "true",
 				},
-				Backoff: wait.Backoff{
+				Backoff: common.Backoff{
 					Steps:    2,
 					Duration: time.Second * 1,
-					Factor:   2,
-					Jitter:   0.5,
+					Factor:   common.NewAmount("2"),
+					Jitter:   &jitter,
 				},
 			},
 		},
@@ -131,9 +134,9 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 		Client:  namespacableClient,
 	}
 
-	var err error
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			var err error
 			uObj, err = test.updateFunc(uObj)
 			assert.Nil(t, err)
 			err = resourceLabelsPolicy.ApplyPolicy()

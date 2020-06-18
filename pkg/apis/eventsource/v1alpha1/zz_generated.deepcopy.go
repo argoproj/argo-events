@@ -23,9 +23,7 @@ package v1alpha1
 import (
 	json "encoding/json"
 
-	common "github.com/argoproj/argo-events/common"
-	webhook "github.com/argoproj/argo-events/gateways/server/common/webhook"
-	apiscommon "github.com/argoproj/argo-events/pkg/apis/common"
+	common "github.com/argoproj/argo-events/pkg/apis/common"
 	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
@@ -36,7 +34,7 @@ func (in *AMQPEventSource) DeepCopyInto(out *AMQPEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -92,12 +90,8 @@ func (in *CalendarEventSource) DeepCopyInto(out *CalendarEventSource) {
 	}
 	if in.UserPayload != nil {
 		in, out := &in.UserPayload, &out.UserPayload
-		*out = new(json.RawMessage)
-		if **in != nil {
-			in, out := *in, *out
-			*out = make([]byte, len(*in))
-			copy(*out, *in)
-		}
+		*out = make(json.RawMessage, len(*in))
+		copy(*out, *in)
 	}
 	return
 }
@@ -128,7 +122,7 @@ func (in *EmitterEventSource) DeepCopyInto(out *EmitterEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -154,11 +148,7 @@ func (in *EventSource) DeepCopyInto(out *EventSource) {
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	in.Status.DeepCopyInto(&out.Status)
-	if in.Spec != nil {
-		in, out := &in.Spec, &out.Spec
-		*out = new(EventSourceSpec)
-		(*in).DeepCopyInto(*out)
-	}
+	in.Spec.DeepCopyInto(&out.Spec)
 	return
 }
 
@@ -218,7 +208,7 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 	*out = *in
 	if in.Minio != nil {
 		in, out := &in.Minio, &out.Minio
-		*out = make(map[string]apiscommon.S3Artifact, len(*in))
+		*out = make(map[string]common.S3Artifact, len(*in))
 		for key, val := range *in {
 			(*out)[key] = *val.DeepCopy()
 		}
@@ -246,7 +236,7 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 	}
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		*out = make(map[string]webhook.Context, len(*in))
+		*out = make(map[string]WebhookContext, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val
 		}
@@ -445,7 +435,7 @@ func (in *GithubEventSource) DeepCopyInto(out *GithubEventSource) {
 	*out = *in
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		*out = new(webhook.Context)
+		*out = new(WebhookContext)
 		**out = **in
 	}
 	if in.Events != nil {
@@ -481,7 +471,7 @@ func (in *GitlabEventSource) DeepCopyInto(out *GitlabEventSource) {
 	*out = *in
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		*out = new(webhook.Context)
+		*out = new(WebhookContext)
 		**out = **in
 	}
 	if in.Events != nil {
@@ -550,7 +540,7 @@ func (in *KafkaEventSource) DeepCopyInto(out *KafkaEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -576,7 +566,7 @@ func (in *MQTTEventSource) DeepCopyInto(out *MQTTEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -602,7 +592,7 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -628,7 +618,7 @@ func (in *NSQEventSource) DeepCopyInto(out *NSQEventSource) {
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
@@ -754,7 +744,7 @@ func (in *SNSEventSource) DeepCopyInto(out *SNSEventSource) {
 	*out = *in
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		*out = new(webhook.Context)
+		*out = new(WebhookContext)
 		**out = **in
 	}
 	if in.AccessKey != nil {
@@ -837,7 +827,7 @@ func (in *SlackEventSource) DeepCopyInto(out *SlackEventSource) {
 	}
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		*out = new(webhook.Context)
+		*out = new(WebhookContext)
 		**out = **in
 	}
 	return
@@ -858,7 +848,7 @@ func (in *StorageGridEventSource) DeepCopyInto(out *StorageGridEventSource) {
 	*out = *in
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		*out = new(webhook.Context)
+		*out = new(WebhookContext)
 		**out = **in
 	}
 	if in.Events != nil {
@@ -910,7 +900,7 @@ func (in *StripeEventSource) DeepCopyInto(out *StripeEventSource) {
 	*out = *in
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		*out = new(webhook.Context)
+		*out = new(WebhookContext)
 		**out = **in
 	}
 	if in.APIKey != nil {
@@ -948,6 +938,38 @@ func (in *TLSConfig) DeepCopy() *TLSConfig {
 		return nil
 	}
 	out := new(TLSConfig)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *WatchPathConfig) DeepCopyInto(out *WatchPathConfig) {
+	*out = *in
+	return
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new WatchPathConfig.
+func (in *WatchPathConfig) DeepCopy() *WatchPathConfig {
+	if in == nil {
+		return nil
+	}
+	out := new(WatchPathConfig)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *WebhookContext) DeepCopyInto(out *WebhookContext) {
+	*out = *in
+	return
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new WebhookContext.
+func (in *WebhookContext) DeepCopy() *WebhookContext {
+	if in == nil {
+		return nil
+	}
+	out := new(WebhookContext)
 	in.DeepCopyInto(out)
 	return out
 }

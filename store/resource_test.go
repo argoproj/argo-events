@@ -17,14 +17,17 @@ limitations under the License.
 package store
 
 import (
+	"testing"
+
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"testing"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 func TestNewResourceReader(t *testing.T) {
 	convey.Convey("Given a resource, get new reader", t, func() {
-		reader, err := NewResourceReader(&unstructured.Unstructured{
+		un := unstructured.Unstructured{
 			Object: map[string]interface{}{
 				"apiVersion": "v1",
 				"kind":       "Secret",
@@ -37,7 +40,9 @@ func TestNewResourceReader(t *testing.T) {
 					"secret": "c2VjcmV0",
 				},
 			},
-		})
+		}
+		artifact := common.NewResource(un)
+		reader, err := NewResourceReader(&artifact)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(reader, convey.ShouldNotBeNil)
 

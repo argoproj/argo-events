@@ -185,7 +185,7 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 		}
 	}
 
-	go func() error {
+	go func() {
 		logger.Info("listening to file notifications...")
 		for {
 			select {
@@ -193,7 +193,8 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 				if !ok {
 					logger.Info("fs watcher has stopped")
 					// watcher stopped watching file events
-					return errors.Errorf("fs watcher stopped for %s", eventSource.Name)
+					logger.Errorf("fs watcher stopped for %s", eventSource.Name)
+					return
 				}
 				// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 				matched := false
@@ -227,10 +228,11 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 					channels.Data <- payload
 				}
 			case err := <-watcher.Error:
-				return errors.Wrapf(err, "failed to process %s", eventSource.Name)
+				logger.WithError(err).Errorf("failed to process %s", eventSource.Name)
+				return
 			case <-channels.Done:
 				logger.Infoln("event source has been stopped")
-				return nil
+				return
 			}
 		}
 	}()

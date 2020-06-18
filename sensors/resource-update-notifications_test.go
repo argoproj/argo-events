@@ -19,10 +19,11 @@ package sensors
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/types"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestOperateResourceUpdateNotification(t *testing.T) {

@@ -92,7 +92,7 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 		return ctx.makeLegacyDeploymentSpec()
 	}
 
-	replicas := int32(ctx.gateway.Spec.Replica)
+	replicas := ctx.gateway.Spec.Replica
 	if replicas == 0 {
 		replicas = 1
 	}
@@ -164,7 +164,7 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 
 // makeLegacyDeploymentSpec is deprecated, will be unsupported soon.
 func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, error) {
-	replicas := int32(ctx.gateway.Spec.Replica)
+	replicas := ctx.gateway.Spec.Replica
 	if replicas == 0 {
 		replicas = 1
 	}

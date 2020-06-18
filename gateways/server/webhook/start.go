@@ -21,12 +21,14 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/events"
-	"github.com/ghodss/yaml"
-	"github.com/sirupsen/logrus"
+	v1alpha12 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // EventListener implements Eventing for webhook events
@@ -123,7 +125,7 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 
 	log.Info("started operating on the event source...")
 
-	var webhookEventSource *webhook.Context
+	var webhookEventSource *v1alpha12.WebhookContext
 	if err := yaml.Unmarshal(eventSource.Value, &webhookEventSource); err != nil {
 		log.WithError(err).Error("failed to parse the event source")
 		return err

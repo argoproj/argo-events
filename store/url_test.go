@@ -2,13 +2,13 @@ package store
 
 import (
 	"fmt"
-	"testing"
-
 	"net/http"
 	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestURLReader(t *testing.T) {

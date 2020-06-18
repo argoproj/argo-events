@@ -17,9 +17,10 @@ limitations under the License.
 package dependencies
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/gobwas/glob"
 	"github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ResolveDependency resolves a dependency based on Event and gateway name
@@ -33,16 +34,17 @@ func ResolveDependency(dependencies []v1alpha1.EventDependency, event *v1alpha1.
 			continue
 		}
 		var sourceGlob glob.Glob
-		if len(dependency.EventSourceName) > 0 {
+		switch {
+		case len(dependency.EventSourceName) > 0:
 			sourceGlob, err = glob.Compile(dependency.EventSourceName)
-		} else if len(dependency.GatewayName) > 0 {
+		case len(dependency.GatewayName) > 0:
 			// DEPRECATED:
 			logger.WithFields(logrus.Fields{
 				"source":  event.Context.Source,
 				"subject": event.Context.Subject,
 			}).Warn("spec.dependencies.gatewayName is DEPRECATED, it will be unsupported soon, please use spec.dependencies.eventSourceName")
 			sourceGlob, err = glob.Compile(dependency.GatewayName)
-		} else {
+		default:
 			continue
 		}
 		if err != nil {

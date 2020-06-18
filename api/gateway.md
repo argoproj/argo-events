@@ -323,13 +323,6 @@ Service is the specifications of the service to expose the gateway
 
 <em>(Optional)</em>
 
-<p>
-
-Subscribers holds the contexts of the subscribers/sinks to send events
-to.
-
-</p>
-
 </td>
 
 </tr>
@@ -358,7 +351,7 @@ Port on which the gateway event source processor is running on.
 
 <td>
 
-<code>replica</code></br> <em> int </em>
+<code>replica</code></br> <em> int32 </em>
 
 </td>
 
@@ -631,13 +624,6 @@ Service is the specifications of the service to expose the gateway
 
 <em>(Optional)</em>
 
-<p>
-
-Subscribers holds the contexts of the subscribers/sinks to send events
-to.
-
-</p>
-
 </td>
 
 </tr>
@@ -666,7 +652,7 @@ Port on which the gateway event source processor is running on.
 
 <td>
 
-<code>replica</code></br> <em> int </em>
+<code>replica</code></br> <em> int32 </em>
 
 </td>
 
@@ -1444,12 +1430,6 @@ Description
 
 <em>(Optional)</em>
 
-<p>
-
-HTTP subscribers are HTTP endpoints to send events to.
-
-</p>
-
 </td>
 
 </tr>
@@ -1467,12 +1447,6 @@ HTTP subscribers are HTTP endpoints to send events to.
 <td>
 
 <em>(Optional)</em>
-
-<p>
-
-NATS refers to the subscribers over NATS protocol.
-
-</p>
 
 </td>
 
