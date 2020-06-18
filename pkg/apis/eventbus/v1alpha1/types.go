@@ -37,9 +37,9 @@ type EventBusSpec struct {
 
 // EventBusStatus holds the status of the eventbus resource
 type EventBusStatus struct {
-	common.Status `json:",inline" protobuf:"bytes,2,opt,name=status"`
+	common.Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
 	// Config holds the fininalized configuration of EventBus
-	Config BusConfig `json:"config,omitempty" protobuf:"bytes,1,opt,name=config"`
+	Config BusConfig `json:"config,omitempty" protobuf:"bytes,2,opt,name=config"`
 }
 
 // NATSBus holds the NATS eventbus information
