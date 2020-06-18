@@ -235,12 +235,18 @@
       "description": "EventBusStatus holds the status of the eventbus resource",
       "type": "object",
       "properties": {
+        "conditions": {
+          "description": "Conditions are the latest available observations of a resource's current state.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.common.Condition"
+          },
+          "x-kubernetes-patch-merge-key": "type",
+          "x-kubernetes-patch-strategy": "merge"
+        },
         "config": {
           "description": "Config holds the fininalized configuration of EventBus",
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.BusConfig"
-        },
-        "status": {
-          "$ref": "#/definitions/io.argoproj.common.Status"
         }
       }
     },

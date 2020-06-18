@@ -86,8 +86,8 @@ type Status struct {
 	Conditions []Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
 }
 
-// InitConditions initializes the contions to Unknown
-func (s *Status) InitConditions(conditionTypes ...ConditionType) {
+// InitializeConditions initializes the contions to Unknown
+func (s *Status) InitializeConditions(conditionTypes ...ConditionType) {
 	for _, t := range conditionTypes {
 		c := Condition{
 			Type:   t,

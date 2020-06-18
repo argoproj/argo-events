@@ -87,7 +87,7 @@ func TestReconcileNative(t *testing.T) {
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
-		assert.True(t, testBus.Status.Status.IsReady())
+		assert.True(t, testBus.Status.IsReady())
 		assert.NotNil(t, testBus.Status.Config.NATS)
 		assert.NotEmpty(t, testBus.Status.Config.NATS.URL)
 		assert.NotEmpty(t, testBus.Status.Config.NATS.ClusterID)

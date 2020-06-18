@@ -64,10 +64,10 @@ message EventBusSpec {
 
 // EventBusStatus holds the status of the eventbus resource
 message EventBusStatus {
-  optional github.com.argoproj.argo_events.pkg.apis.common.Status status = 1;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Status status = 2;
 
   // Config holds the fininalized configuration of EventBus
-  optional BusConfig config = 2;
+  optional BusConfig config = 1;
 }
 
 // NATSBus holds the NATS eventbus information
