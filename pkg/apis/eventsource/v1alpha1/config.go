@@ -1,4 +1,4 @@
-package fsevent
+package v1alpha1
 
 import (
 	"errors"
@@ -8,11 +8,11 @@ import (
 
 type WatchPathConfig struct {
 	// Directory to watch for events
-	Directory string `json:"directory"`
+	Directory string `json:"directory" protobuf:"bytes,1,opt,name=directory"`
 	// Path is relative path of object to watch with respect to the directory
-	Path string `json:"path,omitempty"`
+	Path string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
 	// PathRegexp is regexp of relative path of object to watch with respect to the directory
-	PathRegexp string `json:"pathRegexp,omitempty"`
+	PathRegexp string `json:"pathRegexp,omitempty" protobuf:"bytes,3,opt,name=pathRegexp"`
 }
 
 // Validate validates WatchPathConfig

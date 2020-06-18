@@ -36,7 +36,7 @@ import (
 func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 	port := common.SensorServerPort
 	if ctx.sensor.Spec.Subscription.HTTP != nil {
-		port = ctx.sensor.Spec.Subscription.HTTP.Port
+		port = int(ctx.sensor.Spec.Subscription.HTTP.Port)
 	}
 
 	serviceSpec := &corev1.Service{

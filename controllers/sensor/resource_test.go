@@ -19,9 +19,10 @@ package sensor
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,8 +60,8 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8sTrigger{
-						GroupVersionResource: &metav1.GroupVersionResource{
+					K8s: &v1alpha1.StandardK8STrigger{
+						GroupVersionResource: metav1.GroupVersionResource{
 							Group:    "k8s.io",
 							Version:  "",
 							Resource: "pods",
@@ -94,8 +95,8 @@ var sensorObjNoTemplate = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8sTrigger{
-						GroupVersionResource: &metav1.GroupVersionResource{
+					K8s: &v1alpha1.StandardK8STrigger{
+						GroupVersionResource: metav1.GroupVersionResource{
 							Group:    "k8s.io",
 							Version:  "",
 							Resource: "pods",

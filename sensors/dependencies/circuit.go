@@ -18,10 +18,11 @@ package dependencies
 
 import (
 	"github.com/Knetic/govaluate"
-	snctrl "github.com/argoproj/argo-events/controllers/sensor"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	snctrl "github.com/argoproj/argo-events/controllers/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ResolveCircuit resolves a circuit

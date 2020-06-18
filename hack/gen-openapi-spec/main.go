@@ -7,11 +7,13 @@ import (
 	"os"
 	"strings"
 
-	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
-	gwv1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/go-openapi/spec"
 	"k8s.io/kube-openapi/pkg/common"
+
+	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
+	ebv1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	esv1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // Generate OpenAPI spec definitions for Workflow Resource
@@ -23,23 +25,20 @@ func main() {
 	if !strings.HasPrefix(version, "v") {
 		version = "v" + version
 	}
-	gwOAPIDefs := gwv1.GetOpenAPIDefinitions(func(name string) spec.Ref {
+	referenceCallback := func(name string) spec.Ref {
 		return spec.MustCreateRef("#/definitions/" + common.EscapeJsonPointer(swaggify(name)))
-	})
-	sOAPIDefs := sv1.GetOpenAPIDefinitions(func(name string) spec.Ref {
-		return spec.MustCreateRef("#/definitions/" + common.EscapeJsonPointer(swaggify(name)))
-	})
-	cOAPIDefs := cv1.GetOpenAPIDefinitions(func(name string) spec.Ref {
-		return spec.MustCreateRef("#/definitions/" + common.EscapeJsonPointer(swaggify(name)))
-	})
+	}
 	defs := spec.Definitions{}
-	for defName, val := range gwOAPIDefs {
+	for defName, val := range cv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
 	}
-	for defName, val := range sOAPIDefs {
+	for defName, val := range ebv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
 	}
-	for defName, val := range cOAPIDefs {
+	for defName, val := range esv1.GetOpenAPIDefinitions(referenceCallback) {
+		defs[swaggify(defName)] = val.Schema
+	}
+	for defName, val := range sv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
 	}
 	swagger := spec.Swagger{
@@ -49,7 +48,7 @@ func main() {
 			Paths:       &spec.Paths{Paths: map[string]spec.PathItem{}},
 			Info: &spec.Info{
 				InfoProps: spec.InfoProps{
-					Title:   "Argo",
+					Title:   "Argo Events",
 					Version: version,
 				},
 			},

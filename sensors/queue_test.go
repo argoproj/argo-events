@@ -20,16 +20,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
-	"github.com/argoproj/argo-events/sensors/types"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	dfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
+	"github.com/argoproj/argo-events/sensors/types"
 )
 
 func TestProcessQueue(t *testing.T) {
@@ -91,8 +93,9 @@ func TestProcessQueue(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "fake-deployment")
+	artifact := apicommon.NewResource(deployment)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: &artifact,
 	}
 
 	sensorCtx.processQueue(&types.Notification{

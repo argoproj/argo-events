@@ -22,14 +22,16 @@ import (
 
 	k8stypes "k8s.io/apimachinery/pkg/types"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -42,8 +44,8 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8sTrigger{
-						GroupVersionResource: &metav1.GroupVersionResource{
+					K8s: &v1alpha1.StandardK8STrigger{
+						GroupVersionResource: metav1.GroupVersionResource{
 							Group:    "apps",
 							Version:  "v1",
 							Resource: "deployments",
@@ -76,8 +78,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	artifact := apicommon.NewResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: &artifact,
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
@@ -122,8 +125,9 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	artifact := apicommon.NewResource(deployment)
 	fakeSensor.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: &artifact,
 	}
 
 	fakeSensor.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
@@ -151,8 +155,9 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestStandardK8sTrigger_Execute(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	artifact := apicommon.NewResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: &artifact,
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)

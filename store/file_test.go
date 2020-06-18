@@ -21,8 +21,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func TestFileReader(t *testing.T) {

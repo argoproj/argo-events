@@ -58,6 +58,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridFilter":         schema_pkg_apis_eventsource_v1alpha1_StorageGridFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource":         schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig":                 schema_pkg_apis_eventsource_v1alpha1_TLSConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig":           schema_pkg_apis_eventsource_v1alpha1_WatchPathConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext":            schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref),
 	}
 }
 
@@ -99,7 +101,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 					"connectionBackoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff holds parameters applied to connection.",
-							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
 					"jsonBody": {
@@ -120,7 +122,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -165,7 +167,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 						},
 					},
 				},
-				Required: []string{"fqdn", "sharedAccessKeyName", "sharedAccessKey", "hubName"},
+				Required: []string{"fqdn", "hubName"},
 			},
 		},
 		Dependencies: []string{
@@ -195,14 +197,8 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 						},
 					},
 					"exclusionDates": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ExclusionDates defines the list of DATE-TIME exceptions for recurring events.",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -284,7 +280,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 					"connectionBackoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff holds parameters applied to connection.",
-							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
 					"jsonBody": {
@@ -305,7 +301,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -381,11 +377,6 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceList(ref common.ReferenceCa
 						},
 					},
 					"items": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "eventsource",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -477,7 +468,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 									},
 								},
 							},
@@ -735,19 +726,11 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 							},
 						},
 					},
-					"type": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Type of the event source",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
-				Required: []string{"type"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource"},
+			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"},
 	}
 }
 
@@ -788,7 +771,7 @@ func schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref common.ReferenceCa
 					"watchPathConfig": {
 						SchemaProps: spec.SchemaProps{
 							Description: "WatchPathConfig contains configuration about the file path to watch",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig"),
 						},
 					},
 					"polling": {
@@ -803,7 +786,7 @@ func schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig"},
 	}
 }
 
@@ -845,7 +828,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Webhook refers to the configuration required to run a http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
 					"owner": {
@@ -863,14 +846,8 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 						},
 					},
 					"events": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Events refer to Github events to subscribe to which the gateway will subscribe",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -943,11 +920,11 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"id", "webhook", "owner", "repository", "events", "apiToken"},
+				Required: []string{"id", "owner", "repository", "events"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -961,7 +938,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Webhook holds configuration to run a http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
 					"projectID": {
@@ -1013,11 +990,11 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"webhook", "projectID", "events", "accessToken", "gitlabBaseURL"},
+				Required: []string{"projectID", "events", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1064,14 +1041,8 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 						},
 					},
 					"addresses": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Addresses is accessible addresses of HDFS name nodes",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -1175,7 +1146,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					"connectionBackoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff holds parameters applied to connection.",
-							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
 					"tls": {
@@ -1189,7 +1160,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1224,7 +1195,7 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 					"connectionBackoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ConnectionBackoff holds backoff applied to connection.",
-							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
 					"jsonBody": {
@@ -1245,7 +1216,7 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1273,7 +1244,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 					"connectionBackoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ConnectionBackoff holds backoff applied to connection.",
-							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
 					"jsonBody": {
@@ -1294,7 +1265,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1329,7 +1300,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 					"connectionBackoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff holds parameters applied to connection.",
-							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
 					"jsonBody": {
@@ -1350,7 +1321,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1391,7 +1362,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					},
 					"enableWorkflowIdentity": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile. If true, authentication is done with WorkflowIdentity. If false or omited, authentication is done with CredentialsFile.",
+							Description: "EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile. If true, authentication is done with WorkflowIdentity. If false or omitted, authentication is done with CredentialsFile.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
@@ -1452,14 +1423,8 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 						},
 					},
 					"channels": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Channels to subscribe to listen events.",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -1617,7 +1582,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Webhook configuration for http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
 					"topicArn": {
@@ -1661,11 +1626,11 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 						},
 					},
 				},
-				Required: []string{"webhook", "topicArn", "region"},
+				Required: []string{"topicArn", "region"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1803,7 +1768,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SlackEventSource(ref common.ReferenceC
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Webhook holds configuration for a REST endpoint",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
 					"namespace": {
@@ -1814,11 +1779,10 @@ func schema_pkg_apis_eventsource_v1alpha1_SlackEventSource(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"webhook"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1832,18 +1796,12 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Webhook holds configuration for a REST endpoint",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
 					"events": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Events are s3 bucket notification events. For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations Note that storage grid notifications do not contain `s3:`",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -1895,11 +1853,11 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 						},
 					},
 				},
-				Required: []string{"webhook", "topicArn", "bucket", "authToken", "apiURL"},
+				Required: []string{"topicArn", "bucket", "authToken", "apiURL"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1939,7 +1897,7 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Webhook holds configuration for a REST endpoint",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
 					"createWebhook": {
@@ -1963,14 +1921,8 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 						},
 					},
 					"eventFilter": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "EventFilter describes the type of events to listen to. If not specified, all types of events will be processed. More info at https://stripe.com/docs/api/events/list",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -1982,11 +1934,10 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"webhook"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2020,6 +1971,96 @@ func schema_pkg_apis_eventsource_v1alpha1_TLSConfig(ref common.ReferenceCallback
 					},
 				},
 				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_WatchPathConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"directory": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Directory to watch for events",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"path": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Path is relative path of object to watch with respect to the directory",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"pathRegexp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PathRegexp is regexp of relative path of object to watch with respect to the directory",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"directory"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "WebhookContext holds a general purpose REST API context",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"endpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "REST API endpoint",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"method": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"port": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Port on which HTTP server is listening for incoming events.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL is the url of the server.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"serverCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServerCertPath refers the file that contains the cert.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"serverKeyPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServerKeyPath refers the file that contains private key",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"endpoint", "method", "port", "url"},
 			},
 		},
 	}

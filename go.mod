@@ -34,7 +34,7 @@ require (
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
-	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.5
 	github.com/google/go-cmp v0.4.0
 	github.com/google/go-github/v31 v31.0.0
@@ -45,6 +45,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.9.5
 	github.com/hashicorp/go-retryablehttp v0.6.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20190818114111-108c894c2c0e // indirect
@@ -107,7 +108,8 @@ require (
 	k8s.io/kubernetes v1.17.5 // indirect
 	k8s.io/utils v0.0.0-20200327001022-6496210b90e8 // indirect
 	sigs.k8s.io/controller-runtime v0.5.4
-	sigs.k8s.io/yaml v1.2.0 // indirect
+	sigs.k8s.io/controller-tools v0.2.5
+	sigs.k8s.io/yaml v1.2.0
 )
 
 replace k8s.io/api => k8s.io/api v0.17.5

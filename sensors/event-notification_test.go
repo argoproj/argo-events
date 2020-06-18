@@ -20,11 +20,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	snctrl "github.com/argoproj/argo-events/controllers/sensor"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
-	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -32,6 +27,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	dfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/common"
+	snctrl "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
+	"github.com/argoproj/argo-events/sensors/types"
 )
 
 func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
@@ -60,8 +62,8 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8sTrigger{
-						GroupVersionResource: &metav1.GroupVersionResource{
+					K8s: &v1alpha1.StandardK8STrigger{
+						GroupVersionResource: metav1.GroupVersionResource{
 							Group:    "apps",
 							Version:  "v1",
 							Resource: "deployments",
@@ -305,8 +307,9 @@ func TestOperateEventNotification(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "fake-deployment")
+	artifact := apicommon.NewResource(deployment)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: &artifact,
 	}
 
 	err := sensorCtx.operateEventNotification(&types.Notification{

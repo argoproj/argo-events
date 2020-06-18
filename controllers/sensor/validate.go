@@ -22,9 +22,10 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
+	"github.com/pkg/errors"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it
@@ -162,14 +163,14 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 }
 
 // validateK8sTrigger validates a kubernetes trigger
-func validateK8sTrigger(trigger *v1alpha1.StandardK8sTrigger) error {
+func validateK8sTrigger(trigger *v1alpha1.StandardK8STrigger) error {
 	if trigger == nil {
 		return errors.New("k8s trigger for can't be nil")
 	}
 	if trigger.Source == nil {
 		return errors.New("k8s trigger for does not contain an absolute action")
 	}
-	if trigger.GroupVersionResource == nil {
+	if trigger.GroupVersionResource.Resource == "" {
 		return errors.New("must provide group, version and resource for the resource")
 	}
 	switch trigger.Operation {
@@ -195,7 +196,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	if trigger.Source == nil {
 		return errors.New("k8s trigger for does not contain an absolute action")
 	}
-	if trigger.GroupVersionResource == nil {
+	if trigger.GroupVersionResource.Size() == 0 {
 		return errors.New("must provide group, version and resource for the resource")
 	}
 	switch trigger.Operation {
@@ -533,7 +534,7 @@ func validateTriggerPolicy(trigger *v1alpha1.Trigger) error {
 }
 
 // validateK8sTriggerPolicy validates a k8s trigger policy
-func validateK8sTriggerPolicy(policy *v1alpha1.K8sResourcePolicy) error {
+func validateK8sTriggerPolicy(policy *v1alpha1.K8SResourcePolicy) error {
 	if policy == nil {
 		return nil
 	}

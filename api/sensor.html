@@ -97,7 +97,6 @@ string
 </em>
 </td>
 <td>
-<p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
 </td>
 </tr>
 <tr>
@@ -111,8 +110,6 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Parameters is the list of key-value extracted from event&rsquo;s payload that are applied to
-the trigger resource.</p>
 </td>
 </tr>
 </tbody>
@@ -181,7 +178,6 @@ Default value is Submit.</p>
 </em>
 </td>
 <td>
-<p>Parameters is the list of parameters to pass to resolved Argo Workflow object</p>
 </td>
 </tr>
 <tr>
@@ -207,10 +203,10 @@ Kubernetes meta/v1.GroupVersionResource
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>, 
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 </p>
 <p>
-<p>ArtifactLocation describes the source location for an external minio</p>
+<p>ArtifactLocation describes the source location for an external artifact</p>
 </p>
 <table>
 <thead>
@@ -228,7 +224,7 @@ github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
 </em>
 </td>
 <td>
-<p>S3 compliant minio</p>
+<p>S3 compliant artifact</p>
 </td>
 </tr>
 <tr>
@@ -239,7 +235,7 @@ string
 </em>
 </td>
 <td>
-<p>Inline minio is embedded in sensor spec as a string</p>
+<p>Inline artifact is embedded in sensor spec as a string</p>
 </td>
 </tr>
 <tr>
@@ -252,7 +248,7 @@ FileArtifact
 </em>
 </td>
 <td>
-<p>File minio is minio stored in a file</p>
+<p>File artifact is artifact stored in a file</p>
 </td>
 </tr>
 <tr>
@@ -265,7 +261,7 @@ URLArtifact
 </em>
 </td>
 <td>
-<p>URL to fetch the minio from</p>
+<p>URL to fetch the artifact from</p>
 </td>
 </tr>
 <tr>
@@ -278,7 +274,7 @@ ConfigmapArtifact
 </em>
 </td>
 <td>
-<p>Configmap that stores the minio</p>
+<p>Configmap that stores the artifact</p>
 </td>
 </tr>
 <tr>
@@ -291,79 +287,18 @@ GitArtifact
 </em>
 </td>
 <td>
-<p>Git repository hosting the minio</p>
+<p>Git repository hosting the artifact</p>
 </td>
 </tr>
 <tr>
 <td>
 <code>resource</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#unstructured-unstructured-v1">
-Kubernetes meta/v1/unstructured.Unstructured
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.Resource
 </em>
 </td>
 <td>
 <p>Resource is generic template for K8s resource</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.Backoff">Backoff
-</h3>
-<p>
-<p>Backoff for an operation</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>duration</code></br>
-<em>
-time.Duration
-</em>
-</td>
-<td>
-<p>Duration is the duration in nanoseconds</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>factor</code></br>
-<em>
-float64
-</em>
-</td>
-<td>
-<p>Duration is multiplied by factor each iteration</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>jitter</code></br>
-<em>
-float64
-</em>
-</td>
-<td>
-<p>The amount of jitter applied each iteration</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>steps</code></br>
-<em>
-int
-</em>
-</td>
-<td>
-<p>Exit with error after this many steps</p>
 </td>
 </tr>
 </tbody>
@@ -442,7 +377,7 @@ Defaults to sensor&rsquo;s namespace.</p>
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>ConfigmapArtifact contains information about minio in k8 configmap</p>
+<p>ConfigmapArtifact contains information about artifact in k8 configmap</p>
 </p>
 <table>
 <thead>
@@ -573,7 +508,6 @@ map[string]string
 </em>
 </td>
 <td>
-<p>Parameters is the list of parameters that is applied to resolved custom trigger trigger object.</p>
 </td>
 </tr>
 <tr>
@@ -586,7 +520,6 @@ map[string]string
 </em>
 </td>
 <td>
-<p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
 </td>
 </tr>
 </tbody>
@@ -991,7 +924,7 @@ EventContext
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>FileArtifact contains information about an minio in a filesystem</p>
+<p>FileArtifact contains information about an artifact in a filesystem</p>
 </p>
 <table>
 <thead>
@@ -1020,7 +953,7 @@ string
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>GitArtifact contains information about an minio stored in git</p>
+<p>GitArtifact contains information about an artifact stored in git</p>
 </p>
 <table>
 <thead>
@@ -1263,7 +1196,7 @@ always use the first URL, while push will use all of them.</p>
 <td>
 <code>port</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1310,7 +1243,6 @@ string
 </em>
 </td>
 <td>
-<p>Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.</p>
 </td>
 </tr>
 <tr>
@@ -1351,15 +1283,13 @@ Default value is POST.</p>
 </em>
 </td>
 <td>
-<p>Parameters is the list of key-value extracted from event&rsquo;s payload that are applied to
-the HTTP trigger resource.</p>
 </td>
 </tr>
 <tr>
 <td>
 <code>timeout</code></br>
 <em>
-int
+int64
 </em>
 </td>
 <td>
@@ -1386,7 +1316,7 @@ BasicAuth
 <td>
 <code>headers</code></br>
 <em>
-map[string][]string
+map[string]string
 </em>
 </td>
 <td>
@@ -1405,14 +1335,14 @@ map[string][]string
 <p>
 <p>JSONType contains the supported JSON types for data filtering</p>
 </p>
-<h3 id="argoproj.io/v1alpha1.K8sResourcePolicy">K8sResourcePolicy
+<h3 id="argoproj.io/v1alpha1.K8SResourcePolicy">K8SResourcePolicy
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
 </p>
 <p>
-<p>K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
+<p>K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
 </p>
 <table>
 <thead>
@@ -1437,7 +1367,7 @@ map[string]string
 <td>
 <code>backoff</code></br>
 <em>
-k8s.io/apimachinery/pkg/util/wait.Backoff
+github.com/argoproj/argo-events/pkg/apis/common.Backoff
 </em>
 </td>
 <td>
@@ -1502,7 +1432,7 @@ More info at <a href="https://kafka.apache.org/documentation/#intro_topics">http
 <td>
 <code>partition</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1519,14 +1449,13 @@ int
 </em>
 </td>
 <td>
-<p>Parameters is the list of parameters that is applied to resolved Kafka trigger object.</p>
 </td>
 </tr>
 <tr>
 <td>
 <code>requiredAcks</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1552,7 +1481,7 @@ If set to true, compresses message using snappy compression.</p>
 <td>
 <code>flushFrequency</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1585,7 +1514,6 @@ TLSConfig
 </em>
 </td>
 <td>
-<p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
 </td>
 </tr>
 <tr>
@@ -1606,7 +1534,7 @@ Defaults to broker url.</p>
 (<code>string</code> alias)</p></h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 </p>
 <p>
 <p>KubernetesResourceOperation refers to the type of operation performed on the K8s resource</p>
@@ -1701,7 +1629,6 @@ string
 </em>
 </td>
 <td>
-<p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
 </td>
 </tr>
 <tr>
@@ -1714,7 +1641,6 @@ string
 </em>
 </td>
 <td>
-<p>Parameters is the list of parameters that is applied to resolved NATS trigger object.</p>
 </td>
 </tr>
 <tr>
@@ -2001,7 +1927,6 @@ string
 </em>
 </td>
 <td>
-<p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
 </td>
 </tr>
 <tr>
@@ -2015,8 +1940,6 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Parameters is the list of key-value extracted from event&rsquo;s payload that are applied to
-the trigger resource.</p>
 </td>
 </tr>
 </tbody>
@@ -2530,8 +2453,6 @@ SensorResources
 </td>
 <td>
 <em>(Optional)</em>
-<p>Parameters is the list of key-value extracted from event&rsquo;s payload that are applied to
-the trigger resource.</p>
 </td>
 </tr>
 <tr>
@@ -2586,14 +2507,14 @@ string
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger
+<h3 id="argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
 </p>
 <p>
-<p>StandardK8sTrigger is the standard Kubernetes resource trigger</p>
+<p>StandardK8STrigger is the standard Kubernetes resource trigger</p>
 </p>
 <table>
 <thead>
@@ -2657,7 +2578,6 @@ Default value is Create.</p>
 </em>
 </td>
 <td>
-<p>Parameters is the list of parameters that is applied to resolved K8s trigger object.</p>
 </td>
 </tr>
 <tr>
@@ -2718,12 +2638,10 @@ Only valid for operation type <code>update</code></p>
 <td>
 <code>allow</code></br>
 <em>
-[]int
+[]int32
 </em>
 </td>
 <td>
-<p>Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list,
-the trigger will marked as successful else it will result in trigger failure.</p>
 </td>
 </tr>
 </tbody>
@@ -3049,7 +2967,7 @@ TriggerPolicy
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>, 
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>, 
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>, 
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 </p>
 <p>
@@ -3237,13 +3155,13 @@ If the DataKey is invalid and this is not defined, this param source will produc
 <td>
 <code>k8s</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.K8sResourcePolicy">
-K8sResourcePolicy
+<a href="#argoproj.io/v1alpha1.K8SResourcePolicy">
+K8SResourcePolicy
 </a>
 </em>
 </td>
 <td>
-<p>K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
+<p>K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
 </td>
 </tr>
 <tr>
@@ -3349,14 +3267,14 @@ TriggerSwitch
 <td>
 <code>k8s</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">
-StandardK8sTrigger
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">
+StandardK8STrigger
 </a>
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.</p>
+<p>StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes resource.</p>
 </td>
 </tr>
 <tr>
@@ -3478,7 +3396,7 @@ OpenWhiskTrigger
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>URLArtifact contains information about an minio at an http endpoint.</p>
+<p>URLArtifact contains information about an artifact at an http endpoint.</p>
 </p>
 <table>
 <thead>

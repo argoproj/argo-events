@@ -17,15 +17,16 @@ limitations under the License.
 package triggers
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/store"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/store"
 )
 
-func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.ArtifactLocation, namespace string, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.ArtifactLocation, namespace string, gvr metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
 	if source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
 	}

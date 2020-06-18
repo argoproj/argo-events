@@ -23,10 +23,11 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // KafkaTrigger describes the trigger to place messages on Kafka topic using a producer
@@ -80,7 +81,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 		ff := 500
 		if kafkatrigger.FlushFrequency != 0 {
-			ff = kafkatrigger.FlushFrequency
+			ff = int(kafkatrigger.FlushFrequency)
 		}
 		config.Producer.Flush.Frequency = time.Duration(ff)
 
@@ -163,7 +164,7 @@ func (t *KafkaTrigger) Execute(resource interface{}) (interface{}, error) {
 		Topic:     trigger.Topic,
 		Key:       sarama.StringEncoder(pk),
 		Value:     sarama.ByteEncoder(payload),
-		Partition: int32(trigger.Partition),
+		Partition: trigger.Partition,
 		Timestamp: time.Now().UTC(),
 	}
 

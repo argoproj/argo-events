@@ -144,11 +144,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayList(ref common.ReferenceCallback) 
 						},
 					},
 					"items": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "items",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -189,7 +184,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref common.ReferenceCallba
 						},
 					},
 				},
-				Required: []string{"deployment"},
 			},
 		},
 		Dependencies: []string{
@@ -230,14 +224,8 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 					"subscribers": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "subscribers",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Subscribers holds the contexts of the subscribers/sinks to send events to.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers"),
 						},
 					},
 					"processorPort": {
@@ -311,7 +299,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 						},
 					},
 				},
-				Required: []string{"phase", "resources"},
+				Required: []string{"phase"},
 			},
 		},
 		Dependencies: []string{
@@ -511,14 +499,8 @@ func schema_pkg_apis_gateway_v1alpha1_Subscribers(ref common.ReferenceCallback) 
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"http": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "HTTP subscribers are HTTP endpoints to send events to.",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -530,14 +512,8 @@ func schema_pkg_apis_gateway_v1alpha1_Subscribers(ref common.ReferenceCallback) 
 						},
 					},
 					"nats": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "NATSSubscriber",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
-							Description: "NATS refers to the subscribers over NATS protocol.",
-							Type:        []string{"array"},
+							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{

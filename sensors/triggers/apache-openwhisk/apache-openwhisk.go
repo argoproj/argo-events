@@ -20,13 +20,14 @@ import (
 	"net/http"
 
 	"github.com/apache/openwhisk-client-go/whisk"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
 )
 
 // TriggerImpl implements the Trigger interface for OpenWhisk trigger.
@@ -180,7 +181,7 @@ func (t *TriggerImpl) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger execution response")
 	}
 
-	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.Allow)
+	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.GetAllow())
 
 	return p.ApplyPolicy()
 }
