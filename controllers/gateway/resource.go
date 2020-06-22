@@ -88,7 +88,7 @@ func (ctx *gatewayContext) buildLegacyServiceResource() (*corev1.Service, error)
 func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 	// Deprecated spec, will be unsupported soon.
 	if ctx.gateway.Spec.Template.Spec != nil {
-		ctx.logger.WithField("name", ctx.gateway.Name).WithField("namespace", ctx.gateway.Namespace).Warn("spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.container")
+		ctx.logger.WithField("name", ctx.gateway.Name).WithField("namespace", ctx.gateway.Namespace).Warn("spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.containers")
 		return ctx.makeLegacyDeploymentSpec()
 	}
 
