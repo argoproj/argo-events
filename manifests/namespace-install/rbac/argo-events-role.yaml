@@ -28,6 +28,15 @@ rules:
       - eventbus
       - eventbus/finalizers
   - apiGroups:
+      - argoproj.io
+    verbs:
+      - get
+      - list
+      - watch
+    resources:
+      - clusterworkflowtemplates
+      - clusterworkflowtemplates/finalizers
+  - apiGroups:
       - ""
     resources:
       - pods
