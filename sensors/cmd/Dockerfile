@@ -1,13 +1,20 @@
 FROM centos:7
+
+ARG ARGO_VERSION=v2.8.2
+
 RUN yum -y install ca-certificates openssh openssh-server openssh-clients openssl-libs curl git
 
 # OpenFass CLI
 COPY assets/faas-cli /usr/local/bin/faas
 
 # Argo Workflow CLI
-COPY assets/argo-linux-amd64 /usr/local/bin/argo
+RUN curl -sSL -o /usr/local/bin/argo \
+    https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64 \
+ && chmod +x /usr/local/bin/argo
 
-RUN argo version
+# added `|| true` to ignore "invalid configuration: no configuration has been provided"
+# TODO: argo version shouldn't rely on a cluster connection to execute
+RUN argo version || true
 RUN faas version
 
 RUN mkdir /.openfaas
