@@ -5,6 +5,7 @@ ARG ARGO_VERSION=v2.8.2
 RUN yum -y install ca-certificates openssh openssh-server openssh-clients openssl-libs curl git
 
 # OpenFass CLI
+# TODO: donwload faas instead of copying it from the svc, same as with argo-cli
 COPY assets/faas-cli /usr/local/bin/faas
 
 # Argo Workflow CLI
