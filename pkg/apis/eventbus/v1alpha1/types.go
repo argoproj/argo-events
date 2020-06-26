@@ -37,7 +37,7 @@ type EventBusSpec struct {
 
 // EventBusStatus holds the status of the eventbus resource
 type EventBusStatus struct {
-	Status common.Status `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
+	common.Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
 	// Config holds the fininalized configuration of EventBus
 	Config BusConfig `json:"config,omitempty" protobuf:"bytes,2,opt,name=config"`
 }
@@ -69,6 +69,7 @@ type NativeStrategy struct {
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
 }
 
+// GetReplicas return the replicas of statefulset
 func (in *NativeStrategy) GetReplicas() int {
 	return int(in.Replicas)
 }
@@ -118,30 +119,30 @@ const (
 
 // InitConditions sets conditions to Unknown state.
 func (s *EventBusStatus) InitConditions() {
-	s.Status.InitConditions(EventBusConditionDeployed, EventBusConditionConfigured)
+	s.InitializeConditions(EventBusConditionDeployed, EventBusConditionConfigured)
 }
 
 // MarkDeployed set the bus has been deployed.
 func (s *EventBusStatus) MarkDeployed(reason, message string) {
-	s.Status.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
+	s.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeploying set the bus is deploying
 func (s *EventBusStatus) MarkDeploying(reason, message string) {
-	s.Status.MarkUnknown(EventBusConditionDeployed, reason, message)
+	s.MarkUnknown(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeployFailed set the bus deploy failed
 func (s *EventBusStatus) MarkDeployFailed(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionDeployed, reason, message)
+	s.MarkFalse(EventBusConditionDeployed, reason, message)
 }
 
 // MarkConfigured set the bus configuration has been done.
 func (s *EventBusStatus) MarkConfigured() {
-	s.Status.MarkTrue(EventBusConditionConfigured)
+	s.MarkTrue(EventBusConditionConfigured)
 }
 
 // MarkNotConfigured set the bus status not configured.
 func (s *EventBusStatus) MarkNotConfigured(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionConfigured, reason, message)
+	s.MarkFalse(EventBusConditionConfigured, reason, message)
 }

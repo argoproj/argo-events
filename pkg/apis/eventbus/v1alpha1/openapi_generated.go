@@ -181,9 +181,23 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 				Description: "EventBusStatus holds the status of the eventbus resource",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"status": {
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Status"),
+							Description: "Conditions are the latest available observations of a resource's current state.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
+									},
+								},
+							},
 						},
 					},
 					"config": {
@@ -196,7 +210,7 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Status", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Condition", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig"},
 	}
 }
 
