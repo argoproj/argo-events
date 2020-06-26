@@ -33,7 +33,7 @@ Argo workflow is K8s custom resource which help orchestrating parallel jobs on K
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              eventSourceName: webhook-event-source
+              gatewayName: webhook-gateway
               eventName: example
           subscription:
             http:

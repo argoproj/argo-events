@@ -56,7 +56,7 @@ Let's look at the following sensor,
               serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              eventSourceName: webhook-event-source
+              gatewayName: webhook-gateway
               eventName: example
           subscription:
             http:

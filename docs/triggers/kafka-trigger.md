@@ -24,7 +24,7 @@ The Kafka trigger specification is available [here](https://github.com/argoproj/
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              eventSourceName: minio-event-source
+              gatewayName: minio-gateway
               eventName: example
           subscription:
             http:

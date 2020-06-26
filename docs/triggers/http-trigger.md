@@ -188,7 +188,7 @@ to invoke OpenFaas function.
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              eventSourceName: redis-event-source
+              gatewayName: redis-gateway
               eventName: example
           subscription:
             http:
@@ -240,7 +240,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              eventSourceName: nats-event-source
+              gatewayName: nats-gateway
               eventName: example
           subscription:
             http:
