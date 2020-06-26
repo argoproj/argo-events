@@ -8,10 +8,10 @@ spec:
   # defines list of all events sensor will accept
   dependencies:
     - name: test-dep
-      eventSourceName: webhook-event-source
+      gatewayName: webhook
       eventName: example
     - name: test-dep-foo
-      eventSourceName: webhook-event-source
+      gatewayName: webhook
       eventName: example-foo
 
   # group event dependencies

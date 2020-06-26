@@ -10,7 +10,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      eventSourceName: gcp-pubsub-event-source
+      gatewayName: gcp-pubsub
       eventName: example
   triggers:
     - template:

@@ -11,10 +11,10 @@ spec:
   # waits for both test-dependency-webhook and test-dependency-calendar to resolve
   dependencies:
     - name: test-dependency-webhook
-      eventSourceName: webhook-event-source
+      gatewayName: webhook
       eventName: example
     - name: test-dependency-calendar
-      eventSourceName: calendar-event-source
+      gatewayName: calendar
       eventName: example-with-interval
   triggers:
     - template:

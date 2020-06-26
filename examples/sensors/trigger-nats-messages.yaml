@@ -7,7 +7,7 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      eventSourceName: minio-event-source
+      gatewayName: minio
       eventName: example
   subscription:
     http:

@@ -10,7 +10,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      eventSourceName: resource-event-source
+      gatewayName: resource
       eventName: example
   triggers:
     - template:

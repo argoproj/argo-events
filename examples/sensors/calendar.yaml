@@ -7,7 +7,7 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      eventSourceName: calendar-event-source
+      gatewayName: calendar
       eventName: example-with-interval
   subscription:
     http:

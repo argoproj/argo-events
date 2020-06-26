@@ -10,7 +10,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      eventSourceName: kafka-event-source
+      gatewayName: kafka
       eventName: example
   triggers:
     - template:

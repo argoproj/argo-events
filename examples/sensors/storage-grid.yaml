@@ -7,7 +7,7 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      eventSourceName: storage-grid-event-source
+      gatewayName: storage-grid
       eventName: example
   subscription:
     http:

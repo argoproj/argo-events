@@ -25,7 +25,7 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      eventSourceName: webhook-event-source
+      gatewayName: webhook
       eventName: example
   subscription:
     http:
