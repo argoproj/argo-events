@@ -71,7 +71,7 @@ func main() {
 
 	// Watch EventBus and enqueue EventBus object key
 	if err := c.Watch(&source.Kind{Type: &v1alpha1.EventBus{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		mainLog.Error(err, "unable to watch EventBuses")
+		mainLog.Error(err, "unable to watch EventBus")
 		panic(err)
 	}
 
