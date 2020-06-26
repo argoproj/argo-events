@@ -372,12 +372,18 @@ Description
 
 <td>
 
-<code>status</code></br> <em>
+<code>Status</code></br> <em>
 github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 
 </td>
 
 <td>
+
+<p>
+
+(Members of <code>Status</code> are embedded into this type.)
+
+</p>
 
 </td>
 
