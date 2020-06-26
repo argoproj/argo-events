@@ -1638,6 +1638,27 @@ Name is a unique name of this dependency
 <p>
 
 GatewayName is the name of the gateway from whom the event is received
+DEPRECATED: Use EventSourceName instead.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventSourceName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+EventSourceName is the name of EventSource that Sensor depends on
 
 </p>
 

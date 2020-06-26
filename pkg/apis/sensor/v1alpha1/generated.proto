@@ -214,13 +214,17 @@ message EventDependency {
   optional string name = 1;
 
   // GatewayName is the name of the gateway from whom the event is received
+  // DEPRECATED: Use EventSourceName instead.
   optional string gatewayName = 2;
 
+  // EventSourceName is the name of EventSource that Sensor depends on
+  optional string eventSourceName = 3;
+
   // EventName is the name of the event
-  optional string eventName = 3;
+  optional string eventName = 4;
 
   // Filters and rules governing toleration of success and constraints on the context and data of an event
-  optional EventDependencyFilter filters = 4;
+  optional EventDependencyFilter filters = 5;
 }
 
 // EventDependencyFilter defines filters and constraints for a event.

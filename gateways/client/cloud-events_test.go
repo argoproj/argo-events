@@ -37,13 +37,16 @@ func TestTransformEvent(t *testing.T) {
 			},
 			Spec: v1alpha1.GatewaySpec{
 				Type: "webhook",
+				EventSourceRef: &v1alpha1.EventSourceRef{
+					Name: "test-event-source",
+				},
 			},
 		},
 	}
 	cloudevent, err := ctx.transformEvent(event)
 	assert.Nil(t, err)
 	assert.NotNil(t, cloudevent.Context.AsV03())
-	assert.Equal(t, "test-gateway", cloudevent.Source())
+	assert.Equal(t, "test-event-source", cloudevent.Source())
 	assert.Equal(t, "hello", cloudevent.Subject())
 	assert.Equal(t, "webhook", cloudevent.Type())
 

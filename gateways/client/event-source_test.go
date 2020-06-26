@@ -48,6 +48,9 @@ func getGatewayContext() *GatewayContext {
 				Namespace: "fake-namespace",
 			},
 			Spec: v1alpha1.GatewaySpec{
+				EventSourceRef: &v1alpha1.EventSourceRef{
+					Name: "fake-event-source",
+				},
 				Subscribers: &v1alpha1.Subscribers{
 					HTTP: []string{},
 				},

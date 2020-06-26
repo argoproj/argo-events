@@ -207,11 +207,14 @@ type EventDependency struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 	// GatewayName is the name of the gateway from whom the event is received
-	GatewayName string `json:"gatewayName" protobuf:"bytes,2,opt,name=gatewayName"`
+	// DEPRECATED: Use EventSourceName instead.
+	GatewayName string `json:"gatewayName" protobuf:"bytes,2,name=gatewayName"`
+	// EventSourceName is the name of EventSource that Sensor depends on
+	EventSourceName string `json:"eventSourceName" protobuf:"bytes,3,name=eventSourceName"`
 	// EventName is the name of the event
-	EventName string `json:"eventName" protobuf:"bytes,3,opt,name=eventName"`
+	EventName string `json:"eventName" protobuf:"bytes,4,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
-	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
+	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,5,opt,name=filters"`
 }
 
 // DependencyGroup is the group of dependencies

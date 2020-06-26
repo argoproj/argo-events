@@ -172,7 +172,7 @@ func (sensorCtx *SensorContext) handleEvent(eventBody []byte) error {
 
 	// Resolve Dependency
 	// validate whether the event is from gateway that this sensor is watching
-	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor.Spec.Dependencies, internalEvent); eventDependency != nil {
+	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor.Spec.Dependencies, internalEvent, sensorCtx.Logger); eventDependency != nil {
 		sensorCtx.NotificationQueue <- &types.Notification{
 			Event:            internalEvent,
 			EventDependency:  eventDependency,
