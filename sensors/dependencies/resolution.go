@@ -18,24 +18,42 @@ package dependencies
 
 import (
 	"github.com/gobwas/glob"
+	"github.com/sirupsen/logrus"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ResolveDependency resolves a dependency based on Event and gateway name
-func ResolveDependency(dependencies []v1alpha1.EventDependency, events *v1alpha1.Event) *v1alpha1.EventDependency {
+func ResolveDependency(dependencies []v1alpha1.EventDependency, event *v1alpha1.Event, logger *logrus.Logger) *v1alpha1.EventDependency {
 	for _, dependency := range dependencies {
-		gatewayNameGlob, err := glob.Compile(dependency.GatewayName)
-		if err != nil {
-			continue
-		}
 		eventNameGlob, err := glob.Compile(dependency.EventName)
 		if err != nil {
 			continue
 		}
-		if gatewayNameGlob.Match(events.Context.Source) && eventNameGlob.Match(events.Context.Subject) {
-			return &dependency
+		if !eventNameGlob.Match(event.Context.Subject) {
+			continue
 		}
+		var sourceGlob glob.Glob
+		switch {
+		case len(dependency.EventSourceName) > 0:
+			sourceGlob, err = glob.Compile(dependency.EventSourceName)
+		case len(dependency.GatewayName) > 0:
+			// DEPRECATED:
+			logger.WithFields(logrus.Fields{
+				"source":  event.Context.Source,
+				"subject": event.Context.Subject,
+			}).Warn("spec.dependencies.gatewayName is DEPRECATED, it will be unsupported soon, please use spec.dependencies.eventSourceName")
+			sourceGlob, err = glob.Compile(dependency.GatewayName)
+		default:
+			continue
+		}
+		if err != nil {
+			continue
+		}
+		if !sourceGlob.Match(event.Context.Source) {
+			continue
+		}
+		return &dependency
 	}
 	return nil
 }

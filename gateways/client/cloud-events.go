@@ -138,7 +138,7 @@ func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Even
 	event.SetID(fmt.Sprintf("%x", uuid.New()))
 	event.SetSpecVersion(cloudevents.VersionV03)
 	event.SetType(string(gatewayContext.gateway.Spec.Type))
-	event.SetSource(gatewayContext.gateway.Name)
+	event.SetSource(gatewayContext.gateway.Spec.EventSourceRef.Name)
 	event.SetDataContentType("application/json")
 	event.SetSubject(gatewayEvent.Name)
 	event.SetTime(time.Now())
