@@ -142,10 +142,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 				Timestamp: msg.Timestamp.String(),
 			}
 			if kafkaEventSource.JSONBody {
-                                eventData.Body = (*json.RawMessage)(&msg.Value)
-                        } else {
-                                eventData.Body = msg.Value
-                        }
+				eventData.Body = (*json.RawMessage)(&msg.Value)
+			} else {
+				eventData.Body = msg.Value
+			}
 			eventBody, err := json.Marshal(eventData)
 			if err != nil {
 				logger.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")
