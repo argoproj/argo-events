@@ -19,7 +19,7 @@ require (
 	github.com/argoproj/argo-rollouts v0.7.2
 	github.com/argoproj/pkg v0.0.0-20200319004004-f46beff7cd54 // indirect
 	github.com/aws/aws-sdk-go v1.30.7
-	github.com/cloudevents/sdk-go v1.1.2
+	github.com/cloudevents/sdk-go/v2 v2.1.0
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/eclipse/paho.mqtt.golang v1.2.0

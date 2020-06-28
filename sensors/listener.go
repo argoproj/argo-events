@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -88,7 +88,8 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus() error {
 // Categorize all the trigger into groups
 // Return a map with key - depName, value: trigger list
 func (sensorCtx *SensorContext) categorizeTriggers() map[string][]v1alpha1.Trigger {
-
+	sensor := sensorCtx.Sensor
+	sensor.Spec.DependencyGroups
 }
 
 // listenEventsOverHTTP listens to events over HTTP

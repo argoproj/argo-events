@@ -2,6 +2,7 @@ package driver
 
 import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
 // Driver is an interface for event bus
@@ -12,17 +13,15 @@ type Driver interface {
 
 	Reconnect() error
 
-	// Subscribe to a subject
-	Subscribe(subject string, action func(message []byte)) error
-
-	// Subscribe to multiple subjects
-	// Parameter - subjectExpr, example: "(subject1 || subject2) && subject3"
+	// SubscribeEventSources is used to subscribe multiple event source dependencies
+	// Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
+	// Parameter - depencencies, array of dependencies information
 	// Parameter - filter, a function used to filter the message
 	// Parameter - action, a function to be triggered after all conditions meet
-	SubscribeSubjects(subjectExpr string, filter func(subject string, message []byte) bool, action func(subjectMessages map[string][]byte)) error
+	SubscribeEventSources(dependencyExpr string, depencencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
 
-	// Publish a message to a subject
-	Publish(subject string, message []byte) error
+	// Publish a message
+	Publish(message []byte) error
 }
 
 // Auth contains the auth infor for event bus
@@ -36,4 +35,11 @@ type AuthCredential struct {
 	Token    string
 	Username string
 	Password string
+}
+
+// Dependency is a struct for dependency info of a sensor
+type Dependency struct {
+	Name            string
+	EventSourceName string
+	EventName       string
 }

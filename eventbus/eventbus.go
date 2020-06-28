@@ -12,7 +12,7 @@ import (
 )
 
 // GetDriver returns a Driver implementation
-func GetDriver(eventBusConfig eventbusv1alpha1.BusConfig, clientID string, logger *logrus.Logger) (driver.Driver, error) {
+func GetDriver(eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID string, logger *logrus.Logger) (driver.Driver, error) {
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
 	if eventBusConfig.NATS != nil {
@@ -56,7 +56,7 @@ func GetDriver(eventBusConfig eventbusv1alpha1.BusConfig, clientID string, logge
 	var dvr driver.Driver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
-		dvr = driver.NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, clientID, auth, logger)
+		dvr = driver.NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, subject, clientID, auth, logger)
 	default:
 		return nil, errors.New("invalid eventbus type")
 	}

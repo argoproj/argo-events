@@ -21,8 +21,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/imdario/mergo"
@@ -34,7 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
@@ -61,21 +58,16 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
-	eventBusExisting := true
 	err := client.Get(ctx, types.NamespacedName{Namespace: sensor.Namespace, Name: eventBusName}, eventBus)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			eventBusExisting = false
-		} else {
-			sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
-			logger.Error(err, "failed to get EventBus", "eventBusName", eventBusName)
-			return err
+			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
+			logger.Error(err, "EventBus not found", "eventBusName", eventBusName)
+			return errors.Errorf("eventbus %s not found", eventBusName)
 		}
-	}
-	if !eventBusExisting {
-		// DEPRECATED: Build lagecy resources
-		// TODO: Remove following and error out.
-		return reconcileLegacy(ctx, client, args, logger)
+		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
+		logger.Error(err, "failed to get EventBus", "eventBusName", eventBusName)
+		return err
 	}
 	if !eventBus.Status.IsReady() {
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
@@ -114,82 +106,6 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 			return err
 		}
 		logger.Info("deployment is created", "deploymentName", expectedDeploy.Name)
-	}
-	sensor.Status.MarkDeployed()
-	return nil
-}
-
-// EventBus not existing create legacy service
-// DEPRECATED
-func reconcileLegacy(ctx context.Context, client client.Client, args *AdaptorArgs, logger logr.Logger) error {
-	sensor := args.Sensor
-	expectedDeploy, err := buildDeployment(args, nil, logger)
-	if err != nil {
-		sensor.Status.MarkDeployFailed("BuildDeploymentSpecFailed", "Failed to build Deployment spec.")
-		logger.Error(err, "failed to build deployment spec")
-		return err
-	}
-	expectedService, err := buildLegacyService(args, logger)
-	if err != nil {
-		sensor.Status.MarkDeployFailed("BuildServiceSpecFailed", "Failed to build legacy Service spec.")
-		logger.Error(err, "failed to build service spec")
-		return err
-	}
-	deploy, err := getDeployment(ctx, client, args)
-	if err != nil && !apierrors.IsNotFound(err) {
-		sensor.Status.MarkDeployFailed("GetDeploymentFailed", "Get existing deployment failed")
-		logger.Error(err, "error getting existing deployment")
-		return err
-	}
-	svc, err := getLegacyService(ctx, client, args)
-	if err != nil && !apierrors.IsNotFound(err) {
-		sensor.Status.MarkDeployFailed("GetLegacyServiceFailed", "Get existing legacy service failed")
-		logger.Error(err, "error getting existing service")
-		return err
-	}
-
-	if deploy != nil {
-		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
-			deploy.Spec = expectedDeploy.Spec
-			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
-			err = client.Update(ctx, deploy)
-			if err != nil {
-				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
-				logger.Error(err, "error updating existing deployment")
-				return err
-			}
-			logger.Info("deployment is updated", "deploymentName", deploy.Name)
-		}
-	} else {
-		err = client.Create(ctx, expectedDeploy)
-		if err != nil {
-			sensor.Status.MarkDeployFailed("CreateDeploymentFailed", "Failed to create a deployment")
-			logger.Error(err, "error creating a deployment")
-			return err
-		}
-		logger.Info("deployment is created", "deploymentName", expectedDeploy.Name)
-	}
-
-	if svc != nil {
-		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedService.Annotations[common.AnnotationResourceSpecHash] {
-			svc.Spec = expectedService.Spec
-			svc.Annotations[common.AnnotationResourceSpecHash] = expectedService.Annotations[common.AnnotationResourceSpecHash]
-			err = client.Update(ctx, svc)
-			if err != nil {
-				sensor.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
-				logger.Error(err, "error updating existing service")
-				return err
-			}
-			logger.Info("service is updated", "serviceName", svc.Name)
-		}
-	} else {
-		err = client.Create(ctx, expectedService)
-		if err != nil {
-			sensor.Status.MarkDeployFailed("CreateServiceFailed", "Failed to create a legacy service")
-			logger.Error(err, "error creating a legacy service")
-			return err
-		}
-		logger.Info("service is created", "serviceName", expectedService.Name)
 	}
 	sensor.Status.MarkDeployed()
 	return nil
@@ -347,64 +263,6 @@ func buildLegacyDeploymentSpec(sensor *v1alpha1.Sensor) *appv1.DeploymentSpec {
 	}
 }
 
-// buildLegacyService builds a service that exposes sensor.
-// DEPRECATED: This is to make it backward compatible.
-func buildLegacyService(args *AdaptorArgs, log logr.Logger) (*corev1.Service, error) {
-	port := common.SensorServerPort
-	if args.Sensor.Spec.Subscription.HTTP != nil {
-		port = int(args.Sensor.Spec.Subscription.HTTP.Port)
-	}
-	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-sensor", args.Sensor.Name),
-			Labels:      args.Labels,
-			Annotations: args.Sensor.Spec.ServiceAnnotations,
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Port:       intstr.FromInt(port).IntVal,
-					TargetPort: intstr.FromInt(port),
-				},
-			},
-			Type:     corev1.ServiceTypeClusterIP,
-			Selector: args.Labels,
-		},
-	}
-	if err := controllerscommon.SetObjectMeta(args.Sensor, service, v1alpha1.SchemaGroupVersionKind); err != nil {
-		return nil, err
-	}
-	return service, nil
-}
-
-func getLegacyService(ctx context.Context, cl client.Client, args *AdaptorArgs) (*corev1.Service, error) {
-	sl := &corev1.ServiceList{}
-	err := cl.List(ctx, sl, &client.ListOptions{
-		Namespace:     args.Sensor.Namespace,
-		LabelSelector: labelSelector(args.Labels),
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, svc := range sl.Items {
-		if metav1.IsControlledBy(&svc, args.Sensor) {
-			return &svc, nil
-		}
-	}
-	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
-}
-
 func labelSelector(labelMap map[string]string) labels.Selector {
 	return labels.SelectorFromSet(labelMap)
-}
-
-// generate a random string as token with given length
-func generateToken(length int) string {
-	seeds := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = seeds[seededRand.Intn(len(seeds))]
-	}
-	return string(b)
 }

@@ -1,11 +1,13 @@
 package driver
 
 import (
+	"encoding/json"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/Knetic/govaluate"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
@@ -19,6 +21,7 @@ type natsStreaming struct {
 	url       string
 	auth      *Auth
 	clusterID string
+	subject   string
 	clientID  string
 
 	natsConn *nats.Conn
@@ -27,8 +30,14 @@ type natsStreaming struct {
 }
 
 // NewNATSStreaming returns a nats streaming driver
-func NewNATSStreaming(url, clusterID, clientID string, auth *Auth, logger *logrus.Logger) Driver {
-	return &natsStreaming{url: url, clusterID: clusterID, clientID: clientID, auth: auth, logger: logger}
+func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logger *logrus.Logger) Driver {
+	return &natsStreaming{
+		url:       url,
+		clusterID: clusterID,
+		subject:   subject,
+		clientID:  clientID,
+		auth:      auth,
+		logger:    logger.WithField("clusterID", clusterID).WithField("clientID", clientID).Logger}
 }
 
 func (n *natsStreaming) Connect() error {
@@ -77,43 +86,34 @@ func (n *natsStreaming) Reconnect() error {
 	return n.Connect()
 }
 
-func (n *natsStreaming) Publish(subject string, message []byte) error {
-	return n.stanConn.Publish(subject, message)
+func (n *natsStreaming) Publish(message []byte) error {
+	return n.stanConn.Publish(n.subject, message)
 }
 
-func (n *natsStreaming) Subscribe(subject string, action func([]byte)) error {
-	filterFunc := func(string, []byte) bool { return true }
-	actionFunc := func(msgs map[string][]byte) { action(msgs[subject]) }
-	return n.SubscribeSubjects(subject, filterFunc, actionFunc)
-}
-
-// SubscribeSubjects is used to subscribe multiple subjects with dependency expression
-// Parameter - subjectExpr, example: "(subject1 || subject2) && subject3"
+// SubscribeCloudEvents is used to subscribe multiple dependency expression
+// Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
+// Parameter - depencencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeSubjects(subjectExpr string, filter func(string, []byte) bool, action func(map[string][]byte)) error {
-	msgHolder, err := newMessageHolder(subjectExpr)
+func (n *natsStreaming) SubscribeEventSources(dependencyExpr string, depencencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, depencencies)
 	if err != nil {
 		return err
 	}
-	subscriptionMap := make(map[string]stan.Subscription)
-	for _, subject := range msgHolder.subjects {
-		// use clientID as durable name?
-		durableName := n.clientID
-		sub, err := n.stanConn.Subscribe(subject, func(m *stan.Msg) {
-			n.processMsg(m, msgHolder, filter, action)
-		}, stan.DurableName(durableName),
-			stan.SetManualAckMode(),
-			stan.StartAt(pb.StartPosition_NewOnly),
-			stan.AckWait(1*time.Second),
-			stan.MaxInflight(2))
-		if err != nil {
-			n.logger.Errorf("failed to subscribe to subject %s", subject)
-			return err
-		}
-		subscriptionMap[subject] = sub
-		n.logger.Infof("Subscribed to subject %s ...", subject)
+	// use clientID as durable name?
+	durableName := n.clientID
+	sub, err := n.stanConn.Subscribe(n.subject, func(m *stan.Msg) {
+		n.processEventSourceMsg(m, msgHolder, filter, action)
+	}, stan.DurableName(durableName),
+		stan.SetManualAckMode(),
+		stan.StartAt(pb.StartPosition_NewOnly),
+		stan.AckWait(1*time.Second),
+		stan.MaxInflight(len(msgHolder.dependencies)+2))
+	if err != nil {
+		n.logger.Errorf("failed to subscribe to subject %s", n.subject)
+		return err
 	}
+	n.logger.Infof("Subscribed to subject %s ...", n.subject)
 
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan bool)
@@ -121,10 +121,8 @@ func (n *natsStreaming) SubscribeSubjects(subjectExpr string, filter func(string
 	go func() {
 		for range signalChan {
 			n.logger.Info("Received an interrupt, unsubscribing and closing connection...")
-			for k, v := range subscriptionMap {
-				_ = v.Close()
-				n.logger.Infof("subscription on subject %s closed", k)
-			}
+			_ = sub.Close()
+			n.logger.Infof("subscription on subject %s closed", n.subject)
 			cleanupDone <- true
 		}
 	}()
@@ -132,107 +130,168 @@ func (n *natsStreaming) SubscribeSubjects(subjectExpr string, filter func(string
 	return nil
 }
 
-func (n *natsStreaming) processMsg(m *stan.Msg, msgHolder *messageHolder, filter func(subject string, message []byte) bool, action func(map[string][]byte)) error {
-	// ACK all the old messages after conditions meet
-	if m.Timestamp <= msgHolder.lastMeetTime {
-		msgHolder.reset(m.Subject)
+func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event)) {
+	var event *cloudevents.Event
+	if err := json.Unmarshal(m.Data, &event); err != nil {
+		n.logger.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
 		m.Ack()
-		return nil
+		return
+	}
+
+	// Old redelivered messages should be able to be acked in 60 seconds.
+	// Reset if the flag didn't get cleared in that period for some reasons.
+	if msgHolder.lastMeetTime > 0 || msgHolder.latestGoodMsgTimestamp > 0 {
+		if time.Now().Unix()-msgHolder.lastMeetTime > 60 {
+			msgHolder.resetAll()
+			n.logger.Info("ATTENTION: Reset the flags because they didn't get cleared in 60 seconds...")
+		}
+	}
+
+	// ACK all the old messages after conditions meet
+	depName := msgHolder.getDependencyName(event.Source(), event.Subject())
+	if m.Timestamp <= msgHolder.latestGoodMsgTimestamp {
+		if depName != "" {
+			msgHolder.reset(depName)
+		}
+		m.Ack()
+		return
 	}
 
 	// Start a new round
-	if !filter(m.Subject, m.Data) {
+	if depName == "" || !filter(depName, *event) {
 		// message not interested
 		m.Ack()
-		return nil
+		return
 	}
-	if existingMsg, ok := msgHolder.msgs[m.Subject]; ok {
+	if existingMsg, ok := msgHolder.msgs[depName]; ok {
 		if m.Sequence == existingMsg.seq {
 			// Redelivered latest messge, return
-			return nil
+			return
 		} else if m.Sequence < existingMsg.seq {
 			// Redelivered old message, ack and return
 			m.Ack()
-			return nil
+			return
 		}
 	}
 	// New message, set and check
-	msgHolder.msgs[m.Subject] = &message{seq: m.Sequence, timestamp: m.Timestamp, data: m.Data}
-	msgHolder.parameters[m.Subject] = true
+	msgHolder.msgs[depName] = &eventSourceMessage{seq: m.Sequence, timestamp: m.Timestamp, event: event}
+	msgHolder.parameters[depName] = true
 
 	result, err := msgHolder.expr.Evaluate(msgHolder.parameters)
 	if err != nil {
-		n.logger.Errorf("failed to evaluate subject expression: %v", err)
-		return err
+		n.logger.Errorf("failed to evaluate dependency expression: %v", err)
+		// TODO: how to handle this situation?
+		return
 	}
 	if result != true {
-		return nil
+		return
 	}
-	msgHolder.lastMeetTime = m.Timestamp
+	msgHolder.latestGoodMsgTimestamp = m.Timestamp
+	msgHolder.lastMeetTime = time.Now().Unix()
 	// Trigger actions
-	messages := make(map[string][]byte)
+	messages := make(map[string]cloudevents.Event)
 	for k, v := range msgHolder.msgs {
-		messages[k] = v.data
+		messages[k] = *v.event
 	}
 	n.logger.Infof("Triggering actions for client %s", n.clientID)
 
 	go action(messages)
 
-	msgHolder.reset(m.Subject)
+	msgHolder.reset(depName)
 	m.Ack()
-	return nil
+	return
 }
 
-// message is used by messageHolder to hold the latest message
-type message struct {
+// eventSourceMessage is used by messageHolder to hold the latest message
+type eventSourceMessage struct {
 	seq       uint64
 	timestamp int64
-	data      []byte
+	event     *cloudevents.Event
 }
 
-// messageHolder is a struct used to hold the message information of subscribed subjects
-type messageHolder struct {
+// eventSourceMessageHolder is a struct used to hold the message information of subscribed dependencies
+type eventSourceMessageHolder struct {
+	// time that all conditions meet
 	lastMeetTime int64
-	expr         *govaluate.EvaluableExpression
-	subjects     []string
+	// timestamp of last msg when all the conditions meet
+	latestGoodMsgTimestamp int64
+	expr                   *govaluate.EvaluableExpression
+	dependencies           []string
+	// Mapping of [eventSourceName + eventName]dependencyName
+	sourceDepMap map[string]string
 	parameters   map[string]interface{}
-	msgs         map[string]*message
+	msgs         map[string]*eventSourceMessage
 }
 
-func newMessageHolder(subjectExpr string) (*messageHolder, error) {
-	expression, err := govaluate.NewEvaluableExpression(subjectExpr)
+func newEventSourceMessageHolder(dependencyExpr string, depencencies []Dependency) (*eventSourceMessageHolder, error) {
+	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
 	if err != nil {
 		return nil, err
 	}
-	subjects := unique(expression.Vars())
-	if len(subjects) == 0 {
-		return nil, errors.Errorf("no subjects found: %s", subjectExpr)
+	deps := unique(expression.Vars())
+	if len(dependencyExpr) == 0 {
+		return nil, errors.Errorf("no dependencies found: %s", dependencyExpr)
 	}
-	parameters := make(map[string]interface{}, len(subjects))
-	msgs := make(map[string]*message)
-	for _, subject := range subjects {
-		parameters[subject] = false
+
+	srcDepMap := make(map[string]string)
+	depSrcMap := make(map[string]Dependency)
+	for _, d := range depencencies {
+		key := d.EventSourceName + "__" + d.EventName
+		srcDepMap[key] = d.Name
+		depSrcMap[d.Name] = d
 	}
-	return &messageHolder{
-		lastMeetTime: int64(0),
-		expr:         expression,
-		subjects:     subjects,
-		parameters:   parameters,
-		msgs:         msgs,
+
+	parameters := make(map[string]interface{}, len(deps))
+	msgs := make(map[string]*eventSourceMessage)
+	for _, dep := range deps {
+		// Validate if there's an invalid dependency name
+		if _, ok := depSrcMap[dep]; !ok {
+			return nil, errors.Errorf("Dependency expression and dependency list do not match, %s is not found", dep)
+		}
+		parameters[dep] = false
+	}
+
+	return &eventSourceMessageHolder{
+		lastMeetTime:           int64(0),
+		latestGoodMsgTimestamp: int64(0),
+		expr:                   expression,
+		dependencies:           deps,
+		sourceDepMap:           srcDepMap,
+		parameters:             parameters,
+		msgs:                   msgs,
 	}, nil
 }
 
-// Reset the parameter and message that a subject holds
-func (mh *messageHolder) reset(subject string) {
-	mh.parameters[subject] = false
-	delete(mh.msgs, subject)
+func (mh *eventSourceMessageHolder) getDependencyName(eventSourceName, eventName string) string {
+	if depName, ok := mh.sourceDepMap[eventSourceName+"__"+eventName]; ok {
+		return depName
+	}
+	return ""
+}
+
+// Reset the parameter and message that a dependency holds
+func (mh *eventSourceMessageHolder) reset(depName string) {
+	mh.parameters[depName] = false
+	delete(mh.msgs, depName)
 	if mh.isCleanedUp() {
 		mh.lastMeetTime = 0
+		mh.latestGoodMsgTimestamp = 0
 	}
 }
 
+func (mh *eventSourceMessageHolder) resetAll() {
+	for k := range mh.msgs {
+		delete(mh.msgs, k)
+	}
+	for k := range mh.parameters {
+		mh.parameters[k] = false
+	}
+	mh.lastMeetTime = 0
+	mh.latestGoodMsgTimestamp = 0
+}
+
 // Check if all the parameters and messages have been cleaned up
-func (mh *messageHolder) isCleanedUp() bool {
+func (mh *eventSourceMessageHolder) isCleanedUp() bool {
 	for _, v := range mh.parameters {
 		if v == true {
 			return false
