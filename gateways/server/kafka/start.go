@@ -80,7 +80,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger.Infoln("connecting to Kafka cluster...")
 	if err := server.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
 		var err error
-		config := &sarama.Config{}
+		config := sarama.NewConfig()
 
 		if kafkaEventSource.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
@@ -89,6 +89,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			}
 			config.Net.TLS.Config = tlsConfig
 			config.Net.TLS.Enable = true
+		} else {
+			consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, nil)
+			if err != nil {
+				return err
+			}
 		}
 
 		consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, config)
@@ -134,8 +139,12 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			eventData := &events.KafkaEventData{
 				Topic:     msg.Topic,
 				Partition: int(msg.Partition),
-				Body:      msg.Value,
 				Timestamp: msg.Timestamp.String(),
+			}
+			if kafkaEventSource.JSONBody {
+				eventData.Body = (*json.RawMessage)(&msg.Value)
+			} else {
+				eventData.Body = msg.Value
 			}
 			eventBody, err := json.Marshal(eventData)
 			if err != nil {
