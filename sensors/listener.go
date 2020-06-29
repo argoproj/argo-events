@@ -19,17 +19,21 @@ package sensors
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"io/ioutil"
 	"net/http"
+	"hash/fnv"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/nats-io/go-nats"
+	"github.com/antonmedv/expr"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/eventbus"
+	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/types"
@@ -79,79 +83,164 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 }
 
 func (sensorCtx *SensorContext) listenEventsOverEventBus() error {
-	// sensor := sensorCtx.Sensor
-	// sensor.Spec.Triggers
-	ebDriver := eventbus.GetDriver(*sensorCtx.EventBusConfig, "", sensorCtx.Logger)
+	sensor := sensorCtx.Sensor
+	// Get a mapping of dependencyExpression: []triggers
+	triggerMapping := make(map[string][]v1alpha1.Trigger)
+	for _, trigger := range sensor.Spec.Triggers {
+		depExpr, err := sensorCtx.getDependencyExpression(trigger)
+		if err != nil {
+			return nil, err
+		}
+		triggers, ok := triggerMapping[depExpr]
+		if !ok {
+			triggers = []v1alpha1.Trigger{}
+		}
+		triggers = append(triggers, trigger)
+		triggerMapping[depExpr] = triggers
+	}
+
+	deps := []eventbusdriver.Dependency{}
+	for _, d := range sensor.Spec.Dependencies {
+		esName := d.EventSourceName
+		if esName == "" {
+			esName = d.GatewayName
+		}
+		ebd := eventbusdriver.Dependency{
+			Name: d.Name,
+			EventSourceName: esName,
+			EventName: d.EventName,
+		}
+		deps = append(deps, ebd)
+	}
+
+	for k, v := range triggerMapping{
+		// Generate clientID with hash code
+		h := fnv.New32a()
+		h.Write([]byte(k))
+		clientID := fmt.Sprintf("client-%v", h.Sum32())
+		ebDriver, err := eventbus.GetDriver(*sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).Errorln("Failed to get event bus driver")
+			return err
+		}
+		err = ebDriver.Connect()
+		if err != nil {
+			sensorCtx.Logger.WithError(err).Errorln("Failed to connect to event bus")
+			return err
+		}
+		ebDriver.SubscribeEventSources(k, deps, )
+	}
+	
 	return
 }
 
-// Categorize all the trigger into groups
-// Return a map with key - depName, value: trigger list
-func (sensorCtx *SensorContext) categorizeTriggers() map[string][]v1alpha1.Trigger {
+
+func (sensorCtx *SensorContext) getDependencyExpression(trigger v1alpha1.Trigger) (string, error) {
 	sensor := sensorCtx.Sensor
-	sensor.Spec.DependencyGroups
-}
-
-// listenEventsOverHTTP listens to events over HTTP
-func (sensorCtx *SensorContext) listenEventsOverHTTP() error {
-	port := sensorCtx.Sensor.Spec.Subscription.HTTP.Port
-	if port == 0 {
-		port = common.SensorServerPort
-	}
-
-	sensorCtx.Logger.WithFields(logrus.Fields{
-		"port":     port,
-		"endpoint": "/",
-	}).Infoln("starting HTTP events receiver")
-
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		eventBody, err := ioutil.ReadAll(request.Body)
+	var depExpression string
+	if len(sensor.Spec.DependencyGroups) > 0 && sensor.Spec.Circuit != "" && trigger.Template.Switch != nil {
+		temp := ""
+		sw := trigger.Template.Switch
+		switch{
+		case len(sw.All) > 0:
+			temp = strings.Join(sw.All, "&&")
+		case len(sw.Any) > 0 :
+			temp = strings.Join(sw.Any, "||")
+		default:
+			return "", errors.New("invalid trigger switch")
+		}
+		groupDepExpr := fmt.Sprintf("(%s) && (%s)", sensor.Spec.Circuit, temp)
+		depGroupMapping := make(map[string]string)
+		for _, depGroup := range sensor.Spec.DependencyGroups {
+			depGroupMapping[depGroup.Name] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
+		}
+		groupDepExpr = strings.ReplaceAll(groupDepExpr, "&&", " + \"&&\" + ")
+		groupDepExpr = strings.ReplaceAll(groupDepExpr, "||", " + \"||\" + ")
+		program, err := expr.Compile(groupDepExpr, expr.Env(depGroupMapping))
 		if err != nil {
-			writer.WriteHeader(http.StatusBadRequest)
-			_, _ = writer.Write([]byte("failed to parse the event"))
-			return
+			sensorCtx.Logger.WithError(err).Errorln("Failed to compile group dependency expression")
+			return "", err
 		}
-		if err := sensorCtx.handleEvent(eventBody); err != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			_, _ = writer.Write([]byte("failed to handle the event"))
-			return
+		depExpression, err = expr.Run(program, depGroupMapping)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).Errorln("Failed to parse group dependency expression")
+			return "", err
 		}
-	})
-
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
-		return err
+	} else {
+		deps := []string
+		for _, dep := range sensor.Spec.Dependencies {
+			deps = deps.append(deps, dep.Name)
+		}
+		depExpression = strings.Join(deps, "&&")
 	}
-
-	return nil
+	boolSimplifier, err := common.NewBoolExpression(depExpression)
+	if err != nil {
+		sensorCtx.Logger.WithError(err).Errorln("Invalid dependency expression")
+		return "", err
+	}
+	return boolSimplifier.GetExpression()
 }
+
+// // listenEventsOverHTTP listens to events over HTTP
+// func (sensorCtx *SensorContext) listenEventsOverHTTP() error {
+// 	port := sensorCtx.Sensor.Spec.Subscription.HTTP.Port
+// 	if port == 0 {
+// 		port = common.SensorServerPort
+// 	}
+
+// 	sensorCtx.Logger.WithFields(logrus.Fields{
+// 		"port":     port,
+// 		"endpoint": "/",
+// 	}).Infoln("starting HTTP events receiver")
+
+// 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+// 		eventBody, err := ioutil.ReadAll(request.Body)
+// 		if err != nil {
+// 			writer.WriteHeader(http.StatusBadRequest)
+// 			_, _ = writer.Write([]byte("failed to parse the event"))
+// 			return
+// 		}
+// 		if err := sensorCtx.handleEvent(eventBody); err != nil {
+// 			writer.WriteHeader(http.StatusInternalServerError)
+// 			_, _ = writer.Write([]byte("failed to handle the event"))
+// 			return
+// 		}
+// 	})
+
+// 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
 
 // listenEventsOverNATS listens to events over NATS
-func (sensorCtx *SensorContext) listenEventsOverNATS() error {
-	subscription := sensorCtx.Sensor.Spec.Subscription.NATS
+// func (sensorCtx *SensorContext) listenEventsOverNATS() error {
+// 	subscription := sensorCtx.Sensor.Spec.Subscription.NATS
 
-	conn, err := nats.Connect(subscription.ServerURL)
-	if err != nil {
-		return err
-	}
+// 	conn, err := nats.Connect(subscription.ServerURL)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	logger := sensorCtx.Logger.WithFields(logrus.Fields{
-		"url":     subscription.ServerURL,
-		"subject": subscription.Subject,
-	})
+// 	logger := sensorCtx.Logger.WithFields(logrus.Fields{
+// 		"url":     subscription.ServerURL,
+// 		"subject": subscription.Subject,
+// 	})
 
-	logger.Infoln("starting NATS events subscriber")
+// 	logger.Infoln("starting NATS events subscriber")
 
-	_, err = conn.Subscribe(subscription.Subject, func(msg *nats.Msg) {
-		if err := sensorCtx.handleEvent(msg.Data); err != nil {
-			logger.WithError(err).Errorln("failed to process the event")
-		}
-	})
-	if err != nil {
-		return err
-	}
+// 	_, err = conn.Subscribe(subscription.Subject, func(msg *nats.Msg) {
+// 		if err := sensorCtx.handleEvent(msg.Data); err != nil {
+// 			logger.WithError(err).Errorln("failed to process the event")
+// 		}
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func cloudEventConverter(event *cloudevents.Event) (*v1alpha1.Event, error) {
 	data, err := event.DataBytes()

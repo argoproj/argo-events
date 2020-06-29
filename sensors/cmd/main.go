@@ -64,6 +64,11 @@ func main() {
 		}
 	}
 
+	ebSubject, defined := os.LookupEnv(common.EnvVarEventBusSubject)
+	if !defined {
+		panic(errors.Errorf("required environment variable '%s' not defined", common.EnvVarEventBusSubject))
+	}
+
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 	ebType := os.Getenv(common.EnvVarEventBusType)
 	var eventBusType *apicommon.EventBusType
@@ -75,7 +80,7 @@ func main() {
 		ebAuth := os.Getenv(common.EnvVarEventBusAuth)
 		eventBusAuth = &eventbusv1alpha1.AuthStrategy(ebAuth)
 	}
-	sensorExecutionCtx := sensors.NewSensorContext(sensorClient, kubeClient, dynamicClient, sensor, busConfig)
+	sensorExecutionCtx := sensors.NewSensorContext(sensorClient, kubeClient, dynamicClient, sensor, busConfig, ebSubject)
 	if err := sensorExecutionCtx.ListenEvents(); err != nil {
 		sensorExecutionCtx.Logger.WithError(err).Errorln("failed to listen to events")
 		os.Exit(-1)

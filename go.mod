@@ -13,6 +13,7 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/Shopify/sarama v1.26.1
 	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
+	github.com/antonmedv/expr v1.8.8
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/argoproj/argo v2.5.2+incompatible
 	github.com/argoproj/argo-cd v1.5.1

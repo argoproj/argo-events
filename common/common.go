@@ -59,6 +59,8 @@ const (
 
 	// EnvVarEventBusConfig refers to the eventbus config env
 	EnvVarEventBusConfig = "EVENTBUS_CONFIG"
+	// EnvVarEventBusSubject refers to the eventbus subject env
+	EnvVarEventBusSubject = "EVENTBUS_SUBJECT"
 )
 
 // Controller labels

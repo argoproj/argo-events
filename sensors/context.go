@@ -45,6 +45,8 @@ type SensorContext struct {
 	Sensor *v1alpha1.Sensor
 	// EventBus config
 	EventBusConfig *eventbusv1alpha1.BusConfig
+	// EventBus subject
+	EventBusSubject string
 	// Logger for the Sensor
 	Logger *logrus.Logger
 	// NotificationQueue is internal NotificationQueue to manage incoming events
@@ -66,12 +68,13 @@ type SensorContext struct {
 }
 
 // NewSensorContext returns a new sensor execution context.
-func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig) *SensorContext {
+func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject string) *SensorContext {
 	return &SensorContext{
 		KubeClient:           kubeClient,
 		DynamicClient:        dynamicClient,
 		Sensor:               sensor,
 		EventBusConfig:       eventBusConfig,
+		EventBusSubject:      eventBusSubject,
 		Logger:               common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
 		NotificationQueue:    make(chan *types.Notification),
 		httpClients:          make(map[string]*http.Client),
