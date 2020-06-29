@@ -14,7 +14,7 @@ require (
 	github.com/Shopify/sarama v1.26.1
 	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
-	github.com/argoproj/argo v2.5.2+incompatible
+	github.com/argoproj/argo v2.8.2
 	github.com/argoproj/argo-cd v1.5.1
 	github.com/argoproj/argo-rollouts v0.7.2
 	github.com/argoproj/pkg v0.0.0-20200319004004-f46beff7cd54 // indirect
