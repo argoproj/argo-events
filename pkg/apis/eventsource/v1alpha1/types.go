@@ -219,6 +219,10 @@ type KafkaEventSource struct {
 	// TLS configuration for the kafka client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,6,opt,name=jsonBody"`
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
