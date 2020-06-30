@@ -28,7 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	eventbusv1alphal1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -42,7 +41,7 @@ var (
 )
 
 func init() {
-	_ = eventbusv1alphal1.AddToScheme(scheme.Scheme)
+	_ = eventbusv1alpha1.AddToScheme(scheme.Scheme)
 	_ = v1alpha1.AddToScheme(scheme.Scheme)
 	_ = appv1.AddToScheme(scheme.Scheme)
 	_ = corev1.AddToScheme(scheme.Scheme)

@@ -37,6 +37,7 @@ type tableRow struct {
 // NewBoolExpression returns a Minifier instance
 func NewBoolExpression(expression string) (Minifier, error) {
 	// e.g. (a || b || c) && (a && b)
+	expression = strings.ReplaceAll(expression, "-", "\\-")
 	ex, err := govaluate.NewEvaluableExpression(expression)
 	if err != nil {
 		return nil, err

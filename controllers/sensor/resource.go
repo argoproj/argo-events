@@ -133,7 +133,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log
 	if err != nil {
 		return nil, err
 	}
-	sensorBytes, err := json.Marshal(args.Sensor)
+	sensorCopy := &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: args.Sensor.Namespace,
+			Name:      args.Sensor.Name,
+		},
+		Spec: args.Sensor.Spec,
+	}
+	sensorBytes, err := json.Marshal(sensorCopy)
 	if err != nil {
 		return nil, errors.New("failed marshal sensor spec")
 	}
@@ -148,8 +155,8 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log
 			Value: args.Sensor.Namespace,
 		},
 		{
-			Name: common.EnvVarEventBusSubject,
-			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace)
+			Name:  common.EnvVarEventBusSubject,
+			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
 		},
 	}
 

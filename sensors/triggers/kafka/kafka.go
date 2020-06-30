@@ -114,7 +114,7 @@ func (t *KafkaTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (t *KafkaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *KafkaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.KafkaTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the fetched trigger resource")
@@ -126,7 +126,7 @@ func (t *KafkaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, events)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +140,7 @@ func (t *KafkaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 }
 
 // Execute executes the trigger
-func (t *KafkaTrigger) Execute(resource interface{}) (interface{}, error) {
+func (t *KafkaTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.KafkaTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
@@ -150,7 +150,7 @@ func (t *KafkaTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("payload parameters are not specified")
 	}
 
-	payload, err := triggers.ConstructPayload(t.Sensor, trigger.Payload)
+	payload, err := triggers.ConstructPayload(events, trigger.Payload)
 	if err != nil {
 		return nil, err
 	}

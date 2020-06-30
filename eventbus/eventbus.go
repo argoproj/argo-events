@@ -22,14 +22,15 @@ func GetDriver(eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID stri
 		return nil, errors.New("invalid event bus")
 	}
 	var auth *driver.Auth
-	var cred *driver.AuthCredential
-	if eventBusAuth != nil {
+	cred := &driver.AuthCredential{}
+	if eventBusAuth == nil {
 		auth = &driver.Auth{
 			Strategy: eventbusv1alpha1.AuthStrategyNone,
 		}
 	} else {
 		v := viper.New()
-		v.SetConfigName("auth.yaml")
+		v.SetConfigName("auth")
+		v.SetConfigType("yaml")
 		v.AddConfigPath("/etc/eventbus/auth")
 		err := v.ReadInConfig()
 		if err != nil {

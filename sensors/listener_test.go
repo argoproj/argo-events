@@ -26,7 +26,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/types"
 )
 
 func TestHandleEvent(t *testing.T) {

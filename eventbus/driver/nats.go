@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/gobwas/glob"
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
@@ -44,25 +46,29 @@ func (n *natsStreaming) Connect() error {
 	opts := []nats.Option{}
 	switch n.auth.Strategy {
 	case eventbusv1alpha1.AuthStrategyToken:
+		n.logger.Info("NATS auth strategy: Token")
 		opts = append(opts, nats.Token(n.auth.Crendential.Token))
 	case eventbusv1alpha1.AuthStrategyNone:
+		n.logger.Info("NATS auth strategy: None")
 	default:
 		return errors.New("unsupported auth strategy")
 	}
 	nc, err := nats.Connect(n.url, opts...)
 	if err != nil {
-		n.logger.Errorf("failed to connect to NATS server, +%v", err)
+		n.logger.Errorf("Failed to connect to NATS server, %v", err)
 		return err
 	}
 	n.natsConn = nc
+	n.logger.Info("Connected to NATS server.")
 	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
 			n.logger.Fatalf("Connection lost, reason: %v", reason)
 		}))
 	if err != nil {
-		n.logger.Errorf("failed to connect to NATS streaming server, +%v", err)
+		n.logger.Errorf("Failed to connect to NATS streaming server, +%v", err)
 	}
 	n.stanConn = sc
+	n.logger.Info("Connected to NATS streaming server.")
 	return nil
 }
 
@@ -108,7 +114,7 @@ func (n *natsStreaming) SubscribeEventSources(dependencyExpr string, depencencie
 		stan.SetManualAckMode(),
 		stan.StartAt(pb.StartPosition_NewOnly),
 		stan.AckWait(1*time.Second),
-		stan.MaxInflight(len(msgHolder.dependencies)+2))
+		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
 		n.logger.Errorf("failed to subscribe to subject %s", n.subject)
 		return err
@@ -147,8 +153,14 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		}
 	}
 
+	depName, err := msgHolder.getDependencyName(event.Source(), event.Subject())
+	if err != nil {
+		n.logger.Errorf("Failed to get the dependency name, discarding it... err: %v", err)
+		m.Ack()
+		return
+	}
+
 	// ACK all the old messages after conditions meet
-	depName := msgHolder.getDependencyName(event.Source(), event.Subject())
 	if m.Timestamp <= msgHolder.latestGoodMsgTimestamp {
 		if depName != "" {
 			msgHolder.reset(depName)
@@ -216,7 +228,7 @@ type eventSourceMessageHolder struct {
 	// timestamp of last msg when all the conditions meet
 	latestGoodMsgTimestamp int64
 	expr                   *govaluate.EvaluableExpression
-	dependencies           []string
+	depNames               []string
 	// Mapping of [eventSourceName + eventName]dependencyName
 	sourceDepMap map[string]string
 	parameters   map[string]interface{}
@@ -224,6 +236,7 @@ type eventSourceMessageHolder struct {
 }
 
 func newEventSourceMessageHolder(dependencyExpr string, depencencies []Dependency) (*eventSourceMessageHolder, error) {
+	dependencyExpr = strings.ReplaceAll(dependencyExpr, "-", "\\-")
 	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
 	if err != nil {
 		return nil, err
@@ -234,20 +247,14 @@ func newEventSourceMessageHolder(dependencyExpr string, depencencies []Dependenc
 	}
 
 	srcDepMap := make(map[string]string)
-	depSrcMap := make(map[string]Dependency)
 	for _, d := range depencencies {
 		key := d.EventSourceName + "__" + d.EventName
 		srcDepMap[key] = d.Name
-		depSrcMap[d.Name] = d
 	}
 
 	parameters := make(map[string]interface{}, len(deps))
 	msgs := make(map[string]*eventSourceMessage)
 	for _, dep := range deps {
-		// Validate if there's an invalid dependency name
-		if _, ok := depSrcMap[dep]; !ok {
-			return nil, errors.Errorf("Dependency expression and dependency list do not match, %s is not found", dep)
-		}
 		parameters[dep] = false
 	}
 
@@ -255,18 +262,24 @@ func newEventSourceMessageHolder(dependencyExpr string, depencencies []Dependenc
 		lastMeetTime:           int64(0),
 		latestGoodMsgTimestamp: int64(0),
 		expr:                   expression,
-		dependencies:           deps,
+		depNames:               deps,
 		sourceDepMap:           srcDepMap,
 		parameters:             parameters,
 		msgs:                   msgs,
 	}, nil
 }
 
-func (mh *eventSourceMessageHolder) getDependencyName(eventSourceName, eventName string) string {
-	if depName, ok := mh.sourceDepMap[eventSourceName+"__"+eventName]; ok {
-		return depName
+func (mh *eventSourceMessageHolder) getDependencyName(eventSourceName, eventName string) (string, error) {
+	for k, v := range mh.sourceDepMap {
+		sourceGlob, err := glob.Compile(k)
+		if err != nil {
+			return "", err
+		}
+		if sourceGlob.Match(eventSourceName + "__" + eventName) {
+			return v, nil
+		}
 	}
-	return ""
+	return "", nil
 }
 
 // Reset the parameter and message that a dependency holds

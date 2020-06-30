@@ -34,6 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/argoproj/argo-events/controllers/sensor"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -81,7 +82,12 @@ func main() {
 	}
 	err = v1alpha1.AddToScheme(mgr.GetScheme())
 	if err != nil {
-		mainLog.Error(err, "unable to add scheme")
+		mainLog.Error(err, "unable to add Sensor scheme")
+		panic(err)
+	}
+	err = eventbusv1alpha1.AddToScheme(mgr.GetScheme())
+	if err != nil {
+		mainLog.Error(err, "unable to add EventBus scheme")
 		panic(err)
 	}
 	// A controller with DefaultControllerRateLimiter

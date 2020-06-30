@@ -105,7 +105,7 @@ func (t *HTTPTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (t *HTTPTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *HTTPTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.HTTPTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the fetched trigger resource")
@@ -117,7 +117,7 @@ func (t *HTTPTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource 
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, events)
 		if err != nil {
 			return nil, err
 		}
@@ -131,7 +131,7 @@ func (t *HTTPTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource 
 }
 
 // Execute executes the trigger
-func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
+func (t *HTTPTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	var payload []byte
 	var err error
 
@@ -145,7 +145,7 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 	}
 
 	if trigger.Payload != nil {
-		payload, err = triggers.ConstructPayload(t.Sensor, trigger.Payload)
+		payload, err = triggers.ConstructPayload(events, trigger.Payload)
 		if err != nil {
 			return nil, err
 		}

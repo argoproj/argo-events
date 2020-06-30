@@ -26,7 +26,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors"
@@ -47,19 +46,19 @@ func main() {
 	if err != nil {
 		panic(errors.Errorf("failed to decode sensor string. err: %+v", err))
 	}
-	var sensor *v1alpha1.Sensor
-	if err = json.Unmarshal([]bype(sensorSpec), sensor); err != nil {
+	sensor := &v1alpha1.Sensor{}
+	if err = json.Unmarshal([]byte(sensorSpec), sensor); err != nil {
 		panic(errors.Errorf("failed to unmarshal sensor object. err: %+v", err))
 	}
 
-	var busConfig *eventbusv1alpha1.BusConfig
+	busConfig := &eventbusv1alpha1.BusConfig{}
 	encodedBusConfigSpec := os.Getenv(common.EnvVarEventBusConfig)
 	if len(encodedBusConfigSpec) > 0 {
 		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)
 		if err != nil {
 			panic(errors.Errorf("failed to decode bus config string. err: %+v", err))
 		}
-		if err = json.Unmarshal([]bype(busConfigSpec), busConfig); err != nil {
+		if err = json.Unmarshal([]byte(busConfigSpec), busConfig); err != nil {
 			panic(errors.Errorf("failed to unmarshal bus config object. err: %+v", err))
 		}
 	}
@@ -70,17 +69,8 @@ func main() {
 	}
 
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
-	ebType := os.Getenv(common.EnvVarEventBusType)
-	var eventBusType *apicommon.EventBusType
-	if len(ebType) > 0 {
-		eventBusType = &apicommon.EventBusType(ebType)
-	}
-	var eventBusAuth *eventbusv1alpha1.AuthStrategy
-	if eventBusType != nil {
-		ebAuth := os.Getenv(common.EnvVarEventBusAuth)
-		eventBusAuth = &eventbusv1alpha1.AuthStrategy(ebAuth)
-	}
-	sensorExecutionCtx := sensors.NewSensorContext(sensorClient, kubeClient, dynamicClient, sensor, busConfig, ebSubject)
+
+	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject)
 	if err := sensorExecutionCtx.ListenEvents(); err != nil {
 		sensorExecutionCtx.Logger.WithError(err).Errorln("failed to listen to events")
 		os.Exit(-1)

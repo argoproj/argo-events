@@ -32,7 +32,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/types"
 )
 
 // SensorContext contains execution context for Sensor
@@ -49,8 +48,6 @@ type SensorContext struct {
 	EventBusSubject string
 	// Logger for the Sensor
 	Logger *logrus.Logger
-	// NotificationQueue is internal NotificationQueue to manage incoming events
-	NotificationQueue chan *types.Notification
 	// httpClients holds the reference to HTTP clients for HTTP triggers.
 	httpClients map[string]*http.Client
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
@@ -76,7 +73,6 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		EventBusConfig:       eventBusConfig,
 		EventBusSubject:      eventBusSubject,
 		Logger:               common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
-		NotificationQueue:    make(chan *types.Notification),
 		httpClients:          make(map[string]*http.Client),
 		customTriggerClients: make(map[string]*grpc.ClientConn),
 		slackHTTPClient: &http.Client{

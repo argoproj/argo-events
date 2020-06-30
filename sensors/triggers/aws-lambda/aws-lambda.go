@@ -77,14 +77,14 @@ func (t *AWSLambdaTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (t *AWSLambdaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *AWSLambdaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the aws lamda trigger resource")
 	}
 	parameters := t.Trigger.Template.AWSLambda.Parameters
 	if parameters != nil {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.AWSLambda.Parameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.AWSLambda.Parameters, events)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +98,7 @@ func (t *AWSLambdaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, reso
 }
 
 // Execute executes the trigger
-func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
+func (t *AWSLambdaTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.AWSLambdaTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
@@ -108,7 +108,7 @@ func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("payload parameters are not specified")
 	}
 
-	payload, err := triggers.ConstructPayload(t.Sensor, trigger.Payload)
+	payload, err := triggers.ConstructPayload(events, trigger.Payload)
 	if err != nil {
 		return nil, err
 	}

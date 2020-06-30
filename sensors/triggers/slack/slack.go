@@ -57,7 +57,7 @@ func (t *SlackTrigger) FetchResource() (interface{}, error) {
 	return t.Trigger.Template.Slack, nil
 }
 
-func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *SlackTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the Slack trigger resource")
@@ -65,7 +65,7 @@ func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 	parameters := t.Trigger.Template.Slack.Parameters
 
 	if parameters != nil {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.Slack.Parameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.Slack.Parameters, events)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 }
 
 // Execute executes the trigger
-func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
+func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	t.Logger.Infoln("executing SlackTrigger")
 	_, ok := resource.(*v1alpha1.SlackTrigger)
 	if !ok {

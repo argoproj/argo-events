@@ -19,6 +19,7 @@ package sensor
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Knetic/govaluate"
@@ -41,7 +42,8 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Circuit is empty.")
 			return errors.Errorf("no circuit expression provided to resolve dependency groups")
 		}
-		expression, err := govaluate.NewEvaluableExpression(s.Spec.Circuit)
+		c := strings.ReplaceAll(s.Spec.Circuit, "-", "\\-")
+		expression, err := govaluate.NewEvaluableExpression(c)
 		if err != nil {
 			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Invalid circurit expression.")
 			return errors.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)

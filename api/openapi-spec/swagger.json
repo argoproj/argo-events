@@ -935,6 +935,10 @@
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
         },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
         "partition": {
           "description": "Partition name",
           "type": "string"
@@ -1772,12 +1776,12 @@
         "source",
         "specversion",
         "type",
-        "dataContentType",
+        "datacontenttype",
         "subject",
         "time"
       ],
       "properties": {
-        "dataContentType": {
+        "datacontenttype": {
           "description": "DataContentType - A MIME (RFC2046) string describing the media type of `data`.",
           "type": "string"
         },
@@ -1960,20 +1964,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.HTTPSubscription": {
-      "description": "HTTPSubscription holds the context of the HTTP subscription of events for the sensor. DEPRECATED",
-      "type": "object",
-      "required": [
-        "port"
-      ],
-      "properties": {
-        "port": {
-          "description": "Port on which sensor server should run.",
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.HTTPTrigger": {
       "description": "HTTPTrigger is the trigger for the HTTP request",
       "type": "object",
@@ -2108,24 +2098,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.NATSSubscription": {
-      "description": "NATSSubscription holds the context of the NATS subscription of events for the sensor",
-      "type": "object",
-      "required": [
-        "serverURL",
-        "subject"
-      ],
-      "properties": {
-        "serverURL": {
-          "description": "ServerURL refers to NATS server url.",
-          "type": "string"
-        },
-        "subject": {
-          "description": "Subject refers to NATS subject name.",
-          "type": "string"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.NATSTrigger": {
       "description": "NATSTrigger refers to the specification of the NATS trigger.",
       "type": "object",
@@ -2158,63 +2130,6 @@
         "url": {
           "description": "URL of the NATS cluster.",
           "type": "string"
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.NodeStatus": {
-      "description": "NodeStatus describes the status for an individual node in the sensor's FSM. A single node can represent the status for event or a trigger.",
-      "type": "object",
-      "required": [
-        "id",
-        "name",
-        "displayName",
-        "type",
-        "phase"
-      ],
-      "properties": {
-        "completedAt": {
-          "description": "CompletedAt is the time at which this node completed",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
-        },
-        "displayName": {
-          "description": "DisplayName is the human readable representation of the node",
-          "type": "string"
-        },
-        "event": {
-          "description": "Event stores the last seen event for this node",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Event"
-        },
-        "id": {
-          "description": "ID is a unique identifier of a node within a sensor It is a hash of the node name",
-          "type": "string"
-        },
-        "message": {
-          "description": "store data or something to save for event notifications or trigger events",
-          "type": "string"
-        },
-        "name": {
-          "description": "Name is a unique name in the node tree used to generate the node ID",
-          "type": "string"
-        },
-        "phase": {
-          "description": "Phase of the node",
-          "type": "string"
-        },
-        "resolvedAt": {
-          "description": "ResolvedAt refers to the time at which the node was resolved.",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
-        },
-        "startedAt": {
-          "description": "StartedAt is the time at which this node started",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
-        },
-        "type": {
-          "description": "Type is the type of the node",
-          "type": "string"
-        },
-        "updatedAt": {
-          "description": "UpdatedAt refers to the time at which the node was updated.",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
         }
       }
     },
@@ -2316,20 +2231,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.SensorResources": {
-      "description": "SensorResources holds the metadata of the resources created for the sensor",
-      "type": "object",
-      "properties": {
-        "deployment": {
-          "description": "Deployment holds the metadata of the deployment for the sensor",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
-        },
-        "service": {
-          "description": "Service holds the metadata of the service for the sensor",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.SensorSpec": {
       "description": "SensorSpec represents desired sensor state",
       "type": "object",
@@ -2364,24 +2265,6 @@
           "description": "EventBusRef references to a EventBus name. By default the value is \"default\"",
           "type": "string"
         },
-        "serviceAnnotations": {
-          "description": "ServiceAnnotations refers to annotations to be set for the service generated DEPRECATED: Service will not be created in the future.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "serviceLabels": {
-          "description": "ServiceLabels to be set for the service generated DEPRECATED: Service will not be created in the future.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "subscription": {
-          "description": "Subscription refers to the modes of events subscriptions for the sensor. At least one of the types of subscription must be defined in order for sensor to be meaningful. DEPRECATED: Use EventBus instead",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Subscription"
-        },
         "template": {
           "description": "Template is the pod specification for the sensor",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Template"
@@ -2398,10 +2281,6 @@
     "io.argoproj.sensor.v1alpha1.SensorStatus": {
       "description": "SensorStatus contains information about the status of a sensor.",
       "type": "object",
-      "required": [
-        "triggerCycleStatus",
-        "lastCycleTime"
-      ],
       "properties": {
         "conditions": {
           "description": "Conditions are the latest available observations of a resource's current state.",
@@ -2411,26 +2290,6 @@
           },
           "x-kubernetes-patch-merge-key": "type",
           "x-kubernetes-patch-strategy": "merge"
-        },
-        "lastCycleTime": {
-          "description": "LastCycleTime is the time when last trigger cycle completed",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
-        },
-        "nodes": {
-          "description": "Nodes is a mapping between a node ID and the node's status it records the states for the FSM of this sensor.",
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.NodeStatus"
-          }
-        },
-        "triggerCycleCount": {
-          "description": "TriggerCycleCount is the count of sensor's trigger cycle runs.",
-          "type": "integer",
-          "format": "int32"
-        },
-        "triggerCycleStatus": {
-          "description": "TriggerCycleState is the status from last cycle of triggers execution.",
-          "type": "string"
         }
       }
     },
@@ -2517,20 +2376,6 @@
             "type": "integer",
             "format": "int32"
           }
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.Subscription": {
-      "description": "Subscription holds different modes of subscription available for sensor to consume events. DEPRECATED",
-      "type": "object",
-      "properties": {
-        "http": {
-          "description": "HTTP refers to the HTTP subscription of events for the sensor.",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.HTTPSubscription"
-        },
-        "nats": {
-          "description": "NATS refers to the NATS subscription of events for the sensor",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.NATSSubscription"
         }
       }
     },

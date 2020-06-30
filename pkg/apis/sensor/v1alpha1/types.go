@@ -17,9 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	fmt "fmt"
-	"hash/fnv"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -146,17 +143,6 @@ type SensorSpec struct {
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,6,opt,name=errorOnFailedRound"`
 	// EventBusRef references to a EventBus name. By default the value is "default"
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,7,opt,name=eventBusName"`
-	// ServiceLabels to be set for the service generated
-	// DEPRECATED: Service will not be created in the future.
-	ServiceLabels map[string]string `json:"serviceLabels,omitempty" protobuf:"bytes,8,rep,name=serviceLabels"`
-	// ServiceAnnotations refers to annotations to be set
-	// for the service generated
-	// DEPRECATED: Service will not be created in the future.
-	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
-	// Subscription refers to the modes of events subscriptions for the sensor.
-	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
-	// DEPRECATED: Use EventBus instead
-	Subscription *Subscription `json:"subscription,omitempty" protobuf:"bytes,10,opt,name=subscription"`
 }
 
 // Template holds the information of a sensor deployment template
@@ -180,32 +166,6 @@ type Template struct {
 	// Spec holds the sensor deployment spec.
 	// DEPRECATED: Use Container instead.
 	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
-}
-
-// Subscription holds different modes of subscription available for sensor to consume events.
-// DEPRECATED
-type Subscription struct {
-	// HTTP refers to the HTTP subscription of events for the sensor.
-	// +optional
-	HTTP *HTTPSubscription `json:"http,omitempty" protobuf:"bytes,1,opt,name=http"`
-	// NATS refers to the NATS subscription of events for the sensor
-	// +optional
-	NATS *NATSSubscription `json:"nats,omitempty" protobuf:"bytes,2,opt,name=nats"`
-}
-
-// HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
-// DEPRECATED
-type HTTPSubscription struct {
-	// Port on which sensor server should run.
-	Port int32 `json:"port" protobuf:"varint,1,opt,name=port"`
-}
-
-// NATSSubscription holds the context of the NATS subscription of events for the sensor
-type NATSSubscription struct {
-	// ServerURL refers to NATS server url.
-	ServerURL string `json:"serverURL" protobuf:"bytes,1,opt,name=serverURL"`
-	// Subject refers to NATS subject name.
-	Subject string `json:"subject" protobuf:"bytes,2,opt,name=subject"`
 }
 
 // EventDependency describes a dependency
@@ -693,55 +653,9 @@ func (in *StatusPolicy) GetAllow() []int {
 	return statuses
 }
 
-// SensorResources holds the metadata of the resources created for the sensor
-type SensorResources struct {
-	// Deployment holds the metadata of the deployment for the sensor
-	Deployment *metav1.ObjectMeta `json:"deployment,omitempty" protobuf:"bytes,1,opt,name=deployment"`
-	// Service holds the metadata of the service for the sensor
-	// +optional
-	Service *metav1.ObjectMeta `json:"service,omitempty" protobuf:"bytes,2,opt,name=service"`
-}
-
 // SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
 	apicommon.Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
-	// Nodes is a mapping between a node ID and the node's status
-	// it records the states for the FSM of this sensor.
-	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,2,rep,name=nodes"`
-	// TriggerCycleCount is the count of sensor's trigger cycle runs.
-	TriggerCycleCount int32 `json:"triggerCycleCount,omitempty" protobuf:"varint,3,opt,name=triggerCycleCount"`
-	// TriggerCycleState is the status from last cycle of triggers execution.
-	TriggerCycleStatus TriggerCycleState `json:"triggerCycleStatus" protobuf:"bytes,4,opt,name=triggerCycleStatus,casttype=TriggerCycleState"`
-	// LastCycleTime is the time when last trigger cycle completed
-	LastCycleTime metav1.Time `json:"lastCycleTime" protobuf:"bytes,5,opt,name=lastCycleTime"`
-}
-
-// NodeStatus describes the status for an individual node in the sensor's FSM.
-// A single node can represent the status for event or a trigger.
-type NodeStatus struct {
-	// ID is a unique identifier of a node within a sensor
-	// It is a hash of the node name
-	ID string `json:"id" protobuf:"bytes,1,opt,name=id"`
-	// Name is a unique name in the node tree used to generate the node ID
-	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
-	// DisplayName is the human readable representation of the node
-	DisplayName string `json:"displayName" protobuf:"bytes,3,opt,name=displayName"`
-	// Type is the type of the node
-	Type NodeType `json:"type" protobuf:"bytes,4,opt,name=type,casttype=NodeType"`
-	// Phase of the node
-	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase,casttype=NodePhase"`
-	// StartedAt is the time at which this node started
-	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
-	// CompletedAt is the time at which this node completed
-	CompletedAt metav1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
-	// store data or something to save for event notifications or trigger events
-	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
-	// Event stores the last seen event for this node
-	Event *Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
-	// UpdatedAt refers to the time at which the node was updated.
-	UpdatedAt metav1.MicroTime `json:"updatedAt,omitempty" protobuf:"bytes,10,opt,name=updatedAt"`
-	// ResolvedAt refers to the time at which the node was resolved.
-	ResolvedAt metav1.MicroTime `json:"resolvedAt,omitempty" protobuf:"bytes,11,opt,name=resolvedAt"`
 }
 
 const (
@@ -900,7 +814,7 @@ type EventContext struct {
 	// Type - The type of the occurrence which has happened.
 	Type string `json:"type" protobuf:"bytes,4,opt,name=type"`
 	// DataContentType - A MIME (RFC2046) string describing the media type of `data`.
-	DataContentType string `json:"dataContentType" protobuf:"bytes,5,opt,name=dataContentType"`
+	DataContentType string `json:"datacontenttype" protobuf:"bytes,5,opt,name=datacontenttype"`
 	// Subject - The subject of the event in the context of the event producer
 	Subject string `json:"subject" protobuf:"bytes,6,opt,name=subject"`
 	// Time - A Timestamp when the event happened.
@@ -910,26 +824,4 @@ type EventContext struct {
 // HasLocation whether or not an artifact has a location defined
 func (a *ArtifactLocation) HasLocation() bool {
 	return a.S3 != nil || a.Inline != nil || a.File != nil || a.URL != nil
-}
-
-// AreAllNodesSuccess determines if all nodes of the given type have completed successfully
-func (s *Sensor) AreAllNodesSuccess(nodeType NodeType) bool {
-	for _, node := range s.Status.Nodes {
-		if node.Type == nodeType && node.Phase != NodePhaseComplete {
-			return false
-		}
-	}
-	return true
-}
-
-// NodeID creates a deterministic node ID based on a node name
-// we support 3 kinds of "nodes" - sensors, events, triggers
-// each should pass it's name field
-func (s *Sensor) NodeID(name string) string {
-	if name == s.ObjectMeta.Name {
-		return s.ObjectMeta.Name
-	}
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(name))
-	return fmt.Sprintf("%s-%v", s.ObjectMeta.Name, h.Sum32())
 }

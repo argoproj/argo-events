@@ -23,26 +23,22 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/types"
 )
 
-func ApplyFilter(notification *types.Notification) error {
-	if notification.EventDependency.Filters == nil {
-		return nil
+// Filter filters the event with dependency's defined filters
+func Filter(event *v1alpha1.Event, filters *v1alpha1.EventDependencyFilter) (bool, error) {
+	if filters == nil {
+		return true, nil
 	}
-	ok, err := filterEvent(notification.EventDependency.Filters, notification.Event)
+	ok, err := filterEvent(filters, event)
 	if err != nil {
-		return err
+		return false, err
 	}
-	if !ok {
-		return errors.Errorf("failed to apply filter on Event dependency %s", notification.EventDependency.Name)
-	}
-	return nil
+	return ok, nil
 }
 
 // apply the filters to an Event
