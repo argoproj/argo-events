@@ -7,21 +7,26 @@ import (
 
 // Driver is an interface for event bus
 type Driver interface {
-	Connect() error
-
-	Disconnect() error
-
-	Reconnect() error
+	Connect() (Connection, error)
 
 	// SubscribeEventSources is used to subscribe multiple event source dependencies
 	// Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
 	// Parameter - depencencies, array of dependencies information
 	// Parameter - filter, a function used to filter the message
 	// Parameter - action, a function to be triggered after all conditions meet
-	SubscribeEventSources(dependencyExpr string, depencencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
+	SubscribeEventSources(conn Connection, dependencyExpr string, depencencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
 
 	// Publish a message
-	Publish(message []byte) error
+	Publish(conn Connection, message []byte) error
+}
+
+// Connection is an interface of event bus driver
+type Connection interface {
+	Close() error
+
+	IsClosed() bool
+
+	Publish(subject string, data []byte) error
 }
 
 // Auth contains the auth infor for event bus

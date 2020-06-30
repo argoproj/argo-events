@@ -19,6 +19,35 @@ import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
+type natsStreamingConnection struct {
+	natsConn *nats.Conn
+	stanConn stan.Conn
+}
+
+func (nsc *natsStreamingConnection) Close() error {
+	if nsc.stanConn != nil {
+		err := nsc.stanConn.Close()
+		if err != nil {
+			return err
+		}
+	}
+	if nsc.natsConn != nil && nsc.natsConn.IsConnected() {
+		nsc.natsConn.Close()
+	}
+	return nil
+}
+
+func (nsc *natsStreamingConnection) IsClosed() bool {
+	if nsc.natsConn == nil {
+		return true
+	}
+	return nsc.natsConn.IsClosed()
+}
+
+func (nsc *natsStreamingConnection) Publish(subject string, data []byte) error {
+	return nsc.stanConn.Publish(subject, data)
+}
+
 type natsStreaming struct {
 	url       string
 	auth      *Auth
@@ -26,9 +55,7 @@ type natsStreaming struct {
 	subject   string
 	clientID  string
 
-	natsConn *nats.Conn
-	stanConn stan.Conn
-	logger   *logrus.Logger
+	logger *logrus.Logger
 }
 
 // NewNATSStreaming returns a nats streaming driver
@@ -42,7 +69,7 @@ func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logg
 		logger:    logger.WithField("clusterID", clusterID).WithField("clientID", clientID).Logger}
 }
 
-func (n *natsStreaming) Connect() error {
+func (n *natsStreaming) Connect() (Connection, error) {
 	opts := []nats.Option{}
 	switch n.auth.Strategy {
 	case eventbusv1alpha1.AuthStrategyToken:
@@ -51,14 +78,13 @@ func (n *natsStreaming) Connect() error {
 	case eventbusv1alpha1.AuthStrategyNone:
 		n.logger.Info("NATS auth strategy: None")
 	default:
-		return errors.New("unsupported auth strategy")
+		return nil, errors.New("unsupported auth strategy")
 	}
 	nc, err := nats.Connect(n.url, opts...)
 	if err != nil {
 		n.logger.Errorf("Failed to connect to NATS server, %v", err)
-		return err
+		return nil, err
 	}
-	n.natsConn = nc
 	n.logger.Info("Connected to NATS server.")
 	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
@@ -67,33 +93,15 @@ func (n *natsStreaming) Connect() error {
 	if err != nil {
 		n.logger.Errorf("Failed to connect to NATS streaming server, +%v", err)
 	}
-	n.stanConn = sc
 	n.logger.Info("Connected to NATS streaming server.")
-	return nil
+	return &natsStreamingConnection{
+		natsConn: nc,
+		stanConn: sc,
+	}, nil
 }
 
-func (n *natsStreaming) Disconnect() error {
-	if n.stanConn != nil {
-		err := n.stanConn.Close()
-		if err != nil {
-			return err
-		}
-	}
-	if n.natsConn != nil && n.natsConn.IsConnected() {
-		n.natsConn.Close()
-	}
-	return nil
-}
-
-func (n *natsStreaming) Reconnect() error {
-	if err := n.Disconnect(); err != nil {
-		return err
-	}
-	return n.Connect()
-}
-
-func (n *natsStreaming) Publish(message []byte) error {
-	return n.stanConn.Publish(n.subject, message)
+func (n *natsStreaming) Publish(conn Connection, message []byte) error {
+	return conn.Publish(n.subject, message)
 }
 
 // SubscribeCloudEvents is used to subscribe multiple dependency expression
@@ -101,14 +109,18 @@ func (n *natsStreaming) Publish(message []byte) error {
 // Parameter - depencencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(dependencyExpr string, depencencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (n *natsStreaming) SubscribeEventSources(conn Connection, dependencyExpr string, depencencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, depencencies)
 	if err != nil {
 		return err
 	}
+	nsc, ok := conn.(*natsStreamingConnection)
+	if !ok {
+		return errors.New("not a NATS streaming connection")
+	}
 	// use clientID as durable name?
 	durableName := n.clientID
-	sub, err := n.stanConn.Subscribe(n.subject, func(m *stan.Msg) {
+	sub, err := nsc.stanConn.Subscribe(n.subject, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, filter, action)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),

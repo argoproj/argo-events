@@ -102,17 +102,18 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 				sensorCtx.Logger.WithError(err).Errorln("Failed to get event bus driver")
 				errCh <- err
 			}
-			err = ebDriver.Connect()
-			if err != nil {
-				sensorCtx.Logger.WithError(err).Errorln("Failed to connect to event bus")
-				errCh <- err
-			}
 			triggerNames := []string{}
 			for _, t := range triggers {
 				triggerNames = append(triggerNames, t.Template.Name)
 			}
+			conn, err := ebDriver.Connect()
+			if err != nil {
+				sensorCtx.Logger.WithError(err).Errorln("Failed to connect to event bus")
+				errCh <- err
+			}
+			defer conn.Close()
 			sensorCtx.Logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
-			ebDriver.SubscribeEventSources(depExpression, deps, func(depName string, event cloudevents.Event) bool {
+			ebDriver.SubscribeEventSources(conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
 					return false
