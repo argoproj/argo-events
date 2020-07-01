@@ -58,8 +58,8 @@ func TestReconcile(t *testing.T) {
 			logger:      ctrl.Log.WithName("test"),
 		}
 		err := r.reconcile(ctx, sensorObj)
-		assert.NoError(t, err)
-		assert.True(t, sensorObj.Status.IsReady())
+		assert.Error(t, err)
+		assert.False(t, sensorObj.Status.IsReady())
 	})
 
 	t.Run("test reconcile with eventbus", func(t *testing.T) {

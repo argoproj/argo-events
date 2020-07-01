@@ -70,25 +70,18 @@ func TestHTTPTrigger_FetchResource(t *testing.T) {
 
 func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getFakeHTTPTrigger()
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"url": "http://another-fake.com", "method": "GET"}`),
-				},
+
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": &v1alpha1.Event{
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"url": "http://another-fake.com", "method": "GET"}`),
 		},
 	}
 
@@ -115,7 +108,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 
 	assert.Equal(t, http.MethodPost, trigger.Trigger.Template.HTTP.Method)
 
-	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.HTTP)
+	resource, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.HTTP)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 

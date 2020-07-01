@@ -27,6 +27,7 @@ import (
 
 func TestGatewayOperateLifecycle(t *testing.T) {
 	controller := newController()
+	createEventBus(controller.eventBusClient)
 	ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
 	gateway, err := controller.gatewayClient.ArgoprojV1alpha1().Gateways(gatewayObj.Namespace).Create(gatewayObj)
 	assert.Nil(t, err)

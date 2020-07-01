@@ -17,20 +17,43 @@ limitations under the License.
 package gateway
 
 import (
+	"errors"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	eventbusclientset "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
 )
+
+var testEventBus = &eventbusv1alpha1.EventBus{
+	TypeMeta: metav1.TypeMeta{
+		APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
+		Kind:       "EventBus",
+	},
+	ObjectMeta: metav1.ObjectMeta{
+		Namespace: common.DefaultControllerNamespace,
+		Name:      "default",
+	},
+	Spec: eventbusv1alpha1.EventBusSpec{
+		NATS: &eventbusv1alpha1.NATSBus{
+			Native: &eventbusv1alpha1.NativeStrategy{
+				Replicas: 3,
+				Auth:     &eventbusv1alpha1.AuthStrategyToken,
+			},
+		},
+	},
+}
 
 var gatewayObj = &v1alpha1.Gateway{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "fake-gateway",
+		Name:      "fake-gateway-1",
 		Namespace: common.DefaultControllerNamespace,
 	},
 	Spec: v1alpha1.GatewaySpec{
@@ -60,7 +83,7 @@ var gatewayObj = &v1alpha1.Gateway{
 
 var gatewayObjNoTemplate = &v1alpha1.Gateway{
 	ObjectMeta: metav1.ObjectMeta{
-		Name:      "fake-gateway",
+		Name:      "fake-gateway-2",
 		Namespace: common.DefaultControllerNamespace,
 	},
 	Spec: v1alpha1.GatewaySpec{
@@ -84,14 +107,16 @@ var gatewayObjNoTemplate = &v1alpha1.Gateway{
 
 func TestResource_BuildServiceResource(t *testing.T) {
 	gwObjs := []*v1alpha1.Gateway{gatewayObj, gatewayObjNoTemplate}
+	controller := newController()
+	_, err := createEventBus(controller.eventBusClient)
+	assert.NoError(t, err)
 	for _, gwObj := range gwObjs {
-		controller := newController()
 		opCtx := newGatewayContext(gwObj, controller)
 
 		service, err := opCtx.buildServiceResource()
 		assert.Nil(t, err)
 		assert.NotNil(t, service)
-		assert.Equal(t, service.Name, gatewayObj.Name+"-gateway")
+		assert.Equal(t, service.Name, gwObj.Name+"-gateway")
 		assert.Equal(t, service.Namespace, opCtx.gateway.Namespace)
 
 		newSvc, err := controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
@@ -104,34 +129,33 @@ func TestResource_BuildServiceResource(t *testing.T) {
 }
 
 func TestResource_BuildDeploymentResource(t *testing.T) {
-	gwObjs := []*v1alpha1.Gateway{gatewayObj, gatewayObjNoTemplate}
-	for _, gwObj := range gwObjs {
-		controller := newController()
-		ctx := newGatewayContext(gwObj, controller)
-		deployment, err := ctx.buildDeploymentResource()
-		assert.Nil(t, err)
-		assert.NotNil(t, deployment)
+	controller := newController()
+	_, err := createEventBus(controller.eventBusClient)
+	assert.NoError(t, err)
+	ctx := newGatewayContext(gatewayObjNoTemplate, controller)
+	deployment, err := ctx.buildDeploymentResource()
+	assert.Nil(t, err)
+	assert.NotNil(t, deployment)
 
-		for _, container := range deployment.Spec.Template.Spec.Containers {
-			assert.NotNil(t, container.Env)
-			assert.Equal(t, container.Env[0].Name, common.EnvVarNamespace)
-			assert.Equal(t, container.Env[0].Value, ctx.gateway.Namespace)
-			assert.Equal(t, container.Env[1].Name, common.EnvVarEventSource)
-			assert.Equal(t, container.Env[1].Value, ctx.gateway.Spec.EventSourceRef.Name)
-			assert.Equal(t, container.Env[2].Name, common.EnvVarResourceName)
-			assert.Equal(t, container.Env[2].Value, ctx.gateway.Name)
-			assert.Equal(t, container.Env[3].Name, common.EnvVarControllerInstanceID)
-			assert.Equal(t, container.Env[3].Value, ctx.controller.Config.InstanceID)
-			assert.Equal(t, container.Env[4].Name, common.EnvVarGatewayServerPort)
-			assert.Equal(t, container.Env[4].Value, ctx.gateway.Spec.ProcessorPort)
-		}
-
-		newDeployment, err := controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
-		assert.Nil(t, err)
-		assert.NotNil(t, newDeployment)
-		assert.Equal(t, newDeployment.Labels[common.LabelOwnerName], ctx.gateway.Name)
-		assert.NotNil(t, newDeployment.Annotations[common.AnnotationResourceSpecHash])
+	for _, container := range deployment.Spec.Template.Spec.Containers {
+		assert.NotNil(t, container.Env)
+		assert.Equal(t, container.Env[0].Name, common.EnvVarNamespace)
+		assert.Equal(t, container.Env[0].Value, ctx.gateway.Namespace)
+		assert.Equal(t, container.Env[1].Name, common.EnvVarEventSource)
+		assert.Equal(t, container.Env[1].Value, ctx.gateway.Spec.EventSourceRef.Name)
+		assert.Equal(t, container.Env[2].Name, common.EnvVarResourceName)
+		assert.Equal(t, container.Env[2].Value, ctx.gateway.Name)
+		assert.Equal(t, container.Env[3].Name, common.EnvVarControllerInstanceID)
+		assert.Equal(t, container.Env[3].Value, ctx.controller.Config.InstanceID)
+		assert.Equal(t, container.Env[4].Name, common.EnvVarGatewayServerPort)
+		assert.Equal(t, container.Env[4].Value, ctx.gateway.Spec.ProcessorPort)
 	}
+
+	newDeployment, err := controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
+	assert.NoError(t, err)
+	assert.NotNil(t, newDeployment)
+	assert.Equal(t, newDeployment.Labels[common.LabelOwnerName], ctx.gateway.Name)
+	assert.NotNil(t, newDeployment.Annotations[common.AnnotationResourceSpecHash])
 }
 
 func TestResource_CreateGatewayResourceNoTemplate(t *testing.T) {
@@ -158,6 +182,7 @@ func TestResource_CreateGatewayResourceNoTemplate(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			controller := newController()
+			createEventBus(controller.eventBusClient)
 			ctx := newGatewayContext(gatewayObjNoTemplate.DeepCopy(), controller)
 			test.updateFunc(ctx)
 			err := ctx.createGatewayResources()
@@ -218,6 +243,7 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			controller := newController()
+			createEventBus(controller.eventBusClient)
 			ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
 			test.updateFunc(ctx)
 			err := ctx.createGatewayResources()
@@ -229,6 +255,7 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 
 func TestResource_UpdateGatewayResource(t *testing.T) {
 	controller := newController()
+	createEventBus(controller.eventBusClient)
 	ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
 	err := ctx.createGatewayResources()
 	assert.Nil(t, err)
@@ -281,4 +308,24 @@ func TestResource_UpdateGatewayResource(t *testing.T) {
 			test.testFunc(t, metadata)
 		})
 	}
+}
+
+func createEventBus(eventBusClient eventbusclientset.Interface) (*eventbusv1alpha1.EventBus, error) {
+	obj := testEventBus.DeepCopyObject()
+	busCopy, ok := obj.(*eventbusv1alpha1.EventBus)
+	busCopy.Status.MarkDeployed("", "")
+	busCopy.Status.MarkConfigured()
+	clusterID := "test"
+	busCopy.Status.Config = eventbusv1alpha1.BusConfig{
+		NATS: &eventbusv1alpha1.NATSConfig{
+			URL:       "nats://xxxx",
+			ClusterID: &clusterID,
+			Auth:      &eventbusv1alpha1.AuthStrategyToken,
+		},
+	}
+	if !ok {
+		return nil, errors.New("convert error")
+	}
+	eb, err := eventBusClient.ArgoprojV1alpha1().EventBus(common.DefaultControllerNamespace).Create(busCopy)
+	return eb, err
 }

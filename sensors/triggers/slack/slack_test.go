@@ -79,25 +79,18 @@ func TestSlackTrigger_FetchResource(t *testing.T) {
 
 func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getSlackTrigger()
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     "1.0",
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"channel": "real-channel", "message": "real-message"}`),
-				},
+
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": &v1alpha1.Event{
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     "1.0",
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"channel": "real-channel", "message": "real-message"}`),
 		},
 	}
 
@@ -118,7 +111,7 @@ func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.Slack)
+	resource, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.Slack)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 

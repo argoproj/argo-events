@@ -86,25 +86,17 @@ func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
 
 func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getAWSTrigger()
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"function": "real-function"}`),
-				},
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": &v1alpha1.Event{
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"function": "real-function"}`),
 		},
 	}
 
@@ -130,7 +122,7 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	response, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.AWSLambda)
+	response, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.AWSLambda)
 	assert.Nil(t, err)
 	assert.NotNil(t, response)
 

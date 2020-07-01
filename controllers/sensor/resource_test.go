@@ -28,7 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/argoproj/argo-events/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -158,20 +157,6 @@ var (
 
 func Test_BuildDeployment(t *testing.T) {
 	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
-	t.Run("test build without eventbus", func(t *testing.T) {
-		for _, sObj := range sensorObjs {
-			args := &AdaptorArgs{
-				Image:  testImage,
-				Sensor: sObj,
-				Labels: testLabels,
-			}
-			deployment, err := buildDeployment(args, nil, ctrl.Log.WithName("test"))
-			assert.Nil(t, err)
-			assert.NotNil(t, deployment)
-			assert.NotEmpty(t, deployment.Annotations[common.AnnotationResourceSpecHash])
-			assert.Equal(t, int(*deployment.Spec.Replicas), 1)
-		}
-	})
 	t.Run("test build with eventbus", func(t *testing.T) {
 		for _, sObj := range sensorObjs {
 			args := &AdaptorArgs{
@@ -205,16 +190,8 @@ func TestResourceReconcile(t *testing.T) {
 			Labels: testLabels,
 		}
 		err := Reconcile(cl, args, ctrl.Log.WithName("test"))
-		assert.Nil(t, err)
-		assert.True(t, sensorObj.Status.IsReady())
-
-		ctx := context.TODO()
-		svcList := &corev1.ServiceList{}
-		err = cl.List(ctx, svcList, &client.ListOptions{
-			Namespace: testNamespace,
-		})
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(svcList.Items))
+		assert.Error(t, err)
+		assert.False(t, sensorObj.Status.IsReady())
 	})
 
 	t.Run("test resource reconcile with eventbus", func(t *testing.T) {
