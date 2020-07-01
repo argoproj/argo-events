@@ -88,7 +88,19 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 	}
 	if deploy != nil {
 		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
+			// Event bus does not allow multiple clients with same clientID to connect to the server at the same time.
+			// Scaling it to 0 to get the old POD terminated before new POD starts
+			replicas := int32(0)
+			deploy.Spec.Replicas = &replicas
+			err = client.Update(ctx, deploy)
+			if err != nil {
+				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to scale down existing deployment")
+				logger.Error(err, "error scaling down existing deployment")
+				return err
+			}
+			replicas = int32(1)
 			deploy.Spec = expectedDeploy.Spec
+			deploy.Spec.Replicas = &replicas
 			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
 			err = client.Update(ctx, deploy)
 			if err != nil {

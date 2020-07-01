@@ -91,7 +91,8 @@ func (n *natsStreaming) Connect() (Connection, error) {
 			n.logger.Fatalf("Connection lost, reason: %v", reason)
 		}))
 	if err != nil {
-		n.logger.Errorf("Failed to connect to NATS streaming server, +%v", err)
+		n.logger.Errorf("Failed to connect to NATS streaming server, %v", err)
+		return nil, err
 	}
 	n.logger.Info("Connected to NATS streaming server.")
 	return &natsStreamingConnection{
