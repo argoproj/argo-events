@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/eventbus/driver"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -23,7 +24,7 @@ func GetDriver(eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID stri
 	}
 	var auth *driver.Auth
 	cred := &driver.AuthCredential{}
-	if eventBusAuth == nil {
+	if eventBusAuth == nil || eventBusAuth == &eventbusv1alpha1.AuthStrategyNone {
 		auth = &driver.Auth{
 			Strategy: eventbusv1alpha1.AuthStrategyNone,
 		}
@@ -31,7 +32,7 @@ func GetDriver(eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID stri
 		v := viper.New()
 		v.SetConfigName("auth")
 		v.SetConfigType("yaml")
-		v.AddConfigPath("/etc/eventbus/auth")
+		v.AddConfigPath(common.EventBusAuthFileMountPath)
 		err := v.ReadInConfig()
 		if err != nil {
 			return nil, errors.Errorf("failed to load auth.yaml. err: %+v", err)

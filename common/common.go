@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2020 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -56,11 +56,16 @@ const (
 	EnvVarSensorImage = "SENSOR_IMAGE"
 	// EnvVarSensorObject refers to the env of based64 encoded sensor spec
 	EnvVarSensorObject = "SENSOR_OBJECT"
+)
 
+// EventBus related
+const (
 	// EnvVarEventBusConfig refers to the eventbus config env
 	EnvVarEventBusConfig = "EVENTBUS_CONFIG"
 	// EnvVarEventBusSubject refers to the eventbus subject env
 	EnvVarEventBusSubject = "EVENTBUS_SUBJECT"
+	// volumeMount path for eventbus auth file
+	EventBusAuthFileMountPath = "/etc/eventbus/auth"
 )
 
 // Controller labels

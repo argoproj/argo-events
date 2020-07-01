@@ -55,9 +55,6 @@ var gatewayObj = &v1alpha1.Gateway{
 				},
 			},
 		},
-		Subscribers: &v1alpha1.Subscribers{
-			HTTP: []string{"http://fake-sensor.fake.svc.cluser.local:8080/"},
-		},
 	},
 }
 
@@ -81,9 +78,6 @@ var gatewayObjNoTemplate = &v1alpha1.Gateway{
 					TargetPort: intstr.FromInt(12000),
 				},
 			},
-		},
-		Subscribers: &v1alpha1.Subscribers{
-			HTTP: []string{"http://fake-sensor.fake.svc.cluser.local:8080/"},
 		},
 	},
 }

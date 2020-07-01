@@ -202,6 +202,9 @@ func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, er
 func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) {
 	// TODO: temporarily hardcode eventbus name here
 	eventBusName := "default"
+	if len(ctx.gateway.Spec.EventBusName) > 0 {
+		eventBusName = ctx.gateway.Spec.EventBusName
+	}
 	eventBus, err := ctx.controller.eventBusClient.ArgoprojV1alpha1().EventBus(ctx.gateway.Namespace).Get(eventBusName, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) {
@@ -244,7 +247,7 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 			deploymentSpec.Template.Spec.Volumes = volumes
 			for i, container := range deploymentSpec.Template.Spec.Containers {
 				volumeMounts := container.VolumeMounts
-				volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: "/etc/eventbus/auth"})
+				volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
 				container.VolumeMounts = volumeMounts
 				deploymentSpec.Template.Spec.Containers[i] = container
 			}

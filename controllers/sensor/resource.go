@@ -200,7 +200,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log
 			})
 			deploymentSpec.Template.Spec.Volumes = volumes
 			volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
-			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: "/etc/eventbus/auth"})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
 			deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 		}
 	} else {
