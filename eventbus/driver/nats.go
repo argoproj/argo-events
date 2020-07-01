@@ -189,10 +189,10 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		return
 	}
 	if existingMsg, ok := msgHolder.msgs[depName]; ok {
-		if m.Sequence == existingMsg.seq {
+		if m.Timestamp == existingMsg.timestamp {
 			// Redelivered latest messge, return
 			return
-		} else if m.Sequence < existingMsg.seq {
+		} else if m.Timestamp < existingMsg.timestamp {
 			// Redelivered old message, ack and return
 			m.Ack()
 			return

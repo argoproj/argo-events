@@ -17,42 +17,42 @@ limitations under the License.
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
-	"github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/eventbus"
+	"github.com/argoproj/argo-events/eventbus/driver"
+	"github.com/argoproj/argo-events/gateways"
+)
+
+var (
+	ebDriver driver.Driver
+	conn     driver.Connection
 )
 
 // updateSubscriberClients updates the active clients for event subscribers
 func (gatewayContext *GatewayContext) updateSubscriberClients() {
-	if gatewayContext.gateway.Spec.Subscribers == nil {
-		return
-	}
-
-	if gatewayContext.natsSubscribers == nil {
-		gatewayContext.natsSubscribers = make(map[string]*nats.Conn)
-	}
-
-	// nats subscribers
-	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
-		if _, ok := gatewayContext.natsSubscribers[subscriber.Name]; !ok {
-			conn, err := nats.Connect(subscriber.ServerURL)
-			if err != nil {
-				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to connect to subscriber")
-				continue
-			}
-
-			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
-			gatewayContext.natsSubscribers[subscriber.Name] = conn
+	if ebDriver == nil {
+		d, err := eventbus.GetDriver(*gatewayContext.eventBusConfig, gatewayContext.eventBusSubject, gatewayContext.podName, gatewayContext.logger)
+		if err != nil {
+			gatewayContext.logger.WithError(err).Warnln("failed to get eventbus driver")
+			return
 		}
+		ebDriver = d
+	}
+	if conn == nil || conn.IsClosed() {
+		c, err := ebDriver.Connect()
+		if err != nil {
+			gatewayContext.logger.WithError(err).Warnln("failed to connect to eventbus")
+			return
+		}
+		conn = c
 	}
 }
 
@@ -61,14 +61,7 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
 	logger.Infoln("dispatching event to subscribers")
 
-	if gatewayContext.gateway.Spec.Subscribers == nil {
-		logger.Warnln("no active subscribers to send event to.")
-		return nil
-	}
-
 	cloudEvent := gatewayContext.transformEvent(gatewayEvent)
-
-	completeSuccess := true
 
 	eventBody, err := json.Marshal(cloudEvent)
 	if err != nil {
@@ -76,55 +69,16 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 		return err
 	}
 
-	// http subscribers
-	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.HTTP {
-		request, err := http.NewRequest(http.MethodPost, subscriber, bytes.NewReader(eventBody))
-		if err != nil {
-			logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to construct http request for the event")
-			completeSuccess = false
-			continue
-		}
+	gatewayContext.updateSubscriberClients()
 
-		response, err := gatewayContext.httpClient.Do(request)
-		if err != nil {
-			logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to send http request for the event")
-			completeSuccess = false
-			continue
-		}
-
-		logger.WithFields(logrus.Fields{
-			"status":     response.Status,
-			"subscriber": subscriber,
-		}).Infoln("successfully sent event to the subscriber")
+	err = ebDriver.Publish(conn, eventBody)
+	if err != nil {
+		logger.WithError(err).Infoln("Failed to send a message to eventbus")
+		return err
 	}
-
-	// NATS subscribers
-	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
-		conn, ok := gatewayContext.natsSubscribers[subscriber.Name]
-		if !ok {
-			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
-			completeSuccess = false
-			continue
-		}
-
-		if err := conn.Publish(subscriber.Subject, eventBody); err != nil {
-			logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to publish the event")
-			completeSuccess = false
-			continue
-		}
-
-		logger.WithFields(logrus.Fields{
-			"subscriber": subscriber.Name,
-			"subject":    subscriber.Subject,
-		}).Infoln("successfully published event on the subject")
-	}
-
-	response := "dispatched event"
-	if !completeSuccess {
-		response = fmt.Sprintf("%s.%s", response, " although some of the dispatch operations failed, check logs for more info")
-	}
-
-	logger.Infoln(response)
+	logger.WithFields(logrus.Fields{
+		"eventName": gatewayEvent.Name,
+	}).Infoln("successfully sent a message to the eventbus")
 	return nil
 }
 

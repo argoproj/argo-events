@@ -119,7 +119,7 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 					return false
 				}
 				if dep.Filters == nil {
-					return false
+					return true
 				}
 				e := convertEvent(event)
 				result, err := sensordependencies.Filter(e, dep.Filters)
