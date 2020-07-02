@@ -82,7 +82,7 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Nil(t, err)
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": &v1alpha1.Event{
+		"fake-dependency": {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -125,7 +125,7 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": &v1alpha1.Event{
+		"fake-dependency": {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",

@@ -72,7 +72,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getFakeHTTPTrigger()
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": &v1alpha1.Event{
+		"fake-dependency": {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",

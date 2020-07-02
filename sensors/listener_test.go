@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2020 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,52 +21,37 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
-	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": apiVersion,
-			"kind":       kind,
-			"metadata": map[string]interface{}{
-				"namespace": namespace,
-				"name":      name,
-				"labels": map[string]interface{}{
-					"name": name,
+var (
+	fakeTrigger = &v1alpha1.Trigger{
+		Template: &v1alpha1.TriggerTemplate{
+			Name: "fake-trigger",
+			K8s: &v1alpha1.StandardK8STrigger{
+				GroupVersionResource: metav1.GroupVersionResource{
+					Group:    "apps",
+					Version:  "v1",
+					Resource: "deployments",
 				},
 			},
 		},
 	}
-}
 
-var fakeTrigger = &v1alpha1.Trigger{
-	Template: &v1alpha1.TriggerTemplate{
-		Name: "fake-trigger",
-		K8s: &v1alpha1.StandardK8STrigger{
-			GroupVersionResource: metav1.GroupVersionResource{
-				Group:    "apps",
-				Version:  "v1",
-				Resource: "deployments",
+	sensorObj = &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-sensor",
+			Namespace: "fake",
+		},
+		Spec: v1alpha1.SensorSpec{
+			Triggers: []v1alpha1.Trigger{
+				*fakeTrigger,
 			},
 		},
-	},
-}
-
-var sensorObj = &v1alpha1.Sensor{
-	ObjectMeta: metav1.ObjectMeta{
-		Name:      "fake-sensor",
-		Namespace: "fake",
-	},
-	Spec: v1alpha1.SensorSpec{
-		Triggers: []v1alpha1.Trigger{
-			*fakeTrigger,
-		},
-	},
-}
+	}
+)
 
 func TestGetDependencyExpression(t *testing.T) {
 	t.Run("get simple expression", func(t *testing.T) {

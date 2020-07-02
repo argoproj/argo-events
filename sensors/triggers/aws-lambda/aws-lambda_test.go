@@ -87,7 +87,7 @@ func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
 func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getAWSTrigger()
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": &v1alpha1.Event{
+		"fake-dependency": {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",

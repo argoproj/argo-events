@@ -61,7 +61,11 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
 	logger.Infoln("dispatching event to subscribers")
 
-	cloudEvent := gatewayContext.transformEvent(gatewayEvent)
+	cloudEvent, err := gatewayContext.transformEvent(gatewayEvent)
+	if err != nil {
+		logger.WithError(err).Errorln("failed to convert to cloudevent")
+		return err
+	}
 
 	eventBody, err := json.Marshal(cloudEvent)
 	if err != nil {
@@ -84,13 +88,16 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 
 // transformEvent transforms an event from gateway server into a CloudEvent
 // See https://github.com/cloudevents/spec for more info.
-func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Event) *cloudevents.Event {
+func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Event) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent()
 	event.SetID(fmt.Sprintf("%x", uuid.New()))
 	event.SetType(string(gatewayContext.gateway.Spec.Type))
 	event.SetSource(gatewayContext.gateway.Spec.EventSourceRef.Name)
 	event.SetSubject(gatewayEvent.Name)
 	event.SetTime(time.Now())
-	event.SetData(cloudevents.ApplicationJSON, gatewayEvent.Payload)
-	return &event
+	err := event.SetData(cloudevents.ApplicationJSON, gatewayEvent.Payload)
+	if err != nil {
+		return nil, err
+	}
+	return &event, nil
 }

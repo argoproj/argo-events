@@ -83,9 +83,8 @@ type Payload struct {
 }
 
 func TestConstructPayload(t *testing.T) {
-
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": &v1alpha1.Event{
+		"fake-dependency": {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -95,7 +94,7 @@ func TestConstructPayload(t *testing.T) {
 			},
 			Data: []byte("{\"firstName\": \"fake\"}"),
 		},
-		"another-fake-dependency": &v1alpha1.Event{
+		"another-fake-dependency": {
 			Context: &v1alpha1.EventContext{
 				ID:              "2",
 				Type:            "calendar",

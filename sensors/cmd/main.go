@@ -47,7 +47,7 @@ func main() {
 		panic(errors.Errorf("failed to decode sensor string. err: %+v", err))
 	}
 	sensor := &v1alpha1.Sensor{}
-	if err = json.Unmarshal([]byte(sensorSpec), sensor); err != nil {
+	if err = json.Unmarshal(sensorSpec, sensor); err != nil {
 		panic(errors.Errorf("failed to unmarshal sensor object. err: %+v", err))
 	}
 
@@ -58,7 +58,7 @@ func main() {
 		if err != nil {
 			panic(errors.Errorf("failed to decode bus config string. err: %+v", err))
 		}
-		if err = json.Unmarshal([]byte(busConfigSpec), busConfig); err != nil {
+		if err = json.Unmarshal(busConfigSpec, busConfig); err != nil {
 			panic(errors.Errorf("failed to unmarshal bus config object. err: %+v", err))
 		}
 	}

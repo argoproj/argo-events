@@ -156,7 +156,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log
 	if err != nil {
 		return nil, errors.New("failed marshal sensor spec")
 	}
-	encodedSensorSpec := base64.StdEncoding.EncodeToString([]byte(sensorBytes))
+	encodedSensorSpec := base64.StdEncoding.EncodeToString(sensorBytes)
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.EnvVarSensorObject,
@@ -176,7 +176,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log
 	if err != nil {
 		return nil, errors.Errorf("failed marshal event bus config: %v", err)
 	}
-	encodedBusConfig := base64.StdEncoding.EncodeToString([]byte(busConfigBytes))
+	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
 	if eventBus.Status.Config.NATS != nil {
 		natsConf := eventBus.Status.Config.NATS

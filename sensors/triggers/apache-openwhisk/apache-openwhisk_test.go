@@ -71,7 +71,7 @@ func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 	trigger := getFakeTriggerImpl()
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": &v1alpha1.Event{
+		"fake-dependency": {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",

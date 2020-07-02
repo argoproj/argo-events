@@ -117,7 +117,7 @@ func NewGatewayContext() *GatewayContext {
 		if err != nil {
 			panic(errors.Errorf("failed to decode bus config string. err: %+v", err))
 		}
-		if err = json.Unmarshal([]byte(busConfigSpec), busConfig); err != nil {
+		if err = json.Unmarshal(busConfigSpec, busConfig); err != nil {
 			panic(errors.Errorf("failed to unmarshal bus config object. err: %+v", err))
 		}
 	}

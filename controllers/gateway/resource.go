@@ -304,7 +304,7 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 	if err != nil {
 		return nil, errors.Errorf("failed marshal event bus config: %v", err)
 	}
-	encodedBusConfig := base64.StdEncoding.EncodeToString([]byte(busConfigBytes))
+	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
 
 	for i, container := range deployment.Spec.Template.Spec.Containers {

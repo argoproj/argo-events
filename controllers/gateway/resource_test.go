@@ -181,10 +181,11 @@ func TestResource_CreateGatewayResourceNoTemplate(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			controller := newController()
-			createEventBus(controller.eventBusClient)
+			_, err := createEventBus(controller.eventBusClient)
+			assert.NoError(t, err)
 			ctx := newGatewayContext(gatewayObjNoTemplate.DeepCopy(), controller)
 			test.updateFunc(ctx)
-			err := ctx.createGatewayResources()
+			err = ctx.createGatewayResources()
 			assert.Nil(t, err)
 			test.testFunc(controller, ctx, t)
 		})
@@ -242,10 +243,11 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			controller := newController()
-			createEventBus(controller.eventBusClient)
+			_, err := createEventBus(controller.eventBusClient)
+			assert.NoError(t, err)
 			ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
 			test.updateFunc(ctx)
-			err := ctx.createGatewayResources()
+			err = ctx.createGatewayResources()
 			assert.Nil(t, err)
 			test.testFunc(controller, ctx, t)
 		})
@@ -254,9 +256,10 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 
 func TestResource_UpdateGatewayResource(t *testing.T) {
 	controller := newController()
-	createEventBus(controller.eventBusClient)
+	_, err := createEventBus(controller.eventBusClient)
+	assert.NoError(t, err)
 	ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
-	err := ctx.createGatewayResources()
+	err = ctx.createGatewayResources()
 	assert.Nil(t, err)
 
 	tests := []struct {

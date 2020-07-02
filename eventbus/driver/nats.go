@@ -233,7 +233,6 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 
 	msgHolder.reset(depName)
 	_ = m.Ack()
-	return
 }
 
 // eventSourceMessage is used by messageHolder to hold the latest message

@@ -43,7 +43,8 @@ func TestTransformEvent(t *testing.T) {
 			},
 		},
 	}
-	cloudevent := ctx.transformEvent(event)
+	cloudevent, err := ctx.transformEvent(event)
+	assert.NoError(t, err)
 	assert.Equal(t, "test-event-source", cloudevent.Source())
 	assert.Equal(t, "hello", cloudevent.Subject())
 	assert.Equal(t, "webhook", cloudevent.Type())

@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2020 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -94,8 +94,9 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 			}
 
 			// Generate clientID with hash code
+			hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
 			h := fnv.New32a()
-			h.Write([]byte(k))
+			_, _ = h.Write([]byte(hashKey))
 			clientID := fmt.Sprintf("client-%v", h.Sum32())
 			ebDriver, err := eventbus.GetDriver(*sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID, sensorCtx.Logger)
 			if err != nil {
@@ -113,7 +114,7 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 			}
 			defer conn.Close()
 			sensorCtx.Logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
-			ebDriver.SubscribeEventSources(conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
+			err = ebDriver.SubscribeEventSources(conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
 					return false
@@ -134,6 +135,10 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 					sensorCtx.Logger.WithError(err).Errorln("Failed to trigger actions")
 				}
 			})
+			if err != nil {
+				sensorCtx.Logger.WithError(err).Errorln("Failed to subscribe to event bus")
+				errCh <- err
+			}
 		}(k, v)
 	}
 }
