@@ -19,6 +19,7 @@ package common
 import (
 	"os"
 
+	"github.com/mattn/go-isatty"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,19 +36,31 @@ const (
 	LabelHTTPMethod  = "http-method"
 	LabelVersion     = "version"
 	LabelTime        = "time"
+	TimestampFormat  = "2006-01-02 15:04:05"
 )
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger
 func NewArgoEventsLogger() *logrus.Logger {
-	log := &logrus.Logger{
-		Out:   os.Stdout,
-		Level: logrus.InfoLevel,
-		Formatter: &logrus.TextFormatter{
-			TimestampFormat:  "2006-01-02 15:04:05",
+	var formatter logrus.Formatter
+
+	// If out is term use textformatter
+	if isatty.IsTerminal(os.Stdout.Fd()) {
+		formatter = &logrus.TextFormatter{
+			TimestampFormat:  TimestampFormat,
 			FullTimestamp:    true,
 			ForceColors:      true,
 			QuoteEmptyFields: true,
-		},
+		}
+	} else {
+		formatter = &logrus.JSONFormatter{
+			TimestampFormat: TimestampFormat,
+		}
+	}
+
+	log := &logrus.Logger{
+		Out:       os.Stdout,
+		Level:     logrus.InfoLevel,
+		Formatter: formatter,
 	}
 
 	debugMode, ok := os.LookupEnv(EnvVarDebugLog)
