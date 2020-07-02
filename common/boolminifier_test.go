@@ -20,12 +20,28 @@ func TestSimplifyBoolExpression(t *testing.T) {
 			expect:     "a && b",
 		},
 		{
+			expression: "a_a || b_b",
+			expect:     "b_b || a_a",
+		},
+		{
+			expression: "a-a && b-b",
+			expect:     "a-a && b-b",
+		},
+		{
 			expression: "(a || b || c || d || e) && (c && a)",
 			expect:     "a && c",
 		},
 		{
 			expression: "(a || b) && c",
 			expect:     "(b && c) || (a && c)",
+		},
+		{
+			expression: "((a && b) || (c && d)) && c",
+			expect:     "(c && d) || (a && b && c)",
+		},
+		{
+			expression: "((a && b) || (c && d)) || c",
+			expect:     "c || (a && b)",
 		},
 	}
 

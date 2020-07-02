@@ -93,11 +93,11 @@ func (e *expr) GetExpression() string {
 					}
 				}
 				if len(temp) == len(e.variables)-1 {
-					temp, saver, compared = e.saveValue(temp, saver, compared, j, k)
+					saver, compared = e.saveValue(temp, saver, compared, j, k)
 				}
 			}
 		}
-		saver, compared = e.addOther(saver, compared)
+		saver = e.addOther(saver, compared)
 
 		if len(saver) > 0 {
 			e.minterms = []term{}
@@ -119,7 +119,7 @@ func (e *expr) GetExpression() string {
 	return e.getMinified()
 }
 
-func (e *expr) saveValue(temp term, saver []term, compared []bool, start, end int) (term, []term, []bool) {
+func (e *expr) saveValue(temp term, saver []term, compared []bool, start, end int) ([]term, []bool) {
 	if len(temp) == len(e.variables)-1 {
 		for i := 0; i < len(e.minterms[start]); i++ {
 			if i == len(temp) {
@@ -145,10 +145,10 @@ func (e *expr) saveValue(temp term, saver []term, compared []bool, start, end in
 		compared[start] = true
 		compared[end] = true
 	}
-	return temp, saver, compared
+	return saver, compared
 }
 
-func (e *expr) addOther(saver []term, compared []bool) ([]term, []bool) {
+func (e *expr) addOther(saver []term, compared []bool) []term {
 	for i := 0; i < len(e.minterms); i++ {
 		if len(compared) > 0 && !compared[i] {
 			t := term{}
@@ -158,7 +158,7 @@ func (e *expr) addOther(saver []term, compared []bool) ([]term, []bool) {
 			saver = append(saver, t)
 		}
 	}
-	return saver, compared
+	return saver
 }
 
 func (e *expr) getMinified() string {
@@ -201,39 +201,25 @@ func (e *expr) generateTable() {
 	}
 }
 
-func (e *expr) printTable() {
-	fmt.Println("Truth Table:")
-	for _, v := range e.variables {
-		fmt.Printf("%s  ", v)
-	}
-	fmt.Println("  F")
-
-	for _, tt := range e.table {
-		for _, t := range tt.term {
-			fmt.Printf("%v ", t)
-		}
-		fmt.Println(tt.postfix)
-	}
-}
-
 func (e *expr) infixToPostfix() []string {
 	postfix := []string{}
 	operators := stringStack{}
 	for _, token := range e.expression.Tokens() {
-		if token.Kind == govaluate.CLAUSE {
+		switch token.Kind {
+		case govaluate.CLAUSE:
 			operators.push("(")
-		} else if token.Kind == govaluate.CLAUSE_CLOSE {
+		case govaluate.CLAUSE_CLOSE:
 			for operators.peek() != "(" {
 				postfix = append(postfix, operators.pop())
 			}
 			// pop up "("
 			operators.pop()
-		} else if token.Kind == govaluate.LOGICALOP {
+		case govaluate.LOGICALOP:
 			for !operators.isEmpty() && rank(token.Value) <= rank(operators.peek()) {
 				postfix = append(postfix, operators.pop())
 			}
 			operators.push(fmt.Sprintf("%v", token.Value))
-		} else {
+		default:
 			// VARIABLE
 			postfix = append(postfix, fmt.Sprintf("%s%v", variableFlag, token.Value))
 		}
@@ -264,12 +250,10 @@ func (e *expr) evaluatePostfix(vars []string, set term, postfix []string) bool {
 			n := len(operands) - 1
 			operands[n-1] = operands[n] + operands[n-1] - operands[n]*operands[n-1]
 			operands = operands[:n]
-			break
 		case p == "&&":
 			n := len(operands) - 1
 			operands[n-1] = operands[n] * operands[n-1]
 			operands = operands[:n]
-			break
 		}
 	}
 	return operands[len(operands)-1] > 0
