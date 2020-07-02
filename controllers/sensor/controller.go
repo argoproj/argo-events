@@ -28,7 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -68,11 +67,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 	log := r.logger.WithValues("namespace", sensor.Namespace).WithValues("sensor", sensor.Name)
-	obj := sensor.DeepCopyObject()
-	sensorCopy, ok := obj.(*v1alpha1.Sensor)
-	if !ok {
-		return ctrl.Result{}, errors.New("convert error")
-	}
+	sensorCopy := sensor.DeepCopy()
 	reconcileErr := r.reconcile(ctx, sensorCopy)
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "reconcile error")

@@ -17,7 +17,6 @@ limitations under the License.
 package gateway
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -311,8 +310,7 @@ func TestResource_UpdateGatewayResource(t *testing.T) {
 }
 
 func createEventBus(eventBusClient eventbusclientset.Interface) (*eventbusv1alpha1.EventBus, error) {
-	obj := testEventBus.DeepCopyObject()
-	busCopy, ok := obj.(*eventbusv1alpha1.EventBus)
+	busCopy := testEventBus.DeepCopy()
 	busCopy.Status.MarkDeployed("", "")
 	busCopy.Status.MarkConfigured()
 	clusterID := "test"
@@ -322,9 +320,6 @@ func createEventBus(eventBusClient eventbusclientset.Interface) (*eventbusv1alph
 			ClusterID: &clusterID,
 			Auth:      &eventbusv1alpha1.AuthStrategyToken,
 		},
-	}
-	if !ok {
-		return nil, errors.New("convert error")
 	}
 	eb, err := eventBusClient.ArgoprojV1alpha1().EventBus(common.DefaultControllerNamespace).Create(busCopy)
 	return eb, err

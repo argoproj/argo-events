@@ -197,8 +197,7 @@ func TestResourceReconcile(t *testing.T) {
 	t.Run("test resource reconcile with eventbus", func(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewFakeClient(sensorObj)
-		obj := fakeEventBus.DeepCopyObject()
-		testBus := obj.(*eventbusv1alpha1.EventBus)
+		testBus := fakeEventBus.DeepCopy()
 		testBus.Status.MarkDeployed("test", "test")
 		testBus.Status.MarkConfigured()
 		err := cl.Create(ctx, testBus)

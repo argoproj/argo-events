@@ -207,10 +207,12 @@ func (sensorCtx *SensorContext) getDependencyExpression(trigger v1alpha1.Trigger
 		groupDepExpr := fmt.Sprintf("(%s) && (%s)", sensor.Spec.Circuit, temp)
 		depGroupMapping := make(map[string]string)
 		for _, depGroup := range sensor.Spec.DependencyGroups {
-			depGroupMapping[depGroup.Name] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
+			key := strings.ReplaceAll(depGroup.Name, "-", "_")
+			depGroupMapping[key] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
 		}
 		groupDepExpr = strings.ReplaceAll(groupDepExpr, "&&", " + \"&&\" + ")
 		groupDepExpr = strings.ReplaceAll(groupDepExpr, "||", " + \"||\" + ")
+		groupDepExpr = strings.ReplaceAll(groupDepExpr, "-", "_")
 		program, err := expr.Compile(groupDepExpr, expr.Env(depGroupMapping))
 		if err != nil {
 			sensorCtx.Logger.WithError(err).Errorln("Failed to compile group dependency expression")
