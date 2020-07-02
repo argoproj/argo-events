@@ -454,7 +454,7 @@ streaming {
 	peers: [%s]
   }
   store_limits {
-    max_age: 24h
+    max_age: 72h
   }
 }`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","))
 	cm := &corev1.ConfigMap{

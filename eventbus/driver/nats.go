@@ -107,11 +107,11 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 
 // SubscribeCloudEvents is used to subscribe multiple dependency expression
 // Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
-// Parameter - depencencies, array of dependencies information
+// Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(conn Connection, dependencyExpr string, depencencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
-	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, depencencies)
+func (n *natsStreaming) SubscribeEventSources(conn Connection, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
 		n.logger.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
-		m.Ack()
+		_ = m.Ack()
 		return
 	}
 
@@ -169,7 +169,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	depName, err := msgHolder.getDependencyName(event.Source(), event.Subject())
 	if err != nil {
 		n.logger.Errorf("Failed to get the dependency name, discarding it... err: %v", err)
-		m.Ack()
+		_ = m.Ack()
 		return
 	}
 
@@ -178,14 +178,14 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		if depName != "" {
 			msgHolder.reset(depName)
 		}
-		m.Ack()
+		_ = m.Ack()
 		return
 	}
 
 	// Start a new round
 	if depName == "" || !filter(depName, *event) {
 		// message not interested
-		m.Ack()
+		_ = m.Ack()
 		return
 	}
 	if existingMsg, ok := msgHolder.msgs[depName]; ok {
@@ -194,13 +194,22 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 			return
 		} else if m.Timestamp < existingMsg.timestamp {
 			// Redelivered old message, ack and return
-			m.Ack()
+			_ = m.Ack()
 			return
 		}
 	}
 	// New message, set and check
 	msgHolder.msgs[depName] = &eventSourceMessage{seq: m.Sequence, timestamp: m.Timestamp, event: event}
 	msgHolder.parameters[depName] = true
+
+	// Check if there's any message older than 3 days, which is the default exiration time of event bus messages.
+	now := time.Now().UnixNano()
+	for k, v := range msgHolder.msgs {
+		if (now - v.timestamp) > 3*24*60*60*1000000000 {
+			msgHolder.reset(k)
+			return
+		}
+	}
 
 	result, err := msgHolder.expr.Evaluate(msgHolder.parameters)
 	if err != nil {
@@ -223,7 +232,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	go action(messages)
 
 	msgHolder.reset(depName)
-	m.Ack()
+	_ = m.Ack()
 	return
 }
 
@@ -248,7 +257,7 @@ type eventSourceMessageHolder struct {
 	msgs         map[string]*eventSourceMessage
 }
 
-func newEventSourceMessageHolder(dependencyExpr string, depencencies []Dependency) (*eventSourceMessageHolder, error) {
+func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependency) (*eventSourceMessageHolder, error) {
 	dependencyExpr = strings.ReplaceAll(dependencyExpr, "-", "\\-")
 	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
 	if err != nil {
@@ -260,7 +269,7 @@ func newEventSourceMessageHolder(dependencyExpr string, depencencies []Dependenc
 	}
 
 	srcDepMap := make(map[string]string)
-	for _, d := range depencencies {
+	for _, d := range dependencies {
 		key := d.EventSourceName + "__" + d.EventName
 		srcDepMap[key] = d.Name
 	}
