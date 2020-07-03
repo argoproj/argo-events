@@ -35,8 +35,11 @@ type tableRow struct {
 }
 
 // NewBoolExpression returns a Minifier instance
+// It is used to simplify boolean epressions.
+// For example, "(a || b || c) && (a && b)" can be simplified as "a && b"
+// It is achieved by using Quine–McCluskey algorithm.
+// See https://en.wikipedia.org/wiki/Quine%E2%80%93McCluskey_algorithm
 func NewBoolExpression(expression string) (Minifier, error) {
-	// e.g. (a || b || c) && (a && b)
 	expression = strings.ReplaceAll(expression, "-", "\\-")
 	ex, err := govaluate.NewEvaluableExpression(expression)
 	if err != nil {
