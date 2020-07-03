@@ -634,7 +634,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		volMode := corev1.PersistentVolumeFilesystem
 		pvcName := generatePVCName(i.eventBus)
 		// Default volume size
-		volSize := apiresource.MustParse("5Gi")
+		volSize := apiresource.MustParse("10Gi")
 		if i.eventBus.Spec.NATS.Native.Persistence.VolumeSize != nil {
 			volSize = *i.eventBus.Spec.NATS.Native.Persistence.VolumeSize
 		}
