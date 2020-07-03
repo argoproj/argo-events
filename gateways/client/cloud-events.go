@@ -59,7 +59,7 @@ func (gatewayContext *GatewayContext) updateSubscriberClients() {
 // dispatchEvent dispatches event to gateway transformer for further processing
 func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
 	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
-	logger.Infoln("dispatching event to subscribers")
+	logger.Infoln("dispatching event to eventbus")
 
 	cloudEvent, err := gatewayContext.transformEvent(gatewayEvent)
 	if err != nil {
