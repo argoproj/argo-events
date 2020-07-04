@@ -1,19 +1,22 @@
 package eventbus
 
 import (
+	"context"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus/driver"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
 // GetDriver returns a Driver implementation
-func GetDriver(eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID string, logger *logrus.Logger) (driver.Driver, error) {
+func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID string) (driver.Driver, error) {
+	logger := logging.FromContext(ctx)
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
 	if eventBusConfig.NATS != nil {

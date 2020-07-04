@@ -10,6 +10,7 @@ namespace: argo-events
 resources:
   - crds
   - argo-events-sa.yaml
+  - eventsource-controller
   - gateway-controller
   - sensor-controller
   - eventbus-controller
@@ -21,23 +22,23 @@ images:
     newTag: v0.16.0
   - name: argoproj/eventbus-controller
     newTag: v0.16.0
+  - name: argoproj/eventsource-controller
+    newTag: v0.16.0
 
 patchesStrategicMerge:
   - |-
     apiVersion: apps/v1
     kind: Deployment
     metadata:
-      name: gateway-controller
+      name: eventsource-controller
     spec:
       template:
         spec:
           containers:
-            - name: gateway-controller
+            - name: eventsource-controller
               env:
-                - name: GATEWAY_CLIENT_IMAGE
-                  value: argoproj/gateway-client:v0.16.0
-                - name: GATEWAY_SERVER_IMAGE
-                  value: argoproj/gateway-server:v0.16.0
+                - name: EVENTSOURCE_IMAGE
+                  value: argoproj/eventsource:v0.16.0
   - |-
     apiVersion: apps/v1
     kind: Deployment

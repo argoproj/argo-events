@@ -24,12 +24,10 @@ import (
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	natslib "github.com/nats-io/go-nats"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -46,8 +44,6 @@ type SensorContext struct {
 	EventBusConfig *eventbusv1alpha1.BusConfig
 	// EventBus subject
 	EventBusSubject string
-	// Logger for the Sensor
-	Logger *logrus.Logger
 	// httpClients holds the reference to HTTP clients for HTTP triggers.
 	httpClients map[string]*http.Client
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
@@ -72,7 +68,6 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		Sensor:               sensor,
 		EventBusConfig:       eventBusConfig,
 		EventBusSubject:      eventBusSubject,
-		Logger:               common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
 		httpClients:          make(map[string]*http.Client),
 		customTriggerClients: make(map[string]*grpc.ClientConn),
 		slackHTTPClient: &http.Client{

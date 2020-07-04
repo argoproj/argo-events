@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-controller
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor-controller
+          args:
+            - --namespaced

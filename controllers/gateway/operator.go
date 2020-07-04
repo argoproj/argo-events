@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclient "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/sirupsen/logrus"
@@ -46,10 +47,10 @@ func newGatewayContext(gatewayObj *v1alpha1.Gateway, controller *Controller) *ga
 	return &gatewayContext{
 		gateway: gatewayObj,
 		updated: false,
-		logger: common.NewArgoEventsLogger().WithFields(
+		logger: logging.NewArgoEventsLogger().WithFields(
 			map[string]interface{}{
 				common.LabelResourceName: gatewayObj.Name,
-				common.LabelNamespace:    gatewayObj.Namespace,
+				logging.LabelNamespace:   gatewayObj.Namespace,
 			}).Logger,
 		controller: controller,
 	}
@@ -59,7 +60,7 @@ func newGatewayContext(gatewayObj *v1alpha1.Gateway, controller *Controller) *ga
 func (ctx *gatewayContext) operate() error {
 	defer ctx.updateGatewayState()
 
-	ctx.logger.WithField(common.LabelPhase, string(ctx.gateway.Status.Phase)).Infoln("operating on the gateway...")
+	ctx.logger.WithField(logging.LabelPhase, string(ctx.gateway.Status.Phase)).Infoln("operating on the gateway...")
 
 	if err := Validate(ctx.gateway); err != nil {
 		ctx.logger.WithError(err).Infoln("invalid gateway object")
@@ -96,7 +97,7 @@ func (ctx *gatewayContext) operate() error {
 		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")
 
 	default:
-		ctx.logger.WithField(common.LabelPhase, string(ctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
+		ctx.logger.WithField(logging.LabelPhase, string(ctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
 	}
 	return nil
 }

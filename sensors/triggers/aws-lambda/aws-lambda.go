@@ -24,7 +24,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 
-	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
+	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
