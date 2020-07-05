@@ -25,7 +25,6 @@ import (
 	uzap "go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	appv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -108,13 +107,6 @@ func main() {
 	// Watch Deployments and enqueue owning Sensor key
 	if err := c.Watch(&source.Kind{Type: &appv1.Deployment{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.Sensor{}, IsController: true}); err != nil {
 		mainLog.Error(err, "unable to watch Deployments")
-		panic(err)
-	}
-
-	// Watch Services and enqueue owning Sensor key
-	// TODO: Remove this after we clean up all the legacy code (stop creating Service for Sensor)
-	if err := c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.Sensor{}, IsController: true}); err != nil {
-		mainLog.Error(err, "unable to watch Services")
 		panic(err)
 	}
 
