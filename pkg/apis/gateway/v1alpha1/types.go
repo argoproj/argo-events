@@ -71,7 +71,7 @@ type GatewaySpec struct {
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,5,opt,name=processorPort"`
 	// Replica is the gateway deployment replicas
 	Replica int32 `json:"replica,omitempty" protobuf:"varint,6,opt,name=replica"`
-	// EventBusRef references to a EventBus name. By default the value is "default"
+	// EventBusName references to a EventBus name. By default the value is "default"
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,7,opt,name=eventBusName"`
 }
 

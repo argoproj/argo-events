@@ -485,7 +485,7 @@ message SensorSpec {
   // Once sensor state is set to `error`, no further triggers will be processed.
   optional bool errorOnFailedRound = 6;
 
-  // EventBusRef references to a EventBus name. By default the value is "default"
+  // EventBusName references to a EventBus name. By default the value is "default"
   optional string eventBusName = 7;
 }
 

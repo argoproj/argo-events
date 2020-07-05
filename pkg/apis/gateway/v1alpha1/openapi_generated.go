@@ -237,7 +237,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"eventBusName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventBusRef references to a EventBus name. By default the value is \"default\"",
+							Description: "EventBusName references to a EventBus name. By default the value is \"default\"",
 							Type:        []string{"string"},
 							Format:      "",
 						},

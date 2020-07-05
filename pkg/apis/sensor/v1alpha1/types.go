@@ -141,7 +141,7 @@ type SensorSpec struct {
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
 	// Once sensor state is set to `error`, no further triggers will be processed.
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,6,opt,name=errorOnFailedRound"`
-	// EventBusRef references to a EventBus name. By default the value is "default"
+	// EventBusName references to a EventBus name. By default the value is "default"
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,7,opt,name=eventBusName"`
 }
 

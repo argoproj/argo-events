@@ -2262,7 +2262,7 @@
           "type": "boolean"
         },
         "eventBusName": {
-          "description": "EventBusRef references to a EventBus name. By default the value is \"default\"",
+          "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
         },
         "template": {

@@ -93,7 +93,7 @@ message GatewaySpec {
   // Replica is the gateway deployment replicas
   optional int32 replica = 6;
 
-  // EventBusRef references to a EventBus name. By default the value is "default"
+  // EventBusName references to a EventBus name. By default the value is "default"
   optional string eventBusName = 7;
 }
 

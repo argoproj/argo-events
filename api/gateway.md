@@ -362,7 +362,7 @@ Replica is the gateway deployment replicas
 
 <p>
 
-EventBusRef references to a EventBus name. By default the value is
+EventBusName references to a EventBus name. By default the value is
 “default”
 
 </p>
@@ -667,7 +667,7 @@ Replica is the gateway deployment replicas
 
 <p>
 
-EventBusRef references to a EventBus name. By default the value is
+EventBusName references to a EventBus name. By default the value is
 “default”
 
 </p>

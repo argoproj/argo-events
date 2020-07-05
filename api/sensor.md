@@ -3604,7 +3604,7 @@ processed.
 
 <p>
 
-EventBusRef references to a EventBus name. By default the value is
+EventBusName references to a EventBus name. By default the value is
 “default”
 
 </p>
@@ -3828,7 +3828,7 @@ processed.
 
 <p>
 
-EventBusRef references to a EventBus name. By default the value is
+EventBusName references to a EventBus name. By default the value is
 “default”
 
 </p>
