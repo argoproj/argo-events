@@ -163,10 +163,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log
 			Value: encodedSensorSpec,
 		},
 		{
-			Name:  common.SensorNamespace,
-			Value: args.Sensor.Namespace,
-		},
-		{
 			Name:  common.EnvVarEventBusSubject,
 			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
 		},
