@@ -17,8 +17,8 @@ limitations under the License.
 package sensors
 
 import (
+	"context"
 	"fmt"
-	"hash/fnv"
 	"strings"
 
 	"github.com/Knetic/govaluate"
@@ -38,13 +38,16 @@ import (
 // ListenEvents watches and handles events received from the gateway.
 func (sensorCtx *SensorContext) ListenEvents() error {
 	errCh := make(chan error)
-	sensorCtx.listenEventsOverEventBus(errCh)
+	ctx := context.Background()
+	cctx, cancel := context.WithCancel(ctx)
+	sensorCtx.listenEventsOverEventBus(cctx, errCh)
 	err := <-errCh
+	cancel()
 	sensorCtx.Logger.WithError(err).Errorln("subscription failure. stopping sensor operations")
 	return nil
 }
 
-func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
+func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, errCh chan<- error) {
 	sensor := sensorCtx.Sensor
 	// Get a mapping of dependencyExpression: []triggers
 	triggerMapping := make(map[string][]v1alpha1.Trigger)
@@ -67,7 +70,7 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 	}
 
 	for k, v := range triggerMapping {
-		go func(depExpression string, triggers []v1alpha1.Trigger) {
+		go func(ctx context.Context, depExpression string, triggers []v1alpha1.Trigger) {
 			// Calculate dependencies of each group of triggers.
 			de := strings.ReplaceAll(depExpression, "-", "\\-")
 			expr, err := govaluate.NewEvaluableExpression(de)
@@ -95,9 +98,7 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 
 			// Generate clientID with hash code
 			hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
-			h := fnv.New32a()
-			_, _ = h.Write([]byte(hashKey))
-			clientID := fmt.Sprintf("client-%v", h.Sum32())
+			clientID := fmt.Sprintf("client-%v", common.Hasher(hashKey))
 			ebDriver, err := eventbus.GetDriver(*sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID, sensorCtx.Logger)
 			if err != nil {
 				sensorCtx.Logger.WithError(err).Errorln("Failed to get event bus driver")
@@ -114,7 +115,7 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 			}
 			defer conn.Close()
 			sensorCtx.Logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
-			err = ebDriver.SubscribeEventSources(conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
+			err = ebDriver.SubscribeEventSources(ctx, conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
 					return false
@@ -139,7 +140,7 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(errCh chan<- error) {
 				sensorCtx.Logger.WithError(err).Errorln("Failed to subscribe to event bus")
 				errCh <- err
 			}
-		}(k, v)
+		}(ctx, k, v)
 	}
 }
 

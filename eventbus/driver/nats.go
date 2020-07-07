@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"os/signal"
@@ -106,11 +107,12 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 }
 
 // SubscribeCloudEvents is used to subscribe multiple dependency expression
+// Parameter - ctx, context
 // Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(conn Connection, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
 	if err != nil {
 		return err
