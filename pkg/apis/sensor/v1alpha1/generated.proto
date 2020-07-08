@@ -199,7 +199,7 @@ message EventContext {
   optional string type = 4;
 
   // DataContentType - A MIME (RFC2046) string describing the media type of `data`.
-  optional string dataContentType = 5;
+  optional string datacontenttype = 5;
 
   // Subject - The subject of the event in the context of the event producer
   optional string subject = 6;
@@ -308,12 +308,6 @@ message GitRemoteConfig {
   repeated string urls = 2;
 }
 
-// HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
-message HTTPSubscription {
-  // Port on which sensor server should run.
-  optional int32 port = 1;
-}
-
 // HTTPTrigger is the trigger for the HTTP request
 message HTTPTrigger {
   // URL refers to the URL to send HTTP request to.
@@ -402,15 +396,6 @@ message KafkaTrigger {
   optional string partitioningKey = 10;
 }
 
-// NATSSubscription holds the context of the NATS subscription of events for the sensor
-message NATSSubscription {
-  // ServerURL refers to NATS server url.
-  optional string serverURL = 1;
-
-  // Subject refers to NATS subject name.
-  optional string subject = 2;
-}
-
 // NATSTrigger refers to the specification of the NATS trigger.
 message NATSTrigger {
   // URL of the NATS cluster.
@@ -426,44 +411,6 @@ message NATSTrigger {
   // TLS configuration for the NATS producer.
   // +optional
   optional TLSConfig tls = 5;
-}
-
-// NodeStatus describes the status for an individual node in the sensor's FSM.
-// A single node can represent the status for event or a trigger.
-message NodeStatus {
-  // ID is a unique identifier of a node within a sensor
-  // It is a hash of the node name
-  optional string id = 1;
-
-  // Name is a unique name in the node tree used to generate the node ID
-  optional string name = 2;
-
-  // DisplayName is the human readable representation of the node
-  optional string displayName = 3;
-
-  // Type is the type of the node
-  optional string type = 4;
-
-  // Phase of the node
-  optional string phase = 5;
-
-  // StartedAt is the time at which this node started
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 6;
-
-  // CompletedAt is the time at which this node completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7;
-
-  // store data or something to save for event notifications or trigger events
-  optional string message = 8;
-
-  // Event stores the last seen event for this node
-  optional Event event = 9;
-
-  // UpdatedAt refers to the time at which the node was updated.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updatedAt = 10;
-
-  // ResolvedAt refers to the time at which the node was resolved.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime resolvedAt = 11;
 }
 
 // OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
@@ -516,16 +463,6 @@ message SensorList {
   repeated Sensor items = 2;
 }
 
-// SensorResources holds the metadata of the resources created for the sensor
-message SensorResources {
-  // Deployment holds the metadata of the deployment for the sensor
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta deployment = 1;
-
-  // Service holds the metadata of the service for the sensor
-  // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta service = 2;
-}
-
 // SensorSpec represents desired sensor state
 message SensorSpec {
   // Dependencies is a list of the events that this sensor is dependent on.
@@ -538,57 +475,23 @@ message SensorSpec {
   // +optional
   optional Template template = 3;
 
-  // Subscription refers to the modes of events subscriptions for the sensor.
-  // At least one of the types of subscription must be defined in order for sensor to be meaningful.
-  optional Subscription subscription = 4;
-
   // Circuit is a boolean expression of dependency groups
-  optional string circuit = 5;
+  optional string circuit = 4;
 
   // DependencyGroups is a list of the groups of events.
-  repeated DependencyGroup dependencyGroups = 6;
+  repeated DependencyGroup dependencyGroups = 5;
 
   // ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
   // Once sensor state is set to `error`, no further triggers will be processed.
-  optional bool errorOnFailedRound = 7;
+  optional bool errorOnFailedRound = 6;
 
-  // ServiceLabels to be set for the service generated
-  map<string, string> serviceLabels = 8;
-
-  // ServiceAnnotations refers to annotations to be set
-  // for the service generated
-  map<string, string> serviceAnnotations = 9;
+  // EventBusName references to a EventBus name. By default the value is "default"
+  optional string eventBusName = 7;
 }
 
 // SensorStatus contains information about the status of a sensor.
 message SensorStatus {
-  // Phase is the high-level summary of the sensor.
-  optional string phase = 1;
-
-  // StartedAt is the time at which this sensor was initiated
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
-
-  // CompletedAt is the time at which this sensor was completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3;
-
-  // Message is a human readable string indicating details about a sensor in its phase
-  optional string message = 4;
-
-  // Nodes is a mapping between a node ID and the node's status
-  // it records the states for the FSM of this sensor.
-  map<string, NodeStatus> nodes = 5;
-
-  // TriggerCycleCount is the count of sensor's trigger cycle runs.
-  optional int32 triggerCycleCount = 6;
-
-  // TriggerCycleState is the status from last cycle of triggers execution.
-  optional string triggerCycleStatus = 7;
-
-  // LastCycleTime is the time when last trigger cycle completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastCycleTime = 8;
-
-  // Resources refers to metadata of the resources created for the sensor
-  optional SensorResources resources = 9;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Status status = 1;
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
@@ -651,17 +554,6 @@ message StandardK8STrigger {
 // StatusPolicy refers to the policy used to check the state of the trigger using response status
 message StatusPolicy {
   repeated int32 allow = 1;
-}
-
-// Subscription holds different modes of subscription available for sensor to consume events.
-message Subscription {
-  // HTTP refers to the HTTP subscription of events for the sensor.
-  // +optional
-  optional HTTPSubscription http = 1;
-
-  // NATS refers to the NATS subscription of events for the sensor
-  // +optional
-  optional NATSSubscription nats = 2;
 }
 
 // TLSConfig refers to TLS configuration for the HTTP client

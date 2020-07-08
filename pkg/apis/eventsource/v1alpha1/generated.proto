@@ -395,6 +395,11 @@ message KafkaEventSource {
   // TLS configuration for the kafka client.
   // +optional
   optional TLSConfig tls = 5;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 6;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events

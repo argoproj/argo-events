@@ -18,19 +18,22 @@ package main
 
 import (
 	"context"
-	"net/http"
+	"encoding/base64"
+	"encoding/json"
 	"os"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	eventsourceClientset "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	"github.com/nats-io/go-nats"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	eventsourceClientset "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
+	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 )
 
 // GatewayContext holds the context for a gateway
@@ -61,10 +64,12 @@ type GatewayContext struct {
 	controllerInstanceID string
 	// statusCh is used to communicate the status of an event source
 	statusCh chan notification
-	// http client to send cloud events to subscribers
-	httpClient *http.Client
-	// natsSubscribers holds the active clients for NATS subscribers
-	natsSubscribers map[string]*nats.Conn
+	// EventBus config
+	eventBusConfig *eventbusv1alpha1.BusConfig
+	// EventBus subject
+	eventBusSubject string
+	// POD name
+	podName string
 }
 
 // EventSourceContext contains information of a event source for gateway to run.
@@ -105,6 +110,28 @@ func NewGatewayContext() *GatewayContext {
 		panic("server port is not provided")
 	}
 
+	busConfig := &eventbusv1alpha1.BusConfig{}
+	encodedBusConfigSpec := os.Getenv(common.EnvVarEventBusConfig)
+	if len(encodedBusConfigSpec) > 0 {
+		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)
+		if err != nil {
+			panic(errors.Errorf("failed to decode bus config string. err: %+v", err))
+		}
+		if err = json.Unmarshal(busConfigSpec, busConfig); err != nil {
+			panic(errors.Errorf("failed to unmarshal bus config object. err: %+v", err))
+		}
+	}
+
+	ebSubject, defined := os.LookupEnv(common.EnvVarEventBusSubject)
+	if !defined {
+		panic(errors.Errorf("required environment variable '%s' not defined", common.EnvVarEventBusSubject))
+	}
+
+	podName, defined := os.LookupEnv("POD_NAME")
+	if !defined {
+		panic(errors.New("Environment POD_NAME is missing"))
+	}
+
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayClient := gwclientset.NewForConfigOrDie(restConfig)
 	eventSourceClient := eventsourceClientset.NewForConfigOrDie(restConfig)
@@ -131,8 +158,9 @@ func NewGatewayContext() *GatewayContext {
 		controllerInstanceID: controllerInstanceID,
 		serverPort:           serverPort,
 		statusCh:             make(chan notification),
-		httpClient:           &http.Client{},
-		natsSubscribers:      make(map[string]*nats.Conn),
+		eventBusConfig:       busConfig,
+		eventBusSubject:      ebSubject,
+		podName:              podName,
 	}
 
 	return gatewayConfig

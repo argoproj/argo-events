@@ -19,13 +19,13 @@ package sensor
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Knetic/govaluate"
-	"github.com/pkg/errors"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it
@@ -34,24 +34,18 @@ import (
 // Exporting this function so that external APIs can use this to validate sensor resource.
 func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err := validateDependencies(s.Spec.Dependencies); err != nil {
+		s.Status.MarkDependenciesNotProvided("InvalidDependencies", "Faild to validate dependencies.")
 		return err
-	}
-	err := validateTriggers(s.Spec.Triggers)
-	if err != nil {
-		return err
-	}
-	if s.Spec.Subscription == nil {
-		return errors.New("at least one subscription must be specified")
-	}
-	if err := validateSubscription(s.Spec.Subscription); err != nil {
-		return errors.Wrap(err, "subscription is invalid")
 	}
 	if s.Spec.DependencyGroups != nil {
 		if s.Spec.Circuit == "" {
+			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Circuit is empty.")
 			return errors.Errorf("no circuit expression provided to resolve dependency groups")
 		}
-		expression, err := govaluate.NewEvaluableExpression(s.Spec.Circuit)
+		c := strings.ReplaceAll(s.Spec.Circuit, "-", "\\-")
+		expression, err := govaluate.NewEvaluableExpression(c)
 		if err != nil {
+			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Invalid circurit expression.")
 			return errors.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)
 		}
 
@@ -60,26 +54,17 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 			groups[group.Name] = false
 		}
 		if _, err = expression.Evaluate(groups); err != nil {
+			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Circuit expression can not be evaluated for dependency groups.")
 			return errors.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
 		}
 	}
-
-	return nil
-}
-
-// validateSubscription validates the sensor subscription
-func validateSubscription(subscription *v1alpha1.Subscription) error {
-	if subscription.HTTP == nil && subscription.NATS == nil {
-		return errors.New("either HTTP or NATS subscription must be specified")
+	s.Status.MarkDependenciesProvided()
+	err := validateTriggers(s.Spec.Triggers)
+	if err != nil {
+		s.Status.MarkTriggersNotProvided("InvalidTriggers", "Invalid triggers.")
+		return err
 	}
-	if subscription.NATS != nil {
-		if subscription.NATS.ServerURL == "" {
-			return errors.New("NATS server url must be specified for the subscription")
-		}
-		if subscription.NATS.Subject == "" {
-			return errors.New("NATS subject must be specified for the subscription")
-		}
-	}
+	s.Status.MarkTriggersProvided()
 	return nil
 }
 
@@ -115,7 +100,7 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 		return errors.Errorf("trigger condition can't have both any and all condition")
 	}
 	if template.K8s != nil {
-		if err := validateK8sTrigger(template.K8s); err != nil {
+		if err := validateK8STrigger(template.K8s); err != nil {
 			return errors.Wrapf(err, "trigger for template %s is invalid", template.Name)
 		}
 	}
@@ -162,15 +147,15 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	return nil
 }
 
-// validateK8sTrigger validates a kubernetes trigger
-func validateK8sTrigger(trigger *v1alpha1.StandardK8STrigger) error {
+// validateK8STrigger validates a kubernetes trigger
+func validateK8STrigger(trigger *v1alpha1.StandardK8STrigger) error {
 	if trigger == nil {
 		return errors.New("k8s trigger for can't be nil")
 	}
 	if trigger.Source == nil {
 		return errors.New("k8s trigger for does not contain an absolute action")
 	}
-	if trigger.GroupVersionResource.Resource == "" {
+	if trigger.GroupVersionResource.Size() == 0 {
 		return errors.New("must provide group, version and resource for the resource")
 	}
 	switch trigger.Operation {

@@ -13,13 +13,14 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/Shopify/sarama v1.26.1
 	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
+	github.com/antonmedv/expr v1.8.8
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/argoproj/argo v2.5.2+incompatible
 	github.com/argoproj/argo-cd v1.5.1
 	github.com/argoproj/argo-rollouts v0.7.2
 	github.com/argoproj/pkg v0.0.0-20200319004004-f46beff7cd54 // indirect
 	github.com/aws/aws-sdk-go v1.30.7
-	github.com/cloudevents/sdk-go v1.1.2
+	github.com/cloudevents/sdk-go/v2 v2.1.0
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/eclipse/paho.mqtt.golang v1.2.0
@@ -67,13 +68,17 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/go-nats v1.7.2
+	github.com/nats-io/nats-streaming-server v0.17.0 // indirect
+	github.com/nats-io/nats.go v1.9.1
 	github.com/nats-io/nkeys v0.1.4 // indirect
+	github.com/nats-io/stan.go v0.6.0
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
 	github.com/nlopes/slack v0.6.1-0.20200219171353-c05e07b0a5de
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pierrec/lz4 v2.5.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/robfig/cron v1.2.0
@@ -81,6 +86,7 @@ require (
 	github.com/sirupsen/logrus v1.5.0
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v1.6.4
+	github.com/spf13/viper v1.3.2
 	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
 	github.com/stretchr/testify v1.5.1
 	github.com/stripe/stripe-go v70.11.0+incompatible

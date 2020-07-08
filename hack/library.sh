@@ -54,3 +54,10 @@ ensure_mockery() {
   fi
 }
 
+ensure_protobuf() {
+  if [ "`command -v protoc`" = "" ]; then
+    warning "Please install protobuf with - brew install protobuf"
+    exit 1
+  fi
+}
+

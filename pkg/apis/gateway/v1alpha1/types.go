@@ -67,14 +67,12 @@ type GatewaySpec struct {
 	// Service is the specifications of the service to expose the gateway
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
-	// Subscribers holds the contexts of the subscribers/sinks to send events to.
-
-	// +optional
-	Subscribers *Subscribers `json:"subscribers,omitempty" protobuf:"bytes,5,opt,name=subscribers"`
 	// Port on which the gateway event source processor is running on.
-	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
+	ProcessorPort string `json:"processorPort" protobuf:"bytes,5,opt,name=processorPort"`
 	// Replica is the gateway deployment replicas
-	Replica int32 `json:"replica,omitempty" protobuf:"varint,7,opt,name=replica"`
+	Replica int32 `json:"replica,omitempty" protobuf:"varint,6,opt,name=replica"`
+	// EventBusName references to a EventBus name. By default the value is "default"
+	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,7,opt,name=eventBusName"`
 }
 
 // Template holds the information of a Gateway deployment template
@@ -135,27 +133,6 @@ type Service struct {
 	// Spec holds the gateway service spec.
 	// DEPRECATED: Use Ports to declare the ports to be exposed.
 	Spec *corev1.ServiceSpec `json:"spec,omitempty" protobuf:"bytes,3,opt,name=spec"`
-}
-
-type Subscribers struct {
-	// HTTP subscribers are HTTP endpoints to send events to.
-
-	// +optional
-	HTTP []string `json:"http,omitempty" protobuf:"bytes,1,rep,name=http"`
-	// NATS refers to the subscribers over NATS protocol.
-
-	// +optional
-	NATS []NATSSubscriber `json:"nats,omitempty" protobuf:"bytes,2,rep,name=nats"`
-}
-
-// NATSSubscriber holds the context of subscriber over NATS.
-type NATSSubscriber struct {
-	// ServerURL refers to the NATS server URL.
-	ServerURL string `json:"serverURL" protobuf:"bytes,1,opt,name=serverURL"`
-	// Subject refers to the NATS subject name.
-	Subject string `json:"subject" protobuf:"bytes,2,opt,name=subject"`
-	// Name of the subscription. Must be unique.
-	Name string `json:"name" protobuf:"bytes,3,opt,name=name"`
 }
 
 // EventSourceRef holds information about the EventSourceRef custom resource

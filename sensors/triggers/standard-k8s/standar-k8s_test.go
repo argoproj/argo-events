@@ -110,18 +110,8 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}
 
-	dep := fakeSensor.NodeID("dep-1")
-
-	fakeSensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			dep: {
-				ID:          dep,
-				Name:        dep,
-				DisplayName: dep,
-				Type:        v1alpha1.NodeTypeEventDependency,
-				Event:       event,
-			},
-		},
+	testEvents := map[string]*v1alpha1.Event{
+		"dep-1": event,
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
@@ -145,7 +135,7 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, fakeSensor, &fakeSensor.Spec.Triggers[0], common.NewArgoEventsLogger())
 
-	out, err := impl.ApplyResourceParameters(fakeSensor, deployment)
+	out, err := impl.ApplyResourceParameters(testEvents, deployment)
 	assert.Nil(t, err)
 
 	updatedObj, ok := out.(*unstructured.Unstructured)
@@ -163,7 +153,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
 
-	resource, err := impl.Execute(deployment)
+	resource, err := impl.Execute(nil, deployment)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -177,7 +167,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 
 	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Update
 	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
-	resource, err = impl.Execute(uObj)
+	resource, err = impl.Execute(nil, uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -194,7 +184,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	sensorObj.Spec.Triggers[0].Template.K8s.PatchStrategy = k8stypes.MergePatchType
 
 	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
-	resource, err = impl.Execute(uObj)
+	resource, err = impl.Execute(nil, uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 	uObj, ok = resource.(*unstructured.Unstructured)

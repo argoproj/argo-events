@@ -17,19 +17,22 @@ limitations under the License.
 package gateway
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"github.com/imdario/mergo"
 
-	"github.com/argoproj/argo-events/common"
-	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common"
+	controllerscommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 // buildServiceResource builds a new service that exposes gateway.
@@ -197,10 +200,62 @@ func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, er
 
 // buildDeploymentResource builds a deployment resource for the gateway
 func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) {
+	// TODO: temporarily hardcode eventbus name here
+	eventBusName := "default"
+	if len(ctx.gateway.Spec.EventBusName) > 0 {
+		eventBusName = ctx.gateway.Spec.EventBusName
+	}
+	eventBus, err := ctx.controller.eventBusClient.ArgoprojV1alpha1().EventBus(ctx.gateway.Namespace).Get(eventBusName, metav1.GetOptions{})
+	if err != nil {
+		if apierr.IsNotFound(err) {
+			return nil, errors.Errorf("eventbus %s is not found in namespace %s", eventBusName, ctx.gateway.Namespace)
+		}
+		return nil, err
+	}
+	if !eventBus.Status.IsReady() {
+		return nil, errors.Errorf("eventbus %s not ready in namespace %s", eventBusName, ctx.gateway.Namespace)
+	}
+
+	if ctx.gateway.Status.Resources == nil {
+		ctx.gateway.Status.Resources = &v1alpha1.GatewayResource{}
+	}
+
 	deploymentSpec, err := ctx.makeDeploymentSpec()
 	if err != nil {
 		return nil, err
 	}
+	if eventBus.Status.Config.NATS != nil {
+		natsConf := eventBus.Status.Config.NATS
+		if natsConf.Auth != nil && natsConf.AccessSecret != nil {
+			// Mount the secret as volume instead of using evnFrom to gain the ability
+			// for the sensor deployment to auto reload when the secret changes
+			volumes := deploymentSpec.Template.Spec.Volumes
+			volumes = append(volumes, corev1.Volume{
+				Name: "auth-volume",
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: natsConf.AccessSecret.Name,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  natsConf.AccessSecret.Key,
+								Path: "auth.yaml",
+							},
+						},
+					},
+				},
+			})
+			deploymentSpec.Template.Spec.Volumes = volumes
+			for i, container := range deploymentSpec.Template.Spec.Containers {
+				volumeMounts := container.VolumeMounts
+				volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
+				container.VolumeMounts = volumeMounts
+				deploymentSpec.Template.Spec.Containers[i] = container
+			}
+		}
+	} else {
+		return nil, errors.New("unsupported event bus")
+	}
+
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    ctx.gateway.Namespace,
@@ -236,7 +291,21 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 			Name:  common.EnvVarGatewayServerPort,
 			Value: processorPort,
 		},
+		{
+			Name:      "POD_NAME",
+			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}},
+		},
+		{
+			Name:  common.EnvVarEventBusSubject,
+			Value: fmt.Sprintf("eventbus-%s", ctx.gateway.Namespace),
+		},
 	}
+	busConfigBytes, err := json.Marshal(eventBus.Status.Config)
+	if err != nil {
+		return nil, errors.Errorf("failed marshal event bus config: %v", err)
+	}
+	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
+	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
 
 	for i, container := range deployment.Spec.Template.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
@@ -252,10 +321,6 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 
 // createGatewayResources creates gateway deployment and service
 func (ctx *gatewayContext) createGatewayResources() error {
-	if ctx.gateway.Status.Resources == nil {
-		ctx.gateway.Status.Resources = &v1alpha1.GatewayResource{}
-	}
-
 	deployment, err := ctx.createGatewayDeployment()
 	if err != nil {
 		return err

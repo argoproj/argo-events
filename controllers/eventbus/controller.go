@@ -2,7 +2,6 @@ package eventbus
 
 import (
 	"context"
-	"errors"
 
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -50,11 +49,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 	log := r.logger.WithValues("namespace", eventBus.Namespace).WithValues("eventbus", eventBus.Name)
-	obj := eventBus.DeepCopyObject()
-	busCopy, ok := obj.(*v1alpha1.EventBus)
-	if !ok {
-		return ctrl.Result{}, errors.New("convert error")
-	}
+	busCopy := eventBus.DeepCopy()
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "reconcile error")

@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/lambda"
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,25 +86,17 @@ func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
 
 func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getAWSTrigger()
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"function": "real-function"}`),
-				},
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"function": "real-function"}`),
 		},
 	}
 
@@ -130,7 +122,7 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	response, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.AWSLambda)
+	response, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.AWSLambda)
 	assert.Nil(t, err)
 	assert.NotNil(t, response)
 
