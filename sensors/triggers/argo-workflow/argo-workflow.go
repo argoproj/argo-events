@@ -71,19 +71,19 @@ func (t *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (t *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *ArgoWorkflowTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
-	if err := triggers.ApplyResourceParameters(sensor, t.Trigger.Template.ArgoWorkflow.Parameters, obj); err != nil {
+	if err := triggers.ApplyResourceParameters(events, t.Trigger.Template.ArgoWorkflow.Parameters, obj); err != nil {
 		return nil, err
 	}
 	return obj, nil
 }
 
 // Execute executes the trigger
-func (t *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error) {
+func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger := t.Trigger
 
 	obj, ok := resource.(*unstructured.Unstructured)

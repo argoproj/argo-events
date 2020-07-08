@@ -115,19 +115,19 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (k8sTrigger *StandardK8sTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (k8sTrigger *StandardK8sTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
-	if err := triggers.ApplyResourceParameters(sensor, k8sTrigger.Trigger.Template.K8s.Parameters, obj); err != nil {
+	if err := triggers.ApplyResourceParameters(events, k8sTrigger.Trigger.Template.K8s.Parameters, obj); err != nil {
 		return nil, err
 	}
 	return obj, nil
 }
 
 // Execute executes the trigger
-func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}, error) {
+func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger := k8sTrigger.Trigger
 
 	obj, ok := resource.(*unstructured.Unstructured)

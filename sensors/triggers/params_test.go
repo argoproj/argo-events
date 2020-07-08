@@ -24,11 +24,51 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
+
+var sensorObj = &v1alpha1.Sensor{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "fake-sensor",
+		Namespace: "fake",
+	},
+	Spec: v1alpha1.SensorSpec{
+		Triggers: []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger",
+					K8s: &v1alpha1.StandardK8STrigger{
+						GroupVersionResource: metav1.GroupVersionResource{
+							Group:    "apps",
+							Version:  "v1",
+							Resource: "deployments",
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
+	return &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": apiVersion,
+			"kind":       kind,
+			"metadata": map[string]interface{}{
+				"namespace": namespace,
+				"name":      name,
+				"labels": map[string]interface{}{
+					"name": name,
+				},
+			},
+		},
+	}
+}
 
 type Details struct {
 	Street string `json:"street"`
@@ -43,42 +83,26 @@ type Payload struct {
 }
 
 func TestConstructPayload(t *testing.T) {
-	obj := sensorObj.DeepCopy()
-	id := obj.NodeID("fake-dependency")
-	id2 := obj.NodeID("another-fake-dependency")
-
-	obj.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: common.MediaTypeJSON,
-						Subject:         "example-1",
-					},
-					Data: []byte("{\"firstName\": \"fake\"}"),
-				},
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: common.MediaTypeJSON,
+				Subject:         "example-1",
 			},
-			id2: {
-				Name: "another-fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "2",
-						Type:            "calendar",
-						Source:          "calendar-gateway",
-						DataContentType: common.MediaTypeJSON,
-						Subject:         "example-1",
-					},
-					Data: []byte("{\"lastName\": \"foo\"}"),
-				},
+			Data: []byte("{\"firstName\": \"fake\"}"),
+		},
+		"another-fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "2",
+				Type:            "calendar",
+				Source:          "calendar-gateway",
+				DataContentType: common.MediaTypeJSON,
+				Subject:         "example-1",
 			},
+			Data: []byte("{\"lastName\": \"foo\"}"),
 		},
 	}
 
@@ -104,7 +128,7 @@ func TestConstructPayload(t *testing.T) {
 		},
 	}
 
-	payloadBytes, err := ConstructPayload(obj, parameters)
+	payloadBytes, err := ConstructPayload(testEvents, parameters)
 	assert.Nil(t, err)
 	assert.NotNil(t, payloadBytes)
 
@@ -117,7 +141,7 @@ func TestConstructPayload(t *testing.T) {
 	parameters[0].Src.DataKey = "unknown"
 	parameters[1].Src.DataKey = "unknown"
 
-	payloadBytes, err = ConstructPayload(obj, parameters)
+	payloadBytes, err = ConstructPayload(testEvents, parameters)
 	assert.Nil(t, err)
 	assert.NotNil(t, payloadBytes)
 
@@ -125,51 +149,6 @@ func TestConstructPayload(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "faker", p.FirstName)
 	assert.Equal(t, "bar", p.LastName)
-}
-
-func TestExtractEvents(t *testing.T) {
-	obj := sensorObj.DeepCopy()
-	id := obj.NodeID("fake-dependency")
-	obj.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: common.MediaTypeJSON,
-						Subject:         "example-1",
-					},
-					Data: []byte("{\"name\": \"fake\"}"),
-				},
-			},
-		},
-	}
-	events := ExtractEvents(obj, []v1alpha1.TriggerParameter{
-		{
-			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "name",
-			},
-		},
-	})
-	assert.NotNil(t, events)
-	assert.Equal(t, events["fake-dependency"].Context.Subject, "example-1")
-
-	delete(obj.Status.Nodes, id)
-	events = ExtractEvents(obj, []v1alpha1.TriggerParameter{
-		{
-			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "name",
-			},
-		},
-	})
-	assert.Empty(t, events)
 }
 
 func TestResolveParamValue(t *testing.T) {
@@ -452,18 +431,13 @@ func TestApplyResourceParameters(t *testing.T) {
 		Data: []byte("{\"name\": {\"first\": \"test-deployment\"} }"),
 	}
 
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": event,
+	}
+
 	artifact := apicommon.NewResource(deployment)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
-	}
-	id := obj.NodeID("fake-dependency")
-	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
-		id: {
-			Event: event,
-			ID:    id,
-			Name:  "fake-dependency",
-			Type:  v1alpha1.NodeTypeEventDependency,
-		},
 	}
 	obj.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
 		{
@@ -476,7 +450,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
+	err := ApplyResourceParameters(testEvents, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
 	assert.Nil(t, err)
 	assert.Equal(t, deployment.GetName(), "test-deployment")
 }
@@ -494,15 +468,10 @@ func TestApplyTemplateParameters(t *testing.T) {
 		},
 		Data: []byte("{\"group\": \"fake\" }"),
 	}
-	id := obj.NodeID("fake-dependency")
-	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
-		id: {
-			Event: event,
-			ID:    id,
-			Name:  "fake-dependency",
-			Type:  v1alpha1.NodeTypeEventDependency,
-		},
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": event,
 	}
+
 	obj.Spec.Triggers[0].Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
@@ -513,7 +482,7 @@ func TestApplyTemplateParameters(t *testing.T) {
 			Dest:      "k8s.group",
 		},
 	}
-	err := ApplyTemplateParameters(obj, &obj.Spec.Triggers[0])
+	err := ApplyTemplateParameters(testEvents, &obj.Spec.Triggers[0])
 	assert.Nil(t, err)
 	assert.Equal(t, "fake", obj.Spec.Triggers[0].Template.K8s.GroupVersionResource.Group)
 }

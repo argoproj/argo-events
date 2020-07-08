@@ -46,7 +46,7 @@ all-controller-images: sensor-controller-image gateway-controller-image eventbus
 
 # Sensor
 sensor:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/client.go
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
 
 sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
@@ -148,6 +148,7 @@ codegen:
 	./hack/update-openapigen.sh
 	$(MAKE) swagger
 	./hack/update-api-docs.sh
+	./hack/update-mocks.sh
 	rm -rf ./vendor
 	go mod tidy
 	$(MAKE) manifests

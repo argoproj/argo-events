@@ -24,6 +24,7 @@ import (
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	eventbusclientset "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -67,6 +68,8 @@ type Controller struct {
 	k8sClient kubernetes.Interface
 	// gatewayClient is the Argo-Events gateway resource client
 	gatewayClient clientset.Interface
+	// EventBus clientset
+	eventBusClient eventbusclientset.Interface
 	// gateway-controller informer and queue
 	informer cache.SharedIndexInformer
 	queue    workqueue.RateLimitingInterface
@@ -76,15 +79,16 @@ type Controller struct {
 func NewGatewayController(rest *rest.Config, configMap, namespace, clientImage, serverImage string) *Controller {
 	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
 	return &Controller{
-		ConfigMap:     configMap,
-		Namespace:     namespace,
-		clientImage:   clientImage,
-		serverImage:   serverImage,
-		kubeConfig:    rest,
-		logger:        common.NewArgoEventsLogger(),
-		k8sClient:     kubernetes.NewForConfigOrDie(rest),
-		gatewayClient: clientset.NewForConfigOrDie(rest),
-		queue:         workqueue.NewRateLimitingQueue(rateLimiter),
+		ConfigMap:      configMap,
+		Namespace:      namespace,
+		clientImage:    clientImage,
+		serverImage:    serverImage,
+		kubeConfig:     rest,
+		logger:         common.NewArgoEventsLogger(),
+		k8sClient:      kubernetes.NewForConfigOrDie(rest),
+		gatewayClient:  clientset.NewForConfigOrDie(rest),
+		eventBusClient: eventbusclientset.NewForConfigOrDie(rest),
+		queue:          workqueue.NewRateLimitingQueue(rateLimiter),
 	}
 }
 

@@ -32,9 +32,9 @@ type Trigger interface {
 	// FetchResource fetches the trigger resource from external source
 	FetchResource() (interface{}, error)
 	// ApplyResourceParameters applies parameters to the trigger resource
-	ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error)
+	ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error)
 	// Execute executes the trigger
-	Execute(resource interface{}) (interface{}, error)
+	Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error)
 	// ApplyPolicy applies the policy on the trigger
 	ApplyPolicy(resource interface{}) error
 }
@@ -86,7 +86,7 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 	}
 
 	if trigger.Template.Slack != nil {
-		result, err := slack.NewSlackTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.slackHttpClient)
+		result, err := slack.NewSlackTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.slackHTTPClient)
 		if err != nil {
 			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil

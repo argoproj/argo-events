@@ -87,14 +87,14 @@ message GatewaySpec {
   // +optional
   optional Service service = 4;
 
-  // +optional
-  optional Subscribers subscribers = 5;
-
   // Port on which the gateway event source processor is running on.
-  optional string processorPort = 6;
+  optional string processorPort = 5;
 
   // Replica is the gateway deployment replicas
-  optional int32 replica = 7;
+  optional int32 replica = 6;
+
+  // EventBusName references to a EventBus name. By default the value is "default"
+  optional string eventBusName = 7;
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -121,18 +121,6 @@ message Metadata {
   map<string, string> annotations = 1;
 
   map<string, string> labels = 2;
-}
-
-// NATSSubscriber holds the context of subscriber over NATS.
-message NATSSubscriber {
-  // ServerURL refers to the NATS server URL.
-  optional string serverURL = 1;
-
-  // Subject refers to the NATS subject name.
-  optional string subject = 2;
-
-  // Name of the subscription. Must be unique.
-  optional string name = 3;
 }
 
 // NodeStatus describes the status for an individual node in the gateway configurations.
@@ -185,14 +173,6 @@ message Service {
   // Spec holds the gateway service spec.
   // DEPRECATED: Use Ports to declare the ports to be exposed.
   optional k8s.io.api.core.v1.ServiceSpec spec = 3;
-}
-
-message Subscribers {
-  // +optional
-  repeated string http = 1;
-
-  // +optional
-  repeated NATSSubscriber nats = 2;
 }
 
 // Template holds the information of a Gateway deployment template

@@ -292,7 +292,7 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		serverAuthText := fmt.Sprintf(`authorization {
   token: "%s"
 }`, token)
-		clientAuthText := fmt.Sprintf("token=%s", token)
+		clientAuthText := fmt.Sprintf("token: \"%s\"", token)
 		// Create server auth secret
 		expectedSSecret, err := i.buildServerAuthSecret(strategy, serverAuthText)
 		if err != nil {
@@ -454,7 +454,7 @@ streaming {
 	peers: [%s]
   }
   store_limits {
-    max_age: 24h
+    max_age: 72h
   }
 }`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","))
 	cm := &corev1.ConfigMap{
@@ -634,7 +634,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		volMode := corev1.PersistentVolumeFilesystem
 		pvcName := generatePVCName(i.eventBus)
 		// Default volume size
-		volSize := apiresource.MustParse("5Gi")
+		volSize := apiresource.MustParse("10Gi")
 		if i.eventBus.Spec.NATS.Native.Persistence.VolumeSize != nil {
 			volSize = *i.eventBus.Spec.NATS.Native.Persistence.VolumeSize
 		}

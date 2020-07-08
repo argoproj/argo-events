@@ -20,13 +20,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	fakeeventbus "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/fake"
+	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 )
 
 func newController() *Controller {
@@ -37,12 +39,13 @@ func newController() *Controller {
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: "argo-events",
 		},
-		clientImage:   "argoproj/gateway-client",
-		serverImage:   "argoproj/gateway-server",
-		k8sClient:     fake.NewSimpleClientset(),
-		gatewayClient: fakegateway.NewSimpleClientset(),
-		queue:         workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		logger:        common.NewArgoEventsLogger(),
+		clientImage:    "argoproj/gateway-client",
+		serverImage:    "argoproj/gateway-server",
+		k8sClient:      fake.NewSimpleClientset(),
+		gatewayClient:  fakegateway.NewSimpleClientset(),
+		eventBusClient: fakeeventbus.NewSimpleClientset(),
+		queue:          workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		logger:         common.NewArgoEventsLogger(),
 	}
 	informer, err := controller.newGatewayInformer()
 	if err != nil {

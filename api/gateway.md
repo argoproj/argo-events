@@ -314,23 +314,6 @@ Service is the specifications of the service to expose the gateway
 
 <td>
 
-<code>subscribers</code></br> <em>
-<a href="#argoproj.io/v1alpha1.Subscribers"> Subscribers </a> </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>processorPort</code></br> <em> string </em>
 
 </td>
@@ -360,6 +343,27 @@ Port on which the gateway event source processor is running on.
 <p>
 
 Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventBusName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+EventBusName references to a EventBus name. By default the value is
+“default”
 
 </p>
 
@@ -615,23 +619,6 @@ Service is the specifications of the service to expose the gateway
 
 <td>
 
-<code>subscribers</code></br> <em>
-<a href="#argoproj.io/v1alpha1.Subscribers"> Subscribers </a> </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>processorPort</code></br> <em> string </em>
 
 </td>
@@ -661,6 +648,27 @@ Port on which the gateway event source processor is running on.
 <p>
 
 Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventBusName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+EventBusName references to a EventBus name. By default the value is
+“default”
 
 </p>
 
@@ -902,117 +910,6 @@ Description
 </td>
 
 <td>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.NATSSubscriber">
-
-NATSSubscriber
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.Subscribers">Subscribers</a>)
-
-</p>
-
-<p>
-
-<p>
-
-NATSSubscriber holds the context of subscriber over NATS.
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>serverURL</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ServerURL refers to the NATS server URL.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>subject</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Subject refers to the NATS subject name.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>name</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Name of the subscription. Must be unique.
-
-</p>
 
 </td>
 
@@ -1368,85 +1265,6 @@ the ports to be exposed.
 <table>
 
 </table>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.Subscribers">
-
-Subscribers
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.GatewaySpec">GatewaySpec</a>)
-
-</p>
-
-<p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>http</code></br> <em> \[\]string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>nats</code></br> <em>
-<a href="#argoproj.io/v1alpha1.NATSSubscriber"> \[\]NATSSubscriber </a>
-</em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
 
 </td>
 

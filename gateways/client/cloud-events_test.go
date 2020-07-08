@@ -44,13 +44,11 @@ func TestTransformEvent(t *testing.T) {
 		},
 	}
 	cloudevent, err := ctx.transformEvent(event)
-	assert.Nil(t, err)
-	assert.NotNil(t, cloudevent.Context.AsV03())
+	assert.NoError(t, err)
 	assert.Equal(t, "test-event-source", cloudevent.Source())
 	assert.Equal(t, "hello", cloudevent.Subject())
 	assert.Equal(t, "webhook", cloudevent.Type())
 
-	data, err := cloudevent.DataBytes()
-	assert.Nil(t, err)
+	data := cloudevent.Data()
 	assert.Equal(t, string(data), "{\"name\": \"hello\"}")
 }

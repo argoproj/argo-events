@@ -46,9 +46,6 @@ func TestGatewayState(t *testing.T) {
 		})
 
 		updatedGw := gc.gateway
-		updatedGw.Spec.Subscribers = &v1alpha1.Subscribers{
-			HTTP: []string{"sensor-1"},
-		}
 
 		convey.Convey("Update gateway watchers", func() {
 			gc.UpdateGatewayState(&notification{
@@ -56,7 +53,6 @@ func TestGatewayState(t *testing.T) {
 					gateway: updatedGw,
 				},
 			})
-			convey.So(len(gc.gateway.Spec.Subscribers.HTTP), convey.ShouldEqual, 1)
 		})
 
 		convey.Convey("Update gateway resource test-node node state to completed", func() {
