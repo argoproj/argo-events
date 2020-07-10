@@ -1,5 +1,5 @@
-FROM centos:7
-RUN yum -y install ca-certificates openssh openssh-server openssh-clients openssl-libs curl git
+FROM centos:8
+RUN yum -y update && yum -y install ca-certificates openssh openssh-server openssh-clients openssl-libs curl git
 
 # OpenFass CLI
 COPY assets/faas-cli /usr/local/bin/faas
