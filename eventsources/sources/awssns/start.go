@@ -17,6 +17,7 @@ limitations under the License.
 package awssns
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -29,8 +30,8 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/eventsources/sources"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -192,31 +193,43 @@ func (router *Router) PostInactivate() error {
 type EventListener struct {
 	EventSourceName string
 	EventName       string
+	SNSEventSource  v1alpha1.SNSEventSource
 }
 
-// StartEventSource starts an SNS event source
-func (listener *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
-	defer server.Recover(eventSource.Name)
+// GetEventSourceName returns name of event source
+func (el *EventListener) GetEventSourceName() string {
+	return el.EventSourceName
+}
 
-	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
-	logger.Info("started processing the event source...")
+// GetEventName returns name of event
+func (el *EventListener) GetEventName() string {
+	return el.EventName
+}
 
-	var snsEventSource *v1alpha1.SNSEventSource
-	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
-		logger.WithError(err).Error("failed to parse event source")
-		return err
-	}
+// GetEventSourceType return type of event server
+func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
+	return apicommon.SNSEvent
+}
 
-	if snsEventSource.Namespace == "" {
-		snsEventSource.Namespace = listener.Namespace
-	}
+// StartListening starts an SNS event source
+func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+	logger := logging.FromContext(ctx)
+	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
+		logging.LabelEventSourceType: el.GetEventSourceType(),
+		logging.LabelEventSourceName: el.GetEventSourceName(),
+		logging.LabelEventName:       el.GetEventName(),
+	})
+	log.Infoln("started processing the AWS SNS event source...")
 
-	route := webhook.NewRoute(snsEventSource.Webhook, listener.Logger, eventSource)
+	defer sources.Recover(el.GetEventName())
+
+	log.Info("started processing the event source...")
+
+	route := webhook.NewRoute(el.SNSEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName())
 
 	logger.Infoln("operating on the route...")
-	return webhook.ManageRoute(&Router{
+	return webhook.ManageRoute(ctx, &Router{
 		Route:       route,
-		eventSource: snsEventSource,
-		k8sClient:   listener.K8sClient,
-	}, controller, eventStream)
+		eventSource: &el.SNSEventSource,
+	}, controller, dispatch)
 }

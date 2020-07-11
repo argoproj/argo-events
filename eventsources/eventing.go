@@ -13,6 +13,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
 	"github.com/argoproj/argo-events/eventsources/sources/webhook"
@@ -94,7 +95,11 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 
 	}
 	if len(eventSource.Spec.SNS) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.SNS {
+			servers = append(servers, &awssns.EventListener{EventSourceName: eventSource.Name, EventName: k, SNSEventSource: v})
+		}
+		result[apicommon.SNSEvent] = servers
 	}
 	if len(eventSource.Spec.SQS) != 0 {
 		servers := []EventingServer{}

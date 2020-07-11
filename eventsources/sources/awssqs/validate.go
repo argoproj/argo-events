@@ -26,10 +26,7 @@ import (
 
 // ValidateEventSource validates sqs event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
-	if err := validate(&listener.SQSEventSource); err != nil {
-		return err
-	}
-	return nil
+	return validate(&listener.SQSEventSource)
 }
 
 func validate(eventSource *v1alpha1.SQSEventSource) error {

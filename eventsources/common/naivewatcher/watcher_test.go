@@ -28,7 +28,7 @@ func (w *WatchableTestFS) Walk(root string, walkFn filepath.WalkFunc) error {
 func (w *WatchableTestFS) GetFileID(fi os.FileInfo) interface{} {
 	stat := fi.Sys().(*syscall.Stat_t)
 	return TestFSID{
-		Device: int32(stat.Dev),
+		Device: stat.Dev,
 		Inode:  stat.Ino,
 	}
 }

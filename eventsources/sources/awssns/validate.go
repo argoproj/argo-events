@@ -21,40 +21,13 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates sns event source
-func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	if apicommon.EventSourceType(eventSource.Type) != apicommon.SNSEvent {
-		return &gateways.ValidEventSource{
-			IsValid: false,
-			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.SNSEvent)),
-		}, nil
-	}
-
-	var snsEventSource *v1alpha1.SNSEventSource
-	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
-		return &gateways.ValidEventSource{
-			IsValid: false,
-			Reason:  err.Error(),
-		}, nil
-	}
-
-	if err := validate(snsEventSource); err != nil {
-		return &gateways.ValidEventSource{
-			Reason:  err.Error(),
-			IsValid: false,
-		}, nil
-	}
-
-	return &gateways.ValidEventSource{
-		IsValid: true,
-	}, nil
+func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
+	return validate(&listener.SNSEventSource)
 }
 
 func validate(snsEventSource *v1alpha1.SNSEventSource) error {

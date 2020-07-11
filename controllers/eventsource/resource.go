@@ -65,6 +65,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 		logger.Error(err, "failed to build deployment spec")
 		return err
 	}
+
 	deploy, err := getDeployment(ctx, client, args)
 	if err != nil && !apierrors.IsNotFound(err) {
 		eventSource.Status.MarkDeployFailed("GetDeploymentFailed", "Get existing deployment failed")
@@ -124,18 +125,21 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 				return err
 			}
 			logger.Info("service is created", "serviceName", expectedSvc.Name)
-		} else {
-			if existingSvc.Annotations != nil && existingSvc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
-				existingSvc.Spec = expectedSvc.Spec
-				existingSvc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
-				err = client.Update(ctx, existingSvc)
-				if err != nil {
-					eventSource.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
-					logger.Error(err, "error updating existing service")
-					return err
-				}
-				logger.Info("service is updated", "serviceName", existingSvc.Name)
+		} else if existingSvc.Annotations != nil && existingSvc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
+			// To avoid service updating issues such as port name change, re-create it.
+			err = client.Delete(ctx, existingSvc)
+			if err != nil {
+				eventSource.Status.MarkDeployFailed("DeleteServiceFailed", "Failed to delete existing service")
+				logger.Error(err, "error deleting existing service")
+				return err
 			}
+			err = client.Create(ctx, expectedSvc)
+			if err != nil {
+				eventSource.Status.MarkDeployFailed("RecreateServiceFailed", "Failed to re-create existing service")
+				logger.Error(err, "error re-creating existing service")
+				return err
+			}
+			logger.Info("service is re-created", "serviceName", existingSvc.Name)
 		}
 	}
 	eventSource.Status.MarkDeployed()
@@ -307,12 +311,17 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	if len(eventSource.Spec.Service.Ports) == 0 {
 		return nil, nil
 	}
+	// Use a ports copy otherwise it will update the oririnal Ports spec in EventSource
+	ports := []corev1.ServicePort{}
+	ports = append(ports, eventSource.Spec.Service.Ports...)
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
+			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
+			Namespace: eventSource.Namespace,
+			Labels:    args.Labels,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports:     eventSource.Spec.Service.Ports,
+			Ports:     ports,
 			Type:      corev1.ServiceTypeClusterIP,
 			ClusterIP: eventSource.Spec.Service.ClusterIP,
 			Selector:  args.Labels,

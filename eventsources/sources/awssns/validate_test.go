@@ -22,42 +22,33 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/argoproj/argo-events/eventsources/sources"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 func TestValidateEventSource(t *testing.T) {
 	listener := &EventListener{}
 
-	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
-		Id:    "1",
-		Name:  "sns",
-		Value: nil,
-		Type:  "sq",
-	})
-	assert.Equal(t, false, valid.IsValid)
-	assert.Equal(t, common.ErrEventSourceTypeMismatch("sns"), valid.Reason)
+	err := listener.ValidateEventSource(context.Background())
+	assert.Error(t, err)
+	assert.Equal(t, "must specify topic arn", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "aws-sns.yaml"))
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "aws-sns.yaml"))
 	assert.Nil(t, err)
 
-	var eventSource *esv1alpha1.EventSource
+	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
 	assert.NotNil(t, eventSource.Spec.SNS)
 
 	for _, value := range eventSource.Spec.SNS {
-		content, err := yaml.Marshal(value)
-		assert.Nil(t, err)
-		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Id:    "1",
-			Name:  "sns",
-			Value: content,
-			Type:  "sns",
-		})
-		assert.Equal(t, true, valid.IsValid)
+		l := &EventListener{
+			SNSEventSource: value,
+		}
+		err := l.ValidateEventSource(context.Background())
+		assert.NoError(t, err)
 	}
 }

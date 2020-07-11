@@ -30,6 +30,14 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
+var (
+	controller = webhook.NewController()
+)
+
+func init() {
+	go webhook.ProcessRouteStatus(controller)
+}
+
 // EventListener implements Eventing for webhook events
 type EventListener struct {
 	EventSourceName string
@@ -134,10 +142,6 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		logging.LabelEventName:       el.GetEventName(),
 	})
 	log.Infoln("started processing the webhook event source...")
-
-	controller := webhook.NewController()
-
-	go webhook.ProcessRouteStatus(controller)
 
 	route := webhook.NewRoute(&el.WebhookContext, logger, el.GetEventSourceName(), el.GetEventName())
 	return webhook.ManageRoute(ctx, &Router{
