@@ -69,7 +69,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 	var awsSession *session.Session
 	awsSession, err := awscommon.CreateAWSSessionWithCredsInEnv(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create aws session for %s / %s", el.GetEventSourceName(), el.GetEventName())
+		return errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
 	}
 
 	sqsClient := sqslib.New(awsSession)
@@ -84,7 +84,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 
 	queueURL, err := sqsClient.GetQueueUrl(getQueueURLInput)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get the queue url for %s / %s", el.GetEventSourceName(), el.GetEventName())
+		return errors.Wrapf(err, "failed to get the queue url for %s", el.GetEventName())
 	}
 
 	if sqsEventSource.JSONBody {

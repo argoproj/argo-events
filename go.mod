@@ -3,6 +3,7 @@ module github.com/argoproj/argo-events
 go 1.13
 
 require (
+	github.com/Azure/azure-event-hubs-go/v3 v3.3.0
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect

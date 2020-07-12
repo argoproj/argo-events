@@ -16,6 +16,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
+	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
 	"github.com/argoproj/argo-events/eventsources/sources/webhook"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -51,7 +52,11 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 		result[apicommon.AMQPEvent] = servers
 	}
 	if len(eventSource.Spec.AzureEventsHub) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.AzureEventsHub {
+			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v})
+		}
+		result[apicommon.AzureEventsHub] = servers
 	}
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}
@@ -201,7 +206,9 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 					}
 					return driver.Publish(e.eventBusConn, eventBody)
 				})
-				logger.WithError(err).Errorln("failed to start service.")
+				logger.WithField(logging.LabelEventSourceName, s.GetEventSourceName()).
+					WithField(logging.LabelEventName, s.GetEventName()).WithError(err).Errorln("failed to start service.")
+				// TODO: Need retry.
 			}(server)
 		}
 	}
