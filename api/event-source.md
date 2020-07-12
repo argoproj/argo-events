@@ -372,29 +372,6 @@ Event Hub path/name
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve the
-shared access key and name from.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>
@@ -4929,29 +4906,6 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 
 SecretKey refers K8 secret containing aws secret key
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace to read access related secret
-from.
 
 </p>
 

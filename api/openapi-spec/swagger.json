@@ -380,10 +380,6 @@
           "description": "Event Hub path/name",
           "type": "string"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.",
-          "type": "string"
-        },
         "sharedAccessKey": {
           "description": "SharedAccessKey is the the generated value of the key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -1255,10 +1251,6 @@
         "accessKey": {
           "description": "AccessKey refers K8 secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace to read access related secret from.",
-          "type": "string"
         },
         "region": {
           "description": "Region is AWS region",

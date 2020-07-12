@@ -337,14 +337,11 @@ type SNSEventSource struct {
 	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,3,opt,name=accessKey"`
 	// SecretKey refers K8 secret containing aws secret key
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,4,opt,name=secretKey"`
-	// Namespace refers to Kubernetes namespace to read access related secret from.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
 	// Region is AWS region
-	Region string `json:"region" protobuf:"bytes,6,opt,name=region"`
+	Region string `json:"region" protobuf:"bytes,5,opt,name=region"`
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
-	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,7,opt,name=roleARN"`
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -551,9 +548,6 @@ type AzureEventsHubEventSource struct {
 	SharedAccessKey *corev1.SecretKeySelector `json:"sharedAccessKey,omitempty" protobuf:"bytes,3,opt,name=sharedAccessKey"`
 	// Event Hub path/name
 	HubName string `json:"hubName" protobuf:"bytes,4,opt,name=hubName"`
-	// Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications

@@ -73,10 +73,6 @@ message AzureEventsHubEventSource {
 
   // Event Hub path/name
   optional string hubName = 4;
-
-  // Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
-  // +optional
-  optional string namespace = 5;
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -606,16 +602,12 @@ message SNSEventSource {
   // SecretKey refers K8 secret containing aws secret key
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 4;
 
-  // Namespace refers to Kubernetes namespace to read access related secret from.
-  // +optional
-  optional string namespace = 5;
-
   // Region is AWS region
-  optional string region = 6;
+  optional string region = 5;
 
   // RoleARN is the Amazon Resource Name (ARN) of the role to assume.
   // +optional
-  optional string roleARN = 7;
+  optional string roleARN = 6;
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events

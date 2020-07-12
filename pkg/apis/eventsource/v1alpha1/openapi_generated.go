@@ -162,13 +162,6 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 							Format:      "",
 						},
 					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
 				Required: []string{"fqdn", "hubName"},
 			},
@@ -1693,13 +1686,6 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 						SchemaProps: spec.SchemaProps{
 							Description: "SecretKey refers K8 secret containing aws secret key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace refers to Kubernetes namespace to read access related secret from.",
-							Type:        []string{"string"},
-							Format:      "",
 						},
 					},
 					"region": {
