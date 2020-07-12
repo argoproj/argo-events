@@ -159,9 +159,9 @@ func (router *Router) PostActivate() error {
 	}
 
 	router.session = snslib.New(awsSession)
-	formattedUrl := common.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
+	formattedURL := common.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
 	if _, err := router.session.Subscribe(&snslib.SubscribeInput{
-		Endpoint: &formattedUrl,
+		Endpoint: &formattedURL,
 		Protocol: func(endpoint string) *string {
 			Protocol := "http"
 			if matched, _ := regexp.MatchString(`https://.*`, endpoint); matched {
@@ -169,7 +169,7 @@ func (router *Router) PostActivate() error {
 				return &Protocol
 			}
 			return &Protocol
-		}(formattedUrl),
+		}(formattedURL),
 		TopicArn: &snsEventSource.TopicArn,
 	}); err != nil {
 		return err
@@ -178,7 +178,7 @@ func (router *Router) PostActivate() error {
 	return nil
 }
 
-// PostInactive refers to operations performed after a route is successfully inactivated
+// PostInactivate refers to operations performed after a route is successfully inactivated
 func (router *Router) PostInactivate() error {
 	// After event source is removed, the subscription is cancelled.
 	if _, err := router.session.Unsubscribe(&snslib.UnsubscribeInput{

@@ -13,6 +13,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	"github.com/argoproj/argo-events/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
@@ -43,7 +44,11 @@ type EventingServer interface {
 func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSourceType][]EventingServer {
 	result := make(map[apicommon.EventSourceType][]EventingServer)
 	if len(eventSource.Spec.AMQP) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.AMQP {
+			servers = append(servers, &amqp.EventListener{EventSourceName: eventSource.Name, EventName: k, AMQPEventSource: v})
+		}
+		result[apicommon.AMQPEvent] = servers
 	}
 	if len(eventSource.Spec.AzureEventsHub) != 0 {
 

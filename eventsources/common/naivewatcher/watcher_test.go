@@ -9,8 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/eventsources/common/fsevent"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/argoproj/argo-events/eventsources/common/fsevent"
 )
 
 type WatchableTestFS struct {
