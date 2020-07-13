@@ -19,6 +19,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
+	"github.com/argoproj/argo-events/eventsources/sources/file"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
@@ -77,7 +78,11 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 		result[apicommon.EmitterEvent] = servers
 	}
 	if len(eventSource.Spec.File) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.File {
+			servers = append(servers, &file.EventListener{EventSourceName: eventSource.Name, EventName: k, FileEventSource: v})
+		}
+		result[apicommon.FileEvent] = servers
 	}
 	if len(eventSource.Spec.Generic) != 0 {
 
