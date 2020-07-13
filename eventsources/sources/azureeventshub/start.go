@@ -26,6 +26,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -61,6 +62,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		logging.LabelEventName:       el.GetEventName(),
 	})
 	log.Infoln("started processing the Azure Events Hub event source...")
+	defer sources.Recover(el.GetEventName())
 
 	hubEventSource := &el.AzureEventsHubEventSource
 	log.Infoln("retrieving the shared access key name...")

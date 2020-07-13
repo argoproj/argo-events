@@ -254,13 +254,6 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 							Format:      "",
 						},
 					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace to use to retrieve the channel key and optional username/password",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"username": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Username to use to connect to broker",

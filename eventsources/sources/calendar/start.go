@@ -124,7 +124,6 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 			log.Infoln("dispatching calendar event...")
 			err = dispatch(payload)
 			if err != nil {
-				// TODO: need retry
 				log.WithError(err).Errorln("failed to dispatch event")
 			}
 		case <-stopCh:

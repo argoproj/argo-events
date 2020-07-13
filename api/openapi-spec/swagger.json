@@ -452,10 +452,6 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
-        "namespace": {
-          "description": "Namespace to use to retrieve the channel key and optional username/password",
-          "type": "string"
-        },
         "password": {
           "description": "Password to use to connect to broker",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"

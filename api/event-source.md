@@ -642,29 +642,6 @@ ChannelName refers to the channel name
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to use to retrieve the channel key and optional
-username/password
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>username</code></br> <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>

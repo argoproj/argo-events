@@ -107,30 +107,26 @@ message EmitterEventSource {
   // ChannelName refers to the channel name
   optional string channelName = 3;
 
-  // Namespace to use to retrieve the channel key and optional username/password
-  // +optional
-  optional string namespace = 4;
-
   // Username to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector username = 5;
+  optional k8s.io.api.core.v1.SecretKeySelector username = 4;
 
   // Password to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 6;
+  optional k8s.io.api.core.v1.SecretKeySelector password = 5;
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 6;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 8;
+  optional bool jsonBody = 7;
 
   // TLS configuration for the emitter client.
   // +optional
-  optional TLSConfig tls = 9;
+  optional TLSConfig tls = 8;
 }
 
 // EventSource is the definition of a eventsource resource

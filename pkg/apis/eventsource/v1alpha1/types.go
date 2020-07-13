@@ -573,25 +573,22 @@ type EmitterEventSource struct {
 	ChannelKey string `json:"channelKey" protobuf:"bytes,2,opt,name=channelKey"`
 	// ChannelName refers to the channel name
 	ChannelName string `json:"channelName" protobuf:"bytes,3,opt,name=channelName"`
-	// Namespace to use to retrieve the channel key and optional username/password
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// Username to use to connect to broker
 	// +optional
-	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,4,opt,name=username"`
 	// Password to use to connect to broker
 	// +optional
-	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,6,opt,name=password"`
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,5,opt,name=password"`
 	// Backoff holds parameters applied to connection.
 	// +optional
-	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,7,opt,name=connectionBackoff"`
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,6,opt,name=connectionBackoff"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
-	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,8,opt,name=jsonBody"`
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
 	// TLS configuration for the emitter client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,9,opt,name=tls"`
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
