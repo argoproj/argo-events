@@ -19,6 +19,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
+	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/eventsources/sources/webhook"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -128,7 +129,11 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 		result[apicommon.SlackEvent] = servers
 	}
 	if len(eventSource.Spec.StorageGrid) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.StorageGrid {
+			servers = append(servers, &storagegrid.EventListener{EventSourceName: eventSource.Name, EventName: k, StorageGridEventSource: v})
+		}
+		result[apicommon.StorageGridEvent] = servers
 	}
 	if len(eventSource.Spec.Stripe) != 0 {
 		servers := []EventingServer{}
