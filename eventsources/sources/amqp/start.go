@@ -61,6 +61,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		logging.LabelEventName:       el.GetEventName(),
 	})
 	log.Infoln("started processing the AMQP event source...")
+	defer sources.Recover(el.GetEventName())
 
 	amqpEventSource := &el.AMQPEventSource
 	backoff := common.GetConnectionBackoff(amqpEventSource.ConnectionBackoff)

@@ -5513,29 +5513,6 @@ Webhook holds configuration for a REST endpoint
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve token
-and signing secret from.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>

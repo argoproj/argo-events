@@ -499,9 +499,6 @@ type SlackEventSource struct {
 	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,opt,name=token"`
 	// Webhook holds configuration for a REST endpoint
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,3,opt,name=webhook"`
-	// Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events

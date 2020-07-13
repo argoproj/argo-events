@@ -64,6 +64,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		logging.LabelEventName:       el.GetEventName(),
 	})
 	log.Infoln("started processing the AWS SQS event source...")
+	defer sources.Recover(el.GetEventName())
 
 	sqsEventSource := &el.SQSEventSource
 	var awsSession *session.Session

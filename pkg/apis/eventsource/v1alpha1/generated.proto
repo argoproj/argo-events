@@ -688,10 +688,6 @@ message SlackEventSource {
 
   // Webhook holds configuration for a REST endpoint
   optional WebhookContext webhook = 3;
-
-  // Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
-  // +optional
-  optional string namespace = 4;
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
