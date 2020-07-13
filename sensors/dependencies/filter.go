@@ -93,15 +93,16 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 		return true, nil
 	}
 
+	startTime, startParseErr := common.ParseTime(timeFilter.Start, eventTime)
+	stopTime, stopParseErr := common.ParseTime(timeFilter.Stop, eventTime)
+
 	if timeFilter.Start != "" && timeFilter.Stop != "" {
-		startTime, err := common.ParseTime(timeFilter.Start, eventTime)
-		if err != nil {
-			return false, err
+		if startParseErr != nil {
+			return false, startParseErr
 		}
 
-		stopTime, err := common.ParseTime(timeFilter.Stop, eventTime)
-		if err != nil {
-			return false, err
+		if stopParseErr != nil {
+			return false, stopParseErr
 		}
 
 		if startTime.Before(stopTime) {
@@ -113,17 +114,15 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 
 	if timeFilter.Start != "" {
 		// stop is nil - does not have an end
-		startTime, err := common.ParseTime(timeFilter.Start, eventTime)
-		if err != nil {
-			return false, err
+		if startParseErr != nil {
+			return false, startParseErr
 		}
 		return (eventTime.After(startTime) || eventTime.Equal(startTime)), nil
 	}
 
 	if timeFilter.Stop != "" {
-		stopTime, err := common.ParseTime(timeFilter.Stop, eventTime)
-		if err != nil {
-			return false, err
+		if stopParseErr != nil {
+			return false, stopParseErr
 		}
 		return eventTime.Before(stopTime), nil
 	}
