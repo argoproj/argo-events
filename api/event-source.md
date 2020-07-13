@@ -5933,7 +5933,7 @@ CreateWebhook is enabled.
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
+<code>eventFilter</code></br> <em> \[\]string </em>
 
 </td>
 
@@ -5943,24 +5943,11 @@ CreateWebhook is enabled.
 
 <p>
 
-Namespace to retrieve the APIKey secret from. Must be specified in order
-to read API key from APIKey K8s secret.
+EventFilter describes the type of events to listen to. If not specified,
+all types of events will be processed. More info at
+<a href="https://stripe.com/docs/api/events/list">https://stripe.com/docs/api/events/list</a>
 
 </p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>eventFilter</code></br> <em> \[\]string </em>
-
-</td>
-
-<td>
 
 </td>
 

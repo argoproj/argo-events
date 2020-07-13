@@ -740,11 +740,10 @@ message StripeEventSource {
   // +optional
   optional k8s.io.api.core.v1.SecretKeySelector apiKey = 3;
 
-  // Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.
+  // EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
+  // More info at https://stripe.com/docs/api/events/list
   // +optional
-  optional string namespace = 4;
-
-  repeated string eventFilter = 5;
+  repeated string eventFilter = 4;
 }
 
 // TLSConfig refers to TLS configuration for a client.

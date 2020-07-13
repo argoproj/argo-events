@@ -2022,16 +2022,10 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"eventFilter": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
+							Description: "EventFilter describes the type of events to listen to. If not specified, all types of events will be processed. More info at https://stripe.com/docs/api/events/list",
+							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{

@@ -558,14 +558,10 @@ type StripeEventSource struct {
 	// APIKey refers to K8s secret that holds Stripe API key. Used only if CreateWebhook is enabled.
 	// +optional
 	APIKey *corev1.SecretKeySelector `json:"apiKey,omitempty" protobuf:"bytes,3,opt,name=apiKey"`
-	// Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
 	// More info at https://stripe.com/docs/api/events/list
 	// +optional
-
-	EventFilter []string `json:"eventFilter,omitempty" protobuf:"bytes,5,rep,name=eventFilter"`
+	EventFilter []string `json:"eventFilter,omitempty" protobuf:"bytes,4,rep,name=eventFilter"`
 }
 
 // EmitterEventSource describes the event source for emitter

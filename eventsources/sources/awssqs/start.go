@@ -29,6 +29,7 @@ import (
 
 	"github.com/argoproj/argo-events/common/logging"
 	awscommon "github.com/argoproj/argo-events/eventsources/common/aws"
+	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"

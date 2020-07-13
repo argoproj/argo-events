@@ -77,6 +77,7 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.5.1
+	github.com/stripe/stripe-go v70.15.0+incompatible
 	github.com/tidwall/gjson v1.6.0
 	github.com/tidwall/sjson v1.1.1
 	github.com/yudai/gojsondiff v1.0.0 // indirect

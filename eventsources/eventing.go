@@ -19,6 +19,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
+	"github.com/argoproj/argo-events/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/eventsources/sources/webhook"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -130,7 +131,11 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 
 	}
 	if len(eventSource.Spec.Stripe) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Stripe {
+			servers = append(servers, &stripe.EventListener{EventSourceName: eventSource.Name, EventName: k, StripeEventSource: v})
+		}
+		result[apicommon.StripeEvent] = servers
 	}
 	if len(eventSource.Spec.Webhook) != 0 {
 		servers := []EventingServer{}
