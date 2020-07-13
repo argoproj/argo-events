@@ -40,10 +40,8 @@ import (
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		router := &Router{
-			route: webhook.GetFakeRoute(),
-			slackEventSource: &v1alpha1.SlackEventSource{
-				Namespace: "fake",
-			},
+			route:            webhook.GetFakeRoute(),
+			slackEventSource: &v1alpha1.SlackEventSource{},
 		}
 
 		convey.Convey("Inactive route should return 404", func() {
@@ -76,10 +74,8 @@ func TestRouteActiveHandler(t *testing.T) {
 func TestSlackSignature(t *testing.T) {
 	convey.Convey("Given a route that receives a message from Slack", t, func() {
 		router := &Router{
-			route: webhook.GetFakeRoute(),
-			slackEventSource: &v1alpha1.SlackEventSource{
-				Namespace: "fake",
-			},
+			route:            webhook.GetFakeRoute(),
+			slackEventSource: &v1alpha1.SlackEventSource{},
 		}
 
 		router.signingSecret = "abcdefghiklm1234567890"
@@ -118,10 +114,8 @@ func TestSlackSignature(t *testing.T) {
 func TestInteractionHandler(t *testing.T) {
 	convey.Convey("Given a route that receives an interaction event", t, func() {
 		router := &Router{
-			route: webhook.GetFakeRoute(),
-			slackEventSource: &v1alpha1.SlackEventSource{
-				Namespace: "fake",
-			},
+			route:            webhook.GetFakeRoute(),
+			slackEventSource: &v1alpha1.SlackEventSource{},
 		}
 
 		convey.Convey("Test an interaction action message", func() {
@@ -156,10 +150,8 @@ func TestInteractionHandler(t *testing.T) {
 func TestEventHandler(t *testing.T) {
 	convey.Convey("Given a route that receives an event", t, func() {
 		router := &Router{
-			route: webhook.GetFakeRoute(),
-			slackEventSource: &v1alpha1.SlackEventSource{
-				Namespace: "fake",
-			},
+			route:            webhook.GetFakeRoute(),
+			slackEventSource: &v1alpha1.SlackEventSource{},
 		}
 
 		convey.Convey("Test an event notification", func() {

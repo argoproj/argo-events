@@ -39,9 +39,6 @@ func validate(eventSource *v1alpha1.StripeEventSource) error {
 		if eventSource.APIKey == nil {
 			return errors.New("api key K8s secret selector not provided")
 		}
-		if eventSource.Namespace == "" {
-			return errors.New("namespace to retrieve the api key K8s secret not provided")
-		}
 	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }
