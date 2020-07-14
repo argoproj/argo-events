@@ -56,6 +56,8 @@ const (
 	EnvVarSensorImage = "SENSOR_IMAGE"
 	// EnvVarSensorObject refers to the env of based64 encoded sensor spec
 	EnvVarSensorObject = "SENSOR_OBJECT"
+	// EnvVarEventSourceObject refers to the env of based64 encoded eventsource spec
+	EnvVarEventSourceObject = "EVENTSOURCE_OBJECT"
 )
 
 // EventBus related
@@ -94,8 +96,8 @@ const (
 
 // Gateway constants
 const (
-	// LabelEventSourceName is the label for a event source in gateway
-	LabelEventSourceName    = "event-source-name"
+	// LabelEventSourceName is the label for a event source
+	LabelEventSourceName    = "eventsource-name"
 	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
 	// ProcessorPort is the default port for the gateway event processor server to run on.
 	GatewayProcessorPort = "9300"

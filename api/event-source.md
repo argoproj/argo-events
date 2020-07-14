@@ -372,29 +372,6 @@ Event Hub path/name
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve the
-shared access key and name from.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>
@@ -665,29 +642,6 @@ ChannelName refers to the channel name
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to use to retrieve the channel key and optional
-username/password
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>username</code></br> <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
@@ -868,22 +822,6 @@ Refer to the Kubernetes API documentation for the fields of the
 
 <td>
 
-<code>status</code></br> <em>
-<a href="#argoproj.io/v1alpha1.EventSourceStatus"> EventSourceStatus
-</a> </em>
-
-</td>
-
-<td>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>spec</code></br> <em>
 <a href="#argoproj.io/v1alpha1.EventSourceSpec"> EventSourceSpec </a>
 </em>
@@ -895,6 +833,93 @@ Refer to the Kubernetes API documentation for the fields of the
 <br/> <br/>
 
 <table>
+
+<tr>
+
+<td>
+
+<code>eventBusName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+EventBusName references to a EventBus name. By default the value is
+“default”
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>template</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Template is the pod specification for the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>service</code></br> <em> <a href="#argoproj.io/v1alpha1.Service">
+Service </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Service is the specifications of the service to expose the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>replica</code></br> <em> int32 </em>
+
+</td>
+
+<td>
+
+<p>
+
+Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
 
 <tr>
 
@@ -1430,6 +1455,22 @@ Generic event source
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>status</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceStatus"> EventSourceStatus
+</a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1480,6 +1521,93 @@ Description
 </thead>
 
 <tbody>
+
+<tr>
+
+<td>
+
+<code>eventBusName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+EventBusName references to a EventBus name. By default the value is
+“default”
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>template</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Template is the pod specification for the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>service</code></br> <em> <a href="#argoproj.io/v1alpha1.Service">
+Service </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Service is the specifications of the service to expose the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>replica</code></br> <em> int32 </em>
+
+</td>
+
+<td>
+
+<p>
+
+Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
 
 <tr>
 
@@ -2064,13 +2192,18 @@ Description
 
 <td>
 
-<code>createdAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
-Kubernetes meta/v1.Time </a> </em>
+<code>Status</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 
 </td>
 
 <td>
+
+<p>
+
+(Members of <code>Status</code> are embedded into this type.)
+
+</p>
 
 </td>
 
@@ -2557,29 +2690,6 @@ GitHub base URL (for GitHub Enterprise)
 <p>
 
 GitHub upload URL (for GitHub Enterprise)
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve
-webhook secret and api token from.
 
 </p>
 
@@ -3093,29 +3203,6 @@ must be set if either ccache or keytab is used.
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve cache
-secret and ket tab secret from.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>
@@ -3476,6 +3563,85 @@ TLS configuration for the mqtt client.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Metadata">
+
+Metadata
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Template">Template</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Metadata holds the annotations and labels of an event source pod
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>annotations</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>labels</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.NATSEventsSource">
 
 NATSEventsSource
@@ -3493,7 +3659,7 @@ NATSEventsSource
 
 <p>
 
-NATSEventSource refers to event-source for NATS related events
+NATSEventsSource refers to event-source for NATS related events
 
 </p>
 
@@ -3948,7 +4114,7 @@ for GCP
 
 <td>
 
-<code>enableWorkflowIdentity</code></br> <em> bool </em>
+<code>enableWorkloadIdentity</code></br> <em> bool </em>
 
 </td>
 
@@ -3958,9 +4124,9 @@ for GCP
 
 <p>
 
-EnableWorkflowIdentity determines if your project authenticates to GCP
-with WorkflowIdentity or CredentialsFile. If true, authentication is
-done with WorkflowIdentity. If false or omitted, authentication is done
+EnableWorkloadIdentity determines if your project authenticates to GCP
+with WorkloadIdentity or CredentialsFile. If true, authentication is
+done with WorkloadIdentity. If false or omitted, authentication is done
 with CredentialsFile.
 
 </p>
@@ -4682,29 +4848,6 @@ SecretKey refers K8 secret containing aws secret key
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace to read access related secret
-from.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>region</code></br> <em> string </em>
 
 </td>
@@ -4903,29 +5046,6 @@ for a message to arrive in the queue before returning.
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace to read access related secret
-from.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>roleARN</code></br> <em> string </em>
 
 </td>
@@ -4981,7 +5101,7 @@ will be JSON
 
 <p>
 
-QueueAccountId is the ID of the account that created the queue to
+QueueAccountID is the ID of the account that created the queue to
 monitor
 
 </p>
@@ -5109,6 +5229,108 @@ Value
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Service">
+
+Service
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Service holds the service information eventsource exposes
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>ports</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#serviceport-v1-core">
+\[\]Kubernetes core/v1.ServicePort </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+The list of ports that are exposed by this ClusterIP service.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clusterIP</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+clusterIP is the IP address of the service and is usually assigned
+randomly by the master. If an address is specified manually and is not
+in use by others, it will be allocated to the service; otherwise,
+creation of the service will fail. This field can not be changed through
+updates. Valid values are “None”, empty string (“”), or a valid IP
+address. “None” can be specified for headless services when proxying is
+not required. More info:
+<a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies">https://kubernetes.io/docs/concepts/services-networking/service/\#virtual-ips-and-service-proxies</a>
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.SlackEventSource">
 
 SlackEventSource
@@ -5215,29 +5437,6 @@ Token for URL verification handshake
 <p>
 
 Webhook holds configuration for a REST endpoint
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve token
-and signing secret from.
 
 </p>
 
@@ -5451,7 +5650,7 @@ Auth token for storagegrid api
 
 <p>
 
-ApiURL is the url of the storagegrid api.
+APIURL is the url of the storagegrid api.
 
 </p>
 
@@ -5480,8 +5679,8 @@ StorageGridFilter
 
 <p>
 
-Filter represents filters to apply to bucket notifications for
-specifying constraints on objects
+StorageGridFilter represents filters to apply to bucket notifications
+for specifying constraints on objects
 
 </p>
 
@@ -5665,7 +5864,7 @@ CreateWebhook is enabled.
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
+<code>eventFilter</code></br> <em> \[\]string </em>
 
 </td>
 
@@ -5675,24 +5874,11 @@ CreateWebhook is enabled.
 
 <p>
 
-Namespace to retrieve the APIKey secret from. Must be specified in order
-to read API key from APIKey K8s secret.
+EventFilter describes the type of events to listen to. If not specified,
+all types of events will be processed. More info at
+<a href="https://stripe.com/docs/api/events/list">https://stripe.com/docs/api/events/list</a>
 
 </p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>eventFilter</code></br> <em> \[\]string </em>
-
-</td>
-
-<td>
 
 </td>
 
@@ -5808,6 +5994,225 @@ ClientCertPath refers the file path that contains client cert.
 <p>
 
 ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Template">
+
+Template
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Template holds the information of an EventSource deployment template
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Metadata"> Metadata </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Metdata sets the pods’s metadata, i.e. annotations and labels
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serviceAccountName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ServiceAccountName is the name of the ServiceAccount to use to run event
+source pod. More info:
+<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>container</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#container-v1-core">
+Kubernetes core/v1.Container </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Container is the main container image to run in the event source pod
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>volumes</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#volume-v1-core">
+\[\]Kubernetes core/v1.Volume </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Volumes is a list of volumes that can be mounted by containers in a
+workflow.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>securityContext</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+Kubernetes core/v1.PodSecurityContext </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+SecurityContext holds pod-level security attributes and common container
+settings. Optional: Defaults to empty. See type description for default
+values of each field.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>affinity</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+Kubernetes core/v1.Affinity </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+If specified, the pod’s scheduling constraints
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tolerations</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#toleration-v1-core">
+\[\]Kubernetes core/v1.Toleration </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+If specified, the pod’s tolerations.
 
 </p>
 

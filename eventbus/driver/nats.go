@@ -67,35 +67,37 @@ func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logg
 		subject:   subject,
 		clientID:  clientID,
 		auth:      auth,
-		logger:    logger.WithField("clusterID", clusterID).WithField("clientID", clientID).Logger}
+		logger:    logger,
+	}
 }
 
 func (n *natsStreaming) Connect() (Connection, error) {
+	log := n.logger.WithField("clientID", n.clientID)
 	opts := []nats.Option{}
 	switch n.auth.Strategy {
 	case eventbusv1alpha1.AuthStrategyToken:
-		n.logger.Info("NATS auth strategy: Token")
+		log.Info("NATS auth strategy: Token")
 		opts = append(opts, nats.Token(n.auth.Crendential.Token))
 	case eventbusv1alpha1.AuthStrategyNone:
-		n.logger.Info("NATS auth strategy: None")
+		log.Info("NATS auth strategy: None")
 	default:
 		return nil, errors.New("unsupported auth strategy")
 	}
 	nc, err := nats.Connect(n.url, opts...)
 	if err != nil {
-		n.logger.Errorf("Failed to connect to NATS server, %v", err)
+		log.Errorf("Failed to connect to NATS server, %v", err)
 		return nil, err
 	}
-	n.logger.Info("Connected to NATS server.")
+	log.Info("Connected to NATS server.")
 	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
-			n.logger.Fatalf("Connection lost, reason: %v", reason)
+			log.Fatalf("Connection lost, reason: %v", reason)
 		}))
 	if err != nil {
-		n.logger.Errorf("Failed to connect to NATS streaming server, %v", err)
+		log.Errorf("Failed to connect to NATS streaming server, %v", err)
 		return nil, err
 	}
-	n.logger.Info("Connected to NATS streaming server.")
+	log.Info("Connected to NATS streaming server.")
 	return &natsStreamingConnection{
 		natsConn: nc,
 		stanConn: sc,
@@ -113,6 +115,7 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
 func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+	log := n.logger.WithField("clientID", n.clientID)
 	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
 	if err != nil {
 		return err
@@ -124,26 +127,26 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	// use clientID as durable name?
 	durableName := n.clientID
 	sub, err := nsc.stanConn.Subscribe(n.subject, func(m *stan.Msg) {
-		n.processEventSourceMsg(m, msgHolder, filter, action)
+		n.processEventSourceMsg(m, msgHolder, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
 		stan.StartAt(pb.StartPosition_NewOnly),
 		stan.AckWait(1*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
-		n.logger.Errorf("failed to subscribe to subject %s", n.subject)
+		log.Errorf("failed to subscribe to subject %s", n.subject)
 		return err
 	}
-	n.logger.Infof("Subscribed to subject %s ...", n.subject)
+	log.Infof("Subscribed to subject %s ...", n.subject)
 
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan bool)
 	signal.Notify(signalChan, os.Interrupt)
 	go func() {
 		for range signalChan {
-			n.logger.Info("Received an interrupt, unsubscribing and closing connection...")
+			log.Info("Received an interrupt, unsubscribing and closing connection...")
 			_ = sub.Close()
-			n.logger.Infof("subscription on subject %s closed", n.subject)
+			log.Infof("subscription on subject %s closed", n.subject)
 			cleanupDone <- true
 		}
 	}()
@@ -151,45 +154,50 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	return nil
 }
 
-func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event)) {
+func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *logrus.Entry) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
-		n.logger.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
+		log.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
 		_ = m.Ack()
 		return
-	}
-
-	// Old redelivered messages should be able to be acked in 60 seconds.
-	// Reset if the flag didn't get cleared in that period for some reasons.
-	if msgHolder.lastMeetTime > 0 || msgHolder.latestGoodMsgTimestamp > 0 {
-		if time.Now().Unix()-msgHolder.lastMeetTime > 60 {
-			msgHolder.resetAll()
-			n.logger.Info("ATTENTION: Reset the flags because they didn't get cleared in 60 seconds...")
-		}
 	}
 
 	depName, err := msgHolder.getDependencyName(event.Source(), event.Subject())
 	if err != nil {
-		n.logger.Errorf("Failed to get the dependency name, discarding it... err: %v", err)
+		log.Errorf("Failed to get the dependency name, discarding it... err: %v", err)
 		_ = m.Ack()
 		return
 	}
 
-	// ACK all the old messages after conditions meet
-	if m.Timestamp <= msgHolder.latestGoodMsgTimestamp {
-		if depName != "" {
-			msgHolder.reset(depName)
-		}
-		_ = m.Ack()
-		return
-	}
-
-	// Start a new round
 	if depName == "" || !filter(depName, *event) {
 		// message not interested
 		_ = m.Ack()
 		return
 	}
+
+	if msgHolder.lastMeetTime > 0 || msgHolder.latestGoodMsgTimestamp > 0 {
+		// Old redelivered messages should be able to be acked in 60 seconds.
+		// Reset if the flag didn't get cleared in that period for some reasons.
+		if time.Now().Unix()-msgHolder.lastMeetTime > 60 {
+			msgHolder.resetAll()
+			log.Info("ATTENTION: Reset the flags because they didn't get cleared in 60 seconds...")
+		}
+	}
+
+	// Clean up old messages before starting a new round
+	if msgHolder.lastMeetTime > 0 || msgHolder.latestGoodMsgTimestamp > 0 {
+		// ACK all the old messages after conditions meet
+		if m.Timestamp <= msgHolder.latestGoodMsgTimestamp {
+			if depName != "" {
+				msgHolder.reset(depName)
+			}
+			_ = m.Ack()
+			return
+		}
+		return
+	}
+
+	// Start a new round
 	if existingMsg, ok := msgHolder.msgs[depName]; ok {
 		if m.Timestamp == existingMsg.timestamp {
 			// Redelivered latest messge, return
@@ -215,7 +223,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 
 	result, err := msgHolder.expr.Evaluate(msgHolder.parameters)
 	if err != nil {
-		n.logger.Errorf("failed to evaluate dependency expression: %v", err)
+		log.Errorf("failed to evaluate dependency expression: %v", err)
 		// TODO: how to handle this situation?
 		return
 	}
@@ -229,7 +237,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	for k, v := range msgHolder.msgs {
 		messages[k] = *v.event
 	}
-	n.logger.Infof("Triggering actions for client %s", n.clientID)
+	log.Infof("Triggering actions for client %s", n.clientID)
 
 	go action(messages)
 

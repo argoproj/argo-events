@@ -158,8 +158,8 @@ type MinioEventData struct {
 type MQTTEventData struct {
 	// Topic refers to the MQTT topic name.
 	Topic string `json:"topic"`
-	// MessageId is the unique ID for the message
-	MessageId int `json:"messageId"`
+	// MessageID is the unique ID for the message
+	MessageID int `json:"messageId"`
 	// Body is the message payload.
 	Body interface{} `json:"body"`
 }

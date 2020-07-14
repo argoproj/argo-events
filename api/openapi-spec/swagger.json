@@ -380,10 +380,6 @@
           "description": "Event Hub path/name",
           "type": "string"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.",
-          "type": "string"
-        },
         "sharedAccessKey": {
           "description": "SharedAccessKey is the the generated value of the key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -456,10 +452,6 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
-        "namespace": {
-          "description": "Namespace to use to retrieve the channel key and optional username/password",
-          "type": "string"
-        },
         "password": {
           "description": "Password to use to connect to broker",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -479,8 +471,8 @@
       "type": "object",
       "required": [
         "metadata",
-        "status",
-        "spec"
+        "spec",
+        "status"
       ],
       "properties": {
         "apiVersion": {
@@ -560,6 +552,10 @@
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EmitterEventSource"
           }
+        },
+        "eventBusName": {
+          "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
+          "type": "string"
         },
         "file": {
           "description": "File event sources",
@@ -645,12 +641,21 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.RedisEventSource"
           }
         },
+        "replica": {
+          "description": "Replica is the gateway deployment replicas",
+          "type": "integer",
+          "format": "int32"
+        },
         "resource": {
           "description": "Resource event sources",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.ResourceEventSource"
           }
+        },
+        "service": {
+          "description": "Service is the specifications of the service to expose the event source",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Service"
         },
         "slack": {
           "description": "Slack event sources",
@@ -687,6 +692,10 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.StripeEventSource"
           }
         },
+        "template": {
+          "description": "Template is the pod specification for the event source",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Template"
+        },
         "webhook": {
           "description": "Webhook event sources",
           "type": "object",
@@ -700,8 +709,14 @@
       "description": "EventSourceStatus holds the status of the event-source resource",
       "type": "object",
       "properties": {
-        "createdAt": {
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        "conditions": {
+          "description": "Conditions are the latest available observations of a resource's current state.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.common.Condition"
+          },
+          "x-kubernetes-patch-merge-key": "type",
+          "x-kubernetes-patch-strategy": "merge"
         }
       }
     },
@@ -788,10 +803,6 @@
         "insecure": {
           "description": "Insecure tls verification",
           "type": "boolean"
-        },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.",
-          "type": "string"
         },
         "owner": {
           "description": "Owner refers to GitHub owner name i.e. argoproj",
@@ -904,10 +915,6 @@
           "description": "KrbUsername is the Kerberos username used with Kerberos keytab It must be set if keytab is used.",
           "type": "string"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.",
-          "type": "string"
-        },
         "path": {
           "description": "Path is relative path of object to watch with respect to the directory",
           "type": "string"
@@ -992,8 +999,26 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.Metadata": {
+      "description": "Metadata holds the annotations and labels of an event source pod",
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.NATSEventsSource": {
-      "description": "NATSEventSource refers to event-source for NATS related events",
+      "description": "NATSEventsSource refers to event-source for NATS related events",
       "type": "object",
       "required": [
         "url",
@@ -1075,8 +1100,8 @@
           "description": "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
           "type": "boolean"
         },
-        "enableWorkflowIdentity": {
-          "description": "EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile. If true, authentication is done with WorkflowIdentity. If false or omitted, authentication is done with CredentialsFile.",
+        "enableWorkloadIdentity": {
+          "description": "EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile. If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.",
           "type": "boolean"
         },
         "jsonBody": {
@@ -1215,10 +1240,6 @@
           "description": "AccessKey refers K8 secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace to read access related secret from.",
-          "type": "string"
-        },
         "region": {
           "description": "Region is AWS region",
           "type": "string"
@@ -1258,16 +1279,12 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace to read access related secret from.",
-          "type": "string"
-        },
         "queue": {
           "description": "Queue is AWS SQS queue to listen to for messages",
           "type": "string"
         },
         "queueAccountId": {
-          "description": "QueueAccountId is the ID of the account that created the queue to monitor",
+          "description": "QueueAccountID is the ID of the account that created the queue to monitor",
           "type": "string"
         },
         "region": {
@@ -1311,14 +1328,34 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.Service": {
+      "description": "Service holds the service information eventsource exposes",
+      "type": "object",
+      "properties": {
+        "clusterIP": {
+          "description": "clusterIP is the IP address of the service and is usually assigned randomly by the master. If an address is specified manually and is not in use by others, it will be allocated to the service; otherwise, creation of the service will fail. This field can not be changed through updates. Valid values are \"None\", empty string (\"\"), or a valid IP address. \"None\" can be specified for headless services when proxying is not required. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+          "type": "string"
+        },
+        "ports": {
+          "description": "The list of ports that are exposed by this ClusterIP service.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.ServicePort"
+          },
+          "x-kubernetes-list-map-keys": [
+            "port",
+            "protocol"
+          ],
+          "x-kubernetes-list-type": "map",
+          "x-kubernetes-patch-merge-key": "port",
+          "x-kubernetes-patch-strategy": "merge"
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.SlackEventSource": {
       "description": "SlackEventSource refers to event-source for Slack related events",
       "type": "object",
       "properties": {
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.",
-          "type": "string"
-        },
         "signingSecret": {
           "description": "Slack App signing secret",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -1344,7 +1381,7 @@
       ],
       "properties": {
         "apiURL": {
-          "description": "ApiURL is the url of the storagegrid api.",
+          "description": "APIURL is the url of the storagegrid api.",
           "type": "string"
         },
         "authToken": {
@@ -1380,7 +1417,7 @@
       }
     },
     "io.argoproj.eventsource.v1alpha1.StorageGridFilter": {
-      "description": "Filter represents filters to apply to bucket notifications for specifying constraints on objects",
+      "description": "StorageGridFilter represents filters to apply to bucket notifications for specifying constraints on objects",
       "type": "object",
       "required": [
         "prefix",
@@ -1408,14 +1445,11 @@
           "type": "boolean"
         },
         "eventFilter": {
+          "description": "EventFilter describes the type of events to listen to. If not specified, all types of events will be processed. More info at https://stripe.com/docs/api/events/list",
           "type": "array",
           "items": {
             "type": "string"
           }
-        },
-        "namespace": {
-          "description": "Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.",
-          "type": "string"
         },
         "webhook": {
           "description": "Webhook holds configuration for a REST endpoint",
@@ -1443,6 +1477,48 @@
         "clientKeyPath": {
           "description": "ClientKeyPath refers the file path that contains client key.",
           "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.Template": {
+      "description": "Template holds the information of an EventSource deployment template",
+      "type": "object",
+      "properties": {
+        "affinity": {
+          "description": "If specified, the pod's scheduling constraints",
+          "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
+        },
+        "container": {
+          "description": "Container is the main container image to run in the event source pod",
+          "$ref": "#/definitions/io.k8s.api.core.v1.Container"
+        },
+        "metadata": {
+          "description": "Metdata sets the pods's metadata, i.e. annotations and labels",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Metadata"
+        },
+        "securityContext": {
+          "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext"
+        },
+        "serviceAccountName": {
+          "description": "ServiceAccountName is the name of the ServiceAccount to use to run event source pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
+          "type": "string"
+        },
+        "tolerations": {
+          "description": "If specified, the pod's tolerations.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.Toleration"
+          }
+        },
+        "volumes": {
+          "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.Volume"
+          },
+          "x-kubernetes-patch-merge-key": "name",
+          "x-kubernetes-patch-strategy": "merge"
         }
       }
     },
