@@ -52,7 +52,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 	return apicommon.RedisEvent
 }
 
-// listenEvents listens events published by redis
+// StartListening listens events published by redis
 func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),

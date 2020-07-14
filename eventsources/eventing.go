@@ -21,6 +21,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
 	"github.com/argoproj/argo-events/eventsources/sources/file"
 	"github.com/argoproj/argo-events/eventsources/sources/gcppubsub"
+	"github.com/argoproj/argo-events/eventsources/sources/nsq"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
@@ -108,7 +109,11 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 
 	}
 	if len(eventSource.Spec.NSQ) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.NSQ {
+			servers = append(servers, &nsq.EventListener{EventSourceName: eventSource.Name, EventName: k, NSQEventSource: v})
+		}
+		result[apicommon.NSQEvent] = servers
 	}
 	if len(eventSource.Spec.PubSub) != 0 {
 		servers := []EventingServer{}
