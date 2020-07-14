@@ -16,7 +16,7 @@ spec:
       # topic name
       topic: test
       # Refers to path of the credential file that is mounted in the gateway pod.
-      credentialsFile: /creds/key.json
+      credentialsFile: /gcp-pubsub-creds-dir/key.json
 
 #    example-workload-identity:
 #      # jsonBody specifies that all event body payload coming from this
