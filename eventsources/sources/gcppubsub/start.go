@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -114,7 +115,12 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		}
 	}
 
-	subscriptionName := fmt.Sprintf("%s-%s", el.GetEventName(), eventSource.Id)
+	hashcode, err := el.hash()
+	if err != nil {
+		log.WithError(err).Errorln("failed get hashcode")
+		return err
+	}
+	subscriptionName := fmt.Sprintf("%s-%s", el.GetEventName(), hashcode)
 
 	log = log.WithField("subscription", subscriptionName)
 
@@ -180,4 +186,12 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 	}
 
 	return nil
+}
+
+func (el *EventListener) hash() (string, error) {
+	body, err := json.Marshal(&el.PubSubEventSource)
+	if err != nil {
+		return "", err
+	}
+	return common.Hasher(el.GetEventName() + string(body)), nil
 }
