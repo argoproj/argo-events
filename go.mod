@@ -20,6 +20,7 @@ require (
 	github.com/aws/aws-sdk-go v1.30.7
 	github.com/cloudevents/sdk-go/v2 v2.1.0
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
+	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/emicklei/go-restful v2.12.0+incompatible // indirect
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/fatih/color v1.9.0 // indirect

@@ -60,7 +60,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 	})
 	defer sources.Recover(el.GetEventName())
 
-	log.Infoln("parsing minio event source...")
+	log.Infoln("starting minio event source...")
 
 	minioEventSource := &el.MinioEventSource
 

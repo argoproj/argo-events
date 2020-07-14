@@ -21,7 +21,9 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
 	"github.com/argoproj/argo-events/eventsources/sources/file"
 	"github.com/argoproj/argo-events/eventsources/sources/gcppubsub"
+	"github.com/argoproj/argo-events/eventsources/sources/kafka"
 	"github.com/argoproj/argo-events/eventsources/sources/minio"
+	"github.com/argoproj/argo-events/eventsources/sources/mqtt"
 	"github.com/argoproj/argo-events/eventsources/sources/nats"
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
@@ -99,10 +101,18 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 
 	}
 	if len(eventSource.Spec.Kafka) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Kafka {
+			servers = append(servers, &kafka.EventListener{EventSourceName: eventSource.Name, EventName: k, KafkaEventSource: v})
+		}
+		result[apicommon.KafkaEvent] = servers
 	}
 	if len(eventSource.Spec.MQTT) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.MQTT {
+			servers = append(servers, &mqtt.EventListener{EventSourceName: eventSource.Name, EventName: k, MQTTEventSource: v})
+		}
+		result[apicommon.MQTTEvent] = servers
 	}
 	if len(eventSource.Spec.Minio) != 0 {
 		servers := []EventingServer{}
