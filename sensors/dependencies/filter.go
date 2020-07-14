@@ -93,37 +93,37 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 		return true, nil
 	}
 
-	startTime, startParseErr := common.ParseTime(timeFilter.Start, eventTime)
-	stopTime, stopParseErr := common.ParseTime(timeFilter.Stop, eventTime)
+	// Parse start and stop
+	var startTime, stopTime time.Time
+	var err error
+	if timeFilter.Start != "" {
+		startTime, err = common.ParseTime(timeFilter.Start, eventTime)
+		if err != nil {
+			return false, err
+		}
+	}
+	if timeFilter.Stop != "" {
+		stopTime, err = common.ParseTime(timeFilter.Stop, eventTime)
+		if err != nil {
+			return false, err
+		}
+	}
 
+	// Filtering logic
+	// Case 1, 2: Both are set
 	if timeFilter.Start != "" && timeFilter.Stop != "" {
-		if startParseErr != nil {
-			return false, startParseErr
-		}
-
-		if stopParseErr != nil {
-			return false, stopParseErr
-		}
-
 		if startTime.Before(stopTime) {
 			return (eventTime.After(startTime) || eventTime.Equal(startTime)) && eventTime.Before(stopTime), nil
 		} else {
 			return (eventTime.After(startTime) || eventTime.Equal(startTime)) || eventTime.Before(stopTime), nil
 		}
 	}
-
+	// Case 3: Only start is set
 	if timeFilter.Start != "" {
-		// stop is nil - does not have an end
-		if startParseErr != nil {
-			return false, startParseErr
-		}
 		return (eventTime.After(startTime) || eventTime.Equal(startTime)), nil
 	}
-
+	// Case 4: Only stop is set
 	if timeFilter.Stop != "" {
-		if stopParseErr != nil {
-			return false, stopParseErr
-		}
 		return eventTime.Before(stopTime), nil
 	}
 
