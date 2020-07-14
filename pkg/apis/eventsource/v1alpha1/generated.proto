@@ -303,13 +303,9 @@ message GithubEventSource {
   // +optional
   optional string githubUploadURL = 12;
 
-  // Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.
-  // +optional
-  optional string namespace = 13;
-
   // DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
   // +optional
-  optional bool deleteHookOnFinish = 14;
+  optional bool deleteHookOnFinish = 13;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events

@@ -21,6 +21,8 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
 	"github.com/argoproj/argo-events/eventsources/sources/file"
 	"github.com/argoproj/argo-events/eventsources/sources/gcppubsub"
+	"github.com/argoproj/argo-events/eventsources/sources/github"
+	"github.com/argoproj/argo-events/eventsources/sources/gitlab"
 	"github.com/argoproj/argo-events/eventsources/sources/kafka"
 	"github.com/argoproj/argo-events/eventsources/sources/minio"
 	"github.com/argoproj/argo-events/eventsources/sources/mqtt"
@@ -92,10 +94,18 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 		result[apicommon.FileEvent] = servers
 	}
 	if len(eventSource.Spec.Github) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Github {
+			servers = append(servers, &github.EventListener{EventSourceName: eventSource.Name, EventName: k, GithubEventSource: v})
+		}
+		result[apicommon.GithubEvent] = servers
 	}
 	if len(eventSource.Spec.Gitlab) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Gitlab {
+			servers = append(servers, &gitlab.EventListener{EventSourceName: eventSource.Name, EventName: k, GitlabEventSource: v})
+		}
+		result[apicommon.GitlabEvent] = servers
 	}
 	if len(eventSource.Spec.HDFS) != 0 {
 

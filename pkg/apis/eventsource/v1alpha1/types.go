@@ -426,12 +426,9 @@ type GithubEventSource struct {
 	// GitHub upload URL (for GitHub Enterprise)
 	// +optional
 	GithubUploadURL string `json:"githubUploadURL,omitempty" protobuf:"bytes,12,opt,name=githubUploadURL"`
-	// Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,13,opt,name=namespace"`
 	// DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
 	// +optional
-	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,14,opt,name=deleteHookOnFinish"`
+	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,13,opt,name=deleteHookOnFinish"`
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events

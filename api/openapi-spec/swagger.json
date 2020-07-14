@@ -804,10 +804,6 @@
           "description": "Insecure tls verification",
           "type": "boolean"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.",
-          "type": "string"
-        },
         "owner": {
           "description": "Owner refers to GitHub owner name i.e. argoproj",
           "type": "string"

@@ -2701,29 +2701,6 @@ GitHub upload URL (for GitHub Enterprise)
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve
-webhook secret and api token from.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>deleteHookOnFinish</code></br> <em> bool </em>
 
 </td>

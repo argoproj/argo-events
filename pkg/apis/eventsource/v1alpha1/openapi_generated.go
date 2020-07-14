@@ -934,13 +934,6 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"deleteHookOnFinish": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.",
