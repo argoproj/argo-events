@@ -404,7 +404,6 @@ func envFromSecretsOrConfigMaps(source interface{}, t reflect.Type) []corev1.Env
 					result = append(result, common.GenerateEnvFromConfigMapSpec(selector))
 				default:
 				}
-
 			}
 		}
 	}
