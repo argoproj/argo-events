@@ -21,6 +21,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
 	"github.com/argoproj/argo-events/eventsources/sources/file"
 	"github.com/argoproj/argo-events/eventsources/sources/gcppubsub"
+	"github.com/argoproj/argo-events/eventsources/sources/redis"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
@@ -117,7 +118,11 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 		result[apicommon.PubSubEvent] = servers
 	}
 	if len(eventSource.Spec.Redis) != 0 {
-
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Redis {
+			servers = append(servers, &redis.EventListener{EventSourceName: eventSource.Name, EventName: k, RedisEventSource: v})
+		}
+		result[apicommon.RedisEvent] = servers
 	}
 	if len(eventSource.Spec.SNS) != 0 {
 		servers := []EventingServer{}
