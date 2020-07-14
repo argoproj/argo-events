@@ -1437,9 +1437,9 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"enableWorkflowIdentity": {
+					"enableWorkloadIdentity": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile. If true, authentication is done with WorkflowIdentity. If false or omitted, authentication is done with CredentialsFile.",
+							Description: "EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile. If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},

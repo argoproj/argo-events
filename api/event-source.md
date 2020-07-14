@@ -4160,7 +4160,7 @@ for GCP
 
 <td>
 
-<code>enableWorkflowIdentity</code></br> <em> bool </em>
+<code>enableWorkloadIdentity</code></br> <em> bool </em>
 
 </td>
 
@@ -4170,9 +4170,9 @@ for GCP
 
 <p>
 
-EnableWorkflowIdentity determines if your project authenticates to GCP
-with WorkflowIdentity or CredentialsFile. If true, authentication is
-done with WorkflowIdentity. If false or omitted, authentication is done
+EnableWorkloadIdentity determines if your project authenticates to GCP
+with WorkloadIdentity or CredentialsFile. If true, authentication is
+done with WorkloadIdentity. If false or omitted, authentication is done
 with CredentialsFile.
 
 </p>

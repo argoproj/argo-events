@@ -3,6 +3,7 @@ module github.com/argoproj/argo-events
 go 1.13
 
 require (
+	cloud.google.com/go v0.38.0
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.0
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/goutils v1.1.0 // indirect
@@ -96,6 +97,7 @@ require (
 	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20200408132156-9ee5ef7a2c0d // indirect
+	google.golang.org/api v0.6.1-0.20190607001116-5213b8090861
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200408120641-fbb3ad325eb7 // indirect
 	google.golang.org/grpc v1.28.1

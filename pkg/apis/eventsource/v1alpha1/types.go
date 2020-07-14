@@ -380,10 +380,10 @@ type PubSubEventSource struct {
 	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
 	// CredentialsFile is the file that contains credentials to authenticate for GCP
 	CredentialsFile string `json:"credentialsFile" protobuf:"bytes,4,opt,name=credentialsFile"`
-	// EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile.
-	// If true, authentication is done with WorkflowIdentity. If false or omitted, authentication is done with CredentialsFile.
+	// EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile.
+	// If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.
 	// +optional
-	EnableWorkflowIdentity bool `json:"enableWorkflowIdentity,omitempty" protobuf:"varint,5,opt,name=enableWorkflowIdentity"`
+	EnableWorkloadIdentity bool `json:"enableWorkloadIdentity,omitempty" protobuf:"varint,5,opt,name=enableWorkloadIdentity"`
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
 	// +optional
 	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"varint,6,opt,name=deleteSubscriptionOnFinish"`
