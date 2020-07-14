@@ -1,0 +1,5 @@
+/api/**/swagger.json    linguist-generated=true
+/api/*.html             linguist-generated=true
+/api/*.md               linguist-generated=true
+/manifests/install.yaml linguist-generated=true
+/pkg/**/generated.proto linguist-generated=true
