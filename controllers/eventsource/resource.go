@@ -25,6 +25,11 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
+var (
+	secretKeySelectorType    = reflect.TypeOf(&corev1.SecretKeySelector{})
+	configMapKeySelectorType = reflect.TypeOf(&corev1.ConfigMapKeySelector{})
+)
+
 // AdaptorArgs are the args needed to create a sensor deployment
 type AdaptorArgs struct {
 	// controller namespace
@@ -233,10 +238,19 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	envs := deploymentSpec.Template.Spec.Containers[0].Env
 	envs = append(envs, envVars...)
 	deploymentSpec.Template.Spec.Containers[0].Env = envs
-	envFroms := envFromSecrets(args.EventSource)
+
+	envFroms := []corev1.EnvFromSource{}
 	oldEnvFroms := deploymentSpec.Template.Spec.Containers[0].EnvFrom
 	if len(oldEnvFroms) > 0 {
 		envFroms = append(envFroms, oldEnvFroms...)
+	}
+	envFromSecrets := envFromSources(args.EventSource, secretKeySelectorType)
+	if len(envFromSecrets) > 0 {
+		envFroms = append(envFroms, envFromSecrets...)
+	}
+	envFromConfigMaps := envFromSources(args.EventSource, configMapKeySelectorType)
+	if len(envFromConfigMaps) > 0 {
+		envFroms = append(envFroms, envFromConfigMaps...)
 	}
 	deploymentSpec.Template.Spec.Containers[0].EnvFrom = envFroms
 	deployment := &appv1.Deployment{
@@ -337,8 +351,8 @@ func labelSelector(labelMap map[string]string) labels.Selector {
 	return labels.SelectorFromSet(labelMap)
 }
 
-// envFromSecrets returns list of EnvFromSource of an EventSource
-func envFromSecrets(eventSource *v1alpha1.EventSource) []corev1.EnvFromSource {
+// envFromSources returns list of EnvFromSource of an EventSource
+func envFromSources(eventSource *v1alpha1.EventSource, t reflect.Type) []corev1.EnvFromSource {
 	result := []corev1.EnvFromSource{}
 	v := reflect.ValueOf(&eventSource.Spec).Elem()
 	for j := 0; j < v.NumField(); j++ {
@@ -347,8 +361,8 @@ func envFromSecrets(eventSource *v1alpha1.EventSource) []corev1.EnvFromSource {
 			iter := f.MapRange()
 			for iter.Next() {
 				val := iter.Value().Interface()
-				secrets := envFromSecretsOfSource(val)
-				result = append(result, secrets...)
+				froms := envFromSecretsOrConfigMaps(val, t)
+				result = append(result, froms...)
 			}
 		}
 	}
@@ -365,10 +379,8 @@ func envFromSecrets(eventSource *v1alpha1.EventSource) []corev1.EnvFromSource {
 	return r
 }
 
-func envFromSecretsOfSource(source interface{}) []corev1.EnvFromSource {
+func envFromSecretsOrConfigMaps(source interface{}, t reflect.Type) []corev1.EnvFromSource {
 	result := []corev1.EnvFromSource{}
-	secretKeySelectorType := reflect.TypeOf(&corev1.SecretKeySelector{})
-
 	value := reflect.ValueOf(source)
 	if value.Kind() == reflect.Ptr {
 		value = reflect.Indirect(value)
@@ -380,11 +392,19 @@ func envFromSecretsOfSource(source interface{}) []corev1.EnvFromSource {
 	for i := 0; i < structType.NumField(); i++ {
 		f := structType.Field(i)
 
-		if f.Type == secretKeySelectorType {
+		if f.Type == t {
 			v := value.FieldByName(f.Name)
 			if !v.IsNil() {
-				selector := v.Interface().(*corev1.SecretKeySelector)
-				result = append(result, common.GenerateEnvFromSecretSpec(selector))
+				switch t {
+				case secretKeySelectorType:
+					selector := v.Interface().(*corev1.SecretKeySelector)
+					result = append(result, common.GenerateEnvFromSecretSpec(selector))
+				case configMapKeySelectorType:
+					selector := v.Interface().(*corev1.ConfigMapKeySelector)
+					result = append(result, common.GenerateEnvFromConfigMapSpec(selector))
+				default:
+				}
+
 			}
 		}
 	}

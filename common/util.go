@@ -119,11 +119,29 @@ func GetEnvFromSecret(selector *v1.SecretKeySelector) (string, bool) {
 	return os.LookupEnv(fmt.Sprintf("%s_%s", selector.Name, selector.Key))
 }
 
-// GenerateEnvFromSecretSpec builds a "envFrom" spec with a selectKeySelector
+// GenerateEnvFromSecretSpec builds a "envFrom" spec with a secretKeySelector
 func GenerateEnvFromSecretSpec(selector *v1.SecretKeySelector) v1.EnvFromSource {
 	return v1.EnvFromSource{
 		Prefix: selector.Name + "_",
 		SecretRef: &v1.SecretEnvSource{
+			LocalObjectReference: v1.LocalObjectReference{
+				Name: selector.Name,
+			},
+		},
+	}
+}
+
+// GetEnvFromConfigMap retrieves the value of envFrom.configMapRef
+// "${configMapRef.name}_" is expected to be defined as "prefix"
+func GetEnvFromConfigMap(selector *v1.ConfigMapKeySelector) (string, bool) {
+	return os.LookupEnv(fmt.Sprintf("%s_%s", selector.Name, selector.Key))
+}
+
+// GenerateEnvFromConfigMapSpec builds a "envFrom" spec with a configMapKeySelector
+func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromSource {
+	return v1.EnvFromSource{
+		Prefix: selector.Name + "_",
+		ConfigMapRef: &v1.ConfigMapEnvSource{
 			LocalObjectReference: v1.LocalObjectReference{
 				Name: selector.Name,
 			},
