@@ -374,10 +374,6 @@ message HDFSEventSource {
   // KrbServicePrincipalName is the principal name of Kerberos service
   // It must be set if either ccache or keytab is used.
   optional string krbServicePrincipalName = 11;
-
-  // Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.
-  // +optional
-  optional string namespace = 12;
 }
 
 // KafkaEventSource refers to event-source for Kafka related events

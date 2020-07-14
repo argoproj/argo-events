@@ -483,9 +483,6 @@ type HDFSEventSource struct {
 	// KrbServicePrincipalName is the principal name of Kerberos service
 	// It must be set if either ccache or keytab is used.
 	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty" protobuf:"bytes,11,opt,name=krbServicePrincipalName"`
-	// Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,12,opt,name=namespace"`
 }
 
 // SlackEventSource refers to event-source for Slack related events

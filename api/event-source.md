@@ -3203,29 +3203,6 @@ must be set if either ccache or keytab is used.
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve cache
-secret and ket tab secret from.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>

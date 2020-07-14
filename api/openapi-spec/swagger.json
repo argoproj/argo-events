@@ -915,10 +915,6 @@
           "description": "KrbUsername is the Kerberos username used with Kerberos keytab It must be set if keytab is used.",
           "type": "string"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.",
-          "type": "string"
-        },
         "path": {
           "description": "Path is relative path of object to watch with respect to the directory",
           "type": "string"
