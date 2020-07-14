@@ -17,12 +17,12 @@ limitations under the License.
 package sensors
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -65,9 +65,8 @@ func TestGetDependencyExpression(t *testing.T) {
 		}
 		sensorCtx := &SensorContext{
 			Sensor: obj,
-			Logger: common.NewArgoEventsLogger(),
 		}
-		expr, err := sensorCtx.getDependencyExpression(*fakeTrigger)
+		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
 		assert.NoError(t, err)
 		assert.Equal(t, "dep1", expr)
 	})
@@ -88,9 +87,8 @@ func TestGetDependencyExpression(t *testing.T) {
 		}
 		sensorCtx := &SensorContext{
 			Sensor: obj,
-			Logger: common.NewArgoEventsLogger(),
 		}
-		expr, err := sensorCtx.getDependencyExpression(*fakeTrigger)
+		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
 		assert.NoError(t, err)
 		assert.Equal(t, "dep1 && dep2", expr)
 	})
@@ -116,7 +114,6 @@ func TestGetDependencyExpression(t *testing.T) {
 		}
 		sensorCtx := &SensorContext{
 			Sensor: obj,
-			Logger: common.NewArgoEventsLogger(),
 		}
 		obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
 			{Name: "group-1", Dependencies: []string{"dep1", "dep1a"}},
@@ -127,7 +124,7 @@ func TestGetDependencyExpression(t *testing.T) {
 		trig.Template.Switch = &v1alpha1.TriggerSwitch{
 			Any: []string{"group-1"},
 		}
-		expr, err := sensorCtx.getDependencyExpression(*trig)
+		expr, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
 		assert.NoError(t, err)
 		assert.Equal(t, "dep1 && dep1a", expr)
 	})

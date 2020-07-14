@@ -178,15 +178,6 @@ metadata:
   name: gateway-controller-configmap
   namespace: argo-events
 ---
-apiVersion: v1
-data:
-  config: |
-    namespace: argo-events
-kind: ConfigMap
-metadata:
-  name: sensor-controller-configmap
-  namespace: argo-events
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -220,6 +211,36 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: eventsource-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventsource-controller
+  template:
+    metadata:
+      labels:
+        app: eventsource-controller
+    spec:
+      containers:
+      - args:
+        - --namespaced
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: EVENTSOURCE_IMAGE
+          value: argoproj/eventsource:v0.16.0
+        image: argoproj/eventsource-controller:v0.16.0
+        imagePullPolicy: Always
+        name: eventsource-controller
+      serviceAccountName: argo-events-sa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: gateway-controller
   namespace: argo-events
 spec:
@@ -240,10 +261,6 @@ spec:
               fieldPath: metadata.namespace
         - name: CONTROLLER_CONFIG_MAP
           value: gateway-controller-configmap
-        - name: GATEWAY_CLIENT_IMAGE
-          value: argoproj/gateway-client:v0.16.0
-        - name: GATEWAY_SERVER_IMAGE
-          value: argoproj/gateway-server:v0.16.0
         image: argoproj/gateway-controller:v0.16.0
         name: gateway-controller
       serviceAccountName: argo-events-sa
@@ -264,13 +281,13 @@ spec:
         app: sensor-controller
     spec:
       containers:
-      - env:
+      - args:
+        - --namespaced
+        env:
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: CONTROLLER_CONFIG_MAP
-          value: sensor-controller-configmap
         - name: SENSOR_IMAGE
           value: argoproj/sensor:v0.16.0
         image: argoproj/sensor-controller:v0.16.0

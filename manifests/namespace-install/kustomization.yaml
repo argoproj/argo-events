@@ -7,6 +7,8 @@ resources:
 
 patchesStrategicMerge:
   - overlays/eventbus-controller-deployment.yaml
+  - overlays/eventsource-controller-deployment.yaml
+  - overlays/sensor-controller-deployment.yaml
 
 patchesJson6902:
   - path: ./overlays/gateway-controller-configmap.yaml
@@ -14,10 +16,4 @@ patchesJson6902:
       group: ""
       kind: ConfigMap
       name: gateway-controller-configmap
-      version: v1
-  - path: ./overlays/sensor-controller-configmap.yaml
-    target:
-      group: ""
-      kind: ConfigMap
-      name: sensor-controller-configmap
       version: v1

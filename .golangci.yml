@@ -3,7 +3,7 @@ run:
   skip-dirs:
     - pkg/client
     - vendor
-    - "gateways/server/common/naivewatcher"
+    - "eventsources/common/naivewatcher"
   skip-files:
     - ".*generated.*"
 linters:

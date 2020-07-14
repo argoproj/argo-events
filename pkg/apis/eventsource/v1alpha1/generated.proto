@@ -73,10 +73,6 @@ message AzureEventsHubEventSource {
 
   // Event Hub path/name
   optional string hubName = 4;
-
-  // Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
-  // +optional
-  optional string namespace = 5;
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -111,30 +107,26 @@ message EmitterEventSource {
   // ChannelName refers to the channel name
   optional string channelName = 3;
 
-  // Namespace to use to retrieve the channel key and optional username/password
-  // +optional
-  optional string namespace = 4;
-
   // Username to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector username = 5;
+  optional k8s.io.api.core.v1.SecretKeySelector username = 4;
 
   // Password to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 6;
+  optional k8s.io.api.core.v1.SecretKeySelector password = 5;
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 6;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 8;
+  optional bool jsonBody = 7;
 
   // TLS configuration for the emitter client.
   // +optional
-  optional TLSConfig tls = 9;
+  optional TLSConfig tls = 8;
 }
 
 // EventSource is the definition of a eventsource resource
@@ -145,9 +137,9 @@ message EmitterEventSource {
 message EventSource {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
-  optional EventSourceStatus status = 2;
+  optional EventSourceSpec spec = 2;
 
-  optional EventSourceSpec spec = 3;
+  optional EventSourceStatus status = 3;
 }
 
 // EventSourceList is the list of eventsource resources
@@ -160,79 +152,93 @@ message EventSourceList {
 
 // EventSourceSpec refers to specification of event-source resource
 message EventSourceSpec {
+  // EventBusName references to a EventBus name. By default the value is "default"
+  optional string eventBusName = 1;
+
+  // Template is the pod specification for the event source
+  // +optional
+  optional Template template = 2;
+
+  // Service is the specifications of the service to expose the event source
+  // +optional
+  optional Service service = 3;
+
+  // Replica is the gateway deployment replicas
+  optional int32 replica = 4;
+
   // Minio event sources
-  map<string, github.com.argoproj.argo_events.pkg.apis.common.S3Artifact> minio = 1;
+  map<string, github.com.argoproj.argo_events.pkg.apis.common.S3Artifact> minio = 5;
 
   // Calendar event sources
-  map<string, CalendarEventSource> calendar = 2;
+  map<string, CalendarEventSource> calendar = 6;
 
   // File event sources
-  map<string, FileEventSource> file = 3;
+  map<string, FileEventSource> file = 7;
 
   // Resource event sources
-  map<string, ResourceEventSource> resource = 4;
+  map<string, ResourceEventSource> resource = 8;
 
   // Webhook event sources
-  map<string, WebhookContext> webhook = 5;
+  map<string, WebhookContext> webhook = 9;
 
   // AMQP event sources
-  map<string, AMQPEventSource> amqp = 6;
+  map<string, AMQPEventSource> amqp = 10;
 
   // Kafka event sources
-  map<string, KafkaEventSource> kafka = 7;
+  map<string, KafkaEventSource> kafka = 11;
 
   // MQTT event sources
-  map<string, MQTTEventSource> mqtt = 8;
+  map<string, MQTTEventSource> mqtt = 12;
 
   // NATS event sources
-  map<string, NATSEventsSource> nats = 9;
+  map<string, NATSEventsSource> nats = 13;
 
   // SNS event sources
-  map<string, SNSEventSource> sns = 10;
+  map<string, SNSEventSource> sns = 14;
 
   // SQS event sources
-  map<string, SQSEventSource> sqs = 11;
+  map<string, SQSEventSource> sqs = 15;
 
   // PubSub eevnt sources
-  map<string, PubSubEventSource> pubSub = 12;
+  map<string, PubSubEventSource> pubSub = 16;
 
   // Github event sources
-  map<string, GithubEventSource> github = 13;
+  map<string, GithubEventSource> github = 17;
 
   // Gitlab event sources
-  map<string, GitlabEventSource> gitlab = 14;
+  map<string, GitlabEventSource> gitlab = 18;
 
   // HDFS event sources
-  map<string, HDFSEventSource> hdfs = 15;
+  map<string, HDFSEventSource> hdfs = 19;
 
   // Slack event sources
-  map<string, SlackEventSource> slack = 16;
+  map<string, SlackEventSource> slack = 20;
 
   // StorageGrid event sources
-  map<string, StorageGridEventSource> storageGrid = 17;
+  map<string, StorageGridEventSource> storageGrid = 21;
 
   // AzureEventsHub event sources
-  map<string, AzureEventsHubEventSource> azureEventsHub = 18;
+  map<string, AzureEventsHubEventSource> azureEventsHub = 22;
 
   // Stripe event sources
-  map<string, StripeEventSource> stripe = 19;
+  map<string, StripeEventSource> stripe = 23;
 
   // Emitter event source
-  map<string, EmitterEventSource> emitter = 20;
+  map<string, EmitterEventSource> emitter = 24;
 
   // Redis event source
-  map<string, RedisEventSource> redis = 21;
+  map<string, RedisEventSource> redis = 25;
 
   // NSQ event source
-  map<string, NSQEventSource> nsq = 22;
+  map<string, NSQEventSource> nsq = 26;
 
   // Generic event source
-  map<string, GenericEventSource> generic = 23;
+  map<string, GenericEventSource> generic = 27;
 }
 
 // EventSourceStatus holds the status of the event-source resource
 message EventSourceStatus {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time createdAt = 1;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Status status = 1;
 }
 
 // FileEventSource describes an event-source for file related events.
@@ -297,13 +303,9 @@ message GithubEventSource {
   // +optional
   optional string githubUploadURL = 12;
 
-  // Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.
-  // +optional
-  optional string namespace = 13;
-
   // DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
   // +optional
-  optional bool deleteHookOnFinish = 14;
+  optional bool deleteHookOnFinish = 13;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
@@ -372,10 +374,6 @@ message HDFSEventSource {
   // KrbServicePrincipalName is the principal name of Kerberos service
   // It must be set if either ccache or keytab is used.
   optional string krbServicePrincipalName = 11;
-
-  // Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.
-  // +optional
-  optional string namespace = 12;
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
@@ -426,7 +424,14 @@ message MQTTEventSource {
   optional TLSConfig tls = 6;
 }
 
-// NATSEventSource refers to event-source for NATS related events
+// Metadata holds the annotations and labels of an event source pod
+message Metadata {
+  map<string, string> annotations = 1;
+
+  map<string, string> labels = 2;
+}
+
+// NATSEventsSource refers to event-source for NATS related events
 message NATSEventsSource {
   // URL to connect to NATS cluster
   optional string url = 1;
@@ -488,10 +493,10 @@ message PubSubEventSource {
   // CredentialsFile is the file that contains credentials to authenticate for GCP
   optional string credentialsFile = 4;
 
-  // EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile.
-  // If true, authentication is done with WorkflowIdentity. If false or omitted, authentication is done with CredentialsFile.
+  // EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile.
+  // If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.
   // +optional
-  optional bool enableWorkflowIdentity = 5;
+  optional bool enableWorkloadIdentity = 5;
 
   // DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
   // +optional
@@ -585,16 +590,12 @@ message SNSEventSource {
   // SecretKey refers K8 secret containing aws secret key
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 4;
 
-  // Namespace refers to Kubernetes namespace to read access related secret from.
-  // +optional
-  optional string namespace = 5;
-
   // Region is AWS region
-  optional string region = 6;
+  optional string region = 5;
 
   // RoleARN is the Amazon Resource Name (ARN) of the role to assume.
   // +optional
-  optional string roleARN = 7;
+  optional string roleARN = 6;
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -615,22 +616,18 @@ message SQSEventSource {
   // in the queue before returning.
   optional int64 waitTimeSeconds = 5;
 
-  // Namespace refers to Kubernetes namespace to read access related secret from.
-  // +optional
-  optional string namespace = 6;
-
   // RoleARN is the Amazon Resource Name (ARN) of the role to assume.
   // +optional
-  optional string roleARN = 7;
+  optional string roleARN = 6;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 8;
+  optional bool jsonBody = 7;
 
-  // QueueAccountId is the ID of the account that created the queue to monitor
+  // QueueAccountID is the ID of the account that created the queue to monitor
   // +optional
-  optional string queueAccountId = 9;
+  optional string queueAccountId = 8;
 }
 
 // Selector represents conditional operation to select K8s objects.
@@ -648,6 +645,27 @@ message Selector {
   optional string value = 3;
 }
 
+// Service holds the service information eventsource exposes
+message Service {
+  // The list of ports that are exposed by this ClusterIP service.
+  // +patchMergeKey=port
+  // +patchStrategy=merge
+  // +listType=map
+  // +listMapKey=port
+  // +listMapKey=protocol
+  repeated k8s.io.api.core.v1.ServicePort ports = 1;
+
+  // clusterIP is the IP address of the service and is usually assigned
+  // randomly by the master. If an address is specified manually and is not in
+  // use by others, it will be allocated to the service; otherwise, creation
+  // of the service will fail. This field can not be changed through updates.
+  // Valid values are "None", empty string (""), or a valid IP address. "None"
+  // can be specified for headless services when proxying is not required.
+  // More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+  // +optional
+  optional string clusterIP = 2;
+}
+
 // SlackEventSource refers to event-source for Slack related events
 message SlackEventSource {
   // Slack App signing secret
@@ -658,10 +676,6 @@ message SlackEventSource {
 
   // Webhook holds configuration for a REST endpoint
   optional WebhookContext webhook = 3;
-
-  // Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
-  // +optional
-  optional string namespace = 4;
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
@@ -688,11 +702,11 @@ message StorageGridEventSource {
   // Auth token for storagegrid api
   optional k8s.io.api.core.v1.SecretKeySelector authToken = 7;
 
-  // ApiURL is the url of the storagegrid api.
+  // APIURL is the url of the storagegrid api.
   optional string apiURL = 8;
 }
 
-// Filter represents filters to apply to bucket notifications for specifying constraints on objects
+// StorageGridFilter represents filters to apply to bucket notifications for specifying constraints on objects
 // +k8s:openapi-gen=true
 message StorageGridFilter {
   optional string prefix = 1;
@@ -714,11 +728,10 @@ message StripeEventSource {
   // +optional
   optional k8s.io.api.core.v1.SecretKeySelector apiKey = 3;
 
-  // Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.
+  // EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
+  // More info at https://stripe.com/docs/api/events/list
   // +optional
-  optional string namespace = 4;
-
-  repeated string eventFilter = 5;
+  repeated string eventFilter = 4;
 }
 
 // TLSConfig refers to TLS configuration for a client.
@@ -731,6 +744,40 @@ message TLSConfig {
 
   // ClientKeyPath refers the file path that contains client key.
   optional string clientKeyPath = 3;
+}
+
+// Template holds the information of an EventSource deployment template
+message Template {
+  // Metdata sets the pods's metadata, i.e. annotations and labels
+  optional Metadata metadata = 1;
+
+  // ServiceAccountName is the name of the ServiceAccount to use to run event source pod.
+  // More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  // +optional
+  optional string serviceAccountName = 2;
+
+  // Container is the main container image to run in the event source pod
+  // +optional
+  optional k8s.io.api.core.v1.Container container = 3;
+
+  // Volumes is a list of volumes that can be mounted by containers in a workflow.
+  // +patchStrategy=merge
+  // +patchMergeKey=name
+  // +optional
+  repeated k8s.io.api.core.v1.Volume volumes = 4;
+
+  // SecurityContext holds pod-level security attributes and common container settings.
+  // Optional: Defaults to empty.  See type description for default values of each field.
+  // +optional
+  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 5;
+
+  // If specified, the pod's scheduling constraints
+  // +optional
+  optional k8s.io.api.core.v1.Affinity affinity = 6;
+
+  // If specified, the pod's tolerations.
+  // +optional
+  repeated k8s.io.api.core.v1.Toleration tolerations = 7;
 }
 
 message WatchPathConfig {
