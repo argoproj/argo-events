@@ -93,7 +93,7 @@ If you don't see the gateway and sensor pod in `argo-events` namespace,
   4. Look for any error in gateway or sensor pod.
   5. Inspect the gateway,
 
-        kubectl -n argo-event gateway-object-name -o yaml
+        kubectl -n argo-events gateway-object-name -o yaml
 
      Inspect the sensor,
 
