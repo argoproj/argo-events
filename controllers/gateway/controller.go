@@ -23,6 +23,7 @@ import (
 
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	eventbusclientset "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
@@ -84,7 +85,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace, clientImage, 
 		clientImage:    clientImage,
 		serverImage:    serverImage,
 		kubeConfig:     rest,
-		logger:         common.NewArgoEventsLogger(),
+		logger:         logging.NewArgoEventsLogger(),
 		k8sClient:      kubernetes.NewForConfigOrDie(rest),
 		gatewayClient:  clientset.NewForConfigOrDie(rest),
 		eventBusClient: eventbusclientset.NewForConfigOrDie(rest),
@@ -161,8 +162,8 @@ func (c *Controller) Run(ctx context.Context, threads int) {
 	defer c.queue.ShutDown()
 	c.logger.WithFields(
 		map[string]interface{}{
-			common.LabelInstanceID: c.Config.InstanceID,
-			common.LabelVersion:    base.GetVersion().Version,
+			logging.LabelInstanceID: c.Config.InstanceID,
+			logging.LabelVersion:    base.GetVersion().Version,
 		}).Infoln("starting controller")
 
 	configMapCtrl := c.watchControllerConfigMap()

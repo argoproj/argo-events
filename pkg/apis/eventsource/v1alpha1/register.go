@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2020 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,20 +13,35 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package v1alpha1 contains API Schema definitions for the sources v1alpha1 API group
+// +k8s:openapi-gen=true
+// +k8s:deepcopy-gen=package,register
+// +k8s:defaulter-gen=TypeMeta
+// +groupName=argoproj.io
 package v1alpha1
 
 import (
-	event_sources "github.com/argoproj/argo-events/pkg/apis/eventsource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	eventsource "github.com/argoproj/argo-events/pkg/apis/eventsource"
 )
 
-// SchemeGroupVersion is a group version used to register these objects
-var SchemeGroupVersion = schema.GroupVersion{Group: event_sources.Group, Version: "v1alpha1"}
+var (
+	// SchemeGroupVersion is a group version used to register these objects
+	SchemeGroupVersion = schema.GroupVersion{Group: eventsource.Group, Version: "v1alpha1"}
 
-// SchemaGroupVersionKind is a group version kind used to attach owner references to gateway-controller
-var SchemaGroupVersionKind = schema.GroupVersionKind{Group: event_sources.Group, Version: "v1alpha1", Kind: event_sources.Kind}
+	// SchemaGroupVersionKind is a group version kind used to attach owner references to gateway-controller
+	SchemaGroupVersionKind = schema.GroupVersionKind{Group: eventsource.Group, Version: "v1alpha1", Kind: eventsource.Kind}
+
+	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
+	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+
+	// AddToScheme is required by pkg/client/...
+	AddToScheme = SchemeBuilder.AddToScheme
+)
 
 // Kind takes an unqualified kind and returns back a Group qualified GroupKind
 func Kind(kind string) schema.GroupKind {
@@ -37,14 +52,6 @@ func Kind(kind string) schema.GroupKind {
 func Resource(resource string) schema.GroupResource {
 	return SchemeGroupVersion.WithResource(resource).GroupResource()
 }
-
-var (
-	// SchemeBuilder is the builder for this scheme
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-
-	// AddToScheme adds this
-	AddToScheme = SchemeBuilder.AddToScheme
-)
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,

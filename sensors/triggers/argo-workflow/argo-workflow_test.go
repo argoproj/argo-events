@@ -25,7 +25,7 @@ import (
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -90,7 +90,7 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 			},
 		},
 	}
-	return NewArgoWorkflowTrigger(fake.NewSimpleClientset(), client, sensorObj.DeepCopy(), trigger, common.NewArgoEventsLogger())
+	return NewArgoWorkflowTrigger(fake.NewSimpleClientset(), client, sensorObj.DeepCopy(), trigger, logging.NewArgoEventsLogger())
 }
 
 func TestFetchResource(t *testing.T) {

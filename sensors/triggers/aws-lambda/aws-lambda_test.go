@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -68,7 +68,7 @@ func getAWSTrigger() *AWSLambdaTrigger {
 		K8sClient:    fake.NewSimpleClientset(),
 		Sensor:       sensorObj.DeepCopy(),
 		Trigger:      &sensorObj.Spec.Triggers[0],
-		Logger:       common.NewArgoEventsLogger(),
+		Logger:       logging.NewArgoEventsLogger(),
 	}
 }
 

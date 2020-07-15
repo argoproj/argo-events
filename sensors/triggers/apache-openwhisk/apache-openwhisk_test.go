@@ -23,7 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -53,7 +53,7 @@ func getFakeTriggerImpl() *TriggerImpl {
 		K8sClient:       nil,
 		Sensor:          sensorObj.DeepCopy(),
 		Trigger:         sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:          common.NewArgoEventsLogger(),
+		Logger:          logging.NewArgoEventsLogger(),
 	}
 }
 

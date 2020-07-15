@@ -28,6 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -36,25 +37,28 @@ import (
 )
 
 // ListenEvents watches and handles events received from the gateway.
-func (sensorCtx *SensorContext) ListenEvents() error {
-	errCh := make(chan error)
-	ctx := context.Background()
+func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan struct{}) error {
 	cctx, cancel := context.WithCancel(ctx)
-	sensorCtx.listenEventsOverEventBus(cctx, errCh)
-	err := <-errCh
-	cancel()
-	sensorCtx.Logger.WithError(err).Errorln("subscription failure. stopping sensor operations")
+	defer cancel()
+	logger := logging.FromContext(cctx)
+	err := sensorCtx.listenEventsOverEventBus(cctx, stopCh)
+	if err != nil {
+		logger.WithError(err).Errorln("subscription failure. stopping sensor operations")
+		return err
+	}
 	return nil
 }
 
-func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, errCh chan<- error) {
+func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, stopCh <-chan struct{}) error {
+	logger := logging.FromContext(ctx)
 	sensor := sensorCtx.Sensor
 	// Get a mapping of dependencyExpression: []triggers
 	triggerMapping := make(map[string][]v1alpha1.Trigger)
 	for _, trigger := range sensor.Spec.Triggers {
-		depExpr, err := sensorCtx.getDependencyExpression(trigger)
+		depExpr, err := sensorCtx.getDependencyExpression(ctx, trigger)
 		if err != nil {
-			errCh <- err
+			logger.WithError(err).Errorln("failed to get dependency expression")
+			return err
 		}
 		triggers, ok := triggerMapping[depExpr]
 		if !ok {
@@ -75,14 +79,16 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, er
 			de := strings.ReplaceAll(depExpression, "-", "\\-")
 			expr, err := govaluate.NewEvaluableExpression(de)
 			if err != nil {
-				errCh <- err
+				logger.WithError(err).Errorln("failed to get new evaluable expression")
+				return
 			}
 			depNames := unique(expr.Vars())
 			deps := []eventbusdriver.Dependency{}
 			for _, depName := range depNames {
 				dep, ok := depMapping[depName]
 				if !ok {
-					errCh <- errors.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
+					logger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
+					return
 				}
 				esName := dep.EventSourceName
 				if esName == "" {
@@ -99,10 +105,10 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, er
 			// Generate clientID with hash code
 			hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
 			clientID := fmt.Sprintf("client-%v", common.Hasher(hashKey))
-			ebDriver, err := eventbus.GetDriver(*sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID, sensorCtx.Logger)
+			ebDriver, err := eventbus.GetDriver(ctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
 			if err != nil {
-				sensorCtx.Logger.WithError(err).Errorln("Failed to get event bus driver")
-				errCh <- err
+				logger.WithError(err).Errorln("Failed to get event bus driver")
+				return
 			}
 			triggerNames := []string{}
 			for _, t := range triggers {
@@ -110,11 +116,11 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, er
 			}
 			conn, err := ebDriver.Connect()
 			if err != nil {
-				sensorCtx.Logger.WithError(err).Errorln("Failed to connect to event bus")
-				errCh <- err
+				logger.WithError(err).Errorln("Failed to connect to event bus")
+				return
 			}
 			defer conn.Close()
-			sensorCtx.Logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
+			logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 			err = ebDriver.SubscribeEventSources(ctx, conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
@@ -126,26 +132,30 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, er
 				e := convertEvent(event)
 				result, err := sensordependencies.Filter(e, dep.Filters)
 				if err != nil {
-					sensorCtx.Logger.WithError(err).Errorln("Failed to apply filters")
+					logger.WithError(err).Errorln("Failed to apply filters")
 					return false
 				}
 				return result
 			}, func(events map[string]cloudevents.Event) {
-				err := sensorCtx.triggerActions(events, triggers)
+				err := sensorCtx.triggerActions(ctx, events, triggers)
 				if err != nil {
-					sensorCtx.Logger.WithError(err).Errorln("Failed to trigger actions")
+					logger.WithError(err).Errorln("Failed to trigger actions")
 				}
 			})
 			if err != nil {
-				sensorCtx.Logger.WithError(err).Errorln("Failed to subscribe to event bus")
-				errCh <- err
+				logger.WithError(err).Errorln("Failed to subscribe to event bus")
+				return
 			}
 		}(ctx, k, v)
 	}
+	logger.Info("Sensor started.")
+	<-stopCh
+	logger.Info("Shutting down...")
+	return nil
 }
 
-func (sensorCtx *SensorContext) triggerActions(events map[string]cloudevents.Event, triggers []v1alpha1.Trigger) error {
-	log := sensorCtx.Logger
+func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[string]cloudevents.Event, triggers []v1alpha1.Trigger) error {
+	log := logging.FromContext(ctx)
 	eventsMapping := make(map[string]*v1alpha1.Event)
 	for k, v := range events {
 		eventsMapping[k] = convertEvent(v)
@@ -157,7 +167,7 @@ func (sensorCtx *SensorContext) triggerActions(events map[string]cloudevents.Eve
 		}
 
 		log.WithField("triggerName", trigger.Template.Name).Infoln("resolving the trigger implementation")
-		triggerImpl := sensorCtx.GetTrigger(&trigger)
+		triggerImpl := sensorCtx.GetTrigger(ctx, &trigger)
 		if triggerImpl == nil {
 			log.WithField("triggerName", trigger.Template.Name).Errorln("failed to get the specific trigger implementation. continuing to next trigger if any")
 			continue
@@ -196,7 +206,8 @@ func (sensorCtx *SensorContext) triggerActions(events map[string]cloudevents.Eve
 	return nil
 }
 
-func (sensorCtx *SensorContext) getDependencyExpression(trigger v1alpha1.Trigger) (string, error) {
+func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, trigger v1alpha1.Trigger) (string, error) {
+	logger := logging.FromContext(ctx)
 	sensor := sensorCtx.Sensor
 	var depExpression string
 	if len(sensor.Spec.DependencyGroups) > 0 && sensor.Spec.Circuit != "" && trigger.Template.Switch != nil {
@@ -221,12 +232,12 @@ func (sensorCtx *SensorContext) getDependencyExpression(trigger v1alpha1.Trigger
 		groupDepExpr = strings.ReplaceAll(groupDepExpr, "-", "_")
 		program, err := expr.Compile(groupDepExpr, expr.Env(depGroupMapping))
 		if err != nil {
-			sensorCtx.Logger.WithError(err).Errorln("Failed to compile group dependency expression")
+			logger.WithError(err).Errorln("Failed to compile group dependency expression")
 			return "", err
 		}
 		result, err := expr.Run(program, depGroupMapping)
 		if err != nil {
-			sensorCtx.Logger.WithError(err).Errorln("Failed to parse group dependency expression")
+			logger.WithError(err).Errorln("Failed to parse group dependency expression")
 			return "", err
 		}
 		depExpression = fmt.Sprintf("%v", result)
@@ -237,14 +248,14 @@ func (sensorCtx *SensorContext) getDependencyExpression(trigger v1alpha1.Trigger
 		}
 		depExpression = strings.Join(deps, "&&")
 	}
-	sensorCtx.Logger.Infof("Dependency expression for trigger %s before simlification: %s", trigger.Template.Name, depExpression)
+	logger.Infof("Dependency expression for trigger %s before simlification: %s", trigger.Template.Name, depExpression)
 	boolSimplifier, err := common.NewBoolExpression(depExpression)
 	if err != nil {
-		sensorCtx.Logger.WithError(err).Errorln("Invalid dependency expression")
+		logger.WithError(err).Errorln("Invalid dependency expression")
 		return "", err
 	}
 	result := boolSimplifier.GetExpression()
-	sensorCtx.Logger.Infof("Dependency expression for trigger %s after simlification: %s", trigger.Template.Name, result)
+	logger.Infof("Dependency expression for trigger %s after simlification: %s", trigger.Template.Name, result)
 	return result, nil
 }
 

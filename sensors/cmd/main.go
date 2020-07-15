@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"os"
@@ -24,8 +25,10 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors"
@@ -44,11 +47,11 @@ func main() {
 	}
 	sensorSpec, err := base64.StdEncoding.DecodeString(encodedSensorSpec)
 	if err != nil {
-		panic(errors.Errorf("failed to decode sensor string. err: %+v", err))
+		panic(errors.Errorf("failed to decode sensor string. err: %v", err))
 	}
 	sensor := &v1alpha1.Sensor{}
 	if err = json.Unmarshal(sensorSpec, sensor); err != nil {
-		panic(errors.Errorf("failed to unmarshal sensor object. err: %+v", err))
+		panic(errors.Errorf("failed to unmarshal sensor object. err: %v", err))
 	}
 
 	busConfig := &eventbusv1alpha1.BusConfig{}
@@ -56,10 +59,10 @@ func main() {
 	if len(encodedBusConfigSpec) > 0 {
 		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)
 		if err != nil {
-			panic(errors.Errorf("failed to decode bus config string. err: %+v", err))
+			panic(errors.Errorf("failed to decode bus config string. err: %v", err))
 		}
 		if err = json.Unmarshal(busConfigSpec, busConfig); err != nil {
-			panic(errors.Errorf("failed to unmarshal bus config object. err: %+v", err))
+			panic(errors.Errorf("failed to unmarshal bus config object. err: %v", err))
 		}
 	}
 
@@ -71,8 +74,11 @@ func main() {
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
 	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject)
-	if err := sensorExecutionCtx.ListenEvents(); err != nil {
-		sensorExecutionCtx.Logger.WithError(err).Errorln("failed to listen to events")
+	logger := logging.NewArgoEventsLogger()
+	ctx := logging.WithLogger(context.Background(), logger)
+	stopCh := signals.SetupSignalHandler()
+	if err := sensorExecutionCtx.ListenEvents(ctx, stopCh); err != nil {
+		logger.WithError(err).Errorln("failed to listen to events")
 		os.Exit(-1)
 	}
 }
