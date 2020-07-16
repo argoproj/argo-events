@@ -166,6 +166,15 @@
         }
       }
     },
+    "io.argoproj.eventbus.v1alpha1.ContainerTemplate": {
+      "description": "ContainerTemplate defines customized spec for a container",
+      "type": "object",
+      "properties": {
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements"
+        }
+      }
+    },
     "io.argoproj.eventbus.v1alpha1.EventBus": {
       "description": "EventBus is the definition of a eventbus resource",
       "type": "object",
@@ -295,6 +304,14 @@
         },
         "auth": {
           "type": "string"
+        },
+        "containerTemplate": {
+          "description": "ContainerTemplate contains customized spec for NATS container",
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.ContainerTemplate"
+        },
+        "metricsContainerTemplate": {
+          "description": "MetricsContainerTemplate contains customized spec for metrics container",
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.ContainerTemplate"
         },
         "persistence": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.PersistenceStrategy"
