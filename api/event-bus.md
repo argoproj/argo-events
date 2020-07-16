@@ -128,6 +128,73 @@ NATSConfig </a> </em>
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.ContainerTemplate">
+
+ContainerTemplate
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NativeStrategy">NativeStrategy</a>)
+
+</p>
+
+<p>
+
+<p>
+
+ContainerTemplate defines customized spec for a container
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>resources</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#resourcerequirements-v1-core">
+Kubernetes core/v1.ResourceRequirements </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.EventBus">
 
 EventBus
@@ -758,6 +825,54 @@ Size is the NATS StatefulSet size
 <td>
 
 <em>(Optional)</em>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>containerTemplate</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ContainerTemplate contains customized spec for NATS container
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metricsContainerTemplate</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+MetricsContainerTemplate contains customized spec for metrics container
+
+</p>
 
 </td>
 

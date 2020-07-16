@@ -29,12 +29,13 @@ type reconciler struct {
 	scheme *runtime.Scheme
 
 	natsStreamingImage string
+	natsMetricsImage   string
 	logger             logr.Logger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage string, logger logr.Logger) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, logger: logger}
+func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage, natsMetricsImage string, logger logr.Logger) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, natsMetricsImage: natsMetricsImage, logger: logger}
 }
 
 func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -68,7 +69,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
 		// Finalizer logic should be added here.
-		err := installer.Uninstall(eventBus, r.client, r.natsStreamingImage, log)
+		err := installer.Uninstall(eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
 		if err != nil {
 			log.Error(err, "failed to uninstall")
 			return nil
@@ -79,7 +80,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	r.addFinalizer(eventBus)
 
 	eventBus.Status.InitConditions()
-	return installer.Install(eventBus, r.client, r.natsStreamingImage, log)
+	return installer.Install(eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
 }
 
 func (r *reconciler) addFinalizer(s *v1alpha1.EventBus) {

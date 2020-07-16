@@ -18,8 +18,8 @@ type Installer interface {
 }
 
 // Install function installs the event bus
-func Install(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage string, logger logr.Logger) error {
-	installer, err := getInstaller(eventBus, client, natsStreamingImage, logger)
+func Install(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger logr.Logger) error {
+	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
 		logger.Error(err, "failed to an installer")
 	}
@@ -33,12 +33,12 @@ func Install(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingIma
 }
 
 // GetInstaller returns Installer implementation
-func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage string, logger logr.Logger) (Installer, error) {
+func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger logr.Logger) (Installer, error) {
 	if nats := eventBus.Spec.NATS; nats != nil {
 		if nats.Exotic != nil {
 			return NewExoticNATSInstaller(eventBus, logger), nil
 		} else if nats.Native != nil {
-			return NewNATSInstaller(client, eventBus, natsStreamingImage, getLabels(eventBus), logger), nil
+			return NewNATSInstaller(client, eventBus, natsStreamingImage, natsMetricsImage, getLabels(eventBus), logger), nil
 		}
 	}
 	return nil, errors.New("invalid eventbus spec")
@@ -56,8 +56,8 @@ func getLabels(bus *v1alpha1.EventBus) map[string]string {
 // the dependency resources should have been deleted by owner references cascade
 // deletion, but things like PVC created by StatefulSet need to be cleaned up
 // separately.
-func Uninstall(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage string, logger logr.Logger) error {
-	installer, err := getInstaller(eventBus, client, natsStreamingImage, logger)
+func Uninstall(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger logr.Logger) error {
+	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
 		logger.Error(err, "failed to get an installer")
 	}
