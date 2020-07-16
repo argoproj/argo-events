@@ -306,11 +306,11 @@
           "type": "string"
         },
         "containerTemplate": {
-          "description": "ContainerTemplate contains some customized spec for NATS container",
+          "description": "ContainerTemplate contains customized spec for NATS container",
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.ContainerTemplate"
         },
-        "metricsTemplate": {
-          "description": "MetricsTemplate refers whether expose metrics container, it also contains some customized spec for the container",
+        "metricsContainerTemplate": {
+          "description": "MetricsContainerTemplate contains customized spec for metrics container",
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.ContainerTemplate"
         },
         "persistence": {

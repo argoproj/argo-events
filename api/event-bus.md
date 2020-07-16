@@ -846,7 +846,7 @@ Size is the NATS StatefulSet size
 
 <p>
 
-ContainerTemplate contains some customized spec for NATS container
+ContainerTemplate contains customized spec for NATS container
 
 </p>
 
@@ -858,7 +858,7 @@ ContainerTemplate contains some customized spec for NATS container
 
 <td>
 
-<code>metricsTemplate</code></br> <em>
+<code>metricsContainerTemplate</code></br> <em>
 <a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
 </a> </em>
 
@@ -870,8 +870,7 @@ ContainerTemplate contains some customized spec for NATS container
 
 <p>
 
-MetricsTemplate refers whether expose metrics container, it also
-contains some customized spec for the container
+MetricsContainerTemplate contains customized spec for metrics container
 
 </p>
 

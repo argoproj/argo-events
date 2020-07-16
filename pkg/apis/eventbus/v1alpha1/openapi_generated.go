@@ -337,13 +337,13 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 					},
 					"containerTemplate": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ContainerTemplate contains some customized spec for NATS container",
+							Description: "ContainerTemplate contains customized spec for NATS container",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
 						},
 					},
-					"metricsTemplate": {
+					"metricsContainerTemplate": {
 						SchemaProps: spec.SchemaProps{
-							Description: "MetricsTemplate refers whether expose metrics container, it also contains some customized spec for the container",
+							Description: "MetricsContainerTemplate contains customized spec for metrics container",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
 						},
 					},

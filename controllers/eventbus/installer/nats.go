@@ -625,8 +625,8 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		stanContainerResources = containerTmpl.Resources
 	}
 	metricsContainerResources := corev1.ResourceRequirements{}
-	if i.eventBus.Spec.NATS.Native.MetricsTemplate != nil {
-		metricsContainerResources = i.eventBus.Spec.NATS.Native.MetricsTemplate.Resources
+	if i.eventBus.Spec.NATS.Native.MetricsContainerTemplate != nil {
+		metricsContainerResources = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.Resources
 	}
 	spec := appv1.StatefulSetSpec{
 		Replicas:    &replicas,

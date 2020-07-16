@@ -238,8 +238,8 @@ func (in *NativeStrategy) DeepCopyInto(out *NativeStrategy) {
 		*out = new(ContainerTemplate)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.MetricsTemplate != nil {
-		in, out := &in.MetricsTemplate, &out.MetricsTemplate
+	if in.MetricsContainerTemplate != nil {
+		in, out := &in.MetricsContainerTemplate, &out.MetricsContainerTemplate
 		*out = new(ContainerTemplate)
 		(*in).DeepCopyInto(*out)
 	}

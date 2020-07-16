@@ -67,12 +67,12 @@ type NativeStrategy struct {
 	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"varint,3,opt,name=antiAffinity"`
 	// +optional
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
-	// ContainerTemplate contains some customized spec for NATS container
+	// ContainerTemplate contains customized spec for NATS container
 	// +optional
 	ContainerTemplate *ContainerTemplate `json:"containerTemplate,omitempty" protobuf:"bytes,5,opt,name=containerTemplate"`
-	// MetricsTemplate refers whether expose metrics container, it also contains some customized spec for the container
+	// MetricsContainerTemplate contains customized spec for metrics container
 	// +optional
-	MetricsTemplate *ContainerTemplate `json:"metricsTemplate,omitempty" protobuf:"bytes,6,opt,name=metricsTemplate"`
+	MetricsContainerTemplate *ContainerTemplate `json:"metricsContainerTemplate,omitempty" protobuf:"bytes,6,opt,name=metricsContainerTemplate"`
 }
 
 // ContainerTemplate defines customized spec for a container
