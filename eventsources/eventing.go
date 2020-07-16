@@ -53,7 +53,7 @@ type EventingServer interface {
 	GetEventSourceType() apicommon.EventSourceType
 
 	// Function to start listening events.
-	StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error
+	StartListening(ctx context.Context, dispatch func([]byte) error) error
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
@@ -253,6 +253,29 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 		logger.WithError(err).Errorln("failed to connect to eventbus")
 		return err
 	}
+	defer e.eventBusConn.Close()
+
+	go func(ctx context.Context) {
+		logger.Info("starting eventbus connection daemon...")
+		for {
+			select {
+			case <-ctx.Done():
+				logger.Info("exiting eventbus connection daemon...")
+				return
+			default:
+				time.Sleep(2 * time.Second)
+			}
+			if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
+				e.eventBusConn, err = driver.Connect()
+				if err != nil {
+					logger.WithError(err).Errorln("failed to reconnect to eventbus")
+					continue
+				}
+				logger.Info("reconnected the NATS streaming server...")
+			}
+		}
+	}(cctx)
+
 	for _, ss := range servers {
 		for _, server := range ss {
 			err := server.ValidateEventSource(cctx)
@@ -261,7 +284,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 				return err
 			}
 			go func(s EventingServer) {
-				err := s.StartListening(cctx, stopCh, func(data []byte) error {
+				err := s.StartListening(cctx, func(data []byte) error {
 					event := cloudevents.NewEvent()
 					event.SetID(fmt.Sprintf("%x", uuid.New()))
 					event.SetType(string(s.GetEventSourceType()))

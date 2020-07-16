@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Knetic/govaluate"
 	"github.com/antonmedv/expr"
@@ -41,21 +42,11 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 	cctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	logger := logging.FromContext(cctx)
-	err := sensorCtx.listenEventsOverEventBus(cctx, stopCh)
-	if err != nil {
-		logger.WithError(err).Errorln("subscription failure. stopping sensor operations")
-		return err
-	}
-	return nil
-}
-
-func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, stopCh <-chan struct{}) error {
-	logger := logging.FromContext(ctx)
 	sensor := sensorCtx.Sensor
 	// Get a mapping of dependencyExpression: []triggers
 	triggerMapping := make(map[string][]v1alpha1.Trigger)
 	for _, trigger := range sensor.Spec.Triggers {
-		depExpr, err := sensorCtx.getDependencyExpression(ctx, trigger)
+		depExpr, err := sensorCtx.getDependencyExpression(cctx, trigger)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to get dependency expression")
 			return err
@@ -120,6 +111,28 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, st
 				return
 			}
 			defer conn.Close()
+
+			go func(ctx context.Context) {
+				logger.Info("starting eventbus connection daemon...")
+				for {
+					select {
+					case <-ctx.Done():
+						logger.Info("exiting eventbus connection daemon...")
+						return
+					default:
+						time.Sleep(2 * time.Second)
+					}
+					if conn == nil || conn.IsClosed() {
+						conn, err = ebDriver.Connect()
+						if err != nil {
+							logger.WithError(err).Errorln("failed to reconnect to eventbus")
+							continue
+						}
+						logger.Info("reconnected the NATS streaming server...")
+					}
+				}
+			}(ctx)
+
 			logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 			err = ebDriver.SubscribeEventSources(ctx, conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
@@ -146,7 +159,7 @@ func (sensorCtx *SensorContext) listenEventsOverEventBus(ctx context.Context, st
 				logger.WithError(err).Errorln("Failed to subscribe to event bus")
 				return
 			}
-		}(ctx, k, v)
+		}(cctx, k, v)
 	}
 	logger.Info("Sensor started.")
 	<-stopCh

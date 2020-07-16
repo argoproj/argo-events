@@ -269,7 +269,7 @@ func (rc *Router) verifyRequest(request *http.Request) error {
 }
 
 // StartListening starts an SNS event source
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	logger := logging.FromContext(ctx)
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),
