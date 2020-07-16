@@ -30,6 +30,7 @@ import (
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig":           schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate":   schema_pkg_apis_eventbus_v1alpha1_ContainerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBus":            schema_pkg_apis_eventbus_v1alpha1_EventBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusList":        schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec":        schema_pkg_apis_eventbus_v1alpha1_EventBusSpec(ref),
@@ -58,6 +59,26 @@ func schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref common.ReferenceCallback) c
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"},
+	}
+}
+
+func schema_pkg_apis_eventbus_v1alpha1_ContainerTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ContainerTemplate defines customized spec for a container",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.ResourceRequirements"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.ResourceRequirements"},
 	}
 }
 
@@ -314,11 +335,23 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"),
 						},
 					},
+					"containerTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ContainerTemplate contains some customized spec for NATS container",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
+						},
+					},
+					"metricsTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MetricsTemplate refers whether expose metrics container, it also contains some customized spec for the container",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"},
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"},
 	}
 }
 

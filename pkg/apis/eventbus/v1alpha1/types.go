@@ -67,6 +67,17 @@ type NativeStrategy struct {
 	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"varint,3,opt,name=antiAffinity"`
 	// +optional
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
+	// ContainerTemplate contains some customized spec for NATS container
+	// +optional
+	ContainerTemplate *ContainerTemplate `json:"containerTemplate,omitempty" protobuf:"bytes,5,opt,name=containerTemplate"`
+	// MetricsTemplate refers whether expose metrics container, it also contains some customized spec for the container
+	// +optional
+	MetricsTemplate *ContainerTemplate `json:"metricsTemplate,omitempty" protobuf:"bytes,6,opt,name=metricsTemplate"`
+}
+
+// ContainerTemplate defines customized spec for a container
+type ContainerTemplate struct {
+	Resources corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
 }
 
 // GetReplicas return the replicas of statefulset

@@ -35,6 +35,11 @@ message BusConfig {
   optional NATSConfig nats = 1;
 }
 
+// ContainerTemplate defines customized spec for a container
+message ContainerTemplate {
+  optional k8s.io.api.core.v1.ResourceRequirements resources = 1;
+}
+
 // EventBus is the definition of a eventbus resource
 // +genclient
 // +kubebuilder:resource:singular=eventbus,shortName=eb
@@ -108,6 +113,14 @@ message NativeStrategy {
 
   // +optional
   optional PersistenceStrategy persistence = 4;
+
+  // ContainerTemplate contains some customized spec for NATS container
+  // +optional
+  optional ContainerTemplate containerTemplate = 5;
+
+  // MetricsTemplate refers whether expose metrics container, it also contains some customized spec for the container
+  // +optional
+  optional ContainerTemplate metricsTemplate = 6;
 }
 
 // PersistenceStrategy defines the strategy of persistence
