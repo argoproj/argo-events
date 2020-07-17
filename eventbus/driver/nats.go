@@ -156,7 +156,6 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 			log.Info("closing subscription...")
 			_ = sub.Close()
 			log.Infof("subscription on subject %s closed", n.subject)
-		default:
 		}
 	}
 }

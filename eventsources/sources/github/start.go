@@ -274,7 +274,7 @@ func (router *Router) PostInactivate() error {
 	return nil
 }
 
-// StartListening starts an SNS event source
+// StartListening starts an event source
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	logger := logging.FromContext(ctx)
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
