@@ -52,7 +52,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),
 		logging.LabelEventSourceName: el.GetEventSourceName(),
@@ -104,7 +104,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		}
 	}
 
-	<-stopCh
+	<-ctx.Done()
 	doneCh <- struct{}{}
 
 	log.Infoln("event source is stopped")

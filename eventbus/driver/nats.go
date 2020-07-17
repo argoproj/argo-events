@@ -3,8 +3,6 @@ package driver
 import (
 	"context"
 	"encoding/json"
-	"os"
-	"os/signal"
 	"strings"
 	"time"
 
@@ -73,7 +71,16 @@ func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logg
 
 func (n *natsStreaming) Connect() (Connection, error) {
 	log := n.logger.WithField("clientID", n.clientID)
-	opts := []nats.Option{}
+	opts := []nats.Option{
+		nats.MaxReconnects(-1),
+		nats.ReconnectWait(3 * time.Second),
+		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
+			log.Errorf("NATS connection lost, reason: %v", err)
+		}),
+		nats.ReconnectHandler(func(nnc *nats.Conn) {
+			log.Info("Reconnected to NATS server")
+		}),
+	}
 	switch n.auth.Strategy {
 	case eventbusv1alpha1.AuthStrategyToken:
 		log.Info("NATS auth strategy: Token")
@@ -89,9 +96,10 @@ func (n *natsStreaming) Connect() (Connection, error) {
 		return nil, err
 	}
 	log.Info("Connected to NATS server.")
-	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc),
+
+	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc), stan.Pings(5, 60),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
-			log.Fatalf("Connection lost, reason: %v", reason)
+			log.Errorf("NATS streaming connection lost, reason: %v", reason)
 		}))
 	if err != nil {
 		log.Errorf("Failed to connect to NATS streaming server, %v", err)
@@ -114,7 +122,7 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, closeCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	log := n.logger.WithField("clientID", n.clientID)
 	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
 	if err != nil {
@@ -138,20 +146,18 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		return err
 	}
 	log.Infof("Subscribed to subject %s ...", n.subject)
-
-	signalChan := make(chan os.Signal, 1)
-	cleanupDone := make(chan bool)
-	signal.Notify(signalChan, os.Interrupt)
-	go func() {
-		for range signalChan {
-			log.Info("Received an interrupt, unsubscribing and closing connection...")
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info("existing, unsubscribing and closing connection...")
 			_ = sub.Close()
 			log.Infof("subscription on subject %s closed", n.subject)
-			cleanupDone <- true
+		case <-closeCh:
+			log.Info("closing subscription...")
+			_ = sub.Close()
+			log.Infof("subscription on subject %s closed", n.subject)
 		}
-	}()
-	<-cleanupDone
-	return nil
+	}
 }
 
 func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *logrus.Entry) {

@@ -182,8 +182,8 @@ func filterEvent(event *stripe.Event, filters []string) bool {
 	return false
 }
 
-// StartListening starts an SNS event source
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+// StartListening starts an event source
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	logger := logging.FromContext(ctx)
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),

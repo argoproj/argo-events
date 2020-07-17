@@ -55,7 +55,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening listens to GCP PubSub events
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	// In order to listen events from GCP PubSub,
 	// 1. Parse the event source that contains configuration to connect to GCP PubSub
 	// 2. Create a new PubSub client
@@ -169,7 +169,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		return errors.Wrapf(err, "failed to receive the messages for subscription %s and topic %s for %s", subscriptionName, pubsubEventSource.Topic, el.GetEventName())
 	}
 
-	<-stopCh
+	<-ctx.Done()
 
 	log.Infoln("event source has been stopped")
 

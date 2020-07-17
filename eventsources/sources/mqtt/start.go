@@ -54,7 +54,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),
 		logging.LabelEventSourceName: el.GetEventSourceName(),
@@ -122,7 +122,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		return errors.Wrapf(token.Error(), "failed to subscribe to the topic %s for event source %s", mqttEventSource.Topic, el.GetEventName())
 	}
 
-	<-stopCh
+	<-ctx.Done()
 	log.Infoln("event source is stopped, unsubscribing the client...")
 
 	token := client.Unsubscribe(mqttEventSource.Topic)

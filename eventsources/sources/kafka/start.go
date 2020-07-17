@@ -63,7 +63,7 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),
 		logging.LabelEventSourceName: el.GetEventSourceName(),
@@ -157,7 +157,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 		case err := <-partitionConsumer.Errors():
 			return errors.Wrapf(err, "failed to consume messages for event source %s", el.GetEventName())
 
-		case <-stopCh:
+		case <-ctx.Done():
 			log.Infoln("event source is stopped, closing partition consumer")
 			err = partitionConsumer.Close()
 			if err != nil {
