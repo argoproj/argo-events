@@ -73,7 +73,6 @@ func (n *natsStreaming) Connect() (Connection, error) {
 	log := n.logger.WithField("clientID", n.clientID)
 	opts := []nats.Option{
 		nats.MaxReconnects(-1),
-		// TODO: somehow reconnection doesn't work here
 		nats.ReconnectWait(3 * time.Second),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
 			log.Errorf("NATS connection lost, reason: %v", err)
@@ -97,7 +96,8 @@ func (n *natsStreaming) Connect() (Connection, error) {
 		return nil, err
 	}
 	log.Info("Connected to NATS server.")
-	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc),
+
+	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc), stan.Pings(5, 60),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
 			log.Errorf("NATS streaming connection lost, reason: %v", reason)
 		}))
@@ -122,7 +122,7 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, closeCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	log := n.logger.WithField("clientID", n.clientID)
 	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
 	if err != nil {
@@ -146,12 +146,19 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		return err
 	}
 	log.Infof("Subscribed to subject %s ...", n.subject)
-
-	<-ctx.Done()
-	log.Info("existing, unsubscribing and closing connection...")
-	_ = sub.Close()
-	log.Infof("subscription on subject %s closed", n.subject)
-	return nil
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info("existing, unsubscribing and closing connection...")
+			_ = sub.Close()
+			log.Infof("subscription on subject %s closed", n.subject)
+		case <-closeCh:
+			log.Info("closing subscription...")
+			_ = sub.Close()
+			log.Infof("subscription on subject %s closed", n.subject)
+		default:
+		}
+	}
 }
 
 func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *logrus.Entry) {

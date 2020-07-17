@@ -14,11 +14,12 @@ type Driver interface {
 	// SubscribeEventSources is used to subscribe multiple event source dependencies
 	// Parameter - ctx, context
 	// Parameter - conn, eventbus connection
+	// Parameter - closeCh, channel to indicate to close the subscription
 	// Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
 	// Parameter - dependencies, array of dependencies information
 	// Parameter - filter, a function used to filter the message
 	// Parameter - action, a function to be triggered after all conditions meet
-	SubscribeEventSources(ctx context.Context, conn Connection, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
+	SubscribeEventSources(ctx context.Context, conn Connection, closeCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
 
 	// Publish a message
 	Publish(conn Connection, message []byte) error

@@ -112,29 +112,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 			}
 			defer conn.Close()
 
-			go func(ctx context.Context) {
-				logger.Info("starting eventbus connection daemon...")
-				for {
-					select {
-					case <-ctx.Done():
-						logger.Info("exiting eventbus connection daemon...")
-						return
-					default:
-						time.Sleep(2 * time.Second)
-					}
-					if conn == nil || conn.IsClosed() {
-						conn, err = ebDriver.Connect()
-						if err != nil {
-							logger.WithError(err).Errorln("failed to reconnect to eventbus")
-							continue
-						}
-						logger.Info("reconnected the NATS streaming server...")
-					}
-				}
-			}(ctx)
-
-			logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
-			err = ebDriver.SubscribeEventSources(ctx, conn, depExpression, deps, func(depName string, event cloudevents.Event) bool {
+			filterFunc := func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
 					return false
@@ -149,12 +127,44 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 					return false
 				}
 				return result
-			}, func(events map[string]cloudevents.Event) {
+			}
+
+			actionFunc := func(events map[string]cloudevents.Event) {
 				err := sensorCtx.triggerActions(ctx, events, triggers)
 				if err != nil {
 					logger.WithError(err).Errorln("Failed to trigger actions")
 				}
-			})
+			}
+
+			// Attempt to reconnect
+			closeSubCh := make(chan struct{}, 1)
+			go func(ctx context.Context, dvr eventbusdriver.Driver) {
+				logger.Infof("starting eventbus connection daemon for client %s...", clientID)
+				for {
+					select {
+					case <-ctx.Done():
+						logger.Infof("exiting eventbus connection daemon for client %s...", clientID)
+						return
+					default:
+						time.Sleep(3 * time.Second)
+					}
+					if conn == nil || conn.IsClosed() {
+						logger.Info("NATS connection lost, reconnecting...")
+						conn, err = dvr.Connect()
+						if err != nil {
+							logger.WithError(err).Errorf("failed to reconnect to eventbus, client: %s", clientID)
+							continue
+						}
+						logger.Infof("reconnected the NATS streaming server for client %s...", clientID)
+						closeSubCh <- struct{}{}
+						time.Sleep(2 * time.Second)
+						err = ebDriver.SubscribeEventSources(ctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
+					}
+				}
+			}(ctx, ebDriver)
+
+			logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
+			err = ebDriver.SubscribeEventSources(ctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
 			if err != nil {
 				logger.WithError(err).Errorln("Failed to subscribe to event bus")
 				return
@@ -243,6 +253,8 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 		groupDepExpr = strings.ReplaceAll(groupDepExpr, "&&", " + \"&&\" + ")
 		groupDepExpr = strings.ReplaceAll(groupDepExpr, "||", " + \"||\" + ")
 		groupDepExpr = strings.ReplaceAll(groupDepExpr, "-", "_")
+		groupDepExpr = strings.ReplaceAll(groupDepExpr, "(", "\"(\"+")
+		groupDepExpr = strings.ReplaceAll(groupDepExpr, ")", "+\")\"")
 		program, err := expr.Compile(groupDepExpr, expr.Env(depGroupMapping))
 		if err != nil {
 			logger.WithError(err).Errorln("Failed to compile group dependency expression")
@@ -254,6 +266,8 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 			return "", err
 		}
 		depExpression = fmt.Sprintf("%v", result)
+		depExpression = strings.ReplaceAll(depExpression, "\"(\"", "(")
+		depExpression = strings.ReplaceAll(depExpression, "\")\"", ")")
 	} else {
 		deps := []string{}
 		for _, dep := range sensor.Spec.Dependencies {

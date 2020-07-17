@@ -119,7 +119,7 @@ func TestGetDependencyExpression(t *testing.T) {
 			{Name: "group-1", Dependencies: []string{"dep1", "dep1a"}},
 			{Name: "group-2", Dependencies: []string{"dep2"}},
 		}
-		obj.Spec.Circuit = "group-1 || group-2"
+		obj.Spec.Circuit = "((group-2) || group-1)"
 		trig := fakeTrigger.DeepCopy()
 		trig.Template.Switch = &v1alpha1.TriggerSwitch{
 			Any: []string{"group-1"},

@@ -102,7 +102,7 @@ require (
 	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 	golang.org/x/tools v0.0.0-20200408132156-9ee5ef7a2c0d // indirect
 	google.golang.org/api v0.6.1-0.20190607001116-5213b8090861
-	google.golang.org/appengine v1.6.5 // indirect
+	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20200408120641-fbb3ad325eb7 // indirect
 	google.golang.org/grpc v1.28.1
 	gopkg.in/ini.v1 v1.55.0 // indirect
