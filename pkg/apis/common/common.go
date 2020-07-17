@@ -46,6 +46,17 @@ var (
 	GenericEvent     EventSourceType = "generic"
 )
 
+var (
+	// RecreateStrategyEventSources refers to the list of event source types
+	// that need to use Recreate strategy for its Deployment
+	RecreateStrategyEventSources = []EventSourceType{
+		KafkaEvent,
+		PubSubEvent,
+		AzureEventsHub,
+		NATSEvent,
+	}
+)
+
 // EventBusType is the type of event bus
 type EventBusType string
 

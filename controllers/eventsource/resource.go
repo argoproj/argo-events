@@ -21,6 +21,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/argoproj/argo-events/eventsources"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -268,7 +270,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 }
 
 func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
-	replicas := int32(1)
+	singleReplica := int32(1)
+	replicas := singleReplica
+	if args.EventSource.Spec.Replica != nil {
+		replicas = *args.EventSource.Spec.Replica
+	}
+	if replicas < singleReplica {
+		replicas = singleReplica
+	}
 	eventSourceContainer := corev1.Container{
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
@@ -279,7 +288,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		}
 	}
 	eventSourceContainer.Name = "main"
-	return &appv1.DeploymentSpec{
+	spec := &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: args.Labels,
 		},
@@ -297,7 +306,26 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 				SecurityContext: args.EventSource.Spec.Template.SecurityContext,
 			},
 		},
-	}, nil
+	}
+	allEventTypes := eventsources.GetEventingServers(args.EventSource)
+	recreateTypes := make(map[apicommon.EventSourceType]bool)
+	for _, esType := range apicommon.RecreateStrategyEventSources {
+		recreateTypes[esType] = true
+	}
+	recreates := 0
+	for eventType := range allEventTypes {
+		if _, ok := recreateTypes[eventType]; ok {
+			recreates++
+			break
+		}
+	}
+	if recreates > 0 {
+		spec.Replicas = &singleReplica
+		spec.Strategy = appv1.DeploymentStrategy{
+			Type: appv1.RecreateDeploymentStrategyType,
+		}
+	}
+	return spec, nil
 }
 
 func getService(ctx context.Context, cl client.Client, args *AdaptorArgs) (*corev1.Service, error) {
