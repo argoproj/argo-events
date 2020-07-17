@@ -58,7 +58,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),
 		logging.LabelEventSourceName: el.GetEventSourceName(),
@@ -96,7 +96,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 	log.Infoln("listening for messages on the queue...")
 	for {
 		select {
-		case <-stopCh:
+		case <-ctx.Done():
 			log.Info("exiting SQS event listener...")
 			return nil
 		default:

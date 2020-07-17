@@ -58,7 +58,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
 		logging.LabelEventSourceType: el.GetEventSourceType(),
 		logging.LabelEventSourceName: el.GetEventSourceName(),
@@ -68,12 +68,12 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 
 	fileEventSource := &el.FileEventSource
 	if fileEventSource.Polling {
-		if err := el.listenEventsPolling(ctx, stopCh, dispatch, log); err != nil {
+		if err := el.listenEventsPolling(ctx, dispatch, log); err != nil {
 			log.WithError(err).Errorln("failed to listen to events")
 			return err
 		}
 	} else {
-		if err := el.listenEvents(ctx, stopCh, dispatch, log); err != nil {
+		if err := el.listenEvents(ctx, dispatch, log); err != nil {
 			log.WithError(err).Errorln("failed to listen to events")
 			return err
 		}
@@ -82,7 +82,7 @@ func (el *EventListener) StartListening(ctx context.Context, stopCh <-chan struc
 }
 
 // listenEvents listen to file related events.
-func (el *EventListener) listenEvents(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error, log *logrus.Entry) error {
+func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte) error, log *logrus.Entry) error {
 	fileEventSource := &el.FileEventSource
 
 	// create new fs watcher
@@ -154,7 +154,7 @@ func (el *EventListener) listenEvents(ctx context.Context, stopCh <-chan struct{
 			}
 		case err := <-watcher.Errors:
 			return errors.Wrapf(err, "failed to process %s", el.GetEventName())
-		case <-stopCh:
+		case <-ctx.Done():
 			log.Infoln("event source has been stopped")
 			return nil
 		}
@@ -162,7 +162,7 @@ func (el *EventListener) listenEvents(ctx context.Context, stopCh <-chan struct{
 }
 
 // listenEvents listen to file related events using polling.
-func (el *EventListener) listenEventsPolling(ctx context.Context, stopCh <-chan struct{}, dispatch func([]byte) error, log *logrus.Entry) error {
+func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func([]byte) error, log *logrus.Entry) error {
 	fileEventSource := &el.FileEventSource
 
 	// create new fs watcher
@@ -234,7 +234,7 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, stopCh <-chan 
 			case err := <-watcher.Error:
 				log.WithError(err).Errorf("failed to process %s", el.GetEventName())
 				return
-			case <-stopCh:
+			case <-ctx.Done():
 				log.Infoln("event source has been stopped")
 				return
 			}
