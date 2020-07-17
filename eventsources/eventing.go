@@ -305,7 +305,6 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 				})
 				logger.WithField(logging.LabelEventSourceName, s.GetEventSourceName()).
 					WithField(logging.LabelEventName, s.GetEventName()).WithError(err).Errorln("failed to start service.")
-				// TODO: Need retry.
 			}(server)
 		}
 	}
