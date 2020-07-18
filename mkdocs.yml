@@ -21,13 +21,11 @@ nav:
   - 'installation.md'
   - 'quick_start.md'
   - Concepts:
-      - 'concepts/gateway.md'
-      - 'concepts/sensor.md'
-      - 'concepts/event_source.md'
-      - 'concepts/trigger.md'
       - 'concepts/architecture.md'
-  - Demo:
-      - 'demo/notebooks.md'
+      - 'concepts/event_source.md'
+      - 'concepts/sensor.md'
+      - 'concepts/eventbus.md'
+      - 'concepts/trigger.md'
   - Setup:
       - 'setup/amqp.md'
       - 'setup/aws-sns.md'
@@ -67,7 +65,6 @@ nav:
       - 'triggers/slack-trigger.md'
       - 'triggers/build-your-own-trigger.md'
   - 'developer_guide.md'
-  - 'controllers.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones

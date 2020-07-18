@@ -1,31 +1,20 @@
 # Emitter
 
-Emitter gateway subscribes to a channel and helps sensor trigger the workloads.
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/emitter-setup.png?raw=true" alt="Emitter Setup"/>
-</p>
-
-<br/>
-<br/>
+Emitter event-source subscribes to a channel and helps sensor trigger the workloads.
 
 # Event Structure
 
-The structure of an event dispatched by the gateway to the sensor looks like following,
-
+The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
             "context": {
-              "type": "type_of_gateway",
+              "type": "type_of_event_source",
               "specVersion": "cloud_events_version",
-              "source": "name_of_the_gateway",
+              "source": "name_of_the_event_source",
               "eventID": "unique_event_id",
               "time": "event_time",
               "dataContentType": "type_of_data",
-              "subject": "name_of_the_event_within_event_source"
+              "subject": "name_of_the_configuration_within_event_source"
             },
             "data": {
               "topic": "name_of_the_topic",
@@ -33,11 +22,13 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
             }
         }
 
-<br/>
+## Specification
+
+Emitter event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#emittereventsource).
 
 ## Setup
 
-1. Deploy emitter in your local K8s cluster,
+1. Deploy the emitter in your local K8s cluster,
 
         ---
         apiVersion: v1
@@ -90,25 +81,19 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
                   hostPath:
                     path: /emitter #directory on host
  
-2. Create the event source by running the following command.
+1. Create the event-source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/emitter.yaml
 
-3. Create the gateway by running the following command,
+1. Inspect the event-source pod logs to make sure it was able to subscribe to the topic specified in the event source to consume messages.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/emitter.yaml
-
-4. Inspect the gateway pod logs to make sure the gateway was able to subscribe to the topic specified in the event source to consume messages.
-
-5. Create the sensor by running the following command,
+1. Create the sensor by running the following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/emitter.yaml
 
-6. Send message on emitter channel using one of the clients https://emitter.io/develop/golang/
+1. Send a message on emitter channel using one of the clients https://emitter.io/develop/golang/
 
-7. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
-
-
