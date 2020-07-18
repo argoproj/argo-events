@@ -34,8 +34,6 @@ var (
 
 // AdaptorArgs are the args needed to create a sensor deployment
 type AdaptorArgs struct {
-	// controller namespace
-	Namespace   string
 	Image       string
 	EventSource *v1alpha1.EventSource
 	Labels      map[string]string
@@ -398,7 +396,14 @@ func envFromSources(eventSource *v1alpha1.EventSource, t reflect.Type) []corev1.
 	r := []corev1.EnvFromSource{}
 	keys := make(map[string]bool)
 	for _, e := range result {
-		entry := e.SecretRef.Name
+		var entry string
+		switch t {
+		case secretKeySelectorType:
+			entry = e.SecretRef.Name
+		case configMapKeySelectorType:
+			entry = e.ConfigMapRef.Name
+		default:
+		}
 		if _, value := keys[entry]; !value {
 			keys[entry] = true
 			r = append(r, e)

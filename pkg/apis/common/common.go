@@ -54,6 +54,7 @@ var (
 		PubSubEvent,
 		AzureEventsHub,
 		NATSEvent,
+		MQTTEvent,
 	}
 )
 

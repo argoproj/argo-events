@@ -91,7 +91,7 @@ func main() {
 	}
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(sensor.ControllerName, mgr, controller.Options{
-		Reconciler: sensor.NewReconciler(mgr.GetClient(), mgr.GetScheme(), namespace, sensorImage, log.WithName("reconciler")),
+		Reconciler: sensor.NewReconciler(mgr.GetClient(), mgr.GetScheme(), sensorImage, log.WithName("reconciler")),
 	})
 	if err != nil {
 		mainLog.Error(err, "unable to set up individual controller")

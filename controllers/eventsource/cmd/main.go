@@ -76,7 +76,7 @@ func main() {
 	}
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventsource.ControllerName, mgr, controller.Options{
-		Reconciler: eventsource.NewReconciler(mgr.GetClient(), mgr.GetScheme(), namespace, eventSourceImage, log.WithName("reconciler")),
+		Reconciler: eventsource.NewReconciler(mgr.GetClient(), mgr.GetScheme(), eventSourceImage, log.WithName("reconciler")),
 	})
 	if err != nil {
 		mainLog.Error(err, "unable to set up individual controller")
