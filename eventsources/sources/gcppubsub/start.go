@@ -91,11 +91,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	// https://github.com/googleapis/google-cloud-go/tree/v0.38.0#authorization
 	// Note this env var is automatically injected from Secret to the Pod by EventSource controller.
 	if cred := pubsubEventSource.Credentials; cred != nil {
-		credJson, ok := GetEnvFromSecret(cred)
+		credJson, ok := common.GetEnvFromSecret(cred)
 		if !ok {
-			return nil, errors.Errorf("could not find credentials in secret: name=%#v / key=%#v", cred.Name, cred.Key)
+			return errors.Errorf("could not find credentials in secret: name=%#v / key=%#v", cred.Name, cred.Key)
 		}
-		opt = append(opt, option.WithCredentialsJSON(bytes(credJson)))
+		opt = append(opt, option.WithCredentialsJSON([]byte(credJson)))
 	}
 
 	// Use default ProjectID unless TopicProjectID exists
