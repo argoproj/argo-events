@@ -42,11 +42,9 @@ import (
 
 // AdaptorArgs are the args needed to create a sensor deployment
 type AdaptorArgs struct {
-	// controller namespace
-	Namespace string
-	Image     string
-	Sensor    *v1alpha1.Sensor
-	Labels    map[string]string
+	Image  string
+	Sensor *v1alpha1.Sensor
+	Labels map[string]string
 }
 
 // Reconcile does the real logic

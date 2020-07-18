@@ -28,14 +28,12 @@ type reconciler struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	// controller namespace
-	namespace        string
 	eventSourceImage string
 	logger           logr.Logger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, namespace, eventSourceImage string, logger logr.Logger) reconcile.Reconciler {
+func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImage string, logger logr.Logger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, eventSourceImage: eventSourceImage, logger: logger}
 }
 
@@ -82,7 +80,6 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 		return err
 	}
 	args := &AdaptorArgs{
-		Namespace:   r.namespace,
 		Image:       r.eventSourceImage,
 		EventSource: eventSource,
 		Labels: map[string]string{

@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
@@ -30,6 +29,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/nats"
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
+	"github.com/argoproj/argo-events/eventsources/sources/resource"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
@@ -37,7 +37,6 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
 // EventingServer is the server API for Eventing service.
@@ -206,16 +205,18 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 		}
 		result[apicommon.WebhookEvent] = servers
 	}
+	if len(eventSource.Spec.Resource) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Resource {
+			servers = append(servers, &resource.EventListener{EventSourceName: eventSource.Name, EventName: k, ResourceEventSource: v})
+		}
+		result[apicommon.ResourceEvent] = servers
+	}
 	return result
 }
 
 // EventSourceAdaptor is the adaptor for eventsource service
 type EventSourceAdaptor struct {
-	// kubeClient is the kubernetes client
-	kubeClient kubernetes.Interface
-	// clientPool manages a pool of dynamic clients.
-	dynamicClient dynamic.Interface
-
 	eventSource     *v1alpha1.EventSource
 	eventBusConfig  *eventbusv1alpha1.BusConfig
 	eventBusSubject string
@@ -225,10 +226,8 @@ type EventSourceAdaptor struct {
 }
 
 // NewEventSourceAdaptor returns a new EventSourceAdaptor
-func NewEventSourceAdaptor(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, eventSource *v1alpha1.EventSource, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string) *EventSourceAdaptor {
+func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string) *EventSourceAdaptor {
 	return &EventSourceAdaptor{
-		kubeClient:      kubeClient,
-		dynamicClient:   dynamicClient,
 		eventSource:     eventSource,
 		eventBusConfig:  eventBusConfig,
 		eventBusSubject: eventBusSubject,
