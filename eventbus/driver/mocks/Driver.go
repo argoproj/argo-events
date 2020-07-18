@@ -53,13 +53,13 @@ func (_m *Driver) Publish(conn driver.Connection, message []byte) error {
 	return r0
 }
 
-// SubscribeEventSources provides a mock function with given fields: ctx, conn, dependencyExpr, dependencies, filter, action
-func (_m *Driver) SubscribeEventSources(ctx context.Context, conn driver.Connection, dependencyExpr string, dependencies []driver.Dependency, filter func(string, event.Event) bool, action func(map[string]event.Event)) error {
-	ret := _m.Called(ctx, conn, dependencyExpr, dependencies, filter, action)
+// SubscribeEventSources provides a mock function with given fields: ctx, conn, closeCh, dependencyExpr, dependencies, filter, action
+func (_m *Driver) SubscribeEventSources(ctx context.Context, conn driver.Connection, closeCh <-chan struct{}, dependencyExpr string, dependencies []driver.Dependency, filter func(string, event.Event) bool, action func(map[string]event.Event)) error {
+	ret := _m.Called(ctx, conn, closeCh, dependencyExpr, dependencies, filter, action)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, driver.Connection, string, []driver.Dependency, func(string, event.Event) bool, func(map[string]event.Event)) error); ok {
-		r0 = rf(ctx, conn, dependencyExpr, dependencies, filter, action)
+	if rf, ok := ret.Get(0).(func(context.Context, driver.Connection, <-chan struct{}, string, []driver.Dependency, func(string, event.Event) bool, func(map[string]event.Event)) error); ok {
+		r0 = rf(ctx, conn, closeCh, dependencyExpr, dependencies, filter, action)
 	} else {
 		r0 = ret.Error(0)
 	}

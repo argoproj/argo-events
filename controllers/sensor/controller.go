@@ -44,14 +44,12 @@ type reconciler struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	// controller namespace
-	namespace   string
 	sensorImage string
 	logger      logr.Logger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, namespace, sensorImage string, logger logr.Logger) reconcile.Reconciler {
+func NewReconciler(client client.Client, scheme *runtime.Scheme, sensorImage string, logger logr.Logger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, sensorImage: sensorImage, logger: logger}
 }
 
@@ -97,9 +95,8 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		log.Error(err, "validation error")
 	}
 	args := &AdaptorArgs{
-		Namespace: r.namespace,
-		Image:     r.sensorImage,
-		Sensor:    sensor,
+		Image:  r.sensorImage,
+		Sensor: sensor,
 		Labels: map[string]string{
 			"controller":           "sensor-controller",
 			common.LabelSensorName: sensor.Name,
