@@ -1,12 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: storage-grid-event-source
+  name: storage-grid
 spec:
   type: storagegrid
+  service:
+    ports:
+      - port: 8080
+        targetPort: 8080
   storageGrid:
     example:
-      # hook contains configuration for the HTTP server running in the gateway.
+      # hook contains configuration for the HTTP server running in the event-source.
       # StorageGrid will send events to following port and endpoint
       webhook:
         # port to run HTTP server on
@@ -16,7 +20,9 @@ spec:
         # endpoint to listen events on
         endpoint: "/"
         # url for StorageGrid to send notifications to. Make sure that this URL is reachable from StorageGrid
-        url: gateway-url
+        # The name for the service is in `<event-source-name>-eventsource-svc` format.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from StorageGrid.
+        url: event-source-url
       # List of supported events can be derived from AWS S3 events https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#supported-notification-event-types
       events:
         - s3:ObjectCreated:*

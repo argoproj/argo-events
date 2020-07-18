@@ -1,9 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: gcp-pubsub-event-source
+  name: gcp-pubsub
 spec:
   type: pubsub
+  template:
+    container:
+      volumeMounts:
+        - mountPath: /gcp-pubsub-creds-dir
+          name: gcp-pubsub-data
+    volumes:
+      - name: gcp-pubsub-data
+        secret:
+          secretName: gcp-pubsub
   pubSub:
     example:
       # jsonBody specifies that all event body payload coming from this

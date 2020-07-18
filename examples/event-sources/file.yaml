@@ -1,9 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: file-event-source
+  name: file
 spec:
   type: file
+  template:
+    container:
+      volumeMounts:
+        - mountPath: /test-data
+          name: test-data
+    volumes:
+      - name: test-data
+        emptyDir: {}
   file:
     example:
       watchPathConfig:

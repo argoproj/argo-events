@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: hdfs-event-source
+  name: hdfs
 spec:
   type: hdfs
   hdfs:

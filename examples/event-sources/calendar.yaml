@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: calendar-event-source
+  name: calendar
 spec:
   type: calendar
   calendar:

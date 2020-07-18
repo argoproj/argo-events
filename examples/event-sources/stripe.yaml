@@ -1,9 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: stripe-event-source
+  name: stripe
 spec:
   type: stripe
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
   stripe:
     example:
       # Webhook holds a REST endpoint configuration for Stripe to connect with.
@@ -16,7 +20,9 @@ spec:
         method: POST
         # Webhook URL to configure at Stripe.
         # This url must be reachable from outside the cluster.
-        # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Stripe can reach to.
+        # The event-source pod is backed by the service defined in the event-source spec. So get the URL for that service Stripe can reach to.
+        # The name for the service is in `<event-source-name>-eventsource-svc` format.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Stripe.
         url: http://myfakeurl.fake
       # CreateWebhook if specified creates a new webhook programmatically.
       # +optional

@@ -1,12 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: slack-event-source
+  name: slack
 spec:
   type: slack
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
   slack:
     example-insecure:
-      # hook contains configuration for the HTTP server running in the gateway.
+      # hook contains configuration for the HTTP server running in the event-source.
       # Slack will send events to following port and endpoint
       webhook:
         # endpoint to listen events on
@@ -36,9 +40,9 @@ spec:
         endpoint: "/"
         port: "14000"
         method: "POST"
-        # path to file that is mounted in gateway pod which contains certs
+        # path to file that is mounted in event-source pod which contains certs
         serverCertPath: "some path in pod"
-        # path to file that is mounted in gateway pod which contains private key
+        # path to file that is mounted in event-source pod which contains private key
         serverKeyPath: "some path in pod"
       token:
         name: slack-secret

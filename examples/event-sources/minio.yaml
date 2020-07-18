@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: minio-event-source
+  name: minio
 spec:
   type: minio
   minio:

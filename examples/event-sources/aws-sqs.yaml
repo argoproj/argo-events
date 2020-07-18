@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: aws-sqs-event-source
+  name: aws-sqs
 spec:
   type: sqs
   sqs:
@@ -21,12 +21,6 @@ spec:
         key: secretkey
         # Name of the K8s secret that contains the secret key
         name: aws-secret
-
-#      # Namespace to read secrets from.
-#      # +Optional. Default to gateway's namespace.
-#      namespace: "argo-events"
-
-
       # aws region
       region: us-east-1
       # name of the queue. The gateway resolves the url of the queue from the queue name.
@@ -34,7 +28,6 @@ spec:
       # The duration (in seconds) for which the call waits for a message to arrive in the queue before returning.
       # MUST BE > 0 AND <= 20
       waitTimeSeconds: 20
-
 
 #    example-without-credentials:
 #      # If AWS access credentials are already present on the Pod's IAM role running the Gateway,
@@ -58,4 +51,3 @@ spec:
 #       # AWS Account Id that created the queue
 #       queueAccountId: "12345678"
 #       waitTimeSeconds: 20
-

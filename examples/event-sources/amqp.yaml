@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: amqp-event-source
+  name: amqp
 spec:
   type: amqp
   amqp:

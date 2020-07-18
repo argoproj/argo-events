@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: nats-event-source
+  name: nats
 spec:
   type: nats
   nats:
@@ -30,8 +30,8 @@ spec:
 #      jsonBody: true
 #      subject: "foo"
 #      tls:
-#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
-#        clientCertPath: path-to-client-cert-mounted-in-gateway
-#        clientKeyPath: path-to-client-key-mounted-in-gateway
+#        caCertPath: path-to-ca-cert-key-mounted-in-event-source
+#        clientCertPath: path-to-client-cert-mounted-in-event-source
+#        clientKeyPath: path-to-client-key-mounted-in-event-source
 
 
