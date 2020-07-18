@@ -859,6 +859,13 @@ func (in *Template) DeepCopyInto(out *Template) {
 		*out = new(v1.PodSecurityContext)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.NodeSelector != nil {
+		in, out := &in.NodeSelector, &out.NodeSelector
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.Spec != nil {
 		in, out := &in.Spec, &out.Spec
 		*out = new(v1.PodSpec)

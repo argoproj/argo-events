@@ -246,6 +246,7 @@ func buildDeploymentSpec(args *AdaptorArgs, log logr.Logger) (*appv1.DeploymentS
 				},
 				Volumes:         args.Sensor.Spec.Template.Volumes,
 				SecurityContext: args.Sensor.Spec.Template.SecurityContext,
+				NodeSelector:    args.Sensor.Spec.Template.NodeSelector,
 			},
 		},
 	}, nil

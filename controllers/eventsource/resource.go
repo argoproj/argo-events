@@ -295,6 +295,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 				},
 				Volumes:         args.EventSource.Spec.Template.Volumes,
 				SecurityContext: args.EventSource.Spec.Template.SecurityContext,
+				NodeSelector:    args.EventSource.Spec.Template.NodeSelector,
 			},
 		},
 	}, nil
