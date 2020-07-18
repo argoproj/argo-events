@@ -7,11 +7,8 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook
+      eventSourceName: webhook
       eventName: example
-  subscription:
-    http:
-      port: 9300
 
   # If set to true, marks sensor state as `error` if the previous trigger round fails.
   # Once sensor state is set to `error`, no further triggers will be processed.

@@ -7,11 +7,8 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: calendar
+      eventSourceName: calendar
       eventName: example-with-interval
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         name: calendar-workflow-trigger
