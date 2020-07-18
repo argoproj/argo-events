@@ -15,8 +15,8 @@ spec:
       # topicProjectID: "project-id"
       # topic name
       topic: test
-      # Refers to the secret which contains the credential file
-      # Leave this omitted if you want to use Application Default Credentials such as Workload Identity
+      # (optional) Refers to the secret which contains the credential file
+      # Omit this if you want to use Application Default Credentials such as Workload Identity
       credentials:
         name: gcp-credentials
         key: key.json
