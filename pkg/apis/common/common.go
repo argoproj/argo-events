@@ -57,6 +57,7 @@ var (
 		MQTTEvent,
 		EmitterEvent,
 		NSQEvent,
+		ResourceEvent,
 	}
 )
 

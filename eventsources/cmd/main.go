@@ -7,8 +7,6 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/argoproj/argo-events/common"
@@ -19,12 +17,6 @@ import (
 )
 
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	encodedEventSourceSpec, defined := os.LookupEnv(common.EnvVarEventSourceObject)
 	if !defined {
 		panic(errors.Errorf("required environment variable '%s' not defined", common.EnvVarEventSourceObject))
@@ -60,9 +52,7 @@ func main() {
 		panic(errors.New("required environment variable 'POD_NAME' not defined"))
 	}
 
-	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
-
-	adaptor := eventsources.NewEventSourceAdaptor(kubeClient, dynamicClient, eventSource, busConfig, ebSubject, hostname)
+	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname)
 	logger := logging.NewArgoEventsLogger()
 	ctx := logging.WithLogger(context.Background(), logger)
 	stopCh := signals.SetupSignalHandler()
