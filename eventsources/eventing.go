@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -36,7 +37,6 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
 // EventingServer is the server API for Eventing service.
