@@ -55,6 +55,8 @@ var (
 		AzureEventsHub,
 		NATSEvent,
 		MQTTEvent,
+		EmitterEvent,
+		NSQEvent,
 	}
 )
 
