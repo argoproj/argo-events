@@ -639,6 +639,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				Labels: i.labels,
 			},
 			Spec: corev1.PodSpec{
+				NodeSelector: i.eventBus.Spec.NATS.Native.NodeSelector,
 				Volumes: []corev1.Volume{
 					{
 						Name: "config-volume",

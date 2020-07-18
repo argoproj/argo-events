@@ -163,9 +163,14 @@ type Template struct {
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,5,rep,name=nodeSelector"`
 	// Spec holds the sensor deployment spec.
 	// DEPRECATED: Use Container instead.
-	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
+	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,6,opt,name=spec"`
 }
 
 // EventDependency describes a dependency
