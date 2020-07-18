@@ -33,8 +33,6 @@ rules:
       - workflows/finalizers
       - workflowtemplates
       - workflowtemplates/finalizers
-      - gateways
-      - gateways/finalizers
       - sensors
       - sensors/finalizers
       - eventsources

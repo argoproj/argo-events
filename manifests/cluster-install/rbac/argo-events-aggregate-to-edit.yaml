@@ -8,8 +8,6 @@ rules:
   - apiGroups:
       - argoproj.io
     resources:
-      - gateways
-      - gateways/finalizers
       - sensors
       - sensors/finalizers
       - eventsources
