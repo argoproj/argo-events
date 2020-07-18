@@ -39,6 +39,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 ## Setup
 
 1. Fetch the project credentials JSON file from GCP console.
+      - Note: You don't need step 1 and 2 if you use Workload Identity. In such case, don't forget to remove `credentials` field from event source manifest.
 
 2. Create a K8s secret called `gcp-credentials` to store the credentials file
 

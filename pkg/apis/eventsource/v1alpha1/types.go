@@ -378,12 +378,11 @@ type PubSubEventSource struct {
 	TopicProjectID string `json:"topicProjectID" protobuf:"bytes,2,opt,name=topicProjectID"`
 	// Topic on which a subscription will be created
 	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
-	// CredentialsFile is the file that contains credentials to authenticate for GCP
-	CredentialsFile string `json:"credentialsFile" protobuf:"bytes,4,opt,name=credentialsFile"`
-	// EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile.
-	// If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.
+	// Credentials is the reference to the secret which contains JSON credentials to authenitacate for GCP.
+	// If this field is omitted, Application Default Credentials, such as WorkloadIdentity, will be used.
+	// https://cloud.google.com/docs/authentication/production
 	// +optional
-	EnableWorkloadIdentity bool `json:"enableWorkloadIdentity,omitempty" protobuf:"varint,5,opt,name=enableWorkloadIdentity"`
+	Credentials *corev1.SecretKeySelector `json:"credentials,omitempty" protobuf:"bytes,8,opt,name=credentials"`
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
 	// +optional
 	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"varint,6,opt,name=deleteSubscriptionOnFinish"`

@@ -1416,18 +1416,10 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"credentialsFile": {
+					"credentials": {
 						SchemaProps: spec.SchemaProps{
-							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"enableWorkloadIdentity": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile. If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.",
-							Type:        []string{"boolean"},
-							Format:      "",
+							Description: "Credentials is the reference to the secret which contains JSON credentials to authenitacate for GCP. If this field is omitted, Application Default Credentials, such as WorkloadIdentity, will be used. https://cloud.google.com/docs/authentication/production",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"deleteSubscriptionOnFinish": {
@@ -1445,9 +1437,11 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"projectID", "topicProjectID", "topic", "credentialsFile"},
+				Required: []string{"projectID", "topicProjectID", "topic"},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

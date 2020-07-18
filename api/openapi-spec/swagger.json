@@ -1105,20 +1105,15 @@
       "required": [
         "projectID",
         "topicProjectID",
-        "topic",
-        "credentialsFile"
+        "topic"
       ],
       "properties": {
-        "credentialsFile": {
-          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP",
-          "type": "string"
+        "credentials": {
+          "description": "Credentials is the reference to the secret which contains JSON credentials to authenitacate for GCP. If this field is omitted, Application Default Credentials, such as WorkloadIdentity, will be used. https://cloud.google.com/docs/authentication/production",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "deleteSubscriptionOnFinish": {
           "description": "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
-          "type": "boolean"
-        },
-        "enableWorkloadIdentity": {
-          "description": "EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile. If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.",
           "type": "boolean"
         },
         "jsonBody": {

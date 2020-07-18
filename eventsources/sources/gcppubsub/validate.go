@@ -39,8 +39,10 @@ func validate(eventSource *v1alpha1.PubSubEventSource) error {
 	if eventSource.Topic == "" {
 		return fmt.Errorf("must specify topic")
 	}
-	if !eventSource.EnableWorkloadIdentity && eventSource.CredentialsFile == "" {
-		return fmt.Errorf("must specify credentials file path if not using Workload Identity")
+	if cred := eventSource.Credentials; cred != nil {
+		if cred.Name == "" || cred.Key == "" {
+			return fmt.Errorf("must specify both name and key if you use credentials")
+		}
 	}
 	return nil
 }

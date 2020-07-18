@@ -4093,28 +4093,9 @@ Topic on which a subscription will be created
 
 <td>
 
-<code>credentialsFile</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-CredentialsFile is the file that contains credentials to authenticate
-for GCP
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>enableWorkloadIdentity</code></br> <em> bool </em>
+<code>credentials</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 
 </td>
 
@@ -4124,10 +4105,10 @@ for GCP
 
 <p>
 
-EnableWorkloadIdentity determines if your project authenticates to GCP
-with WorkloadIdentity or CredentialsFile. If true, authentication is
-done with WorkloadIdentity. If false or omitted, authentication is done
-with CredentialsFile.
+Credentials is the reference to the secret which contains JSON
+credentials to authenitacate for GCP. If this field is omitted,
+Application Default Credentials, such as WorkloadIdentity, will be used.
+<a href="https://cloud.google.com/docs/authentication/production">https://cloud.google.com/docs/authentication/production</a>
 
 </p>
 

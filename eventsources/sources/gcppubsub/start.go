@@ -87,8 +87,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var opt []option.ClientOption
 	projectID := pubsubEventSource.ProjectID
 
-	if !pubsubEventSource.EnableWorkloadIdentity {
-		opt = append(opt, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
+	// Uses credentials from Secret if specified, otherwise defaults back to Application Default Credentials.
+	// https://github.com/googleapis/google-cloud-go/tree/v0.38.0#authorization
+	// Note this env var is automatically injected from Secret to the Pod by EventSource controller.
+	if cred := pubsubEventSource.Credentials; cred != nil {
+		credJson, ok := GetEnvFromSecret(cred)
+		if !ok {
+			return nil, errors.Errorf("could not find credentials in secret: name=%#v / key=%#v", cred.Name, cred.Key)
+		}
+		opt = append(opt, option.WithCredentialsJSON(bytes(credJson)))
 	}
 
 	// Use default ProjectID unless TopicProjectID exists
