@@ -14,73 +14,21 @@ Argo workflow is K8s custom resource which help orchestrating parallel jobs on K
 
 ## Trigger a workflow
 
-1. We will use webhook gateway and sensor to trigger an Argo workflow.
+1. Make sure to have the eventbus deployed in the namespace.
 
-1. Lets set up a webhook gateway and event source to process incoming requests.
+1. We will use webhook event-source and sensor to trigger an Argo workflow.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
+1. Let's set up a webhook event-source to process incoming requests.
         
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-
-1.  To trigger a workflow, we need to create a sensor as defined below,
-
-        apiVersion: argoproj.io/v1alpha1
-        kind: Sensor
-        metadata:
-          name: webhook-sensor
-        spec:
-          template:
-            serviceAccountName: argo-events-sa
-          dependencies:
-            - name: test-dep
-              gatewayName: webhook-gateway
-              eventName: example
-          subscription:
-            http:
-              port: 9300
-          triggers:
-            - template:
-                name: webhook-workflow-trigger
-                k8s:
-                  group: argoproj.io
-                  version: v1alpha1
-                  resource: workflows
-                  operation: create
-                  source:
-                    resource:
-                      apiVersion: argoproj.io/v1alpha1
-                      kind: Workflow
-                      metadata:
-                        generateName: webhook-
-                      spec:
-                        entrypoint: whalesay
-                        arguments:
-                          parameters:
-                          - name: message
-                            # the value will get overridden by event payload from test-dep
-                            value: hello world
-                        templates:
-                        - name: whalesay
-                          serviceAccountName: argo-events-sa
-                          inputs:
-                            parameters:
-                            - name: message
-                          container:
-                            image: docker/whalesay:latest
-                            command: [cowsay]
-                            args: ["{{inputs.parameters.message}}"]
-                  parameters:
-                    - src:
-                        dependencyName: test-dep
-                      dest: spec.arguments.parameters.0.value
 
 1. Create the sensor,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 
-1. Lets expose the webhook gateway using `port-forward` so that we can make a request to it.
+1. Let's expose the webhook event-source pod using `port-forward` so that we can make a request to it.
   
-        kubectl -n argo-events port-forward <name-of-gateway-pod> 12000:12000   
+        kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
 
 1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 

@@ -3,20 +3,18 @@
 The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario. 
 
 ## Prerequisite
-Have a Slack workspace setup you wish to send a message to. Set up the webhook gateway and event source. The K8s manifests are available under `examples`.
+1. Deploy the eventbus in the namespace.
 
-1. Set up a simple webhook gateway.
+1. Make sure to have a Slack workspace setup you wish to send a message to.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
-
-2. Create a webhook event source.
+2. Create a webhook event-source.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 3. Set up port-forwarding to expose the http server. We will
    use port-forwarding here.
    
-        kubectl port-forward -n argo-events webhook-gateway-YOUR-GATEWAY-POD 12000:12000
+        kubectl port-forward -n argo-events <event-source-pod-name> 12000:12000
 
 ## Create a Slack App
 We need to create a Slack App which will send messages to your Slack Workspace. We will add OAuth Permissions and add the OAuth token to the k8s cluster via a secret.
@@ -55,16 +53,17 @@ We will set up a basic slack trigger and send a default message, and then a dyna
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/slack-trigger.yaml
 
-2. Send a http request to the newly setup gateway to fire the Slack trigger. 
+2. Send a http request to the event-source-pod to fire the Slack trigger. 
 
         curl -d '{"text":"Hello, World!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
         
       **Note**: The default slack-trigger will send the message "hello world" to the #general channel. You may change the default message and channel in slack-trigger.yaml under triggers.slack.channel and triggers.slack.message.
+
 3. Alternatively, you can dynamically determine the channel and message based on parameterization of your event. 
 
         curl -d '{"channel":"random","message":"test message"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-4. Great! But how did the sensor use the event to customize the message and channel from the http request? We will see that in next section.
+4. Great! But, how did the sensor use the event to customize the message and channel from the http request? We will see that in next section.
 
 ## Parameterization
 The slack trigger parameters have the following structure,

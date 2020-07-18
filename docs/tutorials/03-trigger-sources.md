@@ -7,7 +7,8 @@ In the previous sections, you have been dealing with the `Resource` trigger sour
 will explore other trigger sources.
 
 ## Prerequisites
-1. The `Webhook` gateway is already set up.
+
+1. The `Webhook` event-source is already set up.
 
 ## Git
 Git trigger source refers to K8s trigger refers to the K8s resource stored in Git. 
