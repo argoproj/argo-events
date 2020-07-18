@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: minio
+spec:
+  type: minio
+  minio:
+    example:
+      # bucket information
+      bucket:
+        # name of the bucket
+        name: input
+      # s3 service endpoint
+      endpoint: minio-service.argo-events:9000
+      # list of events to subscribe to
+      # Visit https://docs.minio.io/docs/minio-bucket-notification-guide.html
+      events:
+        - s3:ObjectCreated:Put
+        - s3:ObjectRemoved:Delete
+      # type of the connection
+      insecure: true
+      # accessKey refers to K8s secret that stores the access key
+      accessKey:
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
+        key: accesskey
+        # Name of the K8s secret that contains the access key
+        name: artifacts-minio
+      # secretKey contains information about K8s secret that stores the secret key
+      secretKey:
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is secret key
+        key: secretkey
+        # Name of the K8s secret that contains the secret key
+        name: artifacts-minio

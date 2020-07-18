@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor
+  name: webhook
 spec:
   template:
     container:
@@ -27,11 +27,8 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook-gateway
+      eventSourceName: webhook-gateway
       eventName: example
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         name: workflow-trigger

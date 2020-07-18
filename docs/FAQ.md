@@ -4,7 +4,7 @@
 
 **A**. Recommended way to get started with Argo Events is,
 
- 1. Read the basic concepts about [EventBus](https://argoproj.github.io/argo-events/concepts/gateway/), [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/) and [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/).
+ 1. Read the basic concepts about [EventBus](https://argoproj.github.io/argo-events/concepts/eventbus/), [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/) and [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/).
  2. Install the setup as outlined [here](https://argoproj.github.io/argo-events/installation/).
  3. Read the tutorials available [here](https://argoproj.github.io/argo-events/tutorials/01-introduction/). 
 
@@ -16,7 +16,7 @@ event-source definition with desired namespace and service account. Make sure to
 **Q. How to debug Argo-Events.**
 
 **A**.
- 
+
 1. Make sure you have installed everything as instructed [here](https://argoproj.github.io/argo-events/installation/).
 1. Make sure you have `EventBus` resource created in the namespace.
 1. The  event-bus, event-source and sensor pods must be running. If you see any issue with the pods, check the logs

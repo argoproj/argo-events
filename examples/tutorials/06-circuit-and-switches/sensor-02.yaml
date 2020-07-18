@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: circuit-sensor
+  name: circuit
 spec:
   template:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep-webhook
-      gatewayName: webhook-gateway
+      eventSourceName: webhook
       eventName: example
     - name: test-dep-minio
-      gatewayName: minio-gateway
+      eventSourceName: minio
       eventName: example
 
   # group event dependencies

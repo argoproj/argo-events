@@ -59,7 +59,7 @@ GitHub event-source specification is available [here](https://github.com/argopro
         kubectl apply -n argo-events -f <event-source-file-updated-in-previous-step>
 
 1. Go to `Webhooks` under your project settings on GitHub and verify the webhook is registered. You can also do the same by
-    looking at the gateway pod logs.
+    looking at the event-source pod logs.
 
 1. Create the sensor by running the following command,
 
