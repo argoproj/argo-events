@@ -243,6 +243,13 @@ func (in *NativeStrategy) DeepCopyInto(out *NativeStrategy) {
 		*out = new(ContainerTemplate)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.NodeSelector != nil {
+		in, out := &in.NodeSelector, &out.NodeSelector
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
