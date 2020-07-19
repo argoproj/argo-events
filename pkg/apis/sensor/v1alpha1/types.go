@@ -213,13 +213,13 @@ type TimeFilter struct {
 	// Start is the beginning of a time window in UTC.
 	// Before this time, events for this dependency are ignored.
 	// Format is hh:mm:ss.
-	Start string `json:"start,omitempty" protobuf:"bytes,1,opt,name=start"`
+	Start string `json:"start" protobuf:"bytes,1,opt,name=start"`
 	// Stop is the end of a time window in UTC.
 	// After or equal to this time, events for this dependency are ignored and
 	// Format is hh:mm:ss.
 	// If it is smaller than Start, it is treated as next day of Start
 	// (e.g.: 22:00:00-01:00:00 means 22:00:00-25:00:00).
-	Stop string `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
+	Stop string `json:"stop" protobuf:"bytes,2,opt,name=stop"`
 }
 
 // JSONType contains the supported JSON types for data filtering

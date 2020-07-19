@@ -106,11 +106,9 @@ You can also use time filter, which is applied on event time.
 It filters out events that occur outside the specified time range, so it is specially helpful when
 you need to make sure an event occurs between a certain time-frame.
 
-Time filter takes a `start` and `stop` time in `HH:MM:SS` format in UTC, but both fields are optional.
-If `stop` time is omitted, the stop time will be midnight (`00:00:00`). Similarly, if `start` time is
-omitted, the start time will be midnight (`00:00:00`). If `stop` is smaller than `start`, the stop time
-is treated as next day of `start`. Note that `start` is inclusive while `stop` is exclusive. The diagrams
-below illustlate these behavior.
+Time filter takes a `start` and `stop` time in `HH:MM:SS` format in UTC. If `stop` is smaller than `start`,
+the stop time is treated as next day of `start`. Note that `start` is inclusive while `stop` is exclusive.
+The diagrams below illustlate these behavior.
 
 An example of time filter is available under `examples/sensors`.
 
@@ -128,17 +126,3 @@ An example of time filter is available under `examples/sensors`.
          ┃           stop        start       ┃       stop            start       ┃
         ─┸───────────○───────────●───────────┸───────────○───────────●───────────┸─
         ─── OK ──────╯           ╰───────── OK ──────────╯           ╰────── OK ───
-
-3. if only `start` is specified: event time must be in `[start, 00:00:00@Next day)`
-
-         00:00:00                            00:00:00                            00:00:00
-         ┃           start                   ┃           start                   ┃
-        ─○───────────●───────────────────────○───────────●───────────────────────○─
-        ─╯           ╰───────── OK ──────────╯           ╰───────── OK ──────────╯
-
-4. if only `stop` is specified: event time must be in `[00:00:00, stop)`
-
-         00:00:00                            00:00:00                            00:00:00
-         ┃                       stop        ┃                    stop           ┃
-        ─●───────────────────────○───────────●───────────────────────○───────────●─
-         ╰───────── OK ──────────╯           ╰───────── OK ──────────╯           ╰─

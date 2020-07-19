@@ -76,58 +76,27 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) 
 //   0:00        Stop        Start       0:00
 //   ●───────────○───────────●───────────○
 //   └─── OK ────┘           └─── OK ────┘
-//
-// if only Start is specified: eventTime must be in [Start, 0:00@Next day)
-//
-//   0:00        Start                   0:00
-//   ├───────────●───────────────────────┤
-//               └───────── OK ──────────┘
-//
-// if only Stop is specified: eventTime must be in [0:00, Stop)
-//
-//   0:00                    Stop        0:00
-//   ├───────────────────────○───────────┤
-//   └───────── OK ──────────┘
 func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, error) {
 	if timeFilter == nil {
 		return true, nil
 	}
 
 	// Parse start and stop
-	var startTime, stopTime time.Time
-	var err error
-	if timeFilter.Start != "" {
-		startTime, err = common.ParseTime(timeFilter.Start, eventTime)
-		if err != nil {
-			return false, err
-		}
+	startTime, err := common.ParseTime(timeFilter.Start, eventTime)
+	if err != nil {
+		return false, err
 	}
-	if timeFilter.Stop != "" {
-		stopTime, err = common.ParseTime(timeFilter.Stop, eventTime)
-		if err != nil {
-			return false, err
-		}
+	stopTime, err := common.ParseTime(timeFilter.Stop, eventTime)
+	if err != nil {
+		return false, err
 	}
 
 	// Filtering logic
-	// Case 1, 2: Both are set
-	if timeFilter.Start != "" && timeFilter.Stop != "" {
-		if startTime.Before(stopTime) {
-			return (eventTime.After(startTime) || eventTime.Equal(startTime)) && eventTime.Before(stopTime), nil
-		} else {
-			return (eventTime.After(startTime) || eventTime.Equal(startTime)) || eventTime.Before(stopTime), nil
-		}
+	if startTime.Before(stopTime) {
+		return (eventTime.After(startTime) || eventTime.Equal(startTime)) && eventTime.Before(stopTime), nil
+	} else {
+		return (eventTime.After(startTime) || eventTime.Equal(startTime)) || eventTime.Before(stopTime), nil
 	}
-	// Case 3: Only start is set
-	if timeFilter.Start != "" {
-		return (eventTime.After(startTime) || eventTime.Equal(startTime)), nil
-	}
-	// Case 4: Only stop is set
-	if timeFilter.Stop != "" {
-		return eventTime.Before(stopTime), nil
-	}
-
-	return true, nil
 }
 
 // applyContextFilter checks the expected EventContext against the actual EventContext

@@ -337,26 +337,6 @@ func TestFilterTime(t *testing.T) {
 			//               ~~~~~~~~~~                ~~~~~~~~~~
 			//              [          , time1)       [time2     , )
 		},
-		{
-			name: "only start",
-			timeFilter: &v1alpha1.TimeFilter{
-				Start: time1,
-				Stop:  "",
-			},
-			results: [6]bool{false, false, true, true, true, true},
-			//                             ~~~~~~~~~~~~~~~~~~~~~~
-			//                            [time1                 , )
-		},
-		{
-			name: "only stop",
-			timeFilter: &v1alpha1.TimeFilter{
-				Start: "",
-				Stop:  time2,
-			},
-			results: [6]bool{true, true, true, true, false, false},
-			//               ~~~~~~~~~~~~~~~~~~~~~~
-			//              [                      , time2)
-		},
 	}
 
 	for _, test := range tests {
@@ -378,7 +358,7 @@ func TestFilterEvent(t *testing.T) {
 		Name: "test-filter",
 		Time: &v1alpha1.TimeFilter{
 			Start: "09:09:09",
-			Stop:  "",
+			Stop:  "19:19:19",
 		},
 		Context: &v1alpha1.EventContext{
 			Type:   "webhook",

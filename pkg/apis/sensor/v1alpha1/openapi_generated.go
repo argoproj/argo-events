@@ -1687,6 +1687,7 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 						},
 					},
 				},
+				Required: []string{"start", "stop"},
 			},
 		},
 	}

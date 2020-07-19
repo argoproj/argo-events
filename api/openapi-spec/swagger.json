@@ -2512,6 +2512,10 @@
     "io.argoproj.sensor.v1alpha1.TimeFilter": {
       "description": "TimeFilter describes a window in time. It filters out events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
       "type": "object",
+      "required": [
+        "start",
+        "stop"
+      ],
       "properties": {
         "start": {
           "description": "Start is the beginning of a time window in UTC. Before this time, events for this dependency are ignored. Format is hh:mm:ss.",

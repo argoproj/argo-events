@@ -469,31 +469,19 @@ func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
 // validateEventTimeFilter validates time filter
 func validateEventTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 	now := time.Now().UTC()
-	if tFilter.Start != "" && tFilter.Stop != "" {
-		startTime, err := common.ParseTime(tFilter.Start, now)
-		if err != nil {
-			return err
-		}
-		stopTime, err := common.ParseTime(tFilter.Stop, now)
-		if err != nil {
-			return err
-		}
-		if stopTime.Equal(startTime) {
-			return errors.Errorf("invalid event time filter: stop '%s' is equal to start '%s", tFilter.Stop, tFilter.Start)
-		}
-		return nil
+	// Parse start and stop
+	startTime, err := common.ParseTime(tFilter.Start, now)
+	if err != nil {
+		return err
 	}
-
-	if tFilter.Start != "" {
-		_, err := common.ParseTime(tFilter.Start, now)
+	stopTime, err := common.ParseTime(tFilter.Stop, now)
+	if err != nil {
 		return err
 	}
 
-	if tFilter.Stop != "" {
-		_, err := common.ParseTime(tFilter.Stop, now)
-		return err
+	if stopTime.Equal(startTime) {
+		return errors.Errorf("invalid event time filter: stop '%s' is equal to start '%s", tFilter.Stop, tFilter.Start)
 	}
-
 	return nil
 }
 
