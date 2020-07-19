@@ -16,6 +16,15 @@ spec:
         time:
           start: "22:14:05"
           stop: "23:04:05"
+    - name: test-another-dep
+      gatewayName: webhook
+      eventName: example
+      filters:
+        time:
+          # start > stop, stop is treated as next day of start,
+          # so in this case, events can pass only during 50 minutes from 23:34:05
+          start: "23:34:05"
+          stop: "00:24:05" # == "24:24:05"
   triggers:
     - template:
         name: hello-world-workflow-trigger
