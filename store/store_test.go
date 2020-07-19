@@ -20,11 +20,9 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
-
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 type FakeWorkflowArtifactReader struct{}
@@ -35,12 +33,7 @@ func (f *FakeWorkflowArtifactReader) Read() ([]byte, error) {
 
 func TestFetchArtifact(t *testing.T) {
 	reader := &FakeWorkflowArtifactReader{}
-	gvr := metav1.GroupVersionResource{
-		Group:    "argoproj.io",
-		Version:  "v1alpha1",
-		Resource: "workflows",
-	}
-	obj, err := FetchArtifact(reader, gvr)
+	obj, err := FetchArtifact(reader)
 	assert.Nil(t, err)
 	assert.Equal(t, "argoproj.io/v1alpha1", obj.GetAPIVersion())
 	assert.Equal(t, "Workflow", obj.GetKind())
@@ -61,24 +54,12 @@ func TestGetArtifactReader(t *testing.T) {
 func TestDecodeSensor(t *testing.T) {
 	b, err := ioutil.ReadFile("../examples/sensors/multi-trigger-sensor.yaml")
 	assert.Nil(t, err)
-
-	gvr := metav1.GroupVersionResource{
-		Group:    v1alpha1.SchemaGroupVersionKind.Group,
-		Version:  v1alpha1.SchemaGroupVersionKind.Version,
-		Resource: v1alpha1.Resource("sensors").Resource,
-	}
-
-	_, err = decodeAndUnstructure(b, gvr)
+	_, err = decodeAndUnstructure(b)
 	assert.Nil(t, err)
 }
 
 func TestDecodeWorkflow(t *testing.T) {
-	gvr := metav1.GroupVersionResource{
-		Group:    "argoproj.io",
-		Version:  "v1alpha1",
-		Resource: "workflows",
-	}
-	_, err := decodeAndUnstructure([]byte(workflowv1alpha1), gvr)
+	_, err := decodeAndUnstructure([]byte(workflowv1alpha1))
 	assert.Nil(t, err)
 }
 
@@ -98,12 +79,7 @@ spec:
 `
 
 func TestDecodeDeploymentv1(t *testing.T) {
-	gvr := metav1.GroupVersionResource{
-		Group:    "apps",
-		Version:  "v1",
-		Resource: "deployments",
-	}
-	_, err := decodeAndUnstructure([]byte(deploymentv1), gvr)
+	_, err := decodeAndUnstructure([]byte(deploymentv1))
 	assert.Nil(t, err)
 }
 
@@ -149,12 +125,7 @@ var deploymentv1 = `
 `
 
 func TestDecodeJobv1(t *testing.T) {
-	gvr := metav1.GroupVersionResource{
-		Group:    "batch",
-		Version:  "v1",
-		Resource: "jobs",
-	}
-	_, err := decodeAndUnstructure([]byte(jobv1), gvr)
+	_, err := decodeAndUnstructure([]byte(jobv1))
 	assert.Nil(t, err)
 }
 
@@ -179,12 +150,7 @@ spec:
 `
 
 func TestDecodeUnsupported(t *testing.T) {
-	gvr := metav1.GroupVersionResource{
-		Group:    "batch",
-		Version:  "v1",
-		Resource: "jobs",
-	}
-	_, err := decodeAndUnstructure([]byte(unsupportedType), gvr)
+	_, err := decodeAndUnstructure([]byte(unsupportedType))
 	assert.Nil(t, err)
 }
 
@@ -216,11 +182,6 @@ spec:
 `
 
 func TestDecodeUnknown(t *testing.T) {
-	gvr := metav1.GroupVersionResource{
-		Group:    "unknown",
-		Version:  "123",
-		Resource: "What??",
-	}
-	_, err := decodeAndUnstructure([]byte(unsupportedType), gvr)
+	_, err := decodeAndUnstructure([]byte(unsupportedType))
 	assert.Nil(t, err, "expected nil error but got", err)
 }

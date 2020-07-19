@@ -84,7 +84,7 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource() (interface{}, error) {
 
 	// uObj will either hold the resource definition stored in the trigger or just
 	// a stub to provide enough information to fetch the object from K8s cluster
-	uObj, err := store.FetchArtifact(reader, trigger.Template.K8s.GroupVersionResource)
+	uObj, err := store.FetchArtifact(reader)
 	if err != nil {
 		return nil, err
 	}

@@ -18,7 +18,6 @@ package triggers
 
 import (
 	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/kubernetes"
 
@@ -26,7 +25,7 @@ import (
 	"github.com/argoproj/argo-events/store"
 )
 
-func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.ArtifactLocation, namespace string, gvr metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.ArtifactLocation, namespace string) (*unstructured.Unstructured, error) {
 	if source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
 	}
@@ -38,7 +37,7 @@ func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.Artif
 	if err != nil {
 		return nil, err
 	}
-	uObj, err := store.FetchArtifact(reader, gvr)
+	uObj, err := store.FetchArtifact(reader)
 	if err != nil {
 		return nil, err
 	}
