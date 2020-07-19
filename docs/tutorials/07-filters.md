@@ -101,7 +101,28 @@ Change the subscriber in the webhook gateway to point it to `context-filter` sen
    either `custom-webhook` as the value of the `source`.
 
 ## Time Filter
-Time filter is specially helpful when you need to make sure an event occurs between a 
-certain time-frame. Time filter takes a `start` and `stop` time but you can also define just the
-`start` time, meaning, there is no `end time` constraint or just the `stop` time, meaning, there is
-no `start time` constraint. An example of time filter is available under `examples/sensors`.
+
+You can also use time filter, which is applied on event time.
+It filters out events that occur outside the specified time range, so it is specially helpful when
+you need to make sure an event occurs between a certain time-frame.
+
+Time filter takes a `start` and `stop` time in `HH:MM:SS` format in UTC. If `stop` is smaller than `start`,
+the stop time is treated as next day of `start`. Note that `start` is inclusive while `stop` is exclusive.
+The diagrams below illustlate these behavior.
+
+An example of time filter is available under `examples/sensors`.
+
+1. if `start` < `stop`: event time must be in `[start, stop)`
+
+         00:00:00                            00:00:00                            00:00:00
+         ┃     start                   stop  ┃     start                   stop  ┃
+        ─┸─────●───────────────────────○─────┸─────●───────────────────────○─────┸─
+               ╰───────── OK ──────────╯           ╰───────── OK ──────────╯
+
+2. if `stop` < `start`: event time must be in `[start, stop@Next day)`  
+   (this is equivalent to: event time must be in `[00:00:00, stop) || [start, 00:00:00@Next day)`)
+
+         00:00:00                            00:00:00                            00:00:00
+         ┃           stop        start       ┃       stop            start       ┃
+        ─┸───────────○───────────●───────────┸───────────○───────────●───────────┸─
+        ─── OK ──────╯           ╰───────── OK ──────────╯           ╰────── OK ───

@@ -17,7 +17,6 @@ limitations under the License.
 package sensor
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -469,31 +468,19 @@ func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
 
 // validateEventTimeFilter validates time filter
 func validateEventTimeFilter(tFilter *v1alpha1.TimeFilter) error {
-	currentT := time.Now().UTC()
-	currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
-	currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
-	if tFilter.Start != "" && tFilter.Stop != "" {
-		startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTStr, tFilter.Start))
-		if err != nil {
-			return err
-		}
-		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTStr, tFilter.Stop))
-		if err != nil {
-			return err
-		}
-		if stopTime.Before(startTime) || startTime.Equal(stopTime) {
-			return errors.Errorf("invalid event time filter: stop '%s' is before or equal to start '%s", tFilter.Stop, tFilter.Start)
-		}
+	now := time.Now().UTC()
+	// Parse start and stop
+	startTime, err := common.ParseTime(tFilter.Start, now)
+	if err != nil {
+		return err
 	}
-	if tFilter.Stop != "" {
-		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTStr, tFilter.Stop))
-		if err != nil {
-			return err
-		}
-		stopTime = stopTime.UTC()
-		if stopTime.Before(currentT.UTC()) {
-			return errors.Errorf("invalid event time filter: stop '%s' is before the current time '%s'", tFilter.Stop, currentT)
-		}
+	stopTime, err := common.ParseTime(tFilter.Stop, now)
+	if err != nil {
+		return err
+	}
+
+	if stopTime.Equal(startTime) {
+		return errors.Errorf("invalid event time filter: stop '%s' is equal to start '%s", tFilter.Stop, tFilter.Start)
 	}
 	return nil
 }

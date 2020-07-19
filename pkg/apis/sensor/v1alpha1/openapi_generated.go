@@ -1684,24 +1684,25 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TimeFilter describes a window in time. DataFilters out event events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
+				Description: "TimeFilter describes a window in time. It filters out events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"start": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Start is the beginning of a time window. Before this time, events for this event are ignored and format is hh:mm:ss",
+							Description: "Start is the beginning of a time window in UTC. Before this time, events for this dependency are ignored. Format is hh:mm:ss.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"stop": {
 						SchemaProps: spec.SchemaProps{
-							Description: "StopPattern is the end of a time window. After this time, events for this event are ignored and format is hh:mm:ss",
+							Description: "Stop is the end of a time window in UTC. After or equal to this time, events for this dependency are ignored and Format is hh:mm:ss. If it is smaller than Start, it is treated as next day of Start (e.g.: 22:00:00-01:00:00 means 22:00:00-25:00:00).",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 				},
+				Required: []string{"start", "stop"},
 			},
 		},
 	}
