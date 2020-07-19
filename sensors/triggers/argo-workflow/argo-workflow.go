@@ -116,7 +116,7 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 
 	switch op {
 	case v1alpha1.Submit:
-		file, err := ioutil.TempFile("/bin/workflows", name)
+		file, err := ioutil.TempFile("", name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", obj.GetName())
 		}
