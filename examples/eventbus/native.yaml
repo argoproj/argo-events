@@ -7,11 +7,11 @@ spec:
     native:
       replicas: 3
       auth: token
-      containerTemplate:
-        resources:
-          requests:
-            cpu: "10m"
-      metricsContainerTemplate:
-        resources:
-          requests:
-            cpu: "10m"
+#      containerTemplate:
+#        resources:
+#          requests:
+#            cpu: "10m"
+#      metricsContainerTemplate:
+#        resources:
+#          requests:
+#            cpu: "10m"

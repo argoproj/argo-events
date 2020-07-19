@@ -13,7 +13,7 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, ClusterRoles, ConfigMap, Sensor Controller, EventBus and EventSource Controller
+2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 
@@ -31,7 +31,7 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, Roles, ConfigMap, Sensor Controller, EventBus and EventSource Controller
+2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
@@ -73,10 +73,6 @@
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argopoj.io_eventsources.yaml
 
-8. Create the confimap for sensor controller
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-configmap.yaml
-
 9. Deploy the sensor controller
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-deployment.yaml
@@ -103,28 +99,6 @@ Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/stab
       - github.com/argoproj/argo-events/manifests/cluster-install
       # OR
       - github.com/argoproj/argo-events/manifests/namespace-install
-
-To make Argo events watch a specific namespace, define similar overlays as shown in [`namespace-install/overlays`](https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install/overlays).
-
-`kustomization.yaml`:
-
-    patchesJson6902:
-     - path: ./overlays/argo-events-configmap.yaml
-       target:
-         group: ""
-         kind: ConfigMap
-         name: sensor-controller-configmap
-         version: v1
-
-
-`overlays/argo-events-configmap.yaml`:
-
-    - op: replace
-      path: /data
-      value:
-        config: |
-          instanceID: argo-events
-          namespace: YOUR_NAMESPACE
 
 ### Using Helm Chart
 
