@@ -13,9 +13,6 @@ require (
 	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
 	github.com/antonmedv/expr v1.8.8
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
-	github.com/argoproj/argo v2.5.2+incompatible
-	github.com/argoproj/argo-cd v1.5.1
-	github.com/argoproj/argo-rollouts v0.7.2
 	github.com/argoproj/pkg v0.0.0-20200319004004-f46beff7cd54 // indirect
 	github.com/aws/aws-sdk-go v1.30.7
 	github.com/cloudevents/sdk-go/v2 v2.1.0

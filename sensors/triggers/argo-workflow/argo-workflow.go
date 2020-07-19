@@ -16,13 +16,14 @@ limitations under the License.
 package argo_workflow
 
 import (
-	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 
-	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
+	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,10 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/policy"
-	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // ArgoWorkflowTrigger implements Trigger interface for Argo workflow
@@ -67,7 +64,7 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 // FetchResource fetches the trigger resource from external source
 func (t *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
 	trigger := t.Trigger
-	return triggers.FetchKubernetesResource(t.K8sClient, trigger.Template.ArgoWorkflow.Source, t.Sensor.Namespace, trigger.Template.ArgoWorkflow.GroupVersionResource)
+	return triggers.FetchKubernetesResource(t.K8sClient, trigger.Template.ArgoWorkflow.Source, t.Sensor.Namespace)
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
@@ -96,25 +93,18 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 		return nil, err
 	}
 
-	var workflow *wf_v1alpha1.Workflow
-	if err := json.Unmarshal(jObj, &workflow); err != nil {
-		return nil, errors.Wrap(err, "internal un-marshalling of the trigger resource failed")
+	name := obj.GetName()
+
+	if name == "" {
+		name = obj.GetGenerateName()
+	}
+	if name == "" {
+		return nil, fmt.Errorf("failed to trigger the workflow, no name is given")
 	}
 
 	namespace := obj.GetNamespace()
-	// Defaults to sensor's namespace
 	if namespace == "" {
 		namespace = t.Sensor.Namespace
-	}
-	obj.SetNamespace(namespace)
-
-	if workflow.Name == "" && workflow.GenerateName == "" {
-		return nil, errors.New("workflow is malformed. neither name nor generateName is specified")
-	}
-
-	name := workflow.Name
-	if name == "" && workflow.GenerateName != "" {
-		name = workflow.GenerateName
 	}
 
 	op := v1alpha1.Submit
@@ -126,19 +116,14 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 
 	switch op {
 	case v1alpha1.Submit:
-		file, err := ioutil.TempFile("/bin/workflows", workflow.Name)
+		file, err := ioutil.TempFile("", name)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", name)
+			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", obj.GetName())
 		}
 		defer os.Remove(file.Name())
 
-		workflowYaml, err := yaml.Marshal(workflow)
-		if err != nil {
-			return nil, errors.Wrap(err, "internal marshalling to YAML of the trigger resource failed")
-		}
-
-		if _, err := file.Write(workflowYaml); err != nil {
-			return nil, errors.Wrapf(err, "failed to write workflow yaml %s to the temp file %s", name, file.Name())
+		if _, err := file.Write(jObj); err != nil {
+			return nil, errors.Wrapf(err, "failed to write workflow json %s to the temp file %s", name, file.Name())
 		}
 		cmd = exec.Command("argo", "-n", namespace, "submit", file.Name())
 	case v1alpha1.Resubmit:
@@ -160,8 +145,8 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 	}
 
 	t.namespableDynamicClient = t.DynamicClient.Resource(schema.GroupVersionResource{
-		Group:    workflow.GroupVersionKind().Group,
-		Version:  workflow.GroupVersionKind().Version,
+		Group:    "argoproj.io",
+		Version:  "v1alpha1",
 		Resource: "workflows",
 	})
 
