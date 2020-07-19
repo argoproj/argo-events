@@ -15,3 +15,8 @@ spec:
 #        resources:
 #          requests:
 #            cpu: "10m"
+#      antiAffinity: false
+#      persistence:
+#        storageClassName: standard
+#        accessMode: ReadWriteOnce
+#        volumeSize: 10Gi
