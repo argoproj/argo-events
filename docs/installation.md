@@ -118,3 +118,7 @@ Make sure you have helm client installed and Tiller server is running. To instal
 1. Install `argo-events` chart
 
         helm install argo-events argo/argo-events
+
+### Migrate to v0.17.0
+
+If you are looking to migrate Argo Events <0.16.0 to v0.17.0, please read the [migration docs](https://github.com/argoproj/argo-events/wiki/Migration-path-for-v0.17.0).
