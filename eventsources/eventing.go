@@ -302,7 +302,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 						return err
 					}
 					if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
-						return errors.New("failed to publish event, eventbus connection closed.")
+						return errors.New("failed to publish event, eventbus connection closed")
 					}
 					return driver.Publish(e.eventBusConn, eventBody)
 				})
