@@ -137,7 +137,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 			}
 
 			// Attempt to reconnect
-			closeSubCh := make(chan struct{}, 1)
+			closeSubCh := make(chan struct{})
 			go func(ctx context.Context, dvr eventbusdriver.Driver) {
 				logger.Infof("starting eventbus connection daemon for client %s...", clientID)
 				for {
@@ -146,7 +146,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 						logger.Infof("exiting eventbus connection daemon for client %s...", clientID)
 						return
 					default:
-						time.Sleep(3 * time.Second)
+						time.Sleep(5 * time.Second)
 					}
 					if conn == nil || conn.IsClosed() {
 						logger.Info("NATS connection lost, reconnecting...")

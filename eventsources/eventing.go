@@ -3,6 +3,7 @@ package eventsources
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -263,7 +264,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 				logger.Info("exiting eventbus connection daemon...")
 				return
 			default:
-				time.Sleep(3 * time.Second)
+				time.Sleep(5 * time.Second)
 			}
 			if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 				logger.Info("NATS connection lost, reconnecting...")
@@ -299,6 +300,9 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 					eventBody, err := json.Marshal(event)
 					if err != nil {
 						return err
+					}
+					if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
+						return errors.New("failed to publish event, eventbus connection closed.")
 					}
 					return driver.Publish(e.eventBusConn, eventBody)
 				})
