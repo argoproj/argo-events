@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: webhook
 spec:
-  type: webhook
   service:
     ports:
       - port: 12000

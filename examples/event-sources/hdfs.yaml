@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: hdfs
 spec:
-  type: hdfs
   hdfs:
     example:
       directory: "/tmp/"

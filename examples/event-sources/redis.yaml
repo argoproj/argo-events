@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: redis
 spec:
-  type: redis
   redis:
     example:
       # HostAddress refers to the address of the Redis host/server

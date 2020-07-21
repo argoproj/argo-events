@@ -4,7 +4,6 @@ kind: EventSource
 metadata:
   name: github
 spec:
-  type: github
   service:
     ports:
       - port: 12000

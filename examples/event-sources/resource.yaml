@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: resource
 spec:
-  type: resource
   resource:
     example:
       # namespace to listen events within

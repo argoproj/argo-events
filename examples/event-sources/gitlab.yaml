@@ -4,7 +4,6 @@ kind: EventSource
 metadata:
   name: gitlab
 spec:
-  type: gitlab
   service:
     ports:
       - port: 12000

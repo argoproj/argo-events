@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: stripe
 spec:
-  type: stripe
   service:
     ports:
       - port: 12000

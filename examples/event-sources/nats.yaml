@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: nats
 spec:
-  type: nats
   nats:
     example:
       # url of the nats service

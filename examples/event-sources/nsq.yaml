@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: nsq
 spec:
-  type: nsq
   nsq:
     example:
       # HostAddress is the address of the host for NSQ lookupd

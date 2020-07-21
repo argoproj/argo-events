@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: storage-grid
 spec:
-  type: storagegrid
   service:
     ports:
       - port: 8080

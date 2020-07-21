@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: mqtt
 spec:
-  type: mqtt
   mqtt:
     example:
       # mqtt broker url

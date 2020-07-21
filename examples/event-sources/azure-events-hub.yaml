@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: azure-events-hub
 spec:
-  type: azureEventsHub
   azureEventsHub:
     example:
       # FQDN of the EventsHub namespace you created

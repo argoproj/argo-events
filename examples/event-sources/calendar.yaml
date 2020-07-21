@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: calendar
 spec:
-  type: calendar
   calendar:
     example-with-interval:
       # creates an event every 10 seconds

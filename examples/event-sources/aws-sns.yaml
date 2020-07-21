@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: aws-sns
 spec:
-  type: sns
   service:
     ports:
       - port: 12000
