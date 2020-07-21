@@ -256,27 +256,27 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 	defer e.eventBusConn.Close()
 
 	// Daemon to reconnect
-	go func(ctx context.Context) {
+	go func() {
 		logger.Info("starting eventbus connection daemon...")
+		ticker := time.NewTicker(5 * time.Second)
 		for {
 			select {
-			case <-ctx.Done():
+			case <-cctx.Done():
 				logger.Info("exiting eventbus connection daemon...")
 				return
-			default:
-				time.Sleep(5 * time.Second)
-			}
-			if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
-				logger.Info("NATS connection lost, reconnecting...")
-				e.eventBusConn, err = driver.Connect()
-				if err != nil {
-					logger.WithError(err).Errorln("failed to reconnect to eventbus")
-					continue
+			case <-ticker.C:
+				if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
+					logger.Info("NATS connection lost, reconnecting...")
+					e.eventBusConn, err = driver.Connect()
+					if err != nil {
+						logger.WithError(err).Errorln("failed to reconnect to eventbus")
+						continue
+					}
+					logger.Info("reconnected the NATS streaming server...")
 				}
-				logger.Info("reconnected the NATS streaming server...")
 			}
 		}
-	}(cctx)
+	}()
 
 	for _, ss := range servers {
 		for _, server := range ss {

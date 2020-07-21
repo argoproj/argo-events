@@ -39,14 +39,12 @@ import (
 
 // ListenEvents watches and handles events received from the gateway.
 func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan struct{}) error {
-	cctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	logger := logging.FromContext(cctx)
+	logger := logging.FromContext(ctx)
 	sensor := sensorCtx.Sensor
 	// Get a mapping of dependencyExpression: []triggers
 	triggerMapping := make(map[string][]v1alpha1.Trigger)
 	for _, trigger := range sensor.Spec.Triggers {
-		depExpr, err := sensorCtx.getDependencyExpression(cctx, trigger)
+		depExpr, err := sensorCtx.getDependencyExpression(ctx, trigger)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to get dependency expression")
 			return err
@@ -64,8 +62,10 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 		depMapping[d.Name] = d
 	}
 
+	cctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	for k, v := range triggerMapping {
-		go func(ctx context.Context, depExpression string, triggers []v1alpha1.Trigger) {
+		go func(depExpression string, triggers []v1alpha1.Trigger) {
 			// Calculate dependencies of each group of triggers.
 			de := strings.ReplaceAll(depExpression, "-", "\\-")
 			expr, err := govaluate.NewEvaluableExpression(de)
@@ -96,7 +96,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 			// Generate clientID with hash code
 			hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
 			clientID := fmt.Sprintf("client-%v", common.Hasher(hashKey))
-			ebDriver, err := eventbus.GetDriver(ctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
+			ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
 			if err != nil {
 				logger.WithError(err).Errorln("Failed to get event bus driver")
 				return
@@ -130,46 +130,53 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 			}
 
 			actionFunc := func(events map[string]cloudevents.Event) {
-				err := sensorCtx.triggerActions(ctx, events, triggers)
+				err := sensorCtx.triggerActions(cctx, events, triggers)
 				if err != nil {
 					logger.WithError(err).Errorln("Failed to trigger actions")
 				}
 			}
 
-			// Attempt to reconnect
 			closeSubCh := make(chan struct{})
-			go func(ctx context.Context, dvr eventbusdriver.Driver) {
-				logger.Infof("starting eventbus connection daemon for client %s...", clientID)
-				for {
-					select {
-					case <-ctx.Done():
-						logger.Infof("exiting eventbus connection daemon for client %s...", clientID)
-						return
-					default:
-						time.Sleep(5 * time.Second)
-					}
+			go func() {
+				logger.Infof("started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
+				err = ebDriver.SubscribeEventSources(cctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
+				if err != nil {
+					logger.WithError(err).Errorln("Failed to subscribe to event bus")
+					return
+				}
+			}()
+
+			logger.Infof("starting eventbus connection daemon for client %s...", clientID)
+			ticker := time.NewTicker(5 * time.Second)
+			for {
+				select {
+				case <-cctx.Done():
+					logger.Infof("exiting eventbus connection daemon for client %s...", clientID)
+					ticker.Stop()
+					return
+				case <-ticker.C:
 					if conn == nil || conn.IsClosed() {
 						logger.Info("NATS connection lost, reconnecting...")
-						conn, err = dvr.Connect()
+						conn, err = ebDriver.Connect()
 						if err != nil {
 							logger.WithError(err).Errorf("failed to reconnect to eventbus, client: %s", clientID)
 							continue
 						}
-						logger.Infof("reconnected the NATS streaming server for client %s...", clientID)
+						logger.Infof("reconnected to NATS streaming server for client %s...", clientID)
 						closeSubCh <- struct{}{}
 						time.Sleep(2 * time.Second)
-						err = ebDriver.SubscribeEventSources(ctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
+						go func() {
+							logger.Infof("started to re-subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
+							err = ebDriver.SubscribeEventSources(cctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
+							if err != nil {
+								logger.WithError(err).Errorln("Failed to re-subscribe to eventbus")
+								return
+							}
+						}()
 					}
 				}
-			}(ctx, ebDriver)
-
-			logger.Infof("Started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
-			err = ebDriver.SubscribeEventSources(ctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
-			if err != nil {
-				logger.WithError(err).Errorln("Failed to subscribe to event bus")
-				return
 			}
-		}(cctx, k, v)
+		}(k, v)
 	}
 	logger.Info("Sensor started.")
 	<-stopCh

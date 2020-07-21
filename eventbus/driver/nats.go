@@ -76,8 +76,8 @@ func (n *natsStreaming) Connect() (Connection, error) {
 	log := n.logger.WithField("clientID", n.clientID)
 	conn := &natsStreamingConnection{}
 	opts := []nats.Option{
-		nats.MaxReconnects(-1),
-		nats.ReconnectWait(3 * time.Second),
+		// Do not reconnect here but handle reconnction outside
+		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
 			conn.natsConnected = false
 			log.Errorf("NATS connection lost, reason: %v", err)
