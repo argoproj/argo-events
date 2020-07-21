@@ -146,7 +146,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		n.processEventSourceMsg(m, msgHolder, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
-		stan.StartAt(pb.StartPosition_NewOnly),
+		stan.StartAt(pb.StartPosition_LastReceived),
 		stan.AckWait(1*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
