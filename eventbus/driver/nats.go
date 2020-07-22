@@ -21,6 +21,9 @@ import (
 type natsStreamingConnection struct {
 	natsConn *nats.Conn
 	stanConn stan.Conn
+
+	natsConnected bool
+	stanConnected bool
 }
 
 func (nsc *natsStreamingConnection) Close() error {
@@ -37,10 +40,10 @@ func (nsc *natsStreamingConnection) Close() error {
 }
 
 func (nsc *natsStreamingConnection) IsClosed() bool {
-	if nsc.natsConn == nil {
+	if nsc.natsConn == nil || nsc.stanConn == nil || !nsc.natsConnected || !nsc.stanConnected || nsc.natsConn.IsClosed() {
 		return true
 	}
-	return nsc.natsConn.IsClosed()
+	return false
 }
 
 func (nsc *natsStreamingConnection) Publish(subject string, data []byte) error {
@@ -71,13 +74,16 @@ func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logg
 
 func (n *natsStreaming) Connect() (Connection, error) {
 	log := n.logger.WithField("clientID", n.clientID)
+	conn := &natsStreamingConnection{}
 	opts := []nats.Option{
-		nats.MaxReconnects(-1),
-		nats.ReconnectWait(3 * time.Second),
+		// Do not reconnect here but handle reconnction outside
+		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
+			conn.natsConnected = false
 			log.Errorf("NATS connection lost, reason: %v", err)
 		}),
 		nats.ReconnectHandler(func(nnc *nats.Conn) {
+			conn.natsConnected = true
 			log.Info("Reconnected to NATS server")
 		}),
 	}
@@ -96,9 +102,12 @@ func (n *natsStreaming) Connect() (Connection, error) {
 		return nil, err
 	}
 	log.Info("Connected to NATS server.")
+	conn.natsConn = nc
+	conn.natsConnected = true
 
 	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc), stan.Pings(5, 60),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
+			conn.stanConnected = false
 			log.Errorf("NATS streaming connection lost, reason: %v", reason)
 		}))
 	if err != nil {
@@ -106,10 +115,9 @@ func (n *natsStreaming) Connect() (Connection, error) {
 		return nil, err
 	}
 	log.Info("Connected to NATS streaming server.")
-	return &natsStreamingConnection{
-		natsConn: nc,
-		stanConn: sc,
-	}, nil
+	conn.stanConn = sc
+	conn.stanConnected = true
+	return conn, nil
 }
 
 func (n *natsStreaming) Publish(conn Connection, message []byte) error {
@@ -138,7 +146,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		n.processEventSourceMsg(m, msgHolder, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
-		stan.StartAt(pb.StartPosition_NewOnly),
+		stan.StartAt(pb.StartPosition_LastReceived),
 		stan.AckWait(1*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
@@ -152,10 +160,12 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 			log.Info("existing, unsubscribing and closing connection...")
 			_ = sub.Close()
 			log.Infof("subscription on subject %s closed", n.subject)
+			return nil
 		case <-closeCh:
 			log.Info("closing subscription...")
 			_ = sub.Close()
 			log.Infof("subscription on subject %s closed", n.subject)
+			return nil
 		}
 	}
 }

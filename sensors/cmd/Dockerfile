@@ -4,7 +4,7 @@ RUN yum -y update && yum -y install ca-certificates openssh openssh-server opens
 # Argo Workflow CLI
 COPY assets/argo-linux-amd64 /usr/local/bin/argo
 
-RUN argo version
+RUN argo version || true
 
 COPY dist/sensor /bin/
 ENTRYPOINT [ "/bin/sensor" ]
