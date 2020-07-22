@@ -169,7 +169,7 @@ Routing key for bindings
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -372,29 +372,6 @@ Event Hub path/name
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve the
-shared access key and name from.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>
@@ -499,13 +476,6 @@ Interval is a string that describes an interval duration, e.g. 1s, 30m,
 </td>
 
 <td>
-
-<p>
-
-ExclusionDates defines the list of DATE-TIME exceptions for recurring
-events.
-
-</p>
 
 </td>
 
@@ -672,29 +642,6 @@ ChannelName refers to the channel name
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to use to retrieve the channel key and optional
-username/password
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>username</code></br> <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
@@ -744,7 +691,7 @@ Password to use to connect to broker
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -875,22 +822,6 @@ Refer to the Kubernetes API documentation for the fields of the
 
 <td>
 
-<code>status</code></br> <em>
-<a href="#argoproj.io/v1alpha1.EventSourceStatus"> EventSourceStatus
-</a> </em>
-
-</td>
-
-<td>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>spec</code></br> <em>
 <a href="#argoproj.io/v1alpha1.EventSourceSpec"> EventSourceSpec </a>
 </em>
@@ -903,62 +834,92 @@ Refer to the Kubernetes API documentation for the fields of the
 
 <table>
 
-</table>
+<tr>
+
+<td>
+
+<code>eventBusName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+EventBusName references to a EventBus name. By default the value is
+“default”
+
+</p>
 
 </td>
 
 </tr>
 
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.EventSourceSpec">
-
-EventSourceSpec
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.EventSource">EventSource</a>)
-
-</p>
-
-<p>
-
-<p>
-
-EventSourceSpec refers to specification of event-source resource
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
 <tr>
 
-<th>
+<td>
 
-Field
+<code>template</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
 
-</th>
+</td>
 
-<th>
+<td>
 
-Description
+<em>(Optional)</em>
 
-</th>
+<p>
+
+Template is the pod specification for the event source
+
+</p>
+
+</td>
 
 </tr>
 
-</thead>
+<tr>
 
-<tbody>
+<td>
+
+<code>service</code></br> <em> <a href="#argoproj.io/v1alpha1.Service">
+Service </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Service is the specifications of the service to expose the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>replica</code></br> <em> int32 </em>
+
+</td>
+
+<td>
+
+<p>
+
+Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
 
 <tr>
 
@@ -1056,8 +1017,9 @@ Resource event sources
 <td>
 
 <code>webhook</code></br> <em>
-map\[string\]github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<a href="#argoproj.io/v1alpha1.WebhookContext">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext
+</a> </em>
 
 </td>
 
@@ -1487,12 +1449,84 @@ Generic event source
 
 </tr>
 
+</table>
+
+</td>
+
+</tr>
+
 <tr>
 
 <td>
 
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
+<code>status</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceStatus"> EventSourceStatus
+</a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.EventSourceSpec">
+
+EventSourceSpec
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSource">EventSource</a>)
+
+</p>
+
+<p>
+
+<p>
+
+EventSourceSpec refers to specification of event-source resource
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>eventBusName</code></br> <em> string </em>
 
 </td>
 
@@ -1500,7 +1534,602 @@ github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 <p>
 
-Type of the event source
+EventBusName references to a EventBus name. By default the value is
+“default”
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>template</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Template is the pod specification for the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>service</code></br> <em> <a href="#argoproj.io/v1alpha1.Service">
+Service </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Service is the specifications of the service to expose the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>replica</code></br> <em> int32 </em>
+
+</td>
+
+<td>
+
+<p>
+
+Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>minio</code></br> <em>
+map\[string\]github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+Minio event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>calendar</code></br> <em>
+<a href="#argoproj.io/v1alpha1.CalendarEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Calendar event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>file</code></br> <em>
+<a href="#argoproj.io/v1alpha1.FileEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+File event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>resource</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ResourceEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Resource event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Webhook event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>amqp</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+AMQP event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>kafka</code></br> <em>
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Kafka event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>mqtt</code></br> <em>
+<a href="#argoproj.io/v1alpha1.MQTTEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+MQTT event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nats</code></br> <em>
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+NATS event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>sns</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SNSEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+SNS event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>sqs</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SQSEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+SQS event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>pubSub</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PubSubEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+PubSub eevnt sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>github</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GithubEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Github event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>gitlab</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GitlabEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Gitlab event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>hdfs</code></br> <em>
+<a href="#argoproj.io/v1alpha1.HDFSEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+HDFS event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>slack</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Slack event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>storageGrid</code></br> <em>
+<a href="#argoproj.io/v1alpha1.StorageGridEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+StorageGrid event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>azureEventsHub</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+AzureEventsHub event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>stripe</code></br> <em>
+<a href="#argoproj.io/v1alpha1.StripeEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Stripe event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>emitter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EmitterEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Emitter event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>redis</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Redis event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nsq</code></br> <em>
+<a href="#argoproj.io/v1alpha1.NSQEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+NSQ event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>generic</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GenericEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Generic event source
 
 </p>
 
@@ -1563,13 +2192,18 @@ Description
 
 <td>
 
-<code>createdAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
-Kubernetes meta/v1.Time </a> </em>
+<code>Status</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 
 </td>
 
 <td>
+
+<p>
+
+(Members of <code>Status</code> are embedded into this type.)
+
+</p>
 
 </td>
 
@@ -1653,7 +2287,7 @@ for more information
 <td>
 
 <code>watchPathConfig</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig
+<a href="#argoproj.io/v1alpha1.WatchPathConfig"> WatchPathConfig </a>
 </em>
 
 </td>
@@ -1838,7 +2472,7 @@ Id is the webhook’s id
 <td>
 
 <code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
 </em>
 
 </td>
@@ -1904,13 +2538,6 @@ Repository refers to GitHub repo name i.e. argo-events
 </td>
 
 <td>
-
-<p>
-
-Events refer to Github events to subscribe to which the gateway will
-subscribe
-
-</p>
 
 </td>
 
@@ -2074,29 +2701,6 @@ GitHub upload URL (for GitHub Enterprise)
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve
-webhook secret and api token from.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>deleteHookOnFinish</code></br> <em> bool </em>
 
 </td>
@@ -2172,7 +2776,7 @@ Description
 <td>
 
 <code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
 </em>
 
 </td>
@@ -2374,7 +2978,7 @@ Description
 <td>
 
 <code>WatchPathConfig</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig
+<a href="#argoproj.io/v1alpha1.WatchPathConfig"> WatchPathConfig </a>
 </em>
 
 </td>
@@ -2441,12 +3045,6 @@ the directory state, e.g. 1s, 30m, 2h… (defaults to 1m)
 </td>
 
 <td>
-
-<p>
-
-Addresses is accessible addresses of HDFS name nodes
-
-</p>
 
 </td>
 
@@ -2605,29 +3203,6 @@ must be set if either ccache or keytab is used.
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve cache
-secret and ket tab secret from.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>
@@ -2744,7 +3319,7 @@ Topic name
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -2776,6 +3351,29 @@ TLSConfig </a> </em>
 <p>
 
 TLS configuration for the kafka client.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
 
 </p>
 
@@ -2899,7 +3497,7 @@ ClientID is the id of the client
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -2965,6 +3563,85 @@ TLS configuration for the mqtt client.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Metadata">
+
+Metadata
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Template">Template</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Metadata holds the annotations and labels of an event source pod
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>annotations</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>labels</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.NATSEventsSource">
 
 NATSEventsSource
@@ -2982,7 +3659,7 @@ NATSEventsSource
 
 <p>
 
-NATSEventSource refers to event-source for NATS related events
+NATSEventsSource refers to event-source for NATS related events
 
 </p>
 
@@ -3057,7 +3734,7 @@ Subject holds the name of the subject onto which messages are published
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -3236,7 +3913,7 @@ Channel used for subscription
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -3437,7 +4114,7 @@ for GCP
 
 <td>
 
-<code>enableWorkflowIdentity</code></br> <em> bool </em>
+<code>enableWorkloadIdentity</code></br> <em> bool </em>
 
 </td>
 
@@ -3447,9 +4124,9 @@ for GCP
 
 <p>
 
-EnableWorkflowIdentity determines if your project authenticates to GCP
-with WorkflowIdentity or CredentialsFile. If true, authentication is
-done with WorkflowIdentity. If false or omited, authentication is done
+EnableWorkloadIdentity determines if your project authenticates to GCP
+with WorkloadIdentity or CredentialsFile. If true, authentication is
+done with WorkloadIdentity. If false or omitted, authentication is done
 with CredentialsFile.
 
 </p>
@@ -3628,7 +4305,7 @@ specified if password is declared
 
 <td>
 
-<code>db</code></br> <em> int </em>
+<code>db</code></br> <em> int32 </em>
 
 </td>
 
@@ -3655,12 +4332,6 @@ DB to use. If not specified, default DB 0 will be used.
 </td>
 
 <td>
-
-<p>
-
-Channels to subscribe to listen events.
-
-</p>
 
 </td>
 
@@ -4092,7 +4763,7 @@ Description
 <td>
 
 <code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
 </em>
 
 </td>
@@ -4166,29 +4837,6 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 
 SecretKey refers K8 secret containing aws secret key
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace to read access related secret
-from.
 
 </p>
 
@@ -4398,29 +5046,6 @@ for a message to arrive in the queue before returning.
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace to read access related secret
-from.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>roleARN</code></br> <em> string </em>
 
 </td>
@@ -4476,7 +5101,7 @@ will be JSON
 
 <p>
 
-QueueAccountId is the ID of the account that created the queue to
+QueueAccountID is the ID of the account that created the queue to
 monitor
 
 </p>
@@ -4604,6 +5229,108 @@ Value
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Service">
+
+Service
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Service holds the service information eventsource exposes
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>ports</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#serviceport-v1-core">
+\[\]Kubernetes core/v1.ServicePort </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+The list of ports that are exposed by this ClusterIP service.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clusterIP</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+clusterIP is the IP address of the service and is usually assigned
+randomly by the master. If an address is specified manually and is not
+in use by others, it will be allocated to the service; otherwise,
+creation of the service will fail. This field can not be changed through
+updates. Valid values are “None”, empty string (“”), or a valid IP
+address. “None” can be specified for headless services when proxying is
+not required. More info:
+<a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies">https://kubernetes.io/docs/concepts/services-networking/service/\#virtual-ips-and-service-proxies</a>
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.SlackEventSource">
 
 SlackEventSource
@@ -4700,7 +5427,7 @@ Token for URL verification handshake
 <td>
 
 <code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
 </em>
 
 </td>
@@ -4710,29 +5437,6 @@ github.com/argoproj/argo-events/gateways/server/common/webhook.Context
 <p>
 
 Webhook holds configuration for a REST endpoint
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace which is used to retrieve token
-and signing secret from.
 
 </p>
 
@@ -4797,7 +5501,7 @@ Description
 <td>
 
 <code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
 </em>
 
 </td>
@@ -4823,15 +5527,6 @@ Webhook holds configuration for a REST endpoint
 </td>
 
 <td>
-
-<p>
-
-Events are s3 bucket notification events. For more information on s3
-notifications, follow
-<a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations">https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html\#notification-how-to-event-types-and-destinations</a>
-Note that storage grid notifications do not contain <code>s3:</code>
-
-</p>
 
 </td>
 
@@ -4955,7 +5650,7 @@ Auth token for storagegrid api
 
 <p>
 
-ApiURL is the url of the storagegrid api.
+APIURL is the url of the storagegrid api.
 
 </p>
 
@@ -4984,8 +5679,8 @@ StorageGridFilter
 
 <p>
 
-Filter represents filters to apply to bucket notifications for
-specifying constraints on objects
+StorageGridFilter represents filters to apply to bucket notifications
+for specifying constraints on objects
 
 </p>
 
@@ -5101,7 +5796,7 @@ Description
 <td>
 
 <code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
 </em>
 
 </td>
@@ -5158,29 +5853,6 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 
 APIKey refers to K8s secret that holds Stripe API key. Used only if
 CreateWebhook is enabled.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to retrieve the APIKey secret from. Must be specified in order
-to read API key from APIKey K8s secret.
 
 </p>
 
@@ -5322,6 +5994,536 @@ ClientCertPath refers the file path that contains client cert.
 <p>
 
 ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Template">
+
+Template
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Template holds the information of an EventSource deployment template
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Metadata"> Metadata </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Metdata sets the pods’s metadata, i.e. annotations and labels
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serviceAccountName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ServiceAccountName is the name of the ServiceAccount to use to run event
+source pod. More info:
+<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>container</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#container-v1-core">
+Kubernetes core/v1.Container </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Container is the main container image to run in the event source pod
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>volumes</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#volume-v1-core">
+\[\]Kubernetes core/v1.Volume </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Volumes is a list of volumes that can be mounted by containers in a
+workflow.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>securityContext</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+Kubernetes core/v1.PodSecurityContext </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+SecurityContext holds pod-level security attributes and common container
+settings. Optional: Defaults to empty. See type description for default
+values of each field.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>affinity</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+Kubernetes core/v1.Affinity </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+If specified, the pod’s scheduling constraints
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tolerations</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#toleration-v1-core">
+\[\]Kubernetes core/v1.Toleration </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+If specified, the pod’s tolerations.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nodeSelector</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+NodeSelector is a selector which must be true for the pod to fit on a
+node. Selector which must match a node’s labels for the pod to be
+scheduled on that node. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">https://kubernetes.io/docs/concepts/configuration/assign-pod-node/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.WatchPathConfig">
+
+WatchPathConfig
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>,
+<a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>directory</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Directory to watch for events
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>path</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Path is relative path of object to watch with respect to the directory
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>pathRegexp</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+PathRegexp is regexp of relative path of object to watch with respect to
+the directory
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.WebhookContext">
+
+WebhookContext
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
+<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>,
+<a href="#argoproj.io/v1alpha1.StripeEventSource">StripeEventSource</a>)
+
+</p>
+
+<p>
+
+<p>
+
+WebhookContext holds a general purpose REST API context
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>endpoint</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+REST API endpoint
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>method</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Method is HTTP request method that indicates the desired action to be
+performed for a given resource. See RFC7231 Hypertext Transfer Protocol
+(HTTP/1.1): Semantics and Content
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>port</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Port on which HTTP server is listening for incoming events.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+URL is the url of the server.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerCertPath refers the file that contains the cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerKeyPath refers the file that contains private key
 
 </p>
 

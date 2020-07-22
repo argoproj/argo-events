@@ -201,13 +201,6 @@ Region is AWS region
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -225,13 +218,6 @@ construct the request payload.
 <td>
 
 <em>(Optional)</em>
-
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the trigger resource.
-
-</p>
 
 </td>
 
@@ -373,13 +359,6 @@ resource. Default value is Submit.
 
 <td>
 
-<p>
-
-Parameters is the list of parameters to pass to resolved Argo Workflow
-object
-
-</p>
-
 </td>
 
 </tr>
@@ -428,7 +407,7 @@ ArtifactLocation
 
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 
 </p>
 
@@ -436,7 +415,7 @@ ArtifactLocation
 
 <p>
 
-ArtifactLocation describes the source location for an external minio
+ArtifactLocation describes the source location for an external artifact
 
 </p>
 
@@ -479,7 +458,7 @@ github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
 
 <p>
 
-S3 compliant minio
+S3 compliant artifact
 
 </p>
 
@@ -499,7 +478,7 @@ S3 compliant minio
 
 <p>
 
-Inline minio is embedded in sensor spec as a string
+Inline artifact is embedded in sensor spec as a string
 
 </p>
 
@@ -520,7 +499,7 @@ Inline minio is embedded in sensor spec as a string
 
 <p>
 
-File minio is minio stored in a file
+File artifact is artifact stored in a file
 
 </p>
 
@@ -541,7 +520,7 @@ URLArtifact </a> </em>
 
 <p>
 
-URL to fetch the minio from
+URL to fetch the artifact from
 
 </p>
 
@@ -563,7 +542,7 @@ URL to fetch the minio from
 
 <p>
 
-Configmap that stores the minio
+Configmap that stores the artifact
 
 </p>
 
@@ -584,7 +563,7 @@ GitArtifact </a> </em>
 
 <p>
 
-Git repository hosting the minio
+Git repository hosting the artifact
 
 </p>
 
@@ -597,8 +576,7 @@ Git repository hosting the minio
 <td>
 
 <code>resource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#unstructured-unstructured-v1">
-Kubernetes meta/v1/unstructured.Unstructured </a> </em>
+github.com/argoproj/argo-events/pkg/apis/common.Resource </em>
 
 </td>
 
@@ -607,130 +585,6 @@ Kubernetes meta/v1/unstructured.Unstructured </a> </em>
 <p>
 
 Resource is generic template for K8s resource
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.Backoff">
-
-Backoff
-
-</h3>
-
-<p>
-
-<p>
-
-Backoff for an operation
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>duration</code></br> <em> time.Duration </em>
-
-</td>
-
-<td>
-
-<p>
-
-Duration is the duration in nanoseconds
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>factor</code></br> <em> float64 </em>
-
-</td>
-
-<td>
-
-<p>
-
-Duration is multiplied by factor each iteration
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>jitter</code></br> <em> float64 </em>
-
-</td>
-
-<td>
-
-<p>
-
-The amount of jitter applied each iteration
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>steps</code></br> <em> int </em>
-
-</td>
-
-<td>
-
-<p>
-
-Exit with error after this many steps
 
 </p>
 
@@ -904,7 +758,7 @@ ConfigmapArtifact
 
 <p>
 
-ConfigmapArtifact contains information about minio in k8 configmap
+ConfigmapArtifact contains information about artifact in k8 configmap
 
 </p>
 
@@ -1167,13 +1021,6 @@ gRPC server knows how to interpret.
 
 <td>
 
-<p>
-
-Parameters is the list of parameters that is applied to resolved custom
-trigger trigger object.
-
-</p>
-
 </td>
 
 </tr>
@@ -1189,13 +1036,6 @@ trigger trigger object.
 </td>
 
 <td>
-
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
 
 </td>
 
@@ -1449,13 +1289,6 @@ Event
 
 <p>
 
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.NodeStatus">NodeStatus</a>)
-
-</p>
-
-<p>
-
 <p>
 
 Event represents the cloudevent received from a gateway.
@@ -1655,7 +1488,7 @@ Type - The type of the occurrence which has happened.
 
 <td>
 
-<code>dataContentType</code></br> <em> string </em>
+<code>datacontenttype</code></br> <em> string </em>
 
 </td>
 
@@ -1798,6 +1631,27 @@ Name is a unique name of this dependency
 <p>
 
 GatewayName is the name of the gateway from whom the event is received
+DEPRECATED: Use EventSourceName instead.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventSourceName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+EventSourceName is the name of EventSource that Sensor depends on
 
 </p>
 
@@ -2003,7 +1857,7 @@ FileArtifact
 
 <p>
 
-FileArtifact contains information about an minio in a filesystem
+FileArtifact contains information about an artifact in a filesystem
 
 </p>
 
@@ -2068,7 +1922,7 @@ GitArtifact
 
 <p>
 
-GitArtifact contains information about an minio stored in git
+GitArtifact contains information about an artifact stored in git
 
 </p>
 
@@ -2501,78 +2355,6 @@ always use the first URL, while push will use all of them.
 
 </table>
 
-<h3 id="argoproj.io/v1alpha1.HTTPSubscription">
-
-HTTPSubscription
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.Subscription">Subscription</a>)
-
-</p>
-
-<p>
-
-<p>
-
-HTTPSubscription holds the context of the HTTP subscription of events
-for the sensor.
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>port</code></br> <em> int </em>
-
-</td>
-
-<td>
-
-<p>
-
-Port on which sensor server should run.
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
 <h3 id="argoproj.io/v1alpha1.HTTPTrigger">
 
 HTTPTrigger
@@ -2652,13 +2434,6 @@ URL refers to the URL to send HTTP request to.
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the HTTP request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -2722,13 +2497,6 @@ for more info. Default value is POST.
 
 <td>
 
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the HTTP trigger resource.
-
-</p>
-
 </td>
 
 </tr>
@@ -2737,7 +2505,7 @@ are applied to the HTTP trigger resource.
 
 <td>
 
-<code>timeout</code></br> <em> int </em>
+<code>timeout</code></br> <em> int64 </em>
 
 </td>
 
@@ -2783,7 +2551,7 @@ BasicAuth configuration for the http request.
 
 <td>
 
-<code>headers</code></br> <em> map\[string\]\[\]string </em>
+<code>headers</code></br> <em> map\[string\]string </em>
 
 </td>
 
@@ -2830,9 +2598,9 @@ JSONType contains the supported JSON types for data filtering
 
 </p>
 
-<h3 id="argoproj.io/v1alpha1.K8sResourcePolicy">
+<h3 id="argoproj.io/v1alpha1.K8SResourcePolicy">
 
-K8sResourcePolicy
+K8SResourcePolicy
 
 </h3>
 
@@ -2847,7 +2615,7 @@ K8sResourcePolicy
 
 <p>
 
-K8sResourcePolicy refers to the policy used to check the state of K8s
+K8SResourcePolicy refers to the policy used to check the state of K8s
 based triggers using using labels
 
 </p>
@@ -2902,8 +2670,8 @@ Labels required to identify whether a resource is in success state
 
 <td>
 
-<code>backoff</code></br> <em> k8s.io/apimachinery/pkg/util/wait.Backoff
-</em>
+<code>backoff</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -3037,7 +2805,7 @@ Name of the topic. More info at
 
 <td>
 
-<code>partition</code></br> <em> int </em>
+<code>partition</code></br> <em> int32 </em>
 
 </td>
 
@@ -3065,13 +2833,6 @@ Partition to write data to.
 
 <td>
 
-<p>
-
-Parameters is the list of parameters that is applied to resolved Kafka
-trigger object.
-
-</p>
-
 </td>
 
 </tr>
@@ -3080,7 +2841,7 @@ trigger object.
 
 <td>
 
-<code>requiredAcks</code></br> <em> int </em>
+<code>requiredAcks</code></br> <em> int32 </em>
 
 </td>
 
@@ -3124,7 +2885,7 @@ false. If set to true, compresses message using snappy compression.
 
 <td>
 
-<code>flushFrequency</code></br> <em> int </em>
+<code>flushFrequency</code></br> <em> int32 </em>
 
 </td>
 
@@ -3178,13 +2939,6 @@ TLS configuration for the Kafka producer.
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -3225,7 +2979,7 @@ KubernetesResourceOperation (<code>string</code> alias)
 <p>
 
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 
 </p>
 
@@ -3239,98 +2993,6 @@ the K8s resource
 </p>
 
 </p>
-
-<h3 id="argoproj.io/v1alpha1.NATSSubscription">
-
-NATSSubscription
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.Subscription">Subscription</a>)
-
-</p>
-
-<p>
-
-<p>
-
-NATSSubscription holds the context of the NATS subscription of events
-for the sensor
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>serverURL</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ServerURL refers to NATS server url.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>subject</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Subject refers to NATS subject name.
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
 
 <h3 id="argoproj.io/v1alpha1.NATSTrigger">
 
@@ -3431,13 +3093,6 @@ Name of the subject to put message on.
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -3453,13 +3108,6 @@ construct the request payload.
 </td>
 
 <td>
-
-<p>
-
-Parameters is the list of parameters that is applied to resolved NATS
-trigger object.
-
-</p>
 
 </td>
 
@@ -3502,14 +3150,6 @@ NodePhase (<code>string</code> alias)
 
 <p>
 
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.NodeStatus">NodeStatus</a>,
-<a href="#argoproj.io/v1alpha1.SensorStatus">SensorStatus</a>)
-
-</p>
-
-<p>
-
 <p>
 
 NodePhase is the label for the condition of a node
@@ -3518,291 +3158,6 @@ NodePhase is the label for the condition of a node
 
 </p>
 
-<h3 id="argoproj.io/v1alpha1.NodeStatus">
-
-NodeStatus
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorStatus">SensorStatus</a>)
-
-</p>
-
-<p>
-
-<p>
-
-NodeStatus describes the status for an individual node in the sensor’s
-FSM. A single node can represent the status for event or a trigger.
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>id</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ID is a unique identifier of a node within a sensor It is a hash of the
-node name
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>name</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Name is a unique name in the node tree used to generate the node ID
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>displayName</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-DisplayName is the human readable representation of the node
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>type</code></br> <em> <a href="#argoproj.io/v1alpha1.NodeType">
-NodeType </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Type is the type of the node
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>phase</code></br> <em> <a href="#argoproj.io/v1alpha1.NodePhase">
-NodePhase </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Phase of the node
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>startedAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
-Kubernetes meta/v1.MicroTime </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-StartedAt is the time at which this node started
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>completedAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
-Kubernetes meta/v1.MicroTime </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-CompletedAt is the time at which this node completed
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>message</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-store data or something to save for event notifications or trigger
-events
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>event</code></br> <em> <a href="#argoproj.io/v1alpha1.Event">
-Event </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Event stores the last seen event for this node
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>updatedAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
-Kubernetes meta/v1.MicroTime </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-UpdatedAt refers to the time at which the node was updated.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>resolvedAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
-Kubernetes meta/v1.MicroTime </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-ResolvedAt refers to the time at which the node was resolved.
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
 <h3 id="argoproj.io/v1alpha1.NodeType">
 
 NodeType (<code>string</code> alias)
@@ -3810,13 +3165,6 @@ NodeType (<code>string</code> alias)
 </p>
 
 </h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.NodeStatus">NodeStatus</a>)
-
-</p>
 
 <p>
 
@@ -4012,13 +3360,6 @@ Name of the action/function.
 
 <td>
 
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
 </td>
 
 </tr>
@@ -4036,13 +3377,6 @@ construct the request payload.
 <td>
 
 <em>(Optional)</em>
-
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the trigger resource.
-
-</p>
 
 </td>
 
@@ -4197,29 +3531,6 @@ Template is the pod specification for the sensor
 
 <td>
 
-<code>subscription</code></br> <em>
-<a href="#argoproj.io/v1alpha1.Subscription"> Subscription </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Subscription refers to the modes of events subscriptions for the sensor.
-At least one of the types of subscription must be defined in order for
-sensor to be meaningful.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>circuit</code></br> <em> string </em>
 
 </td>
@@ -4285,7 +3596,7 @@ processed.
 
 <td>
 
-<code>serviceLabels</code></br> <em> map\[string\]string </em>
+<code>eventBusName</code></br> <em> string </em>
 
 </td>
 
@@ -4293,28 +3604,8 @@ processed.
 
 <p>
 
-ServiceLabels to be set for the service generated
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>serviceAnnotations</code></br> <em> map\[string\]string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ServiceAnnotations refers to annotations to be set for the service
-generated
+EventBusName references to a EventBus name. By default the value is
+“default”
 
 </p>
 
@@ -4338,104 +3629,6 @@ generated
 </td>
 
 <td>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.SensorResources">
-
-SensorResources
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorStatus">SensorStatus</a>)
-
-</p>
-
-<p>
-
-<p>
-
-SensorResources holds the metadata of the resources created for the
-sensor
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>deployment</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
-Kubernetes meta/v1.ObjectMeta </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Deployment holds the metadata of the deployment for the sensor
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>service</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
-Kubernetes meta/v1.ObjectMeta </a> </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Service holds the metadata of the service for the sensor
-
-</p>
 
 </td>
 
@@ -4562,29 +3755,6 @@ Template is the pod specification for the sensor
 
 <td>
 
-<code>subscription</code></br> <em>
-<a href="#argoproj.io/v1alpha1.Subscription"> Subscription </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Subscription refers to the modes of events subscriptions for the sensor.
-At least one of the types of subscription must be defined in order for
-sensor to be meaningful.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>circuit</code></br> <em> string </em>
 
 </td>
@@ -4650,7 +3820,7 @@ processed.
 
 <td>
 
-<code>serviceLabels</code></br> <em> map\[string\]string </em>
+<code>eventBusName</code></br> <em> string </em>
 
 </td>
 
@@ -4658,28 +3828,8 @@ processed.
 
 <p>
 
-ServiceLabels to be set for the service generated
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>serviceAnnotations</code></br> <em> map\[string\]string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ServiceAnnotations refers to annotations to be set for the service
-generated
+EventBusName references to a EventBus name. By default the value is
+“default”
 
 </p>
 
@@ -4741,8 +3891,8 @@ Description
 
 <td>
 
-<code>phase</code></br> <em> <a href="#argoproj.io/v1alpha1.NodePhase">
-NodePhase </a> </em>
+<code>Status</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 
 </td>
 
@@ -4750,181 +3900,7 @@ NodePhase </a> </em>
 
 <p>
 
-Phase is the high-level summary of the sensor.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>startedAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
-Kubernetes meta/v1.Time </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-StartedAt is the time at which this sensor was initiated
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>completedAt</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
-Kubernetes meta/v1.Time </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-CompletedAt is the time at which this sensor was completed
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>message</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Message is a human readable string indicating details about a sensor in
-its phase
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>nodes</code></br> <em> <a href="#argoproj.io/v1alpha1.NodeStatus">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus
-</a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Nodes is a mapping between a node ID and the node’s status it records
-the states for the FSM of this sensor.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>triggerCycleCount</code></br> <em> int32 </em>
-
-</td>
-
-<td>
-
-<p>
-
-TriggerCycleCount is the count of sensor’s trigger cycle runs.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>triggerCycleStatus</code></br> <em>
-<a href="#argoproj.io/v1alpha1.TriggerCycleState"> TriggerCycleState
-</a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-TriggerCycleState is the status from last cycle of triggers execution.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>lastCycleTime</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
-Kubernetes meta/v1.Time </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-LastCycleTime is the time when last trigger cycle completed
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>resources</code></br> <em>
-<a href="#argoproj.io/v1alpha1.SensorResources"> SensorResources </a>
-</em>
-
-</td>
-
-<td>
-
-<p>
-
-Resources refers to metadata of the resources created for the sensor
+(Members of <code>Status</code> are embedded into this type.)
 
 </p>
 
@@ -4997,13 +3973,6 @@ Description
 <td>
 
 <em>(Optional)</em>
-
-<p>
-
-Parameters is the list of key-value extracted from event’s payload that
-are applied to the trigger resource.
-
-</p>
 
 </td>
 
@@ -5103,9 +4072,9 @@ Message refers to the message to send to the Slack channel.
 
 </table>
 
-<h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">
+<h3 id="argoproj.io/v1alpha1.StandardK8STrigger">
 
-StandardK8sTrigger
+StandardK8STrigger
 
 </h3>
 
@@ -5120,7 +4089,7 @@ StandardK8sTrigger
 
 <p>
 
-StandardK8sTrigger is the standard Kubernetes resource trigger
+StandardK8STrigger is the standard Kubernetes resource trigger
 
 </p>
 
@@ -5239,13 +4208,6 @@ Default value is Create.
 
 <td>
 
-<p>
-
-Parameters is the list of parameters that is applied to resolved K8s
-trigger object.
-
-</p>
-
 </td>
 
 </tr>
@@ -5361,119 +4323,11 @@ Description
 
 <td>
 
-<code>allow</code></br> <em> \[\]int </em>
+<code>allow</code></br> <em> \[\]int32 </em>
 
 </td>
 
 <td>
-
-<p>
-
-Allow refers to the list of allowed response statuses. If the response
-status of the the trigger is within the list, the trigger will marked as
-successful else it will result in trigger failure.
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.Subscription">
-
-Subscription
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
-
-</p>
-
-<p>
-
-<p>
-
-Subscription holds different modes of subscription available for sensor
-to consume events.
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>http</code></br> <em>
-<a href="#argoproj.io/v1alpha1.HTTPSubscription"> HTTPSubscription </a>
-</em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-HTTP refers to the HTTP subscription of events for the sensor.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>nats</code></br> <em>
-<a href="#argoproj.io/v1alpha1.NATSSubscription"> NATSSubscription </a>
-</em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-NATS refers to the NATS subscription of events for the sensor
-
-</p>
 
 </td>
 
@@ -5746,6 +4600,31 @@ values of each field.
 
 <td>
 
+<code>nodeSelector</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+NodeSelector is a selector which must be true for the pod to fit on a
+node. Selector which must match a node’s labels for the pod to be
+scheduled on that node. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">https://kubernetes.io/docs/concepts/configuration/assign-pod-node/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>spec</code></br> <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core">
 Kubernetes core/v1.PodSpec </a> </em>
@@ -5792,9 +4671,9 @@ TimeFilter
 
 <p>
 
-TimeFilter describes a window in time. DataFilters out event events that
-occur outside the time limits. In other words, only events that occur
-after Start and before Stop will pass this filter.
+TimeFilter describes a window in time. It filters out events that occur
+outside the time limits. In other words, only events that occur after
+Start and before Stop will pass this filter.
 
 </p>
 
@@ -5836,8 +4715,8 @@ Description
 
 <p>
 
-Start is the beginning of a time window. Before this time, events for
-this event are ignored and format is hh:mm:ss
+Start is the beginning of a time window in UTC. Before this time, events
+for this dependency are ignored. Format is hh:mm:ss.
 
 </p>
 
@@ -5857,8 +4736,10 @@ this event are ignored and format is hh:mm:ss
 
 <p>
 
-StopPattern is the end of a time window. After this time, events for
-this event are ignored and format is hh:mm:ss
+Stop is the end of a time window in UTC. After or equal to this time,
+events for this dependency are ignored and Format is hh:mm:ss. If it is
+smaller than Start, it is treated as next day of Start (e.g.:
+22:00:00-01:00:00 means 22:00:00-25:00:00).
 
 </p>
 
@@ -5998,13 +4879,6 @@ TriggerCycleState (<code>string</code> alias)
 
 <p>
 
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorStatus">SensorStatus</a>)
-
-</p>
-
-<p>
-
 <p>
 
 TriggerCycleState is the label for the state of the trigger cycle
@@ -6030,7 +4904,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>,
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 
 </p>
@@ -6422,7 +5296,7 @@ Description
 <td>
 
 <code>k8s</code></br> <em>
-<a href="#argoproj.io/v1alpha1.K8sResourcePolicy"> K8sResourcePolicy
+<a href="#argoproj.io/v1alpha1.K8SResourcePolicy"> K8SResourcePolicy
 </a> </em>
 
 </td>
@@ -6431,7 +5305,7 @@ Description
 
 <p>
 
-K8sResourcePolicy refers to the policy used to check the state of K8s
+K8SResourcePolicy refers to the policy used to check the state of K8s
 based triggers using using labels
 
 </p>
@@ -6654,7 +5528,7 @@ Switch is the condition to execute the trigger.
 <td>
 
 <code>k8s</code></br> <em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger"> StandardK8sTrigger
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger"> StandardK8STrigger
 </a> </em>
 
 </td>
@@ -6665,7 +5539,7 @@ Switch is the condition to execute the trigger.
 
 <p>
 
-StandardK8sTrigger refers to the trigger designed to create or update a
+StandardK8STrigger refers to the trigger designed to create or update a
 generic Kubernetes resource.
 
 </p>
@@ -6882,7 +5756,7 @@ URLArtifact
 
 <p>
 
-URLArtifact contains information about an minio at an http endpoint.
+URLArtifact contains information about an artifact at an http endpoint.
 
 </p>
 

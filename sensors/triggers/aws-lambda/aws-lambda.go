@@ -18,15 +18,16 @@ package aws_lambda
 import (
 	"encoding/json"
 
-	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/policy"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
+
+	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // AWSLambdaTrigger refers to trigger that invokes AWS Lambda functions
@@ -76,14 +77,14 @@ func (t *AWSLambdaTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (t *AWSLambdaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *AWSLambdaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the aws lamda trigger resource")
 	}
 	parameters := t.Trigger.Template.AWSLambda.Parameters
 	if parameters != nil {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.AWSLambda.Parameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.AWSLambda.Parameters, events)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +98,7 @@ func (t *AWSLambdaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, reso
 }
 
 // Execute executes the trigger
-func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
+func (t *AWSLambdaTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.AWSLambdaTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
@@ -107,7 +108,7 @@ func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("payload parameters are not specified")
 	}
 
-	payload, err := triggers.ConstructPayload(t.Sensor, trigger.Payload)
+	payload, err := triggers.ConstructPayload(events, trigger.Payload)
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +135,6 @@ func (t *AWSLambdaTrigger) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger resource")
 	}
 
-	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.Allow)
+	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.GetAllow())
 	return p.ApplyPolicy()
 }

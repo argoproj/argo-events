@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	natsStreamingEnvVar = "NATS_STREAMING_IMAGE"
+	natsStreamingEnvVar       = "NATS_STREAMING_IMAGE"
+	natsMetricsExporterEnvVar = "NATS_METRICS_EXPORTER_IMAGE"
 )
 
 var (
@@ -47,6 +48,10 @@ func main() {
 	if !defined {
 		panic(fmt.Errorf("required environment variable '%s' not defined", natsStreamingEnvVar))
 	}
+	natsMetricsImage, defined := os.LookupEnv(natsMetricsExporterEnvVar)
+	if !defined {
+		panic(fmt.Errorf("required environment variable '%s' not defined", natsMetricsExporterEnvVar))
+	}
 	opts := ctrl.Options{}
 	if namespaced {
 		opts.Namespace = managedNamespace
@@ -62,7 +67,7 @@ func main() {
 	}
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, log.WithName("reconciler")),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, log.WithName("reconciler")),
 	})
 	if err != nil {
 		mainLog.Error(err, "unable to set up individual controller")
@@ -71,7 +76,7 @@ func main() {
 
 	// Watch EventBus and enqueue EventBus object key
 	if err := c.Watch(&source.Kind{Type: &v1alpha1.EventBus{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		mainLog.Error(err, "unable to watch EventBuses")
+		mainLog.Error(err, "unable to watch EventBus")
 		panic(err)
 	}
 

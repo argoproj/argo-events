@@ -23,24 +23,19 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	"github.com/argoproj/argo-events/common"
-	snctrl "github.com/argoproj/argo-events/controllers/sensor"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
-func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
+func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
 	var payload []byte
-
-	events := ExtractEvents(sensor, parameters)
-	if events == nil {
-		return nil, errors.New("payload can't be constructed as there are not events to extract data from")
-	}
 
 	for _, parameter := range parameters {
 		value, err := ResolveParamValue(parameter.Src, events)
@@ -58,13 +53,13 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 }
 
 // ApplyTemplateParameters applies parameters to trigger template
-func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) error {
+func ApplyTemplateParameters(events map[string]*v1alpha1.Event, trigger *v1alpha1.Trigger) error {
 	if trigger.Parameters != nil && len(trigger.Parameters) > 0 {
 		templateBytes, err := json.Marshal(trigger.Template)
 		if err != nil {
 			return err
 		}
-		tObj, err := ApplyParams(templateBytes, trigger.Parameters, ExtractEvents(sensor, trigger.Parameters))
+		tObj, err := ApplyParams(templateBytes, trigger.Parameters, events)
 		if err != nil {
 			return err
 		}
@@ -78,13 +73,13 @@ func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger)
 }
 
 // ApplyResourceParameters applies parameters to K8s resource within trigger
-func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
+func ApplyResourceParameters(events map[string]*v1alpha1.Event, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
 	if parameters != nil {
 		jObj, err := obj.MarshalJSON()
 		if err != nil {
 			return err
 		}
-		jUpdatedObj, err := ApplyParams(jObj, parameters, ExtractEvents(sensor, parameters))
+		jUpdatedObj, err := ApplyParams(jObj, parameters, events)
 		if err != nil {
 			return err
 		}
@@ -213,25 +208,6 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		return string(value), nil
 	}
 	return "", errors.Wrapf(err, "unable to resolve '%s' parameter value", src.DependencyName)
-}
-
-// ExtractEvents is a helper method to extract the events from the event dependencies nodes associated with the resource params
-// returns a map of the events keyed by the event dependency name
-func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]*v1alpha1.Event {
-	events := make(map[string]*v1alpha1.Event)
-	for _, param := range params {
-		if param.Src != nil {
-			node := snctrl.GetNodeByName(sensor, param.Src.DependencyName)
-			if node == nil {
-				continue
-			}
-			if node.Event == nil {
-				continue
-			}
-			events[param.Src.DependencyName] = node.Event
-		}
-	}
-	return events
 }
 
 // getValueWithTemplate will attempt to execute the provided template against

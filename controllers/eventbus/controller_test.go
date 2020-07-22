@@ -18,7 +18,6 @@ import (
 
 const (
 	testBusName        = "test-bus"
-	testNATSImage      = "test-image"
 	testStreamingImage = "test-steaming-image"
 	testNamespace      = "testNamespace"
 	testURL            = "http://test"
@@ -39,10 +38,10 @@ var (
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
 				Native: &v1alpha1.NativeStrategy{
-					Size: 1,
-					Auth: &v1alpha1.AuthStrategyToken,
+					Replicas: 1,
+					Auth:     &v1alpha1.AuthStrategyToken,
 					Persistence: &v1alpha1.PersistenceStrategy{
-						Size: &volumeSize,
+						VolumeSize: &volumeSize,
 					},
 				},
 			},
@@ -76,8 +75,7 @@ func init() {
 
 func TestReconcileNative(t *testing.T) {
 	t.Run("native nats installation", func(t *testing.T) {
-		obj := nativeBus.DeepCopyObject()
-		testBus := obj.(*v1alpha1.EventBus)
+		testBus := nativeBus.DeepCopy()
 		ctx := context.TODO()
 		cl := fake.NewFakeClient(testBus)
 		r := &reconciler{
@@ -88,7 +86,7 @@ func TestReconcileNative(t *testing.T) {
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
-		assert.True(t, testBus.Status.Status.IsReady())
+		assert.True(t, testBus.Status.IsReady())
 		assert.NotNil(t, testBus.Status.Config.NATS)
 		assert.NotEmpty(t, testBus.Status.Config.NATS.URL)
 		assert.NotEmpty(t, testBus.Status.Config.NATS.ClusterID)
@@ -97,8 +95,7 @@ func TestReconcileNative(t *testing.T) {
 
 func TestReconcileExotic(t *testing.T) {
 	t.Run("native nats exotic", func(t *testing.T) {
-		obj := exoticBus.DeepCopyObject()
-		testBus := obj.(*v1alpha1.EventBus)
+		testBus := exoticBus.DeepCopy()
 		ctx := context.TODO()
 		cl := fake.NewFakeClient(testBus)
 		r := &reconciler{
@@ -116,8 +113,7 @@ func TestReconcileExotic(t *testing.T) {
 
 func TestNeedsUpdate(t *testing.T) {
 	t.Run("needs update", func(t *testing.T) {
-		obj := nativeBus.DeepCopyObject()
-		testBus := obj.(*v1alpha1.EventBus)
+		testBus := nativeBus.DeepCopy()
 		cl := fake.NewFakeClient(testBus)
 		r := &reconciler{
 			client:             cl,

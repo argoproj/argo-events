@@ -25,8 +25,8 @@ rules:
       - sensors/finalizers
       - eventsources
       - eventsources/finalizers
-      - eventbuses
-      - eventbuses/finalizers
+      - eventbus
+      - eventbus/finalizers
   - apiGroups:
       - ""
     resources:

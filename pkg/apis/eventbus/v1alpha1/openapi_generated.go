@@ -30,6 +30,7 @@ import (
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig":           schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate":   schema_pkg_apis_eventbus_v1alpha1_ContainerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBus":            schema_pkg_apis_eventbus_v1alpha1_EventBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusList":        schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec":        schema_pkg_apis_eventbus_v1alpha1_EventBusSpec(ref),
@@ -58,6 +59,26 @@ func schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref common.ReferenceCallback) c
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"},
+	}
+}
+
+func schema_pkg_apis_eventbus_v1alpha1_ContainerTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ContainerTemplate defines customized spec for a container",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.ResourceRequirements"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.ResourceRequirements"},
 	}
 }
 
@@ -133,11 +154,6 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref common.ReferenceCallback
 						},
 					},
 					"items": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "eventbus",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -186,9 +202,23 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 				Description: "EventBusStatus holds the status of the eventbus resource",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"status": {
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Status"),
+							Description: "Conditions are the latest available observations of a resource's current state.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
+									},
+								},
+							},
 						},
 					},
 					"config": {
@@ -201,7 +231,7 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Status", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Condition", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig"},
 	}
 }
 
@@ -281,7 +311,7 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 				Description: "NativeStrategy indicates to install a native NATS service",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"size": {
+					"replicas": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Size is the NATS StatefulSet size",
 							Type:        []string{"integer"},
@@ -305,11 +335,38 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"),
 						},
 					},
+					"containerTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ContainerTemplate contains customized spec for NATS container",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
+						},
+					},
+					"metricsContainerTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MetricsContainerTemplate contains customized spec for metrics container",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
+						},
+					},
+					"nodeSelector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"},
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"},
 	}
 }
 
@@ -334,7 +391,7 @@ func schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref common.ReferenceC
 							Format:      "",
 						},
 					},
-					"size": {
+					"volumeSize": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Volume size, e.g. 10Gi",
 							Ref:         ref("k8s.io/apimachinery/pkg/api/resource.Quantity"),

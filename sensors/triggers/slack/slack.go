@@ -19,13 +19,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/nlopes/slack"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 type SlackTrigger struct {
@@ -56,7 +57,7 @@ func (t *SlackTrigger) FetchResource() (interface{}, error) {
 	return t.Trigger.Template.Slack, nil
 }
 
-func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *SlackTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the Slack trigger resource")
@@ -64,7 +65,7 @@ func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 	parameters := t.Trigger.Template.Slack.Parameters
 
 	if parameters != nil {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.Slack.Parameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.Slack.Parameters, events)
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +82,7 @@ func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 }
 
 // Execute executes the trigger
-func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
+func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	t.Logger.Infoln("executing SlackTrigger")
 	_, ok := resource.(*v1alpha1.SlackTrigger)
 	if !ok {
@@ -119,6 +120,10 @@ func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 
 	t.Logger.WithField("channel", channel).Infoln("posting to channel...")
 	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
+	if err != nil {
+		t.Logger.WithField("channel", channel).Errorf("unable to post to channel...")
+		return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
+	}
 
 	t.Logger.WithField("message", message).WithField("channelID", channelID).WithField("timestamp", timestamp).Infoln("message successfully sent to channelID with timestamp")
 	t.Logger.Infoln("finished executing SlackTrigger")

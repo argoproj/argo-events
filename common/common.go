@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2020 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,10 +22,6 @@ import (
 
 // Defaults
 const (
-	// StandardTimeFormat is time format reference for golang
-	StandardTimeFormat = "2006-01-02 15:04:05"
-	// StandardYYYYMMDDFormat formats date in yyyy-mm-dd format
-	StandardYYYYMMDDFormat = "2006-01-02"
 	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
 	DefaultControllerNamespace = "argo-events"
 )
@@ -54,6 +50,20 @@ const (
 	EnvVarGatewayServerImage = "GATEWAY_SERVER_IMAGE"
 	// EnvVarSensorImage refers to the default sensor image
 	EnvVarSensorImage = "SENSOR_IMAGE"
+	// EnvVarSensorObject refers to the env of based64 encoded sensor spec
+	EnvVarSensorObject = "SENSOR_OBJECT"
+	// EnvVarEventSourceObject refers to the env of based64 encoded eventsource spec
+	EnvVarEventSourceObject = "EVENTSOURCE_OBJECT"
+)
+
+// EventBus related
+const (
+	// EnvVarEventBusConfig refers to the eventbus config env
+	EnvVarEventBusConfig = "EVENTBUS_CONFIG"
+	// EnvVarEventBusSubject refers to the eventbus subject env
+	EnvVarEventBusSubject = "EVENTBUS_SUBJECT"
+	// volumeMount path for eventbus auth file
+	EventBusAuthFileMountPath = "/etc/eventbus/auth"
 )
 
 // Controller labels
@@ -82,8 +92,8 @@ const (
 
 // Gateway constants
 const (
-	// LabelEventSourceName is the label for a event source in gateway
-	LabelEventSourceName    = "event-source-name"
+	// LabelEventSourceName is the label for a event source
+	LabelEventSourceName    = "eventsource-name"
 	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
 	// ProcessorPort is the default port for the gateway event processor server to run on.
 	GatewayProcessorPort = "9300"

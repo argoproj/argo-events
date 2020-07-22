@@ -6,6 +6,11 @@ package tools
 
 import (
 	_ "github.com/ahmetb/gen-crd-api-reference-docs"
+	_ "github.com/gogo/protobuf/gogoproto"
+	_ "github.com/gogo/protobuf/protoc-gen-gogo"
+	_ "github.com/gogo/protobuf/protoc-gen-gogofast"
+	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway"
+	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger"
 	_ "k8s.io/code-generator"
 	_ "k8s.io/code-generator/cmd/client-gen"
 	_ "k8s.io/code-generator/cmd/conversion-gen"
@@ -20,4 +25,5 @@ import (
 	_ "k8s.io/code-generator/cmd/set-gen"
 	_ "k8s.io/gengo/examples/deepcopy-gen"
 	_ "k8s.io/kube-openapi/cmd/openapi-gen"
+	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
 )

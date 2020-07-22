@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package v1alpha1
 
 import (
@@ -23,9 +24,6 @@ import (
 func ValidateEventSource(eventSource *EventSource) error {
 	if eventSource == nil {
 		return errors.New("event source can't be nil")
-	}
-	if eventSource.Spec == nil {
-		return errors.New("event source specification can't be nil")
 	}
 	return nil
 }

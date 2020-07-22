@@ -23,25 +23,22 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/types"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 )
 
-func ApplyFilter(notification *types.Notification) error {
-	if notification.EventDependency.Filters == nil {
-		return nil
+// Filter filters the event with dependency's defined filters
+func Filter(event *v1alpha1.Event, filters *v1alpha1.EventDependencyFilter) (bool, error) {
+	if filters == nil {
+		return true, nil
 	}
-	ok, err := filterEvent(notification.EventDependency.Filters, notification.Event)
+	ok, err := filterEvent(filters, event)
 	if err != nil {
-		return err
+		return false, err
 	}
-	if !ok {
-		return errors.Errorf("failed to apply filter on Event dependency %s", notification.EventDependency.Name)
-	}
-	return nil
+	return ok, nil
 }
 
 // apply the filters to an Event
@@ -59,51 +56,47 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) 
 	return timeFilter && ctxFilter && dataFilter, err
 }
 
-// applyTimeFilter checks the eventTime against the timeFilter:
-// 1. the eventTime is greater than or equal to the start time
-// 2. the eventTime is less than the end time
-// returns true if 1 and 2 are true and false otherwise
+// filterTime checks the eventTime falls into time range specified by the timeFilter.
+// Start is inclusive, and Stop is exclusive.
+//
+// if Start < Stop: eventTime must be in [Start, Stop)
+//
+//   0:00        Start       Stop        0:00
+//   ├───────────●───────────○───────────┤
+//               └─── OK ────┘
+//
+// if Stop < Start: eventTime must be in [Start, Stop@Next day)
+//
+// this is equivalent to: eventTime must be in [0:00, Stop) or [Start, 0:00@Next day)
+//
+//   0:00                    Start       0:00       Stop                     0:00
+//   ├───────────○───────────●───────────┼───────────○───────────●───────────┤
+//                           └───────── OK ──────────┘
+//
+//   0:00        Stop        Start       0:00
+//   ●───────────○───────────●───────────○
+//   └─── OK ────┘           └─── OK ────┘
 func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, error) {
-	if timeFilter != nil {
-		utc := time.Now().UTC()
-		currentTime := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC).Format(common.StandardYYYYMMDDFormat)
-
-		if timeFilter.Start != "" && timeFilter.Stop != "" {
-			startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Start))
-			if err != nil {
-				return false, err
-			}
-			startTime = startTime.UTC()
-
-			stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Stop))
-			if err != nil {
-				return false, err
-			}
-			stopTime = stopTime.UTC()
-
-			return (startTime.Before(eventTime) || stopTime.Equal(eventTime)) && eventTime.Before(stopTime), nil
-		}
-
-		if timeFilter.Start != "" {
-			// stop is nil - does not have an end
-			startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Start))
-			if err != nil {
-				return false, err
-			}
-			startTime = startTime.UTC()
-			return startTime.Before(eventTime) || startTime.Equal(eventTime), nil
-		}
-
-		if timeFilter.Stop != "" {
-			stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Stop))
-			if err != nil {
-				return false, err
-			}
-			stopTime = stopTime.UTC()
-			return eventTime.Before(stopTime), nil
-		}
+	if timeFilter == nil {
+		return true, nil
 	}
-	return true, nil
+
+	// Parse start and stop
+	startTime, err := common.ParseTime(timeFilter.Start, eventTime)
+	if err != nil {
+		return false, err
+	}
+	stopTime, err := common.ParseTime(timeFilter.Stop, eventTime)
+	if err != nil {
+		return false, err
+	}
+
+	// Filtering logic
+	if startTime.Before(stopTime) {
+		return (eventTime.After(startTime) || eventTime.Equal(startTime)) && eventTime.Before(stopTime), nil
+	} else {
+		return (eventTime.After(startTime) || eventTime.Equal(startTime)) || eventTime.Before(stopTime), nil
+	}
 }
 
 // applyContextFilter checks the expected EventContext against the actual EventContext

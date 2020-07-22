@@ -36,10 +36,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":     schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":   schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Metadata":        schema_pkg_apis_gateway_v1alpha1_Metadata(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NATSSubscriber":  schema_pkg_apis_gateway_v1alpha1_NATSSubscriber(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":      schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service":         schema_pkg_apis_gateway_v1alpha1_Service(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers":     schema_pkg_apis_gateway_v1alpha1_Subscribers(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Template":        schema_pkg_apis_gateway_v1alpha1_Template(ref),
 	}
 }
@@ -144,11 +142,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayList(ref common.ReferenceCallback) 
 						},
 					},
 					"items": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "items",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -189,7 +182,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref common.ReferenceCallba
 						},
 					},
 				},
-				Required: []string{"deployment"},
 			},
 		},
 		Dependencies: []string{
@@ -229,17 +221,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service"),
 						},
 					},
-					"subscribers": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "subscribers",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "Subscribers holds the contexts of the subscribers/sinks to send events to.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers"),
-						},
-					},
 					"processorPort": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Port on which the gateway event source processor is running on.",
@@ -254,12 +235,19 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "int32",
 						},
 					},
+					"eventBusName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EventBusName references to a EventBus name. By default the value is \"default\"",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"type", "processorPort"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Template"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Template"},
 	}
 }
 
@@ -311,7 +299,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 						},
 					},
 				},
-				Required: []string{"phase", "resources"},
+				Required: []string{"phase"},
 			},
 		},
 		Dependencies: []string{
@@ -355,41 +343,6 @@ func schema_pkg_apis_gateway_v1alpha1_Metadata(ref common.ReferenceCallback) com
 						},
 					},
 				},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_gateway_v1alpha1_NATSSubscriber(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "NATSSubscriber holds the context of subscriber over NATS.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"serverURL": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ServerURL refers to the NATS server URL.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"subject": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Subject refers to the NATS subject name.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name of the subscription. Must be unique.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"serverURL", "subject", "name"},
 			},
 		},
 	}
@@ -501,57 +454,6 @@ func schema_pkg_apis_gateway_v1alpha1_Service(ref common.ReferenceCallback) comm
 		},
 		Dependencies: []string{
 			"k8s.io/api/core/v1.ServicePort", "k8s.io/api/core/v1.ServiceSpec"},
-	}
-}
-
-func schema_pkg_apis_gateway_v1alpha1_Subscribers(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"http": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "HTTP subscribers are HTTP endpoints to send events to.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-					"nats": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "NATSSubscriber",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "NATS refers to the subscribers over NATS protocol.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NATSSubscriber"),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NATSSubscriber"},
 	}
 }
 

@@ -36,17 +36,41 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux gateway-server-linux eventbus-controller-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux eventbus-controller-linux eventsource-controller-linux eventsource-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image eventbus-controller-image
+all-images: sensor-image sensor-controller-image gateway-controller-image eventbus-controller-image eventsource-controller-image eventsource-image
 
-all-controller-images: sensor-controller-image gateway-controller-image eventbus-controller-image
+all-controller-images: sensor-controller-image gateway-controller-image eventbus-controller-image eventsource-controller-image
 
 .PHONY: all clean test
 
+# EventSource
+eventsource:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
+
+eventsource-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource
+
+eventsource-image:
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make eventsource-linux; fi
+	docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) -f ./eventsources/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) ; fi
+
+# EventSource controller
+eventsource-controller:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource-controller ./controllers/eventsource/cmd
+
+eventsource-controller-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource-controller
+
+eventsource-controller-image:
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make eventsource-controller-linux; fi
+	docker build -t $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) -f ./controllers/eventsource/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) ; fi
+
 # Sensor
 sensor:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/client.go
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
 
 sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
@@ -92,31 +116,6 @@ eventbus-controller-image:
 	docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) -f ./controllers/eventbus/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
 
-# Gateway client binary
-gateway-client:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-client ./gateways/client
-
-gateway-client-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-client
-
-gateway-client-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then make gateway-client-linux; fi
-	docker build -t $(IMAGE_PREFIX)gateway-client:$(IMAGE_TAG) -f ./gateways/client/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-client:$(IMAGE_TAG) ; fi
-
-
-# gateway binary
-gateway-server:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-server ./gateways/server/cmd/
-
-gateway-server-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-server
-
-gateway-server-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then make gateway-server-linux; fi
-	docker build -t $(IMAGE_PREFIX)gateway-server:$(IMAGE_TAG) -f ./gateways/server/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-server:$(IMAGE_TAG) ; fi
-
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
@@ -127,28 +126,46 @@ coverage:
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
 
+.PHONY: crds
+crds:
+	./hack/crdgen.sh
+
+.PHONY: manifests
+manifests: crds
+	kustomize build manifests/cluster-install > manifests/install.yaml
+	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
+
+.PHONY: swagger
+swagger:
+	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
+
 .PHONY: codegen
 codegen:
 	go mod vendor
+	./hack/generate-proto.sh
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
-	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
+	$(MAKE) swagger
 	./hack/update-api-docs.sh
+	./hack/update-mocks.sh
 	rm -rf ./vendor
 	go mod tidy
+	$(MAKE) manifests
 
-.PHONY: e2e
-e2e:
-	./hack/e2e/run-e2e.sh
+.PHONY: start
+start:
+	kustomize build --load_restrictor=none test/manifests > /tmp/argo-events.yaml
+	kubectl apply -f test/manifests/argo-events-ns.yaml
+	kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f /tmp/argo-events.yaml
+	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
+	kubens argo-events
 
-.PHONY: kind-e2e
-kind-e2e:
-	./hack/e2e/kind-run-e2e.sh
-
-.PHONY: build-e2e-images
-build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image
+$(GOPATH)/bin/golangci-lint:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.26.0
 
 .PHONY: lint
-lint:
-	golangci-lint run
+lint: $(GOPATH)/bin/golangci-lint
+	go mod tidy
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
+
 

@@ -18,14 +18,15 @@ package aws_lambda
 import (
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/aws/aws-sdk-go/service/lambda"
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -67,7 +68,7 @@ func getAWSTrigger() *AWSLambdaTrigger {
 		K8sClient:    fake.NewSimpleClientset(),
 		Sensor:       sensorObj.DeepCopy(),
 		Trigger:      &sensorObj.Spec.Triggers[0],
-		Logger:       common.NewArgoEventsLogger(),
+		Logger:       logging.NewArgoEventsLogger(),
 	}
 }
 
@@ -85,25 +86,17 @@ func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
 
 func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getAWSTrigger()
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"function": "real-function"}`),
-				},
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"function": "real-function"}`),
 		},
 	}
 
@@ -129,7 +122,7 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	response, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.AWSLambda)
+	response, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.AWSLambda)
 	assert.Nil(t, err)
 	assert.NotNil(t, response)
 
@@ -146,7 +139,7 @@ func TestAWSLambdaTrigger_ApplyPolicy(t *testing.T) {
 		StatusCode: &status,
 	}
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
 	err := trigger.ApplyPolicy(response)
 	assert.Nil(t, err)

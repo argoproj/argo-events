@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ConfigMapReader implements the ArtifactReader interface for k8 configmap

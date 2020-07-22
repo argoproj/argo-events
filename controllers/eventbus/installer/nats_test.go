@@ -22,6 +22,7 @@ const (
 	testNamespace      = "test-ns"
 	testName           = "test-name"
 	testStreamingImage = "test-s-image"
+	testMetricsImage   = "test-m-image"
 )
 
 var (
@@ -106,6 +107,7 @@ func TestBadInstallation(t *testing.T) {
 			client:         fake.NewFakeClient(testEventBusBad),
 			eventBus:       testEventBusBad,
 			streamingImage: testStreamingImage,
+			metricsImage:   testMetricsImage,
 			labels:         testLabels,
 			logger:         ctrl.Log.WithName("test"),
 		}
@@ -117,7 +119,7 @@ func TestBadInstallation(t *testing.T) {
 func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBus)
-		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testMetricsImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -130,8 +132,10 @@ func TestInstallationAuthtoken(t *testing.T) {
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(svcList.Items))
-		assert.Equal(t, svcList.Items[0].Name, fmt.Sprintf("eventbus-%s-stan-svc", testName))
+		assert.Equal(t, 2, len(svcList.Items))
+		for _, s := range svcList.Items {
+			assert.True(t, strings.Contains(s.Name, "stan") || strings.Contains(s.Name, "metrics"))
+		}
 
 		cmList := &corev1.ConfigMapList{}
 		err = cl.List(ctx, cmList, &client.ListOptions{
@@ -164,7 +168,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBusAuthNone)
-		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testMetricsImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -177,7 +181,7 @@ func TestInstallationAuthNone(t *testing.T) {
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(svcList.Items))
+		assert.Equal(t, 2, len(svcList.Items))
 
 		cmList := &corev1.ConfigMapList{}
 		err = cl.List(ctx, cmList, &client.ListOptions{
@@ -204,6 +208,7 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 			client:         cl,
 			eventBus:       testEventBusPersist,
 			streamingImage: testStreamingImage,
+			metricsImage:   testMetricsImage,
 			labels:         testLabels,
 			logger:         ctrl.Log.WithName("test"),
 		}
@@ -211,13 +216,4 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, len(ss.Spec.VolumeClaimTemplates) > 0)
 	})
-}
-
-func contains(arr []string, str string) bool {
-	for _, a := range arr {
-		if a == str {
-			return true
-		}
-	}
-	return false
 }

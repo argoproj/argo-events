@@ -4,9 +4,9 @@ const (
 	// Group is the API Group
 	Group string = "argoproj.io"
 
-	// EventSource constants
+	// EventBus constants
 	Kind     string = "EventBus"
 	Singular string = "eventbus"
-	Plural   string = "eventbuses"
+	Plural   string = "eventbus"
 	FullName string = Plural + "." + Group
 )

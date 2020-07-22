@@ -33,8 +33,8 @@ var (
 	SNSEvent         EventSourceType = "sns"
 	SQSEvent         EventSourceType = "sqs"
 	PubSubEvent      EventSourceType = "pubsub"
-	GitHubEvent      EventSourceType = "github"
-	GitLabEvent      EventSourceType = "gitlab"
+	GithubEvent      EventSourceType = "github"
+	GitlabEvent      EventSourceType = "gitlab"
 	HDFSEvent        EventSourceType = "hdfs"
 	SlackEvent       EventSourceType = "slack"
 	StorageGridEvent EventSourceType = "storagegrid"
@@ -44,4 +44,27 @@ var (
 	RedisEvent       EventSourceType = "redis"
 	NSQEvent         EventSourceType = "nsq"
 	GenericEvent     EventSourceType = "generic"
+)
+
+var (
+	// RecreateStrategyEventSources refers to the list of event source types
+	// that need to use Recreate strategy for its Deployment
+	RecreateStrategyEventSources = []EventSourceType{
+		KafkaEvent,
+		PubSubEvent,
+		AzureEventsHub,
+		NATSEvent,
+		MQTTEvent,
+		EmitterEvent,
+		NSQEvent,
+		ResourceEvent,
+	}
+)
+
+// EventBusType is the type of event bus
+type EventBusType string
+
+// possible event bus types
+var (
+	EventBusNATS EventBusType = "nats"
 )

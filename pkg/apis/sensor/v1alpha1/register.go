@@ -17,35 +17,36 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
-// SchemeGroupVersion is a group version used to register these objects
-var SchemeGroupVersion = schema.GroupVersion{Group: sensor.Group, Version: "v1alpha1"}
+var (
+	// SchemeGroupVersion is group version used to register these objects
+	SchemeGroupVersion = schema.GroupVersion{Group: sensor.Group, Version: "v1alpha1"}
 
-// SchemaGroupVersionKind is a group version kind used to attach owner references to sensor executor job
-var SchemaGroupVersionKind = schema.GroupVersionKind{Group: sensor.Group, Version: "v1alpha1", Kind: sensor.Kind}
+	// SchemaGroupVersionKind is a group version kind used to attach owner references
+	SchemaGroupVersionKind = schema.GroupVersionKind{Group: sensor.Group, Version: "v1alpha1", Kind: sensor.Kind}
+
+	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
+	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+
+	// AddToScheme is required by pkg/client/...
+	AddToScheme = SchemeBuilder.AddToScheme
+)
 
 // Kind takes an unqualified kind and returns back a Group qualified GroupKind
 func Kind(kind string) schema.GroupKind {
 	return SchemeGroupVersion.WithKind(kind).GroupKind()
 }
 
-// Resource takes unqualified resource and returns Group qualified GroupResource
+// Resource takes an unqualified resource and returns a Group qualified GroupResource
 func Resource(resource string) schema.GroupResource {
 	return SchemeGroupVersion.WithResource(resource).GroupResource()
 }
-
-var (
-	// SchemeBuilder is the builder for this scheme
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-
-	// AddToScheme adds this
-	AddToScheme = SchemeBuilder.AddToScheme
-)
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,

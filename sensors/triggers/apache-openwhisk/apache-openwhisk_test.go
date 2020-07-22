@@ -19,11 +19,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -52,7 +53,7 @@ func getFakeTriggerImpl() *TriggerImpl {
 		K8sClient:       nil,
 		Sensor:          sensorObj.DeepCopy(),
 		Trigger:         sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:          common.NewArgoEventsLogger(),
+		Logger:          logging.NewArgoEventsLogger(),
 	}
 }
 
@@ -68,25 +69,18 @@ func TestTriggerImpl_FetchResource(t *testing.T) {
 
 func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 	trigger := getFakeTriggerImpl()
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"host": "another-fake.com", "actionName": "world"}`),
-				},
+
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"host": "another-fake.com", "actionName": "world"}`),
 		},
 	}
 
@@ -111,7 +105,7 @@ func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.OpenWhisk)
+	resource, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.OpenWhisk)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -124,14 +118,14 @@ func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 func TestTriggerImpl_ApplyPolicy(t *testing.T) {
 	trigger := getFakeTriggerImpl()
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
 	response := &http.Response{StatusCode: 200}
 	err := trigger.ApplyPolicy(response)
 	assert.Nil(t, err)
 
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{300}},
 	}
 	err = trigger.ApplyPolicy(response)
 	assert.NotNil(t, err)

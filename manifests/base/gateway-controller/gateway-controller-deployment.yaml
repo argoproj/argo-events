@@ -23,7 +23,3 @@ spec:
                   fieldPath: metadata.namespace
             - name: CONTROLLER_CONFIG_MAP
               value: gateway-controller-configmap
-            - name: GATEWAY_CLIENT_IMAGE
-              value: argoproj/gateway-client:latest
-            - name: GATEWAY_SERVER_IMAGE
-              value: argoproj/gateway-server:latest

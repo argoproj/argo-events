@@ -128,6 +128,73 @@ NATSConfig </a> </em>
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.ContainerTemplate">
+
+ContainerTemplate
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NativeStrategy">NativeStrategy</a>)
+
+</p>
+
+<p>
+
+<p>
+
+ContainerTemplate defines customized spec for a container
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>resources</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#resourcerequirements-v1-core">
+Kubernetes core/v1.ResourceRequirements </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.EventBus">
 
 EventBus
@@ -372,12 +439,18 @@ Description
 
 <td>
 
-<code>status</code></br> <em>
+<code>Status</code></br> <em>
 github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 
 </td>
 
 <td>
+
+<p>
+
+(Members of <code>Status</code> are embedded into this type.)
+
+</p>
 
 </td>
 
@@ -694,7 +767,7 @@ Description
 
 <td>
 
-<code>size</code></br> <em> int </em>
+<code>replicas</code></br> <em> int32 </em>
 
 </td>
 
@@ -752,6 +825,79 @@ Size is the NATS StatefulSet size
 <td>
 
 <em>(Optional)</em>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>containerTemplate</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ContainerTemplate contains customized spec for NATS container
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metricsContainerTemplate</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+MetricsContainerTemplate contains customized spec for metrics container
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nodeSelector</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+NodeSelector is a selector which must be true for the pod to fit on a
+node. Selector which must match a node’s labels for the pod to be
+scheduled on that node. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">https://kubernetes.io/docs/concepts/configuration/assign-pod-node/</a>
+
+</p>
 
 </td>
 
@@ -860,7 +1006,7 @@ Available access modes such as ReadWriteOnce, ReadWriteMany
 
 <td>
 
-<code>size</code></br> <em>
+<code>volumeSize</code></br> <em>
 k8s.io/apimachinery/pkg/api/resource.Quantity </em>
 
 </td>

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-logr/logr"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -22,14 +23,13 @@ import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-
-	"github.com/go-logr/logr"
 )
 
 const (
 	clientPort  = int32(4222)
 	clusterPort = int32(6222)
 	monitorPort = int32(8222)
+	metricsPort = int32(7777)
 
 	// annotation key on serverAuthSecret and clientAuthsecret
 	authStrategyAnnoKey = "strategy"
@@ -46,16 +46,18 @@ type natsInstaller struct {
 	client         client.Client
 	eventBus       *v1alpha1.EventBus
 	streamingImage string
+	metricsImage   string
 	labels         map[string]string
 	logger         logr.Logger
 }
 
 // NewNATSInstaller returns a new NATS installer
-func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, streamingImage string, labels map[string]string, logger logr.Logger) Installer {
+func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, streamingImage, metricsImage string, labels map[string]string, logger logr.Logger) Installer {
 	return &natsInstaller{
 		client:         client,
 		eventBus:       eventBus,
 		streamingImage: streamingImage,
+		metricsImage:   metricsImage,
 		labels:         labels,
 		logger:         logger.WithName("nats"),
 	}
@@ -69,8 +71,11 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	}
 	ctx := context.Background()
 
-	svc, err := i.createService(ctx)
+	svc, err := i.createStanService(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if _, err := i.createMetricsService(ctx); err != nil {
 		return nil, err
 	}
 	cm, err := i.createConfigMap(ctx)
@@ -139,15 +144,15 @@ func (i *natsInstaller) uninstallPVCs(ctx context.Context) error {
 }
 
 // Create a service for nats streaming
-func (i *natsInstaller) createService(ctx context.Context) (*corev1.Service, error) {
+func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service, error) {
 	log := i.logger
-	svc, err := i.getService(ctx)
+	svc, err := i.getStanService(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
 		i.eventBus.Status.MarkDeployFailed("GetServiceFailed", "Get existing service failed")
 		log.Error(err, "error getting existing service")
 		return nil, err
 	}
-	expectedSvc, err := i.buildService()
+	expectedSvc, err := i.buildStanService()
 	if err != nil {
 		i.eventBus.Status.MarkDeployFailed("BuildServiceFailed", "Failed to build a service spec")
 		log.Error(err, "error building service spec")
@@ -176,6 +181,45 @@ func (i *natsInstaller) createService(ctx context.Context) (*corev1.Service, err
 		return nil, err
 	}
 	log.Info("service is created", "serviceName", expectedSvc.Name)
+	return expectedSvc, nil
+}
+
+// Create a service for nats streaming metrics
+func (i *natsInstaller) createMetricsService(ctx context.Context) (*corev1.Service, error) {
+	log := i.logger
+	svc, err := i.getMetricsService(ctx)
+	if err != nil && !apierrors.IsNotFound(err) {
+		i.eventBus.Status.MarkDeployFailed("GetMetricsServiceFailed", "Get existing metrics service failed")
+		log.Error(err, "error getting existing metrics service")
+		return nil, err
+	}
+	expectedSvc, err := i.buildMetricsService()
+	if err != nil {
+		i.eventBus.Status.MarkDeployFailed("BuildMetricsServiceFailed", "Failed to build a metrics service spec")
+		log.Error(err, "error building metrics service spec")
+		return nil, err
+	}
+	if svc != nil {
+		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
+			svc.Spec = expectedSvc.Spec
+			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
+			err = i.client.Update(ctx, svc)
+			if err != nil {
+				i.eventBus.Status.MarkDeployFailed("UpdateMetricsServiceFailed", "Failed to update existing metrics service")
+				log.Error(err, "error updating existing metrics service")
+				return nil, err
+			}
+			log.Info("metrics service is updated", "serviceName", svc.Name)
+		}
+		return svc, nil
+	}
+	err = i.client.Create(ctx, expectedSvc)
+	if err != nil {
+		i.eventBus.Status.MarkDeployFailed("CreateMetricsServiceFailed", "Failed to create a metrics service")
+		log.Error(err, "error creating a metrics service")
+		return nil, err
+	}
+	log.Info("metrics service is created", "serviceName", expectedSvc.Name)
 	return expectedSvc, nil
 }
 
@@ -292,7 +336,7 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		serverAuthText := fmt.Sprintf(`authorization {
   token: "%s"
 }`, token)
-		clientAuthText := fmt.Sprintf("token=%s", token)
+		clientAuthText := fmt.Sprintf("token: \"%s\"", token)
 		// Create server auth secret
 		expectedSSecret, err := i.buildServerAuthSecret(strategy, serverAuthText)
 		if err != nil {
@@ -397,13 +441,13 @@ func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, conf
 	return nil
 }
 
-// buildService builds a Service for NATS streaming
-func (i *natsInstaller) buildService() (*corev1.Service, error) {
+// buildStanService builds a Service for NATS streaming
+func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      generateServiceName(i.eventBus),
 			Namespace: i.eventBus.Namespace,
-			Labels:    i.labels,
+			Labels:    stanServiceLabels(i.labels),
 		},
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
@@ -422,17 +466,40 @@ func (i *natsInstaller) buildService() (*corev1.Service, error) {
 	return svc, nil
 }
 
+// buildMetricsService builds a metrics Service for NATS streaming
+func (i *natsInstaller) buildMetricsService() (*corev1.Service, error) {
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      generateMetricsServiceName(i.eventBus),
+			Namespace: i.eventBus.Namespace,
+			Labels:    metricsServiceLabels(i.labels),
+		},
+		Spec: corev1.ServiceSpec{
+			ClusterIP: corev1.ClusterIPNone,
+			Ports: []corev1.ServicePort{
+				{Name: "metrics", Port: metricsPort},
+			},
+			Type:     corev1.ServiceTypeClusterIP,
+			Selector: i.labels,
+		},
+	}
+	if err := controllerscommon.SetObjectMeta(i.eventBus, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
+		return nil, err
+	}
+	return svc, nil
+}
+
 // buildConfigMap builds a ConfigMap for NATS streaming
 func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	clusterID := generateClusterID(i.eventBus)
 	svcName := generateServiceName(i.eventBus)
 	ssName := generateStatefulSetName(i.eventBus)
-	size := i.eventBus.Spec.NATS.Native.Size
-	if size < 3 {
-		size = 3
+	replicas := i.eventBus.Spec.NATS.Native.GetReplicas()
+	if replicas < 3 {
+		replicas = 3
 	}
 	peers := []string{}
-	for j := 0; j < size; j++ {
+	for j := 0; j < replicas; j++ {
 		peers = append(peers, fmt.Sprintf("\"%s-%s\"", ssName, strconv.Itoa(j)))
 	}
 	conf := fmt.Sprintf(`http: %s
@@ -454,7 +521,7 @@ streaming {
 	peers: [%s]
   }
   store_limits {
-    max_age: 24h
+    max_age: 72h
   }
 }`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","))
 	cm := &corev1.ConfigMap{
@@ -522,15 +589,19 @@ func (i *natsInstaller) buildClientAuthSecret(authStrategy v1alpha1.AuthStrategy
 
 // buildStatefulSet builds a StatefulSet for nats streaming
 func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretName string) (*appv1.StatefulSet, error) {
+	// Use provided serviceName, configMapName to build the spec
+	// to avoid issues when naming convention changes
+	spec, err := i.buildStatefulSetSpec(serviceName, configmapName, authSecretName)
+	if err != nil {
+		return nil, err
+	}
 	ss := &appv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
 			Name:      generateStatefulSetName(i.eventBus),
 			Labels:    i.labels,
 		},
-		// Use provided serviceName, configMapName to build the spec
-		// to avoid issues when naming convention changes
-		Spec: i.buildStatefulSetSpec(serviceName, configmapName, authSecretName),
+		Spec: *spec,
 	}
 	if err := controllerscommon.SetObjectMeta(i.eventBus, ss, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
@@ -538,11 +609,24 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 	return ss, nil
 }
 
-func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSecretName string) appv1.StatefulSetSpec {
+func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSecretName string) (*appv1.StatefulSetSpec, error) {
 	// Streaming requires minimal size 3.
-	replicas := int32(i.eventBus.Spec.NATS.Native.Size)
+	replicas := i.eventBus.Spec.NATS.Native.Replicas
 	if replicas < 3 {
 		replicas = 3
+	}
+	stanContainerResources := corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU: apiresource.MustParse("0"),
+		},
+	}
+	containerTmpl := i.eventBus.Spec.NATS.Native.ContainerTemplate
+	if containerTmpl != nil {
+		stanContainerResources = containerTmpl.Resources
+	}
+	metricsContainerResources := corev1.ResourceRequirements{}
+	if i.eventBus.Spec.NATS.Native.MetricsContainerTemplate != nil {
+		metricsContainerResources = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.Resources
 	}
 	spec := appv1.StatefulSetSpec{
 		Replicas:    &replicas,
@@ -555,6 +639,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				Labels: i.labels,
 			},
 			Spec: corev1.PodSpec{
+				NodeSelector: i.eventBus.Spec.NATS.Native.NodeSelector,
 				Volumes: []corev1.Volume{
 					{
 						Name: "config-volume",
@@ -610,11 +695,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/stan-config"},
 						},
-						Resources: corev1.ResourceRequirements{
-							Requests: corev1.ResourceList{
-								corev1.ResourceCPU: apiresource.MustParse("0"),
-							},
-						},
+						Resources: stanContainerResources,
 						LivenessProbe: &corev1.Probe{
 							Handler: corev1.Handler{
 								HTTPGet: &corev1.HTTPGetAction{
@@ -626,6 +707,15 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 							TimeoutSeconds:      5,
 						},
 					},
+					{
+						Name:  "metrics",
+						Image: i.metricsImage,
+						Ports: []corev1.ContainerPort{
+							{Name: "metrics", ContainerPort: metricsPort},
+						},
+						Args:      []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(monitorPort)))},
+						Resources: metricsContainerResources,
+					},
 				},
 			},
 		},
@@ -634,9 +724,9 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		volMode := corev1.PersistentVolumeFilesystem
 		pvcName := generatePVCName(i.eventBus)
 		// Default volume size
-		volSize := apiresource.MustParse("5Gi")
-		if i.eventBus.Spec.NATS.Native.Persistence.Size != nil {
-			volSize = *i.eventBus.Spec.NATS.Native.Persistence.Size
+		volSize := apiresource.MustParse("10Gi")
+		if i.eventBus.Spec.NATS.Native.Persistence.VolumeSize != nil {
+			volSize = *i.eventBus.Spec.NATS.Native.Persistence.VolumeSize
 		}
 		// Default to ReadWriteOnce
 		accessMode := corev1.ReadWriteOnce
@@ -680,16 +770,24 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 			},
 		}
 	}
-	return spec
+	return &spec, nil
 }
 
-func (i *natsInstaller) getService(ctx context.Context) (*corev1.Service, error) {
+func (i *natsInstaller) getStanService(ctx context.Context) (*corev1.Service, error) {
+	return i.getService(ctx, stanServiceLabels(i.labels))
+}
+
+func (i *natsInstaller) getMetricsService(ctx context.Context) (*corev1.Service, error) {
+	return i.getService(ctx, metricsServiceLabels(i.labels))
+}
+
+func (i *natsInstaller) getService(ctx context.Context, labels map[string]string) (*corev1.Service, error) {
 	// Why not using getByName()?
 	// Naming convention might be changed.
 	sl := &corev1.ServiceList{}
 	err := i.client.List(ctx, sl, &client.ListOptions{
 		Namespace:     i.eventBus.Namespace,
-		LabelSelector: labelSelector(i.labels),
+		LabelSelector: labelSelector(labels),
 	})
 	if err != nil {
 		return nil, err
@@ -806,12 +904,32 @@ func clientAuthSecretLabels(given map[string]string) map[string]string {
 	return result
 }
 
+func stanServiceLabels(given map[string]string) map[string]string {
+	result := map[string]string{"stan": "yes"}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
+}
+
+func metricsServiceLabels(given map[string]string) map[string]string {
+	result := map[string]string{"metrics": "yes"}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
+}
+
 func labelSelector(labelMap map[string]string) labels.Selector {
 	return labels.SelectorFromSet(labelMap)
 }
 
 func generateServiceName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-stan-svc", eventBus.Name)
+}
+
+func generateMetricsServiceName(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("eventbus-%s-metrics-svc", eventBus.Name)
 }
 
 func generateConfigMapName(eventBus *v1alpha1.EventBus) string {

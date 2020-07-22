@@ -16,6 +16,9 @@ limitations under the License.
 package sensors
 
 import (
+	"context"
+
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	argoworkflow "github.com/argoproj/argo-events/sensors/triggers/argo-workflow"
 	awslambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
@@ -32,72 +35,73 @@ type Trigger interface {
 	// FetchResource fetches the trigger resource from external source
 	FetchResource() (interface{}, error)
 	// ApplyResourceParameters applies parameters to the trigger resource
-	ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error)
+	ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error)
 	// Execute executes the trigger
-	Execute(resource interface{}) (interface{}, error)
+	Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error)
 	// ApplyPolicy applies the policy on the trigger
 	ApplyPolicy(resource interface{}) error
 }
 
 // GetTrigger returns a trigger
-func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
+func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha1.Trigger) Trigger {
+	log := logging.FromContext(ctx)
 	if trigger.Template.K8s != nil {
-		return standardk8s.NewStandardK8sTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		return standardk8s.NewStandardK8sTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, log)
 	}
 
 	if trigger.Template.ArgoWorkflow != nil {
-		return argoworkflow.NewArgoWorkflowTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		return argoworkflow.NewArgoWorkflowTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, log)
 	}
 
 	if trigger.Template.HTTP != nil {
-		result, err := http.NewHTTPTrigger(sensorCtx.httpClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		result, err := http.NewHTTPTrigger(sensorCtx.httpClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, log)
 		if err != nil {
-			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
 		}
 		return result
 	}
 
 	if trigger.Template.AWSLambda != nil {
-		result, err := awslambda.NewAWSLambdaTrigger(sensorCtx.awsLambdaClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		result, err := awslambda.NewAWSLambdaTrigger(sensorCtx.awsLambdaClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, log)
 		if err != nil {
-			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
 		}
 		return result
 	}
 
 	if trigger.Template.Kafka != nil {
-		result, err := kafka.NewKafkaTrigger(sensorCtx.Sensor, trigger, sensorCtx.kafkaProducers, sensorCtx.Logger)
+		result, err := kafka.NewKafkaTrigger(sensorCtx.Sensor, trigger, sensorCtx.kafkaProducers, log)
 		if err != nil {
-			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
 		}
 		return result
 	}
 
 	if trigger.Template.NATS != nil {
-		result, err := nats.NewNATSTrigger(sensorCtx.Sensor, trigger, sensorCtx.natsConnections, sensorCtx.Logger)
+		result, err := nats.NewNATSTrigger(sensorCtx.Sensor, trigger, sensorCtx.natsConnections, log)
 		if err != nil {
-			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
 		}
 		return result
 	}
 
 	if trigger.Template.Slack != nil {
-		result, err := slack.NewSlackTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.slackHttpClient)
+		result, err := slack.NewSlackTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, log, sensorCtx.slackHTTPClient)
 		if err != nil {
-			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
 		}
 		return result
 	}
 
 	if trigger.Template.CustomTrigger != nil {
-		result, err := customtrigger.NewCustomTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.customTriggerClients)
+		result, err := customtrigger.NewCustomTrigger(sensorCtx.Sensor, trigger, log, sensorCtx.customTriggerClients)
 		if err != nil {
-			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
 		}
 		return result

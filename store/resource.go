@@ -17,11 +17,15 @@ limitations under the License.
 package store
 
 import (
+	"encoding/json"
 	"errors"
+
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // ResourceReader implements the ArtifactReader interface for resource artifacts
@@ -30,14 +34,24 @@ type ResourceReader struct {
 }
 
 // NewResourceReader creates a new ArtifactReader for resource
-func NewResourceReader(resourceArtifact *unstructured.Unstructured) (ArtifactReader, error) {
+func NewResourceReader(resourceArtifact *common.Resource) (ArtifactReader, error) {
 	if resourceArtifact == nil {
 		return nil, errors.New("ResourceArtifact does not exist")
 	}
-	return &ResourceReader{resourceArtifact}, nil
+	data, err := json.Marshal(resourceArtifact)
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]interface{})
+	err = json.Unmarshal(data, &object)
+	if err != nil {
+		return nil, err
+	}
+	un := &unstructured.Unstructured{Object: object}
+	return &ResourceReader{un}, nil
 }
 
 func (reader *ResourceReader) Read() ([]byte, error) {
-	log.WithField("resource", reader.resourceArtifact.Object).Debug("reading minio from resource template")
+	log.WithField("resource", reader.resourceArtifact.Object).Debug("reading artifact from resource template")
 	return yaml.Marshal(reader.resourceArtifact.Object)
 }

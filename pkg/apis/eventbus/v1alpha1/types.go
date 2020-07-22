@@ -1,14 +1,16 @@
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // EventBus is the definition of a eventbus resource
 // +genclient
+// +kubebuilder:resource:singular=eventbus,shortName=eb
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type EventBus struct {
@@ -23,8 +25,8 @@ type EventBus struct {
 type EventBusList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	// +listType=eventbus
-	Items []EventBus `json:"items" protobuf:"bytes,2,opt,name=items"`
+
+	Items []EventBus `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // EventBusSpec refers to specification of eventbus resource
@@ -35,7 +37,7 @@ type EventBusSpec struct {
 
 // EventBusStatus holds the status of the eventbus resource
 type EventBusStatus struct {
-	Status common.Status `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
+	common.Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
 	// Config holds the fininalized configuration of EventBus
 	Config BusConfig `json:"config,omitempty" protobuf:"bytes,2,opt,name=config"`
 }
@@ -60,11 +62,32 @@ var (
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
-	Size         int           `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
-	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
-	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"bytes,3,opt,name=antiAffinity"`
+	Replicas     int32         `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
+	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth,casttype=AuthStrategy"`
+	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"varint,3,opt,name=antiAffinity"`
 	// +optional
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
+	// ContainerTemplate contains customized spec for NATS container
+	// +optional
+	ContainerTemplate *ContainerTemplate `json:"containerTemplate,omitempty" protobuf:"bytes,5,opt,name=containerTemplate"`
+	// MetricsContainerTemplate contains customized spec for metrics container
+	// +optional
+	MetricsContainerTemplate *ContainerTemplate `json:"metricsContainerTemplate,omitempty" protobuf:"bytes,6,opt,name=metricsContainerTemplate"`
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
+}
+
+// ContainerTemplate defines customized spec for a container
+type ContainerTemplate struct {
+	Resources corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
+}
+
+// GetReplicas return the replicas of statefulset
+func (in *NativeStrategy) GetReplicas() int {
+	return int(in.Replicas)
 }
 
 // PersistenceStrategy defines the strategy of persistence
@@ -76,9 +99,9 @@ type PersistenceStrategy struct {
 	// Available access modes such as ReadWriteOnce, ReadWriteMany
 	// https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 	// +optional
-	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode"`
+	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode,casttype=k8s.io/api/core/v1.PersistentVolumeAccessMode"`
 	// Volume size, e.g. 10Gi
-	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,3,opt,name=size"`
+	VolumeSize *apiresource.Quantity `json:"volumeSize,omitempty" protobuf:"bytes,3,opt,name=volumeSize"`
 }
 
 // BusConfig has the finalized configuration for EventBus
@@ -95,7 +118,7 @@ type NATSConfig struct {
 	ClusterID *string `json:"clusterID,omitempty" protobuf:"bytes,2,opt,name=clusterID"`
 	// Auth strategy, default to AuthStrategyNone
 	// +optional
-	Auth *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
+	Auth *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth,casttype=AuthStrategy"`
 	// Secret for auth
 	// +optional
 	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,4,opt,name=accessSecret"`
@@ -112,34 +135,30 @@ const (
 
 // InitConditions sets conditions to Unknown state.
 func (s *EventBusStatus) InitConditions() {
-	s.Status.InitConditions(EventBusConditionDeployed, EventBusConditionConfigured)
+	s.InitializeConditions(EventBusConditionDeployed, EventBusConditionConfigured)
 }
 
 // MarkDeployed set the bus has been deployed.
 func (s *EventBusStatus) MarkDeployed(reason, message string) {
-	s.Status.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
+	s.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeploying set the bus is deploying
 func (s *EventBusStatus) MarkDeploying(reason, message string) {
-	s.Status.MarkUnknown(EventBusConditionDeployed, reason, message)
+	s.MarkUnknown(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeployFailed set the bus deploy failed
 func (s *EventBusStatus) MarkDeployFailed(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionDeployed, reason, message)
+	s.MarkFalse(EventBusConditionDeployed, reason, message)
 }
 
 // MarkConfigured set the bus configuration has been done.
 func (s *EventBusStatus) MarkConfigured() {
-	s.Status.MarkTrue(EventBusConditionConfigured)
+	s.MarkTrue(EventBusConditionConfigured)
 }
 
 // MarkNotConfigured set the bus status not configured.
 func (s *EventBusStatus) MarkNotConfigured(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionConfigured, reason, message)
-}
-
-func init() {
-	SchemeBuilder.Register(&EventBus{}, &EventBusList{})
+	s.MarkFalse(EventBusConditionConfigured, reason, message)
 }

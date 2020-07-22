@@ -19,11 +19,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -53,7 +54,7 @@ func getFakeHTTPTrigger() *HTTPTrigger {
 		K8sClient: nil,
 		Sensor:    sensorObj.DeepCopy(),
 		Trigger:   sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:    common.NewArgoEventsLogger(),
+		Logger:    logging.NewArgoEventsLogger(),
 	}
 }
 
@@ -69,25 +70,18 @@ func TestHTTPTrigger_FetchResource(t *testing.T) {
 
 func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getFakeHTTPTrigger()
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"url": "http://another-fake.com", "method": "GET"}`),
-				},
+
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"url": "http://another-fake.com", "method": "GET"}`),
 		},
 	}
 
@@ -114,7 +108,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 
 	assert.Equal(t, http.MethodPost, trigger.Trigger.Template.HTTP.Method)
 
-	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.HTTP)
+	resource, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.HTTP)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -128,14 +122,14 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 func TestHTTPTrigger_ApplyPolicy(t *testing.T) {
 	trigger := getFakeHTTPTrigger()
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
 	response := &http.Response{StatusCode: 200}
 	err := trigger.ApplyPolicy(response)
 	assert.Nil(t, err)
 
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{300}},
 	}
 	err = trigger.ApplyPolicy(response)
 	assert.NotNil(t, err)

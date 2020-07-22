@@ -19,9 +19,6 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -29,6 +26,10 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials"
 	"k8s.io/apimachinery/pkg/util/wait"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // CustomTrigger implements Trigger interface for custom trigger resource
@@ -126,21 +127,21 @@ func (ct *CustomTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (ct *CustomTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (ct *CustomTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	obj, ok := resource.([]byte)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource for resource parameters application")
 	}
 	parameters := ct.Trigger.Template.CustomTrigger.Parameters
 
-	if parameters != nil && len(parameters) > 0 {
+	if len(parameters) > 0 {
 		// only JSON formatted resource body is eligible for parameters
 		var temp map[string]interface{}
 		if err := json.Unmarshal(obj, &temp); err != nil {
 			return nil, errors.Wrapf(err, "fetched resource body is not valid JSON for trigger %s", ct.Trigger.Template.Name)
 		}
 
-		result, err := triggers.ApplyParams(obj, ct.Trigger.Template.CustomTrigger.Parameters, triggers.ExtractEvents(sensor, parameters))
+		result, err := triggers.ApplyParams(obj, ct.Trigger.Template.CustomTrigger.Parameters, events)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to apply the parameters to the custom trigger resource for %s", ct.Trigger.Template.Name)
 		}
@@ -153,7 +154,7 @@ func (ct *CustomTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resour
 }
 
 // Execute executes the trigger
-func (ct *CustomTrigger) Execute(resource interface{}) (interface{}, error) {
+func (ct *CustomTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	obj, ok := resource.([]byte)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource for the execution")
@@ -167,7 +168,7 @@ func (ct *CustomTrigger) Execute(resource interface{}) (interface{}, error) {
 	var err error
 
 	if trigger.Payload != nil {
-		payload, err = triggers.ConstructPayload(ct.Sensor, trigger.Payload)
+		payload, err = triggers.ConstructPayload(events, trigger.Payload)
 		if err != nil {
 			return nil, err
 		}

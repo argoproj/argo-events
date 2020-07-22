@@ -57,7 +57,7 @@ func TestEventBusStatusIsReady(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := test.s.Status.IsReady()
+			got := test.s.IsReady()
 			if diff := cmp.Diff(test.expect, got); diff != "" {
 				t.Errorf("%s: unexpected condition (-expect, +got) = %v", test.name, diff)
 			}

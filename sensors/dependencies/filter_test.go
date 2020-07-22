@@ -20,10 +20,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func TestFilterContext(t *testing.T) {
@@ -292,64 +293,72 @@ func TestFilterData(t *testing.T) {
 }
 
 func TestFilterTime(t *testing.T) {
-	currentT := time.Now().UTC()
-	currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
-	currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
-	eventTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" 16:36:34")
-	assert.Nil(t, err)
+	now := time.Now().UTC()
+	eventTimes := [6]time.Time{
+		time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 4, 5, 6, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 8, 9, 10, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 12, 13, 14, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 16, 17, 18, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 20, 21, 22, 0, time.UTC),
+	}
+
+	time1 := eventTimes[2].Format("15:04:05")
+	time2 := eventTimes[4].Format("15:04:05")
 
 	tests := []struct {
 		name       string
 		timeFilter *v1alpha1.TimeFilter
-		result     bool
+		results    [6]bool
 	}{
 		{
-			name: "event time outside filter start and stop time",
-			timeFilter: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "09:10:09",
-			},
-			result: false,
+			name:       "no filter",
+			timeFilter: nil,
+			results:    [6]bool{true, true, true, true, true, true},
+			// With no filter, any event time should pass
 		},
 		{
-			name: "filter with no stop time",
+			name: "start < stop",
 			timeFilter: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "",
+				Start: time1,
+				Stop:  time2,
 			},
-			result: true,
+			results: [6]bool{false, false, true, true, false, false},
+			//                             ~~~~~~~~~~
+			//                            [time1     , time2)
 		},
 		{
-			name: "filter with no start time",
+			name: "stop < start",
 			timeFilter: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "17:09:09",
+				Start: time2,
+				Stop:  time1,
 			},
-			result: true,
+			results: [6]bool{true, true, false, false, true, true},
+			//               ~~~~~~~~~~                ~~~~~~~~~~
+			//              [          , time1)       [time2     , )
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := filterTime(test.timeFilter, eventTime)
-			assert.Nil(t, err)
-			assert.Equal(t, test.result, result)
+			for i, eventTime := range eventTimes {
+				result, err := filterTime(test.timeFilter, eventTime)
+				assert.Nil(t, err)
+				assert.Equal(t, test.results[i], result)
+			}
 		})
 	}
 }
 
 func TestFilterEvent(t *testing.T) {
-	currentT := time.Now().UTC()
-	currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
-	currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
-	eventTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" 16:36:34")
-	assert.Nil(t, err)
+	now := time.Now().UTC()
+	eventTime := time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC)
 
 	filter := v1alpha1.EventDependencyFilter{
 		Name: "test-filter",
 		Time: &v1alpha1.TimeFilter{
 			Start: "09:09:09",
-			Stop:  "",
+			Stop:  "19:19:19",
 		},
 		Context: &v1alpha1.EventContext{
 			Type:   "webhook",

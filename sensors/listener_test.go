@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2020 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,75 +17,115 @@ limitations under the License.
 package sensors
 
 import (
-	"encoding/json"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/types"
-	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/stretchr/testify/assert"
+	"context"
 	"testing"
-	"time"
+
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-func TestHandleEvent(t *testing.T) {
-	obj := sensorObj.DeepCopy()
-	obj.Spec.Dependencies = []v1alpha1.EventDependency{
-		{
-			Name:        "dep1",
-			GatewayName: "webhook-gateway",
-			EventName:   "example-1",
+var (
+	fakeTrigger = &v1alpha1.Trigger{
+		Template: &v1alpha1.TriggerTemplate{
+			Name: "fake-trigger",
+			K8s: &v1alpha1.StandardK8STrigger{
+				GroupVersionResource: metav1.GroupVersionResource{
+					Group:    "apps",
+					Version:  "v1",
+					Resource: "deployments",
+				},
+			},
 		},
 	}
 
-	event := cloudevents.NewEvent(cloudevents.VersionV1)
-	event.SetID("1")
-	event.SetSource("webhook-gateway")
-	event.SetSubject("example-1")
-	event.SetType("webhook")
-	event.SetDataContentType(common.MediaTypeJSON)
-	event.SetTime(time.Now())
+	sensorObj = &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-sensor",
+			Namespace: "fake",
+		},
+		Spec: v1alpha1.SensorSpec{
+			Triggers: []v1alpha1.Trigger{
+				*fakeTrigger,
+			},
+		},
+	}
+)
 
-	queue := make(chan *types.Notification)
-	done := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-queue:
-			case <-done:
-				return
-			}
+func TestGetDependencyExpression(t *testing.T) {
+	t.Run("get simple expression", func(t *testing.T) {
+		obj := sensorObj.DeepCopy()
+		obj.Spec.Dependencies = []v1alpha1.EventDependency{
+			{
+				Name:            "dep1",
+				EventSourceName: "webhook",
+				EventName:       "example-1",
+			},
 		}
-	}()
+		sensorCtx := &SensorContext{
+			Sensor: obj,
+		}
+		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
+		assert.NoError(t, err)
+		assert.Equal(t, "dep1", expr)
+	})
 
-	sensorCtx := &SensorContext{
-		Sensor:            obj,
-		NotificationQueue: queue,
-		Logger:            common.NewArgoEventsLogger(),
-	}
+	t.Run("get two deps expression", func(t *testing.T) {
+		obj := sensorObj.DeepCopy()
+		obj.Spec.Dependencies = []v1alpha1.EventDependency{
+			{
+				Name:            "dep1",
+				EventSourceName: "webhook",
+				EventName:       "example-1",
+			},
+			{
+				Name:            "dep2",
+				EventSourceName: "webhook2",
+				EventName:       "example-2",
+			},
+		}
+		sensorCtx := &SensorContext{
+			Sensor: obj,
+		}
+		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
+		assert.NoError(t, err)
+		assert.Equal(t, "dep1 && dep2", expr)
+	})
 
-	tests := []struct {
-		name       string
-		updateFunc func()
-		result     error
-	}{
-		{
-			name:       "valid event is received",
-			updateFunc: func() {},
-			result:     nil,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			test.updateFunc()
-			eventBody, err := json.Marshal(&event)
-			if err != nil {
-				assert.Fail(t, err.Error())
-			}
-			result := sensorCtx.handleEvent(eventBody)
-			assert.Equal(t, test.result, result)
-		})
-	}
-
-	done <- struct{}{}
+	t.Run("get complex expression", func(t *testing.T) {
+		obj := sensorObj.DeepCopy()
+		obj.Spec.Dependencies = []v1alpha1.EventDependency{
+			{
+				Name:            "dep1",
+				EventSourceName: "webhook",
+				EventName:       "example-1",
+			},
+			{
+				Name:            "dep1a",
+				EventSourceName: "webhook",
+				EventName:       "example-1a",
+			},
+			{
+				Name:            "dep2",
+				EventSourceName: "webhook2",
+				EventName:       "example-2",
+			},
+		}
+		sensorCtx := &SensorContext{
+			Sensor: obj,
+		}
+		obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
+			{Name: "group-1", Dependencies: []string{"dep1", "dep1a"}},
+			{Name: "group-2", Dependencies: []string{"dep2"}},
+		}
+		obj.Spec.Circuit = "((group-2) || group-1)"
+		trig := fakeTrigger.DeepCopy()
+		trig.Template.Switch = &v1alpha1.TriggerSwitch{
+			Any: []string{"group-1"},
+		}
+		expr, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
+		assert.NoError(t, err)
+		assert.Equal(t, "dep1 && dep1a", expr)
+	})
 }

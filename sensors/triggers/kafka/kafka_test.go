@@ -20,11 +20,12 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -56,7 +57,7 @@ var sensorObj = &v1alpha1.Sensor{
 }
 
 func getFakeKafkaTrigger(producers map[string]sarama.AsyncProducer) (*KafkaTrigger, error) {
-	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, common.NewArgoEventsLogger())
+	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 }
 
 func TestKafkaTrigger_FetchResource(t *testing.T) {
@@ -79,25 +80,18 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 		"fake-trigger": producer,
 	})
 	assert.Nil(t, err)
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"url": "another-fake-kafka-url"}`),
-				},
+
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"url": "another-fake-kafka-url"}`),
 		},
 	}
 
@@ -114,7 +108,7 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.Kafka)
+	resource, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.Kafka)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -130,27 +124,20 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 		"fake-trigger": producer,
 	})
 	assert.Nil(t, err)
-	id := trigger.Sensor.NodeID("fake-dependency")
-	trigger.Sensor.Status = v1alpha1.SensorStatus{
-		Nodes: map[string]v1alpha1.NodeStatus{
-			id: {
-				Name: "fake-dependency",
-				Type: v1alpha1.NodeTypeEventDependency,
-				ID:   id,
-				Event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						ID:              "1",
-						Type:            "webhook",
-						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
-						Subject:         "example-1",
-					},
-					Data: []byte(`{"message": "world"}`),
-				},
+	testEvents := map[string]*v1alpha1.Event{
+		"fake-dependency": {
+			Context: &v1alpha1.EventContext{
+				ID:              "1",
+				Type:            "webhook",
+				Source:          "webhook-gateway",
+				DataContentType: "application/json",
+				SpecVersion:     cloudevents.VersionV1,
+				Subject:         "example-1",
 			},
+			Data: []byte(`{"message": "world"}`),
 		},
 	}
+
 	defaultValue := "hello"
 
 	trigger.Trigger.Template.Kafka.Payload = []v1alpha1.TriggerParameter{
@@ -166,7 +153,7 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 
 	producer.ExpectInputAndSucceed()
 
-	result, err := trigger.Execute(trigger.Trigger.Template.Kafka)
+	result, err := trigger.Execute(testEvents, trigger.Trigger.Template.Kafka)
 	assert.Nil(t, err)
 	assert.Nil(t, result)
 }
