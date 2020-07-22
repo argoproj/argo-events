@@ -19,7 +19,7 @@ package store
 import (
 	"errors"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/argoproj/argo-events/common/logging"
 )
 
 // InlineReader implements the ArtifactReader interface for inlined artifacts
@@ -37,6 +37,7 @@ func NewInlineReader(inlineArtifact *string) (ArtifactReader, error) {
 }
 
 func (reader *InlineReader) Read() ([]byte, error) {
+	log := logging.NewArgoEventsLogger()
 	log.Debug("reading fileArtifact from inline")
 	return []byte(*reader.inlineArtifact), nil
 }

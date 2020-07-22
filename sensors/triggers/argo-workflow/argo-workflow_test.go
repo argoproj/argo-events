@@ -89,7 +89,7 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 			},
 		},
 	}
-	return NewArgoWorkflowTrigger(fake.NewSimpleClientset(), client, sensorObj.DeepCopy(), trigger, logging.NewArgoEventsLogger())
+	return NewArgoWorkflowTrigger(fake.NewSimpleClientset(), client, sensorObj.DeepCopy(), trigger, logging.NewArgoEventsLogger().Desugar())
 }
 
 func TestFetchResource(t *testing.T) {

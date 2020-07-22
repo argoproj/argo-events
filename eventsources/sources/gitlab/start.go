@@ -30,6 +30,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/pkg/errors"
 	"github.com/xanzy/go-gitlab"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -69,14 +70,11 @@ func (router *Router) GetRoute() *webhook.Route {
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.GetRoute()
 
-	logger := route.Logger.WithFields(
-		map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelHTTPMethod:      route.Context.Method,
-		})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+	)
 
 	logger.Info("received a request, processing it...")
 
@@ -88,7 +86,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.WithError(err).Error("failed to parse request body")
+		logger.Desugar().Error("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		return
 	}
@@ -105,7 +103,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	logger.Infoln("dispatching event on route's data channel")
+	logger.Info("dispatching event on route's data channel")
 	route.DataCh <- eventBody
 
 	logger.Info("request successfully processed")
@@ -123,22 +121,20 @@ func (router *Router) PostActivate() error {
 	// 3. Configure Hook with given event type
 	// 4. Create project hook
 
-	logger := route.Logger.WithFields(map[string]interface{}{
-		logging.LabelEventSourceName: route.EventSourceName,
-		logging.LabelEventName:       route.EventName,
-		logging.LabelEndpoint:        route.Context.Endpoint,
-		logging.LabelPort:            route.Context.Port,
-		logging.LabelHTTPMethod:      route.Context.Method,
-		"project-id":                 gitlabEventSource.ProjectID,
-	})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+		"project-id", gitlabEventSource.ProjectID,
+	)
 
-	logger.Infoln("retrieving the access token credentials...")
+	logger.Info("retrieving the access token credentials...")
 	c, err := router.getCredentials(gitlabEventSource.AccessToken)
 	if err != nil {
 		return errors.Errorf("failed to get gitlab credentials. err: %+v", err)
 	}
 
-	logger.Infoln("setting up the client to connect to GitLab...")
+	logger.Info("setting up the client to connect to GitLab...")
 	router.gitlabClient, err = gitlab.NewClient(c.token, gitlab.WithBaseURL(gitlabEventSource.GitlabBaseURL))
 	if err != nil {
 		return errors.Wrapf(err, "failed to initialize client")
@@ -202,7 +198,7 @@ func (router *Router) PostActivate() error {
 		opt = editOpt
 	}
 
-	logger.Infoln("configuring the GitLab events for the hook...")
+	logger.Info("configuring the GitLab events for the hook...")
 
 	for _, event := range gitlabEventSource.Events {
 		elem := reflect.ValueOf(opt).Elem().FieldByName(event)
@@ -218,13 +214,13 @@ func (router *Router) PostActivate() error {
 	var newHook *gitlab.ProjectHook
 
 	if !isAlreadyExists {
-		logger.Infoln("creating project hook...")
+		logger.Info("creating project hook...")
 		newHook, _, err = router.gitlabClient.Projects.AddProjectHook(router.gitlabEventSource.ProjectID, opt.(*gitlab.AddProjectHookOptions))
 		if err != nil {
 			return errors.Errorf("failed to add project hook. err: %+v", err)
 		}
 	} else {
-		logger.Infoln("project hook already exists, updating it...")
+		logger.Info("project hook already exists, updating it...")
 		if existingHook == nil {
 			return errors.Errorf("existing hook contents are empty, unable to edit existing webhook")
 		}
@@ -235,7 +231,7 @@ func (router *Router) PostActivate() error {
 	}
 
 	router.hook = newHook
-	logger.WithField("hook-id", newHook.ID).Info("hook registered for the project")
+	logger.With("hook-id", newHook.ID).Info("hook registered for the project")
 	return nil
 }
 
@@ -245,32 +241,26 @@ func (router *Router) PostInactivate() error {
 	route := router.route
 
 	if gitlabEventSource.DeleteHookOnFinish {
-		logger := route.Logger.WithFields(map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			"project-id":                 gitlabEventSource.ProjectID,
-			"hook-id":                    router.hook.ID,
-		})
+		logger := route.Logger.With(
+			"project-id", gitlabEventSource.ProjectID,
+			"hook-id", router.hook.ID,
+		)
 
-		logger.Infoln("deleting project hook...")
+		logger.Info("deleting project hook...")
 		if _, err := router.gitlabClient.Projects.DeleteProjectHook(router.gitlabEventSource.ProjectID, router.hook.ID); err != nil {
 			return errors.Errorf("failed to delete hook. err: %+v", err)
 		}
 
-		logger.Infoln("gitlab hook deleted")
+		logger.Info("gitlab hook deleted")
 	}
 	return nil
 }
 
 // StartListening starts an event source
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	logger := logging.FromContext(ctx)
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Gitlab event source...")
+	logger := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	logger.Info("started processing the Gitlab event source...")
 
 	defer sources.Recover(el.GetEventName())
 

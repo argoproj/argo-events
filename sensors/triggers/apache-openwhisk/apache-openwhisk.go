@@ -21,7 +21,7 @@ import (
 
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
@@ -41,20 +41,17 @@ type TriggerImpl struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *logrus.Logger
+	Logger *zap.Logger
 }
 
 // NewTriggerImpl returns a new TriggerImpl
-func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, k8sCLient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) (*TriggerImpl, error) {
+func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, k8sCLient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*TriggerImpl, error) {
 	openwhisktrigger := trigger.Template.OpenWhisk
 
 	client, ok := openWhiskClients[trigger.Template.Name]
 	if !ok {
-		logger.WithFields(logrus.Fields{
-			"name":    trigger.Template.Name,
-			"trigger": *trigger.Template.OpenWhisk,
-		}).Debugln("OpenWhisk trigger value")
-		logger.WithField("trigger-name", trigger.Template.Name).Infoln("instantiating OpenWhisk client")
+		logger.Debug("OpenWhisk trigger value", zap.Any("name", trigger.Template.Name), zap.Any("trigger", *trigger.Template.OpenWhisk))
+		logger.Info("instantiating OpenWhisk client", zap.Any("trigger-name", trigger.Template.Name))
 
 		config, err := whisk.GetDefaultConfig()
 		if err != nil {
@@ -78,7 +75,7 @@ func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, k8sCLient kuberne
 			config.Version = openwhisktrigger.Version
 		}
 
-		logger.WithField("config", *config).Debugln("configuration for OpenWhisk client")
+		logger.Debug("configuration for OpenWhisk client", zap.Any("config", *config))
 
 		client, err = whisk.NewClient(http.DefaultClient, config)
 		if err != nil {
@@ -125,10 +122,7 @@ func (t *TriggerImpl) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 			return nil, errors.Wrap(err, "failed to unmarshal the updated OpenWhisk trigger resource after applying resource parameters")
 		}
 
-		t.Logger.WithFields(logrus.Fields{
-			"name":    t.Trigger.Template.Name,
-			"trigger": *openwhisktrigger,
-		}).Debugln("applied parameters to the OpenWhisk trigger")
+		t.Logger.Debug("applied parameters to the OpenWhisk trigger", zap.Any("name", t.Trigger.Template.Name), zap.Any("trigger", *openwhisktrigger))
 
 		return openwhisktrigger, nil
 	}
@@ -152,10 +146,7 @@ func (t *TriggerImpl) Execute(events map[string]*v1alpha1.Event, resource interf
 			return nil, err
 		}
 
-		t.Logger.WithFields(logrus.Fields{
-			"name":    t.Trigger.Template.Name,
-			"payload": string(payload),
-		}).Debugln("payload for the OpenWhisk action invocation")
+		t.Logger.Debug("payload for the OpenWhisk action invocation", zap.Any("name", t.Trigger.Template.Name), zap.Any("payload", string(payload)))
 	}
 
 	response, status, err := t.OpenWhiskClient.Actions.Invoke(openwhisktrigger.ActionName, payload, true, true)
@@ -163,10 +154,7 @@ func (t *TriggerImpl) Execute(events map[string]*v1alpha1.Event, resource interf
 		return nil, errors.Wrapf(err, "failed to invoke action %s", openwhisktrigger.ActionName)
 	}
 
-	t.Logger.WithFields(logrus.Fields{
-		"name":     t.Trigger.Template.Name,
-		"response": response,
-	}).Debugln("response for the OpenWhisk action invocation")
+	t.Logger.Debug("response for the OpenWhisk action invocation", zap.Any("name", t.Trigger.Template.Name), zap.Any("response", response))
 
 	return status, nil
 }

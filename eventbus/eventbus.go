@@ -6,6 +6,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -16,7 +17,7 @@ import (
 
 // GetDriver returns a Driver implementation
 func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID string) (driver.Driver, error) {
-	logger := logging.FromContext(ctx)
+	logger := logging.FromContext(ctx).Desugar()
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
 	if eventBusConfig.NATS != nil {
@@ -42,7 +43,7 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, s
 		}
 		err = v.Unmarshal(cred)
 		if err != nil {
-			logger.Errorf("failed to unmarshal auth.yaml, err: %v", err)
+			logger.Error("failed to unmarshal auth.yaml", zap.Error(err))
 			return nil, err
 		}
 		v.WatchConfig()
@@ -50,7 +51,7 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, s
 			logger.Info("eventbus auth config file changed.")
 			err = v.Unmarshal(cred)
 			if err != nil {
-				logger.Errorf("failed to unmarshal auth.yaml after reloading, err: %v", err)
+				logger.Error("failed to unmarshal auth.yaml after reloading", zap.Error(err))
 			}
 		})
 		auth = &driver.Auth{
@@ -62,7 +63,7 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, s
 	var dvr driver.Driver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
-		dvr = driver.NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, subject, clientID, auth, logger)
+		dvr = driver.NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, subject, clientID, auth, logger.Sugar())
 	default:
 		return nil, errors.New("invalid eventbus type")
 	}

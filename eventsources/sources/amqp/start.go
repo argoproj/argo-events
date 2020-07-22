@@ -22,6 +22,7 @@ import (
 
 	"github.com/pkg/errors"
 	amqplib "github.com/streadway/amqp"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -55,12 +56,10 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the AMQP event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+
+	log.Info("started processing the AMQP event source...")
 	defer sources.Recover(el.GetEventName())
 
 	amqpEventSource := &el.AMQPEventSource
@@ -88,27 +87,27 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to connect to amqp broker for the event source %s", el.GetEventName())
 	}
 
-	log.Infoln("opening the server channel...")
+	log.Info("opening the server channel...")
 	ch, err := conn.Channel()
 	if err != nil {
 		return errors.Wrapf(err, "failed to open the channel for the event source %s", el.GetEventName())
 	}
 
-	log.Infoln("setting up the delivery channel...")
+	log.Info("setting up the delivery channel...")
 	delivery, err := getDelivery(ch, amqpEventSource)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the delivery for the event source %s", el.GetEventName())
 	}
 
 	if amqpEventSource.JSONBody {
-		log.Infoln("assuming all events have a json body...")
+		log.Info("assuming all events have a json body...")
 	}
 
 	log.Info("listening to messages on channel...")
 	for {
 		select {
 		case msg := <-delivery:
-			log.WithField("message-id", msg.MessageId).Infoln("received the message")
+			log.Info("received the message", zap.Any("message-id", msg.MessageId))
 			body := &events.AMQPEventData{
 				ContentType:     msg.ContentType,
 				ContentEncoding: msg.ContentEncoding,
@@ -132,19 +131,19 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 			bodyBytes, err := json.Marshal(body)
 			if err != nil {
-				log.WithError(err).WithField("message-id", msg.MessageId).Errorln("failed to marshal the message")
+				log.Error("failed to marshal the message", zap.Any("message-id", msg.MessageId), zap.Error(err))
 				continue
 			}
 
-			log.Infoln("dispatching event ...")
+			log.Info("dispatching event ...")
 			err = dispatch(bodyBytes)
 			if err != nil {
-				log.WithError(err).Errorln("failed to dispatch event")
+				log.Error("failed to dispatch AMQP event", zap.Error(err))
 			}
 		case <-ctx.Done():
 			err = conn.Close()
 			if err != nil {
-				log.WithError(err).Info("failed to close connection")
+				log.Error("failed to close connection", zap.Error(err))
 			}
 			return nil
 		}

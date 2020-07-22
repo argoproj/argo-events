@@ -23,6 +23,7 @@ import (
 
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -56,22 +57,19 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Azure Events Hub event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+	log.Info("started processing the Azure Events Hub event source...")
 	defer sources.Recover(el.GetEventName())
 
 	hubEventSource := &el.AzureEventsHubEventSource
-	log.Infoln("retrieving the shared access key name...")
+	log.Info("retrieving the shared access key name...")
 	sharedAccessKeyName, ok := common.GetEnvFromSecret(hubEventSource.SharedAccessKeyName)
 	if !ok {
 		return errors.Errorf("failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
 	}
 
-	log.Infoln("retrieving the shared access key...")
+	log.Info("retrieving the shared access key...")
 	sharedAccessKey, ok := common.GetEnvFromSecret(hubEventSource.SharedAccessKey)
 	if !ok {
 		return errors.Errorf("failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
@@ -79,7 +77,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	endpoint := fmt.Sprintf("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", hubEventSource.FQDN, sharedAccessKeyName, sharedAccessKey, hubEventSource.HubName)
 
-	log.Infoln("connecting to the hub...")
+	log.Info("connecting to the hub...")
 	hub, err := eventhub.NewHubFromConnectionString(endpoint)
 	if err != nil {
 		return errors.Wrapf(err, "failed to connect to the hub %s", hubEventSource.HubName)
@@ -99,14 +97,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		err = dispatch(eventBytes)
 		if err != nil {
-			log.WithError(err).Errorln("failed to dispatch event")
+			log.Error("failed to dispatch Azure EventHub event", zap.Error(err))
 			return err
 		}
 		return nil
 	}
 
 	// listen to each partition of the Event Hub
-	log.Infoln("gathering the hub runtime information...")
+	log.Info("gathering the hub runtime information...")
 	runtimeInfo, err := hub.GetRuntimeInformation(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the hub runtime information for %s", el.GetEventName())
@@ -114,7 +112,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var listenerHandles []*eventhub.ListenerHandle
 
-	log.Infoln("handling the partitions...")
+	log.Info("handling the partitions...")
 	for _, partitionID := range runtimeInfo.PartitionIDs {
 		listenerHandle, err := hub.Receive(ctx, partitionID, handler, eventhub.ReceiveWithLatestOffset())
 		if err != nil {
@@ -124,7 +122,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	<-ctx.Done()
-	log.Infoln("stopping listener handlers")
+	log.Info("stopping listener handlers")
 
 	for _, handler := range listenerHandles {
 		handler.Close(ctx)

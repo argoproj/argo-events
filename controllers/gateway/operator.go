@@ -23,7 +23,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclient "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -36,7 +36,7 @@ type gatewayContext struct {
 	// updated indicates whether the controller object was updated and needs to be persisted back to k8
 	updated bool
 	// logger is the logger for a gateway
-	logger *logrus.Logger
+	logger *zap.Logger
 	// reference to the controller
 	controller *Controller
 }
@@ -47,11 +47,8 @@ func newGatewayContext(gatewayObj *v1alpha1.Gateway, controller *Controller) *ga
 	return &gatewayContext{
 		gateway: gatewayObj,
 		updated: false,
-		logger: logging.NewArgoEventsLogger().WithFields(
-			map[string]interface{}{
-				common.LabelResourceName: gatewayObj.Name,
-				logging.LabelNamespace:   gatewayObj.Namespace,
-			}).Logger,
+		logger: logging.NewArgoEventsLogger().With(
+			common.LabelResourceName, gatewayObj.Name).With(logging.LabelNamespace, gatewayObj.Namespace).Desugar(),
 		controller: controller,
 	}
 }
@@ -60,10 +57,10 @@ func newGatewayContext(gatewayObj *v1alpha1.Gateway, controller *Controller) *ga
 func (ctx *gatewayContext) operate() error {
 	defer ctx.updateGatewayState()
 
-	ctx.logger.WithField(logging.LabelPhase, string(ctx.gateway.Status.Phase)).Infoln("operating on the gateway...")
+	ctx.logger.Info("operating on the gateway...", zap.Any(logging.LabelPhase, string(ctx.gateway.Status.Phase)))
 
 	if err := Validate(ctx.gateway); err != nil {
-		ctx.logger.WithError(err).Infoln("invalid gateway object")
+		ctx.logger.Info("invalid gateway object", zap.Error(err))
 		return err
 	}
 
@@ -71,33 +68,33 @@ func (ctx *gatewayContext) operate() error {
 	switch ctx.gateway.Status.Phase {
 	case v1alpha1.NodePhaseNew:
 		if err := ctx.createGatewayResources(); err != nil {
-			ctx.logger.WithError(err).Errorln("failed to create resources for the gateway")
+			ctx.logger.Error("failed to create resources for the gateway", zap.Error(err))
 			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
-		ctx.logger.Infoln("marking gateway as active")
+		ctx.logger.Info("marking gateway as active")
 		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
 	case v1alpha1.NodePhaseRunning:
-		ctx.logger.Infoln("gateway is running")
+		ctx.logger.Info("gateway is running")
 		err := ctx.updateGatewayResources()
 		if err != nil {
-			ctx.logger.WithError(err).Errorln("failed to update resources for the gateway")
+			ctx.logger.Error("failed to update resources for the gateway", zap.Error(err))
 			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
 
 	case v1alpha1.NodePhaseError:
-		ctx.logger.Errorln("gateway is in error state. checking updates for gateway object...")
+		ctx.logger.Error("gateway is in error state. checking updates for gateway object...")
 		err := ctx.updateGatewayResources()
 		if err != nil {
-			ctx.logger.WithError(err).Errorln("failed to update resources for the gateway")
+			ctx.logger.Error("failed to update resources for the gateway", zap.Error(err))
 			return err
 		}
 		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")
 
 	default:
-		ctx.logger.WithField(logging.LabelPhase, string(ctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
+		ctx.logger.Error("unknown gateway phase", zap.Any(logging.LabelPhase, string(ctx.gateway.Status.Phase)))
 	}
 	return nil
 }
@@ -110,11 +107,11 @@ func (ctx *gatewayContext) updateGatewayState() {
 	if ctx.updated {
 		updatedGateway, err := PersistUpdates(ctx.controller.gatewayClient, ctx.gateway, ctx.logger)
 		if err != nil {
-			ctx.logger.WithError(err).Errorln("failed to persist gateway update")
+			ctx.logger.Error("failed to persist gateway update", zap.Error(err))
 			return
 		}
 		ctx.gateway = updatedGateway
-		ctx.logger.Infoln("successfully persisted gateway resource update and created K8s event")
+		ctx.logger.Info("successfully persisted gateway resource update and created K8s event")
 	}
 }
 
@@ -122,12 +119,7 @@ func (ctx *gatewayContext) updateGatewayState() {
 func (ctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
 	justCompleted := ctx.gateway.Status.Phase != phase
 	if justCompleted {
-		ctx.logger.WithFields(
-			map[string]interface{}{
-				"old": string(ctx.gateway.Status.Phase),
-				"new": string(phase),
-			},
-		).Infoln("phase changed")
+		ctx.logger.Info("phase changed", zap.Any("old", string(ctx.gateway.Status.Phase)), zap.Any("new", string(phase)))
 
 		ctx.gateway.Status.Phase = phase
 		if ctx.gateway.ObjectMeta.Labels == nil {
@@ -146,19 +138,14 @@ func (ctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message st
 		ctx.gateway.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
 	}
 
-	ctx.logger.WithFields(
-		map[string]interface{}{
-			"old": ctx.gateway.Status.Message,
-			"new": message,
-		},
-	).Infoln("phase change message")
+	ctx.logger.Info("phase change message", zap.Any("old", ctx.gateway.Status.Message), zap.Any("new", message))
 
 	ctx.gateway.Status.Message = message
 	ctx.updated = true
 }
 
 // PersistUpdates persists the updates for the gateway object.
-func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *logrus.Logger) (*v1alpha1.Gateway, error) {
+func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *zap.Logger) (*v1alpha1.Gateway, error) {
 	gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.ObjectMeta.Namespace)
 
 	obj, err := gatewayClient.Get(gw.Name, metav1.GetOptions{})
@@ -179,7 +166,7 @@ func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *logrus
 		obj = g.DeepCopy()
 		return true, nil
 	}); err != nil {
-		log.WithError(err).Warn("error updating the gateway")
+		log.Warn("error updating the gateway", zap.Error(err))
 		return nil, err
 	}
 	return obj, nil

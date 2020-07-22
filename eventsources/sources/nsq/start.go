@@ -29,7 +29,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/nsqio/go-nsq"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for the NSQ event source
@@ -56,24 +56,21 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 type messageHandler struct {
 	dispatch func([]byte) error
-	logger   *logrus.Entry
+	logger   *zap.SugaredLogger
 	isJSON   bool
 }
 
 // StartListening listens NSQ events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the NSQ event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	log.Info("started processing the NSQ event source...")
 	defer sources.Recover(el.GetEventName())
 
 	nsqEventSource := &el.NSQEventSource
 
 	// Instantiate a consumer that will subscribe to the provided channel.
-	log.Infoln("creating a NSQ consumer")
+	log.Info("creating a NSQ consumer")
 	var consumer *nsq.Consumer
 	config := nsq.NewConfig()
 
@@ -97,7 +94,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if nsqEventSource.JSONBody {
-		log.Infoln("assuming all events have a json body...")
+		log.Info("assuming all events have a json body...")
 	}
 
 	consumer.AddHandler(&messageHandler{dispatch: dispatch, logger: log, isJSON: nsqEventSource.JSONBody})
@@ -108,14 +105,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	<-ctx.Done()
-	log.Infoln("event source has stopped")
+	log.Info("event source has stopped")
 	consumer.Stop()
 	return nil
 }
 
 // HandleMessage implements the Handler interface.
 func (h *messageHandler) HandleMessage(m *nsq.Message) error {
-	h.logger.Infoln("received a message")
+	h.logger.Info("received a message")
 
 	eventData := &events.NSQEventData{
 		Body:        m.Body,
@@ -128,11 +125,11 @@ func (h *messageHandler) HandleMessage(m *nsq.Message) error {
 
 	eventBody, err := json.Marshal(eventData)
 	if err != nil {
-		h.logger.WithError(err).Errorln("failed to marshal the event data. rejecting the event...")
+		h.logger.Error("failed to marshal the event data. rejecting the event...", zap.Error(err))
 		return err
 	}
 
-	h.logger.Infoln("dispatching the event on the data channel...")
+	h.logger.Info("dispatching the event on the data channel...")
 	err = h.dispatch(eventBody)
 	if err != nil {
 		return err

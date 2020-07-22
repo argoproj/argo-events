@@ -23,6 +23,7 @@ import (
 
 	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -55,21 +56,18 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the calendar event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+	log.Info("started processing the calendar event source...")
 
 	calendarEventSource := &el.CalendarEventSource
-	log.Infoln("resolving calendar schedule...")
+	log.Info("resolving calendar schedule...")
 	schedule, err := resolveSchedule(calendarEventSource)
 	if err != nil {
 		return err
 	}
 
-	log.Infoln("parsing exclusion dates if any...")
+	log.Info("parsing exclusion dates if any...")
 	exDates, err := common.ParseExclusionDates(calendarEventSource.ExclusionDates)
 	if err != nil {
 		return err
@@ -93,7 +91,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	lastT := time.Now()
 	var location *time.Location
 	if calendarEventSource.Timezone != "" {
-		log.WithField("location", calendarEventSource.Timezone).Infoln("loading location for the schedule...")
+		log.Info("loading location for the schedule...", zap.Any("location", calendarEventSource.Timezone))
 		location, err = time.LoadLocation(calendarEventSource.Timezone)
 		if err != nil {
 			return errors.Wrapf(err, "failed to load location for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
@@ -104,7 +102,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		log.WithField(logging.LabelTime, t.UTC().String()).Info("expected next calendar event")
+		log.Info("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
 		select {
 		case tx := <-timer:
 			lastT = tx
@@ -117,14 +115,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			payload, err := json.Marshal(response)
 			if err != nil {
-				log.WithError(err).Errorln("failed to marshal the event data")
+				log.Error("failed to marshal the event data", zap.Error(err))
 				// no need to continue as further event payloads will suffer same fate as this one.
 				return errors.Wrapf(err, "failed to marshal the event data for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
 			}
-			log.Infoln("dispatching calendar event...")
+			log.Info("dispatching calendar event...")
 			err = dispatch(payload)
 			if err != nil {
-				log.WithError(err).Errorln("failed to dispatch event")
+				log.Error("failed to dispatch calendar event", zap.Error(err))
 			}
 		case <-ctx.Done():
 			log.Info("exiting calendar event listener...")

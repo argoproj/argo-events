@@ -57,7 +57,7 @@ var sensorObj = &v1alpha1.Sensor{
 }
 
 func getFakeKafkaTrigger(producers map[string]sarama.AsyncProducer) (*KafkaTrigger, error) {
-	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
+	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger().Desugar())
 }
 
 func TestKafkaTrigger_FetchResource(t *testing.T) {

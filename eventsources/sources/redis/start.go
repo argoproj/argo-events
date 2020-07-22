@@ -28,6 +28,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/go-redis/redis"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for the Redis event source
@@ -54,12 +55,9 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening listens events published by redis
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Redis event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	log.Info("started processing the Redis event source...")
 	defer sources.Recover(el.GetEventName())
 
 	redisEventSource := &el.RedisEventSource
@@ -69,7 +67,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		DB:   int(redisEventSource.DB),
 	}
 
-	log.Infoln("retrieving password if it has been configured...")
+	log.Info("retrieving password if it has been configured...")
 	if redisEventSource.Password != nil {
 		password, ok := common.GetEnvFromSecret(redisEventSource.Password)
 		if !ok {
@@ -86,7 +84,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		opt.TLSConfig = tlsConfig
 	}
 
-	log.Infoln("setting up a redis client...")
+	log.Info("setting up a redis client...")
 	client := redis.NewClient(opt)
 
 	if status := client.Ping(); status.Err() != nil {
@@ -101,11 +99,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	// Go channel which receives messages.
 	ch := pubsub.Channel()
-
 	for {
 		select {
 		case message := <-ch:
-			log.WithField("channel", message.Channel).Infoln("received a message")
+			log.With("channel", message.Channel).Info("received a message")
 			eventData := &events.RedisEventData{
 				Channel: message.Channel,
 				Pattern: message.Pattern,
@@ -113,18 +110,18 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			eventBody, err := json.Marshal(&eventData)
 			if err != nil {
-				log.WithError(err).WithField("channel", message.Channel).Errorln("failed to marshal the event data, rejecting the event...")
+				log.With("channel", message.Channel).Desugar().Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
 				continue
 			}
-			log.WithField("channel", message.Channel).Infoln("dispatching th event on the data channel...")
+			log.With("channel", message.Channel).Info("dispatching th event on the data channel...")
 			err = dispatch(eventBody)
 			if err != nil {
-				log.WithError(err).Errorln("failed to dispatch event")
+				log.With("channel", message.Channel).Desugar().Error("failed to dispatch redis event", zap.Error(err))
 			}
 		case <-ctx.Done():
-			log.Infoln("event source is stopped. unsubscribing the subscription")
+			log.Info("event source is stopped. unsubscribing the subscription")
 			if err := pubsub.Unsubscribe(redisEventSource.Channels...); err != nil {
-				log.WithError(err).Errorln("failed to unsubscribe")
+				log.Desugar().Error("failed to unsubscribe", zap.Error(err))
 			}
 			return nil
 		}

@@ -19,7 +19,6 @@ package storagegrid
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -29,6 +28,8 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -122,27 +123,24 @@ func (router *Router) GetRoute() *webhook.Route {
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.route
 
-	logger := route.Logger.WithFields(
-		map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelHTTPMethod:      route.Context.Method,
-		})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+	).Desugar()
 
-	logger.Infoln("processing incoming request...")
+	logger.Info("processing incoming request...")
 
 	if !route.Active {
-		logger.Warnln("endpoint is inactive, won't process the request")
+		logger.Warn("endpoint is inactive, won't process the request")
 		common.SendErrorResponse(writer, "inactive endpoint")
 		return
 	}
 
-	logger.Infoln("parsing the request body...")
+	logger.Info("parsing the request body...")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.WithError(err).Errorln("failed to parse request body")
+		logger.Error("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, "")
 		return
 	}
@@ -154,37 +152,37 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Add("Content-Type", "text/plain")
 	if _, err := writer.Write([]byte(respBody)); err != nil {
-		logger.WithError(err).Errorln("failed to write the response")
+		logger.Error("failed to write the response", zap.Error(err))
 		return
 	}
 
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))
 	if err != nil {
-		logger.WithError(err).Errorln("failed to unescape request body url")
+		logger.Error("failed to unescape request body url", zap.Error(err))
 		return
 	}
 	b, err := qson.ToJSON(parsedURL)
 	if err != nil {
-		logger.WithError(err).Errorln("failed to convert request body in JSON format")
+		logger.Error("failed to convert request body in JSON format", zap.Error(err))
 		return
 	}
 
-	logger.Infoln("converting request body to storage grid notification")
+	logger.Info("converting request body to storage grid notification")
 	var notification *storageGridNotification
 	err = json.Unmarshal(b, &notification)
 	if err != nil {
-		logger.WithError(err).Errorln("failed to convert the request body into storage grid notification")
+		logger.Error("failed to convert the request body into storage grid notification", zap.Error(err))
 		return
 	}
 
 	if filterName(notification, router.storageGridEventSource) {
-		logger.WithError(err).Errorln("new event received, dispatching event on route's data channel")
+		logger.Error("new event received, dispatching event on route's data channel", zap.Error(err))
 		route.DataCh <- b
 		return
 	}
 
-	logger.Warnln("discarding notification since it did not pass all filters")
+	logger.Warn("discarding notification since it did not pass all filters")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -201,16 +199,14 @@ func (router *Router) PostActivate() error {
 
 	client := resty.New()
 
-	logger := route.Logger.WithFields(
-		map[string]interface{}{
-			common.LabelEventSource: route.EventName,
-			"registration-url":      registrationURL,
-			"bucket":                eventSource.Bucket,
-			"auth-secret-name":      eventSource.AuthToken.Name,
-			"api-url":               eventSource.APIURL,
-		})
+	logger := route.Logger.With(
+		"registration-url", registrationURL,
+		"bucket", eventSource.Bucket,
+		"auth-secret-name", eventSource.AuthToken.Name,
+		"api-url", eventSource.APIURL,
+	)
 
-	logger.Infoln("checking if the endpoint already exists...")
+	logger.Info("checking if the endpoint already exists...")
 
 	response, err := client.R().
 		SetHeader("Content-Type", common.MediaTypeJSON).
@@ -233,14 +229,14 @@ func (router *Router) PostActivate() error {
 
 	for _, endpoint := range endpointResponse.Data {
 		if endpoint.EndpointURN == eventSource.TopicArn {
-			logger.Infoln("endpoint with topic urn already exists, won't register duplicate endpoint")
+			logger.Info("endpoint with topic urn already exists, won't register duplicate endpoint")
 			isURNExists = true
 			break
 		}
 	}
 
 	if !isURNExists {
-		logger.Infoln("endpoint urn does not exist, registering a new endpoint")
+		logger.Info("endpoint urn does not exist, registering a new endpoint")
 		newEndpoint := createEndpointRequest{
 			DisplayName: router.route.EventName,
 			EndpointURI: common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint),
@@ -270,10 +266,10 @@ func (router *Router) PostActivate() error {
 			return fmt.Errorf("failed to register the endpoint. reason: %s", errObj.Message.Text)
 		}
 
-		logger.Infoln("successfully registered the endpoint")
+		logger.Info("successfully registered the endpoint")
 	}
 
-	logger.Infoln("registering notification configuration on storagegrid...")
+	logger.Info("registering notification configuration on storagegrid...")
 
 	var events []string
 	for _, event := range eventSource.Events {
@@ -306,10 +302,10 @@ func (router *Router) PostActivate() error {
 
 	if !response.IsSuccess() {
 		errObj := response.Error().(*genericResponse)
-		return fmt.Errorf("failed to configure notification. reason %s\n", errObj.Message.Text)
+		return errors.Errorf("failed to configure notification. reason %s", errObj.Message.Text)
 	}
 
-	logger.Infoln("successfully registered notification configuration on storagegrid")
+	logger.Info("successfully registered notification configuration on storagegrid")
 	return nil
 }
 
@@ -320,17 +316,13 @@ func (router *Router) PostInactivate() error {
 
 // StartListening starts an event source
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	logger := logging.FromContext(ctx)
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Storage Grid event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	log.Info("started processing the Storage Grid event source...")
 	defer sources.Recover(el.GetEventName())
 
 	storagegridEventSource := &el.StorageGridEventSource
-	route := webhook.NewRoute(storagegridEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(storagegridEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName())
 
 	return webhook.ManageRoute(ctx, &Router{
 		route:                  route,

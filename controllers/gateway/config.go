@@ -21,6 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -31,7 +32,7 @@ import (
 
 // watches configuration for gateway controller
 func (c *Controller) watchControllerConfigMap() cache.Controller {
-	c.logger.Infoln("watching gateway-controller config map updates")
+	c.logger.Info("watching gateway-controller config map updates")
 	source := c.newControllerConfigMapWatch()
 	_, controller := cache.NewInformer(
 		source,
@@ -43,16 +44,16 @@ func (c *Controller) watchControllerConfigMap() cache.Controller {
 					c.logger.Info("detected new gateway controller configmap")
 					err := c.updateConfig(cm)
 					if err != nil {
-						c.logger.WithError(err).Errorln("update of gateway controller configuration failed")
+						c.logger.Error("update of gateway controller configuration failed", zap.Error(err))
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*apiv1.ConfigMap); ok {
-					c.logger.Infoln("detected gateway controller configmap update.")
+					c.logger.Info("detected gateway controller configmap update.")
 					err := c.updateConfig(newCm)
 					if err != nil {
-						c.logger.WithError(err).Errorln("update of gateway controller configuration failed")
+						c.logger.Error("update of gateway controller configuration failed", zap.Error(err))
 					}
 				}
 			},

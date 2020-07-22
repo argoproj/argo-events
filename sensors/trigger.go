@@ -28,6 +28,7 @@ import (
 	"github.com/argoproj/argo-events/sensors/triggers/nats"
 	"github.com/argoproj/argo-events/sensors/triggers/slack"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
+	"go.uber.org/zap"
 )
 
 // Trigger interface
@@ -44,7 +45,7 @@ type Trigger interface {
 
 // GetTrigger returns a trigger
 func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha1.Trigger) Trigger {
-	log := logging.FromContext(ctx)
+	log := logging.FromContext(ctx).Desugar()
 	if trigger.Template.K8s != nil {
 		return standardk8s.NewStandardK8sTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, log)
 	}
@@ -56,7 +57,7 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	if trigger.Template.HTTP != nil {
 		result, err := http.NewHTTPTrigger(sensorCtx.httpClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, log)
 		if err != nil {
-			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.Error("failed to invoke the trigger", zap.Any("trigger", trigger.Template.Name), zap.Error(err))
 			return nil
 		}
 		return result
@@ -65,7 +66,7 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	if trigger.Template.AWSLambda != nil {
 		result, err := awslambda.NewAWSLambdaTrigger(sensorCtx.awsLambdaClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, log)
 		if err != nil {
-			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.Error("failed to invoke the trigger", zap.Any("trigger", trigger.Template.Name), zap.Error(err))
 			return nil
 		}
 		return result
@@ -74,7 +75,7 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	if trigger.Template.Kafka != nil {
 		result, err := kafka.NewKafkaTrigger(sensorCtx.Sensor, trigger, sensorCtx.kafkaProducers, log)
 		if err != nil {
-			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.Error("failed to invoke the trigger", zap.Any("trigger", trigger.Template.Name), zap.Error(err))
 			return nil
 		}
 		return result
@@ -83,7 +84,7 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	if trigger.Template.NATS != nil {
 		result, err := nats.NewNATSTrigger(sensorCtx.Sensor, trigger, sensorCtx.natsConnections, log)
 		if err != nil {
-			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.Error("failed to invoke the trigger", zap.Any("trigger", trigger.Template.Name), zap.Error(err))
 			return nil
 		}
 		return result
@@ -92,7 +93,7 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	if trigger.Template.Slack != nil {
 		result, err := slack.NewSlackTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, log, sensorCtx.slackHTTPClient)
 		if err != nil {
-			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.Error("failed to invoke the trigger", zap.Any("trigger", trigger.Template.Name), zap.Error(err))
 			return nil
 		}
 		return result
@@ -101,7 +102,7 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	if trigger.Template.CustomTrigger != nil {
 		result, err := customtrigger.NewCustomTrigger(sensorCtx.Sensor, trigger, log, sensorCtx.customTriggerClients)
 		if err != nil {
-			log.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			log.Error("failed to invoke the trigger", zap.Any("trigger", trigger.Template.Name), zap.Error(err))
 			return nil
 		}
 		return result
