@@ -3,6 +3,7 @@ package eventbus
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -13,8 +14,6 @@ import (
 
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-
-	"github.com/go-logr/logr"
 )
 
 const (
@@ -30,11 +29,11 @@ type reconciler struct {
 
 	natsStreamingImage string
 	natsMetricsImage   string
-	logger             logr.Logger
+	logger             *zap.SugaredLogger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage, natsMetricsImage string, logger logr.Logger) reconcile.Reconciler {
+func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, natsMetricsImage: natsMetricsImage, logger: logger}
 }
 
@@ -46,14 +45,14 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.logger.Info("WARNING: eventbus not found", "request", req)
 			return reconcile.Result{}, nil
 		}
-		r.logger.Error(err, "unable to get eventbus ctl", "request", req)
+		r.logger.Errorw("unable to get eventbus ctl", "request", req, "error", err)
 		return ctrl.Result{}, err
 	}
-	log := r.logger.WithValues("namespace", eventBus.Namespace).WithValues("eventbus", eventBus.Name)
+	log := r.logger.With("namespace", eventBus.Namespace).With("eventbus", eventBus.Name)
 	busCopy := eventBus.DeepCopy()
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "reconcile error")
+		log.Desugar().Error("reconcile error", zap.Error(reconcileErr))
 	}
 	if r.needsUpdate(eventBus, busCopy) {
 		if err := r.client.Update(ctx, busCopy); err != nil {
@@ -65,7 +64,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
-	log := r.logger.WithValues("namespace", eventBus.Namespace).WithValues("eventbus", eventBus.Name)
+	log := r.logger.With("namespace", eventBus.Namespace).With("eventbus", eventBus.Name)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
 		// Finalizer logic should be added here.

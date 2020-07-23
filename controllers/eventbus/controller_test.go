@@ -10,9 +10,9 @@ import (
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
@@ -82,7 +82,7 @@ func TestReconcileNative(t *testing.T) {
 			client:             cl,
 			scheme:             scheme.Scheme,
 			natsStreamingImage: testStreamingImage,
-			logger:             ctrl.Log.WithName("test"),
+			logger:             logging.NewArgoEventsLogger(),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -102,7 +102,7 @@ func TestReconcileExotic(t *testing.T) {
 			client:             cl,
 			scheme:             scheme.Scheme,
 			natsStreamingImage: testStreamingImage,
-			logger:             ctrl.Log.WithName("test"),
+			logger:             logging.NewArgoEventsLogger(),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -119,7 +119,7 @@ func TestNeedsUpdate(t *testing.T) {
 			client:             cl,
 			scheme:             scheme.Scheme,
 			natsStreamingImage: testStreamingImage,
-			logger:             ctrl.Log.WithName("test"),
+			logger:             logging.NewArgoEventsLogger(),
 		}
 		assert.False(t, r.needsUpdate(nativeBus, testBus))
 		r.addFinalizer(testBus)
