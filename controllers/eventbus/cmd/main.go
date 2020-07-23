@@ -52,7 +52,7 @@ func main() {
 	}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), opts)
 	if err != nil {
-		panic(err)
+		logger.Desugar().Fatal("unable to get a controller-runtime manager", zap.Error(err))
 	}
 	err = v1alpha1.AddToScheme(mgr.GetScheme())
 	if err != nil {
