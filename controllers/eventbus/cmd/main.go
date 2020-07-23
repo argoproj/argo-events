@@ -24,8 +24,6 @@ const (
 )
 
 var (
-	log = ctrl.Log.WithName(eventbus.ControllerName)
-
 	namespaced       bool
 	managedNamespace string
 )

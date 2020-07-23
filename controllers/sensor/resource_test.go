@@ -82,9 +82,9 @@ var (
 			},
 			Dependencies: []v1alpha1.EventDependency{
 				{
-					Name:        "fake-dep",
-					GatewayName: "fake-gateway",
-					EventName:   "fake-one",
+					Name:            "fake-dep",
+					EventSourceName: "fake-source",
+					EventName:       "fake-one",
 				},
 			},
 		},
@@ -114,9 +114,9 @@ var (
 			},
 			Dependencies: []v1alpha1.EventDependency{
 				{
-					Name:        "fake-dep",
-					GatewayName: "fake-gateway",
-					EventName:   "fake-one",
+					Name:            "fake-dep",
+					EventSourceName: "fake-source",
+					EventName:       "fake-one",
 				},
 			},
 		},

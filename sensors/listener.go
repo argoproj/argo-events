@@ -82,13 +82,9 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 					logger.Sugar().Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
 					return
 				}
-				esName := dep.EventSourceName
-				if esName == "" {
-					esName = dep.GatewayName
-				}
 				d := eventbusdriver.Dependency{
 					Name:            dep.Name,
-					EventSourceName: esName,
+					EventSourceName: dep.EventSourceName,
 					EventName:       dep.EventName,
 				}
 				deps = append(deps, d)

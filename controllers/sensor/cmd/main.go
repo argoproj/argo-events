@@ -40,8 +40,6 @@ const (
 )
 
 var (
-	log = ctrl.Log.WithName(sensor.ControllerName)
-
 	namespace        string
 	namespaced       bool
 	managedNamespace string
