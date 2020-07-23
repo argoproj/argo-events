@@ -21,13 +21,11 @@ nav:
   - 'installation.md'
   - 'quick_start.md'
   - Concepts:
-      - 'concepts/gateway.md'
-      - 'concepts/sensor.md'
-      - 'concepts/event_source.md'
-      - 'concepts/trigger.md'
       - 'concepts/architecture.md'
-  - Demo:
-      - 'demo/notebooks.md'
+      - 'concepts/event_source.md'
+      - 'concepts/sensor.md'
+      - 'concepts/eventbus.md'
+      - 'concepts/trigger.md'
   - Setup:
       - 'setup/amqp.md'
       - 'setup/aws-sns.md'
@@ -51,11 +49,10 @@ nav:
       - 'tutorials/02-parameterization.md'
       - 'tutorials/03-trigger-sources.md'
       - 'tutorials/04-standard-k8s-resources.md'
-      - 'tutorials/05-trigger-custom-resources.md'
       - 'tutorials/06-circuit-and-switch.md'
       - 'tutorials/07-filters.md'
       - 'tutorials/08-policy.md'
-      - 'tutorials/09-events-over-nats.md'
+      - 'tutorials/09-service-account.md'
   - Triggers:
       - 'triggers/argo-workflow.md'
       - 'triggers/aws-lambda.md'
@@ -67,7 +64,6 @@ nav:
       - 'triggers/slack-trigger.md'
       - 'triggers/build-your-own-trigger.md'
   - 'developer_guide.md'
-  - 'controllers.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones

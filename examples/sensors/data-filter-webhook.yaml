@@ -7,7 +7,7 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook
+      eventSourceName: webhook
       eventName: example
       filters:
         name: data-filter
@@ -17,9 +17,6 @@ spec:
             value:
               - argo-workflow-input
               - argo-workflow-input1
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         name: data-workflow

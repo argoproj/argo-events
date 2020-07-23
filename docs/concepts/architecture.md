@@ -1,18 +1,18 @@
 # Architecture
 
+<br/>
+
+![architecture](../assets/argo-events-architecture.png)
+
+<br/>
+
+
 Main components of Argo Events are:
 
-1. [Gateway](https://argoproj.github.io/argo-events/concepts/gateway/)
-2. [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/)
-3. [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/)
-4. [Trigger](https://argoproj.github.io/argo-events/concepts/trigger/)
+1. [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/)
 
-<br/>
-<br/>
+1. [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/)
 
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/high-level-architecture.png?raw=true" alt="High Level Architecture"/>
-</p>
+1. [Eventbus](https://argoproj.github.io/argo-events/concepts/eventbus/)
 
-<br/>
-
+1. [Trigger](https://argoproj.github.io/argo-events/concepts/trigger/)

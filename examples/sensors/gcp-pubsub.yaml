@@ -5,12 +5,9 @@ metadata:
 spec:
   template:
     serviceAccountName: argo-events-sa
-  subscription:
-    http:
-      port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: gcp-pubsub
+      eventSourceName: gcp-pubsub
       eventName: example
   triggers:
     - template:

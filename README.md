@@ -10,7 +10,6 @@
 **Argo Events** is an event-driven workflow automation framework for Kubernetes 
 which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. 
 on events from variety of sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
-https://argoproj.github.io/argo-events/
 
 <br/>
 <br/>
@@ -31,12 +30,10 @@ https://argoproj.github.io/argo-events/
 ## Getting Started
 Follow these [instruction](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
 
-[![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
-
 ## Documentation
 - [Concepts](https://argoproj.github.io/argo-events/concepts/architecture/).
 - [Argo Events in action](https://argoproj.github.io/argo-events/quick_start/).
-- [Deploy gateways and sensors](https://argoproj.github.io/argo-events/setup/webhook/).
+- [Deploy event-sources and sensors](https://argoproj.github.io/argo-events/setup/webhook/).
 - [Deep dive into Argo Events](https://argoproj.github.io/argo-events/tutorials/01-introduction/).  
 
 ## Triggers
@@ -51,7 +48,6 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 1. Argo Rollouts
 1. Custom Trigger / Build Your Own Trigger
 1. Apache OpenWhisk
-
 
 ## Event Sources
 

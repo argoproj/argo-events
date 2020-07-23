@@ -1,30 +1,20 @@
 # GitHub
 
-GitHub gateway programatically configures webhooks for projects on GitHub and helps sensor trigger the workloads upon events.
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/github-setup.png?raw=true" alt="GitHub Setup"/>
-</p>
-
-<br/>
-<br/>
+GitHub event-source programmatically configures webhooks for projects on GitHub and helps sensor trigger the workloads on events.
 
 ## Event Structure
 
-The structure of an event dispatched by the gateway to the sensor looks like following,
+The structure of an event dispatched by the event-source over the eventbus looks like following,
 
             {
                 "context": {
-                  "type": "type_of_gateway",
+                  "type": "type_of_event_source",
                   "specVersion": "cloud_events_version",
-                  "source": "name_of_the_gateway",
+                  "source": "name_of_the_event_source",
                   "eventID": "unique_event_id",
                   "time": "event_time",
                   "dataContentType": "type_of_data",
-                  "subject": "name_of_the_event_within_event_source"
+                  "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
                   	"body": "Body is the github event data",
@@ -32,18 +22,20 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
                 }
             }
 
-<br/>
+## Specification
+
+GitHub event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#githubeventsource).
 
 ## Setup
 
 1. Create an API token if you don't have one. Follow [instructions](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) to create a new GitHub API Token.
    Grant it the `repo_hook` permissions. 
 
-2. Base64 encode your api token key,
+1. Base64 encode your api token key,
 
         echo -n <api-token-key> | base64
 
-3. Create a secret called `github-access`.
+1. Create a secret called `github-access`.
 
         apiVersion: v1
         kind: Secret
@@ -53,37 +45,29 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
         data:
           token: <base64-encoded-api-token-from-previous-step>
 
-4. Deploy the secret into K8s cluster
+1. Deploy the secret into K8s cluster
 
         kubectl -n argo-events apply -f github-access.yaml
 
-5. Create the gateway by running the following command,
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/github.yaml
-
-6. Wait for gateway pod to get into the running state.
-
-7. Create an Ingress or Openshift Route for the gateway service to that it can be reached from GitHub.
+1. The event-source for GitHub creates a pod and exposes it via service.
+   The name for the service is in `<event-source-name>-eventsource-svc` format.
+   You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from GitHub.
    You can find more information on Ingress or Route online.
 
-8. Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/github.yaml
-
-9. Change the `url` under `webhook` to your gateway service url created in a previous step. Make sure this url is reachable from GitHub.
-
-8. Create the event source by running the following command.
+1. Create the event source by running the following command. Make sure to replace the `url` field.
    
         kubectl apply -n argo-events -f <event-source-file-updated-in-previous-step>
 
-11. Go to `Webhooks` under your project settings on GitHub and verify the webhook is registered. You can also do the same by
-    looking at the gateway pod logs.
-    
-12. Create the sensor by running the following command,
+1. Go to `Webhooks` under your project settings on GitHub and verify the webhook is registered. You can also do the same by
+    looking at the event-source pod logs.
+
+1. Create the sensor by running the following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
 
-13. Make a change to one of your project files and commit. It will trigger an argo workflow.
+1. Make a change to one of your project files and commit. It will trigger an argo workflow.
 
-14. Run `argo list` to find the workflow. 
+1. Run `argo list` to find the workflow. 
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

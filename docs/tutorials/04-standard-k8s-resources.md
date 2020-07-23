@@ -8,9 +8,10 @@ Having the ability to trigger standard Kubernetes resources is quite powerful as
 set up pipelines for existing workloads.
 
 ## Prerequisites
+
 1. Make sure that `argo-events-sa` service account has necessary permissions to 
 create the Kubernetes resource of your choice.
-2. The `Webhook` gateway is already set up.
+2. The `Webhook` event-source is already set up.
 
 ## Pod
 
@@ -34,7 +35,7 @@ create the Kubernetes resource of your choice.
 
         _________________________________________ 
         / {"context":{"type":"webhook","specVersi \
-        | on":"0.3","source":"webhook-gateway","e |
+        | on":"0.3","source":"webhook","e |
         | ventID":"30306463666539362d346666642d34 |
         | 3336332d383861312d336538363333613564313 |
         | 932","time":"2020-01-11T21:23:07.682961 |
@@ -75,7 +76,7 @@ create the Kubernetes resource of your choice.
         
         _________________________________________ 
         / {"context":{"type":"webhook","specVersi \
-        | on":"0.3","source":"webhook-gateway","e |
+        | on":"0.3","source":"webhook","e |
         | ventID":"30306463666539362d346666642d34 |
         | 3336332d383861312d336538363333613564313 |
         | 932","time":"2020-01-11T21:23:07.682961 |

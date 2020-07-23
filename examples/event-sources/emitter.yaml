@@ -1,38 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: emitter-event-source
+  name: emitter
 spec:
-  type: emitter
   emitter:
     example:
       # Broker URI to connect to.
       broker: tcp://broker.argo-events.svc:4000
       # ChannelName refers to the channel name
       channelName: hello
-
       # ChannelKey is the key for the channel
       channelKey: channel_key
       # jsonBody specifies that all event body payload coming from this
       # source will be JSON
       jsonBody: true
-
-      # Namespace to use to retrieve the channel key and optional username/password
-      # Optional.
-      # Defaults to gateway namespace
-#      namespace: argo-events
-
-#      # Username to use to connect to broker
-#      # +optional
-#      username:
-#        name: name_of_the_secret_that_containing_username
-#        key: name_of_the_secret_that_containing_username
-#      # Password to use to connect to broker
-#      # +optional
-#      password:
-#        name: name_of_the_secret_that_containing_password
-#        key: name_of_the_secret_that_containing_password
-
       # optional backoff time for connection retries.
       # if not provided, default connection backoff time will be used.
       connectionBackoff:
@@ -44,7 +25,18 @@ spec:
         # setting factor > 1 makes the backoff exponential.
         factor: 2
         jitter: 0.2
-
+#  template:
+#    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
+#      # Username to use to connect to broker
+#      # +optional
+#      username:
+#        name: name_of_the_secret_that_containing_username
+#        key: name_of_the_secret_that_containing_username
+#      # Password to use to connect to broker
+#      # +optional
+#      password:
+#        name: name_of_the_secret_that_containing_password
+#        key: name_of_the_secret_that_containing_password
 
 #    example-tls:
 #      broker: tcp://broker.argo-events.svc:4000
@@ -52,6 +44,6 @@ spec:
 #      channelKey: channel_key
 #      jsonBody: true
 #      tls:
-#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
-#        clientCertPath: path-to-client-cert-mounted-in-gateway
-#        clientKeyPath: path-to-client-key-mounted-in-gateway
+#        caCertPath: path-to-ca-cert-key-mounted-in-event-source-pod
+#        clientCertPath: path-to-client-cert-mounted-in-event-source-pod
+#        clientKeyPath: path-to-client-key-mounted-in-event-source-pod

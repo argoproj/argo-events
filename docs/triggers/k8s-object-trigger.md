@@ -4,7 +4,6 @@ Apart from Argo workflow objects, the sensor lets you trigger standard Kubernete
 Having the ability to trigger standard Kubernetes objects is quite powerful as provides an avenue to
 set up event-driven pipelines for existing workloads.
 
-
 <br/>
 <br/>
 
@@ -17,12 +16,10 @@ set up event-driven pipelines for existing workloads.
 
 ## Trigger a K8s Pod
 
-1. We will use webhook gateway and sensor to trigger a K8s pod.
+1. We will use webhook event-source and sensor to trigger a K8s pod.
 
-1. Lets set up a webhook gateway and event source to process incoming requests.
+1. Lets set up a webhook event source to process incoming requests.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
-        
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 1. To trigger a pod, we need to create a sensor as defined below,
@@ -36,7 +33,7 @@ set up event-driven pipelines for existing workloads.
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              gatewayName: webhook-gateway
+              eventSourceName: webhook
               eventName: example
           subscription:
             http:
@@ -75,9 +72,9 @@ set up event-driven pipelines for existing workloads.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
 
-1. Lets expose the webhook gateway using `port-forward` so that we can make a request to it.
+1. Lets expose the webhook event-source pod using `port-forward` so that we can make a request to it.
   
-        kubectl -n argo-events port-forward <name-of-gateway-pod> 12000:12000   
+        kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
 
 1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 
@@ -87,7 +84,7 @@ set up event-driven pipelines for existing workloads.
 
         _________________________________________ 
         / {"context":{"type":"webhook","specVersi \
-        | on":"0.3","source":"webhook-gateway","e |
+        | on":"0.3","source":"webhook","e |
         | ventID":"30306463666539362d346666642d34 |
         | 3336332d383861312d336538363333613564313 |
         | 932","time":"2020-01-11T21:23:07.682961 |

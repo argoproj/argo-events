@@ -2,8 +2,8 @@
 
 ### Requirements
 
-* Kubernetes cluster >=v1.16
-* Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.16.0
+* Kubernetes cluster >=v1.11
+* Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.11.0
 
 ### Using kubectl
 
@@ -13,13 +13,17 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, ClusterRoles, ConfigMap, Sensor Controller and Gateway Controller
+2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 
-   NOTE: On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
+   NOTE: 
+   
+     * On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
 
-        kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+            kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+       
+     * On Openshift, make sure to grant `anyuid` scc to the service account.
 
 #### Namespace Installation
 
@@ -27,13 +31,17 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, Roles, ConfigMap, Sensor Controller and Gateway Controller
+2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
-   NOTE: On GKE, you may need to grant your account the ability to create new custom resource definitions
+   NOTE: 
+   
+     * On GKE, you may need to grant your account the ability to create new custom resource definitions
 
-        kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+            kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+     
+     * On Openshift, make sure to grant `anyuid` scc to the service account.
 
 #### Step-by-Step Installation
 
@@ -55,32 +63,31 @@
 
 5. Install the sensor custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/sensor-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argopoj.io_sensors.yaml
 
-6. Install the gateway custom resource definition
+6. Install the eventbus custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/gateway-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argopoj.io_eventbus.yaml
 
-7. Install the event source custom resource definition
+7. Install the event-source custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/eventsources-crd.yaml
-
-8. Create the confimap for sensor controller
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-configmap.yaml
-
-8. Create the configmap for gateway controller
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/gateway-controller/gateway-controller-configmap.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argopoj.io_eventsources.yaml
 
 9. Deploy the sensor controller
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-deployment.yaml
 
-10. Deploy the gateway controller
+10. Deploy the eventbus controller
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/gateway-controller/gateway-controller-deployment.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/eventbus-controller/eventbus-controller-deployment.yaml
 
+11. Deploy the event-source controller
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/eventsource-controller/eventsource-controller-deployment.yaml
+
+12. Deploy the eventbus.
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
 ### Using Kustomize
 
@@ -92,34 +99,6 @@ Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/stab
       - github.com/argoproj/argo-events/manifests/cluster-install
       # OR
       - github.com/argoproj/argo-events/manifests/namespace-install
-
-To make Argo events watch a specific namespace, define similar overlays as shown in [`namespace-install/overlays`](https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install/overlays).
-
-`kustomization.yaml`:
-
-    patchesJson6902:
-     - path: ./overlays/argo-events-configmap.yaml
-       target:
-         group: ""
-         kind: ConfigMap
-         name: gateway-controller-configmap
-         version: v1
-     - path: ./overlays/argo-events-configmap.yaml
-       target:
-         group: ""
-         kind: ConfigMap
-         name: sensor-controller-configmap
-         version: v1
-
-
-`overlays/argo-events-configmap.yaml`:
-
-    - op: replace
-      path: /data
-      value:
-        config: |
-          instanceID: argo-events
-          namespace: YOUR_NAMESPACE
 
 ### Using Helm Chart
 
@@ -139,3 +118,7 @@ Make sure you have helm client installed and Tiller server is running. To instal
 1. Install `argo-events` chart
 
         helm install argo-events argo/argo-events
+
+### Migrate to v0.17.0
+
+If you are looking to migrate Argo Events <0.16.0 to v0.17.0, please read the [migration docs](https://github.com/argoproj/argo-events/wiki/Migration-path-for-v0.17.0).

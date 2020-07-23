@@ -8,6 +8,7 @@ Currently, Argo Events supports 2 types of policies:
 2. Policy based on the response status for triggers like HTTP request, AWS Lambda, etc.
 
 ## Resource Labels Policy
+
 This type of policy determines whether trigger completed successfully based on the labels
 set on the trigger resource. 
 
@@ -21,6 +22,7 @@ is unable to determine status of the trigger after the backoff completes. Check 
 resource labels policy [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#k8sresourcepolicy).
 
 ## Status Policy
+
 For triggers like HTTP request or AWS Lambda, you can apply the `Status Policy` to determine the trigger status.
 The Status Policy supports list of expected response statuses. If the status of the HTTP request or Lamda is within
 the statuses defined in the policy, then the trigger is considered successful.
