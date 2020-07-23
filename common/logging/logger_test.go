@@ -26,6 +26,5 @@ func TestNewArgoEventsLogger(t *testing.T) {
 	convey.Convey("Get a logger", t, func() {
 		log := NewArgoEventsLogger()
 		convey.So(log, convey.ShouldNotBeNil)
-
 	})
 }

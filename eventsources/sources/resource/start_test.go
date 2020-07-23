@@ -75,7 +75,7 @@ func TestFilter(t *testing.T) {
 		pass := passFilters(&InformerEvent{
 			Obj:  &unstructured.Unstructured{Object: outmap},
 			Type: "ADD",
-		}, resourceEventSource.Filter, time.Now(), logging.NewArgoEventsLogger().WithField("a", "b"))
+		}, resourceEventSource.Filter, time.Now(), logging.NewArgoEventsLogger())
 		convey.So(pass, convey.ShouldBeTrue)
 	})
 }
