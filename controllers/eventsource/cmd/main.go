@@ -25,8 +25,6 @@ const (
 )
 
 var (
-	log = ctrl.Log.WithName(eventsource.ControllerName)
-
 	namespace        string
 	namespaced       bool
 	managedNamespace string

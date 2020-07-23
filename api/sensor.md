@@ -1622,27 +1622,6 @@ Name is a unique name of this dependency
 
 <td>
 
-<code>gatewayName</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-GatewayName is the name of the gateway from whom the event is received
-DEPRECATED: Use EventSourceName instead.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>eventSourceName</code></br> <em> string </em>
 
 </td>
@@ -4616,35 +4595,6 @@ scheduled on that node. More info:
 <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">https://kubernetes.io/docs/concepts/configuration/assign-pod-node/</a>
 
 </p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>spec</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core">
-Kubernetes core/v1.PodSpec </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Spec holds the sensor deployment spec. DEPRECATED: Use Container
-instead.
-
-</p>
-
-<br/> <br/>
-
-<table>
-
-</table>
 
 </td>
 

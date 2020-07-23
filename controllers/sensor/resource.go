@@ -22,9 +22,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -48,7 +48,7 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) error {
+func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	sensor := args.Sensor
 	eventBus := &eventbusv1alpha1.EventBus{}
@@ -60,28 +60,28 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
-			logger.Error(err, "EventBus not found", "eventBusName", eventBusName)
+			logger.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
 			return errors.Errorf("eventbus %s not found", eventBusName)
 		}
 		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
-		logger.Error(err, "failed to get EventBus", "eventBusName", eventBusName)
+		logger.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)
 		return err
 	}
 	if !eventBus.Status.IsReady() {
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
-		logger.Error(err, "event bus is not in ready status", "eventBusName", eventBusName)
+		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName, "error", err)
 		return errors.New("eventbus not ready")
 	}
-	expectedDeploy, err := buildDeployment(args, eventBus, logger)
+	expectedDeploy, err := buildDeployment(args, eventBus)
 	if err != nil {
 		sensor.Status.MarkDeployFailed("BuildDeploymentSpecFailed", "Failed to build Deployment spec.")
-		logger.Error(err, "failed to build deployment spec")
+		logger.Errorw("failed to build deployment spec", "error", err)
 		return err
 	}
 	deploy, err := getDeployment(ctx, client, args)
 	if err != nil && !apierrors.IsNotFound(err) {
 		sensor.Status.MarkDeployFailed("GetDeploymentFailed", "Get existing deployment failed")
-		logger.Error(err, "error getting existing deployment")
+		logger.Errorw("error getting existing deployment", "error", err)
 		return err
 	}
 	if deploy != nil {
@@ -91,19 +91,19 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
-				logger.Error(err, "error updating existing deployment")
+				logger.Errorw("error updating existing deployment", "error", err)
 				return err
 			}
-			logger.Info("deployment is updated", "deploymentName", deploy.Name)
+			logger.Infof("deployment is updated", "deploymentName", deploy.Name)
 		}
 	} else {
 		err = client.Create(ctx, expectedDeploy)
 		if err != nil {
 			sensor.Status.MarkDeployFailed("CreateDeploymentFailed", "Failed to create a deployment")
-			logger.Error(err, "error creating a deployment")
+			logger.Errorw("error creating a deployment", "error", err)
 			return err
 		}
-		logger.Info("deployment is created", "deploymentName", expectedDeploy.Name)
+		logger.Infof("deployment is created", "deploymentName", expectedDeploy.Name)
 	}
 	sensor.Status.MarkDeployed()
 	return nil
@@ -126,8 +126,8 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log logr.Logger) (*appv1.Deployment, error) {
-	deploymentSpec, err := buildDeploymentSpec(args, log)
+func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*appv1.Deployment, error) {
+	deploymentSpec, err := buildDeploymentSpec(args)
 	if err != nil {
 		return nil, err
 	}
@@ -206,13 +206,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log
 	return deployment, nil
 }
 
-func buildDeploymentSpec(args *AdaptorArgs, log logr.Logger) (*appv1.DeploymentSpec, error) {
-	// Deprecated spec, will be unsupported soon.
-	if args.Sensor.Spec.Template.Spec != nil {
-		log.Info("WARNING: spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.container")
-		return buildLegacyDeploymentSpec(args.Sensor), nil
-	}
-
+func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	replicas := int32(1)
 	sensorContainer := corev1.Container{
 		Image:           args.Image,
@@ -248,26 +242,6 @@ func buildDeploymentSpec(args *AdaptorArgs, log logr.Logger) (*appv1.DeploymentS
 			},
 		},
 	}, nil
-}
-
-// buildLegacyDeploymentSpec is deprecated, will be unsupported soon.
-func buildLegacyDeploymentSpec(sensor *v1alpha1.Sensor) *appv1.DeploymentSpec {
-	replicas := int32(1)
-	labels := map[string]string{
-		common.LabelObjectName: sensor.Name,
-	}
-	return &appv1.DeploymentSpec{
-		Selector: &metav1.LabelSelector{
-			MatchLabels: labels,
-		},
-		Replicas: &replicas,
-		Template: corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
-			},
-			Spec: *sensor.Spec.Template.Spec,
-		},
-	}
 }
 
 func labelSelector(labelMap map[string]string) labels.Selector {

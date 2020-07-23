@@ -18,20 +18,18 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	"github.com/pkg/errors"
-	uzap "go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -62,14 +60,10 @@ func init() {
 }
 
 func main() {
-	ecfg := uzap.NewProductionEncoderConfig()
-	ecfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoder := zapcore.NewConsoleEncoder(ecfg)
-	ctrl.SetLogger(zap.New(zap.UseDevMode(false), zap.WriteTo(os.Stdout), zap.Encoder(encoder)))
-	mainLog := log.WithName("main")
+	logger := logging.NewArgoEventsLogger().Named(sensor.ControllerName)
 	sensorImage, defined := os.LookupEnv(sensorImageEnvVar)
 	if !defined {
-		panic(fmt.Errorf("required environment variable '%s' not defined", sensorImageEnvVar))
+		logger.Fatalf("required environment variable '%s' not defined", sensorImageEnvVar)
 	}
 	opts := ctrl.Options{}
 	if namespaced {
@@ -77,42 +71,36 @@ func main() {
 	}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), opts)
 	if err != nil {
-		panic(err)
+		logger.Desugar().Fatal("unable to get a controller-runtime manager", zap.Error(err))
 	}
 	err = v1alpha1.AddToScheme(mgr.GetScheme())
 	if err != nil {
-		mainLog.Error(err, "unable to add Sensor scheme")
-		panic(err)
+		logger.Desugar().Fatal("unable to add Sensor scheme", zap.Error(err))
 	}
 	err = eventbusv1alpha1.AddToScheme(mgr.GetScheme())
 	if err != nil {
-		mainLog.Error(err, "unable to add EventBus scheme")
-		panic(err)
+		logger.Desugar().Fatal("uunable to add EventBus scheme", zap.Error(err))
 	}
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(sensor.ControllerName, mgr, controller.Options{
-		Reconciler: sensor.NewReconciler(mgr.GetClient(), mgr.GetScheme(), sensorImage, log.WithName("reconciler")),
+		Reconciler: sensor.NewReconciler(mgr.GetClient(), mgr.GetScheme(), sensorImage, logger),
 	})
 	if err != nil {
-		mainLog.Error(err, "unable to set up individual controller")
-		panic(err)
+		logger.Desugar().Fatal("unable to set up individual controller", zap.Error(err))
 	}
 
 	// Watch Sensor and enqueue Sensor object key
 	if err := c.Watch(&source.Kind{Type: &v1alpha1.Sensor{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		mainLog.Error(err, "unable to watch Sensors")
-		panic(err)
+		logger.Desugar().Fatal("unable to watch Sensors", zap.Error(err))
 	}
 
 	// Watch Deployments and enqueue owning Sensor key
 	if err := c.Watch(&source.Kind{Type: &appv1.Deployment{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.Sensor{}, IsController: true}); err != nil {
-		mainLog.Error(err, "unable to watch Deployments")
-		panic(err)
+		logger.Desugar().Fatal("unable to watch Deployments", zap.Error(err))
 	}
 
-	mainLog.Info("starting manager")
+	logger.Info("starting manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		mainLog.Error(err, "unable to run manager")
-		panic(err)
+		logger.Desugar().Fatal("unable to run manager", zap.Error(err))
 	}
 }

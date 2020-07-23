@@ -601,13 +601,6 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 							Format:      "",
 						},
 					},
-					"gatewayName": {
-						SchemaProps: spec.SchemaProps{
-							Description: "GatewayName is the name of the gateway from whom the event is received DEPRECATED: Use EventSourceName instead.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"eventSourceName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "EventSourceName is the name of EventSource that Sensor depends on",
@@ -629,7 +622,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"name", "gatewayName", "eventSourceName", "eventName"},
+				Required: []string{"name", "eventSourceName", "eventName"},
 			},
 		},
 		Dependencies: []string{
@@ -1666,17 +1659,11 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 							},
 						},
 					},
-					"spec": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Spec holds the sensor deployment spec. DEPRECATED: Use Container instead.",
-							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
-						},
-					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.Volume"},
+			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Volume"},
 	}
 }
 
