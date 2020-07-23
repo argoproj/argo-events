@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.17.0
+
++ Introduced Eventbus #674
++ Merged EventSource and Gateway CR #735
++ Re-implementation of sensor-controller and the sensor #723
++ Refined auto-connect for the eventbus #761
++ Introduced metrics to eventbus #745
++ Different deployment update strategy for different event sources #755
++ Removed Argo Workflow package dependency #758
++ Enhanced time filter in the sensor #737
++ Kafka EventSource non-tls connection fix #704
++ Correct pkg structure and proto file generation #701 
+
 ## v0.16.0
 
 + Add affinity, tolerations in template and clusterIP in service #663

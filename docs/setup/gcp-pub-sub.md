@@ -8,12 +8,12 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
             {
                 "context": {
-                  "type": "type_of_event_bus",
-                  "specVersion": "cloud_events_version",
-                  "source": "name_of_the_event_bus",
-                  "eventID": "unique_event_id",
+                  "type": "type_of_event_source",
+                  "specversion": "cloud_events_version",
+                  "source": "name_of_the_event_source",
+                  "id": "unique_event_id",
                   "time": "event_time",
-                  "dataContentType": "type_of_data",
+                  "datacontenttype": "type_of_data",
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
