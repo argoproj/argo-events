@@ -15,7 +15,7 @@ spec:
         context:
           source: webhook
           subject: example
-          dataContentType: application/json
+          datacontenttype: application/json
   triggers:
     - template:
         name: done-workflow
