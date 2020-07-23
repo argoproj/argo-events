@@ -1,9 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: resource-event-source
+  name: resource
 spec:
-  type: resource
+  template:
+    serviceAccountName: argo-events-sa # assign a service account with `get`, `list` and `watch` permissions on the resource being watched.
   resource:
     example:
       # namespace to listen events within

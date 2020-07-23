@@ -1,14 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: aws-sns-event-source
+  name: aws-sns
 spec:
-  type: sns
+  template:
+    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
   sns:
     example:
       # arn of SNS topic
       topicArn: arn:aws:sns:us-east-1:XXXXXXXX:test
-      # hook contains configuration for the HTTP server running in the gateway.
+      # hook contains configuration for the HTTP server running in the event-source.
       # AWS will send events to following port and endpoint
       webhook:
         # endpoint to listen events on
@@ -17,9 +22,11 @@ spec:
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
         method: POST
-        # url the gateway will use to register at AWS.
+        # url of the event-source service to use to register at AWS.
         # This url must be reachable from outside the cluster.
-        # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service AWS can reach to.
+        # The event-source pod is backed by the service defined in the event-source spec. So get the URL for that service AWS can reach to.
+        # The name for the service is in `<event-source-name>-eventsource-svc` format.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from AWS.
         url: http://url-that-is-reachable-from-AWS
       # accessKey contains information about K8s secret that stores the access key
       accessKey:
@@ -35,22 +42,18 @@ spec:
         name: aws-secret
       # aws region
       region: us-east-1
-#      # Namespace to read secrets from.
-#      # +Optional. Default to gateway's namespace.
-#      namespace: "argo-events"
-
 
 #    example-with-secure-connection:
 #      topicArn: "topic-arn"
 #      webhook:
 #        endpoint: "/"
-#        # gateway can run multiple HTTP servers, just define a unique port.
+#        # event-source can run multiple HTTP servers, just define a unique port.
 #        port: "13000"
 #        method: "POST"
-#        url: "http://mysecondfakeurl.fake"
-#        # path to file that is mounted in gateway pod which contains certs
+#        url: "http://myfakeurl.fake"
+#        # path to file that is mounted in event-source pod which contains certs
 #        serverCertPath: "some path in pod"
-#        # path to file that is mounted in gateway pod which contains private key
+#        # path to file that is mounted in event-source pod which contains private key
 #        serverKeyPath: "some path in pod"
 #      accessKey:
 #        name: aws-secret
@@ -61,12 +64,12 @@ spec:
 #      region: "us-east-1"
 #
 #    example-without-credentials:
-#      # If AWS access credentials are already present on the Pod's IAM role running the Gateway,
+#      # If AWS access credentials are already present on the Pod's IAM role running the event-source,
 #      # the AWS session will utilize the existing config and hence we do not need to provide explicit credentials.
 #      topicArn: "topic-arn"
 #      webhook:
 #        endpoint: "/"
 #        port: "13000"
 #        method: "POST"
-#        url: "http://mysecondfakeurl.fake"
+#        url: "http://myfakeurl.fake"
 #      region: "us-east-1"

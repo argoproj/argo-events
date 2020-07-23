@@ -1,9 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: azure-events-hub-event-source
+  name: azure-events-hub
 spec:
-  type: azureEventsHub
+  template:
+    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
   azureEventsHub:
     example:
       # FQDN of the EventsHub namespace you created
@@ -15,8 +16,5 @@ spec:
       sharedAccessKey:
         name: secret_containing_shared_access_key
         key: key_within_the_secret_which_holds_the_value_of_shared_access_key
-      # Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
-      # Optional. Defaults to gateway's namespace
-#      namespace: argo-events
       # Event Hub path/name
       hubName: hub_name

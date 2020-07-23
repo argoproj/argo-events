@@ -4,5 +4,4 @@ kind: Kustomization
 resources:
   - argoproj.io_eventbus.yaml
   - argoproj.io_eventsources.yaml
-  - argoproj.io_gateways.yaml
   - argoproj.io_sensors.yaml

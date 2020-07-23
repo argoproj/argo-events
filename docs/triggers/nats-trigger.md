@@ -10,7 +10,7 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
 1. Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event
    on a NATS subject.
 
-1. Set up the Minio Event Source and Gateway [here](https://argoproj.github.io/argo-events/setup/minio/). 
+1. Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/). 
    Do not create the Minio sensor, we are going to create it in next step.
    
 1. Lets create the sensor,
@@ -24,7 +24,7 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              gatewayName: minio-gateway
+              eventSourceName: minio
               eventName: example
           subscription:
             http:

@@ -1,9 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: redis-event-source
+  name: redis
 spec:
-  type: redis
+  # uncomment if the password field is set
+#  template:
+#    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
   redis:
     example:
       # HostAddress refers to the address of the Redis host/server
@@ -14,10 +16,6 @@ spec:
 #      password:
 #        name: name_of_secret_that_holds_password
 #        key: key_within_secret_which_holds_password_value
-
-      # Namespace to use to retrieve the password from. It should only be specified if password is declared
-      # +optional
-#      namespace: argo-events
 
       # DB to use. If not specified, default DB 0 will be used.
       # +optional
@@ -32,6 +30,6 @@ spec:
 #      channels:
 #        - FOO
 #      tls:
-#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
-#        clientCertPath: path-to-client-cert-mounted-in-gateway
-#        clientKeyPath: path-to-client-key-mounted-in-gateway
+#        caCertPath: path-to-ca-cert-key-mounted-in-event-source
+#        clientCertPath: path-to-client-cert-mounted-in-event-source
+#        clientKeyPath: path-to-client-key-mounted-in-event-source

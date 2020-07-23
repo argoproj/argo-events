@@ -5,16 +5,13 @@ metadata:
 spec:
   template:
     serviceAccountName: argo-events-sa
-  subscription:
-    http:
-      port: 9300
   # waits for both test-dependency-webhook and test-dependency-calendar to resolve
   dependencies:
     - name: test-dependency-webhook
-      gatewayName: webhook
+      eventSourceName: webhook
       eventName: example
     - name: test-dependency-calendar
-      gatewayName: calendar
+      eventSourceName: calendar
       eventName: example-with-interval
   triggers:
     - template:

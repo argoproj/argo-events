@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+spec:
+  nats:
+    native:
+      replicas: 3
+      auth: token
+#      containerTemplate:
+#        resources:
+#          requests:
+#            cpu: "10m"
+#      metricsContainerTemplate:
+#        resources:
+#          requests:
+#            cpu: "10m"
+#      antiAffinity: false
+#      persistence:
+#        storageClassName: standard
+#        accessMode: ReadWriteOnce
+#        volumeSize: 10Gi

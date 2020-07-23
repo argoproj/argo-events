@@ -1,10 +1,9 @@
 # Event Source
 
-Event Sources are the configuration store for gateways. The configuration stored in an Event Source is used by a gateway to consume events from
-external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.
+An `EventSource` defines the configurations required to consume events from external sources  like AWS SNS, SQS, GCP PubSub, Webhooks, etc. It further 
+transforms the events into the [cloudevents](https://github.com/cloudevents/spec) and dispatches them over to the eventbus.
 
-
-Currently supported event sources -
+Available event-sources:
 
 1. AMQP
 1. AWS SNS
@@ -31,7 +30,7 @@ Currently supported event sources -
 
 
 ## Specification
-Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md).
+The complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md).
 
 ## Examples
 Examples are located under `examples/event-sources`.

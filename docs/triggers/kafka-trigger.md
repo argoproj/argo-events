@@ -3,6 +3,7 @@
 Kafka trigger allows sensor to publish events on Kafka topic. This trigger helps source the events from outside world into your messaging queues.
 
 ## Specification
+
 The Kafka trigger specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#kafkatrigger).
 
 ## Walkthrough
@@ -10,7 +11,7 @@ The Kafka trigger specification is available [here](https://github.com/argoproj/
 1. Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event
    on a Kafka topic.
 
-1. Set up the Minio Event Source and Gateway [here](https://argoproj.github.io/argo-events/setup/minio/). 
+1. Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/). 
    Do not create the Minio sensor, we are going to create it in next step.
    
 1. Lets create the sensor,
@@ -24,7 +25,7 @@ The Kafka trigger specification is available [here](https://github.com/argoproj/
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              gatewayName: minio-gateway
+              eventSourceName: minio
               eventName: example
           subscription:
             http:

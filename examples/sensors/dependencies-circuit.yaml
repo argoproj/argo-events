@@ -8,10 +8,10 @@ spec:
   # defines list of all events sensor will accept
   dependencies:
     - name: test-dep
-      gatewayName: webhook
+      eventSourceName: webhook
       eventName: example
     - name: test-dep-foo
-      gatewayName: webhook
+      eventSourceName: webhook
       eventName: example-foo
 
   # group event dependencies
@@ -26,9 +26,6 @@ spec:
   # trigger when either group_1 or group_2 resolves
   circuit: "group_1 || group_2"
 
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         # switch that determines whether to execute the trigger or not

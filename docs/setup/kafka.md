@@ -1,27 +1,19 @@
 # Kafka
 
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/kafka-setup.png?raw=true" alt="KAFKA Setup"/>
-</p>
-
-<br/>
-<br/>
+Kafka event-source listens to messages on topics and helps the sensor trigger workloads.
 
 ## Event Structure
-The structure of an event dispatched by the gateway to the sensor looks like following,
+The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
             "context": {
-              "type": "type_of_gateway",
+              "type": "type_of_event_source",
               "specVersion": "cloud_events_version",
-              "source": "name_of_the_gateway",
+              "source": "name_of_the_event_source",
               "eventID": "unique_event_id",
               "time": "event_time",
               "dataContentType": "type_of_data",
-              "subject": "name_of_the_event_within_event_source"
+              "subject": "name_of_the_configuration_within_event_source"
             },
             "data": {
               "topic": "kafka_topic",
@@ -31,30 +23,26 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
             }
         }
 
-<br/>
+## Specification
+
+Kafka event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#kafkaeventsource).
 
 ## Setup
 
-1. Make sure to setup the Kafka cluster in Kubernetes if you don't already have one. You can refer to https://github.com/Yolean/kubernetes-kafka
+1. Make sure to set up the Kafka cluster in Kubernetes if you don't already have one. You can refer to https://github.com/Yolean/kubernetes-kafka
 for installation instructions.
 
-2. Create the event source by running the following command. Make sure to update the appropriate fields.
+1. Create the event source by running the following command. Make sure to update the appropriate fields.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/kafka.yaml
 
-3. Create the gateway by running the following command,
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/kafka.yaml
-
-4. Inspect the gateway pod logs to make sure the gateway was able to subscribe to the topic specified in the event source to consume messages.
-
-5. Create the sensor by running the following command,
+1. Create the sensor by running the following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/kafka.yaml
 
-6. Send message by using Kafka client. More info on how to send message at https://kafka.apache.org/quickstart
+1. Send message by using Kafka client. More info on how to send message at https://kafka.apache.org/quickstart
 
-7. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

@@ -1,30 +1,19 @@
 # AWS SNS
 
-
-SNS gateway subscribes to AWS SNS topics, listens events and helps sensor trigger workloads.
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/aws-sns-setup.png?raw=true" alt="AWS SNS Setup"/>
-</p>
-
-<br/>
-<br/> 
+SNS event-source subscribes to AWS SNS topics, listens events and helps sensor trigger the workloads.
 
 ## Event Structure
-The structure of an event dispatched by the gateway to the sensor looks like following,
+The structure of an event dispatched by the event-source over eventbus looks like following,
 
             {
                 "context": {
-                  "type": "type_of_gateway",
+                  "type": "type_of_event_source",
                   "specVersion": "cloud_events_version",
-                  "source": "name_of_the_gateway",
+                  "source": "name_of_the_event_source",
                   "eventID": "unique_event_id",
                   "time": "event_time",
                   "dataContentType": "type_of_data",
-                  "subject": "name_of_the_event_within_event_source"
+                  "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
                 	"header": "sns headers",
@@ -32,14 +21,13 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
                 }
             }
 
-
 ## Setup
 
 1. Create a topic called `test` using aws cli or AWS SNS console.
 
-2. Fetch your access and secret key for AWS account and base64 encode them.
+1. Fetch your access and secret key for AWS account and base64 encode them.
 
-3. Create a secret called `aws-secret` as follows,
+1. Create a secret called `aws-secret` as follows,
 
         apiVersion: v1
         kind: Secret
@@ -50,38 +38,28 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
           accesskey: <base64-access-key>
           secretkey: <base64-secret-key>
 
-4. Deploy the secret
+1. Deploy the secret
 
         kubectl -n argo-events apply -f aws-secret.yaml
 
-5. Create the gateway by running the following command,
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/aws-sns.yaml
-
-6. Wait for gateway pod to get into the running state.
-
-7. Create an Ingress or Openshift Route for the gateway service to that it can be reached from AWS.
+1. The event-source for AWS SNS creates a pod and exposes it via service.
+   The name for the service is in `<event-source-name>-eventsource-svc` format.
+   You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from AWS.
    You can find more information on Ingress or Route online.
 
-8. Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/aws-sns.yaml
-
-9. Change the `topicArn` and `url` under `webhook` to your gateway service url created in a previous step. Make sure this url is reachable from AWS.
-
-8. Create the event source by running the following command.
+1. Create the event source by running the following command. Make sure to update the URL in the configuration within the event-source.
    
-        kubectl apply -n argo-events -f <event-source-file-updated-in-previous-step>
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/aws-sns.yaml
 
-11. Go to SNS settings on AWS and verify the webhook is registered. You can also do the same by
-    looking at the gateway pod logs.
+1. Go to SNS settings on AWS and verify the webhook is registered. You can also check it by inspecting the event-source pod logs.
 
-12. Create the sensor by running the following command,
+1. Create the sensor by running the following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-sns.yaml
 
-13. Publish a message to the SNS topic and it will trigger an argo workflow.
+1. Publish a message to the SNS topic, and it will trigger an argo workflow.
 
-14. Run `argo list` to find the workflow. 
+1. Run `argo list` to find the workflow. 
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
-
