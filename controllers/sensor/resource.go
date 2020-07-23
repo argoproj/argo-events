@@ -94,7 +94,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 				logger.Errorw("error updating existing deployment", "error", err)
 				return err
 			}
-			logger.Infof("deployment is updated", "deploymentName", deploy.Name)
+			logger.Infow("deployment is updated", "deploymentName", deploy.Name)
 		}
 	} else {
 		err = client.Create(ctx, expectedDeploy)
@@ -103,7 +103,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 			logger.Errorw("error creating a deployment", "error", err)
 			return err
 		}
-		logger.Infof("deployment is created", "deploymentName", expectedDeploy.Name)
+		logger.Infow("deployment is created", "deploymentName", expectedDeploy.Name)
 	}
 	sensor.Status.MarkDeployed()
 	return nil
