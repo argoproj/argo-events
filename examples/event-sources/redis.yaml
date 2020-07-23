@@ -3,6 +3,9 @@ kind: EventSource
 metadata:
   name: redis
 spec:
+  # uncomment if the password field is set
+#  template:
+#    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
   redis:
     example:
       # HostAddress refers to the address of the Redis host/server

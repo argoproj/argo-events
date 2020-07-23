@@ -3,6 +3,8 @@ kind: EventSource
 metadata:
   name: storage-grid
 spec:
+  template:
+    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
   service:
     ports:
       - port: 8080

@@ -25,6 +25,8 @@ spec:
         # setting factor > 1 makes the backoff exponential.
         factor: 2
         jitter: 0.2
+#  template:
+#    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
 #      # Username to use to connect to broker
 #      # +optional
 #      username:
