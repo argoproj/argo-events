@@ -1,31 +1,30 @@
 # Getting Started
 
-We are going to set up a gateway, sensor and event-source for webhook. The goal is
-to trigger an Argo workflow upon a HTTP Post request.
+We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.
 
 Note: You will need to have [Argo Workflows](https://argoproj.github.io/docs/argo/readme.html) installed to make this work.
 
-1. First, we need to setup event sources for gateway to listen.
+1. Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus,
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+
+1. Setup event-source for webhook as follows,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
-   The event-source drives the configuration required for a gateway to consume events from external sources.
+   The above event-source contains a single event configuration that runs an HTTP server on port `12000` with endpoint `example`.
 
-1. Create webhook gateway, 
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
-
-   After running above command, gateway controller will create corresponding a pod and service.
+   After running the above command, the event-source controller will create a pod and service.
 
 1. Create webhook sensor,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 
-   Once sensor object is created, sensor controller will create corresponding pod and service. 
+   Once the sensor object is created, sensor controller will create corresponding pod and a service. 
 
-1. Expose the gateway pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.
+1. Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.
 
-        kubectl -n argo-events port-forward <gateway-pod-name> 12000:12000
+        kubectl -n argo-events port-forward <event-source-pod-name> 12000:12000
 
 1. Use either Curl or Postman to send a post request to the http://localhost:12000/example
 

@@ -1,31 +1,19 @@
 # File
 
-File gateway listens to file system events and helps sensor trigger workloads.
-
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/file-setup.png?raw=true" alt="File Setup"/>
-</p>
-
-<br/>
-<br/>
+File event-source listens to file system events and helps sensor trigger workloads.
 
 ## Event Structure
-The structure of an event dispatched by the gateway to the sensor looks like following,
-
+The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
             "context": {
-              "type": "type_of_gateway",
+              "type": "type_of_event_source",
               "specVersion": "cloud_events_version",
-              "source": "name_of_the_gateway",
+              "source": "name_of_the_event_source",
               "eventID": "unique_event_id",
               "time": "event_time",
               "dataContentType": "type_of_data",
-              "subject": "name_of_the_event_within_event_source"
+              "subject": "name_of_the_configuration_within_event_source"
             },
             "data": {
                 "name": "Relative path to the file or directory",
@@ -34,7 +22,9 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
         }
 
 
-<br/>
+## Specification
+
+File event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#fileeventsource).
 
 ## Setup
 
@@ -42,32 +32,26 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/file.yaml
 
-2. The event source has configuration to listen to file system events for `test-data` directory and file called `x.txt`.
+1. The event source has configuration to listen to file system events for `test-data` directory and file called `x.txt`.
 
-3. Create the gateway by running the following command,
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/file.yaml
-
-4. Create the sensor by running the following command,
+1. Create the sensor by running the following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/file.yaml
 
-5. Make sure there are no errors in either gateway or sensor pod.
+1. Log into the event-source pod by running following command,
 
-6. Log into the gateway pod by running following command,
+        kubectl -n argo-events exec -it <event-source-pod-name> -c file-events -- /bin/bash
 
-        kubectl -n argo-events exec -it <file-gateway-pod-name> -c file-events -- /bin/bash
-
-6. Lets create a file called `x.txt` under `test-data` directory in gateway pod.
+1. Let's create a file called `x.txt` under `test-data` directory in the event-source pod.
  
         cd test-data
         cat <<EOF > x.txt
         hello
         EOF
 
-8. Once you create file `x.txt`, the sensor will trigger argo workflow.  Run `argo list` to find the workflow. 
+1. Once you create file `x.txt`, the sensor will trigger argo workflow.  Run `argo list` to find the workflow. 
 
-9. For real-world use cases, you should use PersistentVolume and PersistentVolumeClaim.
+1. For real-world use cases, you should use PersistentVolumeClaim.
                                                                   
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/). 

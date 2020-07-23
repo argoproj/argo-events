@@ -1,9 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: hdfs-event-source
+  name: hdfs
 spec:
-  type: hdfs
   hdfs:
     example:
       directory: "/tmp/"
@@ -13,6 +12,8 @@ spec:
         - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
         - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
       hdfsUser: root
+#  template:
+#    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
       # krbCCacheSecret:
       #   name: krb
       #   key: krb5cc_0

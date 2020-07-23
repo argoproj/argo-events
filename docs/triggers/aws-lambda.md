@@ -1,6 +1,6 @@
 # AWS Lambda
 
-AWS Lambda provides a tremendous value but the event driven lambda invocation is limited to 
+AWS Lambda provides a tremendous value, but the event driven lambda invocation is limited to 
 SNS, SQS and few other event sources. Argo Events makes it easy to integrate lambda with event sources
 that are not native to AWS.
 
@@ -17,12 +17,14 @@ that are not native to AWS.
 
 ## Trigger A Simple Lambda
 
+1. Make sure to have eventbus deployed in the namespace.
+
 1. Make sure your AWS account has permissions to execute Lambda. More info on AWS permissions is available
    [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_change-permissions.html).
 
-2. Fetch your access and secret key for AWS account and base64 encode them.
+1. Fetch your access and secret key for AWS account and base64 encode them.
 
-3. Create a secret called `aws-secret` as follows,
+1. Create a secret called `aws-secret` as follows,
 
         apiVersion: v1
         kind: Secret
@@ -33,28 +35,26 @@ that are not native to AWS.
           accesskey: <base64-access-key>
           secretkey: <base64-secret-key>
 
-4. Create a basic lambda function called `hello` either using AWS cli or console.
+1. Create a basic lambda function called `hello` either using AWS cli or console.
 
         exports.handler = async (event, context) => {
             console.log('name =', event.name);
             return event.name;
         };
 
-5. Lets set up webhook gateway to invoke the lambda over http requests.
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
+1. Let's set up webhook event-source to invoke the lambda over http requests.
         
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
-6. Lets expose the webhook gateway using `port-forward` so that we can make a request to it.
+1. Let's expose the webhook event-source using `port-forward` so that we can make a request to it.
 
-        kubectl -n argo-events port-forward <name-of-gateway-pod> 12000:12000   
+        kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
 
-7. Deploy the webhook sensor with AWS Lambda trigger
+1. Deploy the webhook sensor with AWS Lambda trigger
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-lambda-trigger.yaml
 
-8. Once the sensor pod is in running state, make a `curl` request to webhook gateway,
+1. Once the sensor pod is in running state, make a `curl` request to webhook event-source pod,
 
          curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example 
 
@@ -67,7 +67,7 @@ The AWS Lambda trigger specification is available [here](https://github.com/argo
 ## Request Payload
 
 Invoking the AWS Lambda without a request payload would not be very useful. The lambda trigger within a sensor
-is invoked when sensor receives an event from a gateway. In order to construct a request payload based on the event data, sensor offers 
+is invoked when sensor receives an event from the eventbus. In order to construct a request payload based on the event data, sensor offers 
 `payload` field as a part of the lambda trigger.
 
 Let's examine a lambda trigger,

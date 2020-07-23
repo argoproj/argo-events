@@ -31,11 +31,8 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook
+      eventSourceName: webhook
       eventName: example
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         name: workflow-trigger-1
