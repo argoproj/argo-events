@@ -41,26 +41,6 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: gateways.argoproj.io
-spec:
-  group: argoproj.io
-  names:
-    kind: Gateway
-    listKind: GatewayList
-    plural: gateways
-    shortNames:
-    - gw
-    singular: gateway
-  scope: Namespaced
-  version: v1alpha1
-  versions:
-  - name: v1alpha1
-    served: true
-    storage: true
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
   name: sensors.argoproj.io
 spec:
   group: argoproj.io
@@ -94,8 +74,6 @@ rules:
 - apiGroups:
   - argoproj.io
   resources:
-  - gateways
-  - gateways/finalizers
   - sensors
   - sensors/finalizers
   - eventsources
@@ -122,8 +100,6 @@ rules:
 - apiGroups:
   - argoproj.io
   resources:
-  - gateways
-  - gateways/finalizers
   - sensors
   - sensors/finalizers
   - eventsources
@@ -150,8 +126,6 @@ rules:
 - apiGroups:
   - argoproj.io
   resources:
-  - gateways
-  - gateways/finalizers
   - sensors
   - sensors/finalizers
   - eventsources
@@ -189,8 +163,6 @@ rules:
   - workflows/finalizers
   - workflowtemplates
   - workflowtemplates/finalizers
-  - gateways
-  - gateways/finalizers
   - sensors
   - sensors/finalizers
   - eventsources
@@ -263,25 +235,6 @@ subjects:
   name: argo-events-sa
   namespace: argo-events
 ---
-apiVersion: v1
-data:
-  _example: "#\n# This is not real configuration but an example.\n# Copy this block
-    out of \"_example\" and unindent it \n# under \"data\" to make it functional.\n#\nconfig:
-    |\n  # instanceID is a label selector to limit the controller's watch to a specific
-    instance. It\n  # contains an arbitrary value that is carried forward into its
-    pod labels, under the key\n  # gateways.argoproj.io/gateway-controller-instanceid,
-    for the purposes of date segregation.\n  # This enables a controller to only watch
-    the gateway that it is interested about,\n  # in order to support multiple controllers
-    in a single cluster, and ultimately allows the\n  # controller itself to be bundled
-    as part of a higher level application. If omitted, the\n  # controller watches
-    gateways that *are not* labeled with an instance id.\n  instanceID: <instanceID>\n\n
-    \ # namespace is used for namespaced installation, if it is specified, the controller
-    only \n  # watches gateways in this namespace.\n  namespace: <your_namespace>\n"
-kind: ConfigMap
-metadata:
-  name: gateway-controller-configmap
-  namespace: argo-events
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -338,33 +291,6 @@ spec:
         image: argoproj/eventsource-controller:v0.16.0
         imagePullPolicy: Always
         name: eventsource-controller
-      serviceAccountName: argo-events-sa
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gateway-controller
-  namespace: argo-events
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: gateway-controller
-  template:
-    metadata:
-      labels:
-        app: gateway-controller
-    spec:
-      containers:
-      - env:
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: CONTROLLER_CONFIG_MAP
-          value: gateway-controller-configmap
-        image: argoproj/gateway-controller:v0.16.0
-        name: gateway-controller
       serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1

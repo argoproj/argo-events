@@ -4,6 +4,10 @@ metadata:
   name: webhook-event-source
 spec:
   type: "webhook"
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
   webhook:
     # gateway can run multiple HTTP servers. Simply define a unique port to start a new HTTP server
     example:

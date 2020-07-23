@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: context-sensor
+  name: context-filter
 spec:
   template:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook-gateway
+      eventSourceName: webhook
       eventName: example
       filters:
         context:
-          source: custom-gateway
+          source: webhook
   subscription:
     http:
       port: 9300

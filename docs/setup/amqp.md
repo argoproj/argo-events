@@ -1,30 +1,20 @@
 # AMQP
 
-AMQP gateway listens to messages on the MQ and helps sensor trigger the workloads.  
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/amqp-setup.png?raw=true" alt="AMQP Setup"/>
-</p>
-
-<br/>
-<br/>
+AMQP event-source listens to messages on the MQ and helps sensor trigger the workloads.  
 
 ## Event Structure
 
-The structure of an event dispatched by the gateway to the sensor looks like following,
+The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
             "context": {
-              "type": "type_of_gateway",
+              "type": "type_of_event_source",
               "specVersion": "cloud_events_version",
-              "source": "name_of_the_gateway",
+              "source": "name_of_the_event_source",
               "eventID": "unique_event_id",
               "time": "event_time",
               "dataContentType": "type_of_data",
-              "subject": "name_of_the_event_within_event_source"
+              "subject": "name_of_the_configuration_within_event_source"
             },
             "data": {
               	"contentType": "ContentType is the MIME content type",
@@ -96,11 +86,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/amqp.yaml
 
-5. Create the gateway by running the following command,
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/amqp.yaml
-
-6. Inspect the gateway pod logs to make sure the gateway was able to subscribe to the exchange specified in the event source to consume messages.
+6. Inspect the event-source pod logs to make sure it was able to subscribe to the exchange specified in the event source to consume messages.
 
 7. Create the sensor by running the following command,
 
@@ -123,6 +109,3 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
                                                                             
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
-
-
-

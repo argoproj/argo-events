@@ -1,29 +1,19 @@
 # Resource
 
-Resource gateway watches change notifications for K8s object and helps sensor trigger the workloads.
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/resource-setup.png?raw=true" alt="Resource Setup"/>
-</p>
-
-<br/>
-<br/>
+Resource event-source watches change notifications for K8s object and helps sensor trigger the workloads.
 
 ## Event Structure
-The structure of an event dispatched by the gateway to the sensor looks like following,
+The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
             "context": {
-              "type": "type_of_gateway",
+              "type": "type_of_event_source",
               "specVersion": "cloud_events_version",
-              "source": "name_of_the_gateway",
+              "source": "name_of_the_event_source",
               "eventID": "unique_event_id",
               "time": "event_time",
               "dataContentType": "type_of_data",
-              "subject": "name_of_the_event_within_event_source"
+              "subject": "name_of_the_configuration_within_event_source"
             },
             "data": {
               "type": "type_of_the_event", // ADD, UPDATE or DELETE
@@ -34,25 +24,23 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
             }
         }
 
-<br/>
+## Specification
+
+Resource event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#resourceeventsource).
 
 ## Setup
 1. Create the event source by running the following command. 
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/resource.yaml
 
-2. Create the gateway by running the following command,
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/resource.yaml
-
-3. Create the sensor by running the following command,
+1. Create the sensor by running the following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/resource.yaml
 
-4. The event source we created in step 1 contains configuration which makes the gateway listen to 
+1. The event source we created in step 1 contains configuration which makes the event-source listen to 
    Argo workflows marked with label `app: my-workflow`.
 
-5. Lets create a workflow called `my-workflow` with label `app: my-workflow`
+1. Lets create a workflow called `my-workflow` with label `app: my-workflow`
    
         apiVersion: argoproj.io/v1alpha1
         kind: Workflow
@@ -69,7 +57,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
               command: [cowsay]
               args: ["hello world"]
 
-6. Once the `my-workflow` is created, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.
+1. Once the `my-workflow` is created, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.
 
 ## List Options
 
@@ -92,8 +80,8 @@ In the example above, we had set up the list option as follows,
                 value: my-workflow
 
 
-The `key-operation-value` items under the `filter -> labels` are used by the gateway to filter the objects
-that are eligible for the watch. So, in the present case, the gateway will set up a watch for those
+The `key-operation-value` items under the `filter -> labels` are used by the event-source to filter the objects
+that are eligible for the watch. So, in the present case, the event-source will set up a watch for those
 objects who have label "app: my-workflow". You can add more `key-operation-value` items to the list as per your use-case.   
 
 Similarly, you can pass `field` selectors to the watch list options, e.g.,
@@ -113,8 +101,8 @@ Similarly, you can pass `field` selectors to the watch list options, e.g.,
             value: my-workflow
  
 
-**Note:** The `label` and `fields` under `filter` are used at the time of setting up the watch by the gateway. If you want to filter the objects
-based on the `annotations` or some other fields, use the `Data Filters` available in sensor.
+**Note:** The `label` and `fields` under `filter` are used at the time of setting up the watch by the event-source. If you want to filter the objects
+based on the `annotations` or some other fields, use the `Data Filters` available in the sensor.
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

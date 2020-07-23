@@ -2,9 +2,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: gitlab-event-source
+  name: gitlab
 spec:
-  type: gitlab
+  template:
+    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
   gitlab:
     example:
       # id of the project
@@ -17,9 +22,10 @@ spec:
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
         method: POST
-        # url the gateway will use to register at Github.
+        # url the event-source will use to register at GitLab.
         # This url must be reachable from outside the cluster.
-        # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
+        # The name for the service is in `<event-source-name>-eventsource-svc` format.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from GitLab.
         url: http://url-that-is-reachable-from-GitLab
       # events to listen to
       # Visit https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#events
@@ -45,9 +51,9 @@ spec:
 #        port: "13000"
 #        method: "POST"
 #        url: "http://mysecondfakeurl.fake"
-#        # path to file that is mounted in gateway pod which contains certs
+#        # path to file that is mounted in event-source pod which contains certs
 #        serverCertPath: "some path in pod"
-#        # path to file that is mounted in gateway pod which contains private key
+#        # path to file that is mounted in event-source pod which contains private key
 #        serverKeyPath: "some path in pod"
 #      events:
 #        - PushEvents
