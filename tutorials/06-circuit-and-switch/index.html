@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -649,13 +613,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6" checked>
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -705,18 +669,6 @@
   <li class="md-nav__item">
     <a href="../04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-nav__link">
       Trigger Standard K8s Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
     </a>
   </li>
 
@@ -815,8 +767,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -833,13 +785,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -976,18 +928,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1091,7 +1031,7 @@
                 
                 
                 <h1 id="circuit-and-switch">Circuit and Switch<a class="headerlink" href="#circuit-and-switch" title="Permanent link">&para;</a></h1>
-<p>In previous sections, you have been dealing with just a single dependency. But in many
+<p>In the previous sections, you have been dealing with just a single dependency. But, in many
 cases, you want to wait for multiple events to occur and then trigger a resource which means
 you need a mechanism to determine which triggers to execute based on set of different event dependencies.
 This mechanism is supported through <code>Circuit</code> and <code>Switch</code>.</p>
@@ -1103,39 +1043,33 @@ a <code>AND</code> operation, meaning, it will wait for all dependencies to reso
 at <code>minio-service.argo-events:9000</code>.</p>
 <h2 id="circuit">Circuit<a class="headerlink" href="#circuit" title="Permanent link">&para;</a></h2>
 <p>A circuit is a boolean expression. To create a circuit, you just need to define event
-dependencies in groups and the sensor will apply the circuit logic on those groups.
+dependencies in groups, and the sensor will apply the circuit logic on those groups.
 If the logic results in <code>true</code> value, the sensor will execute the triggers else it won't.</p>
 <h2 id="switch">Switch<a class="headerlink" href="#switch" title="Permanent link">&para;</a></h2>
 <p>A switch is the conditional execution gate for a trigger.</p>
-<p>Consider a scenario where you have a <code>Webhook</code> and <code>Minio</code> gateway, and you want
-to trigger an Argo workflow if the sensor receives an event from the <code>Webhook</code> gateway,
-but, another workflow if it receives an event from the <code>Minio</code> gateway.</p>
+<p>Consider a scenario where you have a <code>Webhook</code> and <code>Minio</code> event-source, and you want
+to trigger an Argo workflow if the sensor receives an event from the <code>Webhook</code> event-source,
+but, another workflow if it receives an event from the <code>Minio</code> event-source.</p>
 <ol>
 <li>
-<p>Create the webhook event source and gateway. The gateway listens to HTTP requests
-   on port <code>12000</code></p>
+<p>Create the webhook event-source and event-source. The event-source listens to HTTP requests on port <code>12000</code></p>
 <div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/webhook-event-source.yaml
-
-kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml
 </pre></div>
 
 
 </li>
 <li>
-<p>Create the minio event source and gateway. The gateway listens to events of type
-   <code>PUT</code> and <code>DELETE</code> for objects in bucket <code>test</code>.</p>
+<p>Create the minio event-source. The event-source listens to events of type <code>PUT</code> and <code>DELETE</code> for objects in bucket <code>test</code>.</p>
 <div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml
-
-kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/minio-gateway.yaml
 </pre></div>
 
 
 </li>
 </ol>
-<p>Make sure there are no errors in any of the gateways and all event sources are active.</p>
+<p>Make sure there are no errors in any of the event-sources.</p>
 <ol>
 <li>
-<p>Lets create the sensor. If you take a closer look at the trigger templates, you will
+<p>Let's create the sensor. If you take a closer look at the trigger templates, you will
    notice that it contains <code>switch</code> key with <code>all</code> condition, meaning, execute this trigger
    when every group defined in <code>all</code> is resolved. In the sensor definition, there
    is only one group under <code>all</code> in both trigger templates. So, as soon as the group is resolved, the
@@ -1146,7 +1080,7 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
 
 </li>
 <li>
-<p>Send a HTTP request to Webhook gateway,</p>
+<p>Send a HTTP request to Webhook event-source,</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1175,7 +1109,7 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
 <li>
 <p>Now, lets generate a Minio event so that we can run <code>group-2-xxxx</code> workflow. Drop a file
    onto <code>test</code> bucket. The workflow that will get created will print the name of the bucket as
-   follow,</p>
+   follows,</p>
 <div class="codehilite"><pre><span></span> ______ 
 &lt; test &gt;
  ------ 
@@ -1239,7 +1173,7 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1248,7 +1182,7 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Trigger Custom Resources
+                Trigger Standard K8s Resources
               </span>
             </div>
           </a>

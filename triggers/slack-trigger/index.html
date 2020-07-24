@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -647,13 +611,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -713,18 +677,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -761,8 +713,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../../tutorials/09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -781,13 +733,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -983,18 +935,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1107,17 +1047,15 @@
                 <h1 id="slack-trigger">Slack Trigger<a class="headerlink" href="#slack-trigger" title="Permanent link">&para;</a></h1>
 <p>The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario. </p>
 <h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
-<p>Have a Slack workspace setup you wish to send a message to. Set up the webhook gateway and event source. The K8s manifests are available under <code>examples</code>.</p>
 <ol>
 <li>
-<p>Set up a simple webhook gateway.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
-</pre></div>
-
-
+<p>Deploy the eventbus in the namespace.</p>
 </li>
 <li>
-<p>Create a webhook event source.</p>
+<p>Make sure to have a Slack workspace setup you wish to send a message to.</p>
+</li>
+<li>
+<p>Create a webhook event-source.</p>
 <div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
@@ -1126,7 +1064,7 @@
 <li>
 <p>Set up port-forwarding to expose the http server. We will
    use port-forwarding here.</p>
-<div class="codehilite"><pre><span></span>kubectl port-forward -n argo-events webhook-gateway-YOUR-GATEWAY-POD 12000:12000
+<div class="codehilite"><pre><span></span>kubectl port-forward -n argo-events &lt;event-source-pod-name&gt; 12000:12000
 </pre></div>
 
 
@@ -1188,20 +1126,22 @@
 
 </li>
 <li>
-<p>Send a http request to the newly setup gateway to fire the Slack trigger. </p>
+<p>Send a http request to the event-source-pod to fire the Slack trigger. </p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;text&quot;:&quot;Hello, World!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
 
-<p><strong>Note</strong>: The default slack-trigger will send the message "hello world" to the #general channel. You may change the default message and channel in slack-trigger.yaml under triggers.slack.channel and triggers.slack.message.
-3. Alternatively, you can dynamically determine the channel and message based on parameterization of your event. </p>
+<p><strong>Note</strong>: The default slack-trigger will send the message "hello world" to the #general channel. You may change the default message and channel in slack-trigger.yaml under triggers.slack.channel and triggers.slack.message.</p>
+</li>
+<li>
+<p>Alternatively, you can dynamically determine the channel and message based on parameterization of your event. </p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;channel&quot;:&quot;random&quot;,&quot;message&quot;:&quot;test message&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
 
 </li>
 <li>
-<p>Great! But how did the sensor use the event to customize the message and channel from the http request? We will see that in next section.</p>
+<p>Great! But, how did the sensor use the event to customize the message and channel from the http request? We will see that in next section.</p>
 </li>
 </ol>
 <h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>

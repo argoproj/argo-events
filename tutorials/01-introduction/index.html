@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -649,13 +613,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6" checked>
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -767,18 +731,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -815,8 +767,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -833,13 +785,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -976,18 +928,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1093,30 +1033,29 @@
                 <h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h1>
 <p>In the tutorials, we will cover every aspect of Argo Events and demonstrate how you 
 can leverage these features to build an event driven workflow pipeline. All the concepts you will learn
-in this tutorial and subsequent ones can be applied to any type of gateway.</p>
+in this tutorial and subsequent ones can be applied to any type of event-source.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Follow the installation guide to set up the Argo Events. </li>
 <li>Make sure to configure Argo Workflow controller to listen to workflow objects
 created in <code>argo-events</code> namespace.</li>
-<li>Make sure to read the concepts behind <a href="https://argoproj.github.io/argo-events/concepts/gateway/">gateway</a>,
+<li>Make sure to read the concepts behind <a href="https://argoproj.github.io/argo-events/concepts/eventbus/">eventbus</a>,
 <a href="https://argoproj.github.io/argo-events/concepts/sensor/">sensor</a>,
 <a href="https://argoproj.github.io/argo-events/concepts/event_source/">event source</a>.</li>
 </ul>
 <h2 id="get-started">Get Started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
-<p>Lets set up a basic webhook gateway and sensor that listens to events over
-HTTP and executes an Argo workflow.</p>
+<p>We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.</p>
 <ul>
 <li>
-<p>Create the webhook event source.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+<p>Let' set up the eventbus,</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </pre></div>
 
 
 </li>
 <li>
-<p>Create the webhook gateway.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
+<p>Create the webhook event source.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
 
@@ -1129,13 +1068,12 @@ HTTP and executes an Argo workflow.</p>
 
 </li>
 </ul>
-<p>If the commands are executed successfully, the gateway and sensor pods will get created. You will
-also notice that a service is created for both the gateway and sensor. </p>
+<p>If the commands are executed successfully, the eventbus, event-source and sensor pods will get created. You will
+also notice that a service is created for the event-source. </p>
 <ul>
 <li>
-<p>Expose the gateway pod via Ingress, OpenShift Route
-or port forward to consume requests over HTTP.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;gateway-pod-name&gt; 12000:12000
+<p>Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;event-source-pod-name&gt; 12000:12000
 </pre></div>
 
 
@@ -1157,12 +1095,12 @@ or port forward to consume requests over HTTP.</p>
 <li>
 <p>Make sure the workflow pod ran successfully.</p>
 <div class="codehilite"><pre><span></span>_________________________________________ 
-/ {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
-| on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook-gateway&quot;,&quot;e |
-| ventID&quot;:&quot;38376665363064642d343336352d34 |
-| 3035372d393766662d366234326130656232343 |
+/ {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specversi \
+| on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;id&quot;:
+| &quot;38376665363064642d343336352d343035 |
+| 372d393766662d366234326130656232343 |
 | 337&quot;,&quot;time&quot;:&quot;2020-01-11T16:55:42.996636 |
-| Z&quot;,&quot;dataContentType&quot;:&quot;application/json&quot; |
+| Z&quot;,&quot;datacontenttype&quot;:&quot;application/json&quot; |
 | ,&quot;subject&quot;:&quot;example&quot;},&quot;data&quot;:&quot;eyJoZWFkZ |
 | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
 | LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGU |
@@ -1191,18 +1129,18 @@ or port forward to consume requests over HTTP.</p>
 and data, with data being base64 encoded. In later sections, we will see how to extract particular key-value
 from event context or data and pass it to the workflow as arguments.</p>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>
-<p>If you don't see the gateway and sensor pod in <code>argo-events</code> namespace,</p>
+<p>If you don't see the event-source and sensor pod in <code>argo-events</code> namespace,</p>
 <ol>
 <li>Make sure the correct Role and RoleBindings are applied to the service account
-     and there are no errors in both gateway and sensor controller.</li>
-<li>Make sure gateway and sensor controller configmap has <code>namespace</code> set to 
+     and there are no errors in both event-source and sensor controller.</li>
+<li>Make sure the sensor controller configmap has <code>namespace</code> set to 
      <code>argo-events</code>.</li>
-<li>Check the logs of gateway and sensor controller. Make sure the controllers
-     have processed the gateway and sensor objects and there are no errors.</li>
-<li>Look for any error in gateway or sensor pod.</li>
+<li>Check the logs of event-source and sensor controller. Make sure the controllers
+     have processed the event-source and sensor objects and there are no errors.</li>
+<li>Look for any error in event-source or sensor pod.</li>
 <li>
-<p>Inspect the gateway,</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-event gateway-object-name -o yaml
+<p>Inspect the event-source,</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events event-source-object-name -o yaml
 </pre></div>
 
 

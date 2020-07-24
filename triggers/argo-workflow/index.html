@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -647,13 +611,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -713,18 +677,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -761,8 +713,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../../tutorials/09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -781,13 +733,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -983,18 +935,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1117,68 +1057,14 @@
 <h2 id="trigger-a-workflow">Trigger a workflow<a class="headerlink" href="#trigger-a-workflow" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>We will use webhook gateway and sensor to trigger an Argo workflow.</p>
+<p>Make sure to have the eventbus deployed in the namespace.</p>
 </li>
 <li>
-<p>Lets set up a webhook gateway and event source to process incoming requests.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
-
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</pre></div>
-
-
+<p>We will use webhook event-source and sensor to trigger an Argo workflow.</p>
 </li>
 <li>
-<p>To trigger a workflow, we need to create a sensor as defined below,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">template</span><span class="o">:</span>
-    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
-  <span class="n">dependencies</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">gatewayName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
-      <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
-  <span class="n">subscription</span><span class="o">:</span>
-    <span class="n">http</span><span class="o">:</span>
-      <span class="n">port</span><span class="o">:</span> <span class="mi">9300</span>
-  <span class="n">triggers</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
-        <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">workflow</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">k8s</span><span class="o">:</span>
-          <span class="n">group</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span>
-          <span class="n">version</span><span class="o">:</span> <span class="n">v1alpha1</span>
-          <span class="n">resource</span><span class="o">:</span> <span class="n">workflows</span>
-          <span class="n">operation</span><span class="o">:</span> <span class="n">create</span>
-          <span class="n">source</span><span class="o">:</span>
-            <span class="n">resource</span><span class="o">:</span>
-              <span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-              <span class="n">kind</span><span class="o">:</span> <span class="n">Workflow</span>
-              <span class="n">metadata</span><span class="o">:</span>
-                <span class="n">generateName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span>
-              <span class="n">spec</span><span class="o">:</span>
-                <span class="n">entrypoint</span><span class="o">:</span> <span class="n">whalesay</span>
-                <span class="k">arguments</span><span class="o">:</span>
-                  <span class="n">parameters</span><span class="o">:</span>
-                  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">message</span>
-                    <span class="err">#</span> <span class="n">the</span> <span class="n">value</span> <span class="n">will</span> <span class="kd">get</span> <span class="n">overridden</span> <span class="n">by</span> <span class="n">event</span> <span class="n">payload</span> <span class="n">from</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                    <span class="n">value</span><span class="o">:</span> <span class="n">hello</span> <span class="n">world</span>
-                <span class="n">templates</span><span class="o">:</span>
-                <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">whalesay</span>
-                  <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
-                  <span class="n">inputs</span><span class="o">:</span>
-                    <span class="n">parameters</span><span class="o">:</span>
-                    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">message</span>
-                  <span class="n">container</span><span class="o">:</span>
-                    <span class="n">image</span><span class="o">:</span> <span class="n">docker</span><span class="o">/</span><span class="n">whalesay</span><span class="o">:</span><span class="n">latest</span>
-                    <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="n">cowsay</span><span class="o">]</span>
-                    <span class="n">args</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;{{inputs.parameters.message}}&quot;</span><span class="o">]</span>
-          <span class="n">parameters</span><span class="o">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">spec</span><span class="o">.</span><span class="na">arguments</span><span class="o">.</span><span class="na">parameters</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">value</span>
+<p>Let's set up a webhook event-source to process incoming requests.</p>
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
 
@@ -1191,8 +1077,8 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 
 </li>
 <li>
-<p>Lets expose the webhook gateway using <code>port-forward</code> so that we can make a request to it.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;name-of-gateway-pod&gt; 12000:12000
+<p>Let's expose the webhook event-source pod using <code>port-forward</code> so that we can make a request to it.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
 </pre></div>
 
 
@@ -1255,7 +1141,7 @@ provided by the Argo CLI such as,</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../../tutorials/09-service-account/" title="09 service account" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1264,7 +1150,7 @@ provided by the Argo CLI such as,</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Events Over NATS
+                09 service account
               </span>
             </div>
           </a>

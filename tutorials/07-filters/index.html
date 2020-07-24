@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -649,13 +613,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6" checked>
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -705,18 +669,6 @@
   <li class="md-nav__item">
     <a href="../04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-nav__link">
       Trigger Standard K8s Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
     </a>
   </li>
 
@@ -835,8 +787,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -853,13 +805,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -996,18 +948,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1131,7 +1071,7 @@
                 
                 
                 <h1 id="filters">Filters<a class="headerlink" href="#filters" title="Permanent link">&para;</a></h1>
-<p>In previous sections, you have seen how to trigger an Argo workflow based on events. In this tutorial,
+<p>In the previous sections, you have seen how to trigger an Argo workflow based on events. In this tutorial,
 you will learn how to apply filters on event data and context. Filters provide a powerful mechanism to
 apply constraints on the events in order to determine a validity.</p>
 <p>Argo Events offers 3 types of filters:</p>
@@ -1141,19 +1081,19 @@ apply constraints on the events in order to determine a validity.</p>
 <li>Time Filter</li>
 </ol>
 <h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
-<p>Webhook gateway must be set up.</p>
+<p>Webhook event-source must be set up.</p>
 <h2 id="data-filter">Data Filter<a class="headerlink" href="#data-filter" title="Permanent link">&para;</a></h2>
-<p>Data filter as the name suggests are applied on the event data. A CloudEvent from Webhook gateway has
+<p>Data filter as the name suggests are applied on the event data. A CloudEvent from Webhook event-source has
 payload structure as,</p>
 <div class="codehilite"><pre><span></span>    {
         &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_gateway&quot;,
-          &quot;specVersion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_gateway&quot;,
-          &quot;eventID&quot;: &quot;unique_event_id&quot;,
+          &quot;type&quot;: &quot;type_of_event_source&quot;,
+          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
+          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
+          &quot;id&quot;: &quot;unique_event_id&quot;,
           &quot;time&quot;: &quot;event_time&quot;,
-          &quot;dataContentType&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_event_within_event_source&quot;
+          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
+          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
         },
         &quot;data&quot;: {
           &quot;header&quot;: {},
@@ -1164,7 +1104,7 @@ payload structure as,</p>
 
 
 <p>Data Filter are applied on <code>data</code> within the payload. We will make a simple HTTP request
-to webhook gateway with request data as <code>{"message":"this is my first webhook"}</code> and apply
+to webhook event-source with request data as <code>{"message":"this is my first webhook"}</code> and apply
 data filter on <code>message</code>.</p>
 <p>A data filter has following fields,</p>
 <div class="codehilite"><pre><span></span>    data:
@@ -1201,7 +1141,7 @@ If data types is bool or float, then you need to pass the exact value.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to gateway</p>
+<p>Send a HTTP request to event-source</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1212,7 +1152,7 @@ If data types is bool or float, then you need to pass the exact value.</p>
    either <code>hello</code> or <code>hey</code> as the value of <code>body.message</code>.</p>
 </li>
 <li>
-<p>Send a valid HTTP request to gateway</p>
+<p>Send a valid HTTP request to event-source</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;hello&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1224,7 +1164,7 @@ If data types is bool or float, then you need to pass the exact value.</p>
 </ol>
 <h2 id="context-filter">Context Filter<a class="headerlink" href="#context-filter" title="Permanent link">&para;</a></h2>
 <p>Similar to the data filter, you can apply a filter on the context of the event.</p>
-<p>Change the subscriber in the webhook gateway to point it to <code>context-filter</code> sensor's URL.</p>
+<p>Change the subscriber in the webhook event-source to point it to <code>context-filter</code> sensor's URL.</p>
 <ol>
 <li>
 <p>Lets create a webhook sensor with context filter.</p>
@@ -1234,7 +1174,7 @@ If data types is bool or float, then you need to pass the exact value.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to gateway</p>
+<p>Send a HTTP request to event-source</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1246,10 +1186,36 @@ If data types is bool or float, then you need to pass the exact value.</p>
 </li>
 </ol>
 <h2 id="time-filter">Time Filter<a class="headerlink" href="#time-filter" title="Permanent link">&para;</a></h2>
-<p>Time filter is specially helpful when you need to make sure an event occurs between a 
-certain time-frame. Time filter takes a <code>start</code> and <code>stop</code> time but you can also define just the
-<code>start</code> time, meaning, there is no <code>end time</code> constraint or just the <code>stop</code> time, meaning, there is
-no <code>start time</code> constraint. An example of time filter is available under <code>examples/sensors</code>.</p>
+<p>You can also use time filter, which is applied on event time.
+It filters out events that occur outside the specified time range, so it is specially helpful when
+you need to make sure an event occurs between a certain time-frame.</p>
+<p>Time filter takes a <code>start</code> and <code>stop</code> time in <code>HH:MM:SS</code> format in UTC. If <code>stop</code> is smaller than <code>start</code>,
+the stop time is treated as next day of <code>start</code>. Note that <code>start</code> is inclusive while <code>stop</code> is exclusive.
+The diagrams below illustlate these behavior.</p>
+<p>An example of time filter is available under <code>examples/sensors</code>.</p>
+<ol>
+<li>
+<p>if <code>start</code> &lt; <code>stop</code>: event time must be in <code>[start, stop)</code></p>
+<div class="codehilite"><pre><span></span> 00:00:00                            00:00:00                            00:00:00
+ ┃     start                   stop  ┃     start                   stop  ┃
+─┸─────●───────────────────────○─────┸─────●───────────────────────○─────┸─
+       ╰───────── OK ──────────╯           ╰───────── OK ──────────╯
+</pre></div>
+
+
+</li>
+<li>
+<p>if <code>stop</code> &lt; <code>start</code>: event time must be in <code>[start, stop@Next day)</code><br />
+   (this is equivalent to: event time must be in <code>[00:00:00, stop) || [start, 00:00:00@Next day)</code>)</p>
+<div class="codehilite"><pre><span></span> 00:00:00                            00:00:00                            00:00:00
+ ┃           stop        start       ┃       stop            start       ┃
+─┸───────────○───────────●───────────┸───────────○───────────●───────────┸─
+─── OK ──────╯           ╰───────── OK ──────────╯           ╰────── OK ───
+</pre></div>
+
+
+</li>
+</ol>
                 
                   
                 

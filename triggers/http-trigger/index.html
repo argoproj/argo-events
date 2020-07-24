@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -647,13 +611,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -713,18 +677,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -761,8 +713,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../../tutorials/09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -781,13 +733,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -1010,18 +962,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1228,7 +1168,7 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
 </li>
 <li>
 <p>Our goals is to seamlessly integrate Minio S3 bucket notifications with REST API server created in previous step. So,
-   lets set up the Minio Gateway and EventSource available <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>.
+   lets set up the Minio event-source available <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>.
    Don't create the sensor as we will be deploying it in next step.</p>
 </li>
 <li>
@@ -1321,7 +1261,7 @@ to invoke OpenFaas function.</p>
 <p>If you don't have OpenFaas installed, follow the <a href="https://docs.openfaas.com/deployment/kubernetes/">instructions</a>.</p>
 </li>
 <li>
-<p>Lets create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>
+<p>Let's create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>
    to set up the function.</p>
 <div class="codehilite"><pre><span></span><span class="n">package</span> <span class="n">function</span>
 
@@ -1344,11 +1284,11 @@ to invoke OpenFaas function.</p>
 <p>We are going to invoke OpenFaas function on a message on Redis Subscriber.</p>
 </li>
 <li>
-<p>Lets set up the Redis Database, Redis PubSub Gateway and EventSource as specified <a href="https://argoproj.github.io/argo-events/setup/redis/">here</a>.
+<p>Let's set up the Redis Database, Redis PubSub event-source as specified <a href="https://argoproj.github.io/argo-events/setup/redis/">here</a>.
    Do not create the Redis sensor, we are going to create it in next step.</p>
 </li>
 <li>
-<p>Lets create the sensor with OpenFaas trigger</p>
+<p>Let's create the sensor with OpenFaas trigger</p>
 <div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1358,7 +1298,7 @@ to invoke OpenFaas function.</p>
     <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">gatewayName</span><span class="o">:</span> <span class="n">redis</span><span class="o">-</span><span class="n">gateway</span>
+      <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">redis</span>
       <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
   <span class="n">subscription</span><span class="o">:</span>
     <span class="n">http</span><span class="o">:</span>
@@ -1410,11 +1350,11 @@ to invoke OpenFaas function.</p>
 <p>Now, we are going to invoke the Kubeless function when a message is placed on a NATS queue.</p>
 </li>
 <li>
-<p>Lets set up the NATS Gateway and EventSource. Follow <a href="https://argoproj.github.io/argo-events/setup/nats/#setup">instructions</a> for details.
+<p>Let's set up the NATS event-source. Follow <a href="https://argoproj.github.io/argo-events/setup/nats/#setup">instructions</a> for details.
    Do not create the NATS sensor, we are going to create it in next step.</p>
 </li>
 <li>
-<p>Lets create NATS sensor with HTTP trigger,</p>
+<p>Let's create NATS sensor with HTTP trigger,</p>
 <div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1424,7 +1364,7 @@ to invoke OpenFaas function.</p>
     <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">gatewayName</span><span class="o">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">gateway</span>
+      <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">nats</span>
       <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
   <span class="n">subscription</span><span class="o">:</span>
     <span class="n">http</span><span class="o">:</span>
@@ -1449,7 +1389,7 @@ to invoke OpenFaas function.</p>
 
 </li>
 <li>
-<p>Once gateway and sensor pod are up and running, dispatch a message on <code>foo</code> subject using nats client,</p>
+<p>Once event-source and sensor pod are up and running, dispatch a message on <code>foo</code> subject using nats client,</p>
 <div class="codehilite"><pre><span></span>go run main.go -s localhost foo &#39;{&quot;first_name&quot;: &quot;foo&quot;, &quot;last_name&quot;: &quot;bar&quot;}&#39;
 </pre></div>
 

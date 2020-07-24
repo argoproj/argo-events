@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,56 +341,32 @@
 
 
   <li class="md-nav__item">
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
       Trigger
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
-    
-    <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
     </a>
   </li>
 
@@ -421,13 +385,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
     
-    <label class="md-nav__link" for="nav-6">
+    <label class="md-nav__link" for="nav-5">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -701,13 +665,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -767,18 +731,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -815,8 +767,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../../tutorials/09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -833,13 +785,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -976,18 +928,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1091,28 +1031,20 @@
                 
                 
                 <h1 id="minio">Minio<a class="headerlink" href="#minio" title="Permanent link">&para;</a></h1>
-<p>Minio gateway listens to minio bucket notifications and helps sensor trigger the workloads.</p>
-<p><strong><em>Note</em></strong>: Minio gateway is exclusive for the Minio server. If you want to trigger workloads on AWS S3 bucket notification,
-please set up the AWS SNS gateway.</p>
-<p><br/>
-<br/></p>
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/minio-setup.png?raw=true" alt="Minio Setup"/>
-</p>
-
-<p><br/>
-<br/></p>
+<p>Minio event-source listens to minio bucket notifications and helps sensor trigger the workloads.</p>
+<p><strong><em>Note</em></strong>: Minio event-source is exclusive for the Minio server. If you want to trigger workloads on AWS S3 bucket notification,
+please set up the AWS SNS event-source.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
-<p>The structure of an event dispatched by the gateway to the sensor looks like following,</p>
+<p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span>    {
         &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_gateway&quot;,
-          &quot;specVersion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_gateway&quot;,
-          &quot;eventID&quot;: &quot;unique_event_id&quot;,
+          &quot;type&quot;: &quot;type_of_event_source&quot;,
+          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
+          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
+          &quot;id&quot;: &quot;unique_event_id&quot;,
           &quot;time&quot;: &quot;event_time&quot;,
-          &quot;dataContentType&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_event_within_event_source&quot;
+          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
+          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
         },
         &quot;data&quot;: {
           notification: [
@@ -1125,12 +1057,10 @@ please set up the AWS SNS gateway.</p>
 </pre></div>
 
 
-<p><br/></p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Make sure to have minio server deployed and reachable from the gateway. More info on minio server setup 
-is available at https://github.com/minio/minio/blob/master/docs/orchestration/kubernetes/k8s-yaml.md.</p>
+<p>Make sure to have the minio server deployed and reachable from the event-source.</p>
 </li>
 <li>
 <p>If you are running Minio locally, make sure to <code>port-forward</code> to minio pod in order to make the service available outside local K8s cluster.</p>
@@ -1170,32 +1100,14 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 
 </li>
 <li>
-<p>If you inspect the gateway resource definition, you will notice that it refers to the event source <code>minio-event-source</code>. Lets install event source in the <code>argo-events</code> namespace,</p>
+<p>Let's install event source in the <code>argo-events</code> namespace,</p>
 <div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
 </pre></div>
 
 
 </li>
 <li>
-<p>Always make sure to first create a bucket on Minio and then refer it in event source.</p>
-</li>
-<li>
-<p>Install gateway in the <code>argo-events</code> namespace using following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/minio.yaml
-</pre></div>
-
-
-</li>
-</ol>
-<p>Once the gateway resource is created, the gateway controller will process it and create a pod.</p>
-<p>If you don't see the pod in <code>argo-events</code> namespace, check the gateway controller logs
-   for errors.</p>
-<ol>
-<li>
-<p>Check the gateway logs to make sure the gateway has processed the event source.</p>
-</li>
-<li>
-<p>Lets create the sensor,</p>
+<p>Let's create the sensor,</p>
 <div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml
 </pre></div>
 
@@ -1208,9 +1120,8 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 <p>Run <code>argo list</code> to find the workflow.</p>
 </li>
 </ol>
-<p><br/></p>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>
-<p>Please read the <a href="https://argoproj.github.io/argo-events/faq/">FAQ</a>.</p>
+<p>Please read the <a href="https://argoproj.github.io/argo-events/FAQ/">FAQ</a>.</p>
                 
                   
                 

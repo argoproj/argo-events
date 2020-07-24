@@ -36,7 +36,7 @@
     
     
       
-        <title>Gateway - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>09 service account - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -127,7 +127,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#gateway" tabindex="1" class="md-skip">
+      <a href="#service-account-for-eventsources" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -152,7 +152,7 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              Gateway
+              09 service account
             </span>
           
         </div>
@@ -296,12 +296,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
     
     <label class="md-nav__link" for="nav-4">
       Concepts
@@ -317,95 +315,10 @@
           
           
 
-  
-
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Gateway
-      </label>
-    
-    <a href="./" title="Gateway" class="md-nav__link md-nav__link--active">
-      Gateway
-    </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-is-a-gateway" title="What is a gateway?" class="md-nav__link">
-    What is a gateway?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gateway-client" title="Gateway Client" class="md-nav__link">
-    Gateway Client
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gateway-server" title="Gateway Server" class="md-nav__link">
-    Gateway Server
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gateway-event-source" title="Gateway &amp; Event Source" class="md-nav__link">
-    Gateway &amp; Event Source
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#specification" title="Specification" class="md-nav__link">
-    Specification
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" title="Examples" class="md-nav__link">
-    Examples
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
-  </li>
-
-        
-          
-          
-          
-
 
   <li class="md-nav__item">
-    <a href="../sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -416,7 +329,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../event_source/" title="Event Source" class="md-nav__link">
+    <a href="../../concepts/event_source/" title="Event Source" class="md-nav__link">
       Event Source
     </a>
   </li>
@@ -428,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -440,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -461,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -719,16 +608,18 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6" checked>
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -740,7 +631,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/01-introduction/" title="Introduction" class="md-nav__link">
+    <a href="../01-introduction/" title="Introduction" class="md-nav__link">
       Introduction
     </a>
   </li>
@@ -752,7 +643,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/02-parameterization/" title="Parameterization" class="md-nav__link">
+    <a href="../02-parameterization/" title="Parameterization" class="md-nav__link">
       Parameterization
     </a>
   </li>
@@ -764,7 +655,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
+    <a href="../03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
       Trigger Sources
     </a>
   </li>
@@ -776,7 +667,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-nav__link">
+    <a href="../04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-nav__link">
       Trigger Standard K8s Resources
     </a>
   </li>
@@ -788,19 +679,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
+    <a href="../06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
   </li>
@@ -812,7 +691,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/07-filters/" title="Filters" class="md-nav__link">
+    <a href="../07-filters/" title="Filters" class="md-nav__link">
       Filters
     </a>
   </li>
@@ -824,7 +703,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/08-policy/" title="Policy" class="md-nav__link">
+    <a href="../08-policy/" title="Policy" class="md-nav__link">
       Policy
     </a>
   </li>
@@ -834,11 +713,79 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        09 service account
+      </label>
+    
+    <a href="./" title="09 service account" class="md-nav__link md-nav__link--active">
+      09 service account
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#service-account-for-eventsources" title="Service Account for EventSources" class="md-nav__link">
+    Service Account for EventSources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-account-for-triggers" title="Service Account for Triggers" class="md-nav__link">
+    Service Account for Triggers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#k8s-resource-trigger" title="K8s Resource Trigger" class="md-nav__link">
+    K8s Resource Trigger
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aws-lambda-http-slack-and-openwhisk-trigger" title="AWS Lambda, HTTP, Slack and OpenWhisk Trigger" class="md-nav__link">
+    AWS Lambda, HTTP, Slack and OpenWhisk Trigger
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nats-and-kafka-triggers" title="NATS and Kafka Triggers" class="md-nav__link">
+    NATS and Kafka Triggers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -854,13 +801,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -997,18 +944,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1065,51 +1000,48 @@
 <nav class="md-nav md-nav--secondary">
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">Table of contents</label>
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-gateway" title="What is a gateway?" class="md-nav__link">
-    What is a gateway?
+  <a href="#service-account-for-eventsources" title="Service Account for EventSources" class="md-nav__link">
+    Service Account for EventSources
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#gateway-client" title="Gateway Client" class="md-nav__link">
-    Gateway Client
+  <a href="#service-account-for-triggers" title="Service Account for Triggers" class="md-nav__link">
+    Service Account for Triggers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#k8s-resource-trigger" title="K8s Resource Trigger" class="md-nav__link">
+    K8s Resource Trigger
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#gateway-server" title="Gateway Server" class="md-nav__link">
-    Gateway Server
+        
+          <li class="md-nav__item">
+  <a href="#aws-lambda-http-slack-and-openwhisk-trigger" title="AWS Lambda, HTTP, Slack and OpenWhisk Trigger" class="md-nav__link">
+    AWS Lambda, HTTP, Slack and OpenWhisk Trigger
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#gateway-event-source" title="Gateway &amp; Event Source" class="md-nav__link">
-    Gateway &amp; Event Source
+        
+          <li class="md-nav__item">
+  <a href="#nats-and-kafka-triggers" title="NATS and Kafka Triggers" class="md-nav__link">
+    NATS and Kafka Triggers
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#specification" title="Specification" class="md-nav__link">
-    Specification
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" title="Examples" class="md-nav__link">
-    Examples
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1129,43 +1061,34 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/concepts/gateway.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/tutorials/09-service-account.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="gateway">Gateway<a class="headerlink" href="#gateway" title="Permanent link">&para;</a></h1>
-<h2 id="what-is-a-gateway">What is a gateway?<a class="headerlink" href="#what-is-a-gateway" title="Permanent link">&para;</a></h2>
-<p>A gateway consumes events from outside entities, transforms them into the <a href="https://github.com/cloudevents/spec">cloudevents specification</a> compliant events and dispatches them to sensors.</p>
-<p><br/></p>
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/gateway.png?raw=true" alt="Gateway"/>
-</p>
-
-<p><br/></p>
-<p>There are two components for a gateway,</p>
-<h2 id="gateway-client">Gateway Client<a class="headerlink" href="#gateway-client" title="Permanent link">&para;</a></h2>
-<p>Gateway client manages the event source for the gateway.</p>
-<p>Its responsibilities are,</p>
-<ol>
-<li>Monitor and manage the event sources.</li>
-<li>Monitor and manage the subscribers.</li>
-<li>Convert the events received from the gateway server into CloudEvents.</li>
-<li>Dispatch the cloudevents to subscribers.</li>
-</ol>
-<h2 id="gateway-server">Gateway Server<a class="headerlink" href="#gateway-server" title="Permanent link">&para;</a></h2>
-<p>Gateway server listens to events from event sources.</p>
-<p>Its responsibilities are,</p>
-<ol>
-<li>Validate an event source.</li>
-<li>Implement the logic for consuming events from an event source.</li>
-<li>Dispatch events to gateway client.</li>
-</ol>
-<h2 id="gateway-event-source">Gateway &amp; Event Source<a class="headerlink" href="#gateway-event-source" title="Permanent link">&para;</a></h2>
-<p>Event Source are event configuration store for a gateway. The configuration stored in an Event Source is used by a gateway to consume events from
-external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.</p>
-<h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>Complete specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/gateway.md">here</a>.</p>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<p>Examples are located under <code>examples/gateways</code>.</p>
+                  <h1>09 service account</h1>
+                
+                <h2 id="service-account-for-eventsources">Service Account for EventSources<a class="headerlink" href="#service-account-for-eventsources" title="Permanent link">&para;</a></h2>
+<p>Most of the event-sources can be run with a service account with no roles associated, expect the ones which require
+access to secrets to read auth related configuration. Make sure to grant <code>get</code> and <code>list</code> permission for secrets to the service account used in 
+such event-sources.</p>
+<p>For <code>Resource</code> event-source, you need to associate the <code>get</code>, <code>list</code> and <code>watch</code> permissions for the resource being watched, and assign that role to the service account. </p>
+<h2 id="service-account-for-triggers">Service Account for Triggers<a class="headerlink" href="#service-account-for-triggers" title="Permanent link">&para;</a></h2>
+<p>Based on the type of trigger, it's a good practice to create a service account with minimum set of roles to execute it.</p>
+<p>The sensor examples use <code>argo-events-sa</code> service account to execute all types of triggers, but it is has more permissions than needed
+,and you may want to limit those permissions based on your use-case.</p>
+<h3 id="k8s-resource-trigger">K8s Resource Trigger<a class="headerlink" href="#k8s-resource-trigger" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>To execute Argo workflow trigger, make sure to grant <code>create</code> permission for workflows to the service account.</p>
+</li>
+<li>
+<p>To trigger a any other K8s resource, make sure to grant <code>create</code> permission for that resource. </p>
+</li>
+</ul>
+<h3 id="aws-lambda-http-slack-and-openwhisk-trigger">AWS Lambda, HTTP, Slack and OpenWhisk Trigger<a class="headerlink" href="#aws-lambda-http-slack-and-openwhisk-trigger" title="Permanent link">&para;</a></h3>
+<p>These triggers may need access to secrets for access tokens/auth related configuration. Make
+sure to grant <code>get</code> and <code>list</code> permissions for the secret resource.  </p>
+<h3 id="nats-and-kafka-triggers">NATS and Kafka Triggers<a class="headerlink" href="#nats-and-kafka-triggers" title="Permanent link">&para;</a></h3>
+<p>For NATS and Kafka, you <strong>don't</strong> need any K8s role associated with the service account.</p>
                 
                   
                 
@@ -1186,7 +1109,7 @@ external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../../quick_start/" title="Getting Started" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../08-policy/" title="Policy" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1195,19 +1118,19 @@ external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Getting Started
+                Policy
               </span>
             </div>
           </a>
         
         
-          <a href="../sensor/" title="Sensor" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Sensor
+                Argo Workflow Trigger
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

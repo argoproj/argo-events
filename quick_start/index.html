@@ -326,20 +326,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -362,8 +350,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -374,8 +362,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -395,46 +395,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -656,13 +620,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -722,18 +686,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -770,8 +722,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../tutorials/09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -788,13 +740,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -931,18 +883,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1016,25 +956,26 @@
                 
                 
                 <h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
-<p>We are going to set up a gateway, sensor and event-source for webhook. The goal is
-to trigger an Argo workflow upon a HTTP Post request.</p>
+<p>We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.</p>
 <p>Note: You will need to have <a href="https://argoproj.github.io/docs/argo/readme.html">Argo Workflows</a> installed to make this work.</p>
 <ol>
-<li>First, we need to setup event sources for gateway to listen.<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+<li>
+<p>Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus,</p>
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Setup event-source for webhook as follows,</p>
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
 
 </li>
 </ol>
-<p>The event-source drives the configuration required for a gateway to consume events from external sources.</p>
-<ol>
-<li>Create webhook gateway, <div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
-</pre></div>
-
-
-</li>
-</ol>
-<p>After running above command, gateway controller will create corresponding a pod and service.</p>
+<p>The above event-source contains a single event configuration that runs an HTTP server on port <code>12000</code> with endpoint <code>example</code>.</p>
+<p>After running the above command, the event-source controller will create a pod and service.</p>
 <ol>
 <li>Create webhook sensor,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 </pre></div>
@@ -1042,11 +983,11 @@ to trigger an Argo workflow upon a HTTP Post request.</p>
 
 </li>
 </ol>
-<p>Once sensor object is created, sensor controller will create corresponding pod and service. </p>
+<p>Once the sensor object is created, sensor controller will create corresponding pod and a service. </p>
 <ol>
 <li>
-<p>Expose the gateway pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;gateway-pod-name&gt; 12000:12000
+<p>Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;event-source-pod-name&gt; 12000:12000
 </pre></div>
 
 
@@ -1101,13 +1042,13 @@ to trigger an Argo workflow upon a HTTP Post request.</p>
           </a>
         
         
-          <a href="../concepts/gateway/" title="Gateway" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../concepts/architecture/" title="Architecture" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Gateway
+                Architecture
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

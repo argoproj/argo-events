@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -649,13 +613,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6" checked>
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -767,18 +731,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -815,8 +767,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -833,13 +785,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -976,18 +928,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
     <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
@@ -1100,7 +1040,7 @@ set up pipelines for existing workloads.</p>
 <ol>
 <li>Make sure that <code>argo-events-sa</code> service account has necessary permissions to 
 create the Kubernetes resource of your choice.</li>
-<li>The <code>Webhook</code> gateway is already set up.</li>
+<li>The <code>Webhook</code> event-source is already set up.</li>
 </ol>
 <h2 id="pod">Pod<a class="headerlink" href="#pod" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1132,7 +1072,7 @@ create the Kubernetes resource of your choice.</li>
 <p>Output</p>
 <div class="codehilite"><pre><span></span>    _________________________________________ 
     / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
-    | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook-gateway&quot;,&quot;e |
+    | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
     | ventID&quot;:&quot;30306463666539362d346666642d34 |
     | 3336332d383861312d336538363333613564313 |
     | 932&quot;,&quot;time&quot;:&quot;2020-01-11T21:23:07.682961 |
@@ -1185,7 +1125,7 @@ create the Kubernetes resource of your choice.</li>
 <p>Output</p>
 <div class="codehilite"><pre><span></span>    _________________________________________ 
     / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
-    | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook-gateway&quot;,&quot;e |
+    | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
     | ventID&quot;:&quot;30306463666539362d346666642d34 |
     | 3336332d383861312d336538363333613564313 |
     | 932&quot;,&quot;time&quot;:&quot;2020-01-11T21:23:07.682961 |
@@ -1244,13 +1184,13 @@ create the Kubernetes resource of your choice.</li>
           </a>
         
         
-          <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../06-circuit-and-switch/" title="Circuit and Switch" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Trigger Custom Resources
+                Circuit and Switch
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

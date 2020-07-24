@@ -317,20 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
-      Sensor
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
     </a>
   </li>
 
@@ -353,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -365,8 +353,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
-      Architecture
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+      Eventbus
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -386,46 +386,10 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Demo
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
-        Demo
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link" for="nav-6">
       Setup
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
+      <label class="md-nav__title" for="nav-5">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -649,13 +613,13 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6" checked>
     
-    <label class="md-nav__link" for="nav-7">
+    <label class="md-nav__link" for="nav-6">
       Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
+      <label class="md-nav__title" for="nav-6">
         Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -815,18 +779,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
       Circuit and Switch
     </a>
@@ -863,8 +815,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
-      Events Over NATS
+    <a href="../09-service-account/" title="09 service account" class="md-nav__link">
+      09 service account
     </a>
   </li>
 
@@ -881,13 +833,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-8">
+    <label class="md-nav__link" for="nav-7">
       Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-8">
+      <label class="md-nav__title" for="nav-7">
         Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -1014,18 +966,6 @@
   <li class="md-nav__item">
     <a href="../../developer_guide/" title="Developer Guide" class="md-nav__link">
       Developer Guide
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../controllers/" title="Controllers" class="md-nav__link">
-      Controllers
     </a>
   </li>
 
@@ -1187,32 +1127,31 @@
                 
                 
                 <h1 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h1>
-<p>In previous section, we saw how to set up a basic webhook gateway and sensor, and trigger
-an Argo workflow. The trigger template had <code>parameters</code> set in the sensor obejct and
+<p>In the previous section, we saw how to set up a basic webhook event-source and sensor. The trigger template had <code>parameters</code> set in the sensor object, and
 the workflow was able to print the event payload. In this tutorial, we will dig deeper into
 different types of parameterization, how to extract particular key-value from event payload
 and how to use default values if certain <code>key</code> is not available within event payload.</p>
 <h2 id="trigger-resource-parameterization">Trigger Resource Parameterization<a class="headerlink" href="#trigger-resource-parameterization" title="Permanent link">&para;</a></h2>
 <p>If you take a closer look at the <code>Sensor</code> object, you will notice it contains a list
 of triggers. Each <code>Trigger</code> contains the template that defines the context of the trigger
-and actual <code>resource</code> that we expect the sensor to execute. In previous section, the <code>resource</code> within
+and actual <code>resource</code> that we expect the sensor to execute. In the previous section, the <code>resource</code> within
 the trigger template was an Argo workflow.</p>
 <p>This subsection deals with how to parameterize the <code>resource</code> within trigger template
 with the event payload.</p>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<p>Make sure to have the basic webhook gateway and sensor set up. Follow the <a href="https://argoproj.github.io/argo-events/tutorials/01_introduction">introduction</a> tutorial if haven't done already.</p>
+<p>Make sure to have the basic webhook event-source and sensor set up. Follow the <a href="https://argoproj.github.io/argo-events/tutorials/01_introduction">introduction</a> tutorial if haven't done already.</p>
 <h3 id="webhook-event-payload">Webhook Event Payload<a class="headerlink" href="#webhook-event-payload" title="Permanent link">&para;</a></h3>
-<p>Webhook gateway consumes events through HTTP requests and transforms them into CloudEvents.
-The structure of the event the Webhook sensor receives from the gateway looks like following,</p>
+<p>Webhook event-source consumes events through HTTP requests and transforms them into CloudEvents.
+The structure of the event the Webhook sensor receives from the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span>    {
         &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_gateway&quot;,
-          &quot;specVersion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_gateway&quot;,
-          &quot;eventID&quot;: &quot;unique_event_id&quot;,
+          &quot;type&quot;: &quot;type_of_event_source&quot;,
+          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
+          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
+          &quot;id&quot;: &quot;unique_event_id&quot;,
           &quot;time&quot;: &quot;event_time&quot;,
-          &quot;dataContentType&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_event_within_event_source&quot;
+          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
+          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
         },
         &quot;data&quot;: {
           &quot;header&quot;: {},
@@ -1224,7 +1163,7 @@ The structure of the event the Webhook sensor receives from the gateway looks li
 
 <ol>
 <li>
-<p><code>Context</code>: This is the CloudEvent context and it is populated by the gateway regardless of 
+<p><code>Context</code>: This is the CloudEvent context and it is populated by the event-source regardless of 
 type of HTTP request.</p>
 </li>
 <li>
@@ -1232,7 +1171,7 @@ type of HTTP request.</p>
 </li>
 <li>
 <p><code>Header</code>: The <code>header</code> within event <code>data</code> contains the headers in the HTTP request that was dispatched
-   to the gateway. The gateway extracts the headers from the request and put it in
+   to the event-source. The event-source extracts the headers from the request and put it in
    the the <code>header</code> within event <code>data</code>. </p>
 </li>
 <li>
@@ -1241,7 +1180,7 @@ type of HTTP request.</p>
 </ol>
 <h3 id="event-context">Event Context<a class="headerlink" href="#event-context" title="Permanent link">&para;</a></h3>
 <p>Now that we have an understanding of the structure of the event the webhook sensor receives from
-the gateway, lets see how we can use the event context to parameterize the Argo workflow.</p>
+the event-source over the eventbus, lets see how we can use the event context to parameterize the Argo workflow.</p>
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>contextKey</code> for the parameter at index 0.</p>
@@ -1251,7 +1190,7 @@ the gateway, lets see how we can use the event context to parameterize the Argo 
 
 </li>
 <li>
-<p>Send a HTTP request to the gateway.</p>
+<p>Send a HTTP request to the event-source pod.</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1298,7 +1237,7 @@ print the message.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to the gateway.</p>
+<p>Send a HTTP request to the event-source pod.</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1347,7 +1286,7 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 
 </li>
 <li>
-<p>Send a HTTP request to the gateway.</p>
+<p>Send a HTTP request to the event-source pod.</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1408,13 +1347,13 @@ as follows,</p>
 <p>Consider the event the sensor received has format like,</p>
 <div class="codehilite"><pre><span></span>    {
         &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_gateway&quot;,
-          &quot;specVersion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_gateway&quot;,
-          &quot;eventID&quot;: &quot;unique_event_id&quot;,
+          &quot;type&quot;: &quot;type_of_event_source&quot;,
+          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
+          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
+          &quot;id&quot;: &quot;unique_event_id&quot;,
           &quot;time&quot;: &quot;event_time&quot;,
-          &quot;dataContentType&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_event_within_event_source&quot;
+          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
+          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
         },
         &quot;data&quot;: {
           &quot;body&quot;: {
@@ -1428,14 +1367,20 @@ as follows,</p>
 
 <p>The parameters are transformed as,</p>
 <ol>
-<li>The first parameter extracts the <code>body.message</code> from event data and applies <code>title</code> filter which basically
-   capitalizes the first letter and replaces the <code>spec.arguments.parameters.0.value</code>.</li>
-<li>The second parameter extracts the <code>subject</code> from the event context and again applies <code>title</code> filter and replaces the
-   <code>spec.arguments.parameters.1.value</code>.</li>
-<li>The third parameter extracts the <code>body.name</code> from the event data, applies <code>nospace</code> filter which removes all
-   white spaces and then <code>lower</code> filter which lowercases the text and appends it to <code>metadata.generateName</code>.</li>
+<li>
+<p>The first parameter extracts the <code>body.message</code> from event data and applies <code>title</code> filter which basically
+   capitalizes the first letter and replaces the <code>spec.arguments.parameters.0.value</code>.</p>
+</li>
+<li>
+<p>The second parameter extracts the <code>subject</code> from the event context and again applies <code>title</code> filter and replaces the
+   <code>spec.arguments.parameters.1.value</code>.</p>
+</li>
+<li>
+<p>The third parameter extracts the <code>body.name</code> from the event data, applies <code>nospace</code> filter which removes all
+   white spaces and then <code>lower</code> filter which lowercases the text and appends it to <code>metadata.generateName</code>.</p>
+</li>
 </ol>
-<p>Send a curl request to webhook-gateway as follows,</p>
+<p>Send a curl request to event-source as follows,</p>
 <div class="codehilite"><pre><span></span>    curl -d &#39;{&quot;name&quot;:&quot;foo bar&quot;, &quot;message&quot;: &quot;hello there!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1474,7 +1419,7 @@ a parameter comes handy.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to the gateway.</p>
+<p>Send a HTTP request to the event-source.</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;hey!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
@@ -1525,7 +1470,7 @@ applying a parameter at the trigger template level.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to the gateway.</p>
+<p>Send a HTTP request to the event-source.</p>
 <div class="codehilite"><pre><span></span>curl -d &#39;{&quot;dependencyName&quot;:&quot;test-dep&quot;, &quot;dataKey&quot;: &quot;body.message&quot;, &quot;dest&quot;: &quot;spec.arguments.parameters.0.value&quot;, &quot;message&quot;: &quot;amazing!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
