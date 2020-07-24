@@ -85,7 +85,7 @@ func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger())
+	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
 	resource, err := impl.FetchResource()
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
@@ -134,7 +134,7 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, fakeSensor, &fakeSensor.Spec.Triggers[0], logging.NewArgoEventsLogger())
+	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, fakeSensor, &fakeSensor.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
 
 	out, err := impl.ApplyResourceParameters(testEvents, deployment)
 	assert.Nil(t, err)
@@ -152,7 +152,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger())
+	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
 
 	resource, err := impl.Execute(nil, deployment)
 	assert.Nil(t, err)
@@ -167,7 +167,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	uObj.SetLabels(labels)
 
 	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Update
-	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger())
+	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
 	resource, err = impl.Execute(nil, uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
@@ -184,7 +184,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Patch
 	sensorObj.Spec.Triggers[0].Template.K8s.PatchStrategy = k8stypes.MergePatchType
 
-	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger())
+	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
 	resource, err = impl.Execute(nil, uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)

@@ -7,9 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	"github.com/argoproj/argo-events/common/logging"
 )
 
 const (
@@ -67,7 +68,7 @@ func TestResourceReconcile(t *testing.T) {
 			EventSource: testEventSource,
 			Labels:      testLabels,
 		}
-		err := Reconcile(cl, args, ctrl.Log.WithName("test"))
+		err := Reconcile(cl, args, logging.NewArgoEventsLogger())
 		assert.Error(t, err)
 		assert.False(t, testEventSource.Status.IsReady())
 	})
@@ -85,7 +86,7 @@ func TestResourceReconcile(t *testing.T) {
 			EventSource: testEventSource,
 			Labels:      testLabels,
 		}
-		err = Reconcile(cl, args, ctrl.Log.WithName("test"))
+		err = Reconcile(cl, args, logging.NewArgoEventsLogger())
 		assert.Nil(t, err)
 		assert.True(t, testEventSource.Status.IsReady())
 

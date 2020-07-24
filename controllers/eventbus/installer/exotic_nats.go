@@ -4,21 +4,21 @@ import (
 	"errors"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
 )
 
 // exoticNATSInstaller is an inalleration implementation of exotic nats config.
 type exoticNATSInstaller struct {
 	eventBus *v1alpha1.EventBus
 
-	logger logr.Logger
+	logger *zap.SugaredLogger
 }
 
 // NewExoticNATSInstaller return a new exoticNATSInstaller
-func NewExoticNATSInstaller(eventBus *v1alpha1.EventBus, logger logr.Logger) Installer {
+func NewExoticNATSInstaller(eventBus *v1alpha1.EventBus, logger *zap.SugaredLogger) Installer {
 	return &exoticNATSInstaller{
 		eventBus: eventBus,
-		logger:   logger.WithName("exotic-nats"),
+		logger:   logger.Named("exotic-nats"),
 	}
 }
 

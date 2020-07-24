@@ -11,10 +11,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
@@ -109,7 +109,7 @@ func TestBadInstallation(t *testing.T) {
 			streamingImage: testStreamingImage,
 			metricsImage:   testMetricsImage,
 			labels:         testLabels,
-			logger:         ctrl.Log.WithName("test"),
+			logger:         logging.NewArgoEventsLogger(),
 		}
 		_, err := installer.Install()
 		assert.Error(t, err)
@@ -119,7 +119,7 @@ func TestBadInstallation(t *testing.T) {
 func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBus)
-		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testMetricsImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -168,7 +168,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBusAuthNone)
-		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testMetricsImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -210,7 +210,7 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 			streamingImage: testStreamingImage,
 			metricsImage:   testMetricsImage,
 			labels:         testLabels,
-			logger:         ctrl.Log.WithName("test"),
+			logger:         logging.NewArgoEventsLogger(),
 		}
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)

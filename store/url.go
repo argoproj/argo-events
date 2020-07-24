@@ -6,8 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -25,6 +24,7 @@ func NewURLReader(urlArtifact *v1alpha1.URLArtifact) (ArtifactReader, error) {
 }
 
 func (reader *URLReader) Read() ([]byte, error) {
+	log := logging.NewArgoEventsLogger()
 	log.Debugf("reading urlArtifact from %s", reader.urlArtifact.Path)
 	insecureSkipVerify := !reader.urlArtifact.VerifyCert
 	client := &http.Client{

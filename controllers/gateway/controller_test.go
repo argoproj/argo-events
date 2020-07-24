@@ -46,7 +46,7 @@ func newController() *Controller {
 		gatewayClient:  fakegateway.NewSimpleClientset(),
 		eventBusClient: fakeeventbus.NewSimpleClientset(),
 		queue:          workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		logger:         logging.NewArgoEventsLogger(),
+		logger:         logging.NewArgoEventsLogger().Desugar(),
 	}
 	informer, err := controller.newGatewayInformer()
 	if err != nil {

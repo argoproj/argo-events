@@ -21,7 +21,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -48,7 +48,7 @@ type Route struct {
 	// WebhookContext refers to the webhook context
 	Context *v1alpha1.WebhookContext
 	// Logger to log stuff
-	Logger *logrus.Logger
+	Logger *zap.SugaredLogger
 	// StartCh controls the
 	StartCh chan struct{}
 	// EventSourceName refers to event source name

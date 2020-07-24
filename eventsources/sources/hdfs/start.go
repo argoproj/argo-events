@@ -11,6 +11,7 @@ import (
 
 	"github.com/colinmarc/hdfs"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/common/fsevent"
@@ -62,30 +63,27 @@ func (w *WatchableHDFS) GetFileID(fi os.FileInfo) interface{} {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Emitter event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	log.Info("started processing the Emitter event source...")
 	defer sources.Recover(el.GetEventName())
 
 	hdfsEventSource := &el.HDFSEventSource
 
-	log.Infoln("setting up HDFS configuration...")
+	log.Info("setting up HDFS configuration...")
 	hdfsConfig, err := createHDFSConfig(hdfsEventSource)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create HDFS configuration for %s", el.GetEventName())
 	}
 
-	log.Infoln("setting up HDFS client...")
+	log.Info("setting up HDFS client...")
 	hdfscli, err := createHDFSClient(hdfsConfig.Addresses, hdfsConfig.HDFSUser, hdfsConfig.KrbOptions)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create the HDFS client for %s", el.GetEventName())
 	}
 	defer hdfscli.Close()
 
-	log.Infoln("setting up a new watcher...")
+	log.Info("setting up a new watcher...")
 	watcher, err := naivewatcher.NewWatcher(&WatchableHDFS{hdfscli: hdfscli})
 	if err != nil {
 		return errors.Wrapf(err, "failed to create the HDFS watcher for %s", el.GetEventName())
@@ -101,14 +99,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		intervalDuration = d
 	}
 
-	log.Infoln("started HDFS watcher")
+	log.Info("started HDFS watcher")
 	err = watcher.Start(intervalDuration)
 	if err != nil {
 		return errors.Wrapf(err, "failed to start the watcher for %s", el.GetEventName())
 	}
 
 	// directory to watch must be available in HDFS. You can't watch a directory that is not present.
-	log.Infoln("adding configured directory to watcher...")
+	log.Info("adding configured directory to watcher...")
 	err = watcher.Add(hdfsEventSource.Directory)
 	if err != nil {
 		return errors.Wrapf(err, "failed to add directory %s for %s", hdfsEventSource.Directory, el.GetEventName())
@@ -123,7 +121,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
-	log.Infoln("listening to HDFS notifications...")
+	log.Info("listening to HDFS notifications...")
 	for {
 		select {
 		case event, ok := <-watcher.Events:
@@ -142,24 +140,22 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 
 			if matched && (op&event.Op != 0) {
-				log = log.WithFields(
-					map[string]interface{}{
-						"event-type":      event.Op.String(),
-						"descriptor-name": event.Name,
-					},
-				)
-				log.Infoln("received an event")
+				logger := log.With(
+					"event-type", event.Op.String(),
+					"descriptor-name", event.Name,
+				).Desugar()
+				log.Info("received an event")
 
-				log.Infoln("parsing the event...")
+				log.Info("parsing the event...")
 				payload, err := json.Marshal(event)
 				if err != nil {
-					log.WithError(err).Errorln("failed to marshal the event data, rejecting event...")
+					logger.Error("failed to marshal the event data, rejecting event...", zap.Error(err))
 					continue
 				}
 
-				log.Infoln("dispatching event on data channel...")
+				log.Info("dispatching event on data channel...")
 				if err = dispatch(payload); err != nil {
-					log.WithError(err).Errorln("failed to dispatch event...")
+					logger.Error("failed to dispatch HDFS event...", zap.Error(err))
 				}
 			}
 		case err := <-watcher.Errors:

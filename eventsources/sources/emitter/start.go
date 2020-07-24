@@ -28,6 +28,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	emitter "github.com/emitter-io/go/v2"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for Emitter event source
@@ -54,12 +55,9 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Emitter event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+	log.Info("started processing the Emitter event source...")
 	defer sources.Recover(el.GetEventName())
 
 	emitterEventSource := &el.EmitterEventSource
@@ -91,10 +89,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if emitterEventSource.JSONBody {
-		log.Infoln("assuming all events have a json body...")
+		log.Info("assuming all events have a json body...")
 	}
 
-	log.WithField("channel-name", emitterEventSource.ChannelName).Infoln("creating a client")
+	log.Info("creating a client", zap.Any("channelName", emitterEventSource.ChannelName))
 	client := emitter.NewClient(options...)
 
 	if err := sources.Connect(common.GetConnectionBackoff(emitterEventSource.ConnectionBackoff), func() error {
@@ -118,13 +116,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		eventBytes, err := json.Marshal(event)
 
 		if err != nil {
-			log.WithError(err).Errorln("failed to marshal the event data")
+			log.Error("failed to marshal the event data", zap.Error(err))
 			return
 		}
-		log.Infoln("dispatching event on data channel...")
+		log.Info("dispatching event on data channel...")
 		err = dispatch(eventBytes)
 		if err != nil {
-			log.WithError(err).Errorln("failed to dispatch event")
+			log.Error("failed to dispatch event", zap.Error(err))
 		}
 	}); err != nil {
 		return errors.Wrapf(err, "failed to subscribe to channel %s", emitterEventSource.ChannelName)
@@ -132,10 +130,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	<-ctx.Done()
 
-	log.WithField("channel-name", emitterEventSource.ChannelName).Infoln("event source stopped, unsubscribe the channel")
+	log.Info("event source stopped, unsubscribe the channel", zap.Any("channelName", emitterEventSource.ChannelName))
 
 	if err := client.Unsubscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName); err != nil {
-		log.WithError(err).WithField("channel-name", emitterEventSource.ChannelName).Errorln("failed to unsubscribe")
+		log.Error("failed to unsubscribe", zap.Any("channelName", emitterEventSource.ChannelName), zap.Error(err))
 	}
 
 	return nil

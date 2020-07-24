@@ -866,11 +866,6 @@ func (in *Template) DeepCopyInto(out *Template) {
 			(*out)[key] = val
 		}
 	}
-	if in.Spec != nil {
-		in, out := &in.Spec, &out.Spec
-		*out = new(v1.PodSpec)
-		(*in).DeepCopyInto(*out)
-	}
 	return
 }
 

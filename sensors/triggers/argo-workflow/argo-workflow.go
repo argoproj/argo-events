@@ -25,7 +25,7 @@ import (
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,13 +45,13 @@ type ArgoWorkflowTrigger struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *logrus.Logger
+	Logger *zap.Logger
 
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
 }
 
 // NewArgoWorkflowTrigger returns a new Argo workflow trigger
-func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *ArgoWorkflowTrigger {
+func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) *ArgoWorkflowTrigger {
 	return &ArgoWorkflowTrigger{
 		K8sClient:     k8sClient,
 		DynamicClient: dynamicClient,

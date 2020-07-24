@@ -17,27 +17,14 @@ limitations under the License.
 package logging
 
 import (
-	"os"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/smartystreets/goconvey/convey"
-
-	"github.com/argoproj/argo-events/common"
 )
 
 func TestNewArgoEventsLogger(t *testing.T) {
 	convey.Convey("Get a logger", t, func() {
 		log := NewArgoEventsLogger()
 		convey.So(log, convey.ShouldNotBeNil)
-		convey.So(log.GetLevel(), convey.ShouldEqual, logrus.InfoLevel)
-
-		convey.Convey("If debug env var is set then log level must be at debug", func() {
-			err := os.Setenv(common.EnvVarDebugLog, "true")
-			convey.So(err, convey.ShouldBeNil)
-
-			log = NewArgoEventsLogger()
-			convey.So(log.GetLevel(), convey.ShouldEqual, logrus.DebugLevel)
-		})
 	})
 }

@@ -23,7 +23,7 @@ import (
 
 	natslib "github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
@@ -38,11 +38,11 @@ type NATSTrigger struct {
 	// Conn refers to the NATS client connection.
 	Conn *natslib.Conn
 	// Logger to log stuff.
-	Logger *logrus.Logger
+	Logger *zap.Logger
 }
 
 // NewNATSTrigger returns new nats trigger.
-func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections map[string]*natslib.Conn, logger *logrus.Logger) (*NATSTrigger, error) {
+func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections map[string]*natslib.Conn, logger *zap.Logger) (*NATSTrigger, error) {
 	natstrigger := trigger.Template.NATS
 
 	conn, ok := natsConnections[trigger.Template.Name]

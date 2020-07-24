@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/fields"
@@ -75,15 +75,11 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening watches resource updates and consume those events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Redis event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
 
-	log.Infoln("setting up a K8s client")
+	log.Info("setting up a K8s client")
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
@@ -106,7 +102,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	options := &metav1.ListOptions{}
 
-	log.Infoln("configuring label selectors if filters are selected...")
+	log.Info("configuring label selectors if filters are selected...")
 	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Labels != nil {
 		sel, err := LabelSelector(resourceEventSource.Filter.Labels)
 		if err != nil {
@@ -127,7 +123,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		*op = *options
 	}
 
-	log.Infoln("setting up informer factory...")
+	log.Info("setting up informer factory...")
 	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, resourceEventSource.Namespace, tweakListOptions)
 
 	informer := factory.ForResource(gvr)
@@ -137,13 +133,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	startTime := time.Now()
 
 	go func() {
-		log.Infoln("listening to resource events...")
+		log.Info("listening to resource events...")
 		for {
 			select {
 			case event := <-informerEventCh:
 				objBody, err := json.Marshal(event.Obj)
 				if err != nil {
-					log.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
+					log.Desugar().Error("failed to marshal the resource, rejecting the event...", zap.Error(err))
 					continue
 				}
 
@@ -156,14 +152,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 				eventBody, err := json.Marshal(eventData)
 				if err != nil {
-					log.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
+					log.Desugar().Error("failed to marshal the event. rejecting the event...", zap.Error(err))
 					continue
 				}
 				if !passFilters(event, resourceEventSource.Filter, startTime, log) {
 					continue
 				}
 				if err = dispatch(eventBody); err != nil {
-					log.WithError(err).Errorln("failed to dispatch event")
+					log.Desugar().Error("failed to dispatch resource event", zap.Error(err))
 				}
 			case <-stopCh:
 				return
@@ -177,7 +173,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		switch eventType {
 		case v1alpha1.ADD:
 			handlerFuncs.AddFunc = func(obj interface{}) {
-				log.Infoln("detected create event")
+				log.Info("detected create event")
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.ADD,
@@ -185,7 +181,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 		case v1alpha1.UPDATE:
 			handlerFuncs.UpdateFunc = func(oldObj, newObj interface{}) {
-				log.Infoln("detected update event")
+				log.Info("detected update event")
 				informerEventCh <- &InformerEvent{
 					Obj:    newObj,
 					OldObj: oldObj,
@@ -194,7 +190,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 		case v1alpha1.DELETE:
 			handlerFuncs.DeleteFunc = func(obj interface{}) {
-				log.Infoln("detected delete event")
+				log.Info("detected delete event")
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.DELETE,
@@ -211,14 +207,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	doneCh := make(chan struct{})
 
-	log.Infoln("running informer...")
+	log.Info("running informer...")
 	sharedInformer.Run(doneCh)
 
 	<-ctx.Done()
 	doneCh <- struct{}{}
 	stopCh <- struct{}{}
 
-	log.Infoln("event source is stopped")
+	log.Info("event source is stopped")
 	close(informerEventCh)
 
 	return nil
@@ -268,7 +264,7 @@ func FieldSelector(selectors []v1alpha1.Selector) (fields.Selector, error) {
 }
 
 // helper method to check if the object passed the user defined filters
-func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTime time.Time, log *logrus.Entry) bool {
+func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTime time.Time, log *zap.SugaredLogger) bool {
 	// no filters are applied.
 	if filter == nil {
 		return true

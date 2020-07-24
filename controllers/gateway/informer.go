@@ -18,6 +18,7 @@ package gateway
 
 import (
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
+	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -40,7 +41,7 @@ func (c *Controller) instanceIDReq() (*labels.Requirement, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.logger.WithField("instance-id", instanceIDReq.String()).Infoln("instance id requirement")
+	c.logger.Info("instance id requirement", zap.Any("instance-id", instanceIDReq.String()))
 	return instanceIDReq, nil
 }
 

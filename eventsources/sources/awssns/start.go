@@ -25,6 +25,7 @@ import (
 
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -61,14 +62,11 @@ func (router *Router) GetRoute() *webhook.Route {
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.Route
 
-	logger := route.Logger.WithFields(
-		map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelHTTPMethod:      route.Context.Method,
-		})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+	).Desugar()
 
 	logger.Info("request received from event source")
 
@@ -80,7 +78,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.WithError(err).Error("failed to parse the request body")
+		logger.Error("failed to parse the request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		return
 	}
@@ -88,7 +86,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	var notification *httpNotification
 	err = yaml.Unmarshal(body, &notification)
 	if err != nil {
-		logger.WithError(err).Error("failed to convert request payload into sns notification")
+		logger.Error("failed to convert request payload into sns notification", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		return
 	}
@@ -102,16 +100,16 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			Token:    &notification.Token,
 		})
 		if err != nil {
-			logger.WithError(err).Error("failed to send confirmation response to aws sns")
+			logger.Error("failed to send confirmation response to aws sns", zap.Error(err))
 			common.SendErrorResponse(writer, err.Error())
 			return
 		}
 
-		logger.Infoln("subscription successfully confirmed to aws sns")
+		logger.Info("subscription successfully confirmed to aws sns")
 		router.subscriptionArn = response.SubscriptionArn
 
 	case messageTypeNotification:
-		logger.Infoln("dispatching notification on route's data channel")
+		logger.Info("dispatching notification on route's data channel")
 
 		eventData := &events.SNSEventData{
 			Header: request.Header,
@@ -119,7 +117,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
-			logger.WithError(err).Error("failed to marshal the event data")
+			logger.Error("failed to marshal the event data", zap.Error(err))
 			common.SendErrorResponse(writer, err.Error())
 			return
 		}
@@ -133,15 +131,12 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 func (router *Router) PostActivate() error {
 	route := router.Route
 
-	logger := route.Logger.WithFields(
-		map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelHTTPMethod:      route.Context.Method,
-			"topic-arn":                  router.eventSource.TopicArn,
-		})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+		"topic-arn", router.eventSource.TopicArn,
+	)
 
 	// In order to successfully subscribe to sns topic,
 	// 1. Fetch credentials if configured explicitly. Users can use something like https://github.com/jtblin/kube2iam
@@ -213,21 +208,16 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts an SNS event source
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	logger := logging.FromContext(ctx)
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the AWS SNS event source...")
+	logger := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 
 	defer sources.Recover(el.GetEventName())
 
-	log.Info("started processing the event source...")
+	logger.Info("started processing the AWS SNS event source...")
 
 	route := webhook.NewRoute(el.SNSEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName())
 
-	logger.Infoln("operating on the route...")
+	logger.Info("operating on the route...")
 	return webhook.ManageRoute(ctx, &Router{
 		Route:       route,
 		eventSource: &el.SNSEventSource,

@@ -22,7 +22,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -39,10 +39,10 @@ func NewController() *Controller {
 }
 
 // NewRoute returns a vanilla route
-func NewRoute(hookContext *v1alpha1.WebhookContext, logger *logrus.Logger, eventSourceName, eventName string) *Route {
+func NewRoute(hookContext *v1alpha1.WebhookContext, logger *zap.SugaredLogger, eventSourceName, eventName string) *Route {
 	return &Route{
 		Context:         hookContext,
-		Logger:          logger,
+		Logger:          logger.With(logging.LabelEventSourceName, eventSourceName, logging.LabelEventName, eventName),
 		EventSourceName: eventSourceName,
 		EventName:       eventName,
 		Active:          false,
@@ -90,9 +90,8 @@ func startServer(router Router, controller *Controller) {
 			} else {
 				err = server.ListenAndServeTLS(route.Context.ServerCertPath, route.Context.ServerKeyPath)
 			}
-			route.Logger.WithField(logging.LabelEventSourceName, route.EventSourceName).WithError(err).Error("http server stopped")
 			if err != nil {
-				route.Logger.WithError(err).WithField("port", route.Context.Port).Errorln("failed to listen and serve")
+				route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve", zap.Error(err))
 			}
 		}()
 	}
@@ -123,35 +122,26 @@ func activateRoute(router Router, controller *Controller) {
 	// start a http server before marking the route as ready
 	<-route.StartCh
 
-	log := route.Logger.WithFields(
-		map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-		})
-
 	route.Active = true
-	log.Info("route is activated")
+	route.Logger.With(logging.LabelPort, route.Context.Port, logging.LabelEndpoint, route.Context.Endpoint).Info("route is activated")
 }
 
 // manageRouteChannels consumes data from route's data channel and stops the processing when the event source is stopped/removed
 func manageRouteChannels(router Router, dispatcher func([]byte) error) {
 	route := router.GetRoute()
-	logger := route.Logger.WithField(logging.LabelEventSourceName, route.EventSourceName).WithField(logging.LabelEventName, route.EventName)
-
+	logger := route.Logger.Desugar()
 	for {
 		select {
 		case data := <-route.DataCh:
 			logger.Info("new event received, dispatching to gateway client")
 			err := dispatcher(data)
 			if err != nil {
-				logger.WithError(err).Error("failed to send event")
+				logger.Error("failed to send event", zap.Error(err))
 				continue
 			}
 
 		case <-route.StopChan:
-			logger.Infoln("event source is stopped")
+			logger.Info("event source is stopped")
 			return
 		}
 	}
@@ -161,7 +151,7 @@ func manageRouteChannels(router Router, dispatcher func([]byte) error) {
 func ManageRoute(ctx context.Context, router Router, controller *Controller, dispatcher func([]byte) error) error {
 	route := router.GetRoute()
 
-	logger := route.Logger.WithField(logging.LabelEventSourceName, route.EventSourceName).WithField(logging.LabelEventName, route.EventName)
+	logger := route.Logger.Desugar()
 
 	// in order to process a route, it needs to go through
 	// 1. validation - basic configuration checks
@@ -172,7 +162,7 @@ func ManageRoute(ctx context.Context, router Router, controller *Controller, dis
 
 	logger.Info("validating the route...")
 	if err := validateRoute(router.GetRoute()); err != nil {
-		logger.WithError(err).Error("route is invalid, won't initialize it")
+		logger.Error("route is invalid, won't initialize it", zap.Error(err))
 		return err
 	}
 
@@ -188,7 +178,7 @@ func ManageRoute(ctx context.Context, router Router, controller *Controller, dis
 
 	logger.Info("running operations post route activation...")
 	if err := router.PostActivate(); err != nil {
-		logger.WithError(err).Error("error occurred while performing post route activation operations")
+		logger.Error("error occurred while performing post route activation operations", zap.Error(err))
 		return err
 	}
 
@@ -200,7 +190,7 @@ func ManageRoute(ctx context.Context, router Router, controller *Controller, dis
 
 	logger.Info("running operations post route inactivation...")
 	if err := router.PostInactivate(); err != nil {
-		logger.WithError(err).Error("error occurred while running operations post route inactivation")
+		logger.Error("error occurred while running operations post route inactivation", zap.Error(err))
 	}
 
 	return nil

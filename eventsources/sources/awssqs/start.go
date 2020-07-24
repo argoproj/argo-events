@@ -25,7 +25,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
 	awscommon "github.com/argoproj/argo-events/eventsources/common/aws"
@@ -59,12 +59,9 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the AWS SQS event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+	log.Info("started processing the AWS SQS event source...")
 	defer sources.Recover(el.GetEventName())
 
 	sqsEventSource := &el.SQSEventSource
@@ -76,7 +73,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	sqsClient := sqslib.New(awsSession)
 
-	log.Infoln("fetching queue url...")
+	log.Info("fetching queue url...")
 	getQueueURLInput := &sqslib.GetQueueUrlInput{
 		QueueName: &sqsEventSource.Queue,
 	}
@@ -90,10 +87,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if sqsEventSource.JSONBody {
-		log.Infoln("assuming all events have a json body...")
+		log.Info("assuming all events have a json body...")
 	}
 
-	log.Infoln("listening for messages on the queue...")
+	log.Info("listening for messages on the queue...")
 	for {
 		select {
 		case <-ctx.Done():
@@ -103,7 +100,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		messages, err := fetchMessages(ctx, sqsClient, *queueURL.QueueUrl, 10, sqsEventSource.WaitTimeSeconds)
 		if err != nil {
-			log.WithError(err).Errorln("failed to get messages from SQS")
+			log.Error("failed to get messages from SQS", zap.Error(err))
 			time.Sleep(2 * time.Second)
 			continue
 		}
@@ -114,14 +111,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					ReceiptHandle: m.ReceiptHandle,
 				})
 				if err != nil {
-					log.WithError(err).Errorln("Failed to delete message")
+					log.Error("Failed to delete message", zap.Error(err))
 				}
 			}, log)
 		}
 	}
 }
 
-func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Message, dispatch func([]byte) error, ack func(), log *logrus.Entry) {
+func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Message, dispatch func([]byte) error, ack func(), log *zap.Logger) {
 	data := &events.SQSEventData{
 		MessageId:         *message.MessageId,
 		MessageAttributes: message.MessageAttributes,
@@ -134,13 +131,13 @@ func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Mes
 	}
 	eventBytes, err := json.Marshal(data)
 	if err != nil {
-		log.WithError(err).Errorln("failed to marshal event data, will process next message...")
+		log.Error("failed to marshal event data, will process next message...", zap.Error(err))
 		ack()
 		return
 	}
 	err = dispatch(eventBytes)
 	if err != nil {
-		log.WithError(err).Errorln("failed to dispatch event")
+		log.Error("failed to dispatch SQS event", zap.Error(err))
 	} else {
 		ack()
 	}
