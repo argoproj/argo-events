@@ -281,10 +281,13 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 
 	for _, ss := range servers {
 		for _, server := range ss {
+			// Validation has been done in eventsource-controller, it's harmless to do it again here.
 			err := server.ValidateEventSource(cctx)
 			if err != nil {
-				logger.Error("Validation failed", zap.Error(err))
-				return err
+				logger.Error("Validation failed", zap.Error(err), zap.Any(logging.LabelEventName,
+					server.GetEventName()), zap.Any(logging.LabelEventSourceType, server.GetEventSourceType()))
+				// Continue starting other event services instead of failing all of them
+				continue
 			}
 			go func(s EventingServer) {
 				err := s.StartListening(cctx, func(data []byte) error {
@@ -307,7 +310,10 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 					}
 					return driver.Publish(e.eventBusConn, eventBody)
 				})
-				logger.Error("failed to start eventsource service", zap.Any(logging.LabelEventName, s.GetEventName()), zap.Error(err))
+				if err != nil {
+					logger.Error("failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
+						s.GetEventSourceType()), zap.Any(logging.LabelEventName, s.GetEventName()), zap.Error(err))
+				}
 			}(server)
 		}
 	}

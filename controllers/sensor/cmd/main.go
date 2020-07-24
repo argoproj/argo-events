@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	argoevents "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -97,8 +98,8 @@ func main() {
 		logger.Desugar().Fatal("unable to watch Deployments", zap.Error(err))
 	}
 
-	logger.Info("starting manager")
+	logger.Infow("starting sensor controller", "version", argoevents.GetVersion())
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		logger.Desugar().Fatal("unable to run manager", zap.Error(err))
+		logger.Desugar().Fatal("unable to run sensor controller", zap.Error(err))
 	}
 }
