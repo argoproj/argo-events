@@ -14,7 +14,7 @@ spec:
           start: "22:14:05"
           stop: "23:04:05"
     - name: test-another-dep
-      gatewayName: webhook
+      eventSourceName: webhook
       eventName: example
       filters:
         time:

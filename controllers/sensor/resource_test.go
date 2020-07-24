@@ -24,10 +24,10 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/argoproj/argo-events/common/logging"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -82,9 +82,9 @@ var (
 			},
 			Dependencies: []v1alpha1.EventDependency{
 				{
-					Name:        "fake-dep",
-					GatewayName: "fake-gateway",
-					EventName:   "fake-one",
+					Name:            "fake-dep",
+					EventSourceName: "fake-source",
+					EventName:       "fake-one",
 				},
 			},
 		},
@@ -114,9 +114,9 @@ var (
 			},
 			Dependencies: []v1alpha1.EventDependency{
 				{
-					Name:        "fake-dep",
-					GatewayName: "fake-gateway",
-					EventName:   "fake-one",
+					Name:            "fake-dep",
+					EventSourceName: "fake-source",
+					EventName:       "fake-one",
 				},
 			},
 		},
@@ -164,7 +164,7 @@ func Test_BuildDeployment(t *testing.T) {
 				Sensor: sObj,
 				Labels: testLabels,
 			}
-			deployment, err := buildDeployment(args, fakeEventBus, ctrl.Log.WithName("test"))
+			deployment, err := buildDeployment(args, fakeEventBus)
 			assert.Nil(t, err)
 			assert.NotNil(t, deployment)
 			volumes := deployment.Spec.Template.Spec.Volumes
@@ -189,7 +189,7 @@ func TestResourceReconcile(t *testing.T) {
 			Sensor: sensorObj,
 			Labels: testLabels,
 		}
-		err := Reconcile(cl, args, ctrl.Log.WithName("test"))
+		err := Reconcile(cl, args, logging.NewArgoEventsLogger())
 		assert.Error(t, err)
 		assert.False(t, sensorObj.Status.IsReady())
 	})
@@ -207,7 +207,7 @@ func TestResourceReconcile(t *testing.T) {
 			Sensor: sensorObj,
 			Labels: testLabels,
 		}
-		err = Reconcile(cl, args, ctrl.Log.WithName("test"))
+		err = Reconcile(cl, args, logging.NewArgoEventsLogger())
 		assert.Nil(t, err)
 		assert.True(t, sensorObj.Status.IsReady())
 

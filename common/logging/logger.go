@@ -20,8 +20,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/mattn/go-isatty"
-	"github.com/sirupsen/logrus"
+	zap "go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 )
@@ -43,48 +42,34 @@ const (
 )
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger
-func NewArgoEventsLogger() *logrus.Logger {
-	var formatter logrus.Formatter
-
-	// If out is term use textformatter
-	if isatty.IsTerminal(os.Stdout.Fd()) {
-		formatter = &logrus.TextFormatter{
-			TimestampFormat:  TimestampFormat,
-			FullTimestamp:    true,
-			ForceColors:      true,
-			QuoteEmptyFields: true,
-		}
-	} else {
-		formatter = &logrus.JSONFormatter{
-			TimestampFormat: TimestampFormat,
-		}
-	}
-
-	log := &logrus.Logger{
-		Out:       os.Stdout,
-		Level:     logrus.InfoLevel,
-		Formatter: formatter,
-	}
-
+func NewArgoEventsLogger() *zap.SugaredLogger {
+	var config zap.Config
 	debugMode, ok := os.LookupEnv(common.EnvVarDebugLog)
 	if ok && debugMode == "true" {
-		log.SetLevel(logrus.DebugLevel)
+		config = zap.NewDevelopmentConfig()
+	} else {
+		config = zap.NewProductionConfig()
 	}
-
-	return log
+	// Config customization goes here if any
+	//
+	logger, err := config.Build()
+	if err != nil {
+		panic(err)
+	}
+	return logger.Named("argo-events").Sugar()
 }
 
 type loggerKey struct{}
 
 // WithLogger returns a copy of parent context in which the
 // value associated with logger key is the supplied logger.
-func WithLogger(ctx context.Context, logger *logrus.Logger) context.Context {
+func WithLogger(ctx context.Context, logger *zap.SugaredLogger) context.Context {
 	return context.WithValue(ctx, loggerKey{}, logger)
 }
 
 // FromContext returns the logger in the context.
-func FromContext(ctx context.Context) *logrus.Logger {
-	if logger, ok := ctx.Value(loggerKey{}).(*logrus.Logger); ok {
+func FromContext(ctx context.Context) *zap.SugaredLogger {
+	if logger, ok := ctx.Value(loggerKey{}).(*zap.SugaredLogger); ok {
 		return logger
 	}
 	return NewArgoEventsLogger()

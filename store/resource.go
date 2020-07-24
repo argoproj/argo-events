@@ -23,8 +23,7 @@ import (
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
@@ -52,6 +51,7 @@ func NewResourceReader(resourceArtifact *common.Resource) (ArtifactReader, error
 }
 
 func (reader *ResourceReader) Read() ([]byte, error) {
-	log.WithField("resource", reader.resourceArtifact.Object).Debug("reading artifact from resource template")
+	log := logging.NewArgoEventsLogger()
+	log.Debugw("reading artifact from resource template", "resource", reader.resourceArtifact.Object)
 	return yaml.Marshal(reader.resourceArtifact.Object)
 }

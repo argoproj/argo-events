@@ -9,6 +9,7 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
@@ -238,19 +239,19 @@ func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *ev
 
 // Start function
 func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) error {
-	logger := logging.FromContext(ctx)
+	logger := logging.FromContext(ctx).Desugar()
 	logger.Info("Starting event source server...")
 	servers := GetEventingServers(e.eventSource)
 	cctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	driver, err := eventbus.GetDriver(cctx, *e.eventBusConfig, e.eventBusSubject, e.hostname)
 	if err != nil {
-		logger.WithError(err).Errorln("failed to get eventbus driver")
+		logger.Error("failed to get eventbus driver", zap.Error(err))
 		return err
 	}
 	e.eventBusConn, err = driver.Connect()
 	if err != nil {
-		logger.WithError(err).Errorln("failed to connect to eventbus")
+		logger.Error("failed to connect to eventbus", zap.Error(err))
 		return err
 	}
 	defer e.eventBusConn.Close()
@@ -269,7 +270,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 					logger.Info("NATS connection lost, reconnecting...")
 					e.eventBusConn, err = driver.Connect()
 					if err != nil {
-						logger.WithError(err).Errorln("failed to reconnect to eventbus")
+						logger.Error("failed to reconnect to eventbus", zap.Error(err))
 						continue
 					}
 					logger.Info("reconnected the NATS streaming server...")
@@ -282,7 +283,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 		for _, server := range ss {
 			err := server.ValidateEventSource(cctx)
 			if err != nil {
-				logger.WithError(err).Errorln("Validation failed.")
+				logger.Error("Validation failed", zap.Error(err))
 				return err
 			}
 			go func(s EventingServer) {
@@ -306,8 +307,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 					}
 					return driver.Publish(e.eventBusConn, eventBody)
 				})
-				logger.WithField(logging.LabelEventSourceName, s.GetEventSourceName()).
-					WithField(logging.LabelEventName, s.GetEventName()).WithError(err).Errorln("failed to start service.")
+				logger.Error("failed to start eventsource service", zap.Any(logging.LabelEventName, s.GetEventName()), zap.Error(err))
 			}(server)
 		}
 	}

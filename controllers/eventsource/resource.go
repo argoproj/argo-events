@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-logr/logr"
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -40,7 +40,7 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) error {
+func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	eventSource := args.EventSource
 	eventBus := &eventbusv1alpha1.EventBus{}
@@ -52,29 +52,29 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			eventSource.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
-			logger.Error(err, "EventBus not found", "eventBusName", eventBusName)
+			logger.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
 			return errors.Errorf("eventbus %s not found", eventBusName)
 		}
 		eventSource.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
-		logger.Error(err, "failed to get EventBus", "eventBusName", eventBusName)
+		logger.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)
 		return err
 	}
 	if !eventBus.Status.IsReady() {
 		eventSource.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
-		logger.Error(err, "event bus is not in ready status", "eventBusName", eventBusName)
+		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName, "error", err)
 		return errors.New("eventbus not ready")
 	}
 	expectedDeploy, err := buildDeployment(args, eventBus)
 	if err != nil {
 		eventSource.Status.MarkDeployFailed("BuildDeploymentSpecFailed", "Failed to build Deployment spec.")
-		logger.Error(err, "failed to build deployment spec")
+		logger.Errorw("failed to build deployment spec", "error", err)
 		return err
 	}
 
 	deploy, err := getDeployment(ctx, client, args)
 	if err != nil && !apierrors.IsNotFound(err) {
 		eventSource.Status.MarkDeployFailed("GetDeploymentFailed", "Get existing deployment failed")
-		logger.Error(err, "error getting existing deployment")
+		logger.Errorw("error getting existing deployment", "error", err)
 		return err
 	}
 	if deploy != nil {
@@ -84,31 +84,31 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
-				logger.Error(err, "error updating existing deployment")
+				logger.Errorw("error updating existing deployment", "error", err)
 				return err
 			}
-			logger.Info("deployment is updated", "deploymentName", deploy.Name)
+			logger.Infow("deployment is updated", "deploymentName", deploy.Name)
 		}
 	} else {
 		err = client.Create(ctx, expectedDeploy)
 		if err != nil {
 			eventSource.Status.MarkDeployFailed("CreateDeploymentFailed", "Failed to create a deployment")
-			logger.Error(err, "error creating a deployment")
+			logger.Errorw("error creating a deployment", "error", err)
 			return err
 		}
-		logger.Info("deployment is created", "deploymentName", expectedDeploy.Name)
+		logger.Infow("deployment is created", "deploymentName", expectedDeploy.Name)
 	}
 	// Service if any
 	existingSvc, err := getService(ctx, client, args)
 	if err != nil && !apierrors.IsNotFound(err) {
 		eventSource.Status.MarkDeployFailed("GetServiceFailed", "Failed to get existing service")
-		logger.Error(err, "error getting existing service")
+		logger.Errorw("error getting existing service", "error", err)
 		return err
 	}
 	expectedSvc, err := buildService(args)
 	if err != nil {
 		eventSource.Status.MarkDeployFailed("BuildServiceFailed", "Failed to build service spec")
-		logger.Error(err, "error building service spec")
+		logger.Errorw("error building service spec", "error", err)
 		return err
 	}
 	if expectedSvc == nil {
@@ -116,35 +116,35 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) erro
 			err = client.Delete(ctx, existingSvc)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("DeleteServiceFailed", "Failed to delete existing service")
-				logger.Error(err, "error deleting existing service")
+				logger.Errorw("error deleting existing service", "error", err)
 				return err
 			}
-			logger.Info("deleted existing service", "serviceName", existingSvc.Name)
+			logger.Infow("deleted existing service", "serviceName", existingSvc.Name)
 		}
 	} else {
 		if existingSvc == nil {
 			err = client.Create(ctx, expectedSvc)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("CreateServiceFailed", "Failed to create a service")
-				logger.Error(err, "error creating a service")
+				logger.Errorw("error creating a service", "error", err)
 				return err
 			}
-			logger.Info("service is created", "serviceName", expectedSvc.Name)
+			logger.Infow("service is created", "serviceName", expectedSvc.Name)
 		} else if existingSvc.Annotations != nil && existingSvc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
 			// To avoid service updating issues such as port name change, re-create it.
 			err = client.Delete(ctx, existingSvc)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("DeleteServiceFailed", "Failed to delete existing service")
-				logger.Error(err, "error deleting existing service")
+				logger.Errorw("error deleting existing service", "error", err)
 				return err
 			}
 			err = client.Create(ctx, expectedSvc)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("RecreateServiceFailed", "Failed to re-create existing service")
-				logger.Error(err, "error re-creating existing service")
+				logger.Errorw("error re-creating existing service", "error", err)
 				return err
 			}
-			logger.Info("service is re-created", "serviceName", existingSvc.Name)
+			logger.Infow("service is re-created", "serviceName", existingSvc.Name)
 		}
 	}
 	eventSource.Status.MarkDeployed()

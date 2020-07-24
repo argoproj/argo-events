@@ -27,7 +27,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	eventbusclientset "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -62,7 +62,7 @@ type Controller struct {
 	// serverImage is the image for gateway deployment
 	serverImage string
 	// logger to logger stuff
-	logger *logrus.Logger
+	logger *zap.Logger
 	// K8s rest config
 	kubeConfig *rest.Config
 	// k8sClient is Kubernetes client
@@ -85,7 +85,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace, clientImage, 
 		clientImage:    clientImage,
 		serverImage:    serverImage,
 		kubeConfig:     rest,
-		logger:         logging.NewArgoEventsLogger(),
+		logger:         logging.NewArgoEventsLogger().Desugar(),
 		k8sClient:      kubernetes.NewForConfigOrDie(rest),
 		gatewayClient:  clientset.NewForConfigOrDie(rest),
 		eventBusClient: eventbusclientset.NewForConfigOrDie(rest),
@@ -104,7 +104,7 @@ func (c *Controller) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.logger.WithField(common.LabelResourceName, key.(string)).WithError(err).Warnln("failed to get gateway from informer index")
+		c.logger.Warn("failed to get gateway from informer index", zap.Any(common.LabelResourceName, key.(string)), zap.Error(err))
 		return true
 	}
 
@@ -115,7 +115,7 @@ func (c *Controller) processNextItem() bool {
 
 	gw, ok := obj.(*v1alpha1.Gateway)
 	if !ok {
-		c.logger.WithField(common.LabelResourceName, key.(string)).WithError(err).Warnln("key in index is not a gateway")
+		c.logger.Warn("key in index is not a gateway", zap.Any(common.LabelResourceName, key.(string)), zap.Error(err))
 		return true
 	}
 
@@ -123,13 +123,13 @@ func (c *Controller) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		ctx.logger.WithField("gateway", gw.Name).WithError(err).Errorln("failed to operate on the gateway object")
+		ctx.logger.Error("failed to operate on the gateway object", zap.Any("gateway", gw.Name), zap.Error(err))
 	}
 
 	err = c.handleErr(err, key)
 	// create k8 event to escalate the error
 	if err != nil {
-		ctx.logger.WithError(err).Errorln("controller failed to handle error")
+		ctx.logger.Error("controller failed to handle error", zap.Error(err))
 	}
 	return true
 }
@@ -148,7 +148,7 @@ func (c *Controller) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a gateway pod goes down
 	// we want to give the event pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		c.logger.WithField(common.LabelResourceName, key.(string)).WithError(err).Errorln("error syncing gateway")
+		c.logger.Error("error syncing gateway", zap.Any(common.LabelResourceName, key.(string)), zap.Error(err))
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -160,11 +160,7 @@ func (c *Controller) handleErr(err error, key interface{}) error {
 // Run processes the gateway resources on the controller's queue
 func (c *Controller) Run(ctx context.Context, threads int) {
 	defer c.queue.ShutDown()
-	c.logger.WithFields(
-		map[string]interface{}{
-			logging.LabelInstanceID: c.Config.InstanceID,
-			logging.LabelVersion:    base.GetVersion().Version,
-		}).Infoln("starting controller")
+	c.logger.Info("starting controller", zap.Any(logging.LabelInstanceID, c.Config.InstanceID), zap.Any(logging.LabelVersion, base.GetVersion().Version))
 
 	configMapCtrl := c.watchControllerConfigMap()
 	go configMapCtrl.Run(ctx.Done())
@@ -178,7 +174,7 @@ func (c *Controller) Run(ctx context.Context, threads int) {
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.logger.Errorln("timed out waiting for the caches to sync for gateways")
+		c.logger.Error("timed out waiting for the caches to sync for gateways")
 		return
 	}
 

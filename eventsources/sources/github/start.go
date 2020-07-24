@@ -25,6 +25,7 @@ import (
 
 	gh "github.com/google/go-github/v31/github"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/common"
@@ -75,14 +76,11 @@ func (router *Router) GetRoute() *webhook.Route {
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.route
 
-	logger := route.Logger.WithFields(
-		map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelHTTPMethod:      route.Context.Method,
-		})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+	)
 
 	logger.Info("received a request, processing it...")
 
@@ -100,7 +98,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	body, err := parseValidateRequest(request, []byte(secret))
 	if err != nil {
-		logger.WithError(err).Error("request is not valid event notification, discarding it")
+		logger.Desugar().Error("request is not valid event notification, discarding it", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		return
 	}
@@ -117,7 +115,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	logger.Infoln("dispatching event on route's data channel")
+	logger.Info("dispatching event on route's data channel")
 	route.DataCh <- eventBody
 	logger.Info("request successfully processed")
 
@@ -136,27 +134,25 @@ func (router *Router) PostActivate() error {
 	route := router.route
 	githubEventSource := router.githubEventSource
 
-	logger := route.Logger.WithFields(map[string]interface{}{
-		logging.LabelEventSourceName: route.EventSourceName,
-		logging.LabelEventName:       route.EventName,
-		logging.LabelEndpoint:        route.Context.Endpoint,
-		logging.LabelPort:            route.Context.Port,
-		logging.LabelHTTPMethod:      route.Context.Method,
-		"repository":                 githubEventSource.Repository,
-	})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+		"repository", githubEventSource.Repository,
+	)
 
-	logger.Infoln("retrieving api token credentials...")
+	logger.Info("retrieving api token credentials...")
 	apiTokenCreds, err := router.getCredentials(githubEventSource.APIToken)
 	if err != nil {
 		return errors.Errorf("failed to retrieve api token credentials. err: %+v", err)
 	}
 
-	logger.Infoln("setting up auth with api token...")
+	logger.Info("setting up auth with api token...")
 	PATTransport := TokenAuthTransport{
 		Token: apiTokenCreds.secret,
 	}
 
-	logger.Infoln("configuring GitHub hook...")
+	logger.Info("configuring GitHub hook...")
 	formattedURL := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
 	hookConfig := map[string]interface{}{
 		"url": &formattedURL,
@@ -172,7 +168,7 @@ func (router *Router) PostActivate() error {
 		hookConfig["insecure_ssl"] = "0"
 	}
 
-	logger.Infoln("retrieving webhook secret credentials...")
+	logger.Info("retrieving webhook secret credentials...")
 	if githubEventSource.WebhookSecret != nil {
 		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret)
 		if err != nil {
@@ -187,10 +183,10 @@ func (router *Router) PostActivate() error {
 		Config: hookConfig,
 	}
 
-	logger.Infoln("setting up client for GitHub...")
+	logger.Info("setting up client for GitHub...")
 	router.githubClient = gh.NewClient(PATTransport.Client())
 
-	logger.Infoln("setting up base url for GitHub client...")
+	logger.Info("setting up base url for GitHub client...")
 	if githubEventSource.GithubBaseURL != "" {
 		baseURL, err := url.Parse(githubEventSource.GithubBaseURL)
 		if err != nil {
@@ -199,7 +195,7 @@ func (router *Router) PostActivate() error {
 		router.githubClient.BaseURL = baseURL
 	}
 
-	logger.Infoln("setting up the upload url for GitHub client...")
+	logger.Info("setting up the upload url for GitHub client...")
 	if githubEventSource.GithubUploadURL != "" {
 		uploadURL, err := url.Parse(githubEventSource.GithubUploadURL)
 		if err != nil {
@@ -211,7 +207,7 @@ func (router *Router) PostActivate() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	logger.Infoln("creating a GitHub hook for the repository...")
+	logger.Info("creating a GitHub hook for the repository...")
 	hook, _, err := router.githubClient.Repositories.CreateHook(ctx, githubEventSource.Owner, githubEventSource.Repository, router.hook)
 	if err != nil {
 		// Continue if error is because hook already exists
@@ -223,7 +219,7 @@ func (router *Router) PostActivate() error {
 
 	// if hook alreay exists then CreateHook returns hook value as nil
 	if hook == nil {
-		logger.Infoln("GitHub hook for the repository already exists, trying to use the existing hook...")
+		logger.Info("GitHub hook for the repository already exists, trying to use the existing hook...")
 		ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 
@@ -244,7 +240,7 @@ func (router *Router) PostActivate() error {
 	}
 
 	router.hook = hook
-	logger.Infoln("GitHub hook has been successfully set for the repository")
+	logger.Info("GitHub hook has been successfully set for the repository")
 
 	return nil
 }
@@ -257,18 +253,16 @@ func (router *Router) PostInactivate() error {
 	githubEventSource := router.githubEventSource
 
 	if githubEventSource.DeleteHookOnFinish {
-		logger := router.route.Logger.WithFields(map[string]interface{}{
-			logging.LabelEventSourceName: router.route.EventSourceName,
-			logging.LabelEventName:       router.route.EventName,
-			"repository":                 githubEventSource.Repository,
-			"hook-id":                    *router.hook.ID,
-		})
+		logger := router.route.Logger.With(
+			"repository", githubEventSource.Repository,
+			"hook-id", *router.hook.ID,
+		)
 
-		logger.Infoln("deleting GitHub hook...")
+		logger.Info("deleting GitHub hook...")
 		if _, err := router.githubClient.Repositories.DeleteHook(ctx, githubEventSource.Owner, githubEventSource.Repository, *router.hook.ID); err != nil {
 			return errors.Errorf("failed to delete hook. err: %+v", err)
 		}
-		logger.Infoln("GitHub hook deleted")
+		logger.Info("GitHub hook deleted")
 	}
 
 	return nil
@@ -276,13 +270,9 @@ func (router *Router) PostInactivate() error {
 
 // StartListening starts an event source
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	logger := logging.FromContext(ctx)
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Github event source...")
+	logger := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	logger.Info("started processing the Github event source...")
 
 	githubEventSource := &el.GithubEventSource
 

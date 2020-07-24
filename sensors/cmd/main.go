@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
@@ -35,23 +35,24 @@ import (
 )
 
 func main() {
+	logger := logging.NewArgoEventsLogger().Named("sensor")
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
-		panic(err)
+		logger.Desugar().Fatal("failed to get kubeconfig", zap.Error(err))
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	encodedSensorSpec, defined := os.LookupEnv(common.EnvVarSensorObject)
 	if !defined {
-		panic(errors.Errorf("required environment variable '%s' not defined", common.EnvVarSensorObject))
+		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarSensorObject)
 	}
 	sensorSpec, err := base64.StdEncoding.DecodeString(encodedSensorSpec)
 	if err != nil {
-		panic(errors.Errorf("failed to decode sensor string. err: %v", err))
+		logger.Desugar().Fatal("failed to decode sensor string", zap.Error(err))
 	}
 	sensor := &v1alpha1.Sensor{}
 	if err = json.Unmarshal(sensorSpec, sensor); err != nil {
-		panic(errors.Errorf("failed to unmarshal sensor object. err: %v", err))
+		logger.Desugar().Fatal("failed to unmarshal sensor object", zap.Error(err))
 	}
 
 	busConfig := &eventbusv1alpha1.BusConfig{}
@@ -59,26 +60,25 @@ func main() {
 	if len(encodedBusConfigSpec) > 0 {
 		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)
 		if err != nil {
-			panic(errors.Errorf("failed to decode bus config string. err: %v", err))
+			logger.Desugar().Fatal("failed to decode bus config string", zap.Error(err))
 		}
 		if err = json.Unmarshal(busConfigSpec, busConfig); err != nil {
-			panic(errors.Errorf("failed to unmarshal bus config object. err: %v", err))
+			logger.Desugar().Fatal("failed to unmarshal bus config object", zap.Error(err))
 		}
 	}
 
 	ebSubject, defined := os.LookupEnv(common.EnvVarEventBusSubject)
 	if !defined {
-		panic(errors.Errorf("required environment variable '%s' not defined", common.EnvVarEventBusSubject))
+		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarEventBusSubject)
 	}
 
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
 	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject)
-	logger := logging.NewArgoEventsLogger()
+	logger = logger.With("sensorName", sensor.Name)
 	ctx := logging.WithLogger(context.Background(), logger)
 	stopCh := signals.SetupSignalHandler()
 	if err := sensorExecutionCtx.ListenEvents(ctx, stopCh); err != nil {
-		logger.WithError(err).Errorln("failed to listen to events")
-		os.Exit(-1)
+		logger.Desugar().Fatal("failed to listen to events", zap.Error(err))
 	}
 }

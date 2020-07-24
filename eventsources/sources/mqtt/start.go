@@ -22,6 +22,7 @@ import (
 
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -55,21 +56,18 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
 	defer sources.Recover(el.GetEventName())
 
-	log.Infoln("starting MQTT event source...")
+	log.Info("starting MQTT event source...")
 	mqttEventSource := &el.MQTTEventSource
 
 	if mqttEventSource.JSONBody {
-		log.Infoln("assuming all events have a json body...")
+		log.Info("assuming all events have a json body...")
 	}
 
-	log.Infoln("setting up the message handler...")
+	log.Info("setting up the message handler...")
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
 		eventData := &events.MQTTEventData{
 			Topic:     msg.Topic(),
@@ -85,16 +83,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			log.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")
+			log.Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
 			return
 		}
-		log.Infoln("dispatching event on the data channel...")
+		log.Info("dispatching event on the data channel...")
 		if err = dispatch(eventBody); err != nil {
-			log.WithError(err).Errorln("failed to dispatch event...")
+			log.Error("failed to dispatch MQTT event...", zap.Error(err))
 		}
 	}
 
-	log.Infoln("setting up the mqtt broker client...")
+	log.Info("setting up the mqtt broker client...")
 	opts := mqttlib.NewClientOptions().AddBroker(mqttEventSource.URL).SetClientID(mqttEventSource.ClientID)
 	if mqttEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(mqttEventSource.TLS.CACertPath, mqttEventSource.TLS.ClientCertPath, mqttEventSource.TLS.ClientKeyPath)
@@ -106,7 +104,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var client mqttlib.Client
 
-	log.Infoln("connecting to mqtt broker...")
+	log.Info("connecting to mqtt broker...")
 	if err := sources.Connect(common.GetConnectionBackoff(mqttEventSource.ConnectionBackoff), func() error {
 		client = mqttlib.NewClient(opts)
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
@@ -123,11 +121,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	<-ctx.Done()
-	log.Infoln("event source is stopped, unsubscribing the client...")
+	log.Info("event source is stopped, unsubscribing the client...")
 
 	token := client.Unsubscribe(mqttEventSource.Topic)
 	if token.Error() != nil {
-		log.WithError(token.Error()).Error("failed to unsubscribe client")
+		log.Error("failed to unsubscribe client", zap.Error(token.Error()))
 	}
 
 	return nil

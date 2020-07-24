@@ -21,7 +21,7 @@ import (
 
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -49,13 +49,13 @@ type StandardK8sTrigger struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *logrus.Logger
+	Logger *zap.Logger
 
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
 }
 
 // NewStandardK8sTrigger returns a new StandardK8STrigger
-func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *StandardK8sTrigger {
+func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) *StandardK8sTrigger {
 	return &StandardK8sTrigger{
 		K8sClient:     k8sClient,
 		DynamicClient: dynamicClient,
@@ -158,15 +158,15 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 
 	switch op {
 	case v1alpha1.Create:
-		k8sTrigger.Logger.Infoln("creating the object...")
+		k8sTrigger.Logger.Info("creating the object...")
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 
 	case v1alpha1.Update:
-		k8sTrigger.Logger.Infoln("updating the object...")
+		k8sTrigger.Logger.Info("updating the object...")
 
 		oldObj, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
-			k8sTrigger.Logger.Infoln("object not found, creating the object...")
+			k8sTrigger.Logger.Info("object not found, creating the object...")
 			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 		} else if err != nil {
 			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
@@ -179,11 +179,11 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(oldObj, metav1.UpdateOptions{})
 
 	case v1alpha1.Patch:
-		k8sTrigger.Logger.Infoln("patching the object...")
+		k8sTrigger.Logger.Info("patching the object...")
 
 		_, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
-			k8sTrigger.Logger.Infoln("object not found, creating the object...")
+			k8sTrigger.Logger.Info("object not found, creating the object...")
 			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 		} else if err != nil {
 			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
