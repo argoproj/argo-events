@@ -27,8 +27,6 @@ import (
 )
 
 func TestValidateSensor(t *testing.T) {
-	// TODO: Temporarily skip it
-	t.SkipNow()
 	dir := "../../examples/sensors"
 	files, err := ioutil.ReadDir(dir)
 	assert.Nil(t, err)
