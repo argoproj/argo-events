@@ -1079,10 +1079,8 @@
                   <h1>09 service account</h1>
                 
                 <h2 id="service-account-for-eventsources">Service Account for EventSources<a class="headerlink" href="#service-account-for-eventsources" title="Permanent link">&para;</a></h2>
-<p>Most of the event-sources can be run with a service account with no roles associated, expect the ones which require
-access to secrets to read auth related configuration. Make sure to grant <code>get</code> and <code>list</code> permission for secrets to the service account used in 
-such event-sources.</p>
-<p>For <code>Resource</code> event-source, you need to associate the <code>get</code>, <code>list</code> and <code>watch</code> permissions for the resource being watched, and assign that role to the service account. </p>
+<p>Most of the event-sources can be run with a service account with no roles associated, expect <code>Resource</code> event-source. 
+You need to associate the <code>get</code>, <code>list</code> and <code>watch</code> permissions for the resource being watched, and assign that role to the service account. </p>
 <h2 id="service-account-for-triggers">Service Account for Triggers<a class="headerlink" href="#service-account-for-triggers" title="Permanent link">&para;</a></h2>
 <p>Based on the type of trigger, it's a good practice to create a service account with minimum set of roles to execute it.</p>
 <p>The sensor examples use <code>argo-events-sa</code> service account to execute all types of triggers, but it is has more permissions than needed
