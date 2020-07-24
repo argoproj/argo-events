@@ -63,15 +63,15 @@
 
 5. Install the sensor custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argopoj.io_sensors.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_sensors.yaml
 
 6. Install the eventbus custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argopoj.io_eventbus.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_eventbus.yaml
 
 7. Install the event-source custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argopoj.io_eventsources.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_eventsources.yaml
 
 9. Deploy the sensor controller
 
