@@ -633,7 +633,7 @@ type TriggerPolicy struct {
 	Status *StatusPolicy `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
 }
 
-// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels
 type K8SResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,1,rep,name=labels"`

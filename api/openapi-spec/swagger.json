@@ -2122,7 +2122,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.K8SResourcePolicy": {
-      "description": "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
+      "description": "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels",
       "type": "object",
       "required": [
         "backoff",

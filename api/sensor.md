@@ -2616,7 +2616,7 @@ K8SResourcePolicy
 <p>
 
 K8SResourcePolicy refers to the policy used to check the state of K8s
-based triggers using using labels
+based triggers using labels
 
 </p>
 

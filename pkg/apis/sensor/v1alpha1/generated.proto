@@ -341,7 +341,7 @@ message HTTPTrigger {
   map<string, string> headers = 8;
 }
 
-// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels
 message K8SResourcePolicy {
   // Labels required to identify whether a resource is in success state
   map<string, string> labels = 1;
