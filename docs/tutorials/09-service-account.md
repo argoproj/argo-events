@@ -1,10 +1,7 @@
 ## Service Account for EventSources
 
-Most of the event-sources can be run with a service account with no roles associated, expect the ones which require
-access to secrets to read auth related configuration. Make sure to grant `get` and `list` permission for secrets to the service account used in 
-such event-sources.
-
-For `Resource` event-source, you need to associate the `get`, `list` and `watch` permissions for the resource being watched, and assign that role to the service account. 
+Most of the event-sources can be run with a service account with no roles associated, expect `Resource` event-source. 
+You need to associate the `get`, `list` and `watch` permissions for the resource being watched, and assign that role to the service account. 
 
 ## Service Account for Triggers
 
