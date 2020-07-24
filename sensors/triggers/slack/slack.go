@@ -21,7 +21,7 @@ import (
 
 	"github.com/nlopes/slack"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
@@ -37,13 +37,13 @@ type SlackTrigger struct {
 	// Trigger refers to the trigger resource
 	Trigger *v1alpha1.Trigger
 	// Logger to log stuff
-	Logger *logrus.Logger
+	Logger *zap.Logger
 	// http client to invoke function.
 	httpClient *http.Client
 }
 
 // NewSlackTrigger returns a new Slack trigger context
-func NewSlackTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger, httpClient *http.Client) (*SlackTrigger, error) {
+func NewSlackTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger, httpClient *http.Client) (*SlackTrigger, error) {
 	return &SlackTrigger{
 		K8sClient:  k8sClient,
 		Sensor:     sensor,
@@ -83,7 +83,7 @@ func (t *SlackTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event
 
 // Execute executes the trigger
 func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
-	t.Logger.Infoln("executing SlackTrigger")
+	t.Logger.Info("executing SlackTrigger")
 	_, ok := resource.(*v1alpha1.SlackTrigger)
 	if !ok {
 		return nil, errors.New("failed to marshal the Slack trigger resource")
@@ -114,19 +114,19 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 	api := slack.New(slackToken, slack.OptionDebug(true))
 	_, err = api.JoinChannel(channel)
 	if err != nil {
-		t.Logger.WithField("channel", channel).Errorf("unable to join channel...")
+		t.Logger.Error("unable to join channel...", zap.Any("channel", channel))
 		return nil, errors.Wrapf(err, "failed to join channel %s", channel)
 	}
 
-	t.Logger.WithField("channel", channel).Infoln("posting to channel...")
+	t.Logger.Info("posting to channel...", zap.Any("channel", channel))
 	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
 	if err != nil {
-		t.Logger.WithField("channel", channel).Errorf("unable to post to channel...")
+		t.Logger.Error("unable to post to channel...", zap.Any("channel", channel))
 		return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
 	}
 
-	t.Logger.WithField("message", message).WithField("channelID", channelID).WithField("timestamp", timestamp).Infoln("message successfully sent to channelID with timestamp")
-	t.Logger.Infoln("finished executing SlackTrigger")
+	t.Logger.Info("message successfully sent to channelID with timestamp", zap.Any("message", message), zap.Any("channelID", channelID), zap.Any("timestamp", timestamp))
+	t.Logger.Info("finished executing SlackTrigger")
 	return nil, nil
 }
 

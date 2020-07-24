@@ -19,6 +19,7 @@ package sensor
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,8 +27,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"github.com/go-logr/logr"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -45,11 +44,11 @@ type reconciler struct {
 	scheme *runtime.Scheme
 
 	sensorImage string
-	logger      logr.Logger
+	logger      *zap.SugaredLogger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, sensorImage string, logger logr.Logger) reconcile.Reconciler {
+func NewReconciler(client client.Client, scheme *runtime.Scheme, sensorImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, sensorImage: sensorImage, logger: logger}
 }
 
@@ -58,17 +57,17 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	sensor := &v1alpha1.Sensor{}
 	if err := r.client.Get(ctx, req.NamespacedName, sensor); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.logger.Info("WARNING: sensor not found", "request", req)
+			r.logger.Warnw("WARNING: sensor not found", "request", req)
 			return reconcile.Result{}, nil
 		}
-		r.logger.Error(err, "unable to get sensor ctl", "request", req)
+		r.logger.Errorw("unable to get sensor ctl", "request", req, "error", err)
 		return ctrl.Result{}, err
 	}
-	log := r.logger.WithValues("namespace", sensor.Namespace).WithValues("sensor", sensor.Name)
+	log := r.logger.With("namespace", sensor.Namespace).With("sensor", sensor.Name)
 	sensorCopy := sensor.DeepCopy()
 	reconcileErr := r.reconcile(ctx, sensorCopy)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "reconcile error")
+		log.Errorw("reconcile error", "error", reconcileErr)
 	}
 	if r.needsUpdate(sensor, sensorCopy) {
 		if err := r.client.Update(ctx, sensorCopy); err != nil {
@@ -80,7 +79,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) error {
-	log := r.logger.WithValues("namespace", sensor.Namespace).WithValues("sensor", sensor.Name)
+	log := r.logger.With("namespace", sensor.Namespace).With("sensor", sensor.Name)
 	if !sensor.DeletionTimestamp.IsZero() {
 		log.Info("deleting sensor")
 		// Finalizer logic should be added here.

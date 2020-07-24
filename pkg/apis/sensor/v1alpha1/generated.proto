@@ -213,18 +213,14 @@ message EventDependency {
   // Name is a unique name of this dependency
   optional string name = 1;
 
-  // GatewayName is the name of the gateway from whom the event is received
-  // DEPRECATED: Use EventSourceName instead.
-  optional string gatewayName = 2;
-
   // EventSourceName is the name of EventSource that Sensor depends on
-  optional string eventSourceName = 3;
+  optional string eventSourceName = 2;
 
   // EventName is the name of the event
-  optional string eventName = 4;
+  optional string eventName = 3;
 
   // Filters and rules governing toleration of success and constraints on the context and data of an event
-  optional EventDependencyFilter filters = 5;
+  optional EventDependencyFilter filters = 4;
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
@@ -341,7 +337,7 @@ message HTTPTrigger {
   map<string, string> headers = 8;
 }
 
-// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels
 message K8SResourcePolicy {
   // Labels required to identify whether a resource is in success state
   map<string, string> labels = 1;
@@ -595,10 +591,6 @@ message Template {
   // More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   // +optional
   map<string, string> nodeSelector = 5;
-
-  // Spec holds the sensor deployment spec.
-  // DEPRECATED: Use Container instead.
-  optional k8s.io.api.core.v1.PodSpec spec = 6;
 }
 
 // TimeFilter describes a window in time.

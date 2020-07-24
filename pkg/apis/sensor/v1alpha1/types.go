@@ -168,24 +168,18 @@ type Template struct {
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,5,rep,name=nodeSelector"`
-	// Spec holds the sensor deployment spec.
-	// DEPRECATED: Use Container instead.
-	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,6,opt,name=spec"`
 }
 
 // EventDependency describes a dependency
 type EventDependency struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-	// GatewayName is the name of the gateway from whom the event is received
-	// DEPRECATED: Use EventSourceName instead.
-	GatewayName string `json:"gatewayName" protobuf:"bytes,2,name=gatewayName"`
 	// EventSourceName is the name of EventSource that Sensor depends on
-	EventSourceName string `json:"eventSourceName" protobuf:"bytes,3,name=eventSourceName"`
+	EventSourceName string `json:"eventSourceName" protobuf:"bytes,2,name=eventSourceName"`
 	// EventName is the name of the event
-	EventName string `json:"eventName" protobuf:"bytes,4,name=eventName"`
+	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
-	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,5,opt,name=filters"`
+	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
 }
 
 // DependencyGroup is the group of dependencies
@@ -633,7 +627,7 @@ type TriggerPolicy struct {
 	Status *StatusPolicy `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
 }
 
-// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels
 type K8SResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,1,rep,name=labels"`

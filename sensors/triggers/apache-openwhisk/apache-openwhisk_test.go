@@ -53,7 +53,7 @@ func getFakeTriggerImpl() *TriggerImpl {
 		K8sClient:       nil,
 		Sensor:          sensorObj.DeepCopy(),
 		Trigger:         sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:          logging.NewArgoEventsLogger(),
+		Logger:          logging.NewArgoEventsLogger().Desugar(),
 	}
 }
 

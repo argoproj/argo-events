@@ -22,6 +22,7 @@ import (
 
 	natslib "github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -55,18 +56,15 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
 	defer sources.Recover(el.GetEventName())
 
 	natsEventSource := &el.NATSEventSource
 
 	var conn *natslib.Conn
 
-	log.Infoln("connecting to nats cluster...")
+	log.Info("connecting to nats cluster...")
 	if err := sources.Connect(common.GetConnectionBackoff(natsEventSource.ConnectionBackoff), func() error {
 		var err error
 		var opt []natslib.Option
@@ -88,7 +86,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if natsEventSource.JSONBody {
-		log.Infoln("assuming all events have a json body...")
+		log.Info("assuming all events have a json body...")
 	}
 
 	log.Info("subscribing to messages on the queue...")
@@ -104,13 +102,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			log.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")
+			log.Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
 			return
 		}
-		log.Infoln("dispatching the event on data channel...")
+		log.Info("dispatching the event on data channel...")
 		err = dispatch(eventBody)
 		if err != nil {
-			log.WithError(err).Errorln("failed to dispatch event")
+			log.Error("failed to dispatch NATS event", zap.Error(err))
 		}
 	})
 	if err != nil {
@@ -123,6 +121,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	<-ctx.Done()
-	log.Infoln("event source is stopped")
+	log.Info("event source is stopped")
 	return nil
 }

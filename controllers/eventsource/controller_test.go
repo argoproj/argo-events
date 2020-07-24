@@ -8,9 +8,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/argoproj/argo-events/common/logging"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -151,7 +151,7 @@ func TestReconcile(t *testing.T) {
 			client:           cl,
 			scheme:           scheme.Scheme,
 			eventSourceImage: "test-image",
-			logger:           ctrl.Log.WithName("test"),
+			logger:           logging.NewArgoEventsLogger(),
 		}
 		err := r.reconcile(ctx, testEventSource)
 		assert.Error(t, err)
@@ -172,7 +172,7 @@ func TestReconcile(t *testing.T) {
 			client:           cl,
 			scheme:           scheme.Scheme,
 			eventSourceImage: "test-image",
-			logger:           ctrl.Log.WithName("test"),
+			logger:           logging.NewArgoEventsLogger(),
 		}
 		err = r.reconcile(ctx, testEventSource)
 		assert.NoError(t, err)

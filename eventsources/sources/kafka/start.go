@@ -29,6 +29,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing kafka event source
@@ -64,19 +65,16 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
 
-	log.Infoln("start kafka event source...")
+	log.Info("start kafka event source...")
 	kafkaEventSource := &el.KafkaEventSource
 
 	var consumer sarama.Consumer
 
-	log.Infoln("connecting to Kafka cluster...")
+	log.Info("connecting to Kafka cluster...")
 	if err := sources.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
 		var err error
 		config := sarama.NewConfig()
@@ -104,27 +102,27 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to connect to Kafka broker for event source %s", el.GetEventName())
 	}
 
-	log = log.WithField("partition-id", kafkaEventSource.Partition)
+	log = log.With("partition-id", kafkaEventSource.Partition)
 
-	log.Infoln("parsing the partition value...")
+	log.Info("parsing the partition value...")
 	pInt, err := strconv.ParseInt(kafkaEventSource.Partition, 10, 32)
 	if err != nil {
 		return errors.Wrapf(err, "failed to parse Kafka partition %s for event source %s", kafkaEventSource.Partition, el.GetEventName())
 	}
 	partition := int32(pInt)
 
-	log.Infoln("getting available partitions...")
+	log.Info("getting available partitions...")
 	availablePartitions, err := consumer.Partitions(kafkaEventSource.Topic)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the available partitions for topic %s and event source %s", kafkaEventSource.Topic, el.GetEventName())
 	}
 
-	log.Infoln("verifying the partition exists within available partitions...")
+	log.Info("verifying the partition exists within available partitions...")
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
 		return errors.Wrapf(err, "partition %d is not available. event source %s", partition, el.GetEventName())
 	}
 
-	log.Infoln("getting partition consumer...")
+	log.Info("getting partition consumer...")
 	partitionConsumer, err := consumer.ConsumePartition(kafkaEventSource.Topic, partition, sarama.OffsetNewest)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create consumer partition for event source %s", el.GetEventName())
@@ -134,7 +132,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			log.Infoln("dispatching event on the data channel...")
+			log.Info("dispatching event on the data channel...")
 			eventData := &events.KafkaEventData{
 				Topic:     msg.Topic,
 				Partition: int(msg.Partition),
@@ -147,21 +145,21 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			eventBody, err := json.Marshal(eventData)
 			if err != nil {
-				log.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")
+				log.Desugar().Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
 				continue
 			}
 			if err = dispatch(eventBody); err != nil {
-				log.WithError(err).Errorln("failed to dispatch event...")
+				log.Desugar().Error("failed to dispatch kafka event...", zap.Error(err))
 			}
 
 		case err := <-partitionConsumer.Errors():
 			return errors.Wrapf(err, "failed to consume messages for event source %s", el.GetEventName())
 
 		case <-ctx.Done():
-			log.Infoln("event source is stopped, closing partition consumer")
+			log.Info("event source is stopped, closing partition consumer")
 			err = partitionConsumer.Close()
 			if err != nil {
-				log.WithError(err).Error("failed to close consumer")
+				log.Desugar().Error("failed to close consumer", zap.Error(err))
 			}
 			return nil
 		}

@@ -23,9 +23,9 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/argoproj/argo-events/common/logging"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -42,7 +42,7 @@ func TestReconcile(t *testing.T) {
 			client:      cl,
 			scheme:      scheme.Scheme,
 			sensorImage: testImage,
-			logger:      ctrl.Log.WithName("test"),
+			logger:      logging.NewArgoEventsLogger(),
 		}
 		err := r.reconcile(ctx, sensorObj)
 		assert.Error(t, err)
@@ -61,7 +61,7 @@ func TestReconcile(t *testing.T) {
 			client:      cl,
 			scheme:      scheme.Scheme,
 			sensorImage: testImage,
-			logger:      ctrl.Log.WithName("test"),
+			logger:      logging.NewArgoEventsLogger(),
 		}
 		err = r.reconcile(ctx, sensorObj)
 		assert.NoError(t, err)

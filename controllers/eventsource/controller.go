@@ -3,6 +3,7 @@ package eventsource
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -10,8 +11,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"github.com/go-logr/logr"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -29,11 +28,11 @@ type reconciler struct {
 	scheme *runtime.Scheme
 
 	eventSourceImage string
-	logger           logr.Logger
+	logger           *zap.SugaredLogger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImage string, logger logr.Logger) reconcile.Reconciler {
+func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, eventSourceImage: eventSourceImage, logger: logger}
 }
 
@@ -42,17 +41,17 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	eventSource := &v1alpha1.EventSource{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventSource); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.logger.Info("WARNING: eventsource not found", "request", req)
+			r.logger.Warnw("WARNING: eventsource not found", "request", req)
 			return reconcile.Result{}, nil
 		}
-		r.logger.Error(err, "unable to get eventsource ctl", "request", req)
+		r.logger.Errorw("unable to get eventsource ctl", "request", req, "error", err)
 		return ctrl.Result{}, err
 	}
-	log := r.logger.WithValues("namespace", eventSource.Namespace).WithValues("eventSource", eventSource.Name)
+	log := r.logger.With("namespace", eventSource.Namespace).With("eventSource", eventSource.Name)
 	evCopy := eventSource.DeepCopy()
 	reconcileErr := r.reconcile(ctx, evCopy)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "reconcile error")
+		log.Desugar().Error("reconcile error", zap.Error(reconcileErr))
 	}
 	if r.needsUpdate(eventSource, evCopy) {
 		if err := r.client.Update(ctx, evCopy); err != nil {
@@ -64,7 +63,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventSource) error {
-	log := r.logger.WithValues("namespace", eventSource.Namespace).WithValues("eventSource", eventSource.Name)
+	log := r.logger.With("namespace", eventSource.Namespace).With("eventSource", eventSource.Name)
 	if !eventSource.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventsource")
 		// Finalizer logic should be added here.
@@ -76,7 +75,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 	eventSource.Status.InitConditions()
 	err := ValidateEventSource(eventSource)
 	if err != nil {
-		log.Error(err, "validation error")
+		log.Desugar().Error("validation error", zap.Error(err))
 		return err
 	}
 	args := &AdaptorArgs{

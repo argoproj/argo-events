@@ -1923,7 +1923,6 @@
       "type": "object",
       "required": [
         "name",
-        "gatewayName",
         "eventSourceName",
         "eventName"
       ],
@@ -1939,10 +1938,6 @@
         "filters": {
           "description": "Filters and rules governing toleration of success and constraints on the context and data of an event",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyFilter"
-        },
-        "gatewayName": {
-          "description": "GatewayName is the name of the gateway from whom the event is received DEPRECATED: Use EventSourceName instead.",
-          "type": "string"
         },
         "name": {
           "description": "Name is a unique name of this dependency",
@@ -2122,7 +2117,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.K8SResourcePolicy": {
-      "description": "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
+      "description": "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels",
       "type": "object",
       "required": [
         "backoff",
@@ -2531,10 +2526,6 @@
         "serviceAccountName": {
           "description": "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
           "type": "string"
-        },
-        "spec": {
-          "description": "Spec holds the sensor deployment spec. DEPRECATED: Use Container instead.",
-          "$ref": "#/definitions/io.k8s.api.core.v1.PodSpec"
         },
         "volumes": {
           "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",

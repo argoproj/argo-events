@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
@@ -45,11 +45,11 @@ type HTTPTrigger struct {
 	// Trigger reference
 	Trigger *v1alpha1.Trigger
 	// Logger to log stuff
-	Logger *logrus.Logger
+	Logger *zap.Logger
 }
 
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(httpClients map[string]*http.Client, k8sCLient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) (*HTTPTrigger, error) {
+func NewHTTPTrigger(httpClients map[string]*http.Client, k8sCLient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*HTTPTrigger, error) {
 	httptrigger := trigger.Template.HTTP
 
 	client, ok := httpClients[trigger.Template.Name]
@@ -141,7 +141,7 @@ func (t *HTTPTrigger) Execute(events map[string]*v1alpha1.Event, resource interf
 	}
 
 	if (trigger.Method == http.MethodPost || trigger.Method == http.MethodPatch || trigger.Method == http.MethodPut) && trigger.Payload == nil {
-		t.Logger.WithField("url", trigger.URL).Warnln("payload parameters are not specified. request payload will be an empty string")
+		t.Logger.Warn("payload parameters are not specified. request payload will be an empty string", zap.Any("url", trigger.URL))
 	}
 
 	if trigger.Payload != nil {
@@ -189,7 +189,7 @@ func (t *HTTPTrigger) Execute(events map[string]*v1alpha1.Event, resource interf
 		request.SetBasicAuth(username, password)
 	}
 
-	t.Logger.WithField("url", trigger.URL).Infoln("making a http request...")
+	t.Logger.Info("making a http request...", zap.Any("url", trigger.URL))
 
 	return t.Client.Do(request)
 }

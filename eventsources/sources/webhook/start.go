@@ -28,6 +28,7 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"go.uber.org/zap"
 )
 
 var (
@@ -81,14 +82,11 @@ func (router *Router) GetRoute() *webhook.Route {
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.GetRoute()
 
-	logger := route.Logger.WithFields(
-		map[string]interface{}{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelHTTPMethod:      route.Context.Method,
-		})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+	).Desugar()
 
 	logger.Info("a request received, processing it...")
 
@@ -100,7 +98,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.WithError(err).Error("failed to parse request body")
+		logger.Error("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		return
 	}
@@ -112,12 +110,12 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	data, err := json.Marshal(payload)
 	if err != nil {
-		logger.WithError(err).Error("failed to construct the event payload")
+		logger.Error("failed to construct the event payload", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		return
 	}
 
-	logger.Infoln("dispatching event on route's data channel...")
+	logger.Info("dispatching event on route's data channel...")
 	route.DataCh <- data
 	logger.Info("successfully processed the request")
 	common.SendSuccessResponse(writer, "success")
@@ -135,15 +133,11 @@ func (router *Router) PostInactivate() error {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	logger := logging.FromContext(ctx)
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the webhook event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	log.Info("started processing the webhook event source...")
 
-	route := webhook.NewRoute(&el.WebhookContext, logger, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(&el.WebhookContext, log, el.GetEventSourceName(), el.GetEventName())
 	return webhook.ManageRoute(ctx, &Router{
 		route: route,
 	}, controller, dispatch)

@@ -20,8 +20,7 @@ import (
 	"errors"
 	"io/ioutil"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -44,6 +43,7 @@ func (reader *FileReader) Read() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	log := logging.NewArgoEventsLogger()
 	log.Debugf("reading fileArtifact from %s", reader.fileArtifact.Path)
 	return content, nil
 }

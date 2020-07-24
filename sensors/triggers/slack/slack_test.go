@@ -60,7 +60,7 @@ func getSlackTrigger() *SlackTrigger {
 		K8sClient:  fake.NewSimpleClientset(),
 		Sensor:     sensorObj.DeepCopy(),
 		Trigger:    sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:     logging.NewArgoEventsLogger(),
+		Logger:     logging.NewArgoEventsLogger().Desugar(),
 		httpClient: &http.Client{},
 	}
 }

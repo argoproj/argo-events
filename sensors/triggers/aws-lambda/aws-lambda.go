@@ -21,7 +21,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
@@ -41,11 +41,11 @@ type AWSLambdaTrigger struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *logrus.Logger
+	Logger *zap.Logger
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
 	lambdaClient, ok := lambdaClients[trigger.Template.Name]

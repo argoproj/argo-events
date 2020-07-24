@@ -68,7 +68,7 @@ func getAWSTrigger() *AWSLambdaTrigger {
 		K8sClient:    fake.NewSimpleClientset(),
 		Sensor:       sensorObj.DeepCopy(),
 		Trigger:      &sensorObj.Spec.Triggers[0],
-		Logger:       logging.NewArgoEventsLogger(),
+		Logger:       logging.NewArgoEventsLogger().Desugar(),
 	}
 }
 

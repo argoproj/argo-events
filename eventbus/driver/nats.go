@@ -13,7 +13,7 @@ import (
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -57,11 +57,11 @@ type natsStreaming struct {
 	subject   string
 	clientID  string
 
-	logger *logrus.Logger
+	logger *zap.SugaredLogger
 }
 
 // NewNATSStreaming returns a nats streaming driver
-func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logger *logrus.Logger) Driver {
+func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
 	return &natsStreaming{
 		url:       url,
 		clusterID: clusterID,
@@ -73,14 +73,14 @@ func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logg
 }
 
 func (n *natsStreaming) Connect() (Connection, error) {
-	log := n.logger.WithField("clientID", n.clientID)
+	log := n.logger.With("clientID", n.clientID).Desugar()
 	conn := &natsStreamingConnection{}
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
 		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
 			conn.natsConnected = false
-			log.Errorf("NATS connection lost, reason: %v", err)
+			log.Error("NATS connection los", zap.Error(err))
 		}),
 		nats.ReconnectHandler(func(nnc *nats.Conn) {
 			conn.natsConnected = true
@@ -98,7 +98,7 @@ func (n *natsStreaming) Connect() (Connection, error) {
 	}
 	nc, err := nats.Connect(n.url, opts...)
 	if err != nil {
-		log.Errorf("Failed to connect to NATS server, %v", err)
+		log.Error("Failed to connect to NATS server", zap.Error(err))
 		return nil, err
 	}
 	log.Info("Connected to NATS server.")
@@ -108,10 +108,10 @@ func (n *natsStreaming) Connect() (Connection, error) {
 	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc), stan.Pings(5, 60),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
 			conn.stanConnected = false
-			log.Errorf("NATS streaming connection lost, reason: %v", reason)
+			log.Error("NATS streaming connection lost", zap.Error(err))
 		}))
 	if err != nil {
-		log.Errorf("Failed to connect to NATS streaming server, %v", err)
+		log.Error("Failed to connect to NATS streaming server", zap.Error(err))
 		return nil, err
 	}
 	log.Info("Connected to NATS streaming server.")
@@ -131,7 +131,7 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
 func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, closeCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
-	log := n.logger.WithField("clientID", n.clientID)
+	log := n.logger.With("clientID", n.clientID)
 	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
 	if err != nil {
 		return err
@@ -170,7 +170,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	}
 }
 
-func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *logrus.Entry) {
+func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *zap.SugaredLogger) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
 		log.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
@@ -253,7 +253,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	for k, v := range msgHolder.msgs {
 		messages[k] = *v.event
 	}
-	log.Infof("Triggering actions for client %s", n.clientID)
+	log.Debugf("Triggering actions for client %s", n.clientID)
 
 	go action(messages)
 

@@ -23,9 +23,9 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/webhookendpoint"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -74,14 +74,11 @@ func (rc *Router) GetRoute() *webhook.Route {
 func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := rc.route
 
-	logger := route.Logger.WithFields(
-		logrus.Fields{
-			logging.LabelEventSourceName: route.EventSourceName,
-			logging.LabelEventName:       route.EventName,
-			logging.LabelEndpoint:        route.Context.Endpoint,
-			logging.LabelPort:            route.Context.Port,
-			logging.LabelHTTPMethod:      route.Context.Method,
-		})
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+	).Desugar()
 
 	logger.Info("request a received, processing it...")
 
@@ -95,33 +92,33 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	request.Body = http.MaxBytesReader(writer, request.Body, MaxBodyBytes)
 	payload, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.WithError(err).Errorln("error reading request body")
+		logger.Error("error reading request body", zap.Error(err))
 		writer.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
 
 	var event *stripe.Event
 	if err := json.Unmarshal(payload, &event); err != nil {
-		logger.WithError(err).Errorln("failed to parse request body")
+		logger.Error("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, "failed to parse the event")
 		return
 	}
 
 	ok := filterEvent(event, rc.stripeEventSource.EventFilter)
 	if !ok {
-		logger.WithField("event-type", event.Type).Warnln("failed to pass the filters")
+		logger.Error("failed to pass the filters", zap.Any("event-type", event.Type), zap.Error(err))
 		common.SendSuccessResponse(writer, "invalid event")
 		return
 	}
 
 	data, err := json.Marshal(event)
 	if err != nil {
-		logger.WithField("event-id", event.ID).Warnln("failed to marshal event into gateway response")
+		logger.Error("failed to marshal event into gateway response", zap.Any("event-id", event.ID), zap.Error(err))
 		common.SendSuccessResponse(writer, "invalid event")
 		return
 	}
 
-	logger.Infoln("dispatching event on route's data channel...")
+	logger.Info("dispatching event on route's data channel...")
 	route.DataCh <- data
 	logger.Info("request successfully processed")
 	common.SendSuccessResponse(writer, "success")
@@ -132,14 +129,11 @@ func (rc *Router) PostActivate() error {
 	if rc.stripeEventSource.CreateWebhook {
 		route := rc.route
 		stripeEventSource := rc.stripeEventSource
-		logger := route.Logger.WithFields(
-			logrus.Fields{
-				logging.LabelEventSourceName: route.EventSourceName,
-				logging.LabelEventName:       route.EventName,
-				logging.LabelEndpoint:        route.Context.Endpoint,
-				logging.LabelHTTPMethod:      route.Context.Method,
-			})
-		logger.Infoln("registering a new webhook")
+		logger := route.Logger.With(
+			logging.LabelEndpoint, route.Context.Endpoint,
+			logging.LabelHTTPMethod, route.Context.Method,
+		)
+		logger.Info("registering a new webhook")
 
 		apiKey, ok := common.GetEnvFromSecret(stripeEventSource.APIKey)
 		if !ok {
@@ -159,8 +153,7 @@ func (rc *Router) PostActivate() error {
 		if err != nil {
 			return err
 		}
-
-		logger.WithField("endpoint-id", endpoint.ID).Infoln("new stripe webhook endpoint created")
+		logger.With("endpoint-id", endpoint.ID).Info("new stripe webhook endpoint created")
 	}
 	return nil
 }
@@ -184,17 +177,13 @@ func filterEvent(event *stripe.Event, filters []string) bool {
 
 // StartListening starts an event source
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	logger := logging.FromContext(ctx)
-	log := logging.FromContext(ctx).WithFields(map[string]interface{}{
-		logging.LabelEventSourceType: el.GetEventSourceType(),
-		logging.LabelEventSourceName: el.GetEventSourceName(),
-		logging.LabelEventName:       el.GetEventName(),
-	})
-	log.Infoln("started processing the Stripe event source...")
+	log := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	log.Info("started processing the Stripe event source...")
 	defer sources.Recover(el.GetEventName())
 
 	stripeEventSource := &el.StripeEventSource
-	route := webhook.NewRoute(stripeEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(stripeEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName())
 
 	return webhook.ManageRoute(ctx, &Router{
 		route:             route,
