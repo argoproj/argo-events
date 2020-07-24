@@ -24,6 +24,6 @@ do
   MOCK_DIR=$(echo $i | awk -F: '{print $1}')
   MOCK_NAME=$(echo $i | awk -F: '{print $2}')
   cd ${REPO_ROOT}/${MOCK_DIR}
-  mockery -name ${MOCK_NAME}
+  mockery --name ${MOCK_NAME}
 done
 

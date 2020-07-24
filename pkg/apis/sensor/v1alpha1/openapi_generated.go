@@ -940,7 +940,7 @@ func schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref common.ReferenceCallb
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
+				Description: "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"labels": {
