@@ -17,13 +17,13 @@
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 
-   NOTE: 
-   
-     * On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
-
-            kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+       NOTE: 
        
-     * On Openshift, make sure to grant `anyuid` scc to the service account.
+         * On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
+    
+                kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+           
+         * On Openshift, make sure to grant `anyuid` scc to the service account.
 
 3. Deploy the eventbus,
 
@@ -39,13 +39,13 @@
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
-   NOTE: 
-   
-     * On GKE, you may need to grant your account the ability to create new custom resource definitions
-
-            kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
-     
-     * On Openshift, make sure to grant `anyuid` scc to the service account.
+       NOTE: 
+       
+         * On GKE, you may need to grant your account the ability to create new custom resource definitions
+    
+                kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+         
+         * On Openshift, make sure to grant `anyuid` scc to the service account.
 
 3. Deploy the eventbus,
 
