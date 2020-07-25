@@ -5,6 +5,8 @@ resources:
   - ../base
   - rbac
 
+namespace: argo-events
+
 patchesStrategicMerge:
   - overlays/eventbus-controller-deployment.yaml
   - overlays/eventsource-controller-deployment.yaml
