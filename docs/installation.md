@@ -13,7 +13,7 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus and EventSource Controller
+2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 
@@ -25,13 +25,17 @@
        
      * On Openshift, make sure to grant `anyuid` scc to the service account.
 
+3. Deploy the eventbus,
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+
 #### Namespace Installation
 
 1. Create the namespace
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus and EventSource Controller
+2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
@@ -42,6 +46,11 @@
             kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
      
      * On Openshift, make sure to grant `anyuid` scc to the service account.
+
+3. Deploy the eventbus,
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml        
+
 
 ### Using Kustomize
 
