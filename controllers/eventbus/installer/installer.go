@@ -22,6 +22,7 @@ func Install(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingIma
 	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
 		logger.Desugar().Error("failed to an installer", zap.Error(err))
+		return err
 	}
 	busConfig, err := installer.Install()
 	if err != nil {
@@ -60,6 +61,7 @@ func Uninstall(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingI
 	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
 		logger.Desugar().Error("failed to get an installer", zap.Error(err))
+		return err
 	}
 	return installer.Uninstall()
 }
