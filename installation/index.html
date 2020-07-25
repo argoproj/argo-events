@@ -329,13 +329,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#step-by-step-installation" title="Step-by-Step Installation" class="md-nav__link">
-    Step-by-Step Installation
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1070,13 +1063,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#step-by-step-installation" title="Step-by-Step Installation" class="md-nav__link">
-    Step-by-Step Installation
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1139,7 +1125,7 @@
 
 </li>
 <li>
-<p>Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus and EventSource Controller</p>
+<p>Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller</p>
 <div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 </pre></div>
 
@@ -1155,6 +1141,13 @@
 </pre></div>
 
 
+<ol>
+<li>Deploy the eventbus,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+</pre></div>
+
+
+</li>
+</ol>
 <h4 id="namespace-installation">Namespace Installation<a class="headerlink" href="#namespace-installation" title="Permanent link">&para;</a></h4>
 <ol>
 <li>
@@ -1165,7 +1158,7 @@
 
 </li>
 <li>
-<p>Deploy Argo Events, SA, Roles, Sensor Controller, EventBus and EventSource Controller</p>
+<p>Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller</p>
 <div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 </pre></div>
 
@@ -1181,81 +1174,8 @@
 </pre></div>
 
 
-<h4 id="step-by-step-installation">Step-by-Step Installation<a class="headerlink" href="#step-by-step-installation" title="Permanent link">&para;</a></h4>
 <ol>
-<li>
-<p>Create the namespace</p>
-<div class="codehilite"><pre><span></span>kubectl create namespace argo-events
-</pre></div>
-
-
-</li>
-<li>
-<p>Create the service account</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/argo-events-sa.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Create the role</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Create the rolebinding</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role-binding.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Install the sensor custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_sensors.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Install the eventbus custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_eventbus.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Install the event-source custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_eventsources.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Deploy the sensor controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-deployment.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Deploy the eventbus controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/eventbus-controller/eventbus-controller-deployment.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Deploy the event-source controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/eventsource-controller/eventsource-controller-deployment.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Deploy the eventbus.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+<li>Deploy the eventbus,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </pre></div>
 
 
