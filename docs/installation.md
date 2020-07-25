@@ -13,17 +13,21 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus and EventSource Controller
+2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 
-   NOTE: 
-   
-     * On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
-
-            kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+       NOTE: 
        
-     * On Openshift, make sure to grant `anyuid` scc to the service account.
+         * On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
+    
+                kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+           
+         * On Openshift, make sure to grant `anyuid` scc to the service account.
+
+3. Deploy the eventbus,
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
 #### Namespace Installation
 
@@ -31,63 +35,22 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus and EventSource Controller
+2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
-   NOTE: 
-   
-     * On GKE, you may need to grant your account the ability to create new custom resource definitions
+       NOTE: 
+       
+         * On GKE, you may need to grant your account the ability to create new custom resource definitions
+    
+                kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+         
+         * On Openshift, make sure to grant `anyuid` scc to the service account.
 
-            kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
-     
-     * On Openshift, make sure to grant `anyuid` scc to the service account.
+3. Deploy the eventbus,
 
-#### Step-by-Step Installation
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml        
 
-1. Create the namespace
-
-        kubectl create namespace argo-events
-
-2. Create the service account
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/argo-events-sa.yaml
-
-3. Create the role
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role.yaml
-
-4. Create the rolebinding
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role-binding.yaml
-
-5. Install the sensor custom resource definition
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_sensors.yaml
-
-6. Install the eventbus custom resource definition
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_eventbus.yaml
-
-7. Install the event-source custom resource definition
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/argoproj.io_eventsources.yaml
-
-9. Deploy the sensor controller
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-deployment.yaml
-
-10. Deploy the eventbus controller
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/eventbus-controller/eventbus-controller-deployment.yaml
-
-11. Deploy the event-source controller
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/eventsource-controller/eventsource-controller-deployment.yaml
-
-12. Deploy the eventbus.
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
 ### Using Kustomize
 
