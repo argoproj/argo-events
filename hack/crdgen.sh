@@ -22,3 +22,6 @@ find manifests/base/crds -name 'argoproj.io*.yaml' | while read -r file; do
   go run ./hack cleancrd "$file"
   add_header "$file"
 done
+
+# Remove this after cleanning up Gateway related code
+rm manifests/base/crds/argoproj.io_gateways.yaml

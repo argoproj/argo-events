@@ -3,8 +3,6 @@ kind: Sensor
 metadata:
   name: minio
 spec:
-  template:
-    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       eventSourceName: minio
