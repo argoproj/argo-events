@@ -4,3 +4,6 @@ kind: Kustomization
 resources:
   - ../base
   - rbac
+
+namespace: argo-events
+

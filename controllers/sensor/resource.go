@@ -218,9 +218,18 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		}
 	}
 	sensorContainer.Name = "main"
+	podTemplateLabels := make(map[string]string)
+	if len(args.Sensor.Spec.Template.Metadata.Labels) > 0 {
+		for k, v := range args.Sensor.Spec.Template.Metadata.Labels {
+			podTemplateLabels[k] = v
+		}
+	}
+	for k, v := range args.Labels {
+		podTemplateLabels[k] = v
+	}
 	return &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
-			MatchLabels: args.Labels,
+			MatchLabels: podTemplateLabels,
 		},
 		Replicas: &replicas,
 		Strategy: appv1.DeploymentStrategy{
@@ -229,7 +238,8 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: args.Labels,
+				Labels:      podTemplateLabels,
+				Annotations: args.Sensor.Spec.Template.Metadata.Annotations,
 			},
 			Spec: corev1.PodSpec{
 				ServiceAccountName: args.Sensor.Spec.Template.ServiceAccountName,

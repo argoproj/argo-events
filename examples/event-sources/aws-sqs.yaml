@@ -3,8 +3,6 @@ kind: EventSource
 metadata:
   name: aws-sqs
 spec:
-  template:
-    serviceAccountName: argo-events-sa # assign a service account with `get` permissions for secrets.
   sqs:
     example:
       # jsonBody specifies that all event body payload coming from this

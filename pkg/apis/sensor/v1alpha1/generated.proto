@@ -392,6 +392,13 @@ message KafkaTrigger {
   optional string partitioningKey = 10;
 }
 
+// Metadata holds the annotations and labels of an event source pod
+message Metadata {
+  map<string, string> annotations = 1;
+
+  map<string, string> labels = 2;
+}
+
 // NATSTrigger refers to the specification of the NATS trigger.
 message NATSTrigger {
   // URL of the NATS cluster.
@@ -566,31 +573,34 @@ message TLSConfig {
 
 // Template holds the information of a sensor deployment template
 message Template {
+  // Metdata sets the pods's metadata, i.e. annotations and labels
+  optional Metadata metadata = 1;
+
   // ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
   // More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   // +optional
-  optional string serviceAccountName = 1;
+  optional string serviceAccountName = 2;
 
   // Container is the main container image to run in the gateway pod
   // +optional
-  optional k8s.io.api.core.v1.Container container = 2;
+  optional k8s.io.api.core.v1.Container container = 3;
 
   // Volumes is a list of volumes that can be mounted by containers in a workflow.
   // +patchStrategy=merge
   // +patchMergeKey=name
   // +optional
-  repeated k8s.io.api.core.v1.Volume volumes = 3;
+  repeated k8s.io.api.core.v1.Volume volumes = 4;
 
   // SecurityContext holds pod-level security attributes and common container settings.
   // Optional: Defaults to empty.  See type description for default values of each field.
   // +optional
-  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 4;
+  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 5;
 
   // NodeSelector is a selector which must be true for the pod to fit on a node.
   // Selector which must match a node's labels for the pod to be scheduled on that node.
   // More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   // +optional
-  map<string, string> nodeSelector = 5;
+  map<string, string> nodeSelector = 6;
 }
 
 // TimeFilter describes a window in time.

@@ -68,6 +68,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: argo-events-role
+  namespace: argo-events
 rules:
 - apiGroups:
   - argoproj.io
@@ -139,6 +140,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: argo-events-role-binding
+  namespace: argo-events
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -146,6 +148,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argo-events-sa
+  namespace: argo-events
 ---
 apiVersion: apps/v1
 kind: Deployment
