@@ -147,27 +147,35 @@ type SensorSpec struct {
 
 // Template holds the information of a sensor deployment template
 type Template struct {
+	// Metdata sets the pods's metadata, i.e. annotations and labels
+	Metadata Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 	// +optional
-	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,1,opt,name=serviceAccountName"`
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,2,opt,name=serviceAccountName"`
 	// Container is the main container image to run in the gateway pod
 	// +optional
-	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,2,opt,name=container"`
+	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
 	// Volumes is a list of volumes that can be mounted by containers in a workflow.
 	// +patchStrategy=merge
 	// +patchMergeKey=name
 	// +optional
-	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,3,rep,name=volumes"`
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,4,rep,name=volumes"`
 	// SecurityContext holds pod-level security attributes and common container settings.
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
-	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,5,opt,name=securityContext"`
 	// NodeSelector is a selector which must be true for the pod to fit on a node.
 	// Selector which must match a node's labels for the pod to be scheduled on that node.
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,5,rep,name=nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,6,rep,name=nodeSelector"`
+}
+
+// Metadata holds the annotations and labels of an event source pod
+type Metadata struct {
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,rep,name=annotations"`
+	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 }
 
 // EventDependency describes a dependency

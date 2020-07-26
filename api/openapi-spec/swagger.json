@@ -2200,6 +2200,24 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.Metadata": {
+      "description": "Metadata holds the annotations and labels of an event source pod",
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.NATSTrigger": {
       "description": "NATSTrigger refers to the specification of the NATS trigger.",
       "type": "object",
@@ -2511,6 +2529,10 @@
         "container": {
           "description": "Container is the main container image to run in the gateway pod",
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"
+        },
+        "metadata": {
+          "description": "Metdata sets the pods's metadata, i.e. annotations and labels",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Metadata"
         },
         "nodeSelector": {
           "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
