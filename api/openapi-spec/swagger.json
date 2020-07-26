@@ -658,6 +658,13 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.PubSubEventSource"
           }
         },
+        "pulsar": {
+          "description": "Pulsar event source",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.PulsarEventSource"
+          }
+        },
         "redis": {
           "description": "Redis event source",
           "type": "object",
@@ -1142,6 +1149,55 @@
         },
         "topicProjectID": {
           "description": "TopicProjectID identifies the project where the topic should exist or be created (assumed to be the same as ProjectID by default)",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.PulsarEventSource": {
+      "description": "PulsarEventSource describes the event source for Apache Pulsar",
+      "type": "object",
+      "required": [
+        "topic",
+        "url"
+      ],
+      "properties": {
+        "connectionBackoff": {
+          "description": "Backoff holds parameters applied to connection.",
+          "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
+        "tls": {
+          "description": "TLS configuration for the pulsar client.",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+        },
+        "tlsAllowInsecureConnection": {
+          "description": "Whether the Pulsar client accept untrusted TLS certificate from broker.",
+          "type": "boolean"
+        },
+        "tlsTrustCertsFilePath": {
+          "description": "Set the path to the trusted TLS certificate file.",
+          "type": "string"
+        },
+        "tlsValidateHostname": {
+          "description": "Whether the Pulsar client verify the validity of the host name from broker.",
+          "type": "boolean"
+        },
+        "topic": {
+          "description": "Name of the topics to subscribe to.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "description": "Type of the subscription. Only \"exclusive\" and \"shared\" is supported. Defaults to exclusive.",
+          "type": "string"
+        },
+        "url": {
+          "description": "Configure the service URL for the Pulsar service.",
           "type": "string"
         }
       }

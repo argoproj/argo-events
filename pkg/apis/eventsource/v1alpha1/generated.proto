@@ -232,8 +232,11 @@ message EventSourceSpec {
   // NSQ event source
   map<string, NSQEventSource> nsq = 26;
 
+  // Pulsar event source
+  map<string, PulsarEventSource> pulsar = 27;
+
   // Generic event source
-  map<string, GenericEventSource> generic = 27;
+  map<string, GenericEventSource> generic = 28;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -506,6 +509,48 @@ message PubSubEventSource {
   // source will be JSON
   // +optional
   optional bool jsonBody = 7;
+}
+
+// PulsarEventSource describes the event source for Apache Pulsar
+message PulsarEventSource {
+  // Name of the topics to subscribe to.
+  // +required
+  repeated string topic = 1;
+
+  // Type of the subscription.
+  // Only "exclusive" and "shared" is supported.
+  // Defaults to exclusive.
+  // +optional
+  optional string type = 2;
+
+  // Configure the service URL for the Pulsar service.
+  // +required
+  optional string url = 3;
+
+  // Set the path to the trusted TLS certificate file.
+  // +optional
+  optional string tlsTrustCertsFilePath = 4;
+
+  // Whether the Pulsar client accept untrusted TLS certificate from broker.
+  // +optional
+  optional bool tlsAllowInsecureConnection = 5;
+
+  // Whether the Pulsar client verify the validity of the host name from broker.
+  // +optional
+  optional bool tlsValidateHostname = 6;
+
+  // TLS configuration for the pulsar client.
+  // +optional
+  optional TLSConfig tls = 7;
+
+  // Backoff holds parameters applied to connection.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 8;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 9;
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
