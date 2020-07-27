@@ -1157,7 +1157,7 @@
       "description": "PulsarEventSource describes the event source for Apache Pulsar",
       "type": "object",
       "required": [
-        "topic",
+        "topics",
         "url"
       ],
       "properties": {
@@ -1185,7 +1185,7 @@
           "description": "Whether the Pulsar client verify the validity of the host name from broker.",
           "type": "boolean"
         },
-        "topic": {
+        "topics": {
           "description": "Name of the topics to subscribe to.",
           "type": "array",
           "items": {

@@ -515,7 +515,7 @@ message PubSubEventSource {
 message PulsarEventSource {
   // Name of the topics to subscribe to.
   // +required
-  repeated string topic = 1;
+  repeated string topics = 1;
 
   // Type of the subscription.
   // Only "exclusive" and "shared" is supported.

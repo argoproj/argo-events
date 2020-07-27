@@ -1,3 +1,18 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package pulsar
 
 import (
@@ -86,6 +101,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to connect to %s for event source %s", pulsarEventSource.URL, el.GetEventName())
 	}
 
+	log.Info("subscribing to messages on the topic...")
 	consumer, err := client.Subscribe(consumerOpt)
 	if err != nil {
 		return errors.Wrapf(err, "failed to connect to topic %+v for event source %s", pulsarEventSource.Topics, el.GetEventName())
@@ -95,6 +111,7 @@ consumeMessages:
 	for {
 		select {
 		case msg := <-msgChannel:
+			log.Infof("received a message on the topic %s", msg.Topic())
 			payload := msg.Payload()
 			eventData := &events.PulsarEventData{
 				Key:         msg.Key(),
@@ -111,9 +128,10 @@ consumeMessages:
 				return err
 			}
 
+			log.Infof("dispatching the message received on the topic %s to eventbus", msg.Topic())
 			err = dispatch(eventBody)
 			if err != nil {
-				log.Error("failed to dispatch NATS event", zap.Error(err))
+				log.Error("failed to dispatch Pulsar event", zap.Error(err))
 			}
 
 		case <-ctx.Done():

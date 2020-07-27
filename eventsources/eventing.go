@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -213,6 +214,13 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 			servers = append(servers, &resource.EventListener{EventSourceName: eventSource.Name, EventName: k, ResourceEventSource: v})
 		}
 		result[apicommon.ResourceEvent] = servers
+	}
+	if len(eventSource.Spec.Pulsar) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Pulsar {
+			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v})
+		}
+		result[apicommon.PulsarEvent] = servers
 	}
 	return result
 }

@@ -1473,7 +1473,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 				Description: "PulsarEventSource describes the event source for Apache Pulsar",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"topic": {
+					"topics": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name of the topics to subscribe to.",
 							Type:        []string{"array"},
@@ -1542,7 +1542,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"topic", "url"},
+				Required: []string{"topics", "url"},
 			},
 		},
 		Dependencies: []string{

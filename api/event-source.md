@@ -4282,7 +4282,7 @@ Description
 
 <td>
 
-<code>topic</code></br> <em> \[\]string </em>
+<code>topics</code></br> <em> \[\]string </em>
 
 </td>
 

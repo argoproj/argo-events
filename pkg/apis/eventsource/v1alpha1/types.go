@@ -639,7 +639,7 @@ type NSQEventSource struct {
 type PulsarEventSource struct {
 	// Name of the topics to subscribe to.
 	// +required
-	Topics []string `json:"topic" protobuf:"bytes,1,rep,name=topic"`
+	Topics []string `json:"topics" protobuf:"bytes,1,rep,name=topics"`
 	// Type of the subscription.
 	// Only "exclusive" and "shared" is supported.
 	// Defaults to exclusive.
