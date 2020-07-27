@@ -32,7 +32,7 @@ func TestEventListener_ValidateEventSource(t *testing.T) {
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "url must be specified", err.Error())
+	assert.Equal(t, "topics can't be empty list", err.Error())
 
 	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "pulsar.yaml"))
 	assert.Nil(t, err)

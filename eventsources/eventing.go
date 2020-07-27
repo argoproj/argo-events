@@ -4,13 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"time"
-
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
@@ -31,6 +25,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/mqtt"
 	"github.com/argoproj/argo-events/eventsources/sources/nats"
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
+	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
 	"github.com/argoproj/argo-events/eventsources/sources/resource"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
@@ -40,6 +35,10 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // EventingServer is the server API for Eventing service.
