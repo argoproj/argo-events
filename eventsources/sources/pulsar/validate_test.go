@@ -13,8 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-package nats
+package pulsar
 
 import (
 	"context"
@@ -28,25 +27,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidateEventSource(t *testing.T) {
+func TestEventListener_ValidateEventSource(t *testing.T) {
 	listener := &EventListener{}
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "url must be specified", err.Error())
+	assert.Equal(t, "topics can't be empty list", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "nats.yaml"))
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "pulsar.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
-	assert.NotNil(t, eventSource.Spec.NATS)
+	assert.NotNil(t, eventSource.Spec.Pulsar)
 
-	for name, value := range eventSource.Spec.NATS {
+	for name, value := range eventSource.Spec.Pulsar {
 		fmt.Println(name)
 		l := &EventListener{
-			NATSEventSource: value,
+			PulsarEventSource: value,
 		}
 		err := l.ValidateEventSource(context.Background())
 		assert.NoError(t, err)

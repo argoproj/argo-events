@@ -43,6 +43,7 @@ var (
 	EmitterEvent     EventSourceType = "emitter"
 	RedisEvent       EventSourceType = "redis"
 	NSQEvent         EventSourceType = "nsq"
+	PulsarEvent      EventSourceType = "pulsar"
 	GenericEvent     EventSourceType = "generic"
 )
 
