@@ -52,7 +52,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 	return apicommon.PulsarEvent
 }
 
-// StartListening listens NSQ events
+// StartListening listens Pulsar events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
@@ -124,14 +124,14 @@ consumeMessages:
 
 			eventBody, err := json.Marshal(eventData)
 			if err != nil {
-				log.Error("failed to marshal the event data. rejecting the event...", zap.Error(err))
+				log.Desugar().Error("failed to marshal the event data. rejecting the event...", zap.Error(err))
 				return err
 			}
 
 			log.Infof("dispatching the message received on the topic %s to eventbus", msg.Topic())
 			err = dispatch(eventBody)
 			if err != nil {
-				log.Error("failed to dispatch Pulsar event", zap.Error(err))
+				log.Desugar().Error("failed to dispatch Pulsar event", zap.Error(err))
 			}
 
 		case <-ctx.Done():
