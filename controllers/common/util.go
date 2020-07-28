@@ -37,13 +37,6 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 		obj.SetNamespace(owner.GetNamespace())
 	}
 
-	objLabels := obj.GetLabels()
-	if objLabels == nil {
-		objLabels = make(map[string]string)
-	}
-	objLabels[common.LabelOwnerName] = owner.GetName()
-	obj.SetLabels(objLabels)
-
 	hash, err := common.GetObjectHash(obj)
 	if err != nil {
 		return err

@@ -84,6 +84,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 		Labels: map[string]string{
 			"controller":                "eventsource-controller",
 			common.LabelEventSourceName: eventSource.Name,
+			common.LabelOwnerName:       eventSource.Name,
 		},
 	}
 	return Reconcile(r.client, args, log)
