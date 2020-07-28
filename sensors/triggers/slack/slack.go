@@ -132,7 +132,7 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 	if channelID == "" {
 		return nil, errors.Errorf("failed to get channelID of %s", channel)
 	}
-	// TODO: Only join if not joined
+	// Only join if not joined? Maybe a join API call is easier.
 	c, _, _, err := api.JoinConversation(channelID)
 	t.Logger.Debug("successfully joined channel", zap.Any("channel", c))
 	if err != nil {
