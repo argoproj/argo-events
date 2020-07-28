@@ -132,7 +132,9 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 	if channelID == "" {
 		return nil, errors.Errorf("failed to get channelID of %s", channel)
 	}
-	_, _, _, err = api.JoinConversation(channelID)
+	// TODO: Only join if not joined
+	c, _, _, err := api.JoinConversation(channelID)
+	t.Logger.Debug("successfully joined channel", zap.Any("channel", c))
 	if err != nil {
 		t.Logger.Error("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
 		return nil, errors.Wrapf(err, "failed to join channel %s", channel)
