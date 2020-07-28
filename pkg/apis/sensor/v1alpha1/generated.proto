@@ -505,18 +505,13 @@ message SlackTrigger {
   // SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
   optional k8s.io.api.core.v1.SecretKeySelector slackToken = 2;
 
-  // Namespace to read the password secret from.
-  // This is required if the password secret selector is specified.
-  // +optional
-  optional string namespace = 3;
-
   // Channel refers to which Slack channel to send slack message.
   // +optional
-  optional string channel = 4;
+  optional string channel = 3;
 
   // Message refers to the message to send to the Slack channel.
   // +optional
-  optional string message = 5;
+  optional string message = 4;
 }
 
 // StandardK8STrigger is the standard Kubernetes resource trigger

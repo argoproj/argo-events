@@ -1477,13 +1477,6 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace to read the password secret from. This is required if the password secret selector is specified.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"channel": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Channel refers to which Slack channel to send slack message.",

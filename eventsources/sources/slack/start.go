@@ -23,9 +23,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/nlopes/slack"
-	"github.com/nlopes/slack/slackevents"
 	"github.com/pkg/errors"
+	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slackevents"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -154,7 +154,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		route.DataCh <- data
 	}
 
-	logger.Info("request successfully processed")
+	logger.Debug("request successfully processed")
 	common.SendSuccessResponse(writer, "success")
 }
 

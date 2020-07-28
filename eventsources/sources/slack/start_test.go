@@ -30,7 +30,7 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	"github.com/nlopes/slack/slackevents"
+	"github.com/slack-go/slack/slackevents"
 	"github.com/smartystreets/goconvey/convey"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"

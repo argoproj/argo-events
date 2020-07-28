@@ -528,16 +528,12 @@ type SlackTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
 	SlackToken *corev1.SecretKeySelector `json:"slackToken,omitempty" protobuf:"bytes,2,opt,name=slackToken"`
-	// Namespace to read the password secret from.
-	// This is required if the password secret selector is specified.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
 	// Channel refers to which Slack channel to send slack message.
 	// +optional
-	Channel string `json:"channel,omitempty" protobuf:"bytes,4,opt,name=channel"`
+	Channel string `json:"channel,omitempty" protobuf:"bytes,3,opt,name=channel"`
 	// Message refers to the message to send to the Slack channel.
 	// +optional
-	Message string `json:"message,omitempty" protobuf:"bytes,5,opt,name=message"`
+	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
 }
 
 // OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.

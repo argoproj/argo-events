@@ -19,6 +19,10 @@ rules:
       - workflows/finalizers
       - workflowtemplates
       - workflowtemplates/finalizers
+      - cronworkflows
+      - cronworkflows/finalizers
+      - clusterworkflowtemplates
+      - clusterworkflowtemplates/finalizers
       - sensors
       - sensors/finalizers
       - eventsources

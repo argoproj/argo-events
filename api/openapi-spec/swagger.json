@@ -2481,10 +2481,6 @@
           "description": "Message refers to the message to send to the Slack channel.",
           "type": "string"
         },
-        "namespace": {
-          "description": "Namespace to read the password secret from. This is required if the password secret selector is specified.",
-          "type": "string"
-        },
         "parameters": {
           "type": "array",
           "items": {
