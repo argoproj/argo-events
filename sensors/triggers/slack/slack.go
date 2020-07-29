@@ -18,6 +18,7 @@ package slack
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
@@ -94,6 +95,9 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 	channel := slacktrigger.Channel
 	if channel == "" {
 		return nil, errors.New("no slack channel provided")
+	}
+	if strings.HasPrefix(channel, "#") {
+		channel = channel[1:]
 	}
 
 	message := slacktrigger.Message
