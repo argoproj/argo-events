@@ -18,7 +18,6 @@ spec:
           slackToken:
             key: token
             name: slack-secret
-          namespace: argo-events
       parameters:
         - src:
             dependencyName: test-dep

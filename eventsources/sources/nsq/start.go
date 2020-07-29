@@ -125,7 +125,7 @@ func (h *messageHandler) HandleMessage(m *nsq.Message) error {
 
 	eventBody, err := json.Marshal(eventData)
 	if err != nil {
-		h.logger.Error("failed to marshal the event data. rejecting the event...", zap.Error(err))
+		h.logger.Desugar().Error("failed to marshal the event data. rejecting the event...", zap.Error(err))
 		return err
 	}
 
