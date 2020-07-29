@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
@@ -47,8 +48,9 @@ func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, natsStreami
 
 func getLabels(bus *v1alpha1.EventBus) map[string]string {
 	return map[string]string{
-		"controller":    "eventbus-controller",
-		"eventbus-name": bus.Name,
+		"controller":          "eventbus-controller",
+		"eventbus-name":       bus.Name,
+		common.LabelOwnerName: bus.Name,
 	}
 }
 

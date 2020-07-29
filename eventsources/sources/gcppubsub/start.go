@@ -30,6 +30,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
@@ -77,16 +78,20 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	logger = logger.With("topic", pubsubEventSource.Topic)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	logger.Info("setting up a client to connect to PubSub...")
 
 	var opt []option.ClientOption
 	projectID := pubsubEventSource.ProjectID
 
-	if !pubsubEventSource.EnableWorkloadIdentity {
-		opt = append(opt, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
+	if pubsubEventSource.CredentialSecret != nil {
+		jsonCred, ok := common.GetEnvFromSecret(pubsubEventSource.CredentialSecret)
+		if !ok {
+			return errors.New("can not find credential from ENV")
+		}
+		opt = append(opt, option.WithCredentialsJSON([]byte(jsonCred)))
+	} else if pubsubEventSource.DeprecatedCredentialsFile != "" {
+		opt = append(opt, option.WithCredentialsFile(pubsubEventSource.DeprecatedCredentialsFile))
 	}
 
 	// Use default ProjectID unless TopicProjectID exists
@@ -100,42 +105,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to set up client for %s", el.GetEventName())
 	}
 
-	logger.Info("getting topic information from PubSub...")
-	topic := client.Topic(pubsubEventSource.Topic)
-	exists, err := topic.Exists(ctx)
-	if err != nil {
-		return errors.Wrapf(err, "failed to get status of the topic %s for %s", pubsubEventSource.Topic, el.GetEventName())
-	}
-	if !exists {
-		logger.Info("topic doesn't exist, creating the PubSub topic...")
-		if _, err := client.CreateTopic(ctx, pubsubEventSource.Topic); err != nil {
-			return errors.Wrapf(err, "failed to create the topic %s for %s", pubsubEventSource.Topic, el.GetEventName())
+	subscriptionID := pubsubEventSource.SubscriptionID
+	if subscriptionID == "" {
+		hashcode, err := el.hash()
+		if err != nil {
+			logger.Desugar().Error("failed get hashcode", zap.Error(err))
+			return err
 		}
+		subscriptionID = fmt.Sprintf("%s-%s", el.GetEventName(), hashcode)
 	}
 
-	hashcode, err := el.hash()
+	subscription, err := el.getSubscription(ctx, client, pubsubEventSource.Topic, subscriptionID)
 	if err != nil {
-		logger.Desugar().Error("failed get hashcode", zap.Error(err))
 		return err
 	}
-	subscriptionName := fmt.Sprintf("%s-%s", el.GetEventName(), hashcode)
 
-	log := logger.With("subscription", subscriptionName).Desugar()
+	log := logger.With("subscription", subscriptionID).Desugar()
 
 	log.Info("subscribing to PubSub topic...")
-	subscription := client.Subscription(subscriptionName)
-	exists, err = subscription.Exists(ctx)
-	if err != nil {
-		return errors.Wrapf(err, "failed to get status of the subscription %s for %s", subscriptionName, el.GetEventName())
-	}
-	if exists {
-		log.Warn("using an existing subscription...")
-	} else {
-		log.Info("creating a new subscription...")
-		if _, err := client.CreateSubscription(ctx, subscriptionName, pubsub.SubscriptionConfig{Topic: topic}); err != nil {
-			return errors.Wrapf(err, "failed to create the subscription %s for %s", subscriptionName, el.GetEventName())
-		}
-	}
 
 	log.Info("listening for messages from PubSub...")
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
@@ -164,7 +151,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		m.Ack()
 	})
 	if err != nil {
-		return errors.Wrapf(err, "failed to receive the messages for subscription %s and topic %s for %s", subscriptionName, pubsubEventSource.Topic, el.GetEventName())
+		return errors.Wrapf(err, "failed to receive the messages for subscription %s and topic %s for %s", subscriptionID, pubsubEventSource.Topic, el.GetEventName())
 	}
 
 	<-ctx.Done()
@@ -192,4 +179,87 @@ func (el *EventListener) hash() (string, error) {
 		return "", err
 	}
 	return common.Hasher(el.GetEventName() + string(body)), nil
+}
+
+func (el *EventListener) getSubscription(ctx context.Context, client *pubsub.Client, topicID, subscriptionID string) (*pubsub.Subscription, error) {
+	logger := logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+	// topic given/existing      sub given/existing
+	// yy                           yy     verify topic and sub
+	// yy                           yn     create sub with given ID
+	// yn                           yn     create topic and sub with given ID
+	// yn                           yy     error
+	// n-                           yy     ok
+	// n-                           yn     error
+	topicExisting, subExisting := false, false
+	var topic *pubsub.Topic
+	if topicID != "" {
+		topic = client.Topic(topicID)
+		exists, err := topic.Exists(ctx)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get status of the topic %s for %s", topicID, el.GetEventName())
+		}
+		if exists {
+			topicExisting = true
+		}
+	}
+
+	subscription := client.Subscription(subscriptionID)
+	exists, err := subscription.Exists(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get status of the subscription %s for %s", subscriptionID, el.GetEventName())
+	}
+	if exists {
+		subExisting = true
+	}
+
+	if topicID == "" {
+		// n-, yn
+		if !subExisting {
+			return nil, errors.New("subscriptionID not existing")
+		}
+		// n-, yy
+		return subscription, nil
+	}
+
+	if !topicExisting {
+		if subExisting {
+			// yn, yy
+			return nil, errors.New("invalid topic - does not match subscriptioin")
+		}
+		// create topic
+		// yn, yn -> yy, yn
+		logger.Info("topic doesn't exist, creating the PubSub topic...")
+		if _, err := client.CreateTopic(ctx, topicID); err != nil {
+			return nil, errors.Wrapf(err, "failed to create the topic %s", topicID)
+		}
+	}
+
+	if !subExisting {
+		// create sub
+		logger.Info("creating a new subscription...")
+		if _, err := client.CreateSubscription(ctx, subscriptionID, pubsub.SubscriptionConfig{Topic: topic}); err != nil {
+			return nil, errors.Wrapf(err, "failed to create the subscription %s", subscriptionID)
+		}
+		// yy, yn
+		return subscription, nil
+	}
+	// yy, yy
+	if topic != nil {
+		iter := topic.Subscriptions(ctx)
+		for {
+			sub, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return nil, errors.Errorf("Next: %v", err)
+			}
+			if sub.ID() == subscriptionID {
+				return subscription, nil
+			}
+		}
+		return nil, errors.New("invalid subscriptionID - not found in all the subscrptions of the topic")
+	}
+	return nil, errors.New("unexpected error")
 }

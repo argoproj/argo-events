@@ -3,15 +3,6 @@ kind: EventSource
 metadata:
   name: gcp-pubsub
 spec:
-  template:
-    container:
-      volumeMounts:
-        - mountPath: /gcp-pubsub-creds-dir
-          name: gcp-pubsub-data
-    volumes:
-      - name: gcp-pubsub-data
-        secret:
-          secretName: gcp-pubsub
   pubSub:
     example:
       # jsonBody specifies that all event body payload coming from this
@@ -23,8 +14,29 @@ spec:
       # topicProjectID: "project-id"
       # topic name
       topic: test
-      # Refers to path of the credential file that is mounted in the gateway pod.
-      credentialsFile: /gcp-pubsub-creds-dir/key.json
+      # subscription ID
+      subscriptionID: test-sub
+      # (optional) Refers to a k8s scret which contains the credential JSON to access pubsub.
+      # If it is missing, it implicts to use Workload Identity.
+      credentialSecret:
+        name: my-secret
+        key: secret-key
+      # Deprecated, legacy approach
+      # credentialsFile: ""
+
+# Different logic with different "topic" and "subscriptionID" combination
+#
+# topic provided/existing      subscription provided/existing
+#     yy                       yy     verify if topic matches subsciption's topic
+#     yy                       yn     create sub with given ID
+#     yy                       n-     create or reuse sub with auto generated sub ID
+#     yn                       yn     create topic and sub with auto generated sub ID
+#     yn                       yy     invalid
+#     yn                       n-     create topic, create or reuse sub with auto generated sub ID
+#     n-                       yy     ok
+#     n-                       yn     invalid
+
+
 
 #    example-workload-identity:
 #      # jsonBody specifies that all event body payload coming from this
@@ -38,5 +50,3 @@ spec:
 #      topic: test
 #      # Empty credentials file when using Workflow Identity
 #      credentialsFile: ""
-#      # If enableWorkflowIdentity is true, the projects uses Workflow Identity for authentication
-#      enableWorkflowIdentity: true

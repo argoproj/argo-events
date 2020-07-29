@@ -44,6 +44,4 @@ func TestSetObjectMeta(t *testing.T) {
 	assert.Equal(t, "fake-namespace", pod.Namespace)
 	assert.Equal(t, owner.GroupVersionKind().Kind, pod.OwnerReferences[0].Kind)
 	assert.NotEmpty(t, pod.Annotations[common.AnnotationResourceSpecHash])
-	assert.NotEmpty(t, pod.Labels)
-	assert.Equal(t, owner.Name, pod.Labels[common.LabelOwnerName])
 }

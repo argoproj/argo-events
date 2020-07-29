@@ -491,15 +491,18 @@ message PubSubEventSource {
   optional string topicProjectID = 2;
 
   // Topic on which a subscription will be created
+  // +optional
   optional string topic = 3;
 
-  // CredentialsFile is the file that contains credentials to authenticate for GCP
-  optional string credentialsFile = 4;
-
-  // EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile.
-  // If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.
+  // SubscriptionID is given then use it instead of creating a new one
   // +optional
-  optional bool enableWorkloadIdentity = 5;
+  optional string subscriptionID = 4;
+
+  // CredentialSecret references to the secret that contains JSON credentials to access GCP.
+  // If it is missing, it implicts to use Workload Identity to access.
+  // https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector credentialSecret = 5;
 
   // DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
   // +optional
@@ -509,6 +512,9 @@ message PubSubEventSource {
   // source will be JSON
   // +optional
   optional bool jsonBody = 7;
+
+  // CredentialsFile is the file that contains credentials to authenticate for GCP
+  optional string credentialsFile = 8;
 }
 
 // PulsarEventSource describes the event source for Apache Pulsar
