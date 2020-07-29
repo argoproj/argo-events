@@ -96,9 +96,7 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 	if channel == "" {
 		return nil, errors.New("no slack channel provided")
 	}
-	if strings.HasPrefix(channel, "#") {
-		channel = channel[1:]
-	}
+	channel = strings.TrimPrefix(channel, "#")
 
 	message := slacktrigger.Message
 	if message == "" {
