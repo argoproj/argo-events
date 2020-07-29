@@ -2162,31 +2162,36 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Topic on which a subscription will be created</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>credentialsFile</code></br>
+<code>subscriptionID</code></br>
 <em>
 string
 </em>
 </td>
 <td>
-<p>CredentialsFile is the file that contains credentials to authenticate for GCP</p>
+<em>(Optional)</em>
+<p>SubscriptionID is given then use it instead of creating a new one</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>enableWorkloadIdentity</code></br>
+<code>credentialSecret</code></br>
 <em>
-bool
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile.
-If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.</p>
+<p>CredentialSecret references to the secret that contains JSON credentials to access GCP.
+If it is missing, it implicts to use Workload Identity to access.
+<a href="https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity">https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity</a></p>
 </td>
 </tr>
 <tr>
@@ -2212,6 +2217,17 @@ bool
 <em>(Optional)</em>
 <p>JSONBody specifies that all event body payload coming from this
 source will be JSON</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>credentialsFile</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>CredentialsFile is the file that contains credentials to authenticate for GCP</p>
 </td>
 </tr>
 </tbody>
