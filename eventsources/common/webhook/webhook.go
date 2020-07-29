@@ -127,14 +127,14 @@ func activateRoute(router Router, controller *Controller) {
 }
 
 // manageRouteChannels consumes data from route's data channel and stops the processing when the event source is stopped/removed
-func manageRouteChannels(router Router, dispatcher func([]byte) error) {
+func manageRouteChannels(router Router, dispatch func([]byte) error) {
 	route := router.GetRoute()
 	logger := route.Logger.Desugar()
 	for {
 		select {
 		case data := <-route.DataCh:
-			logger.Info("new event received, dispatching to gateway client")
-			err := dispatcher(data)
+			logger.Info("new event received, dispatching it...")
+			err := dispatch(data)
 			if err != nil {
 				logger.Error("failed to send event", zap.Error(err))
 				continue
@@ -148,7 +148,7 @@ func manageRouteChannels(router Router, dispatcher func([]byte) error) {
 }
 
 // ManagerRoute manages the lifecycle of a route
-func ManageRoute(ctx context.Context, router Router, controller *Controller, dispatcher func([]byte) error) error {
+func ManageRoute(ctx context.Context, router Router, controller *Controller, dispatch func([]byte) error) error {
 	route := router.GetRoute()
 
 	logger := route.Logger.Desugar()
@@ -167,7 +167,7 @@ func ManageRoute(ctx context.Context, router Router, controller *Controller, dis
 	}
 
 	logger.Info("listening to payloads for the route...")
-	go manageRouteChannels(router, dispatcher)
+	go manageRouteChannels(router, dispatch)
 
 	defer func() {
 		route.StopChan <- struct{}{}

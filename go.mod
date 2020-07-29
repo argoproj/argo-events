@@ -39,7 +39,6 @@ require (
 	github.com/googleapis/gnostic v0.4.0 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gorilla/mux v1.7.3
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.9.5
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20190818114111-108c894c2c0e // indirect
@@ -61,7 +60,6 @@ require (
 	github.com/nats-io/nkeys v0.1.4 // indirect
 	github.com/nats-io/stan.go v0.6.0
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
-	github.com/nlopes/slack v0.6.1-0.20200219171353-c05e07b0a5de
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pierrec/lz4 v2.5.0+incompatible // indirect
@@ -72,6 +70,7 @@ require (
 	github.com/robfig/cron v1.2.0
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.6.0 // indirect
+	github.com/slack-go/slack v0.6.5
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

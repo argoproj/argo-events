@@ -4063,29 +4063,6 @@ required to send messages.
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to read the password secret from. This is required if the
-password secret selector is specified.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>channel</code></br> <em> string </em>
 
 </td>
