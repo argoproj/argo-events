@@ -1431,18 +1431,17 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"credentialsFile": {
+					"subscriptionID": {
 						SchemaProps: spec.SchemaProps{
-							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP",
+							Description: "SubscriptionID is given then use it instead of creating a new one",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"enableWorkloadIdentity": {
+					"credentialSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile. If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.",
-							Type:        []string{"boolean"},
-							Format:      "",
+							Description: "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicts to use Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"deleteSubscriptionOnFinish": {
@@ -1459,10 +1458,19 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
+					"credentialsFile": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"projectID", "topicProjectID", "topic", "credentialsFile"},
+				Required: []string{"projectID", "topicProjectID", "credentialsFile"},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

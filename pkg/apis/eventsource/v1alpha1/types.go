@@ -384,13 +384,16 @@ type PubSubEventSource struct {
 	// (assumed to be the same as ProjectID by default)
 	TopicProjectID string `json:"topicProjectID" protobuf:"bytes,2,opt,name=topicProjectID"`
 	// Topic on which a subscription will be created
-	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
-	// CredentialsFile is the file that contains credentials to authenticate for GCP
-	CredentialsFile string `json:"credentialsFile" protobuf:"bytes,4,opt,name=credentialsFile"`
-	// EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile.
-	// If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.
 	// +optional
-	EnableWorkloadIdentity bool `json:"enableWorkloadIdentity,omitempty" protobuf:"varint,5,opt,name=enableWorkloadIdentity"`
+	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
+	// SubscriptionID is given then use it instead of creating a new one
+	// +optional
+	SubscriptionID string `json:"subscriptionID" protobuf:"bytes,4,opt,name=subscriptionID"`
+	// CredentialSecret references to the secret that contains JSON credentials to access GCP.
+	// If it is missing, it implicts to use Workload Identity to access.
+	// https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+	// +optional
+	CredentialSecret *corev1.SecretKeySelector `json:"credentialSecret,omitempty" protobuf:"bytes,5,opt,name=credentialSecret"`
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
 	// +optional
 	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"varint,6,opt,name=deleteSubscriptionOnFinish"`
@@ -398,6 +401,8 @@ type PubSubEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
+	// CredentialsFile is the file that contains credentials to authenticate for GCP
+	DeprecatedCredentialsFile string `json:"credentialsFile" protobuf:"bytes,8,opt,name=credentialsFile"`
 }
 
 // GithubEventSource refers to event-source for github related events

@@ -99,6 +99,7 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		Labels: map[string]string{
 			"controller":           "sensor-controller",
 			common.LabelSensorName: sensor.Name,
+			common.LabelOwnerName:  sensor.Name,
 		},
 	}
 	return Reconcile(r.client, args, log)

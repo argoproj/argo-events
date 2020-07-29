@@ -36,11 +36,8 @@ func validate(eventSource *v1alpha1.PubSubEventSource) error {
 	if eventSource.ProjectID == "" {
 		return fmt.Errorf("must specify projectId")
 	}
-	if eventSource.Topic == "" {
-		return fmt.Errorf("must specify topic")
-	}
-	if !eventSource.EnableWorkloadIdentity && eventSource.CredentialsFile == "" {
-		return fmt.Errorf("must specify credentials file path if not using Workload Identity")
+	if eventSource.Topic == "" && eventSource.SubscriptionID == "" {
+		return fmt.Errorf("must specify topic or subscriptionID")
 	}
 	return nil
 }
