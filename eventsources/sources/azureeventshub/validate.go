@@ -25,8 +25,8 @@ import (
 )
 
 // ValidateEventSource validates azure events hub event source
-func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
-	return validate(&listener.AzureEventsHubEventSource)
+func (el *EventListener) ValidateEventSource(ctx context.Context) error {
+	return validate(&el.AzureEventsHubEventSource)
 }
 
 func validate(eventSource *v1alpha1.AzureEventsHubEventSource) error {
