@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-
+labels: 'bug'
 ---
 
 **Describe the bug**
@@ -28,3 +28,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+---
+<!-- Issue Author: Don't delete this message to encourage other users to support your issue! -->
+**Message from the maintainers**:
+
+If you wish to see this enhancement implemented please add a 👍 reaction to this issue! We often sort issues this way to know what to prioritize.
