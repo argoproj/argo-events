@@ -3,7 +3,6 @@ package store
 import (
 	"testing"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,10 +13,11 @@ func TestConfigmapReader_Read(t *testing.T) {
 	kubeClientset := fake.NewSimpleClientset()
 	key := "wf"
 
-	cmArtifact := &v1alpha1.ConfigmapArtifact{
-		Name:      "fake-cm",
-		Namespace: "fake-ns",
-		Key:       key,
+	cmArtifact := &corev1.ConfigMapKeySelector{
+		LocalObjectReference: corev1.LocalObjectReference{
+			Name: "fake-cm",
+		},
+		Key: key,
 	}
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -48,7 +48,7 @@ spec:
 		convey.So(cm, convey.ShouldNotBeNil)
 
 		convey.Convey("Make sure new configmap reader is not nil", func() {
-			cmReader, err := NewConfigMapReader(kubeClientset, cmArtifact)
+			cmReader, err := NewConfigMapReader(kubeClientset, "fake-ns", cmArtifact)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(cmReader, convey.ShouldNotBeNil)
 

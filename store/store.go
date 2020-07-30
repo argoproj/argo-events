@@ -42,7 +42,7 @@ func FetchArtifact(reader ArtifactReader) (*unstructured.Unstructured, error) {
 }
 
 // GetArtifactReader returns the ArtifactReader for this location
-func GetArtifactReader(loc *v1alpha1.ArtifactLocation, creds *Credentials, clientset kubernetes.Interface) (ArtifactReader, error) {
+func GetArtifactReader(loc *v1alpha1.ArtifactLocation, namespace string, creds *Credentials, clientset kubernetes.Interface) (ArtifactReader, error) {
 	if loc.S3 != nil {
 		return NewS3Reader(loc.S3, creds)
 	}
@@ -56,10 +56,10 @@ func GetArtifactReader(loc *v1alpha1.ArtifactLocation, creds *Credentials, clien
 		return NewURLReader(loc.URL)
 	}
 	if loc.Git != nil {
-		return NewGitReader(clientset, loc.Git)
+		return NewGitReader(clientset, namespace, loc.Git)
 	}
 	if loc.Configmap != nil {
-		return NewConfigMapReader(clientset, loc.Configmap)
+		return NewConfigMapReader(clientset, namespace, loc.Configmap)
 	}
 	if loc.Resource != nil {
 		return NewResourceReader(loc.Resource)

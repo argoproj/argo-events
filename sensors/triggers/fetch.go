@@ -33,7 +33,7 @@ func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.Artif
 	if err != nil {
 		return nil, err
 	}
-	reader, err := store.GetArtifactReader(source, creds, client)
+	reader, err := store.GetArtifactReader(source, namespace, creds, client)
 	if err != nil {
 		return nil, err
 	}

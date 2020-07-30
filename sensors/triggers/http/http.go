@@ -26,7 +26,6 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -38,8 +37,6 @@ import (
 type HTTPTrigger struct {
 	// Client is http client.
 	Client *http.Client
-	// K8sClient is the Kubernetes client
-	K8sClient kubernetes.Interface
 	// Sensor object
 	Sensor *v1alpha1.Sensor
 	// Trigger reference
@@ -49,7 +46,7 @@ type HTTPTrigger struct {
 }
 
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(httpClients map[string]*http.Client, k8sCLient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*HTTPTrigger, error) {
+func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*HTTPTrigger, error) {
 	httptrigger := trigger.Template.HTTP
 
 	client, ok := httpClients[trigger.Template.Name]
@@ -87,11 +84,10 @@ func NewHTTPTrigger(httpClients map[string]*http.Client, k8sCLient kubernetes.In
 	}
 
 	return &HTTPTrigger{
-		Client:    client,
-		K8sClient: k8sCLient,
-		Sensor:    sensor,
-		Trigger:   trigger,
-		Logger:    logger,
+		Client:  client,
+		Sensor:  sensor,
+		Trigger: trigger,
+		Logger:  logger,
 	}, nil
 }
 
@@ -168,21 +164,17 @@ func (t *HTTPTrigger) Execute(events map[string]*v1alpha1.Event, resource interf
 		username := ""
 		password := ""
 
-		if basicAuth.Namespace == "" {
-			basicAuth.Namespace = t.Sensor.Namespace
-		}
-
 		if basicAuth.Username != nil {
-			username, err = common.GetSecretValue(t.K8sClient, basicAuth.Namespace, basicAuth.Username)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to retrieve the username from secret %s and namespace %s", basicAuth.Username.Name, basicAuth.Namespace)
+			username, ok = common.GetEnvFromSecret(basicAuth.Username)
+			if !ok {
+				return nil, errors.New("failed to retrieve the username")
 			}
 		}
 
 		if basicAuth.Password != nil {
-			password, err = common.GetSecretValue(t.K8sClient, basicAuth.Namespace, basicAuth.Password)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to retrieve the password from secret %s and namespace %s", basicAuth.Password.Name, basicAuth.Namespace)
+			password, ok = common.GetEnvFromSecret(basicAuth.Password)
+			if !ok {
+				return nil, errors.New("failed to retrieve the password")
 			}
 		}
 

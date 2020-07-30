@@ -192,6 +192,18 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	envs := deploymentSpec.Template.Spec.Containers[0].Env
 	envs = append(envs, envVars...)
 	deploymentSpec.Template.Spec.Containers[0].Env = envs
+
+	envFroms := []corev1.EnvFromSource{}
+	oldEnvFroms := deploymentSpec.Template.Spec.Containers[0].EnvFrom
+	if len(oldEnvFroms) > 0 {
+		envFroms = append(envFroms, oldEnvFroms...)
+	}
+	envFromSecrets := envFromSecrets(sensorCopy)
+	if len(envFromSecrets) > 0 {
+		envFroms = append(envFroms, envFromSecrets...)
+	}
+	deploymentSpec.Template.Spec.Containers[0].EnvFrom = envFroms
+
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    args.Sensor.Namespace,
@@ -257,4 +269,48 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 
 func labelSelector(labelMap map[string]string) labels.Selector {
 	return labels.SelectorFromSet(labelMap)
+}
+
+func envFromSecrets(sensor *v1alpha1.Sensor) []corev1.EnvFromSource {
+	result := []corev1.EnvFromSource{}
+	for _, trigger := range sensor.Spec.Triggers {
+		t := trigger.Template
+		if t.AWSLambda != nil {
+			if t.AWSLambda.SecretKey != nil {
+				result = append(result, common.GenerateEnvFromSecretSpec(t.AWSLambda.SecretKey))
+			}
+			if t.AWSLambda.AccessKey != nil {
+				result = append(result, common.GenerateEnvFromSecretSpec(t.AWSLambda.AccessKey))
+			}
+		}
+		if t.HTTP != nil && t.HTTP.BasicAuth != nil {
+			if t.HTTP.BasicAuth.Password != nil {
+				result = append(result, common.GenerateEnvFromSecretSpec(t.HTTP.BasicAuth.Password))
+			}
+			if t.HTTP.BasicAuth.Username != nil {
+				result = append(result, common.GenerateEnvFromSecretSpec(t.HTTP.BasicAuth.Username))
+			}
+		}
+		if t.OpenWhisk != nil {
+			if t.OpenWhisk.AuthToken != nil {
+				result = append(result, common.GenerateEnvFromSecretSpec(t.OpenWhisk.AuthToken))
+			}
+		}
+		if t.Slack != nil {
+			if t.Slack.SlackToken != nil {
+				result = append(result, common.GenerateEnvFromSecretSpec(t.Slack.SlackToken))
+			}
+		}
+	}
+	// Uniq
+	r := []corev1.EnvFromSource{}
+	keys := make(map[string]bool)
+	for _, e := range result {
+		entry := e.SecretRef.Name
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			r = append(r, e)
+		}
+	}
+	return r
 }

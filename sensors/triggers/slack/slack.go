@@ -23,7 +23,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -31,8 +30,6 @@ import (
 )
 
 type SlackTrigger struct {
-	// K8sClient is the Kubernetes client
-	K8sClient kubernetes.Interface
 	// Sensor refer to the sensor object
 	Sensor *v1alpha1.Sensor
 	// Trigger refers to the trigger resource
@@ -44,9 +41,8 @@ type SlackTrigger struct {
 }
 
 // NewSlackTrigger returns a new Slack trigger context
-func NewSlackTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger, httpClient *http.Client) (*SlackTrigger, error) {
+func NewSlackTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger, httpClient *http.Client) (*SlackTrigger, error) {
 	return &SlackTrigger{
-		K8sClient:  k8sClient,
 		Sensor:     sensor,
 		Trigger:    trigger,
 		Logger:     logger,
@@ -103,9 +99,9 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 		return nil, errors.New("no slack message to post")
 	}
 
-	slackToken, err := common.GetSecretValue(t.K8sClient, t.Sensor.Namespace, slacktrigger.SlackToken)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to retrieve the slack token from secret %s", slacktrigger.SlackToken.Name)
+	slackToken, ok := common.GetEnvFromSecret(slacktrigger.SlackToken)
+	if !ok {
+		return nil, errors.New("failed to retrieve the slack token")
 	}
 
 	api := slack.New(slackToken, slack.OptionDebug(true))

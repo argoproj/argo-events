@@ -50,11 +50,10 @@ var sensorObj = &v1alpha1.Sensor{
 
 func getFakeHTTPTrigger() *HTTPTrigger {
 	return &HTTPTrigger{
-		Client:    nil,
-		K8sClient: nil,
-		Sensor:    sensorObj.DeepCopy(),
-		Trigger:   sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:    logging.NewArgoEventsLogger().Desugar(),
+		Client:  nil,
+		Sensor:  sensorObj.DeepCopy(),
+		Trigger: sensorObj.Spec.Triggers[0].DeepCopy(),
+		Logger:  logging.NewArgoEventsLogger().Desugar(),
 	}
 }
 

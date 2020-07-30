@@ -152,27 +152,6 @@ SecretKey refers K8 secret containing aws secret key
 
 <td>
 
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Namespace refers to Kubernetes namespace to read access related secret
-from. Defaults to sensor’s namespace.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>region</code></br> <em> string </em>
 
 </td>
@@ -533,8 +512,8 @@ URL to fetch the artifact from
 <td>
 
 <code>configmap</code></br> <em>
-<a href="#argoproj.io/v1alpha1.ConfigmapArtifact"> ConfigmapArtifact
-</a> </em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#configmapkeyselector-v1-core">
+Kubernetes core/v1.ConfigMapKeySelector </a> </em>
 
 </td>
 
@@ -690,28 +669,6 @@ required for basic auth.
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to read the secrets from. Defaults to sensor’s namespace.
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>
@@ -740,117 +697,6 @@ Comparator refers to the comparator operator for a data filter
 </p>
 
 </p>
-
-<h3 id="argoproj.io/v1alpha1.ConfigmapArtifact">
-
-ConfigmapArtifact
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
-
-</p>
-
-<p>
-
-<p>
-
-ConfigmapArtifact contains information about artifact in k8 configmap
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>name</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Name of the configmap
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Namespace where configmap is deployed
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>key</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Key within configmap data which contains trigger resource definition
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
 
 <h3 id="argoproj.io/v1alpha1.CustomTrigger">
 
@@ -1989,28 +1835,6 @@ GitCreds </a> </em>
 <p>
 
 Creds contain reference to git username and password
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace where creds are stored.
 
 </p>
 

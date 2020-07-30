@@ -75,7 +75,7 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	reader, err := store.GetArtifactReader(trigger.Template.K8s.Source, creds, k8sTrigger.K8sClient)
+	reader, err := store.GetArtifactReader(trigger.Template.K8s.Source, k8sTrigger.Sensor.Namespace, creds, k8sTrigger.K8sClient)
 	if err != nil {
 		return nil, err
 	}

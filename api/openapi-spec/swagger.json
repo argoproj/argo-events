@@ -1692,10 +1692,6 @@
           "description": "FunctionName refers to the name of the function to invoke.",
           "type": "string"
         },
-        "namespace": {
-          "description": "Namespace refers to Kubernetes namespace to read access related secret from. Defaults to sensor's namespace.",
-          "type": "string"
-        },
         "parameters": {
           "type": "array",
           "items": {
@@ -1758,7 +1754,7 @@
       "properties": {
         "configmap": {
           "description": "Configmap that stores the artifact",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ConfigmapArtifact"
+          "$ref": "#/definitions/io.k8s.api.core.v1.ConfigMapKeySelector"
         },
         "file": {
           "description": "File artifact is artifact stored in a file",
@@ -1790,10 +1786,6 @@
       "description": "BasicAuth contains the reference to K8s secrets that holds the username and password",
       "type": "object",
       "properties": {
-        "namespace": {
-          "description": "Namespace to read the secrets from. Defaults to sensor's namespace.",
-          "type": "string"
-        },
         "password": {
           "description": "Password refers to the Kubernetes secret that holds the password required for basic auth.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -1801,29 +1793,6 @@
         "username": {
           "description": "Username refers to the Kubernetes secret that holds the username required for basic auth.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.ConfigmapArtifact": {
-      "description": "ConfigmapArtifact contains information about artifact in k8 configmap",
-      "type": "object",
-      "required": [
-        "name",
-        "namespace",
-        "key"
-      ],
-      "properties": {
-        "key": {
-          "description": "Key within configmap data which contains trigger resource definition",
-          "type": "string"
-        },
-        "name": {
-          "description": "Name of the configmap",
-          "type": "string"
-        },
-        "namespace": {
-          "description": "Namespace where configmap is deployed",
-          "type": "string"
         }
       }
     },
@@ -2071,10 +2040,6 @@
         },
         "filePath": {
           "description": "Path to file that contains trigger resource definition",
-          "type": "string"
-        },
-        "namespace": {
-          "description": "Namespace where creds are stored.",
           "type": "string"
         },
         "ref": {

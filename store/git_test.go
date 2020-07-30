@@ -29,9 +29,9 @@ import (
 
 var gar = &GitArtifactReader{
 	kubeClientset: fake.NewSimpleClientset(),
+	namespace:     "fake",
 	artifact: &v1alpha1.GitArtifact{
-		URL:       "fake",
-		Namespace: "fake",
+		URL: "fake",
 		Creds: &v1alpha1.GitCreds{
 			Username: &corev1.SecretKeySelector{
 				Key: "username",
@@ -51,7 +51,7 @@ var gar = &GitArtifactReader{
 
 func TestNewGitReader(t *testing.T) {
 	convey.Convey("Given configuration, get new git reader", t, func() {
-		reader, err := NewGitReader(fake.NewSimpleClientset(), &v1alpha1.GitArtifact{})
+		reader, err := NewGitReader(fake.NewSimpleClientset(), "fake-ns", &v1alpha1.GitArtifact{})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(reader, convey.ShouldNotBeNil)
 	})
@@ -69,7 +69,7 @@ func TestGetGitAuth(t *testing.T) {
 		secret, err := gar.kubeClientset.CoreV1().Secrets("fake").Create(&corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      gar.artifact.Creds.Username.Name,
-				Namespace: gar.artifact.Namespace,
+				Namespace: "fake",
 			},
 			Data: map[string][]byte{
 				"username": []byte("username"),

@@ -2,35 +2,30 @@ package store
 
 import (
 	"fmt"
-	"os"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ConfigMapReader implements the ArtifactReader interface for k8 configmap
 type ConfigMapReader struct {
 	kubeClientset     kubernetes.Interface
-	configmapArtifact *v1alpha1.ConfigmapArtifact
+	configmapArtifact *corev1.ConfigMapKeySelector
+	namespace         string
 }
 
 // NewConfigMapReader returns a new configmap reader
-func NewConfigMapReader(kubeClientset kubernetes.Interface, configmapArtifact *v1alpha1.ConfigmapArtifact) (*ConfigMapReader, error) {
+func NewConfigMapReader(kubeClientset kubernetes.Interface, namespace string, configmapArtifact *corev1.ConfigMapKeySelector) (*ConfigMapReader, error) {
 	return &ConfigMapReader{
 		kubeClientset:     kubeClientset,
 		configmapArtifact: configmapArtifact,
+		namespace:         namespace,
 	}, nil
 }
 
 func (c *ConfigMapReader) Read() (body []byte, err error) {
-	namespace := os.Getenv(common.EnvVarNamespace)
-	if c.configmapArtifact.Namespace != "" {
-		namespace = c.configmapArtifact.Namespace
-	}
-	cm, err := c.kubeClientset.CoreV1().ConfigMaps(namespace).Get(c.configmapArtifact.Name, metav1.GetOptions{})
+	cm, err := c.kubeClientset.CoreV1().ConfigMaps(c.namespace).Get(c.configmapArtifact.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

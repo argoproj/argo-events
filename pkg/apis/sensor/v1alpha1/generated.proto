@@ -40,18 +40,13 @@ message AWSLambdaTrigger {
   // SecretKey refers K8 secret containing aws secret key
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 3;
 
-  // Namespace refers to Kubernetes namespace to read access related secret from.
-  // Defaults to sensor's namespace.
-  // +optional.
-  optional string namespace = 4;
-
   // Region is AWS region
-  optional string region = 5;
+  optional string region = 4;
 
-  repeated TriggerParameter payload = 6;
+  repeated TriggerParameter payload = 5;
 
   // +optional
-  repeated TriggerParameter parameters = 7;
+  repeated TriggerParameter parameters = 6;
 }
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
@@ -85,7 +80,7 @@ message ArtifactLocation {
   optional URLArtifact url = 4;
 
   // Configmap that stores the artifact
-  optional ConfigmapArtifact configmap = 5;
+  optional k8s.io.api.core.v1.ConfigMapKeySelector configmap = 5;
 
   // Git repository hosting the artifact
   optional GitArtifact git = 6;
@@ -101,23 +96,6 @@ message BasicAuth {
 
   // Password refers to the Kubernetes secret that holds the password required for basic auth.
   optional k8s.io.api.core.v1.SecretKeySelector password = 2;
-
-  // Namespace to read the secrets from.
-  // Defaults to sensor's namespace.
-  // +optional
-  optional string namespace = 3;
-}
-
-// ConfigmapArtifact contains information about artifact in k8 configmap
-message ConfigmapArtifact {
-  // Name of the configmap
-  optional string name = 1;
-
-  // Namespace where configmap is deployed
-  optional string namespace = 2;
-
-  // Key within configmap data which contains trigger resource definition
-  optional string key = 3;
 }
 
 // CustomTrigger refers to the specification of the custom trigger.
@@ -256,35 +234,31 @@ message GitArtifact {
   // +optional
   optional GitCreds creds = 3;
 
-  // Namespace where creds are stored.
-  // +optional
-  optional string namespace = 4;
-
   // SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
   // ssh key path must be mounted in sensor pod.
   // +optional
-  optional string sshKeyPath = 5;
+  optional string sshKeyPath = 4;
 
   // Path to file that contains trigger resource definition
-  optional string filePath = 6;
+  optional string filePath = 5;
 
   // Branch to use to pull trigger resource
   // +optional
-  optional string branch = 7;
+  optional string branch = 6;
 
   // Tag to use to pull trigger resource
   // +optional
-  optional string tag = 8;
+  optional string tag = 7;
 
   // Ref to use to pull trigger resource. Will result in a shallow clone and
   // fetch.
   // +optional
-  optional string ref = 9;
+  optional string ref = 8;
 
   // Remote to manage set of tracked repositories. Defaults to "origin".
   // Refer https://git-scm.com/docs/git-remote
   // +optional
-  optional GitRemoteConfig remote = 10;
+  optional GitRemoteConfig remote = 9;
 }
 
 // GitCreds contain reference to git username and password

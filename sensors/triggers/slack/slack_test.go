@@ -22,7 +22,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -56,7 +55,6 @@ var sensorObj = &v1alpha1.Sensor{
 
 func getSlackTrigger() *SlackTrigger {
 	return &SlackTrigger{
-		K8sClient:  fake.NewSimpleClientset(),
 		Sensor:     sensorObj.DeepCopy(),
 		Trigger:    sensorObj.Spec.Triggers[0].DeepCopy(),
 		Logger:     logging.NewArgoEventsLogger().Desugar(),

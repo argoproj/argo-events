@@ -22,7 +22,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"k8s.io/client-go/kubernetes"
 
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -34,8 +33,6 @@ import (
 type AWSLambdaTrigger struct {
 	// LambdaClient is AWS Lambda client
 	LambdaClient *lambda.Lambda
-	// K8sClient is Kubernetes client
-	K8sClient kubernetes.Interface
 	// Sensor object
 	Sensor *v1alpha1.Sensor
 	// Trigger definition
@@ -45,12 +42,12 @@ type AWSLambdaTrigger struct {
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
 	lambdaClient, ok := lambdaClients[trigger.Template.Name]
 	if !ok {
-		awsSession, err := commonaws.CreateAWSSession(k8sClient, lambdatrigger.Namespace, lambdatrigger.Region, "", lambdatrigger.AccessKey, lambdatrigger.SecretKey)
+		awsSession, err := commonaws.CreateAWSSessionWithCredsInEnv(lambdatrigger.Region, "", lambdatrigger.AccessKey, lambdatrigger.SecretKey)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to create a AWS session")
 		}
@@ -58,13 +55,8 @@ func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, k8sClient kube
 		lambdaClients[trigger.Template.Name] = lambdaClient
 	}
 
-	if lambdatrigger.Namespace == "" {
-		lambdatrigger.Namespace = sensor.Namespace
-	}
-
 	return &AWSLambdaTrigger{
 		LambdaClient: lambdaClient,
-		K8sClient:    k8sClient,
 		Sensor:       sensor,
 		Trigger:      trigger,
 		Logger:       logger,

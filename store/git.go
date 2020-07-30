@@ -47,13 +47,15 @@ var (
 type GitArtifactReader struct {
 	kubeClientset kubernetes.Interface
 	artifact      *v1alpha1.GitArtifact
+	namespace     string
 }
 
 // NewGitReader returns a new git reader
-func NewGitReader(kubeClientset kubernetes.Interface, gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error) {
+func NewGitReader(kubeClientset kubernetes.Interface, namespace string, gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error) {
 	return &GitArtifactReader{
 		kubeClientset: kubeClientset,
 		artifact:      gitArtifact,
+		namespace:     namespace,
 	}, nil
 }
 
@@ -80,11 +82,11 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 
 func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	if g.artifact.Creds != nil {
-		username, err := GetSecrets(g.kubeClientset, g.artifact.Namespace, g.artifact.Creds.Username.Name, g.artifact.Creds.Username.Key)
+		username, err := GetSecrets(g.kubeClientset, g.namespace, g.artifact.Creds.Username.Name, g.artifact.Creds.Username.Key)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve username: err: %+v", err)
 		}
-		password, err := GetSecrets(g.kubeClientset, g.artifact.Namespace, g.artifact.Creds.Password.Name, g.artifact.Creds.Password.Key)
+		password, err := GetSecrets(g.kubeClientset, g.namespace, g.artifact.Creds.Password.Name, g.artifact.Creds.Password.Key)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve password: err: %+v", err)
 		}

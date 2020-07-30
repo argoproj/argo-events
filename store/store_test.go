@@ -47,7 +47,7 @@ func TestGetArtifactReader(t *testing.T) {
 		secretKey: "secret",
 	}
 	clientset := fake.NewSimpleClientset()
-	_, err := GetArtifactReader(location, creds, clientset)
+	_, err := GetArtifactReader(location, "namesapce", creds, clientset)
 	assert.NotNil(t, err)
 }
 

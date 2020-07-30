@@ -3,8 +3,6 @@ kind: Sensor
 metadata:
   name: webhook
 spec:
-  template:
-    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       eventSourceName: webhook
@@ -20,7 +18,6 @@ spec:
           secretKey:
             name: aws-secret
             key: secretkey
-          namespace: argo-events
           region: us-east-1
           payload:
             - src:
