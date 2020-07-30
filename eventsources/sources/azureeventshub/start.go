@@ -85,9 +85,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	handler := func(c context.Context, event *eventhub.Event) error {
 		eventData := &events.AzureEventsHubEventData{
-			Id:           event.ID,
-			PartitionKey: *event.PartitionKey,
-			Body:         event.Data,
+			Id:   event.ID,
+			Body: event.Data,
+		}
+		if event.PartitionKey != nil {
+			eventData.PartitionKey = *event.PartitionKey
 		}
 
 		eventBytes, err := json.Marshal(eventData)
