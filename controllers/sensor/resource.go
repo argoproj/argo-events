@@ -249,6 +249,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 				Volumes:         args.Sensor.Spec.Template.Volumes,
 				SecurityContext: args.Sensor.Spec.Template.SecurityContext,
 				NodeSelector:    args.Sensor.Spec.Template.NodeSelector,
+				Tolerations:     args.Sensor.Spec.Template.Tolerations,
 			},
 		},
 	}, nil
