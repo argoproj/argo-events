@@ -1,0 +1,12 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: pulsar
+spec:
+  pulsar:
+    example:
+      url: "pulsar://pulsar.argo-events.svc:6650"
+      topics:
+        - test
+        - foo
+      type: exclusive

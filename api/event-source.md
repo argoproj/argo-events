@@ -1430,6 +1430,29 @@ NSQ event source
 
 <td>
 
+<code>pulsar</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PulsarEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Pulsar event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>generic</code></br> <em>
 <a href="#argoproj.io/v1alpha1.GenericEventSource">
 map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource
@@ -2107,6 +2130,29 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEv
 <p>
 
 NSQ event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>pulsar</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PulsarEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Pulsar event source
 
 </p>
 
@@ -4079,9 +4125,106 @@ created (assumed to be the same as ProjectID by default)
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Topic on which a subscription will be created
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subscriptionID</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+SubscriptionID is given then use it instead of creating a new one
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>credentialSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+CredentialSecret references to the secret that contains JSON credentials
+to access GCP. If it is missing, it implicts to use Workload Identity to
+access.
+<a href="https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity">https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>deleteSubscriptionOnFinish</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub
+subscription once the event source is stopped.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
 
 </p>
 
@@ -4110,24 +4253,70 @@ for GCP
 
 </tr>
 
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.PulsarEventSource">
+
+PulsarEventSource
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+PulsarEventSource describes the event source for Apache Pulsar
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
 <tr>
 
 <td>
 
-<code>enableWorkloadIdentity</code></br> <em> bool </em>
+<code>topics</code></br> <em> \[\]string </em>
 
 </td>
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
-EnableWorkloadIdentity determines if your project authenticates to GCP
-with WorkloadIdentity or CredentialsFile. If true, authentication is
-done with WorkloadIdentity. If false or omitted, authentication is done
-with CredentialsFile.
+Name of the topics to subscribe to.
 
 </p>
 
@@ -4139,7 +4328,7 @@ with CredentialsFile.
 
 <td>
 
-<code>deleteSubscriptionOnFinish</code></br> <em> bool </em>
+<code>type</code></br> <em> string </em>
 
 </td>
 
@@ -4149,8 +4338,141 @@ with CredentialsFile.
 
 <p>
 
-DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub
-subscription once the event source is stopped.
+Type of the subscription. Only “exclusive” and “shared” is supported.
+Defaults to exclusive.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Configure the service URL for the Pulsar service.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tlsTrustCertsFilePath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Set the path to the trusted TLS certificate file.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tlsAllowInsecureConnection</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Whether the Pulsar client accept untrusted TLS certificate from broker.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tlsValidateHostname</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Whether the Pulsar client verify the validity of the host name from
+broker.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the pulsar client.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>connectionBackoff</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Backoff holds parameters applied to connection.
 
 </p>
 
@@ -5903,6 +6225,7 @@ TLSConfig
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
 <a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
 <a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
+<a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>,
 <a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>)
 
 </p>

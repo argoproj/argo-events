@@ -103,8 +103,10 @@ type EventSourceSpec struct {
 	Redis map[string]RedisEventSource `json:"redis,omitempty" protobuf:"bytes,25,rep,name=redis"`
 	// NSQ event source
 	NSQ map[string]NSQEventSource `json:"nsq,omitempty" protobuf:"bytes,26,rep,name=nsq"`
+	// Pulsar event source
+	Pulsar map[string]PulsarEventSource `json:"pulsar,omitempty" protobuf:"bytes,27,opt,name=pulsar"`
 	// Generic event source
-	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,27,rep,name=generic"`
+	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,28,rep,name=generic"`
 }
 
 // Template holds the information of an EventSource deployment template
@@ -382,13 +384,16 @@ type PubSubEventSource struct {
 	// (assumed to be the same as ProjectID by default)
 	TopicProjectID string `json:"topicProjectID" protobuf:"bytes,2,opt,name=topicProjectID"`
 	// Topic on which a subscription will be created
-	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
-	// CredentialsFile is the file that contains credentials to authenticate for GCP
-	CredentialsFile string `json:"credentialsFile" protobuf:"bytes,4,opt,name=credentialsFile"`
-	// EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile.
-	// If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.
 	// +optional
-	EnableWorkloadIdentity bool `json:"enableWorkloadIdentity,omitempty" protobuf:"varint,5,opt,name=enableWorkloadIdentity"`
+	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
+	// SubscriptionID is given then use it instead of creating a new one
+	// +optional
+	SubscriptionID string `json:"subscriptionID" protobuf:"bytes,4,opt,name=subscriptionID"`
+	// CredentialSecret references to the secret that contains JSON credentials to access GCP.
+	// If it is missing, it implicts to use Workload Identity to access.
+	// https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+	// +optional
+	CredentialSecret *corev1.SecretKeySelector `json:"credentialSecret,omitempty" protobuf:"bytes,5,opt,name=credentialSecret"`
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
 	// +optional
 	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"varint,6,opt,name=deleteSubscriptionOnFinish"`
@@ -396,6 +401,8 @@ type PubSubEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
+	// CredentialsFile is the file that contains credentials to authenticate for GCP
+	DeprecatedCredentialsFile string `json:"credentialsFile" protobuf:"bytes,8,opt,name=credentialsFile"`
 }
 
 // GithubEventSource refers to event-source for github related events
@@ -631,6 +638,40 @@ type NSQEventSource struct {
 	// TLS configuration for the nsq client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+}
+
+// PulsarEventSource describes the event source for Apache Pulsar
+type PulsarEventSource struct {
+	// Name of the topics to subscribe to.
+	// +required
+	Topics []string `json:"topics" protobuf:"bytes,1,rep,name=topics"`
+	// Type of the subscription.
+	// Only "exclusive" and "shared" is supported.
+	// Defaults to exclusive.
+	// +optional
+	Type string `json:"type,omitempty" protobuf:"bytes,2,opt,name=type"`
+	// Configure the service URL for the Pulsar service.
+	// +required
+	URL string `json:"url" protobuf:"bytes,3,name=url"`
+	// Set the path to the trusted TLS certificate file.
+	// +optional
+	TLSTrustCertsFilePath string `json:"tlsTrustCertsFilePath,omitempty" protobuf:"bytes,4,opt,name=tlsTrustCertsFilePath"`
+	// Whether the Pulsar client accept untrusted TLS certificate from broker.
+	// +optional
+	TLSAllowInsecureConnection bool `json:"tlsAllowInsecureConnection,omitempty" protobuf:"bytes,5,opt,name=tlsAllowInsecureConnection"`
+	// Whether the Pulsar client verify the validity of the host name from broker.
+	// +optional
+	TLSValidateHostname bool `json:"tlsValidateHostname,omitempty" protobuf:"bytes,6,opt,name=tlsValidateHostname"`
+	// TLS configuration for the pulsar client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
+	// Backoff holds parameters applied to connection.
+	// +optional
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,8,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,9,opt,name=jsonBody"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

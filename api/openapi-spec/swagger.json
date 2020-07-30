@@ -658,6 +658,13 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.PubSubEventSource"
           }
         },
+        "pulsar": {
+          "description": "Pulsar event source",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.PulsarEventSource"
+          }
+        },
         "redis": {
           "description": "Redis event source",
           "type": "object",
@@ -1112,20 +1119,19 @@
       "required": [
         "projectID",
         "topicProjectID",
-        "topic",
         "credentialsFile"
       ],
       "properties": {
+        "credentialSecret": {
+          "description": "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicts to use Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "credentialsFile": {
           "description": "CredentialsFile is the file that contains credentials to authenticate for GCP",
           "type": "string"
         },
         "deleteSubscriptionOnFinish": {
           "description": "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
-          "type": "boolean"
-        },
-        "enableWorkloadIdentity": {
-          "description": "EnableWorkloadIdentity determines if your project authenticates to GCP with WorkloadIdentity or CredentialsFile. If true, authentication is done with WorkloadIdentity. If false or omitted, authentication is done with CredentialsFile.",
           "type": "boolean"
         },
         "jsonBody": {
@@ -1136,12 +1142,65 @@
           "description": "ProjectID is the unique identifier for your project on GCP",
           "type": "string"
         },
+        "subscriptionID": {
+          "description": "SubscriptionID is given then use it instead of creating a new one",
+          "type": "string"
+        },
         "topic": {
           "description": "Topic on which a subscription will be created",
           "type": "string"
         },
         "topicProjectID": {
           "description": "TopicProjectID identifies the project where the topic should exist or be created (assumed to be the same as ProjectID by default)",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.PulsarEventSource": {
+      "description": "PulsarEventSource describes the event source for Apache Pulsar",
+      "type": "object",
+      "required": [
+        "topics",
+        "url"
+      ],
+      "properties": {
+        "connectionBackoff": {
+          "description": "Backoff holds parameters applied to connection.",
+          "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
+        "tls": {
+          "description": "TLS configuration for the pulsar client.",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+        },
+        "tlsAllowInsecureConnection": {
+          "description": "Whether the Pulsar client accept untrusted TLS certificate from broker.",
+          "type": "boolean"
+        },
+        "tlsTrustCertsFilePath": {
+          "description": "Set the path to the trusted TLS certificate file.",
+          "type": "string"
+        },
+        "tlsValidateHostname": {
+          "description": "Whether the Pulsar client verify the validity of the host name from broker.",
+          "type": "boolean"
+        },
+        "topics": {
+          "description": "Name of the topics to subscribe to.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "description": "Type of the subscription. Only \"exclusive\" and \"shared\" is supported. Defaults to exclusive.",
+          "type": "string"
+        },
+        "url": {
+          "description": "Configure the service URL for the Pulsar service.",
           "type": "string"
         }
       }
@@ -2423,10 +2482,6 @@
         },
         "message": {
           "description": "Message refers to the message to send to the Slack channel.",
-          "type": "string"
-        },
-        "namespace": {
-          "description": "Namespace to read the password secret from. This is required if the password secret selector is specified.",
           "type": "string"
         },
         "parameters": {

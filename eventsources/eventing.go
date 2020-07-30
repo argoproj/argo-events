@@ -6,11 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
@@ -30,6 +25,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/mqtt"
 	"github.com/argoproj/argo-events/eventsources/sources/nats"
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
+	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
 	"github.com/argoproj/argo-events/eventsources/sources/resource"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
@@ -39,6 +35,10 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // EventingServer is the server API for Eventing service.
@@ -213,6 +213,13 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 			servers = append(servers, &resource.EventListener{EventSourceName: eventSource.Name, EventName: k, ResourceEventSource: v})
 		}
 		result[apicommon.ResourceEvent] = servers
+	}
+	if len(eventSource.Spec.Pulsar) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Pulsar {
+			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v})
+		}
+		result[apicommon.PulsarEvent] = servers
 	}
 	return result
 }

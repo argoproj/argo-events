@@ -18,9 +18,10 @@ package slack
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
-	"github.com/nlopes/slack"
 	"github.com/pkg/errors"
+	"github.com/slack-go/slack"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
@@ -91,37 +92,60 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 
 	slacktrigger := t.Trigger.Template.Slack
 
-	namespace := slacktrigger.Namespace
-	if namespace == "" {
-		namespace = t.Sensor.Namespace
-	}
-
 	channel := slacktrigger.Channel
 	if channel == "" {
 		return nil, errors.New("no slack channel provided")
 	}
+	channel = strings.TrimPrefix(channel, "#")
 
 	message := slacktrigger.Message
 	if message == "" {
 		return nil, errors.New("no slack message to post")
 	}
 
-	slackToken, err := common.GetSecretValue(t.K8sClient, namespace, slacktrigger.SlackToken)
+	slackToken, err := common.GetSecretValue(t.K8sClient, t.Sensor.Namespace, slacktrigger.SlackToken)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to retrieve the slack token from secret %s and namespace %s", slacktrigger.SlackToken.Name, namespace)
+		return nil, errors.Wrapf(err, "failed to retrieve the slack token from secret %s", slacktrigger.SlackToken.Name)
 	}
 
 	api := slack.New(slackToken, slack.OptionDebug(true))
-	_, err = api.JoinChannel(channel)
+
+	params := &slack.GetConversationsParameters{
+		Limit: 200,
+	}
+	channelID := ""
+	for {
+		channels, nextCursor, err := api.GetConversations(params)
+		if err != nil {
+			t.Logger.Error("unable to list channels", zap.Error(err))
+			return nil, errors.Wrapf(err, "failed to list channels")
+		}
+		for _, c := range channels {
+			if c.Name == channel {
+				channelID = c.ID
+				break
+			}
+		}
+		if len(channels) < params.Limit || nextCursor == "" {
+			break
+		}
+		params.Cursor = nextCursor
+	}
+	if channelID == "" {
+		return nil, errors.Errorf("failed to get channelID of %s", channel)
+	}
+	// Only join if not joined? Maybe a join API call is easier.
+	c, _, _, err := api.JoinConversation(channelID)
+	t.Logger.Debug("successfully joined channel", zap.Any("channel", c))
 	if err != nil {
-		t.Logger.Error("unable to join channel...", zap.Any("channel", channel))
+		t.Logger.Error("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
 		return nil, errors.Wrapf(err, "failed to join channel %s", channel)
 	}
 
-	t.Logger.Info("posting to channel...", zap.Any("channel", channel))
+	t.Logger.Info("posting to channel...", zap.Any("channelName", channel))
 	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
 	if err != nil {
-		t.Logger.Error("unable to post to channel...", zap.Any("channel", channel))
+		t.Logger.Error("unable to post to channel...", zap.Any("channelName", channel), zap.Error(err))
 		return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
 	}
 
