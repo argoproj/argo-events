@@ -23,7 +23,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -53,8 +52,7 @@ var sensorObj = &v1alpha1.Sensor{
 							},
 							Key: "secretkey",
 						},
-						Namespace: "fake",
-						Region:    "us-east",
+						Region: "us-east",
 					},
 				},
 			},
@@ -65,7 +63,6 @@ var sensorObj = &v1alpha1.Sensor{
 func getAWSTrigger() *AWSLambdaTrigger {
 	return &AWSLambdaTrigger{
 		LambdaClient: nil,
-		K8sClient:    fake.NewSimpleClientset(),
 		Sensor:       sensorObj.DeepCopy(),
 		Trigger:      &sensorObj.Spec.Triggers[0],
 		Logger:       logging.NewArgoEventsLogger().Desugar(),

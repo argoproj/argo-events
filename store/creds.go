@@ -17,13 +17,9 @@ limitations under the License.
 package store
 
 import (
-	"fmt"
 	"strings"
 
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/kubernetes"
+	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -36,15 +32,15 @@ type Credentials struct {
 }
 
 // GetCredentials for this minio
-func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1alpha1.ArtifactLocation) (*Credentials, error) {
+func GetCredentials(art *v1alpha1.ArtifactLocation) (*Credentials, error) {
 	if art.S3 != nil {
-		accessKey, err := GetSecrets(kubeClient, namespace, art.S3.AccessKey.Name, art.S3.AccessKey.Key)
+		accessKey, err := common.GetSecretFromVolume(art.S3.AccessKey)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to retrieve accessKey")
 		}
-		secretKey, err := GetSecrets(kubeClient, namespace, art.S3.SecretKey.Name, art.S3.SecretKey.Key)
+		secretKey, err := common.GetSecretFromVolume(art.S3.SecretKey)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to retrieve secretKey")
 		}
 		return &Credentials{
 			accessKey: strings.TrimSpace(accessKey),
@@ -53,29 +49,4 @@ func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1al
 	}
 
 	return nil, nil
-}
-
-// GetSecretValue retrieves the secret value from the secret in namespace with name and key
-func GetSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
-	secretsIf := client.CoreV1().Secrets(namespace)
-	var secret *v1.Secret
-	var err error
-	_ = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		secret, err = secretsIf.Get(name, metav1.GetOptions{})
-		if err != nil {
-			if !common.IsRetryableKubeAPIError(err) {
-				return false, err
-			}
-			return false, nil
-		}
-		return true, nil
-	})
-	if err != nil {
-		return "", err
-	}
-	val, ok := secret.Data[key]
-	if !ok {
-		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
-	}
-	return string(val), nil
 }

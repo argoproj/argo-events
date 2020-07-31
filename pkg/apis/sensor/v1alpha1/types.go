@@ -418,10 +418,6 @@ type BasicAuth struct {
 	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
 	// Password refers to the Kubernetes secret that holds the password required for basic auth.
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
-	// Namespace to read the secrets from.
-	// Defaults to sensor's namespace.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
 }
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
@@ -432,20 +428,16 @@ type AWSLambdaTrigger struct {
 	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,2,opt,name=accessKey"`
 	// SecretKey refers K8 secret containing aws secret key
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,3,opt,name=secretKey"`
-	// Namespace refers to Kubernetes namespace to read access related secret from.
-	// Defaults to sensor's namespace.
-	// +optional.
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// Region is AWS region
-	Region string `json:"region" protobuf:"bytes,5,opt,name=region"`
+	Region string `json:"region" protobuf:"bytes,4,opt,name=region"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 
-	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,5,rep,name=payload"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
 
 	// +optional
-	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 }
 
 // KafkaTrigger refers to the specification of the Kafka trigger.
@@ -724,21 +716,11 @@ type ArtifactLocation struct {
 	// URL to fetch the artifact from
 	URL *URLArtifact `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
 	// Configmap that stores the artifact
-	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
+	Configmap *corev1.ConfigMapKeySelector `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
 	// Git repository hosting the artifact
 	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
 	// Resource is generic template for K8s resource
 	Resource *apicommon.Resource `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
-}
-
-// ConfigmapArtifact contains information about artifact in k8 configmap
-type ConfigmapArtifact struct {
-	// Name of the configmap
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-	// Namespace where configmap is deployed
-	Namespace string `json:"namespace" protobuf:"bytes,2,opt,name=namespace"`
-	// Key within configmap data which contains trigger resource definition
-	Key string `json:"key" protobuf:"bytes,3,opt,name=key"`
 }
 
 // FileArtifact contains information about an artifact in a filesystem
@@ -764,29 +746,26 @@ type GitArtifact struct {
 	// Creds contain reference to git username and password
 	// +optional
 	Creds *GitCreds `json:"creds,omitempty" protobuf:"bytes,3,opt,name=creds"`
-	// Namespace where creds are stored.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
 	// ssh key path must be mounted in sensor pod.
 	// +optional
-	SSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,5,opt,name=sshKeyPath"`
+	SSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,4,opt,name=sshKeyPath"`
 	// Path to file that contains trigger resource definition
-	FilePath string `json:"filePath" protobuf:"bytes,6,opt,name=filePath"`
+	FilePath string `json:"filePath" protobuf:"bytes,5,opt,name=filePath"`
 	// Branch to use to pull trigger resource
 	// +optional
-	Branch string `json:"branch,omitempty" protobuf:"bytes,7,opt,name=branch"`
+	Branch string `json:"branch,omitempty" protobuf:"bytes,6,opt,name=branch"`
 	// Tag to use to pull trigger resource
 	// +optional
-	Tag string `json:"tag,omitempty" protobuf:"bytes,8,opt,name=tag"`
+	Tag string `json:"tag,omitempty" protobuf:"bytes,7,opt,name=tag"`
 	// Ref to use to pull trigger resource. Will result in a shallow clone and
 	// fetch.
 	// +optional
-	Ref string `json:"ref,omitempty" protobuf:"bytes,9,opt,name=ref"`
+	Ref string `json:"ref,omitempty" protobuf:"bytes,8,opt,name=ref"`
 	// Remote to manage set of tracked repositories. Defaults to "origin".
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
-	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,10,opt,name=remote"`
+	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,9,opt,name=remote"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote

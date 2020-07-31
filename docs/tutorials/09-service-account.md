@@ -16,11 +16,7 @@ The sensor examples use `argo-events-sa` service account to execute all types of
 
 * To trigger a any other K8s resource, make sure to grant `create` permission for that resource. 
 
-### AWS Lambda, HTTP, Slack and OpenWhisk Trigger
+### AWS Lambda, HTTP, Slack and OpenWhisk Trigger, NATS and Kafka Triggers
 
-These triggers may need access to secrets for access tokens/auth related configuration. Make
-sure to grant `get` and `list` permissions for the secret resource.  
+For these triggers, you **don't** need any K8s role associated with the service account.
 
-### NATS and Kafka Triggers
-
-For NATS and Kafka, you **don't** need any K8s role associated with the service account.

@@ -23,10 +23,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/store"
 )
 
 // GetAWSCredFromEnvironment reads credential stored in ENV by using envFrom.
@@ -45,17 +43,16 @@ func GetAWSCredFromEnvironment(access *corev1.SecretKeySelector, secret *corev1.
 	}), nil
 }
 
-// GetAWSCreds reads credential stored in Kubernetes secrets and return it.
-func GetAWSCreds(client kubernetes.Interface, namespace string, access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector) (*credentials.Credentials, error) {
-	accessKey, err := store.GetSecrets(client, namespace, access.Name, access.Key)
+// GetAWSCredFromVolume reads credential stored in mounted secret volume.
+func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector) (*credentials.Credentials, error) {
+	accessKey, err := common.GetSecretFromVolume(access)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "can not find access key")
 	}
-	secretKey, err := store.GetSecrets(client, namespace, secret.Name, secret.Key)
+	secretKey, err := common.GetSecretFromVolume(secret)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "can not find secret key")
 	}
-
 	return credentials.NewStaticCredentialsFromCreds(credentials.Value{
 		AccessKeyID:     accessKey,
 		SecretAccessKey: secretKey,
@@ -81,7 +78,7 @@ func GetAWSAssumeRoleCreds(roleARN, region string) (*session.Session, error) {
 	return GetAWSSession(creds, region)
 }
 
-// CreateAWSSessionWithCredsInEnv based on credentials in ENV	 return a aws session
+// CreateAWSSessionWithCredsInEnv based on credentials in ENV, return a aws session
 func CreateAWSSessionWithCredsInEnv(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
 	if roleARN != "" {
 		return GetAWSAssumeRoleCreds(roleARN, region)
@@ -99,8 +96,8 @@ func CreateAWSSessionWithCredsInEnv(region string, roleARN string, accessKey *co
 	return GetAWSSession(creds, region)
 }
 
-// CreateAWSSession based on credentials settings return a aws session
-func CreateAWSSession(client kubernetes.Interface, namespace, region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
+// CreateAWSSessionWithCredsInVolume based on credentials in mounted volumes, return a aws session
+func CreateAWSSessionWithCredsInVolume(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
 	if roleARN != "" {
 		return GetAWSAssumeRoleCreds(roleARN, region)
 	}
@@ -109,7 +106,7 @@ func CreateAWSSession(client kubernetes.Interface, namespace, region string, rol
 		return GetAWSSessionWithoutCreds(region)
 	}
 
-	creds, err := GetAWSCreds(client, namespace, accessKey, secretKey)
+	creds, err := GetAWSCredFromVolume(accessKey, secretKey)
 	if err != nil {
 		return nil, err
 	}

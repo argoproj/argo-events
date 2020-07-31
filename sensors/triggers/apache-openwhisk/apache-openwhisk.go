@@ -22,7 +22,6 @@ import (
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -32,8 +31,6 @@ import (
 
 // TriggerImpl implements the Trigger interface for OpenWhisk trigger.
 type TriggerImpl struct {
-	// K8sClient is Kubernetes client
-	K8sClient kubernetes.Interface
 	// OpenWhiskClient is OpenWhisk API client
 	OpenWhiskClient *whisk.Client
 	// Sensor object
@@ -45,7 +42,7 @@ type TriggerImpl struct {
 }
 
 // NewTriggerImpl returns a new TriggerImpl
-func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, k8sCLient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*TriggerImpl, error) {
+func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients map[string]*whisk.Client, logger *zap.Logger) (*TriggerImpl, error) {
 	openwhisktrigger := trigger.Template.OpenWhisk
 
 	client, ok := openWhiskClients[trigger.Template.Name]
@@ -61,7 +58,7 @@ func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, k8sCLient kuberne
 		config.Host = openwhisktrigger.Host
 
 		if openwhisktrigger.AuthToken != nil {
-			token, err := common.GetSecretValue(k8sCLient, sensor.Namespace, openwhisktrigger.AuthToken)
+			token, err := common.GetSecretFromVolume(openwhisktrigger.AuthToken)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to retrieve auth token")
 			}
@@ -86,7 +83,6 @@ func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, k8sCLient kuberne
 	}
 
 	return &TriggerImpl{
-		K8sClient:       k8sCLient,
 		OpenWhiskClient: client,
 		Sensor:          sensor,
 		Trigger:         trigger,

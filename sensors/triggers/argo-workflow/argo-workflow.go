@@ -64,7 +64,7 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 // FetchResource fetches the trigger resource from external source
 func (t *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
 	trigger := t.Trigger
-	return triggers.FetchKubernetesResource(t.K8sClient, trigger.Template.ArgoWorkflow.Source, t.Sensor.Namespace)
+	return triggers.FetchKubernetesResource(trigger.Template.ArgoWorkflow.Source)
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource

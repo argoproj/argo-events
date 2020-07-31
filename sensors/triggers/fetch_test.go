@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/client-go/kubernetes/fake"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -32,7 +31,7 @@ func TestFetchKubernetesResource(t *testing.T) {
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}
-	uObj, err := FetchKubernetesResource(fake.NewSimpleClientset(), sensorObj.Spec.Triggers[0].Template.K8s.Source, sensorObj.Namespace)
+	uObj, err := FetchKubernetesResource(sensorObj.Spec.Triggers[0].Template.K8s.Source)
 	assert.Nil(t, err)
 	assert.NotNil(t, uObj)
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
