@@ -42,7 +42,7 @@ type TriggerImpl struct {
 }
 
 // NewTriggerImpl returns a new TriggerImpl
-func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*TriggerImpl, error) {
+func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients map[string]*whisk.Client, logger *zap.Logger) (*TriggerImpl, error) {
 	openwhisktrigger := trigger.Template.OpenWhisk
 
 	client, ok := openWhiskClients[trigger.Template.Name]
