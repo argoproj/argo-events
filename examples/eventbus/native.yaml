@@ -5,7 +5,7 @@ metadata:
 spec:
   nats:
     native:
-      # Optional, defaults to 3
+      # Optional, defaults to 3. If it is < 3, set it to 3, that is the minimal requirement.
       replicas: 3
       # Optional, authen strategy, "none" or "token", defaults to "none"
       auth: token

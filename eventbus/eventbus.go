@@ -28,7 +28,7 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, s
 	}
 	var auth *driver.Auth
 	cred := &driver.AuthCredential{}
-	if eventBusAuth == nil || eventBusAuth == &eventbusv1alpha1.AuthStrategyNone {
+	if eventBusAuth == nil || *eventBusAuth == eventbusv1alpha1.AuthStrategyNone {
 		auth = &driver.Auth{
 			Strategy: eventbusv1alpha1.AuthStrategyNone,
 		}
