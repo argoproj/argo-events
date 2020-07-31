@@ -19,20 +19,19 @@ package stripe
 import (
 	"context"
 	"encoding/json"
-	"github.com/argoproj/argo-events/pkg/apis/events"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/webhookendpoint"
-	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/pkg/errors"
+	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/webhookendpoint"
+	"go.uber.org/zap"
 )
 
 // controller controls the webhook operations

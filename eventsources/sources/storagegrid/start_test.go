@@ -19,16 +19,15 @@ package storagegrid
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/argoproj/argo-events/pkg/apis/events"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
+	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-
-	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 var (
