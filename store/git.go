@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
@@ -27,8 +28,8 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	go_git_ssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
-	"k8s.io/client-go/kubernetes"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -45,15 +46,13 @@ var (
 )
 
 type GitArtifactReader struct {
-	kubeClientset kubernetes.Interface
-	artifact      *v1alpha1.GitArtifact
+	artifact *v1alpha1.GitArtifact
 }
 
 // NewGitReader returns a new git reader
-func NewGitReader(kubeClientset kubernetes.Interface, gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error) {
+func NewGitReader(gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error) {
 	return &GitArtifactReader{
-		kubeClientset: kubeClientset,
-		artifact:      gitArtifact,
+		artifact: gitArtifact,
 	}, nil
 }
 
@@ -80,18 +79,18 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 
 func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	if g.artifact.Creds != nil {
-		username, err := GetSecrets(g.kubeClientset, g.artifact.Namespace, g.artifact.Creds.Username.Name, g.artifact.Creds.Username.Key)
+		username, err := common.GetSecretFromVolume(g.artifact.Creds.Username)
 		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve username: err: %+v", err)
+			return nil, errors.Wrap(err, "failed to retrieve username")
 		}
-		password, err := GetSecrets(g.kubeClientset, g.artifact.Namespace, g.artifact.Creds.Password.Name, g.artifact.Creds.Password.Key)
+		password, err := common.GetSecretFromVolume(g.artifact.Creds.Password)
 		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve password: err: %+v", err)
+			return nil, errors.Wrap(err, "failed to retrieve password")
 		}
 		return &http.BasicAuth{
 			Username: username,
 			Password: password,
-		}, err
+		}, nil
 	}
 	if g.artifact.SSHKeyPath != "" {
 		return getSSHKeyAuth(g.artifact.SSHKeyPath)

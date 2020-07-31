@@ -50,7 +50,6 @@ var sensorObj = &v1alpha1.Sensor{
 func getFakeTriggerImpl() *TriggerImpl {
 	return &TriggerImpl{
 		OpenWhiskClient: nil,
-		K8sClient:       nil,
 		Sensor:          sensorObj.DeepCopy(),
 		Trigger:         sensorObj.Spec.Triggers[0].DeepCopy(),
 		Logger:          logging.NewArgoEventsLogger().Desugar(),

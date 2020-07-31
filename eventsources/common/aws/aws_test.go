@@ -80,32 +80,6 @@ func TestAWS(t *testing.T) {
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(secret, convey.ShouldNotBeNil)
-
-		creds, err := GetAWSCreds(client, namespace, &corev1.SecretKeySelector{
-			Key: LabelAccessKey,
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: secretName,
-			},
-		}, &corev1.SecretKeySelector{
-			Key: LabelSecretKey,
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: secretName,
-			},
-		})
-
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(creds, convey.ShouldNotBeNil)
-
-		value, err := creds.Get()
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(value.AccessKeyID, convey.ShouldEqual, accessKey)
-		convey.So(value.SecretAccessKey, convey.ShouldEqual, secretKey)
-
-		convey.Convey("Get a new aws session", func() {
-			session, err := GetAWSSession(creds, "mock-region")
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(session, convey.ShouldNotBeNil)
-		})
 	})
 
 	convey.Convey("create AWS credential using already present config/IAM role", t, func() {

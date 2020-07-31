@@ -22,7 +22,6 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 type FakeWorkflowArtifactReader struct{}
@@ -46,8 +45,7 @@ func TestGetArtifactReader(t *testing.T) {
 		accessKey: "access",
 		secretKey: "secret",
 	}
-	clientset := fake.NewSimpleClientset()
-	_, err := GetArtifactReader(location, creds, clientset)
+	_, err := GetArtifactReader(location, creds)
 	assert.NotNil(t, err)
 }
 

@@ -20,8 +20,5 @@ spec:
           source:
             configmap:
               name: workflow-cm
-              # optional.
-              # Defaults to sensor namespace.
-              namespace: argo-events
               # key within configmap whose corresponding value contains the workflow definition
               key: wf

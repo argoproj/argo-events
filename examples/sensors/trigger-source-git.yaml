@@ -52,7 +52,6 @@ spec:
                 password:
                   name: github-secret
                   key: password
-              namespace: argo-events
               filePath: "examples/hello-world.yaml"
               tag: "v2.4.0"
     - template:
