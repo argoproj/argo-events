@@ -48,17 +48,9 @@ spec:
 		convey.So(cm, convey.ShouldNotBeNil)
 
 		convey.Convey("Make sure new configmap reader is not nil", func() {
-			cmReader, err := NewConfigMapReader(kubeClientset, "fake-ns", cmArtifact)
+			cmReader, err := NewConfigMapReader(cmArtifact)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(cmReader, convey.ShouldNotBeNil)
-
-			convey.Convey("Create a workflow from configmap minio", func() {
-				resourceBody, err := cmReader.Read()
-				convey.So(err, convey.ShouldBeNil)
-				obj, err := decodeAndUnstructure(resourceBody)
-				convey.So(err, convey.ShouldBeNil)
-				convey.So(obj.GetName(), convey.ShouldEqual, "hello-world")
-			})
 		})
 	})
 }

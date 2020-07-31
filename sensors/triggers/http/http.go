@@ -165,16 +165,16 @@ func (t *HTTPTrigger) Execute(events map[string]*v1alpha1.Event, resource interf
 		password := ""
 
 		if basicAuth.Username != nil {
-			username, ok = common.GetEnvFromSecret(basicAuth.Username)
-			if !ok {
-				return nil, errors.New("failed to retrieve the username")
+			username, err = common.GetSecretFromVolume(basicAuth.Username)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to retrieve the username")
 			}
 		}
 
 		if basicAuth.Password != nil {
-			password, ok = common.GetEnvFromSecret(basicAuth.Password)
+			password, err = common.GetSecretFromVolume(basicAuth.Password)
 			if !ok {
-				return nil, errors.New("failed to retrieve the password")
+				return nil, errors.Wrap(err, "failed to retrieve the password")
 			}
 		}
 

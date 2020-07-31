@@ -19,21 +19,20 @@ package triggers
 import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
 )
 
-func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.ArtifactLocation, namespace string) (*unstructured.Unstructured, error) {
+func FetchKubernetesResource(source *v1alpha1.ArtifactLocation) (*unstructured.Unstructured, error) {
 	if source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
 	}
-	creds, err := store.GetCredentials(client, namespace, source)
+	creds, err := store.GetCredentials(source)
 	if err != nil {
 		return nil, err
 	}
-	reader, err := store.GetArtifactReader(source, namespace, creds, client)
+	reader, err := store.GetArtifactReader(source, creds)
 	if err != nil {
 		return nil, err
 	}

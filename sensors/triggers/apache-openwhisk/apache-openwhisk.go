@@ -58,9 +58,9 @@ func NewTriggerImpl(openWhiskClients map[string]*whisk.Client, sensor *v1alpha1.
 		config.Host = openwhisktrigger.Host
 
 		if openwhisktrigger.AuthToken != nil {
-			token, ok := common.GetEnvFromSecret(openwhisktrigger.AuthToken)
-			if !ok {
-				return nil, errors.New("failed to retrieve auth token")
+			token, err := common.GetSecretFromVolume(openwhisktrigger.AuthToken)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to retrieve auth token")
 			}
 			config.AuthToken = token
 		}

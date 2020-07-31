@@ -71,11 +71,11 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource() (interface{}, error) {
 	if trigger.Template.K8s.Source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
 	}
-	creds, err := store.GetCredentials(k8sTrigger.K8sClient, k8sTrigger.Sensor.Namespace, trigger.Template.K8s.Source)
+	creds, err := store.GetCredentials(trigger.Template.K8s.Source)
 	if err != nil {
 		return nil, err
 	}
-	reader, err := store.GetArtifactReader(trigger.Template.K8s.Source, k8sTrigger.Sensor.Namespace, creds, k8sTrigger.K8sClient)
+	reader, err := store.GetArtifactReader(trigger.Template.K8s.Source, creds)
 	if err != nil {
 		return nil, err
 	}

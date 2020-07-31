@@ -99,9 +99,9 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 		return nil, errors.New("no slack message to post")
 	}
 
-	slackToken, ok := common.GetEnvFromSecret(slacktrigger.SlackToken)
-	if !ok {
-		return nil, errors.New("failed to retrieve the slack token")
+	slackToken, err := common.GetSecretFromVolume(slacktrigger.SlackToken)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve the slack token")
 	}
 
 	api := slack.New(slackToken, slack.OptionDebug(true))

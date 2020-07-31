@@ -193,16 +193,33 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	envs = append(envs, envVars...)
 	deploymentSpec.Template.Spec.Containers[0].Env = envs
 
-	envFroms := []corev1.EnvFromSource{}
-	oldEnvFroms := deploymentSpec.Template.Spec.Containers[0].EnvFrom
-	if len(oldEnvFroms) > 0 {
-		envFroms = append(envFroms, oldEnvFroms...)
+	vols := []corev1.Volume{}
+	volMounts := []corev1.VolumeMount{}
+	oldVols := deploymentSpec.Template.Spec.Volumes
+	oldVolMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
+	if len(oldVols) > 0 {
+		vols = append(vols, oldVols...)
 	}
-	envFromSecrets := envFromSecrets(sensorCopy)
-	if len(envFromSecrets) > 0 {
-		envFroms = append(envFroms, envFromSecrets...)
+	if len(oldVolMounts) > 0 {
+		volMounts = append(volMounts, oldVolMounts...)
 	}
-	deploymentSpec.Template.Spec.Containers[0].EnvFrom = envFroms
+	volSecrets, volSecretMounts := secretVolumes(sensorCopy)
+	if len(volSecrets) > 0 {
+		vols = append(vols, volSecrets...)
+	}
+	if len(volSecretMounts) > 0 {
+		volMounts = append(volMounts, volSecretMounts...)
+	}
+	volConfigMaps, volCofigMapMounts := configMapVolumes(sensorCopy)
+	if len(volConfigMaps) > 0 {
+		vols = append(vols, volConfigMaps...)
+	}
+	if len(volCofigMapMounts) > 0 {
+		volMounts = append(volMounts, volCofigMapMounts...)
+	}
+
+	deploymentSpec.Template.Spec.Volumes = vols
+	deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volMounts
 
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -271,46 +288,125 @@ func labelSelector(labelMap map[string]string) labels.Selector {
 	return labels.SelectorFromSet(labelMap)
 }
 
-func envFromSecrets(sensor *v1alpha1.Sensor) []corev1.EnvFromSource {
-	result := []corev1.EnvFromSource{}
+func secretVolumes(sensor *v1alpha1.Sensor) ([]corev1.Volume, []corev1.VolumeMount) {
+	resultVolumes := []corev1.Volume{}
+	resultMounts := []corev1.VolumeMount{}
 	for _, trigger := range sensor.Spec.Triggers {
 		t := trigger.Template
 		if t.AWSLambda != nil {
 			if t.AWSLambda.SecretKey != nil {
-				result = append(result, common.GenerateEnvFromSecretSpec(t.AWSLambda.SecretKey))
+				vol, mount := common.GenerateSecretVolumeSpecs(t.AWSLambda.SecretKey)
+				resultVolumes = append(resultVolumes, vol)
+				resultMounts = append(resultMounts, mount)
 			}
 			if t.AWSLambda.AccessKey != nil {
-				result = append(result, common.GenerateEnvFromSecretSpec(t.AWSLambda.AccessKey))
+				vol, mount := common.GenerateSecretVolumeSpecs(t.AWSLambda.AccessKey)
+				resultVolumes = append(resultVolumes, vol)
+				resultMounts = append(resultMounts, mount)
 			}
 		}
 		if t.HTTP != nil && t.HTTP.BasicAuth != nil {
 			if t.HTTP.BasicAuth.Password != nil {
-				result = append(result, common.GenerateEnvFromSecretSpec(t.HTTP.BasicAuth.Password))
+				vol, mount := common.GenerateSecretVolumeSpecs(t.HTTP.BasicAuth.Password)
+				resultVolumes = append(resultVolumes, vol)
+				resultMounts = append(resultMounts, mount)
 			}
 			if t.HTTP.BasicAuth.Username != nil {
-				result = append(result, common.GenerateEnvFromSecretSpec(t.HTTP.BasicAuth.Username))
+				vol, mount := common.GenerateSecretVolumeSpecs(t.HTTP.BasicAuth.Username)
+				resultVolumes = append(resultVolumes, vol)
+				resultMounts = append(resultMounts, mount)
 			}
 		}
 		if t.OpenWhisk != nil {
 			if t.OpenWhisk.AuthToken != nil {
-				result = append(result, common.GenerateEnvFromSecretSpec(t.OpenWhisk.AuthToken))
+				vol, mount := common.GenerateSecretVolumeSpecs(t.OpenWhisk.AuthToken)
+				resultVolumes = append(resultVolumes, vol)
+				resultMounts = append(resultMounts, mount)
 			}
 		}
 		if t.Slack != nil {
 			if t.Slack.SlackToken != nil {
-				result = append(result, common.GenerateEnvFromSecretSpec(t.Slack.SlackToken))
+				vol, mount := common.GenerateSecretVolumeSpecs(t.Slack.SlackToken)
+				resultVolumes = append(resultVolumes, vol)
+				resultMounts = append(resultMounts, mount)
+			}
+		}
+		var source *v1alpha1.ArtifactLocation
+		if t.ArgoWorkflow != nil && t.ArgoWorkflow.Source != nil {
+			source = t.ArgoWorkflow.Source
+		} else if t.K8s != nil && t.K8s.Source != nil {
+			source = t.K8s.Source
+		}
+		if source != nil {
+			if source.S3 != nil {
+				if source.S3.AccessKey != nil {
+					vol, mount := common.GenerateSecretVolumeSpecs(source.S3.AccessKey)
+					resultVolumes = append(resultVolumes, vol)
+					resultMounts = append(resultMounts, mount)
+				}
+				if source.S3.SecretKey != nil {
+					vol, mount := common.GenerateSecretVolumeSpecs(source.S3.SecretKey)
+					resultVolumes = append(resultVolumes, vol)
+					resultMounts = append(resultMounts, mount)
+				}
+			}
+			if source.Git != nil && source.Git.Creds != nil {
+				if source.Git.Creds.Username != nil {
+					vol, mount := common.GenerateSecretVolumeSpecs(source.Git.Creds.Username)
+					resultVolumes = append(resultVolumes, vol)
+					resultMounts = append(resultMounts, mount)
+				}
+				if source.Git.Creds.Password != nil {
+					vol, mount := common.GenerateSecretVolumeSpecs(source.Git.Creds.Password)
+					resultVolumes = append(resultVolumes, vol)
+					resultMounts = append(resultMounts, mount)
+				}
 			}
 		}
 	}
-	// Uniq
-	r := []corev1.EnvFromSource{}
-	keys := make(map[string]bool)
-	for _, e := range result {
-		entry := e.SecretRef.Name
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			r = append(r, e)
+	return uniqueVolumes(resultVolumes), uniqueVolumeMounts(resultMounts)
+}
+
+func configMapVolumes(sensor *v1alpha1.Sensor) ([]corev1.Volume, []corev1.VolumeMount) {
+	resultVolumes := []corev1.Volume{}
+	resultMounts := []corev1.VolumeMount{}
+	for _, trigger := range sensor.Spec.Triggers {
+		t := trigger.Template
+		var source *v1alpha1.ArtifactLocation
+		if t.ArgoWorkflow != nil && t.ArgoWorkflow.Source != nil {
+			source = t.ArgoWorkflow.Source
+		} else if t.K8s != nil && t.K8s.Source != nil {
+			source = t.K8s.Source
+		}
+		if source != nil && source.Configmap != nil {
+			vol, mount := common.GenerateConfigMapVolumeSpecs(source.Configmap)
+			resultVolumes = append(resultVolumes, vol)
+			resultMounts = append(resultMounts, mount)
 		}
 	}
-	return r
+	return uniqueVolumes(resultVolumes), uniqueVolumeMounts(resultMounts)
+}
+
+func uniqueVolumes(vols []corev1.Volume) []corev1.Volume {
+	rVols := []corev1.Volume{}
+	keys := make(map[string]bool)
+	for _, e := range vols {
+		if _, value := keys[e.Name]; !value {
+			keys[e.Name] = true
+			rVols = append(rVols, e)
+		}
+	}
+	return rVols
+}
+
+func uniqueVolumeMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
+	rMounts := []corev1.VolumeMount{}
+	keys := make(map[string]bool)
+	for _, e := range mounts {
+		if _, value := keys[e.Name]; !value {
+			keys[e.Name] = true
+			rMounts = append(rMounts, e)
+		}
+	}
+	return rMounts
 }

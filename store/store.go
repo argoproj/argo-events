@@ -22,7 +22,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/kubernetes"
 )
 
 // ArtifactReader enables reading artifacts from an external store
@@ -42,7 +41,7 @@ func FetchArtifact(reader ArtifactReader) (*unstructured.Unstructured, error) {
 }
 
 // GetArtifactReader returns the ArtifactReader for this location
-func GetArtifactReader(loc *v1alpha1.ArtifactLocation, namespace string, creds *Credentials, clientset kubernetes.Interface) (ArtifactReader, error) {
+func GetArtifactReader(loc *v1alpha1.ArtifactLocation, creds *Credentials) (ArtifactReader, error) {
 	if loc.S3 != nil {
 		return NewS3Reader(loc.S3, creds)
 	}
@@ -56,10 +55,10 @@ func GetArtifactReader(loc *v1alpha1.ArtifactLocation, namespace string, creds *
 		return NewURLReader(loc.URL)
 	}
 	if loc.Git != nil {
-		return NewGitReader(clientset, namespace, loc.Git)
+		return NewGitReader(loc.Git)
 	}
 	if loc.Configmap != nil {
-		return NewConfigMapReader(clientset, namespace, loc.Configmap)
+		return NewConfigMapReader(loc.Configmap)
 	}
 	if loc.Resource != nil {
 		return NewResourceReader(loc.Resource)

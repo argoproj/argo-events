@@ -131,6 +131,64 @@ func GenerateEnvFromSecretSpec(selector *v1.SecretKeySelector) v1.EnvFromSource 
 	}
 }
 
+// GetSecretFromVolume retrieves the value of mounted secret volume
+// "/argo-events/secrets/${secretRef.name}/${secretRef.key}" is expected to be the file path
+func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
+	filePath := fmt.Sprintf("/argo-events/secrets/%s/%s", selector.Name, selector.Key)
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to get secret value of name: %s, key: %s", selector.Name, selector.Key)
+	}
+	return string(data), nil
+}
+
+// GenerateSecretVolumeSpecs builds a "volume" and "volumeMount"spec with a secretKeySelector
+func GenerateSecretVolumeSpecs(selector *v1.SecretKeySelector) (v1.Volume, v1.VolumeMount) {
+	volName := strings.ReplaceAll("secret-"+selector.Name, "_", "-")
+	return v1.Volume{
+			Name: volName,
+			VolumeSource: v1.VolumeSource{
+				Secret: &v1.SecretVolumeSource{
+					SecretName: selector.Name,
+				},
+			},
+		}, v1.VolumeMount{
+			Name:      volName,
+			ReadOnly:  true,
+			MountPath: "/argo-events/secrets/" + selector.Name,
+		}
+}
+
+// GetConfigMapFromVolume retrieves the value of mounted config map volume
+// "/argo-events/config/${configMapRef.name}/${configMapRef.key}" is expected to be the file path
+func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
+	filePath := fmt.Sprintf("/argo-events/config/%s/%s", selector.Name, selector.Key)
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to get configMap value of name: %s, key: %s", selector.Name, selector.Key)
+	}
+	return string(data), nil
+}
+
+// GenerateConfigMapVolumeSpecs builds a "volume" and "volumeMount"spec with a configMapKeySelector
+func GenerateConfigMapVolumeSpecs(selector *v1.ConfigMapKeySelector) (v1.Volume, v1.VolumeMount) {
+	volName := strings.ReplaceAll("cm-"+selector.Name, "_", "-")
+	return v1.Volume{
+			Name: volName,
+			VolumeSource: v1.VolumeSource{
+				ConfigMap: &v1.ConfigMapVolumeSource{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: selector.Name,
+					},
+				},
+			},
+		}, v1.VolumeMount{
+			Name:      volName,
+			ReadOnly:  true,
+			MountPath: "/argo-events/config/" + selector.Name,
+		}
+}
+
 // GetEnvFromConfigMap retrieves the value of envFrom.configMapRef
 // "${configMapRef.name}_" is expected to be defined as "prefix"
 func GetEnvFromConfigMap(selector *v1.ConfigMapKeySelector) (string, bool) {
