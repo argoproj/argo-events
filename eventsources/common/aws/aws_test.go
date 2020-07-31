@@ -80,7 +80,6 @@ func TestAWS(t *testing.T) {
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(secret, convey.ShouldNotBeNil)
-
 	})
 
 	convey.Convey("create AWS credential using already present config/IAM role", t, func() {

@@ -45,5 +45,4 @@ func TestGetCredentials(t *testing.T) {
 	creds, err := GetCredentials(unknownArtifact)
 	assert.Nil(t, creds)
 	assert.Nil(t, err)
-
 }
