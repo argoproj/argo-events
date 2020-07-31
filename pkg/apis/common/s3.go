@@ -29,8 +29,9 @@ type S3Artifact struct {
 	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
 	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
 
-	Events []string  `json:"events,omitempty" protobuf:"bytes,7,rep,name=events"`
-	Filter *S3Filter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	Events   []string          `json:"events,omitempty" protobuf:"bytes,7,rep,name=events"`
+	Filter   *S3Filter         `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,opt,name=metadata"`
 }
 
 // S3Bucket contains information to describe an S3 Bucket

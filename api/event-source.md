@@ -233,6 +233,29 @@ TLS configuration for the amqp client.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -365,6 +388,29 @@ SharedAccessKey is the the generated value of the key
 <p>
 
 Event Hub path/name
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -518,7 +564,30 @@ Timezone in which to run the schedule
 <p>
 
 UserPayload will be sent to sensor as extra data once the event is
-triggered
+triggered Deprecated. Please use Metadata instead.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -748,6 +817,29 @@ TLSConfig </a> </em>
 <p>
 
 TLS configuration for the emitter client.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -2370,6 +2462,29 @@ Use polling instead of inotify
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2766,6 +2881,29 @@ repository once the event source is stopped.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2961,6 +3099,29 @@ GitlabBaseURL is the base URL for API requests to a custom endpoint
 
 DeleteHookOnFinish determines whether to delete the GitLab hook for the
 project once the event source is stopped.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -3249,6 +3410,29 @@ must be set if either ccache or keytab is used.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -3427,6 +3611,29 @@ will be JSON
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -3598,6 +3805,29 @@ TLSConfig </a> </em>
 <p>
 
 TLS configuration for the mqtt client.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -3842,6 +4072,29 @@ TLS configuration for the nats client.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4016,6 +4269,29 @@ TLSConfig </a> </em>
 <p>
 
 TLS configuration for the nsq client.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -4246,6 +4522,29 @@ will be JSON
 
 CredentialsFile is the file that contains credentials to authenticate
 for GCP
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -4503,6 +4802,29 @@ will be JSON
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4682,6 +5004,29 @@ TLS configuration for the redis client.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4825,6 +5170,29 @@ Group of the resource
 
 EventTypes is the list of event type to watch. Possible values are -
 ADD, UPDATE and DELETE.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -5208,6 +5576,29 @@ RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -5425,6 +5816,29 @@ will be JSON
 
 QueueAccountID is the ID of the account that created the queue to
 monitor
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -5766,6 +6180,29 @@ Webhook holds configuration for a REST endpoint
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -5973,6 +6410,29 @@ Auth token for storagegrid api
 <p>
 
 APIURL is the url of the storagegrid api.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -6199,6 +6659,29 @@ CreateWebhook is enabled.
 EventFilter describes the type of events to listen to. If not specified,
 all types of events will be processed. More info at
 <a href="https://stripe.com/docs/api/events/list">https://stripe.com/docs/api/events/list</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 
@@ -6847,6 +7330,29 @@ ServerCertPath refers the file that contains the cert.
 <p>
 
 ServerKeyPath refers the file that contains private key
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
 
 </p>
 

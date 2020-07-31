@@ -122,6 +122,7 @@ func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Mes
 	data := &events.SQSEventData{
 		MessageId:         *message.MessageId,
 		MessageAttributes: message.MessageAttributes,
+		Metadata:          el.SQSEventSource.Metadata,
 	}
 	if el.SQSEventSource.JSONBody {
 		body := []byte(*message.Body)

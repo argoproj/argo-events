@@ -133,6 +133,13 @@ func (in *S3Artifact) DeepCopyInto(out *S3Artifact) {
 		*out = new(S3Filter)
 		**out = **in
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

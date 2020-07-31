@@ -92,8 +92,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	event := &events.GitLabEventData{
-		Headers: request.Header,
-		Body:    (*json.RawMessage)(&body),
+		Headers:  request.Header,
+		Body:     (*json.RawMessage)(&body),
+		Metadata: router.gitlabEventSource.Metadata,
 	}
 
 	eventBody, err := json.Marshal(event)

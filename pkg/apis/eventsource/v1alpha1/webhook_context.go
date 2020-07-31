@@ -15,4 +15,7 @@ type WebhookContext struct {
 	ServerCertPath string `json:"serverCertPath,omitempty" protobuf:"bytes,5,opt,name=serverCertPath"`
 	// ServerKeyPath refers the file that contains private key
 	ServerKeyPath string `json:"serverKeyPath,omitempty" protobuf:"bytes,6,opt,name=serverKeyPath"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,opt,name=metadata"`
 }

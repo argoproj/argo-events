@@ -121,6 +121,21 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"url", "exchangeName", "exchangeType", "routingKey"},
 			},
@@ -161,6 +176,21 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 							Description: "Event Hub path/name",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -215,9 +245,24 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 					},
 					"userPayload": {
 						SchemaProps: spec.SchemaProps{
-							Description: "UserPayload will be sent to sensor as extra data once the event is triggered",
+							Description: "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated. Please use Metadata instead.",
 							Type:        []string{"string"},
 							Format:      "byte",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -284,6 +329,21 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the emitter client.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -825,6 +885,21 @@ func schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref common.ReferenceCa
 							Format:      "",
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"eventType", "watchPathConfig"},
 			},
@@ -956,6 +1031,21 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"id", "owner", "repository", "events"},
 			},
@@ -1024,6 +1114,21 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Description: "DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.",
 							Type:        []string{"boolean"},
 							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1136,6 +1241,21 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 							Format:      "",
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"directory", "type", "addresses"},
 			},
@@ -1192,6 +1312,21 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"url", "partition", "topic"},
 			},
@@ -1246,6 +1381,21 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the mqtt client.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1338,6 +1488,21 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"url", "subject"},
 			},
@@ -1392,6 +1557,21 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the nsq client.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1463,6 +1643,21 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1549,6 +1744,21 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"topics", "url"},
 			},
@@ -1611,6 +1821,21 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"hostAddress", "channels"},
 			},
@@ -1663,6 +1888,21 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref common.Referen
 							Description: "EventTypes is the list of event type to watch. Possible values are - ADD, UPDATE and DELETE.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Type:   []string{"string"},
@@ -1788,6 +2028,21 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 							Format:      "",
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"topicArn", "region"},
 			},
@@ -1856,6 +2111,21 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 							Description: "QueueAccountID is the ID of the account that created the queue to monitor",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1973,6 +2243,21 @@ func schema_pkg_apis_eventsource_v1alpha1_SlackEventSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -2047,6 +2332,21 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 							Format:      "",
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"topicArn", "bucket", "authToken", "apiURL"},
 			},
@@ -2113,6 +2413,21 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 							Description: "EventFilter describes the type of events to listen to. If not specified, all types of events will be processed. More info at https://stripe.com/docs/api/events/list",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Type:   []string{"string"},
@@ -2339,6 +2654,21 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 							Description: "ServerKeyPath refers the file that contains private key",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},

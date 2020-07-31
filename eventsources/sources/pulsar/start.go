@@ -117,6 +117,7 @@ consumeMessages:
 				Key:         msg.Key(),
 				PublishTime: msg.PublishTime().UTC().String(),
 				Body:        payload,
+				Metadata:    pulsarEventSource.Metadata,
 			}
 			if pulsarEventSource.JSONBody {
 				eventData.Body = (*json.RawMessage)(&payload)

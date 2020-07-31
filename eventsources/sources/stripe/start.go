@@ -19,6 +19,7 @@ package stripe
 import (
 	"context"
 	"encoding/json"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"io/ioutil"
 	"net/http"
 
@@ -111,9 +112,14 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	data, err := json.Marshal(event)
+	eventData := &events.StripeEventData{
+		Event:    event,
+		Metadata: rc.stripeEventSource.Metadata,
+	}
+
+	data, err := json.Marshal(eventData)
 	if err != nil {
-		logger.Error("failed to marshal event into gateway response", zap.Any("event-id", event.ID), zap.Error(err))
+		logger.Error("failed to marshal event data", zap.Any("event-id", event.ID), zap.Error(err))
 		common.SendSuccessResponse(writer, "invalid event")
 		return
 	}

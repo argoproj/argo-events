@@ -73,6 +73,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			Topic:     msg.Topic(),
 			MessageID: int(msg.MessageID()),
 			Body:      msg.Payload(),
+			Metadata:  mqttEventSource.Metadata,
 		}
 		if mqttEventSource.JSONBody {
 			body := msg.Payload()

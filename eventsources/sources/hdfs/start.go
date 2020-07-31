@@ -130,6 +130,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				// watcher stopped watching file events
 				return errors.Errorf("watcher has been stopped for %s", el.GetEventName())
 			}
+			event.Metadata = hdfsEventSource.Metadata
 			matched := false
 			relPath := strings.TrimPrefix(event.Name, hdfsEventSource.Directory)
 

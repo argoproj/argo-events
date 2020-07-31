@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -77,7 +78,7 @@ func generateUUID() uuid.UUID {
 }
 
 // filterName filters object key based on configured prefix and/or suffix
-func filterName(notification *storageGridNotification, eventSource *v1alpha1.StorageGridEventSource) bool {
+func filterName(notification *events.StorageGridNotification, eventSource *v1alpha1.StorageGridEventSource) bool {
 	if eventSource.Filter == nil {
 		return true
 	}
@@ -169,7 +170,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	logger.Info("converting request body to storage grid notification")
-	var notification *storageGridNotification
+	var notification *events.StorageGridNotification
 	err = json.Unmarshal(b, &notification)
 	if err != nil {
 		logger.Error("failed to convert the request body into storage grid notification", zap.Error(err))
@@ -178,7 +179,16 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if filterName(notification, router.storageGridEventSource) {
 		logger.Error("new event received, dispatching event on route's data channel", zap.Error(err))
-		route.DataCh <- b
+		eventData := &events.StorageGridEventData{
+			Notification: notification,
+			Metadata:     router.storageGridEventSource.Metadata,
+		}
+		eventBody, err := json.Marshal(eventData)
+		if err != nil {
+			logger.Error("failed to marshal the event data", zap.Error(err))
+			return
+		}
+		route.DataCh <- eventBody
 		return
 	}
 

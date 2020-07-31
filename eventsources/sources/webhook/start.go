@@ -104,8 +104,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	payload := &events.WebhookEventData{
-		Header: request.Header,
-		Body:   (*json.RawMessage)(&body),
+		Header:   request.Header,
+		Body:     (*json.RawMessage)(&body),
+		Metadata: route.Context.Metadata,
 	}
 
 	data, err := json.Marshal(payload)

@@ -137,6 +137,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				Topic:     msg.Topic,
 				Partition: int(msg.Partition),
 				Timestamp: msg.Timestamp.String(),
+				Metadata:  kafkaEventSource.Metadata,
 			}
 			if kafkaEventSource.JSONBody {
 				eventData.Body = (*json.RawMessage)(&msg.Value)

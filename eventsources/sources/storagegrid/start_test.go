@@ -19,6 +19,7 @@ package storagegrid
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -148,7 +149,7 @@ func TestFilterName(t *testing.T) {
 				Suffix: ".txt",
 			},
 		}
-		var gridNotification *storageGridNotification
+		var gridNotification *events.StorageGridNotification
 		err := json.Unmarshal([]byte(notification), &gridNotification)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(gridNotification, convey.ShouldNotBeNil)
