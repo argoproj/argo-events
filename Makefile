@@ -22,7 +22,7 @@ DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
 IMAGE_TAG?=v0.17.0
 BUILD_BINARY?=true
-DEV_IMAGE?=false
+DEV_IMAGE?=true
 
 # If we are building dev images, then we want to use local cache for speed.
 ifeq ($(DEV_IMAGE),true)
