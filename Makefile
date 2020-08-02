@@ -2,6 +2,9 @@ PACKAGE=github.com/argoproj/argo-events
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
 
+# Use a different Dockerfile, e.g. for building for Windows or dev images.
+DOCKERFILE := Dockerfile
+
 VERSION=$(shell cat ${CURRENT_DIR}/VERSION)
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(shell git rev-parse HEAD)
@@ -19,6 +22,12 @@ DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
 IMAGE_TAG?=v0.17.0
 BUILD_BINARY?=true
+DEV_IMAGE?=false
+
+# If we are building dev images, then we want to use local cache for speed.
+ifeq ($(DEV_IMAGE),true)
+DOCKERFILE            := Dockerfile.dev
+endif
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
@@ -52,7 +61,7 @@ eventsource-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource
 
 eventsource-image:
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)  --target eventsource -f ./Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)  --target eventsource -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) ; fi
 
 # EventSource controller
@@ -63,7 +72,7 @@ eventsource-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource-controller
 
 eventsource-controller-image:
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG)  --target eventsource-controller -f ./Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG)  --target eventsource-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) ; fi
 
 # Sensor
@@ -74,7 +83,7 @@ sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
 
 sensor-image:
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG)  --target sensor -f ./Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG)  --target sensor -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
 
 # Sensor controller
@@ -85,7 +94,7 @@ sensor-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor-controller
 
 sensor-controller-image:
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG)  --target sensor-controller -f ./Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG)  --target sensor-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
 # Gateway controller
@@ -108,7 +117,7 @@ eventbus-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventbus-controller
 
 eventbus-controller-image:
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f ./Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
 
 test:
