@@ -61,6 +61,7 @@ eventsource-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource
 
 eventsource-image:
+	@if [ "$(DEV_IMAGE)" = "true" ] ; then make eventsource-linux; fi
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)  --target eventsource -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) ; fi
 
@@ -72,6 +73,7 @@ eventsource-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource-controller
 
 eventsource-controller-image:
+	@if [ "$(DEV_IMAGE)" = "true" ] ; then make eventsource-controller-linux; fi
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG)  --target eventsource-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) ; fi
 
@@ -83,6 +85,7 @@ sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
 
 sensor-image:
+	@if [ "$(DEV_IMAGE)" = "true" ] ; then make sensor-linux; fi
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG)  --target sensor -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
 
@@ -94,6 +97,7 @@ sensor-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor-controller
 
 sensor-controller-image:
+	@if [ "$(DEV_IMAGE)" = "true" ] ; then make sensor-controller-linux; fi
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG)  --target sensor-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
@@ -117,6 +121,7 @@ eventbus-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventbus-controller
 
 eventbus-controller-image:
+	@if [ "$(DEV_IMAGE)" = "true" ] ; then make eventbus-controller-image; fi
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
 
