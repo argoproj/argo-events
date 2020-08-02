@@ -15,7 +15,7 @@ override LDFLAGS += \
   -X ${PACKAGE}.gitTreeState=${GIT_TREE_STATE}
 
 #  docker image publishing options
-DOCKER_PUSH?=true
+DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
 IMAGE_TAG?=v0.17.0
 BUILD_BINARY?=true
@@ -52,8 +52,7 @@ eventsource-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource
 
 eventsource-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then make eventsource-linux; fi
-	docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) -f ./eventsources/Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)  --target eventsource -f ./Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) ; fi
 
 # EventSource controller
@@ -64,8 +63,7 @@ eventsource-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventsource-controller
 
 eventsource-controller-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then make eventsource-controller-linux; fi
-	docker build -t $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) -f ./controllers/eventsource/Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG)  --target eventsource-controller -f ./Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) ; fi
 
 # Sensor
@@ -76,8 +74,7 @@ sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
 
 sensor-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then make sensor-linux; fi
-	docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./sensors/cmd/Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG)  --target sensor -f ./Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
 
 # Sensor controller
@@ -88,8 +85,7 @@ sensor-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor-controller
 
 sensor-controller-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then make sensor-controller-linux; fi
-	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controllers/sensor/Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG)  --target sensor-controller -f ./Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
 # Gateway controller
@@ -112,8 +108,7 @@ eventbus-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventbus-controller
 
 eventbus-controller-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then make eventbus-controller-linux; fi
-	docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) -f ./controllers/eventbus/Dockerfile .
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f ./Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
 
 test:
