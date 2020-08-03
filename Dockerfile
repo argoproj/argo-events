@@ -9,7 +9,6 @@ RUN apk --no-cache add tzdata
 # eventbus-controller
 ####################################################################################################
 FROM scratch as eventbus-controller
-# Add timezone data
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventbus-controller /bin/eventbus-controller
@@ -19,7 +18,6 @@ ENTRYPOINT [ "/bin/eventbus-controller" ]
 # eventsource-controller
 ####################################################################################################
 FROM scratch as eventsource-controller
-# Add timezone data
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventsource-controller /bin/eventsource-controller
@@ -29,7 +27,6 @@ ENTRYPOINT [ "/bin/eventsource-controller" ]
 # sensor-controller
 ####################################################################################################
 FROM scratch as sensor-controller
-# Add timezone data
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/sensor-controller /bin/sensor-controller
@@ -39,7 +36,6 @@ ENTRYPOINT [ "/bin/sensor-controller" ]
 # eventsource
 ####################################################################################################
 FROM scratch as eventsource
-# Add timezone data
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventsource /bin/eventsource
