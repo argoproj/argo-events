@@ -2,7 +2,6 @@ PACKAGE=github.com/argoproj/argo-events
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
 
-# Use a different Dockerfile, e.g. for building for Windows or dev images.
 DOCKERFILE:=Dockerfile
 
 VERSION=$(shell cat ${CURRENT_DIR}/VERSION)
