@@ -20,8 +20,6 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
         metadata:
           name: minio-sensor
         spec:
-          template:
-            serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               eventSourceName: minio
