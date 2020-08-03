@@ -1,13 +1,8 @@
 ####################################################################################################
-# certs
+# base
 ####################################################################################################
-FROM alpine:latest as certs
+FROM golang:alpine as base
 RUN apk --update add ca-certificates
-
-####################################################################################################
-# build base
-####################################################################################################
-FROM golang:alpine as build-base
 RUN apk --no-cache add tzdata
 
 ####################################################################################################
@@ -15,8 +10,8 @@ RUN apk --no-cache add tzdata
 ####################################################################################################
 FROM scratch as eventbus-controller
 # Add timezone data
-COPY --from=build-base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventbus-controller /bin/eventbus-controller
 ENTRYPOINT [ "/bin/eventbus-controller" ]
 
@@ -25,8 +20,8 @@ ENTRYPOINT [ "/bin/eventbus-controller" ]
 ####################################################################################################
 FROM scratch as eventsource-controller
 # Add timezone data
-COPY --from=build-base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventsource-controller /bin/eventsource-controller
 ENTRYPOINT [ "/bin/eventsource-controller" ]
 
@@ -35,8 +30,8 @@ ENTRYPOINT [ "/bin/eventsource-controller" ]
 ####################################################################################################
 FROM scratch as sensor-controller
 # Add timezone data
-COPY --from=build-base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/sensor-controller /bin/sensor-controller
 ENTRYPOINT [ "/bin/sensor-controller" ]
 
@@ -45,8 +40,8 @@ ENTRYPOINT [ "/bin/sensor-controller" ]
 ####################################################################################################
 FROM scratch as eventsource
 # Add timezone data
-COPY --from=build-base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventsource /bin/eventsource
 ENTRYPOINT [ "/bin/eventsource" ]
 
