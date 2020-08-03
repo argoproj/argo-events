@@ -127,7 +127,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte)
 				log.Info("file event", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
 
 				// Assume fsnotify event has the same Op spec of our file event
-				fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String())}
+				fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String()), Metadata: fileEventSource.Metadata}
 				payload, err := json.Marshal(fileEvent)
 				if err != nil {
 					log.Error("failed to marshal the event to the fs event", zap.Error(err))

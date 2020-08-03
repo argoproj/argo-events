@@ -103,6 +103,12 @@
         "insecure": {
           "type": "boolean"
         },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "region": {
           "type": "string"
         },
@@ -381,6 +387,13 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "routingKey": {
           "description": "Routing key for bindings",
           "type": "string"
@@ -411,6 +424,13 @@
           "description": "Event Hub path/name",
           "type": "string"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "sharedAccessKey": {
           "description": "SharedAccessKey is the the generated value of the key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -439,6 +459,13 @@
           "description": "Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...",
           "type": "string"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "schedule": {
           "description": "Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
           "type": "string"
@@ -448,7 +475,7 @@
           "type": "string"
         },
         "userPayload": {
-          "description": "UserPayload will be sent to sensor as extra data once the event is triggered",
+          "description": "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated. Please use Metadata instead.",
           "type": "string",
           "format": "byte"
         }
@@ -482,6 +509,13 @@
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "password": {
           "description": "Password to use to connect to broker",
@@ -770,6 +804,13 @@
           "description": "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
           "type": "string"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "polling": {
           "description": "Use polling instead of inotify",
           "type": "boolean"
@@ -842,6 +883,13 @@
           "description": "Insecure tls verification",
           "type": "boolean"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "owner": {
           "description": "Owner refers to GitHub owner name i.e. argoproj",
           "type": "string"
@@ -891,6 +939,13 @@
         "gitlabBaseURL": {
           "description": "GitlabBaseURL is the base URL for API requests to a custom endpoint",
           "type": "string"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "projectID": {
           "description": "ProjectID is the id of project for which integration needs to setup",
@@ -953,6 +1008,13 @@
           "description": "KrbUsername is the Kerberos username used with Kerberos keytab It must be set if keytab is used.",
           "type": "string"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "path": {
           "description": "Path is relative path of object to watch with respect to the directory",
           "type": "string"
@@ -983,6 +1045,13 @@
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "partition": {
           "description": "Partition name",
@@ -1022,6 +1091,13 @@
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "tls": {
           "description": "TLS configuration for the mqtt client.",
@@ -1071,6 +1147,13 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "subject": {
           "description": "Subject holds the name of the subject onto which messages are published",
           "type": "string"
@@ -1110,6 +1193,13 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "tls": {
           "description": "TLS configuration for the nsq client.",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
@@ -1145,6 +1235,13 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "projectID": {
           "description": "ProjectID is the unique identifier for your project on GCP",
           "type": "string"
@@ -1178,6 +1275,13 @@
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "tls": {
           "description": "TLS configuration for the pulsar client.",
@@ -1235,6 +1339,13 @@
           "description": "HostAddress refers to the address of the Redis host/server",
           "type": "string"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "namespace": {
           "description": "Namespace to use to retrieve the password from. It should only be specified if password is declared",
           "type": "string"
@@ -1273,6 +1384,13 @@
         },
         "group": {
           "type": "string"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "namespace": {
           "description": "Namespace where resource is deployed",
@@ -1330,6 +1448,13 @@
           "description": "AccessKey refers K8 secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "region": {
           "description": "Region is AWS region",
           "type": "string"
@@ -1368,6 +1493,13 @@
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "queue": {
           "description": "Queue is AWS SQS queue to listen to for messages",
@@ -1446,6 +1578,13 @@
       "description": "SlackEventSource refers to event-source for Slack related events",
       "type": "object",
       "properties": {
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "signingSecret": {
           "description": "Slack App signing secret",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -1491,6 +1630,13 @@
         "filter": {
           "description": "Filter on object key which caused the notification.",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.StorageGridFilter"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "region": {
           "description": "S3 region. Defaults to us-east-1",
@@ -1538,6 +1684,13 @@
           "description": "EventFilter describes the type of events to listen to. If not specified, all types of events will be processed. More info at https://stripe.com/docs/api/events/list",
           "type": "array",
           "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
             "type": "string"
           }
         },
@@ -1652,6 +1805,13 @@
         "endpoint": {
           "description": "REST API endpoint",
           "type": "string"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "method": {
           "description": "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",

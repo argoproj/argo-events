@@ -56,6 +56,10 @@ message AMQPEventSource {
   // TLS configuration for the amqp client.
   // +optional
   optional TLSConfig tls = 7;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 8;
 }
 
 // AzureEventsHubEventSource describes the event source for azure events hub
@@ -73,6 +77,10 @@ message AzureEventsHubEventSource {
 
   // Event Hub path/name
   optional string hubName = 4;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 5;
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -92,7 +100,12 @@ message CalendarEventSource {
 
   // UserPayload will be sent to sensor as extra data once the event is triggered
   // +optional
+  // Deprecated. Please use Metadata instead.
   optional bytes userPayload = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
 }
 
 // EmitterEventSource describes the event source for emitter
@@ -127,6 +140,10 @@ message EmitterEventSource {
   // TLS configuration for the emitter client.
   // +optional
   optional TLSConfig tls = 8;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 9;
 }
 
 // EventSource is the definition of a eventsource resource
@@ -255,6 +272,10 @@ message FileEventSource {
 
   // Use polling instead of inotify
   optional bool polling = 3;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 4;
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
@@ -309,6 +330,10 @@ message GithubEventSource {
   // DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
   // +optional
   optional bool deleteHookOnFinish = 13;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 14;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
@@ -317,7 +342,7 @@ message GitlabEventSource {
   optional WebhookContext webhook = 1;
 
   // ProjectID is the id of project for which integration needs to setup
-  optional string projectID = 9;
+  optional string projectID = 2;
 
   // Events are gitlab event to listen to.
   // Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
@@ -336,6 +361,10 @@ message GitlabEventSource {
   // DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.
   // +optional
   optional bool deleteHookOnFinish = 8;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 9;
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
@@ -377,6 +406,10 @@ message HDFSEventSource {
   // KrbServicePrincipalName is the principal name of Kerberos service
   // It must be set if either ccache or keytab is used.
   optional string krbServicePrincipalName = 11;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 12;
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
@@ -401,6 +434,10 @@ message KafkaEventSource {
   // source will be JSON
   // +optional
   optional bool jsonBody = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
@@ -425,6 +462,10 @@ message MQTTEventSource {
   // TLS configuration for the mqtt client.
   // +optional
   optional TLSConfig tls = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
 }
 
 // Metadata holds the annotations and labels of an event source pod
@@ -453,6 +494,10 @@ message NATSEventsSource {
   // TLS configuration for the nats client.
   // +optional
   optional TLSConfig tls = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
@@ -479,6 +524,10 @@ message NSQEventSource {
   // TLS configuration for the nsq client.
   // +optional
   optional TLSConfig tls = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
@@ -515,6 +564,10 @@ message PubSubEventSource {
 
   // CredentialsFile is the file that contains credentials to authenticate for GCP
   optional string credentialsFile = 8;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 9;
 }
 
 // PulsarEventSource describes the event source for Apache Pulsar
@@ -557,6 +610,10 @@ message PulsarEventSource {
   // source will be JSON
   // +optional
   optional bool jsonBody = 9;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 10;
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -582,6 +639,10 @@ message RedisEventSource {
   // TLS configuration for the redis client.
   // +optional
   optional TLSConfig tls = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
 }
 
 // ResourceEventSource refers to a event-source for K8s resource related events.
@@ -600,6 +661,10 @@ message ResourceEventSource {
   // EventTypes is the list of event type to watch.
   // Possible values are - ADD, UPDATE and DELETE.
   repeated string eventTypes = 4;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 5;
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
@@ -647,6 +712,10 @@ message SNSEventSource {
   // RoleARN is the Amazon Resource Name (ARN) of the role to assume.
   // +optional
   optional string roleARN = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -679,6 +748,10 @@ message SQSEventSource {
   // QueueAccountID is the ID of the account that created the queue to monitor
   // +optional
   optional string queueAccountId = 8;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 9;
 }
 
 // Selector represents conditional operation to select K8s objects.
@@ -727,6 +800,10 @@ message SlackEventSource {
 
   // Webhook holds configuration for a REST endpoint
   optional WebhookContext webhook = 3;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 4;
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
@@ -755,6 +832,10 @@ message StorageGridEventSource {
 
   // APIURL is the url of the storagegrid api.
   optional string apiURL = 8;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 9;
 }
 
 // StorageGridFilter represents filters to apply to bucket notifications for specifying constraints on objects
@@ -783,6 +864,10 @@ message StripeEventSource {
   // More info at https://stripe.com/docs/api/events/list
   // +optional
   repeated string eventFilter = 4;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 5;
 }
 
 // TLSConfig refers to TLS configuration for a client.
@@ -868,5 +953,9 @@ message WebhookContext {
 
   // ServerKeyPath refers the file that contains private key
   optional string serverKeyPath = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
 }
 

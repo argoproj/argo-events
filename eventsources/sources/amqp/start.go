@@ -122,6 +122,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				AppId:           msg.AppId,
 				Exchange:        msg.Exchange,
 				RoutingKey:      msg.RoutingKey,
+				Metadata:        amqpEventSource.Metadata,
 			}
 			if amqpEventSource.JSONBody {
 				body.Body = (*json.RawMessage)(&msg.Body)

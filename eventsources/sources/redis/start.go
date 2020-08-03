@@ -104,9 +104,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case message := <-ch:
 			log.With("channel", message.Channel).Info("received a message")
 			eventData := &events.RedisEventData{
-				Channel: message.Channel,
-				Pattern: message.Pattern,
-				Body:    message.Payload,
+				Channel:  message.Channel,
+				Pattern:  message.Pattern,
+				Body:     message.Payload,
+				Metadata: redisEventSource.Metadata,
 			}
 			eventBody, err := json.Marshal(&eventData)
 			if err != nil {

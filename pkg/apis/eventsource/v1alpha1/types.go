@@ -183,7 +183,11 @@ type CalendarEventSource struct {
 	Timezone string `json:"timezone,omitempty" protobuf:"bytes,4,opt,name=timezone"`
 	// UserPayload will be sent to sensor as extra data once the event is triggered
 	// +optional
+	// Deprecated. Please use Metadata instead.
 	UserPayload json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload,casttype=encoding/json.RawMessage"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
 }
 
 // FileEventSource describes an event-source for file related events.
@@ -195,6 +199,9 @@ type FileEventSource struct {
 	WatchPathConfig WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,2,opt,name=watchPathConfig"`
 	// Use polling instead of inotify
 	Polling bool `json:"polling,omitempty" protobuf:"varint,3,opt,name=polling"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,4,rep,name=metadata"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation
@@ -220,6 +227,9 @@ type ResourceEventSource struct {
 	// EventTypes is the list of event type to watch.
 	// Possible values are - ADD, UPDATE and DELETE.
 	EventTypes []ResourceEventType `json:"eventTypes" protobuf:"bytes,4,rep,name=eventTypes,casttype=ResourceEventType"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
@@ -277,6 +287,9 @@ type AMQPEventSource struct {
 	// TLS configuration for the amqp client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
@@ -296,6 +309,9 @@ type KafkaEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,6,opt,name=jsonBody"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
@@ -315,6 +331,9 @@ type MQTTEventSource struct {
 	// TLS configuration for the mqtt client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 }
 
 // NATSEventsSource refers to event-source for NATS related events
@@ -332,6 +351,9 @@ type NATSEventsSource struct {
 	// TLS configuration for the nats client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events
@@ -349,6 +371,9 @@ type SNSEventSource struct {
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
 	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -374,6 +399,9 @@ type SQSEventSource struct {
 	// QueueAccountID is the ID of the account that created the queue to monitor
 	// +optional
 	QueueAccountID string `json:"queueAccountId,omitempty" protobuf:"bytes,8,opt,name=queueAccountId"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
@@ -403,6 +431,9 @@ type PubSubEventSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
 	// CredentialsFile is the file that contains credentials to authenticate for GCP
 	DeprecatedCredentialsFile string `json:"credentialsFile" protobuf:"bytes,8,opt,name=credentialsFile"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 }
 
 // GithubEventSource refers to event-source for github related events
@@ -441,6 +472,9 @@ type GithubEventSource struct {
 	// DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,13,opt,name=deleteHookOnFinish"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,14,rep,name=metadata"`
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
@@ -448,7 +482,7 @@ type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
 	// ProjectID is the id of project for which integration needs to setup
-	ProjectID string `json:"projectID" protobuf:"bytes,9,opt,name=projectID"`
+	ProjectID string `json:"projectID" protobuf:"bytes,2,opt,name=projectID"`
 	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
 	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`
@@ -462,6 +496,9 @@ type GitlabEventSource struct {
 	// DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,8,opt,name=deleteHookOnFinish"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
@@ -495,6 +532,9 @@ type HDFSEventSource struct {
 	// KrbServicePrincipalName is the principal name of Kerberos service
 	// It must be set if either ccache or keytab is used.
 	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty" protobuf:"bytes,11,opt,name=krbServicePrincipalName"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,12,rep,name=metadata"`
 }
 
 // SlackEventSource refers to event-source for Slack related events
@@ -505,6 +545,9 @@ type SlackEventSource struct {
 	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,opt,name=token"`
 	// Webhook holds configuration for a REST endpoint
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,3,opt,name=webhook"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,4,rep,name=metadata"`
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
@@ -530,6 +573,9 @@ type StorageGridEventSource struct {
 	AuthToken *corev1.SecretKeySelector `json:"authToken" protobuf:"bytes,7,name=authToken"`
 	// APIURL is the url of the storagegrid api.
 	APIURL string `json:"apiURL" protobuf:"bytes,8,name=apiURL"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 }
 
 // StorageGridFilter represents filters to apply to bucket notifications for specifying constraints on objects
@@ -551,6 +597,9 @@ type AzureEventsHubEventSource struct {
 	SharedAccessKey *corev1.SecretKeySelector `json:"sharedAccessKey,omitempty" protobuf:"bytes,3,opt,name=sharedAccessKey"`
 	// Event Hub path/name
 	HubName string `json:"hubName" protobuf:"bytes,4,opt,name=hubName"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications
@@ -568,6 +617,9 @@ type StripeEventSource struct {
 	// More info at https://stripe.com/docs/api/events/list
 	// +optional
 	EventFilter []string `json:"eventFilter,omitempty" protobuf:"bytes,4,rep,name=eventFilter"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
 }
 
 // EmitterEventSource describes the event source for emitter
@@ -595,6 +647,9 @@ type EmitterEventSource struct {
 	// TLS configuration for the emitter client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -617,6 +672,9 @@ type RedisEventSource struct {
 	// TLS configuration for the redis client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
@@ -638,6 +696,9 @@ type NSQEventSource struct {
 	// TLS configuration for the nsq client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 }
 
 // PulsarEventSource describes the event source for Apache Pulsar
@@ -672,6 +733,9 @@ type PulsarEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,9,opt,name=jsonBody"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

@@ -107,8 +107,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if err := client.Subscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
 		body := message.Payload()
 		event := &events.EmitterEventData{
-			Topic: message.Topic(),
-			Body:  body,
+			Topic:    message.Topic(),
+			Body:     body,
+			Metadata: emitterEventSource.Metadata,
 		}
 		if emitterEventSource.JSONBody {
 			event.Body = (*json.RawMessage)(&body)

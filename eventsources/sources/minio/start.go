@@ -90,7 +90,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			continue
 		}
 
-		eventData := &events.MinioEventData{Notification: notification.Records}
+		eventData := &events.MinioEventData{Notification: notification.Records, Metadata: minioEventSource.Metadata}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			logger.Error("failed to marshal the event data, rejecting the event...", zap.Error(err))

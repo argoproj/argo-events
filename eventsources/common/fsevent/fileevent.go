@@ -12,6 +12,8 @@ type Event struct {
 	Name string `json:"name"`
 	// File operation that triggered the event.
 	Op Op `json:"op"`
+	// User metadata
+	Metadata map[string]string `json:"metadata"`
 }
 
 // Op describes a set of file operations.
