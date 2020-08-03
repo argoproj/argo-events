@@ -121,7 +121,7 @@ eventbus-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventbus-controller
 
 eventbus-controller-image:
-	@if [ "$(DEV_IMAGE)" = "true" ] ; then make eventbus-controller-image; fi
+	@if [ "$(DEV_IMAGE)" = "true" ] ; then make eventbus-controller-linux; fi
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
 
