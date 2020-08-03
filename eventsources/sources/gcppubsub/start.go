@@ -132,6 +132,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			Body:        m.Data,
 			Attributes:  m.Attributes,
 			PublishTime: m.PublishTime.String(),
+			Metadata:    pubsubEventSource.Metadata,
 		}
 		if pubsubEventSource.JSONBody {
 			eventData.Body = (*json.RawMessage)(&m.Data)

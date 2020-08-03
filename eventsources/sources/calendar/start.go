@@ -112,6 +112,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			response := &events.CalendarEventData{
 				EventTime:   tx.String(),
 				UserPayload: calendarEventSource.UserPayload,
+				Metadata:    calendarEventSource.Metadata,
 			}
 			payload, err := json.Marshal(response)
 			if err != nil {

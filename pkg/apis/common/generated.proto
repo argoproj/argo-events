@@ -92,6 +92,8 @@ message S3Artifact {
   repeated string events = 7;
 
   optional S3Filter filter = 8;
+
+  map<string, string> metadata = 9;
 }
 
 // S3Bucket contains information to describe an S3 Bucket

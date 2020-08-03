@@ -23,11 +23,11 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-
-	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 var (
@@ -148,7 +148,7 @@ func TestFilterName(t *testing.T) {
 				Suffix: ".txt",
 			},
 		}
-		var gridNotification *storageGridNotification
+		var gridNotification *events.StorageGridNotification
 		err := json.Unmarshal([]byte(notification), &gridNotification)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(gridNotification, convey.ShouldNotBeNil)

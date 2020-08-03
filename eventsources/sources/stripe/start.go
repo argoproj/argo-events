@@ -22,16 +22,16 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/webhookendpoint"
-	"go.uber.org/zap"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/pkg/errors"
+	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/webhookendpoint"
+	"go.uber.org/zap"
 )
 
 // controller controls the webhook operations
@@ -111,9 +111,14 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	data, err := json.Marshal(event)
+	eventData := &events.StripeEventData{
+		Event:    event,
+		Metadata: rc.stripeEventSource.Metadata,
+	}
+
+	data, err := json.Marshal(eventData)
 	if err != nil {
-		logger.Error("failed to marshal event into gateway response", zap.Any("event-id", event.ID), zap.Error(err))
+		logger.Error("failed to marshal event data", zap.Any("event-id", event.ID), zap.Error(err))
 		common.SendSuccessResponse(writer, "invalid event")
 		return
 	}

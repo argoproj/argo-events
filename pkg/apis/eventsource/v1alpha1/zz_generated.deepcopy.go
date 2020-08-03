@@ -41,6 +41,13 @@ func (in *AMQPEventSource) DeepCopyInto(out *AMQPEventSource) {
 		*out = new(TLSConfig)
 		**out = **in
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -67,6 +74,13 @@ func (in *AzureEventsHubEventSource) DeepCopyInto(out *AzureEventsHubEventSource
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -92,6 +106,13 @@ func (in *CalendarEventSource) DeepCopyInto(out *CalendarEventSource) {
 		in, out := &in.UserPayload, &out.UserPayload
 		*out = make(json.RawMessage, len(*in))
 		copy(*out, *in)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -128,6 +149,13 @@ func (in *EmitterEventSource) DeepCopyInto(out *EmitterEventSource) {
 		in, out := &in.TLS, &out.TLS
 		*out = new(TLSConfig)
 		**out = **in
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -235,7 +263,7 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 		in, out := &in.File, &out.File
 		*out = make(map[string]FileEventSource, len(*in))
 		for key, val := range *in {
-			(*out)[key] = val
+			(*out)[key] = *val.DeepCopy()
 		}
 	}
 	if in.Resource != nil {
@@ -249,7 +277,7 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 		in, out := &in.Webhook, &out.Webhook
 		*out = make(map[string]WebhookContext, len(*in))
 		for key, val := range *in {
-			(*out)[key] = val
+			(*out)[key] = *val.DeepCopy()
 		}
 	}
 	if in.AMQP != nil {
@@ -419,6 +447,13 @@ func (in *EventSourceStatus) DeepCopy() *EventSourceStatus {
 func (in *FileEventSource) DeepCopyInto(out *FileEventSource) {
 	*out = *in
 	out.WatchPathConfig = in.WatchPathConfig
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -454,7 +489,7 @@ func (in *GithubEventSource) DeepCopyInto(out *GithubEventSource) {
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
 		*out = new(WebhookContext)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Events != nil {
 		in, out := &in.Events, &out.Events
@@ -470,6 +505,13 @@ func (in *GithubEventSource) DeepCopyInto(out *GithubEventSource) {
 		in, out := &in.WebhookSecret, &out.WebhookSecret
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -490,7 +532,7 @@ func (in *GitlabEventSource) DeepCopyInto(out *GitlabEventSource) {
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
 		*out = new(WebhookContext)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Events != nil {
 		in, out := &in.Events, &out.Events
@@ -501,6 +543,13 @@ func (in *GitlabEventSource) DeepCopyInto(out *GitlabEventSource) {
 		in, out := &in.AccessToken, &out.AccessToken
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -539,6 +588,13 @@ func (in *HDFSEventSource) DeepCopyInto(out *HDFSEventSource) {
 		*out = new(v1.ConfigMapKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -565,6 +621,13 @@ func (in *KafkaEventSource) DeepCopyInto(out *KafkaEventSource) {
 		*out = new(TLSConfig)
 		**out = **in
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -590,6 +653,13 @@ func (in *MQTTEventSource) DeepCopyInto(out *MQTTEventSource) {
 		in, out := &in.TLS, &out.TLS
 		*out = new(TLSConfig)
 		**out = **in
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -647,6 +717,13 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 		*out = new(TLSConfig)
 		**out = **in
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -673,6 +750,13 @@ func (in *NSQEventSource) DeepCopyInto(out *NSQEventSource) {
 		*out = new(TLSConfig)
 		**out = **in
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -693,6 +777,13 @@ func (in *PubSubEventSource) DeepCopyInto(out *PubSubEventSource) {
 		in, out := &in.CredentialSecret, &out.CredentialSecret
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -725,6 +816,13 @@ func (in *PulsarEventSource) DeepCopyInto(out *PulsarEventSource) {
 		*out = new(common.Backoff)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -756,6 +854,13 @@ func (in *RedisEventSource) DeepCopyInto(out *RedisEventSource) {
 		*out = new(TLSConfig)
 		**out = **in
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
@@ -782,6 +887,13 @@ func (in *ResourceEventSource) DeepCopyInto(out *ResourceEventSource) {
 		in, out := &in.EventTypes, &out.EventTypes
 		*out = make([]ResourceEventType, len(*in))
 		copy(*out, *in)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -829,7 +941,7 @@ func (in *SNSEventSource) DeepCopyInto(out *SNSEventSource) {
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
 		*out = new(WebhookContext)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.AccessKey != nil {
 		in, out := &in.AccessKey, &out.AccessKey
@@ -840,6 +952,13 @@ func (in *SNSEventSource) DeepCopyInto(out *SNSEventSource) {
 		in, out := &in.SecretKey, &out.SecretKey
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -866,6 +985,13 @@ func (in *SQSEventSource) DeepCopyInto(out *SQSEventSource) {
 		in, out := &in.SecretKey, &out.SecretKey
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -933,7 +1059,14 @@ func (in *SlackEventSource) DeepCopyInto(out *SlackEventSource) {
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
 		*out = new(WebhookContext)
-		**out = **in
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -954,7 +1087,7 @@ func (in *StorageGridEventSource) DeepCopyInto(out *StorageGridEventSource) {
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
 		*out = new(WebhookContext)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Events != nil {
 		in, out := &in.Events, &out.Events
@@ -970,6 +1103,13 @@ func (in *StorageGridEventSource) DeepCopyInto(out *StorageGridEventSource) {
 		in, out := &in.AuthToken, &out.AuthToken
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -1006,7 +1146,7 @@ func (in *StripeEventSource) DeepCopyInto(out *StripeEventSource) {
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
 		*out = new(WebhookContext)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.APIKey != nil {
 		in, out := &in.APIKey, &out.APIKey
@@ -1017,6 +1157,13 @@ func (in *StripeEventSource) DeepCopyInto(out *StripeEventSource) {
 		in, out := &in.EventFilter, &out.EventFilter
 		*out = make([]string, len(*in))
 		copy(*out, *in)
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }
@@ -1119,6 +1266,13 @@ func (in *WatchPathConfig) DeepCopy() *WatchPathConfig {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *WebhookContext) DeepCopyInto(out *WebhookContext) {
 	*out = *in
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

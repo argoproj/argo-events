@@ -58,6 +58,7 @@ type messageHandler struct {
 	dispatch func([]byte) error
 	logger   *zap.SugaredLogger
 	isJSON   bool
+	metadata map[string]string
 }
 
 // StartListening listens NSQ events
@@ -97,7 +98,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		log.Info("assuming all events have a json body...")
 	}
 
-	consumer.AddHandler(&messageHandler{dispatch: dispatch, logger: log, isJSON: nsqEventSource.JSONBody})
+	consumer.AddHandler(&messageHandler{dispatch: dispatch, logger: log, isJSON: nsqEventSource.JSONBody, metadata: nsqEventSource.Metadata})
 
 	err := consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress)
 	if err != nil {
@@ -118,6 +119,7 @@ func (h *messageHandler) HandleMessage(m *nsq.Message) error {
 		Body:        m.Body,
 		Timestamp:   strconv.Itoa(int(m.Timestamp)),
 		NSQDAddress: m.NSQDAddress,
+		Metadata:    h.metadata,
 	}
 	if h.isJSON {
 		eventData.Body = (*json.RawMessage)(&m.Body)

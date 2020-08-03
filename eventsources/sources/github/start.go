@@ -104,8 +104,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	event := &events.GithubEventData{
-		Headers: request.Header,
-		Body:    (*json.RawMessage)(&body),
+		Headers:  request.Header,
+		Body:     (*json.RawMessage)(&body),
+		Metadata: router.githubEventSource.Metadata,
 	}
 
 	eventBody, err := json.Marshal(event)

@@ -42,47 +42,6 @@ type storageGridNotificationRequest struct {
 	Notification string `json:"notification"`
 }
 
-// storageGridNotification is the bucket notification received from storage grid
-type storageGridNotification struct {
-	Action  string `json:"Action"`
-	Message struct {
-		Records []struct {
-			EventVersion string    `json:"eventVersion"`
-			EventSource  string    `json:"storageGridEventSource"`
-			EventTime    time.Time `json:"eventTime"`
-			EventName    string    `json:"eventName"`
-			UserIdentity struct {
-				PrincipalID string `json:"principalId"`
-			} `json:"userIdentity"`
-			RequestParameters struct {
-				SourceIPAddress string `json:"sourceIPAddress"`
-			} `json:"requestParameters"`
-			ResponseElements struct {
-				XAmzRequestID string `json:"x-amz-request-id"`
-			} `json:"responseElements"`
-			S3 struct {
-				S3SchemaVersion string `json:"s3SchemaVersion"`
-				ConfigurationID string `json:"configurationId"`
-				Bucket          struct {
-					Name          string `json:"name"`
-					OwnerIdentity struct {
-						PrincipalID string `json:"principalId"`
-					} `json:"ownerIdentity"`
-					Arn string `json:"arn"`
-				} `json:"bucket"`
-				Object struct {
-					Key       string `json:"key"`
-					Size      int    `json:"size"`
-					ETag      string `json:"eTag"`
-					Sequencer string `json:"sequencer"`
-				} `json:"object"`
-			} `json:"s3"`
-		} `json:"Records"`
-	} `json:"Message"`
-	TopicArn string `json:"TopicArn"`
-	Version  string `json:"Version"`
-}
-
 type registerNotificationResponse struct {
 	ResponseTime time.Time `json:"responseTime"`
 	Status       string    `json:"status"`

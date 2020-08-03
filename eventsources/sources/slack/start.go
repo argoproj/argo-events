@@ -253,7 +253,7 @@ func (rc *Router) verifyRequest(request *http.Request) error {
 			return err
 		}
 
-		_, err = sv.Write([]byte(string(body)))
+		_, err = sv.Write(body)
 		if err != nil {
 			return errors.Wrap(err, "error writing body: cannot verify signature")
 		}

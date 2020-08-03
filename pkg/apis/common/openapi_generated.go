@@ -214,6 +214,20 @@ func schema_argo_events_pkg_apis_common_S3Artifact(ref common.ReferenceCallback)
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.S3Filter"),
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"endpoint", "bucket", "accessKey", "secretKey"},
 			},

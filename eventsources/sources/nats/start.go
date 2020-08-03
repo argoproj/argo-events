@@ -92,7 +92,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("subscribing to messages on the queue...")
 	_, err := conn.Subscribe(natsEventSource.Subject, func(msg *natslib.Msg) {
 		eventData := &events.NATSEventData{
-			Subject: msg.Subject,
+			Subject:  msg.Subject,
+			Metadata: natsEventSource.Metadata,
 		}
 		if natsEventSource.JSONBody {
 			eventData.Body = (*json.RawMessage)(&msg.Data)
