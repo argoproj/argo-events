@@ -20,6 +20,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
+	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
@@ -28,6 +30,7 @@ import (
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
@@ -83,23 +86,31 @@ func (t *ArgoWorkflowTrigger) ApplyResourceParameters(events map[string]*v1alpha
 func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger := t.Trigger
 
+	op := v1alpha1.Submit
+	if trigger.Template.ArgoWorkflow.Operation != "" {
+		op = trigger.Template.ArgoWorkflow.Operation
+	}
+
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
 
-	jObj, err := obj.MarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-
 	name := obj.GetName()
-
 	if name == "" {
-		name = obj.GetGenerateName()
+		if op != v1alpha1.Submit {
+			return nil, errors.Errorf("failed to execute the workflow %v operation, no name is given", op)
+		}
+		if obj.GetGenerateName() == "" {
+			return nil, errors.New("failed to trigger the workflow, neither name nor generatedName is given")
+		}
 	}
-	if name == "" {
-		return nil, fmt.Errorf("failed to trigger the workflow, no name is given")
+
+	submittedWFLabels := make(map[string]string)
+	if op == v1alpha1.Submit {
+		submittedWFLabels["events.argoproj.io/sensor"] = t.Sensor.Name
+		submittedWFLabels["events.argoproj.io/trigger"] = trigger.Template.Name
+		submittedWFLabels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
 	}
 
 	namespace := obj.GetNamespace()
@@ -107,20 +118,30 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 		namespace = t.Sensor.Namespace
 	}
 
-	op := v1alpha1.Submit
-	if trigger.Template.ArgoWorkflow.Operation != "" {
-		op = trigger.Template.ArgoWorkflow.Operation
-	}
-
 	var cmd *exec.Cmd
 
 	switch op {
 	case v1alpha1.Submit:
-		file, err := ioutil.TempFile("", name)
+		file, err := ioutil.TempFile("", fmt.Sprintf("%s%s", name, obj.GetGenerateName()))
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", obj.GetName())
 		}
 		defer os.Remove(file.Name())
+
+		// Add labels
+		labels := obj.GetLabels()
+		if labels == nil {
+			labels = make(map[string]string)
+		}
+		for k, v := range submittedWFLabels {
+			labels[k] = v
+		}
+		obj.SetLabels(labels)
+
+		jObj, err := obj.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 
 		if _, err := file.Write(jObj); err != nil {
 			return nil, errors.Wrapf(err, "failed to write workflow json %s to the temp file %s", name, file.Name())
@@ -150,7 +171,17 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 		Resource: "workflows",
 	})
 
-	return t.namespableDynamicClient.Namespace(namespace).Get(name, metav1.GetOptions{})
+	if op != v1alpha1.Submit {
+		return t.namespableDynamicClient.Namespace(namespace).Get(name, metav1.GetOptions{})
+	}
+	l, err := t.namespableDynamicClient.Namespace(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorFromSet(submittedWFLabels).String()})
+	if err != nil {
+		return nil, err
+	}
+	if len(l.Items) == 0 {
+		return nil, errors.New("failed to list created workflows for unknown reason")
+	}
+	return l.Items[0], nil
 }
 
 // ApplyPolicy applies the policy on the trigger

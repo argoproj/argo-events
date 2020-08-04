@@ -18,6 +18,8 @@ package standard_k8s
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
@@ -159,6 +161,15 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 	switch op {
 	case v1alpha1.Create:
 		k8sTrigger.Logger.Info("creating the object...")
+		// Add labels
+		labels := obj.GetLabels()
+		if labels == nil {
+			labels = make(map[string]string)
+		}
+		labels["events.argoproj.io/sensor"] = k8sTrigger.Sensor.Name
+		labels["events.argoproj.io/trigger"] = trigger.Template.Name
+		labels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
+		obj.SetLabels(labels)
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 
 	case v1alpha1.Update:
