@@ -168,7 +168,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 		}
 		labels["events.argoproj.io/sensor"] = k8sTrigger.Sensor.Name
 		labels["events.argoproj.io/trigger"] = trigger.Template.Name
-		labels["events.argoproj.io/submit-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
+		labels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
 		obj.SetLabels(labels)
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 

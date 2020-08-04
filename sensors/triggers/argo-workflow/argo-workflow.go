@@ -110,7 +110,7 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 	if op == v1alpha1.Submit {
 		submittedWFLabels["events.argoproj.io/sensor"] = t.Sensor.Name
 		submittedWFLabels["events.argoproj.io/trigger"] = trigger.Template.Name
-		submittedWFLabels["events.argoproj.io/submit-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
+		submittedWFLabels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
 	}
 
 	namespace := obj.GetNamespace()
