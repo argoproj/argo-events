@@ -2,7 +2,7 @@
 
 We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.
 
-Note: You will need to have [Argo Workflows](https://argoproj.github.io/docs/argo/readme.html) installed to make this work.
+Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo/) installed to make this work.
 
 1. Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus,
 
