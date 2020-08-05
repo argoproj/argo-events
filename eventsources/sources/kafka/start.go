@@ -303,7 +303,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 		}
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			consumer.logger.Error("failed to marshal the event data, rejecting the event...")
+			consumer.logger.Desugar().Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
 			continue
 		}
 
