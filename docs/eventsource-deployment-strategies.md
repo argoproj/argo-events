@@ -47,7 +47,7 @@ in EventSource object, defaults to 1.
 
 ### Replicas Of Recreate Types
 
-The field `replica` for EventSource of these `Recreate` types are ignored, the
+The field `replica` for EventSource of these `Recreate` types is ignored, the
 deployment is always created with `replica=1`.
 
 **Please DO NOT manually scale up the replicas, that will bring unexpected
