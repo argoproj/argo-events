@@ -155,8 +155,6 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	select {
 	case <-ctx.Done():
 		log.Info("terminating: context cancelled")
-	case <-sigterm:
-		log.Info("terminating: via signal")
 	}
 	cancel()
 	wg.Wait()
