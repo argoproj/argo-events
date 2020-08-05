@@ -19,6 +19,9 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"strconv"
+	"sync"
+
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -28,8 +31,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"strconv"
-	"sync"
 )
 
 // EventListener implements Eventing kafka event source
@@ -148,10 +149,8 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	<-consumer.ready // Await till the consumer has been set up
 	log.Info("Sarama consumer group up and running!...")
 
-	select {
-	case <-ctx.Done():
-		log.Info("terminating: context cancelled")
-	}
+	<-ctx.Done()
+	log.Info("terminating: context cancelled")
 	cancel()
 	wg.Wait()
 	if err = client.Close(); err != nil {
