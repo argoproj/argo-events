@@ -19,12 +19,6 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"os"
-	"os/signal"
-	"strconv"
-	"sync"
-	"syscall"
-
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -34,6 +28,8 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"strconv"
+	"sync"
 )
 
 // EventListener implements Eventing kafka event source
@@ -140,7 +136,9 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 			if err := client.Consume(ctx, []string{kafkaEventSource.Topic}, &consumer); err != nil {
 				log.Errorf("Error from consumer: %v", err)
 			}
+			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {
+				log.Errorf("Error from context: %v", ctx.Err())
 				return
 			}
 			consumer.ready = make(chan bool)
@@ -150,8 +148,6 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	<-consumer.ready // Await till the consumer has been set up
 	log.Info("Sarama consumer group up and running!...")
 
-	sigterm := make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
 	select {
 	case <-ctx.Done():
 		log.Info("terminating: context cancelled")
