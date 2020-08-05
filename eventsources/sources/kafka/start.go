@@ -306,7 +306,10 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			consumer.logger.Error("failed to marshal the event data, rejecting the event...")
 			continue
 		}
-		consumer.dispatch(eventBody)
+
+		if err = consumer.dispatch(eventBody); err != nil {
+			consumer.logger.Desugar().Error("failed to dispatch kafka event...", zap.Error(err))
+		}
 
 		session.MarkMessage(message, "")
 	}
