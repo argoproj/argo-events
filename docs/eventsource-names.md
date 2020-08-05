@@ -20,9 +20,9 @@ metadata:
   name: webhook-example # eventSourceName
 spec:
   webhook:
-    example:
+    example: # eventName
       port: "12000"
-      endpoint: /example # eventName
+      endpoint: /example
       method: POST
     example-foo: # eventName
       port: "13000"
