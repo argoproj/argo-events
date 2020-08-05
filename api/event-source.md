@@ -3510,7 +3510,7 @@ The name for the consumer group to use
 
 <p>
 
-Specify what kafka version is being connected to enables certian
+Specify what kafka version is being connected to enables certain
 features in sarama
 
 </p>

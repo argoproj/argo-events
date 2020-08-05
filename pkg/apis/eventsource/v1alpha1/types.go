@@ -321,7 +321,7 @@ type KafkaEventSource struct {
 type KafkaConsumerGroup struct {
 	// The name for the consumer group to use
 	GroupName string `json:"groupName" protobuf:"bytes,1,opt,name=groupName"`
-	// Specify what kafka version is being connected to enables certian features in sarama
+	// Specify what kafka version is being connected to enables certain features in sarama
 	KafkaVersion string `json:"kafkaVersion" protobuf:"bytes,2,opt,name=kafkaVersion"`
 	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
 	RebalanceStrategy string `json:"rebalanceStrategy" protobuf:"bytes,3,opt,name=rebalanceStrategy"`

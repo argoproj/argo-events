@@ -1281,7 +1281,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 					},
 					"kafkaVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Specify what kafka version is being connected to enables certian features in sarama",
+							Description: "Specify what kafka version is being connected to enables certain features in sarama",
 							Type:        []string{"string"},
 							Format:      "",
 						},

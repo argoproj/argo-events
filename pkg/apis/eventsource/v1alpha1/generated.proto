@@ -416,7 +416,7 @@ message KafkaConsumerGroup {
   // The name for the consumer group to use
   optional string groupName = 1;
 
-  // Specify what kafka version is being connected to enables certian features in sarama
+  // Specify what kafka version is being connected to enables certain features in sarama
   optional string kafkaVersion = 2;
 
   // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
