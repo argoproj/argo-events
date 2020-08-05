@@ -11,7 +11,6 @@ are different for different event sources.
 
 `Rolling Update` strategy is applied to the following EventSource types:
 
-- AMQP
 - AWS SNS
 - AWS SQS
 - Github
@@ -30,6 +29,7 @@ EventSource object, defaults to 1.
 
 `Recreate` strategy is applied to the following EventSource types:
 
+- AMQP
 - Azure Events Hub
 - Kafka
 - GCP PubSub
