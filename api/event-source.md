@@ -3437,6 +3437,113 @@ event payload.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.KafkaConsumerGroup">
+
+KafkaConsumerGroup
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>groupName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+The name for the consumer group to use
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>kafkaVersion</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Specify what kafka version is being connected to enables certian
+features in sarama
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>rebalanceStrategy</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Rebalance strategy can be one of: sticky, roundrobin, range. Range is
+the default.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.KafkaEventSource">
 
 KafkaEventSource
@@ -3627,6 +3734,30 @@ will be JSON
 
 Metadata holds the user defined metadata which will passed along the
 event payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>consumerGroup</code></br> <em>
+<a href="#argoproj.io/v1alpha1.KafkaConsumerGroup"> KafkaConsumerGroup
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Consumer group for kafka client
 
 </p>
 

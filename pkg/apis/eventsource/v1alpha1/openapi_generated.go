@@ -42,6 +42,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource":         schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource":         schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource":           schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup":        schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource":          schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource":           schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Metadata":                  schema_pkg_apis_eventsource_v1alpha1_Metadata(ref),
@@ -1265,6 +1266,40 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 	}
 }
 
+func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"groupName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The name for the consumer group to use",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"kafkaVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specify what kafka version is being connected to enables certian features in sarama",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"rebalanceStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"groupName", "kafkaVersion", "rebalanceStrategy"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1327,12 +1362,18 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 							},
 						},
 					},
+					"consumerGroup": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Consumer group for kafka client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"),
+						},
+					},
 				},
 				Required: []string{"url", "partition", "topic"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
 	}
 }
 

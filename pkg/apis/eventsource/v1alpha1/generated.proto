@@ -412,6 +412,17 @@ message HDFSEventSource {
   map<string, string> metadata = 12;
 }
 
+message KafkaConsumerGroup {
+  // The name for the consumer group to use
+  optional string groupName = 1;
+
+  // Specify what kafka version is being connected to enables certian features in sarama
+  optional string kafkaVersion = 2;
+
+  // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+  optional string rebalanceStrategy = 3;
+}
+
 // KafkaEventSource refers to event-source for Kafka related events
 message KafkaEventSource {
   // URL to kafka cluster
@@ -438,6 +449,10 @@ message KafkaEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 7;
+
+  // Consumer group for kafka client
+  // +optional
+  optional KafkaConsumerGroup consumerGroup = 8;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events

@@ -1029,6 +1029,28 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.KafkaConsumerGroup": {
+      "type": "object",
+      "required": [
+        "groupName",
+        "kafkaVersion",
+        "rebalanceStrategy"
+      ],
+      "properties": {
+        "groupName": {
+          "description": "The name for the consumer group to use",
+          "type": "string"
+        },
+        "kafkaVersion": {
+          "description": "Specify what kafka version is being connected to enables certian features in sarama",
+          "type": "string"
+        },
+        "rebalanceStrategy": {
+          "description": "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.KafkaEventSource": {
       "description": "KafkaEventSource refers to event-source for Kafka related events",
       "type": "object",
@@ -1041,6 +1063,10 @@
         "connectionBackoff": {
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "consumerGroup": {
+          "description": "Consumer group for kafka client",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.KafkaConsumerGroup"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
