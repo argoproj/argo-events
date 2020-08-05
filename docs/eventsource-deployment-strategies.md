@@ -21,6 +21,11 @@ are different for different event sources.
 - Stripe
 - Webhook
 
+### Replicas Of Rolling Update Types
+
+Deployment replica of these event source types respects the field of `replica`
+in EventSource object, defaults to 1.
+
 ## Recreate Strategy
 
 `Recreate` strategy is applied to the following EventSource types:
@@ -40,7 +45,7 @@ are different for different event sources.
 - Resource
 - Calendar
 
-### Replicas
+### Replicas Of Recreate Types
 
 The field `replica` for EventSource of these `Recreate` types are ignored, the
 deployment is always created with `replica=1`.
