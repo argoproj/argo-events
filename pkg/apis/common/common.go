@@ -51,14 +51,21 @@ var (
 	// RecreateStrategyEventSources refers to the list of event source types
 	// that need to use Recreate strategy for its Deployment
 	RecreateStrategyEventSources = []EventSourceType{
+		AMQPEvent,
+		CalendarEvent,
 		KafkaEvent,
 		PubSubEvent,
 		AzureEventsHub,
 		NATSEvent,
 		MQTTEvent,
+		MinioEvent,
 		EmitterEvent,
 		NSQEvent,
+		PulsarEvent,
+		RedisEvent,
 		ResourceEvent,
+		HDFSEvent,
+		FileEvent,
 	}
 )
 
