@@ -84,7 +84,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
-
 	config := sarama.NewConfig()
 
 	version, err := sarama.ParseKafkaVersion(kafkaEventSource.ConsumerGroup.KafkaVersion)
@@ -126,6 +125,7 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	client, err := sarama.NewConsumerGroup([]string{kafkaEventSource.URL}, kafkaEventSource.ConsumerGroup.GroupName, config)
 	if err != nil {
 		log.Errorf("Error creating consumer group client: %v", err)
+		cancel()
 		return err
 	}
 
