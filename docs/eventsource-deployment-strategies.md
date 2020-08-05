@@ -23,8 +23,8 @@ are different for different event sources.
 
 ### Replicas Of Rolling Update Types
 
-Deployment replica of these event source types respects the field of `replica`
-in EventSource object, defaults to 1.
+Deployment replica of these event source types respects `spec.replica` in the
+EventSource object, defaults to 1.
 
 ## Recreate Strategy
 
@@ -47,8 +47,8 @@ in EventSource object, defaults to 1.
 
 ### Replicas Of Recreate Types
 
-The field `replica` for EventSource of these `Recreate` types is ignored, the
-deployment is always created with `replica=1`.
+`spec.replica` in the `Recreate` types EventSources is ignored, the deployment
+is always created with `replica=1`.
 
-**Please DO NOT manually scale up the replicas, that will bring unexpected
+**Please DO NOT manually scale up the replicas, that will lead to unexpected
 behaviors!**
