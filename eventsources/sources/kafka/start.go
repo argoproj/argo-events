@@ -19,7 +19,11 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"os/signal"
 	"strconv"
+	"sync"
+	"syscall"
 
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
@@ -71,6 +75,100 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("start kafka event source...")
 	kafkaEventSource := &el.KafkaEventSource
+
+	if kafkaEventSource.ConsumerGroup == nil {
+		return el.partitionConsumer(ctx, log, kafkaEventSource, dispatch)
+	} else {
+		return el.consumerGroupConsumer(ctx, log, kafkaEventSource, dispatch)
+	}
+}
+
+func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
+
+	config := sarama.NewConfig()
+
+	version, err := sarama.ParseKafkaVersion(kafkaEventSource.ConsumerGroup.KafkaVersion)
+	if err != nil {
+		log.Errorf("Error parsing Kafka version: %v", err)
+		return err
+	}
+	config.Version = version
+
+	switch kafkaEventSource.ConsumerGroup.RebalanceStrategy {
+	case "sticky":
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+	case "roundrobin":
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	case "range":
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	default:
+		log.Info("Invalid rebalance strategy using default: range")
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	}
+
+	if kafkaEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		config.Net.TLS.Config = tlsConfig
+		config.Net.TLS.Enable = true
+	}
+
+	consumer := Consumer{
+		ready:            make(chan bool),
+		dispatch:         dispatch,
+		logger:           log,
+		kafkaEventSource: kafkaEventSource,
+	}
+
+	ctx, cancel := context.WithCancel(ctx)
+	client, err := sarama.NewConsumerGroup([]string{kafkaEventSource.URL}, kafkaEventSource.ConsumerGroup.GroupName, config)
+	if err != nil {
+		log.Errorf("Error creating consumer group client: %v", err)
+		return err
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			if err := client.Consume(ctx, []string{kafkaEventSource.Topic}, &consumer); err != nil {
+				log.Panicf("Error from consumer: %v", err)
+			}
+			if ctx.Err() != nil {
+				return
+			}
+			consumer.ready = make(chan bool)
+		}
+	}()
+
+	<-consumer.ready // Await till the consumer has been set up
+	log.Info("Sarama consumer group up and running!...")
+
+	sigterm := make(chan os.Signal, 1)
+	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case <-ctx.Done():
+		log.Info("terminating: context cancelled")
+	case <-sigterm:
+		log.Info("terminating: via signal")
+	}
+	cancel()
+	wg.Wait()
+	if err = client.Close(); err != nil {
+		log.Errorf("Error closing client: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
+	defer sources.Recover(el.GetEventName())
+
+	log.Info("start kafka event source...")
 
 	var consumer sarama.Consumer
 
@@ -165,4 +263,53 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		}
 	}
+}
+
+// Consumer represents a Sarama consumer group consumer
+type Consumer struct {
+	ready            chan bool
+	dispatch         func([]byte) error
+	logger           *zap.SugaredLogger
+	kafkaEventSource *v1alpha1.KafkaEventSource
+}
+
+// Setup is run at the beginning of a new session, before ConsumeClaim
+func (consumer *Consumer) Setup(sarama.ConsumerGroupSession) error {
+	// Mark the consumer as ready
+	close(consumer.ready)
+	return nil
+}
+
+// Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
+func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
+	return nil
+}
+
+// ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
+func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for message := range claim.Messages() {
+		//consumer.logger.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(message.Value), message.Timestamp, message.Topic)
+		consumer.logger.Info("dispatching event on the data channel...")
+		eventData := &events.KafkaEventData{
+			Topic:     message.Topic,
+			Partition: int(message.Partition),
+			Timestamp: message.Timestamp.String(),
+			Metadata:  consumer.kafkaEventSource.Metadata,
+		}
+		if consumer.kafkaEventSource.JSONBody {
+			eventData.Body = (*json.RawMessage)(&message.Value)
+		} else {
+			eventData.Body = message.Value
+		}
+		eventBody, err := json.Marshal(eventData)
+		if err != nil {
+			consumer.logger.Error("failed to marshal the event data, rejecting the event...")
+			continue
+		}
+		consumer.dispatch(eventBody)
+
+		session.MarkMessage(message, "")
+	}
+
+	return nil
 }
