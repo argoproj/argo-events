@@ -134,8 +134,11 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	go func() {
 		defer wg.Done()
 		for {
+			// `Consume` should be called inside an infinite loop, when a
+			// server-side rebalance happens, the consumer session will need to be
+			// recreated to get the new claims
 			if err := client.Consume(ctx, []string{kafkaEventSource.Topic}, &consumer); err != nil {
-				log.Panicf("Error from consumer: %v", err)
+				log.Errorf("Error from consumer: %v", err)
 			}
 			if ctx.Err() != nil {
 				return
@@ -287,6 +290,10 @@ func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	// NOTE:
+	// Do not move the code below to a goroutine.
+	// The `ConsumeClaim` itself is called within a goroutine, see:
+	// https://github.com/Shopify/sarama/blob/master/consumer_group.go#L27-L29
 	for message := range claim.Messages() {
 		//consumer.logger.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(message.Value), message.Timestamp, message.Topic)
 		consumer.logger.Info("dispatching event on the data channel...")
@@ -309,9 +316,9 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 
 		if err = consumer.dispatch(eventBody); err != nil {
 			consumer.logger.Desugar().Error("failed to dispatch kafka event...", zap.Error(err))
+		} else {
+			session.MarkMessage(message, "")
 		}
-
-		session.MarkMessage(message, "")
 	}
 
 	return nil
