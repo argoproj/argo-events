@@ -98,7 +98,7 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	case "range":
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	default:
-		log.Info("Invalid rebalance strategy using default: range")
+		log.Info("Invalid rebalance strategy, using default: range")
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	}
 
@@ -118,11 +118,9 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 		kafkaEventSource: kafkaEventSource,
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
 	client, err := sarama.NewConsumerGroup([]string{kafkaEventSource.URL}, kafkaEventSource.ConsumerGroup.GroupName, config)
 	if err != nil {
 		log.Errorf("Error creating consumer group client: %v", err)
-		cancel()
 		return err
 	}
 
@@ -140,7 +138,7 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {
 				log.Errorf("Error from context: %v", ctx.Err())
-				client.Close()
+				return
 			}
 			consumer.ready = make(chan bool)
 		}
@@ -151,8 +149,8 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 
 	<-ctx.Done()
 	log.Info("terminating: context cancelled")
-	cancel()
 	wg.Wait()
+
 	if err = client.Close(); err != nil {
 		log.Errorf("Error closing client: %v", err)
 		return err
