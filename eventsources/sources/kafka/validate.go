@@ -39,8 +39,8 @@ func validate(eventSource *v1alpha1.KafkaEventSource) error {
 	if eventSource.Topic == "" {
 		return fmt.Errorf("topic must be specified")
 	}
-	if eventSource.Partition == "" {
-		return fmt.Errorf("partition must be specified")
+	if eventSource.Partition == "" && eventSource.ConsumerGroup == nil {
+		return fmt.Errorf("consumerGroup or partition must be specified")
 	}
 	if eventSource.TLS != nil {
 		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
