@@ -24,13 +24,13 @@ For example, if you want to watch actions on `Deployment` objects, you need to:
    kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa
    ```
 
-or (if you want to watch cluster scope)
+   or (if you want to watch cluster scope)
 
-```sh
-kubectl create clusterrole deployments-watcher --verb=list,watch --resource=deployments.apps
+   ```sh
+   kubectl create clusterrole deployments-watcher --verb=list,watch --resource=deployments.apps
 
-kubectl create clusterrolebinding deployments-watcher-clusterrole-binding --clusterrole=deployments-watcher --serviceaccount=your-namespace:my-sa
-```
+   kubectl create clusterrolebinding deployments-watcher-clusterrole-binding --clusterrole=deployments-watcher --serviceaccount=your-namespace:my-sa
+   ```
 
 ## Service Account for Sensors
 
