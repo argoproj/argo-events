@@ -212,7 +212,26 @@ func TestFilterData(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "comparator filter Equal, JSON data",
+			name: "comparator filter NotEqualTo, JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"1.0"},
+					Comparator: "!=",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"1.0\"}"),
+				}},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter EqualTo, JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
 					Path:       "k",
