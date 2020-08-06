@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -249,9 +250,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 	logger := logging.FromContext(ctx).Desugar()
 	logger.Info("Starting event source server...")
 	servers := GetEventingServers(e.eventSource)
-	cctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	driver, err := eventbus.GetDriver(cctx, *e.eventBusConfig, e.eventBusSubject, e.hostname)
+	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, e.hostname)
 	if err != nil {
 		logger.Error("failed to get eventbus driver", zap.Error(err))
 		return err
@@ -263,8 +262,13 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 	}
 	defer e.eventBusConn.Close()
 
+	cctx, cancel := context.WithCancel(ctx)
+	wg := &sync.WaitGroup{}
+
 	// Daemon to reconnect
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		logger.Info("starting eventbus connection daemon...")
 		ticker := time.NewTicker(5 * time.Second)
 		for {
@@ -296,7 +300,9 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 				// Continue starting other event services instead of failing all of them
 				continue
 			}
+			wg.Add(1)
 			go func(s EventingServer) {
+				defer wg.Done()
 				err := s.StartListening(cctx, func(data []byte) error {
 					event := cloudevents.NewEvent()
 					event.SetID(fmt.Sprintf("%x", uuid.New()))
@@ -327,5 +333,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 	logger.Info("Eventing server started.")
 	<-stopCh
 	logger.Info("Shutting down...")
+	cancel()
+	wg.Wait()
 	return nil
 }
