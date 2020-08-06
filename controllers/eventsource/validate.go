@@ -51,7 +51,7 @@ func ValidateEventSource(eventSource *v1alpha1.EventSource) error {
 	if rollingUpdates > 0 && recreates > 0 {
 		// We don't allow this as if we use recreate strategy for the deployment it will have downtime
 		eventSource.Status.MarkSourcesNotProvided("InvalidEventSource", "Some types of event sources can not be put in one spec")
-		return errors.New("event sources with rolling update and recreate update strategy can not put together")
+		return errors.New("event sources with rolling update and recreate update strategy can not be put together")
 	}
 
 	eventSource.Status.MarkSourcesProvided()

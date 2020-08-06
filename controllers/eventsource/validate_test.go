@@ -28,7 +28,7 @@ func TestValidate(t *testing.T) {
 		testEventSource.Spec.Webhook = fakeWebhookEventSourceMap("test2")
 		err := ValidateEventSource(testEventSource)
 		assert.Error(t, err)
-		assert.Equal(t, "event sources with rolling update and recreate update strategy can not put together", err.Error())
+		assert.Equal(t, "event sources with rolling update and recreate update strategy can not be put together", err.Error())
 	})
 
 	t.Run("validate bad mixed types eventsource - duplicated name", func(t *testing.T) {

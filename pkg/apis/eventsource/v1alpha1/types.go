@@ -312,6 +312,19 @@ type KafkaEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+
+	// Consumer group for kafka client
+	// +optional
+	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,8,opt,name=consumerGroup"`
+}
+
+type KafkaConsumerGroup struct {
+	// The name for the consumer group to use
+	GroupName string `json:"groupName" protobuf:"bytes,1,opt,name=groupName"`
+	// Specify what kafka version is being connected to enables certain features in sarama
+	KafkaVersion string `json:"kafkaVersion" protobuf:"bytes,2,opt,name=kafkaVersion"`
+	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+	RebalanceStrategy string `json:"rebalanceStrategy" protobuf:"bytes,3,opt,name=rebalanceStrategy"`
 }
 
 // MQTTEventSource refers to event-source for MQTT related events

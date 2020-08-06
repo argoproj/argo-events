@@ -25,6 +25,11 @@ spec:
         # setting factor > 1 makes backoff exponential.
         factor: 2
         jitter: 0.2
+#      Use a consumer group, if this is used you do not need to specify a "partition: <id>"
+#      consumerGroup:
+#        groupName: test-group
+#        kafkaVersion: "2.5.0"
+#        rebalanceStrategy: range
 
 #    example-tls:
 #      url: "kafka.argo-events:9092"
