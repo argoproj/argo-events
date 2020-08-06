@@ -12,17 +12,17 @@ For example, if you want to watch actions on `Deployment` objects, you need to:
 
 1. Create a Service Account
 
-```sh
-kubectl -n your-namespace create sa my-sa
-```
+   ```sh
+   kubectl -n your-namespace create sa my-sa
+   ```
 
-1. Grant RBAC privileges to it
+2. Grant RBAC privileges to it
 
-```sh
-kubectl -n your-namespace create role deployments-watcher --verb=list,watch --resource=deployments.apps
+   ```sh
+   kubectl -n your-namespace create role deployments-watcher --verb=list,watch --resource=deployments.apps
 
-kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa
-```
+   kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa
+   ```
 
 or (if you want to watch cluster scope)
 
