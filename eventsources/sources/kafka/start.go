@@ -137,7 +137,7 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 			}
 			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {
-				log.Errorf("Error from context: %v", ctx.Err())
+				log.Infof("Error from context: %v", ctx.Err())
 				return
 			}
 			consumer.ready = make(chan bool)
