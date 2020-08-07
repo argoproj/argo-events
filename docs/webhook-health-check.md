@@ -2,7 +2,7 @@
 
 For `webhook` or `webhook` extended event sources such as `github`, `gitlab`,
 `sns`, `slack`, `Storage GRID` and `stripe`, besides the endpint configured in
-the spec, an endpoint `:${port}/health` is also provided by default, this is
+the spec, an endpoint `:${port}/health` will be created by default, this is
 useful for LB or Ingress configuration for the event source, where usually a
 health check endpoint is required.
 
