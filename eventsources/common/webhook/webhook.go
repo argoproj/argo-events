@@ -24,6 +24,7 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -99,14 +100,22 @@ func startServer(router Router, controller *Controller) {
 	handler := controller.ActiveServerHandlers[route.Context.Port]
 
 	routeName := route.Context.Port + route.Context.Endpoint
-
 	r := handler.GetRoute(routeName)
 	if r == nil {
 		r = handler.NewRoute().Name(routeName)
 		r = r.Path(route.Context.Endpoint)
 	}
-
 	r.HandlerFunc(router.HandleRoute)
+
+	healthCheckRouteName := route.Context.Port + "/health"
+	healthCheckRoute := handler.GetRoute(healthCheckRouteName)
+	if healthCheckRoute == nil {
+		healthCheckRoute = handler.NewRoute().Name(healthCheckRouteName)
+		healthCheckRoute = healthCheckRoute.Path("/health")
+	}
+	healthCheckRoute.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		common.SendSuccessResponse(writer, "OK")
+	})
 
 	Lock.Unlock()
 }
