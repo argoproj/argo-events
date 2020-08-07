@@ -80,7 +80,7 @@ func (n *natsStreaming) Connect() (Connection, error) {
 		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
 			conn.natsConnected = false
-			log.Error("NATS connection los", zap.Error(err))
+			log.Error("NATS connection lost", zap.Error(err))
 		}),
 		nats.ReconnectHandler(func(nnc *nats.Conn) {
 			conn.natsConnected = true
