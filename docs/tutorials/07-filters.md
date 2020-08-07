@@ -50,7 +50,7 @@ A data filter has following fields,
 
 ### Comparator
 
-The data filter offers `comparator` “>=”, “>”, “=”, “<”, or “<=”.
+The data filter offers `comparator` “>=”, “>”, “=”, “!=”, “<”, or “<=”.
 
 e.g.,
 
