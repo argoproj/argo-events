@@ -453,6 +453,11 @@ message KafkaEventSource {
   // Consumer group for kafka client
   // +optional
   optional KafkaConsumerGroup consumerGroup = 8;
+
+  // Sets a limit on how many events get read from kafka per second which in turn limits the number of pods
+  // created per second if using an argo workflow or k8s sensor.
+  // +optional
+  optional int64 limitEventsPerSecond = 9;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events

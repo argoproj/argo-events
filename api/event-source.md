@@ -3765,6 +3765,30 @@ Consumer group for kafka client
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>limitEventsPerSecond</code></br> <em> int64 </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Sets a limit on how many events get read from kafka per second which in
+turn limits the number of pods created per second if using an argo
+workflow or k8s sensor.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

@@ -19,9 +19,6 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"strconv"
-	"sync"
-
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -31,6 +28,9 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"strconv"
+	"sync"
+	"time"
 )
 
 // EventListener implements Eventing kafka event source
@@ -116,6 +116,7 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 		dispatch:         dispatch,
 		logger:           log,
 		kafkaEventSource: kafkaEventSource,
+		ctx:              ctx,
 	}
 
 	client, err := sarama.NewConsumerGroup([]string{kafkaEventSource.URL}, kafkaEventSource.ConsumerGroup.GroupName, config)
@@ -265,6 +266,7 @@ type Consumer struct {
 	dispatch         func([]byte) error
 	logger           *zap.SugaredLogger
 	kafkaEventSource *v1alpha1.KafkaEventSource
+	ctx              context.Context
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
@@ -310,7 +312,20 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 		} else {
 			session.MarkMessage(message, "")
 		}
+		if consumer.kafkaEventSource.LimitEventsPerSecond > 0 {
+			//1000000000 is 1 second in nanoseconds
+			d := (1000000000/time.Duration(consumer.kafkaEventSource.LimitEventsPerSecond) * time.Nanosecond) * time.Nanosecond
+			consumer.logger.Infof("Sleeping for: %v.", d)
+			sleepContext(consumer.ctx, d)
+		}
 	}
 
 	return nil
+}
+
+func sleepContext(ctx context.Context, delay time.Duration) {
+	select {
+	case <-ctx.Done():
+	case <-time.After(delay):
+	}
 }

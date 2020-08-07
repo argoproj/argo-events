@@ -1368,6 +1368,13 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"),
 						},
 					},
+					"limitEventsPerSecond": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Sets a limit on how many events get read from kafka per second which in turn limits the number of pods created per second if using an argo workflow or k8s sensor.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
 				},
 				Required: []string{"url", "partition", "topic"},
 			},
