@@ -66,7 +66,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	sqsEventSource := &el.SQSEventSource
 	var awsSession *session.Session
-	awsSession, err := awscommon.CreateAWSSessionWithCredsInEnv(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
+	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
 	}

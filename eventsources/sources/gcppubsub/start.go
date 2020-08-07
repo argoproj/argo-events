@@ -85,9 +85,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	projectID := pubsubEventSource.ProjectID
 
 	if pubsubEventSource.CredentialSecret != nil {
-		jsonCred, ok := common.GetEnvFromSecret(pubsubEventSource.CredentialSecret)
-		if !ok {
-			return errors.New("can not find credential from ENV")
+		jsonCred, err := common.GetSecretFromVolume(pubsubEventSource.CredentialSecret)
+		if err != nil {
+			return errors.Wrap(err, "can not find credential")
 		}
 		opt = append(opt, option.WithCredentialsJSON([]byte(jsonCred)))
 	} else if pubsubEventSource.DeprecatedCredentialsFile != "" {

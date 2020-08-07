@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -43,36 +42,6 @@ var (
 	accessKey      = "YWNjZXNz"
 	LabelAccessKey = "accesskey"
 )
-
-func TestGetCredentials(t *testing.T) {
-	convey.Convey("Given a kubernetes secret, get credentials", t, func() {
-		os.Setenv(secretName+"_"+LabelAccessKey, accessKey)
-
-		githubEventSource := &v1alpha1.GithubEventSource{
-			Webhook: &v1alpha1.WebhookContext{
-				Endpoint: "/push",
-				URL:      "http://webhook-gateway-svc",
-				Port:     "12000",
-			},
-			Owner:      "fake",
-			Repository: "fake",
-			Events: []string{
-				"PushEvent",
-			},
-			APIToken: &corev1.SecretKeySelector{
-				Key: LabelAccessKey,
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: "github-access",
-				},
-			},
-		}
-
-		creds, err := router.getCredentials(githubEventSource.APIToken)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(creds, convey.ShouldNotBeNil)
-		convey.So(creds.secret, convey.ShouldEqual, "YWNjZXNz")
-	})
-}
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
