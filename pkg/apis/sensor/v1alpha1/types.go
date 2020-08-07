@@ -96,6 +96,7 @@ const (
 	GreaterThanOrEqualTo Comparator = ">=" // Greater than or equal to value provided in data filter
 	GreaterThan          Comparator = ">"  // Greater than value provided in data filter
 	EqualTo              Comparator = "="  // Equal to value provided in data filter
+	NotEqualTo           Comparator = "!=" // Not equal to value provided in data filter
 	LessThan             Comparator = "<"  // Less than value provided in data filter
 	LessThanOrEqualTo    Comparator = "<=" // Less than or equal to value provided in data filter
 	EmptyComparator                 = ""   // Equal to value provided in data filter
@@ -261,7 +262,7 @@ type DataFilter struct {
 	// Nils this value is ignored
 	Value []string `json:"value" protobuf:"bytes,3,rep,name=value"`
 	// Comparator compares the event data with a user given value.
-	// Can be ">=", ">", "=", "<", or "<=".
+	// Can be ">=", ">", "=", "!=", "<", or "<=".
 	// Is optional, and if left blank treated as equality "=".
 	Comparator Comparator `json:"comparator,omitempty" protobuf:"bytes,4,opt,name=comparator,casttype=Comparator"`
 }
