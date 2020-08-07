@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Knetic/govaluate"
@@ -65,9 +66,11 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 	}
 
 	cctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	wg := &sync.WaitGroup{}
 	for k, v := range triggerMapping {
+		wg.Add(1)
 		go func(depExpression string, triggers []v1alpha1.Trigger) {
+			defer wg.Done()
 			// Calculate dependencies of each group of triggers.
 			de := strings.ReplaceAll(depExpression, "-", "\\-")
 			expr, err := govaluate.NewEvaluableExpression(de)
@@ -139,8 +142,11 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 				}
 			}
 
+			wg1 := &sync.WaitGroup{}
 			closeSubCh := make(chan struct{})
+			wg1.Add(1)
 			go func() {
+				defer wg1.Done()
 				logger.Sugar().Infof("started to subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 				err = ebDriver.SubscribeEventSources(cctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
 				if err != nil {
@@ -156,6 +162,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 				case <-cctx.Done():
 					logger.Sugar().Infof("exiting eventbus connection daemon for client %s...", clientID)
 					ticker.Stop()
+					wg1.Wait()
 					return
 				case <-ticker.C:
 					if conn == nil || conn.IsClosed() {
@@ -168,7 +175,9 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 						logger.Info("reconnected to NATS streaming server.", zap.Any("clientID", clientID))
 						closeSubCh <- struct{}{}
 						time.Sleep(2 * time.Second)
+						wg1.Add(1)
 						go func() {
+							defer wg1.Done()
 							logger.Sugar().Infof("started to re-subscribe events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 							err = ebDriver.SubscribeEventSources(cctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
 							if err != nil {
@@ -184,6 +193,8 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 	logger.Info("Sensor started.")
 	<-stopCh
 	logger.Info("Shutting down...")
+	cancel()
+	wg.Wait()
 	return nil
 }
 

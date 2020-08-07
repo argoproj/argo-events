@@ -148,7 +148,6 @@ codegen:
 	./hack/update-openapigen.sh
 	$(MAKE) swagger
 	./hack/update-api-docs.sh
-	./hack/update-mocks.sh
 	rm -rf ./vendor
 	go mod tidy
 	$(MAKE) manifests
