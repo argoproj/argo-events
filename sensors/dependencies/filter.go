@@ -191,6 +191,10 @@ filter:
 					if eventVal <= filterVal {
 						continue filter
 					}
+				case v1alpha1.NotEqualTo:
+					if eventVal != filterVal {
+						continue filter
+					}
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if eventVal == filterVal {
 						continue filter
