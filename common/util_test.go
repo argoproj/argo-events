@@ -94,6 +94,7 @@ type bar struct {
 
 var (
 	testXObj = bar{
+		dd:     3,
 		Status: 5,
 		FSlice: []foo{
 			{
@@ -122,13 +123,13 @@ var (
 			},
 		},
 		M2: map[string]*haha{
-			"a": &haha{
+			"a": {
 				Nani: "nani333",
 				S:    &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "s05"}, Key: "key5"},
 				C:    &corev1.ConfigMapKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "c05"}, Key: "ckey5"},
 			},
-			"b": &haha{Nani: "nani444"},
-			"c": &haha{
+			"b": {Nani: "nani444"},
+			"c": {
 				Nani: "nani555",
 				S:    &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "s06"}, Key: "key6"},
 				C:    &corev1.ConfigMapKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "c06"}, Key: "ckey6"},

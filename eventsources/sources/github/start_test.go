@@ -37,10 +37,6 @@ var (
 		route:             webhook.GetFakeRoute(),
 		githubEventSource: &v1alpha1.GithubEventSource{},
 	}
-
-	secretName     = "github-access"
-	accessKey      = "YWNjZXNz"
-	LabelAccessKey = "accesskey"
 )
 
 func TestRouteActiveHandler(t *testing.T) {
