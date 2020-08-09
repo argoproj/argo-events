@@ -400,7 +400,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					},
 					"comparator": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Comparator compares the event data with a user given value. Can be \">=\", \">\", \"=\", \"<\", or \"<=\". Is optional, and if left blank treated as equality \"=\".",
+							Description: "Comparator compares the event data with a user given value. Can be \">=\", \">\", \"=\", \"!=\", \"<\", or \"<=\". Is optional, and if left blank treated as equality \"=\".",
 							Type:        []string{"string"},
 							Format:      "",
 						},
