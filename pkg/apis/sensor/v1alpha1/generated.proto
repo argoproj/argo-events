@@ -141,7 +141,7 @@ message DataFilter {
   repeated string value = 3;
 
   // Comparator compares the event data with a user given value.
-  // Can be ">=", ">", "=", "<", or "<=".
+  // Can be ">=", ">", "=", "!=", "<", or "<=".
   // Is optional, and if left blank treated as equality "=".
   optional string comparator = 4;
 }

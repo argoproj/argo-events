@@ -2039,7 +2039,7 @@
       ],
       "properties": {
         "comparator": {
-          "description": "Comparator compares the event data with a user given value. Can be \"\u003e=\", \"\u003e\", \"=\", \"\u003c\", or \"\u003c=\". Is optional, and if left blank treated as equality \"=\".",
+          "description": "Comparator compares the event data with a user given value. Can be \"\u003e=\", \"\u003e\", \"=\", \"!=\", \"\u003c\", or \"\u003c=\". Is optional, and if left blank treated as equality \"=\".",
           "type": "string"
         },
         "path": {
