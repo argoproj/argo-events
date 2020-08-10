@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -104,7 +105,28 @@ func startServer(router Router, controller *Controller) {
 	if r == nil {
 		r = handler.NewRoute().Name(routeName)
 		r = r.Path(route.Context.Endpoint)
-		r.HandlerFunc(router.HandleRoute)
+		r.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			if route.Context.AuthSecret != nil {
+				token, err := common.GetSecretFromVolume(route.Context.AuthSecret)
+				if err != nil {
+					route.Logger.Errorw("failed to get auth secret from volume", "error", zap.Error)
+					common.SendInternalErrorResponse(writer, "Error loading auth token")
+					return
+				}
+				authHeader := request.Header.Get("Authorization")
+				if !strings.HasPrefix(authHeader, "Bearer ") {
+					route.Logger.Errorw("invalid auth header", "error", zap.Error)
+					common.SendErrorResponse(writer, "Invalid Authorization Header")
+					return
+				}
+				if strings.TrimPrefix(authHeader, "Bearer ") != token {
+					route.Logger.Errorw("invalid auth token", "error", zap.Error)
+					common.SendErrorResponse(writer, "Invalid Auth token")
+					return
+				}
+			}
+			router.HandleRoute(writer, request)
+		})
 	}
 
 	healthCheckRouteName := route.Context.Port + "/health"

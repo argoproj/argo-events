@@ -2437,7 +2437,8 @@ string
 </em>
 </td>
 <td>
-<p>CredentialsFile is the file that contains credentials to authenticate for GCP</p>
+<p>CredentialsFile is the file that contains credentials to authenticate for GCP
+Deprecated, use CredentialSecret instead</p>
 </td>
 </tr>
 <tr>
@@ -3881,6 +3882,20 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authSecret</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>AuthSecret holds a secret selector that contains a bearer token for authentication</p>
 </td>
 </tr>
 </tbody>

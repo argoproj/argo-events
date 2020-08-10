@@ -443,6 +443,7 @@ type PubSubEventSource struct {
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
 	// CredentialsFile is the file that contains credentials to authenticate for GCP
+	// Deprecated, use CredentialSecret instead
 	DeprecatedCredentialsFile string `json:"credentialsFile" protobuf:"bytes,8,opt,name=credentialsFile"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
