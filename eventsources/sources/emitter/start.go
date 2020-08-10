@@ -73,17 +73,17 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	options = append(options, emitter.WithBrokers(emitterEventSource.Broker), emitter.WithAutoReconnect(true))
 
 	if emitterEventSource.Username != nil {
-		username, ok := common.GetEnvFromSecret(emitterEventSource.Username)
-		if !ok {
-			return errors.Errorf("failed to retrieve the username from %s in ENV", emitterEventSource.Username.Name)
+		username, err := common.GetSecretFromVolume(emitterEventSource.Username)
+		if err != nil {
+			return errors.Wrapf(err, "failed to retrieve the username from %s", emitterEventSource.Username.Name)
 		}
 		options = append(options, emitter.WithUsername(username))
 	}
 
 	if emitterEventSource.Password != nil {
-		password, ok := common.GetEnvFromSecret(emitterEventSource.Password)
-		if !ok {
-			return errors.Errorf("failed to retrieve the password from %s in ENV", emitterEventSource.Password.Name)
+		password, err := common.GetSecretFromVolume(emitterEventSource.Password)
+		if err != nil {
+			return errors.Wrapf(err, "failed to retrieve the password from %s", emitterEventSource.Password.Name)
 		}
 		options = append(options, emitter.WithPassword(password))
 	}

@@ -2,6 +2,7 @@ package eventsource
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,23 +37,19 @@ func Test_BuildDeployment(t *testing.T) {
 		volumes := deployment.Spec.Template.Spec.Volumes
 		assert.True(t, len(volumes) > 0)
 		hasAuthVolume := false
+		cmRefs, secretRefs := 0, 0
 		for _, vol := range volumes {
 			if vol.Name == "auth-volume" {
 				hasAuthVolume = true
-				break
+			}
+			if strings.Contains(vol.Name, testEventSource.Spec.HDFS["test"].KrbCCacheSecret.Name) {
+				secretRefs++
+			}
+			if strings.Contains(vol.Name, testEventSource.Spec.HDFS["test"].KrbConfigConfigMap.Name) {
+				cmRefs++
 			}
 		}
 		assert.True(t, hasAuthVolume)
-		envFroms := deployment.Spec.Template.Spec.Containers[0].EnvFrom
-		assert.True(t, len(envFroms) > 0)
-		cmRefs, secretRefs := 0, 0
-		for _, ef := range envFroms {
-			if ef.ConfigMapRef != nil {
-				cmRefs++
-			} else if ef.SecretRef != nil {
-				secretRefs++
-			}
-		}
 		assert.True(t, cmRefs > 0)
 		assert.True(t, secretRefs > 0)
 	})

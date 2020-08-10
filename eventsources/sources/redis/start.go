@@ -69,9 +69,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("retrieving password if it has been configured...")
 	if redisEventSource.Password != nil {
-		password, ok := common.GetEnvFromSecret(redisEventSource.Password)
-		if !ok {
-			return errors.Errorf("failed to find the secret password %s from ENV", redisEventSource.Password.Name)
+		password, err := common.GetSecretFromVolume(redisEventSource.Password)
+		if err != nil {
+			return errors.Wrapf(err, "failed to find the secret password %s", redisEventSource.Password.Name)
 		}
 		opt.Password = password
 	}

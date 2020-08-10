@@ -150,7 +150,7 @@ func (router *Router) PostActivate() error {
 
 	snsEventSource := router.eventSource
 
-	awsSession, err := commonaws.CreateAWSSessionWithCredsInEnv(snsEventSource.Region, snsEventSource.RoleARN, snsEventSource.AccessKey, snsEventSource.SecretKey)
+	awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(snsEventSource.Region, snsEventSource.RoleARN, snsEventSource.AccessKey, snsEventSource.SecretKey)
 	if err != nil {
 		return err
 	}

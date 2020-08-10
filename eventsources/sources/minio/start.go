@@ -63,13 +63,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	minioEventSource := &el.MinioEventSource
 
 	log.Info("retrieving access and secret key...")
-	accessKey, ok := common.GetEnvFromSecret(minioEventSource.AccessKey)
-	if !ok {
-		return errors.Errorf("failed to get the access key for event source %s in ENV", el.GetEventName())
+	accessKey, err := common.GetSecretFromVolume(minioEventSource.AccessKey)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get the access key for event source %s", el.GetEventName())
 	}
-	secretKey, ok := common.GetEnvFromSecret(minioEventSource.SecretKey)
-	if !ok {
-		return errors.Errorf("failed to retrieve the secret key for event source %s in ENV", el.GetEventName())
+	secretKey, err := common.GetSecretFromVolume(minioEventSource.SecretKey)
+	if err != nil {
+		return errors.Wrapf(err, "failed to retrieve the secret key for event source %s", el.GetEventName())
 	}
 
 	log.Info("setting up a minio client...")
