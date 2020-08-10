@@ -109,18 +109,18 @@ func startServer(router Router, controller *Controller) {
 			if route.Context.AuthSecret != nil {
 				token, err := common.GetSecretFromVolume(route.Context.AuthSecret)
 				if err != nil {
-					route.Logger.Errorw("failed to get auth secret from volume", "error", zap.Error)
+					route.Logger.Errorw("failed to get auth secret from volume", "error", err)
 					common.SendInternalErrorResponse(writer, "Error loading auth token")
 					return
 				}
 				authHeader := request.Header.Get("Authorization")
 				if !strings.HasPrefix(authHeader, "Bearer ") {
-					route.Logger.Errorw("invalid auth header", "error", zap.Error)
+					route.Logger.Error("invalid auth header")
 					common.SendErrorResponse(writer, "Invalid Authorization Header")
 					return
 				}
 				if strings.TrimPrefix(authHeader, "Bearer ") != token {
-					route.Logger.Errorw("invalid auth token", "error", zap.Error)
+					route.Logger.Error("invalid auth token")
 					common.SendErrorResponse(writer, "Invalid Auth token")
 					return
 				}
