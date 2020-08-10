@@ -25,9 +25,6 @@ The Kafka trigger specification is available [here](https://github.com/argoproj/
             - name: test-dep
               eventSourceName: minio
               eventName: example
-          subscription:
-            http:
-              port: 9300
           triggers:
             - template:
                 name: kafka-trigger

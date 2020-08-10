@@ -12,9 +12,6 @@ spec:
       filters:
         context:
           source: webhook
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         name: done-workflow

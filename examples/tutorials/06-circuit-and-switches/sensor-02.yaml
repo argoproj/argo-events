@@ -24,9 +24,6 @@ spec:
 
   circuit: "group_1 && group_2"
 
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         switch:
