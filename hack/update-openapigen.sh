@@ -32,13 +32,6 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --output-package github.com/argoproj/argo-events/pkg/apis/sensor/${VERSION} \
     $@
 
-# Gateway
-go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
-    --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \
-    --input-dirs github.com/argoproj/argo-events/pkg/apis/gateway/${VERSION} \
-    --output-package github.com/argoproj/argo-events/pkg/apis/gateway/${VERSION} \
-    $@
-
 # EventSource
 go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \

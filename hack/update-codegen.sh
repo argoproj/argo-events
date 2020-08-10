@@ -28,12 +28,6 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   "sensor:v1alpha1" \
   --go-header-file hack/custom-boilerplate.go.txt
 
-subheader "running codegen for gateway"
-bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-  github.com/argoproj/argo-events/pkg/client/gateway github.com/argoproj/argo-events/pkg/apis \
-  "gateway:v1alpha1" \
-  --go-header-file hack/custom-boilerplate.go.txt
-
 subheader "running codegen for eventsource"
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   github.com/argoproj/argo-events/pkg/client/eventsource github.com/argoproj/argo-events/pkg/apis \
