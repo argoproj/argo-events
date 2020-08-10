@@ -44,6 +44,7 @@ nav:
       - 'setup/redis.md'
       - 'setup/resource.md'
       - 'setup/webhook.md'
+      - 'setup/pulsar.md'
   - Tutorials:
       - 'tutorials/01-introduction.md'
       - 'tutorials/02-parameterization.md'
@@ -53,7 +54,6 @@ nav:
       - 'tutorials/06-circuit-and-switch.md'
       - 'tutorials/07-filters.md'
       - 'tutorials/08-policy.md'
-      - 'tutorials/09-service-account.md'
   - Triggers:
       - 'triggers/argo-workflow.md'
       - 'triggers/aws-lambda.md'
@@ -65,6 +65,11 @@ nav:
       - 'triggers/slack-trigger.md'
       - 'triggers/build-your-own-trigger.md'
   - 'developer_guide.md'
+  - 'eventsource-deployment-strategies.md'
+  - 'eventsource-names.md'
+  - 'eventsource-with-multiple-events.md'
+  - 'managed-namespace.md'
+  - 'service-accounts.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
