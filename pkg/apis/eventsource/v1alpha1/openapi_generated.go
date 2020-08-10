@@ -1681,7 +1681,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					},
 					"credentialsFile": {
 						SchemaProps: spec.SchemaProps{
-							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP",
+							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated, use CredentialSecret instead",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2712,9 +2712,17 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 							},
 						},
 					},
+					"authSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AuthSecret holds a secret selector that contains a bearer token for authentication",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 				Required: []string{"endpoint", "method", "port", "url"},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }

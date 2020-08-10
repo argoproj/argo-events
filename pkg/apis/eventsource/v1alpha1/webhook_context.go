@@ -1,5 +1,9 @@
 package v1alpha1
 
+import (
+	corev1 "k8s.io/api/core/v1"
+)
+
 // WebhookContext holds a general purpose REST API context
 type WebhookContext struct {
 	// REST API endpoint
@@ -17,5 +21,8 @@ type WebhookContext struct {
 	ServerKeyPath string `json:"serverKeyPath,omitempty" protobuf:"bytes,6,opt,name=serverKeyPath"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,opt,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// AuthSecret holds a secret selector that contains a bearer token for authentication
+	// +optional
+	AuthSecret *corev1.SecretKeySelector `json:"authSecret,omitempty" protobuf:"bytes,8,opt,name=authSecret"`
 }
