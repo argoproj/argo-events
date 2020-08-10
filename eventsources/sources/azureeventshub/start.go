@@ -64,15 +64,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	hubEventSource := &el.AzureEventsHubEventSource
 	log.Info("retrieving the shared access key name...")
-	sharedAccessKeyName, ok := common.GetEnvFromSecret(hubEventSource.SharedAccessKeyName)
-	if !ok {
-		return errors.Errorf("failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
+	sharedAccessKeyName, err := common.GetSecretFromVolume(hubEventSource.SharedAccessKeyName)
+	if err != nil {
+		return errors.Wrapf(err, "failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
 	}
 
 	log.Info("retrieving the shared access key...")
-	sharedAccessKey, ok := common.GetEnvFromSecret(hubEventSource.SharedAccessKey)
-	if !ok {
-		return errors.Errorf("failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
+	sharedAccessKey, err := common.GetSecretFromVolume(hubEventSource.SharedAccessKey)
+	if err != nil {
+		return errors.Wrapf(err, "failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
 	}
 
 	endpoint := fmt.Sprintf("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", hubEventSource.FQDN, sharedAccessKeyName, sharedAccessKey, hubEventSource.HubName)

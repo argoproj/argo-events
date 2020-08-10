@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -142,23 +143,6 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 	return string(data), nil
 }
 
-// GenerateSecretVolumeSpecs builds a "volume" and "volumeMount"spec with a secretKeySelector
-func GenerateSecretVolumeSpecs(selector *v1.SecretKeySelector) (v1.Volume, v1.VolumeMount) {
-	volName := strings.ReplaceAll("secret-"+selector.Name, "_", "-")
-	return v1.Volume{
-			Name: volName,
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
-					SecretName: selector.Name,
-				},
-			},
-		}, v1.VolumeMount{
-			Name:      volName,
-			ReadOnly:  true,
-			MountPath: "/argo-events/secrets/" + selector.Name,
-		}
-}
-
 // GetConfigMapFromVolume retrieves the value of mounted config map volume
 // "/argo-events/config/${configMapRef.name}/${configMapRef.key}" is expected to be the file path
 func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
@@ -168,25 +152,6 @@ func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
 		return "", errors.Wrapf(err, "failed to get configMap value of name: %s, key: %s", selector.Name, selector.Key)
 	}
 	return string(data), nil
-}
-
-// GenerateConfigMapVolumeSpecs builds a "volume" and "volumeMount"spec with a configMapKeySelector
-func GenerateConfigMapVolumeSpecs(selector *v1.ConfigMapKeySelector) (v1.Volume, v1.VolumeMount) {
-	volName := strings.ReplaceAll("cm-"+selector.Name, "_", "-")
-	return v1.Volume{
-			Name: volName,
-			VolumeSource: v1.VolumeSource{
-				ConfigMap: &v1.ConfigMapVolumeSource{
-					LocalObjectReference: v1.LocalObjectReference{
-						Name: selector.Name,
-					},
-				},
-			},
-		}, v1.VolumeMount{
-			Name:      volName,
-			ReadOnly:  true,
-			MountPath: "/argo-events/config/" + selector.Name,
-		}
 }
 
 // GetEnvFromConfigMap retrieves the value of envFrom.configMapRef
@@ -224,4 +189,140 @@ func GetTLSConfig(caCertPath, clientCertPath, clientKeyPath string) (*tls.Config
 		RootCAs:      pool,
 		Certificates: []tls.Certificate{clientCert},
 	}, nil
+}
+
+// VolumesFromSecretsOrConfigMaps builds volumes and volumeMounts spec based on
+// the obj and its children's secretKeyselector or configMapKeySelector
+func VolumesFromSecretsOrConfigMaps(obj interface{}, t reflect.Type) ([]v1.Volume, []v1.VolumeMount) {
+	resultVolumes := []v1.Volume{}
+	resultMounts := []v1.VolumeMount{}
+	values := findTypeValues(obj, t)
+	if len(values) == 0 {
+		return resultVolumes, resultMounts
+	}
+	switch t {
+	case SecretKeySelectorType:
+		for _, v := range values {
+			selector := v.(*v1.SecretKeySelector)
+			vol, mount := GenerateSecretVolumeSpecs(selector)
+			resultVolumes = append(resultVolumes, vol)
+			resultMounts = append(resultMounts, mount)
+		}
+	case ConfigMapKeySelectorType:
+		for _, v := range values {
+			selector := v.(*v1.ConfigMapKeySelector)
+			vol, mount := GenerateConfigMapVolumeSpecs(selector)
+			resultVolumes = append(resultVolumes, vol)
+			resultMounts = append(resultMounts, mount)
+		}
+	default:
+	}
+	return uniqueVolumes(resultVolumes), uniqueVolumeMounts(resultMounts)
+}
+
+// Find all the values obj's children matching provided type, type needs to be a pointer
+func findTypeValues(obj interface{}, t reflect.Type) []interface{} {
+	result := []interface{}{}
+	value := reflect.ValueOf(obj)
+	findTypesRecursive(&result, value, t)
+	return result
+}
+
+func findTypesRecursive(result *[]interface{}, obj reflect.Value, t reflect.Type) {
+	if obj.Type() == t && obj.CanInterface() && !obj.IsNil() {
+		*result = append(*result, obj.Interface())
+	}
+	switch obj.Kind() {
+	case reflect.Ptr:
+		objValue := obj.Elem()
+		// Check if it is nil
+		if !objValue.IsValid() {
+			return
+		}
+		findTypesRecursive(result, objValue, t)
+	case reflect.Interface:
+		objValue := obj.Elem()
+		// Check if it is nil
+		if !objValue.IsValid() {
+			return
+		}
+		findTypesRecursive(result, objValue, t)
+	case reflect.Struct:
+		for i := 0; i < obj.NumField(); i++ {
+			if obj.Field(i).CanInterface() {
+				findTypesRecursive(result, obj.Field(i), t)
+			}
+		}
+	case reflect.Slice:
+		for i := 0; i < obj.Len(); i++ {
+			findTypesRecursive(result, obj.Index(i), t)
+		}
+	case reflect.Map:
+		iter := obj.MapRange()
+		for iter.Next() {
+			findTypesRecursive(result, iter.Value(), t)
+		}
+	default:
+		return
+	}
+}
+
+// GenerateSecretVolumeSpecs builds a "volume" and "volumeMount"spec with a secretKeySelector
+func GenerateSecretVolumeSpecs(selector *v1.SecretKeySelector) (v1.Volume, v1.VolumeMount) {
+	volName := strings.ReplaceAll("secret-"+selector.Name, "_", "-")
+	return v1.Volume{
+			Name: volName,
+			VolumeSource: v1.VolumeSource{
+				Secret: &v1.SecretVolumeSource{
+					SecretName: selector.Name,
+				},
+			},
+		}, v1.VolumeMount{
+			Name:      volName,
+			ReadOnly:  true,
+			MountPath: "/argo-events/secrets/" + selector.Name,
+		}
+}
+
+// GenerateConfigMapVolumeSpecs builds a "volume" and "volumeMount"spec with a configMapKeySelector
+func GenerateConfigMapVolumeSpecs(selector *v1.ConfigMapKeySelector) (v1.Volume, v1.VolumeMount) {
+	volName := strings.ReplaceAll("cm-"+selector.Name, "_", "-")
+	return v1.Volume{
+			Name: volName,
+			VolumeSource: v1.VolumeSource{
+				ConfigMap: &v1.ConfigMapVolumeSource{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: selector.Name,
+					},
+				},
+			},
+		}, v1.VolumeMount{
+			Name:      volName,
+			ReadOnly:  true,
+			MountPath: "/argo-events/config/" + selector.Name,
+		}
+}
+
+func uniqueVolumes(vols []v1.Volume) []v1.Volume {
+	rVols := []v1.Volume{}
+	keys := make(map[string]bool)
+	for _, e := range vols {
+		if _, value := keys[e.Name]; !value {
+			keys[e.Name] = true
+			rVols = append(rVols, e)
+		}
+	}
+	return rVols
+}
+
+func uniqueVolumeMounts(mounts []v1.VolumeMount) []v1.VolumeMount {
+	rMounts := []v1.VolumeMount{}
+	keys := make(map[string]bool)
+	for _, e := range mounts {
+		if _, value := keys[e.Name]; !value {
+			keys[e.Name] = true
+			rMounts = append(rMounts, e)
+		}
+	}
+	return rMounts
 }

@@ -140,9 +140,9 @@ func (rc *Router) PostActivate() error {
 		)
 		logger.Info("registering a new webhook")
 
-		apiKey, ok := common.GetEnvFromSecret(stripeEventSource.APIKey)
-		if !ok {
-			return errors.New("APIKey not found in ENV")
+		apiKey, err := common.GetSecretFromVolume(stripeEventSource.APIKey)
+		if err != nil {
+			return errors.Wrap(err, "APIKey not found")
 		}
 
 		stripe.Key = apiKey
