@@ -113,7 +113,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	err := rc.verifyRequest(request)
 	if err != nil {
 		logger.Desugar().Error("failed to validate the request", zap.Error(err))
-		common.SendInternalErrorResponse(writer, err.Error())
+		common.SendResponse(writer, http.StatusUnauthorized, err.Error())
 		return
 	}
 
