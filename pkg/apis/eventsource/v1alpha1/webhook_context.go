@@ -24,5 +24,5 @@ type WebhookContext struct {
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 	// AuthSecret holds a secret selector that contains a bearer token for authentication
 	// +optional
-	AuthSecret *corev1.SecretKeySelector `json:"authSecret,omitempty" protobuf:"bytes,8,rep,name=authSecret"`
+	AuthSecret *corev1.SecretKeySelector `json:"authSecret,omitempty" protobuf:"bytes,8,opt,name=authSecret"`
 }
