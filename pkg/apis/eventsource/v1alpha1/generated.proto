@@ -578,6 +578,7 @@ message PubSubEventSource {
   optional bool jsonBody = 7;
 
   // CredentialsFile is the file that contains credentials to authenticate for GCP
+  // Deprecated, use CredentialSecret instead
   optional string credentialsFile = 8;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
@@ -972,5 +973,9 @@ message WebhookContext {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 7;
+
+  // AuthSecret holds a secret selector that contains a bearer token for authentication
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector authSecret = 8;
 }
 

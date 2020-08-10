@@ -4652,7 +4652,7 @@ will be JSON
 <p>
 
 CredentialsFile is the file that contains credentials to authenticate
-for GCP
+for GCP Deprecated, use CredentialSecret instead
 
 </p>
 
@@ -7484,6 +7484,31 @@ ServerKeyPath refers the file that contains private key
 
 Metadata holds the user defined metadata which will passed along the
 event payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>authSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+AuthSecret holds a secret selector that contains a bearer token for
+authentication
 
 </p>
 

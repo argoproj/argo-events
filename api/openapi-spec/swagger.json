@@ -1250,7 +1250,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "credentialsFile": {
-          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP",
+          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated, use CredentialSecret instead",
           "type": "string"
         },
         "deleteSubscriptionOnFinish": {
@@ -1828,6 +1828,10 @@
         "url"
       ],
       "properties": {
+        "authSecret": {
+          "description": "AuthSecret holds a secret selector that contains a bearer token for authentication",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "endpoint": {
           "description": "REST API endpoint",
           "type": "string"
