@@ -19,6 +19,10 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -28,9 +32,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"strconv"
-	"sync"
-	"time"
 )
 
 // EventListener implements Eventing kafka event source
@@ -81,8 +82,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
-	config := sarama.NewConfig()
-
 	config, err := getSaramaConfig(log, kafkaEventSource)
 	if err != nil {
 		return err
@@ -263,7 +262,7 @@ func getSaramaConfig(log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEve
 	}
 
 	if kafkaEventSource.ConsumerGroup != nil {
-		if kafkaEventSource.ConsumerGroup.Oldest == true {
+		if kafkaEventSource.ConsumerGroup.Oldest {
 			config.Consumer.Offsets.Initial = sarama.OffsetOldest
 		}
 	}
