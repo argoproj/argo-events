@@ -190,9 +190,6 @@ to invoke OpenFaas function.
             - name: test-dep
               eventSourceName: redis
               eventName: example
-          subscription:
-            http:
-              port: 9300
           triggers:
             - template:
                 name: openfaas-trigger
@@ -242,9 +239,6 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
             - name: test-dep
               eventSourceName: nats
               eventName: example
-          subscription:
-            http:
-              port: 9300
           triggers:
             - template:
                 name: kubeless-trigger

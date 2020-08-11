@@ -63,7 +63,7 @@ func main() {
 
 // swaggify converts the github package
 // e.g.:
-// github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway
+// github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor
 // to:
 // io.argoproj.workflow.v1alpha1.Workflow
 func swaggify(name string) string {

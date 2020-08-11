@@ -22,14 +22,14 @@ spec:
         name: aws-secret
       # aws region
       region: us-east-1
-      # name of the queue. The gateway resolves the url of the queue from the queue name.
+      # name of the queue. The eventsource resolves the url of the queue from the queue name.
       queue: test
       # The duration (in seconds) for which the call waits for a message to arrive in the queue before returning.
       # MUST BE > 0 AND <= 20
       waitTimeSeconds: 20
 
 #    example-without-credentials:
-#      # If AWS access credentials are already present on the Pod's IAM role running the Gateway,
+#      # If AWS access credentials are already present on the Pod's IAM role running the EventSource,
 #      # the AWS session will utilize the existing config and hence we do not need to provide explicit credentials.
 #      region: "us-east-1"
 #      queue: "my-fake-queue-2"
