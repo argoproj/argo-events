@@ -416,7 +416,7 @@ message KafkaConsumerGroup {
   // The name for the consumer group to use
   optional string groupName = 1;
 
-  // When starting up a new group do we want to start from the oldest (true) msg or the earliest (false), defaults to true
+  // When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
   optional bool oldest = 2;
 
   // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.

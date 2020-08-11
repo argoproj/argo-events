@@ -3510,8 +3510,8 @@ The name for the consumer group to use
 
 <p>
 
-When starting up a new group do we want to start from the oldest (true)
-msg or the earliest (false), defaults to true
+When starting up a new group do we want to start from the oldest event
+(true) or the newest event (false), defaults to false
 
 </p>
 

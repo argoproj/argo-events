@@ -1281,7 +1281,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 					},
 					"oldest": {
 						SchemaProps: spec.SchemaProps{
-							Description: "When starting up a new group do we want to start from the oldest (true) msg or the earliest (false), defaults to true",
+							Description: "When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
