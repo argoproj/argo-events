@@ -25,6 +25,6 @@ spec:
 #    example-with-path-regex:
 #      watchPathConfig:
 #        directory: "/bin/"
-#        # the gateway will watch events for path that matches following regex
+#        # the eventsource will watch events for path that matches following regex
 #        pathRegexp: "([a-z]+).txt"
 #      eventType: "CREATE"
