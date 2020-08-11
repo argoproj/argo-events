@@ -28,8 +28,10 @@ spec:
 #      Use a consumer group, if this is used you do not need to specify a "partition: <id>"
 #      consumerGroup:
 #        groupName: test-group
-#        kafkaVersion: "2.5.0"
+#        oldest: false
 #        rebalanceStrategy: range
+#      limitEventsPerSecond: 1
+#      kafkaVersion: "2.5.0"
 
 #    example-tls:
 #      url: "kafka.argo-events:9092"
