@@ -17,9 +17,6 @@ spec:
             value:
               - "hello"
               - "hey"
-  subscription:
-    http:
-      port: 9300
   triggers:
     - template:
         name: data-workflow

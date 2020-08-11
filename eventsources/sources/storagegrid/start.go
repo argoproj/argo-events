@@ -200,9 +200,9 @@ func (router *Router) PostActivate() error {
 	eventSource := router.storageGridEventSource
 	route := router.route
 
-	authToken, ok := common.GetEnvFromSecret(eventSource.AuthToken)
-	if !ok {
-		return errors.New("AuthToken not found in ENV")
+	authToken, err := common.GetSecretFromVolume(eventSource.AuthToken)
+	if err != nil {
+		return errors.Wrap(err, "AuthToken not found")
 	}
 
 	registrationURL := common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)

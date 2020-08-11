@@ -1279,10 +1279,10 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 							Format:      "",
 						},
 					},
-					"kafkaVersion": {
+					"oldest": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Specify what kafka version is being connected to enables certain features in sarama",
-							Type:        []string{"string"},
+							Description: "When starting up a new group do we want to start from the oldest (true) msg or the earliest (false), defaults to true",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
@@ -1294,7 +1294,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"groupName", "kafkaVersion", "rebalanceStrategy"},
+				Required: []string{"groupName", "rebalanceStrategy"},
 			},
 		},
 	}
@@ -1375,8 +1375,15 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 							Format:      "int64",
 						},
 					},
+					"kafkaVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"url", "partition", "topic"},
+				Required: []string{"url", "partition", "topic", "kafkaVersion"},
 			},
 		},
 		Dependencies: []string{
@@ -1688,7 +1695,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					},
 					"credentialsFile": {
 						SchemaProps: spec.SchemaProps{
-							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP",
+							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated, use CredentialSecret instead",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2719,9 +2726,17 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 							},
 						},
 					},
+					"authSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AuthSecret holds a secret selector that contains a bearer token for authentication",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 				Required: []string{"endpoint", "method", "port", "url"},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }

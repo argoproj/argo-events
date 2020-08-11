@@ -416,8 +416,8 @@ message KafkaConsumerGroup {
   // The name for the consumer group to use
   optional string groupName = 1;
 
-  // Specify what kafka version is being connected to enables certain features in sarama
-  optional string kafkaVersion = 2;
+  // When starting up a new group do we want to start from the oldest (true) msg or the earliest (false), defaults to true
+  optional bool oldest = 2;
 
   // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
   optional string rebalanceStrategy = 3;
@@ -458,6 +458,9 @@ message KafkaEventSource {
   // created per second if using an argo workflow or k8s sensor.
   // +optional
   optional int64 limitEventsPerSecond = 9;
+
+  // Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
+  optional string kafkaVersion = 10;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
@@ -583,6 +586,7 @@ message PubSubEventSource {
   optional bool jsonBody = 7;
 
   // CredentialsFile is the file that contains credentials to authenticate for GCP
+  // Deprecated, use CredentialSecret instead
   optional string credentialsFile = 8;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
@@ -977,5 +981,9 @@ message WebhookContext {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 7;
+
+  // AuthSecret holds a secret selector that contains a bearer token for authentication
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector authSecret = 8;
 }
 

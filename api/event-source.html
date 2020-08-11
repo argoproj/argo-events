@@ -1850,13 +1850,13 @@ string
 </tr>
 <tr>
 <td>
-<code>kafkaVersion</code></br>
+<code>oldest</code></br>
 <em>
-string
+bool
 </em>
 </td>
 <td>
-<p>Specify what kafka version is being connected to enables certain features in sarama</p>
+<p>When starting up a new group do we want to start from the oldest (true) msg or the earliest (false), defaults to true</p>
 </td>
 </tr>
 <tr>
@@ -1997,6 +1997,17 @@ int64
 <em>(Optional)</em>
 <p>Sets a limit on how many events get read from kafka per second which in turn limits the number of pods
 created per second if using an argo workflow or k8s sensor.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>kafkaVersion</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0</p>
 </td>
 </tr>
 </tbody>
@@ -2450,7 +2461,8 @@ string
 </em>
 </td>
 <td>
-<p>CredentialsFile is the file that contains credentials to authenticate for GCP</p>
+<p>CredentialsFile is the file that contains credentials to authenticate for GCP
+Deprecated, use CredentialSecret instead</p>
 </td>
 </tr>
 <tr>
@@ -3894,6 +3906,20 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authSecret</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>AuthSecret holds a secret selector that contains a bearer token for authentication</p>
 </td>
 </tr>
 </tbody>

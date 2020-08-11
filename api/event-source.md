@@ -3502,7 +3502,7 @@ The name for the consumer group to use
 
 <td>
 
-<code>kafkaVersion</code></br> <em> string </em>
+<code>oldest</code></br> <em> bool </em>
 
 </td>
 
@@ -3510,8 +3510,8 @@ The name for the consumer group to use
 
 <p>
 
-Specify what kafka version is being connected to enables certain
-features in sarama
+When starting up a new group do we want to start from the oldest (true)
+msg or the earliest (false), defaults to true
 
 </p>
 
@@ -3782,6 +3782,27 @@ Consumer group for kafka client
 Sets a limit on how many events get read from kafka per second which in
 turn limits the number of pods created per second if using an argo
 workflow or k8s sensor.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>kafkaVersion</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Specify what kafka version is being connected to enables certain
+features in sarama, defaults to 1.0.0
 
 </p>
 
@@ -4676,7 +4697,7 @@ will be JSON
 <p>
 
 CredentialsFile is the file that contains credentials to authenticate
-for GCP
+for GCP Deprecated, use CredentialSecret instead
 
 </p>
 
@@ -7508,6 +7529,31 @@ ServerKeyPath refers the file that contains private key
 
 Metadata holds the user defined metadata which will passed along the
 event payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>authSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+AuthSecret holds a secret selector that contains a bearer token for
+authentication
 
 </p>
 

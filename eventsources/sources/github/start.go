@@ -52,9 +52,9 @@ func init() {
 
 // getCredentials for retrieves credentials for GitHub connection
 func (router *Router) getCredentials(keySelector *corev1.SecretKeySelector) (*cred, error) {
-	token, ok := common.GetEnvFromSecret(keySelector)
-	if !ok {
-		return nil, errors.New("token not founnd in ENV")
+	token, err := common.GetSecretFromVolume(keySelector)
+	if err != nil {
+		return nil, errors.Wrap(err, "token not founnd")
 	}
 	return &cred{
 		secret: token,

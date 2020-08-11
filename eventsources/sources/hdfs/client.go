@@ -43,17 +43,17 @@ type KeytabOptions struct {
 }
 
 func getConfigMapKey(selector *corev1.ConfigMapKeySelector) (string, error) {
-	result, ok := common.GetEnvFromConfigMap(selector)
-	if !ok {
-		return "", errors.New("configmap value not injected in ENV")
+	result, err := common.GetConfigMapFromVolume(selector)
+	if err != nil {
+		return "", errors.Wrap(err, "configmap value not injected")
 	}
 	return result, nil
 }
 
 func getSecretKey(selector *corev1.SecretKeySelector) ([]byte, error) {
-	result, ok := common.GetEnvFromSecret(selector)
-	if !ok {
-		return nil, errors.New("secret value not injected in ENV")
+	result, err := common.GetSecretFromVolume(selector)
+	if err != nil {
+		return nil, errors.Wrap(err, "secret value not injected")
 	}
 	return []byte(result), nil
 }

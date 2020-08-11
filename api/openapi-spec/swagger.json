@@ -1033,7 +1033,6 @@
       "type": "object",
       "required": [
         "groupName",
-        "kafkaVersion",
         "rebalanceStrategy"
       ],
       "properties": {
@@ -1041,9 +1040,9 @@
           "description": "The name for the consumer group to use",
           "type": "string"
         },
-        "kafkaVersion": {
-          "description": "Specify what kafka version is being connected to enables certain features in sarama",
-          "type": "string"
+        "oldest": {
+          "description": "When starting up a new group do we want to start from the oldest (true) msg or the earliest (false), defaults to true",
+          "type": "boolean"
         },
         "rebalanceStrategy": {
           "description": "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
@@ -1057,7 +1056,8 @@
       "required": [
         "url",
         "partition",
-        "topic"
+        "topic",
+        "kafkaVersion"
       ],
       "properties": {
         "connectionBackoff": {
@@ -1071,6 +1071,10 @@
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
+        },
+        "kafkaVersion": {
+          "description": "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
+          "type": "string"
         },
         "limitEventsPerSecond": {
           "description": "Sets a limit on how many events get read from kafka per second which in turn limits the number of pods created per second if using an argo workflow or k8s sensor.",
@@ -1255,7 +1259,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "credentialsFile": {
-          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP",
+          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated, use CredentialSecret instead",
           "type": "string"
         },
         "deleteSubscriptionOnFinish": {
@@ -1833,6 +1837,10 @@
         "url"
       ],
       "properties": {
+        "authSecret": {
+          "description": "AuthSecret holds a secret selector that contains a bearer token for authentication",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "endpoint": {
           "description": "REST API endpoint",
           "type": "string"
@@ -2044,7 +2052,7 @@
       ],
       "properties": {
         "comparator": {
-          "description": "Comparator compares the event data with a user given value. Can be \"\u003e=\", \"\u003e\", \"=\", \"\u003c\", or \"\u003c=\". Is optional, and if left blank treated as equality \"=\".",
+          "description": "Comparator compares the event data with a user given value. Can be \"\u003e=\", \"\u003e\", \"=\", \"!=\", \"\u003c\", or \"\u003c=\". Is optional, and if left blank treated as equality \"=\".",
           "type": "string"
         },
         "path": {

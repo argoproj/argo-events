@@ -113,7 +113,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	err := rc.verifyRequest(request)
 	if err != nil {
 		logger.Desugar().Error("failed to validate the request", zap.Error(err))
-		common.SendInternalErrorResponse(writer, err.Error())
+		common.SendResponse(writer, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -276,15 +276,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	slackEventSource := &el.SlackEventSource
 	log.Info("retrieving the slack token...")
-	token, ok := common.GetEnvFromSecret(slackEventSource.Token)
-	if !ok {
-		return errors.New("failed to retrieve the token")
+	token, err := common.GetSecretFromVolume(slackEventSource.Token)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the token")
 	}
 
 	log.Info("retrieving the signing secret...")
-	signingSecret, ok := common.GetEnvFromSecret(slackEventSource.SigningSecret)
-	if !ok {
-		return errors.New("failed to retrieve the signing secret")
+	signingSecret, err := common.GetSecretFromVolume(slackEventSource.SigningSecret)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve the signing secret")
 	}
 
 	route := webhook.NewRoute(slackEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName())

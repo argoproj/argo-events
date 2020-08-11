@@ -20,10 +20,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -99,14 +101,43 @@ func startServer(router Router, controller *Controller) {
 	handler := controller.ActiveServerHandlers[route.Context.Port]
 
 	routeName := route.Context.Port + route.Context.Endpoint
-
 	r := handler.GetRoute(routeName)
 	if r == nil {
 		r = handler.NewRoute().Name(routeName)
 		r = r.Path(route.Context.Endpoint)
+		r.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			if route.Context.AuthSecret != nil {
+				token, err := common.GetSecretFromVolume(route.Context.AuthSecret)
+				if err != nil {
+					route.Logger.Errorw("failed to get auth secret from volume", "error", err)
+					common.SendInternalErrorResponse(writer, "Error loading auth token")
+					return
+				}
+				authHeader := request.Header.Get("Authorization")
+				if !strings.HasPrefix(authHeader, "Bearer ") {
+					route.Logger.Error("invalid auth header")
+					common.SendResponse(writer, http.StatusUnauthorized, "Invalid Authorization Header")
+					return
+				}
+				if strings.TrimPrefix(authHeader, "Bearer ") != token {
+					route.Logger.Error("invalid auth token")
+					common.SendResponse(writer, http.StatusUnauthorized, "Invalid Auth token")
+					return
+				}
+			}
+			router.HandleRoute(writer, request)
+		})
 	}
 
-	r.HandlerFunc(router.HandleRoute)
+	healthCheckRouteName := route.Context.Port + "/health"
+	healthCheckRoute := handler.GetRoute(healthCheckRouteName)
+	if healthCheckRoute == nil {
+		healthCheckRoute = handler.NewRoute().Name(healthCheckRouteName)
+		healthCheckRoute = healthCheckRoute.Path("/health")
+		healthCheckRoute.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			common.SendSuccessResponse(writer, "OK")
+		})
+	}
 
 	Lock.Unlock()
 }

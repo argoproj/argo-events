@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
@@ -25,11 +24,6 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-)
-
-var (
-	secretKeySelectorType    = reflect.TypeOf(&corev1.SecretKeySelector{})
-	configMapKeySelectorType = reflect.TypeOf(&corev1.ConfigMapKeySelector{})
 )
 
 // AdaptorArgs are the args needed to create a sensor deployment
@@ -239,20 +233,34 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	envs = append(envs, envVars...)
 	deploymentSpec.Template.Spec.Containers[0].Env = envs
 
-	envFroms := []corev1.EnvFromSource{}
-	oldEnvFroms := deploymentSpec.Template.Spec.Containers[0].EnvFrom
-	if len(oldEnvFroms) > 0 {
-		envFroms = append(envFroms, oldEnvFroms...)
+	vols := []corev1.Volume{}
+	volMounts := []corev1.VolumeMount{}
+	oldVols := deploymentSpec.Template.Spec.Volumes
+	oldVolMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
+	if len(oldVols) > 0 {
+		vols = append(vols, oldVols...)
 	}
-	envFromSecrets := envFromSources(args.EventSource, secretKeySelectorType)
-	if len(envFromSecrets) > 0 {
-		envFroms = append(envFroms, envFromSecrets...)
+	if len(oldVolMounts) > 0 {
+		volMounts = append(volMounts, oldVolMounts...)
 	}
-	envFromConfigMaps := envFromSources(args.EventSource, configMapKeySelectorType)
-	if len(envFromConfigMaps) > 0 {
-		envFroms = append(envFroms, envFromConfigMaps...)
+	volSecrets, volSecretMounts := common.VolumesFromSecretsOrConfigMaps(eventSourceCopy, common.SecretKeySelectorType)
+	if len(volSecrets) > 0 {
+		vols = append(vols, volSecrets...)
 	}
-	deploymentSpec.Template.Spec.Containers[0].EnvFrom = envFroms
+	if len(volSecretMounts) > 0 {
+		volMounts = append(volMounts, volSecretMounts...)
+	}
+	volConfigMaps, volCofigMapMounts := common.VolumesFromSecretsOrConfigMaps(eventSourceCopy, common.ConfigMapKeySelectorType)
+	if len(volConfigMaps) > 0 {
+		vols = append(vols, volConfigMaps...)
+	}
+	if len(volCofigMapMounts) > 0 {
+		volMounts = append(volMounts, volCofigMapMounts...)
+	}
+
+	deploymentSpec.Template.Spec.Volumes = vols
+	deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volMounts
+
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    args.EventSource.Namespace,
@@ -389,70 +397,4 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 
 func labelSelector(labelMap map[string]string) labels.Selector {
 	return labels.SelectorFromSet(labelMap)
-}
-
-// envFromSources returns list of EnvFromSource of an EventSource
-func envFromSources(eventSource *v1alpha1.EventSource, t reflect.Type) []corev1.EnvFromSource {
-	result := []corev1.EnvFromSource{}
-	v := reflect.ValueOf(&eventSource.Spec).Elem()
-	for j := 0; j < v.NumField(); j++ {
-		f := v.Field(j)
-		if f.Kind() == reflect.Map && !f.IsNil() {
-			iter := f.MapRange()
-			for iter.Next() {
-				val := iter.Value().Interface()
-				froms := envFromSecretsOrConfigMaps(val, t)
-				result = append(result, froms...)
-			}
-		}
-	}
-	// Uniq
-	r := []corev1.EnvFromSource{}
-	keys := make(map[string]bool)
-	for _, e := range result {
-		var entry string
-		switch t {
-		case secretKeySelectorType:
-			entry = e.SecretRef.Name
-		case configMapKeySelectorType:
-			entry = e.ConfigMapRef.Name
-		default:
-		}
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			r = append(r, e)
-		}
-	}
-	return r
-}
-
-func envFromSecretsOrConfigMaps(source interface{}, t reflect.Type) []corev1.EnvFromSource {
-	result := []corev1.EnvFromSource{}
-	value := reflect.ValueOf(source)
-	if value.Kind() == reflect.Ptr {
-		value = reflect.Indirect(value)
-	}
-	if value.Kind() != reflect.Struct {
-		return result
-	}
-	structType := value.Type()
-	for i := 0; i < structType.NumField(); i++ {
-		f := structType.Field(i)
-
-		if f.Type == t {
-			v := value.FieldByName(f.Name)
-			if !v.IsNil() {
-				switch t {
-				case secretKeySelectorType:
-					selector := v.Interface().(*corev1.SecretKeySelector)
-					result = append(result, common.GenerateEnvFromSecretSpec(selector))
-				case configMapKeySelectorType:
-					selector := v.Interface().(*corev1.ConfigMapKeySelector)
-					result = append(result, common.GenerateEnvFromConfigMapSpec(selector))
-				default:
-				}
-			}
-		}
-	}
-	return result
 }
