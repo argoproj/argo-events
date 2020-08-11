@@ -24,9 +24,6 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
             - name: test-dep
               eventSourceName: minio
               eventName: example
-          subscription:
-            http:
-              port: 9300
           triggers:
             - template:
                 name: nats-trigger

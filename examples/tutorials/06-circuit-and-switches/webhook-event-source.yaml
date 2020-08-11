@@ -9,7 +9,7 @@ spec:
       - port: 12000
         targetPort: 12000
   webhook:
-    # gateway can run multiple HTTP servers. Simply define a unique port to start a new HTTP server
+    # EventSource can run multiple HTTP servers. Simply define a unique port to start a new HTTP server
     example:
       # port to run HTTP server on
       port: "12000"

@@ -116,12 +116,12 @@ func startServer(router Router, controller *Controller) {
 				authHeader := request.Header.Get("Authorization")
 				if !strings.HasPrefix(authHeader, "Bearer ") {
 					route.Logger.Error("invalid auth header")
-					common.SendErrorResponse(writer, "Invalid Authorization Header")
+					common.SendResponse(writer, http.StatusUnauthorized, "Invalid Authorization Header")
 					return
 				}
 				if strings.TrimPrefix(authHeader, "Bearer ") != token {
 					route.Logger.Error("invalid auth token")
-					common.SendErrorResponse(writer, "Invalid Auth token")
+					common.SendResponse(writer, http.StatusUnauthorized, "Invalid Auth token")
 					return
 				}
 			}

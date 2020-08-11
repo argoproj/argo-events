@@ -68,6 +68,14 @@ func SendInternalErrorResponse(writer http.ResponseWriter, response string) {
 	}
 }
 
+// SendResponse sends http response with given status code
+func SendResponse(writer http.ResponseWriter, statusCode int, response string) {
+	writer.WriteHeader(statusCode)
+	if _, err := writer.Write([]byte(response)); err != nil {
+		fmt.Printf("failed to write the response. err: %+v\n", err)
+	}
+}
+
 // Hasher hashes a string
 func Hasher(value string) string {
 	h := fnv.New32a()

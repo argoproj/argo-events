@@ -35,9 +35,6 @@ set up event-driven pipelines for existing workloads.
             - name: test-dep
               eventSourceName: webhook
               eventName: example
-          subscription:
-            http:
-              port: 9300
           triggers:
             - template:
                 name: webhook-pod-trigger

@@ -58,9 +58,6 @@ Let's look at the following sensor,
             - name: test-dep
               eventSourceName: webhook
               eventName: example
-          subscription:
-            http:
-              port: 9300
           triggers:
             - template:
                 name: webhook-workflow-trigger

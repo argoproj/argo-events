@@ -53,6 +53,6 @@ spec:
 #        factor: 2
 #        jitter: 0.2
 #      tls:
-#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
-#        clientCertPath: path-to-client-cert-mounted-in-gateway
-#        clientKeyPath: path-to-client-key-mounted-in-gateway
+#        caCertPath: path-to-ca-cert-key-mounted-in-eventsource
+#        clientCertPath: path-to-client-cert-mounted-in-eventsource
+#        clientKeyPath: path-to-client-key-mounted-in-eventsource
