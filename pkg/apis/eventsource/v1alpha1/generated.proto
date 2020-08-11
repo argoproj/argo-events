@@ -55,7 +55,7 @@ message AMQPEventSource {
 
   // TLS configuration for the amqp client.
   // +optional
-  optional TLSConfig tls = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 7;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -139,7 +139,7 @@ message EmitterEventSource {
 
   // TLS configuration for the emitter client.
   // +optional
-  optional TLSConfig tls = 8;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 8;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -439,7 +439,7 @@ message KafkaEventSource {
 
   // TLS configuration for the kafka client.
   // +optional
-  optional TLSConfig tls = 5;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 5;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
@@ -476,7 +476,7 @@ message MQTTEventSource {
 
   // TLS configuration for the mqtt client.
   // +optional
-  optional TLSConfig tls = 6;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 6;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -508,7 +508,7 @@ message NATSEventsSource {
 
   // TLS configuration for the nats client.
   // +optional
-  optional TLSConfig tls = 5;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 5;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -538,7 +538,7 @@ message NSQEventSource {
 
   // TLS configuration for the nsq client.
   // +optional
-  optional TLSConfig tls = 6;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 6;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -602,9 +602,9 @@ message PulsarEventSource {
   // +required
   optional string url = 3;
 
-  // Set the path to the trusted TLS certificate file.
+  // Trusted TLS certificate secret.
   // +optional
-  optional string tlsTrustCertsFilePath = 4;
+  optional k8s.io.api.core.v1.SecretKeySelector tlsTrustCertsSecret = 4;
 
   // Whether the Pulsar client accept untrusted TLS certificate from broker.
   // +optional
@@ -616,7 +616,7 @@ message PulsarEventSource {
 
   // TLS configuration for the pulsar client.
   // +optional
-  optional TLSConfig tls = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 7;
 
   // Backoff holds parameters applied to connection.
   // +optional
@@ -654,7 +654,7 @@ message RedisEventSource {
 
   // TLS configuration for the redis client.
   // +optional
-  optional TLSConfig tls = 6;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 6;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -886,18 +886,6 @@ message StripeEventSource {
   map<string, string> metadata = 5;
 }
 
-// TLSConfig refers to TLS configuration for a client.
-message TLSConfig {
-  // CACertPath refers the file path that contains the CA cert.
-  optional string caCertPath = 1;
-
-  // ClientCertPath refers the file path that contains client cert.
-  optional string clientCertPath = 2;
-
-  // ClientKeyPath refers the file path that contains client key.
-  optional string clientKeyPath = 3;
-}
-
 // Template holds the information of an EventSource deployment template
 message Template {
   // Metdata sets the pods's metadata, i.e. annotations and labels
@@ -965,10 +953,10 @@ message WebhookContext {
   optional string url = 4;
 
   // ServerCertPath refers the file that contains the cert.
-  optional string serverCertPath = 5;
+  optional k8s.io.api.core.v1.SecretKeySelector serverCertSecret = 5;
 
   // ServerKeyPath refers the file that contains private key
-  optional string serverKeyPath = 6;
+  optional k8s.io.api.core.v1.SecretKeySelector serverKeySecret = 6;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -977,5 +965,11 @@ message WebhookContext {
   // AuthSecret holds a secret selector that contains a bearer token for authentication
   // +optional
   optional k8s.io.api.core.v1.SecretKeySelector authSecret = 8;
+
+  // DeprecatedServerCertPath refers the file that contains the cert.
+  optional string serverCertPath = 9;
+
+  // DeprecatedServerKeyPath refers the file that contains private key
+  optional string serverKeyPath = 10;
 }
 

@@ -37,6 +37,12 @@ spec:
 #      jsonBody: true
 #      partition: "1"
 #      tls:
-#        caCertPath: path-to-ca-cert-key-mounted-in-event-source
-#        clientCertPath: path-to-client-cert-mounted-in-event-source
-#        clientKeyPath: path-to-client-key-mounted-in-event-source
+#        caCertSecret:
+#          name: my-secret
+#          key: ca-cert-key
+#        clientCertSecret:
+#          name: my-secret
+#          key: client-cert-key
+#        clientKeySecret:
+#          name: my-secret
+#          key: client-key-key

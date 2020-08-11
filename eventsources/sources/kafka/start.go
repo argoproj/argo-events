@@ -103,7 +103,7 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	}
 
 	if kafkaEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
+		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS)
 		if err != nil {
 			return errors.Wrap(err, "failed to get the tls configuration")
 		}
@@ -172,7 +172,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		config := sarama.NewConfig()
 
 		if kafkaEventSource.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
+			tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS)
 			if err != nil {
 				return errors.Wrap(err, "failed to get the tls configuration")
 			}

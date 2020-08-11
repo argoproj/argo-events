@@ -34,6 +34,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // GetClientConfig return rest config, if path not specified, assume in cluster config
@@ -143,7 +145,10 @@ func GenerateEnvFromSecretSpec(selector *v1.SecretKeySelector) v1.EnvFromSource 
 // GetSecretFromVolume retrieves the value of mounted secret volume
 // "/argo-events/secrets/${secretRef.name}/${secretRef.key}" is expected to be the file path
 func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
-	filePath := fmt.Sprintf("/argo-events/secrets/%s/%s", selector.Name, selector.Key)
+	filePath, err := GetSecretVolumePath(selector)
+	if err != nil {
+		return "", err
+	}
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get secret value of name: %s, key: %s", selector.Name, selector.Key)
@@ -151,15 +156,34 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 	return string(data), nil
 }
 
+// GetSecretVolumePath returns the path of the mounted secret
+func GetSecretVolumePath(selector *v1.SecretKeySelector) (string, error) {
+	if selector == nil {
+		return "", errors.New("secret key selector is nil")
+	}
+	return fmt.Sprintf("/argo-events/secrets/%s/%s", selector.Name, selector.Key), nil
+}
+
 // GetConfigMapFromVolume retrieves the value of mounted config map volume
 // "/argo-events/config/${configMapRef.name}/${configMapRef.key}" is expected to be the file path
 func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
-	filePath := fmt.Sprintf("/argo-events/config/%s/%s", selector.Name, selector.Key)
+	filePath, err := GetConfigMapVolumePath(selector)
+	if err != nil {
+		return "", err
+	}
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get configMap value of name: %s, key: %s", selector.Name, selector.Key)
 	}
 	return string(data), nil
+}
+
+// GetConfigMapVolumePath returns the path of the mounted configmap
+func GetConfigMapVolumePath(selector *v1.ConfigMapKeySelector) (string, error) {
+	if selector == nil {
+		return "", errors.New("configmap key selector is nil")
+	}
+	return fmt.Sprintf("/argo-events/config/%s/%s", selector.Name, selector.Key), nil
 }
 
 // GetEnvFromConfigMap retrieves the value of envFrom.configMapRef
@@ -181,7 +205,34 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 }
 
 // GetTLSConfig returns a tls configuration for given cert and key.
-func GetTLSConfig(caCertPath, clientCertPath, clientKeyPath string) (*tls.Config, error) {
+func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
+	if config == nil {
+		return nil, errors.New("TLSConfig is nil")
+	}
+
+	var caCertPath, clientCertPath, clientKeyPath string
+	var err error
+	if config.CACertSecret != nil && config.ClientCertSecret != nil && config.ClientKeySecret != nil {
+		caCertPath, err = GetSecretVolumePath(config.CACertSecret)
+		if err != nil {
+			return nil, err
+		}
+		clientCertPath, err = GetSecretVolumePath(config.ClientCertSecret)
+		if err != nil {
+			return nil, err
+		}
+		clientKeyPath, err = GetSecretVolumePath(config.ClientKeySecret)
+		if err != nil {
+			return nil, err
+		}
+	} else if config.DeprecatedCACertPath != "" && config.DeprecatedClientCertPath != "" && config.DeprecatedClientKeyPath != "" {
+		caCertPath = config.DeprecatedCACertPath
+		clientCertPath = config.DeprecatedClientCertPath
+		clientKeyPath = config.DeprecatedClientKeyPath
+	} else {
+		return nil, errors.New("invalid tls config, please configure caCertSecret, clientCertSecret and clientKeySecret")
+	}
+
 	caCert, err := ioutil.ReadFile(caCertPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read ca cert file %s", caCertPath)

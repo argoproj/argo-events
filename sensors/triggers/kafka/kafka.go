@@ -16,16 +16,14 @@ limitations under the License.
 package kafka
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
-	"io/ioutil"
 	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -52,27 +50,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		config := sarama.NewConfig()
 
 		if kafkatrigger.TLS != nil {
-			if kafkatrigger.TLS.ClientCertPath != "" && kafkatrigger.TLS.ClientKeyPath != "" && kafkatrigger.TLS.CACertPath != "" {
-				cert, err := tls.LoadX509KeyPair(kafkatrigger.TLS.ClientCertPath, kafkatrigger.TLS.ClientKeyPath)
-				if err != nil {
-					return nil, err
-				}
-
-				caCert, err := ioutil.ReadFile(kafkatrigger.TLS.CACertPath)
-				if err != nil {
-					return nil, err
-				}
-
-				caCertPool := x509.NewCertPool()
-				caCertPool.AppendCertsFromPEM(caCert)
-
-				config.Net.TLS.Config = &tls.Config{
-					Certificates:       []tls.Certificate{cert},
-					RootCAs:            caCertPool,
-					InsecureSkipVerify: true,
-				}
-				config.Net.TLS.Enable = true
+			tlsConfig, err := common.GetTLSConfig(kafkatrigger.TLS)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to get the tls configuration")
 			}
+			tlsConfig.InsecureSkipVerify = true
+			config.Net.TLS.Config = tlsConfig
+			config.Net.TLS.Enable = true
 		}
 
 		if kafkatrigger.Compress {
