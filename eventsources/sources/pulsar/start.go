@@ -96,7 +96,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if pulsarEventSource.TLS != nil {
 		log.Info("setting tls auth option...")
 		var clientCertPath, clientKeyPath string
-		if pulsarEventSource.TLS.ClientCertSecret != nil && pulsarEventSource.TLS.ClientKeySecret != nil {
+		switch {
+		case pulsarEventSource.TLS.ClientCertSecret != nil && pulsarEventSource.TLS.ClientKeySecret != nil:
 			clientCertPath, err = common.GetSecretVolumePath(pulsarEventSource.TLS.ClientCertSecret)
 			if err != nil {
 				log.Errorw("failed to get ClientCertPath from the volume", "error", err)
@@ -107,11 +108,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				log.Errorw("failed to get ClientKeyPath from the volume", "error", err)
 				return err
 			}
-		} else if pulsarEventSource.TLS.DeprecatedClientCertPath != "" && pulsarEventSource.TLS.DeprecatedClientKeyPath != "" {
+		case pulsarEventSource.TLS.DeprecatedClientCertPath != "" && pulsarEventSource.TLS.DeprecatedClientKeyPath != "":
 			// DEPRECATED.
 			clientCertPath = pulsarEventSource.TLS.DeprecatedClientCertPath
 			clientKeyPath = pulsarEventSource.TLS.DeprecatedClientKeyPath
-		} else {
+		default:
 			return errors.New("invalid TLS config")
 		}
 		clientOpt.Authentication = pulsar.NewAuthenticationTLS(clientCertPath, clientKeyPath)

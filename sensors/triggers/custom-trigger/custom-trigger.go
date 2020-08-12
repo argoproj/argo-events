@@ -75,15 +75,16 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 	if ct.Secure {
 		var certFilePath string
 		var err error
-		if ct.CertSecret != nil {
+		switch {
+		case ct.CertSecret != nil:
 			certFilePath, err = common.GetSecretVolumePath(ct.CertSecret)
 			if err != nil {
 				return nil, err
 			}
-		} else if ct.DeprecatedCertFilePath != "" {
+		case ct.DeprecatedCertFilePath != "":
 			// DEPRECATED
 			certFilePath = ct.DeprecatedCertFilePath
-		} else {
+		default:
 			return nil, errors.New("invalid config, CERT secret not defined")
 		}
 		creds, err := credentials.NewClientTLSFromFile(certFilePath, ct.ServerNameOverride)

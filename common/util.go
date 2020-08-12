@@ -212,7 +212,8 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 
 	var caCertPath, clientCertPath, clientKeyPath string
 	var err error
-	if config.CACertSecret != nil && config.ClientCertSecret != nil && config.ClientKeySecret != nil {
+	switch {
+	case config.CACertSecret != nil && config.ClientCertSecret != nil && config.ClientKeySecret != nil:
 		caCertPath, err = GetSecretVolumePath(config.CACertSecret)
 		if err != nil {
 			return nil, err
@@ -225,11 +226,12 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if config.DeprecatedCACertPath != "" && config.DeprecatedClientCertPath != "" && config.DeprecatedClientKeyPath != "" {
+	case config.DeprecatedCACertPath != "" && config.DeprecatedClientCertPath != "" && config.DeprecatedClientKeyPath != "":
+		// DEPRECATED.
 		caCertPath = config.DeprecatedCACertPath
 		clientCertPath = config.DeprecatedClientCertPath
 		clientKeyPath = config.DeprecatedClientKeyPath
-	} else {
+	default:
 		return nil, errors.New("invalid tls config, please configure caCertSecret, clientCertSecret and clientKeySecret")
 	}
 
