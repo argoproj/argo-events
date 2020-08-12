@@ -1057,7 +1057,7 @@
         "url",
         "partition",
         "topic",
-        "kafkaVersion"
+        "version"
       ],
       "properties": {
         "connectionBackoff": {
@@ -1072,12 +1072,8 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
-        "kafkaVersion": {
-          "description": "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
-          "type": "string"
-        },
         "limitEventsPerSecond": {
-          "description": "Sets a limit on how many events get read from kafka per second which in turn limits the number of pods created per second if using an argo workflow or k8s sensor.",
+          "description": "Sets a limit on how many events get read from kafka per second.",
           "type": "integer",
           "format": "int64"
         },
@@ -1102,6 +1098,10 @@
         },
         "url": {
           "description": "URL to kafka cluster",
+          "type": "string"
+        },
+        "version": {
+          "description": "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
           "type": "string"
         }
       }

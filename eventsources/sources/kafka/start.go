@@ -82,7 +82,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
-	config, err := getSaramaConfig(log, kafkaEventSource)
+	config, err := getSaramaConfig(kafkaEventSource, log)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	if err := sources.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
 		var err error
 
-		config, err := getSaramaConfig(log, kafkaEventSource)
+		config, err := getSaramaConfig(kafkaEventSource, log)
 		if err != nil {
 			return err
 		}
@@ -238,13 +238,13 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	}
 }
 
-func getSaramaConfig(log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource) (*sarama.Config, error) { //nolint:interfacer
+func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) { //nolint:interfacer
 	config := sarama.NewConfig()
 
-	if kafkaEventSource.KafkaVersion == "" {
+	if kafkaEventSource.Version == "" {
 		config.Version = sarama.V1_0_0_0
 	} else {
-		version, err := sarama.ParseKafkaVersion(kafkaEventSource.KafkaVersion)
+		version, err := sarama.ParseKafkaVersion(kafkaEventSource.Version)
 		if err != nil {
 			log.Errorf("Error parsing Kafka version: %v", err)
 			return nil, err

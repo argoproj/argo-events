@@ -317,13 +317,12 @@ type KafkaEventSource struct {
 	// +optional
 	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,8,opt,name=consumerGroup"`
 
-	// Sets a limit on how many events get read from kafka per second which in turn limits the number of pods
-	// created per second if using an argo workflow or k8s sensor.
+	// Sets a limit on how many events get read from kafka per second.
 	// +optional
 	LimitEventsPerSecond int64 `json:"limitEventsPerSecond,omitempty" protobuf:"varint,9,opt,name=limitEventsPerSecond"`
 
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
-	KafkaVersion string `json:"kafkaVersion" protobuf:"bytes,10,opt,name=kafkaVersion"`
+	Version string `json:"version" protobuf:"bytes,10,opt,name=version"`
 }
 
 type KafkaConsumerGroup struct {

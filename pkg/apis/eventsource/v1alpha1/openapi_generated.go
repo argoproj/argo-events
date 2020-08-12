@@ -1370,12 +1370,12 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					},
 					"limitEventsPerSecond": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Sets a limit on how many events get read from kafka per second which in turn limits the number of pods created per second if using an argo workflow or k8s sensor.",
+							Description: "Sets a limit on how many events get read from kafka per second.",
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
 					},
-					"kafkaVersion": {
+					"version": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
 							Type:        []string{"string"},
@@ -1383,7 +1383,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"url", "partition", "topic", "kafkaVersion"},
+				Required: []string{"url", "partition", "topic", "version"},
 			},
 		},
 		Dependencies: []string{

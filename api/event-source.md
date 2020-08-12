@@ -3779,9 +3779,7 @@ Consumer group for kafka client
 
 <p>
 
-Sets a limit on how many events get read from kafka per second which in
-turn limits the number of pods created per second if using an argo
-workflow or k8s sensor.
+Sets a limit on how many events get read from kafka per second.
 
 </p>
 
@@ -3793,7 +3791,7 @@ workflow or k8s sensor.
 
 <td>
 
-<code>kafkaVersion</code></br> <em> string </em>
+<code>version</code></br> <em> string </em>
 
 </td>
 

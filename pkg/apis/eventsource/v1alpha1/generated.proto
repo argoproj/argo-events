@@ -454,13 +454,12 @@ message KafkaEventSource {
   // +optional
   optional KafkaConsumerGroup consumerGroup = 8;
 
-  // Sets a limit on how many events get read from kafka per second which in turn limits the number of pods
-  // created per second if using an argo workflow or k8s sensor.
+  // Sets a limit on how many events get read from kafka per second.
   // +optional
   optional int64 limitEventsPerSecond = 9;
 
   // Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
-  optional string kafkaVersion = 10;
+  optional string version = 10;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
