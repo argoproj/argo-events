@@ -104,7 +104,6 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 		dispatch:         dispatch,
 		logger:           log,
 		kafkaEventSource: kafkaEventSource,
-		ctx:              ctx,
 	}
 
 	client, err := sarama.NewConsumerGroup([]string{kafkaEventSource.URL}, kafkaEventSource.ConsumerGroup.GroupName, config)
@@ -275,7 +274,6 @@ type Consumer struct {
 	dispatch         func([]byte) error
 	logger           *zap.SugaredLogger
 	kafkaEventSource *v1alpha1.KafkaEventSource
-	ctx              context.Context
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
