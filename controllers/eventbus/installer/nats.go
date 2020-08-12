@@ -519,6 +519,7 @@ streaming {
   cluster {
 	node_id: $POD_NAME
 	peers: [%s]
+	log_path: /data/stan/logs
   }
   store_limits {
     max_age: 72h
