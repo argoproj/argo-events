@@ -1294,7 +1294,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"groupName", "rebalanceStrategy"},
+				Required: []string{"groupName"},
 			},
 		},
 	}

@@ -1032,8 +1032,7 @@
     "io.argoproj.eventsource.v1alpha1.KafkaConsumerGroup": {
       "type": "object",
       "required": [
-        "groupName",
-        "rebalanceStrategy"
+        "groupName"
       ],
       "properties": {
         "groupName": {

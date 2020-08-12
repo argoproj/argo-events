@@ -417,9 +417,11 @@ message KafkaConsumerGroup {
   optional string groupName = 1;
 
   // When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
+  // +optional
   optional bool oldest = 2;
 
   // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+  // +optional
   optional string rebalanceStrategy = 3;
 }
 

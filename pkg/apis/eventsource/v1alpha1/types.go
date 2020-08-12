@@ -330,8 +330,10 @@ type KafkaConsumerGroup struct {
 	// The name for the consumer group to use
 	GroupName string `json:"groupName" protobuf:"bytes,1,opt,name=groupName"`
 	// When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
+	// +optional
 	Oldest bool `json:"oldest,omitempty" protobuf:"varint,2,opt,name=oldest"`
 	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+	// +optional
 	RebalanceStrategy string `json:"rebalanceStrategy" protobuf:"bytes,3,opt,name=rebalanceStrategy"`
 }
 

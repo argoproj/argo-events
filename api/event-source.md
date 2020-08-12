@@ -3508,6 +3508,8 @@ The name for the consumer group to use
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 When starting up a new group do we want to start from the oldest event
@@ -3528,6 +3530,8 @@ When starting up a new group do we want to start from the oldest event
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
