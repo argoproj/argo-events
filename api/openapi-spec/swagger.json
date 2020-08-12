@@ -1056,8 +1056,7 @@
       "required": [
         "url",
         "partition",
-        "topic",
-        "version"
+        "topic"
       ],
       "properties": {
         "connectionBackoff": {

@@ -3797,6 +3797,8 @@ Sets a limit on how many events get read from kafka per second.
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Specify what kafka version is being connected to enables certain

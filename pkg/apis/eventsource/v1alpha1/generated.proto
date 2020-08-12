@@ -459,6 +459,7 @@ message KafkaEventSource {
   optional int64 limitEventsPerSecond = 9;
 
   // Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
+  // +optional
   optional string version = 10;
 }
 

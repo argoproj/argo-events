@@ -322,6 +322,7 @@ type KafkaEventSource struct {
 	LimitEventsPerSecond int64 `json:"limitEventsPerSecond,omitempty" protobuf:"varint,9,opt,name=limitEventsPerSecond"`
 
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
+	// +optional
 	Version string `json:"version" protobuf:"bytes,10,opt,name=version"`
 }
 
