@@ -31,7 +31,7 @@ spec:
 #        oldest: false
 #        rebalanceStrategy: range
 #      limitEventsPerSecond: 1
-#      kafkaVersion: "2.5.0"
+#      version: "2.5.0"
 
 #    example-tls:
 #      url: "kafka.argo-events:9092"
