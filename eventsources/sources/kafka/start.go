@@ -325,16 +325,9 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			//1000000000 is 1 second in nanoseconds
 			d := (1000000000 / time.Duration(consumer.kafkaEventSource.LimitEventsPerSecond) * time.Nanosecond) * time.Nanosecond
 			consumer.logger.Infof("Sleeping for: %v.", d)
-			sleepContext(consumer.ctx, d)
+			time.Sleep(d)
 		}
 	}
 
 	return nil
-}
-
-func sleepContext(ctx context.Context, delay time.Duration) {
-	select {
-	case <-ctx.Done():
-	case <-time.After(delay):
-	}
 }
