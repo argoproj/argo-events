@@ -5627,8 +5627,8 @@ OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
 
 <p>
 
-Switch is the condition to execute the trigger. DEPRECATED: USE Switch
-instead
+DeprecatedSwitch is the condition to execute the trigger. DEPRECATED:
+USE conditions instead
 
 </p>
 

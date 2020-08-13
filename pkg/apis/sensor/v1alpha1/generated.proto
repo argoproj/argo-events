@@ -725,8 +725,8 @@ message TriggerTemplate {
   // +optional
   optional OpenWhiskTrigger openWhisk = 11;
 
-  // Switch is the condition to execute the trigger.
-  // DEPRECATED: USE Switch instead
+  // DeprecatedSwitch is the condition to execute the trigger.
+  // DEPRECATED: USE conditions instead
   // +optional
   optional TriggerSwitch switch = 12;
 }

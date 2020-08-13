@@ -1969,7 +1969,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 					},
 					"switch": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Switch is the condition to execute the trigger. DEPRECATED: USE Switch instead",
+							Description: "DeprecatedSwitch is the condition to execute the trigger. DEPRECATED: USE conditions instead",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"),
 						},
 					},

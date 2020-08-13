@@ -2963,7 +2963,7 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackTrigger"
         },
         "switch": {
-          "description": "Switch is the condition to execute the trigger. DEPRECATED: USE Switch instead",
+          "description": "DeprecatedSwitch is the condition to execute the trigger. DEPRECATED: USE conditions instead",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerSwitch"
         }
       }

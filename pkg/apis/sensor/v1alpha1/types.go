@@ -314,8 +314,8 @@ type TriggerTemplate struct {
 	// OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
 	// +optional
 	OpenWhisk *OpenWhiskTrigger `json:"openWhisk,omitempty" protobuf:"bytes,11,opt,name=openWhisk"`
-	// Switch is the condition to execute the trigger.
-	// DEPRECATED: USE Switch instead
+	// DeprecatedSwitch is the condition to execute the trigger.
+	// DEPRECATED: USE conditions instead
 	// +optional
 	DeprecatedSwitch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,12,opt,name=switch"`
 }
