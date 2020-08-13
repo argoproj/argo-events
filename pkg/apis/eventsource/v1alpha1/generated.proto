@@ -416,10 +416,12 @@ message KafkaConsumerGroup {
   // The name for the consumer group to use
   optional string groupName = 1;
 
-  // Specify what kafka version is being connected to enables certain features in sarama
-  optional string kafkaVersion = 2;
+  // When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
+  // +optional
+  optional bool oldest = 2;
 
   // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+  // +optional
   optional string rebalanceStrategy = 3;
 }
 
@@ -453,6 +455,14 @@ message KafkaEventSource {
   // Consumer group for kafka client
   // +optional
   optional KafkaConsumerGroup consumerGroup = 8;
+
+  // Sets a limit on how many events get read from kafka per second.
+  // +optional
+  optional int64 limitEventsPerSecond = 9;
+
+  // Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
+  // +optional
+  optional string version = 10;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
