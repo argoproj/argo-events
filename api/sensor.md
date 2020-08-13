@@ -3435,6 +3435,27 @@ DependencyGroups is a list of the groups of events.
 
 <td>
 
+<code>dependencyAliases</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DependencyAliases is the aliases mapping of dependency expressions For
+example, “expr01”: “(dep01 && dep 02) || dep03”
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>errorOnFailedRound</code></br> <em> bool </em>
 
 </td>
@@ -3649,6 +3670,27 @@ Template is the pod specification for the sensor
 <p>
 
 DependencyGroups is a list of the groups of events.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>dependencyAliases</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DependencyAliases is the aliases mapping of dependency expressions For
+example, “expr01”: “(dep01 && dep 02) || dep03”
 
 </p>
 

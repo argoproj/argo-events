@@ -729,6 +729,13 @@ func (in *SensorSpec) DeepCopyInto(out *SensorSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.DependencyAliases != nil {
+		in, out := &in.DependencyAliases, &out.DependencyAliases
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

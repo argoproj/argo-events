@@ -137,14 +137,17 @@ type SensorSpec struct {
 	Template Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
 	// DependencyGroups is a list of the groups of events.
 	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,4,rep,name=dependencyGroups"`
+	// DependencyAliases is the aliases mapping of dependency expressions
+	// For example, "expr01": "(dep01 && dep 02) || dep03"
+	DependencyAliases map[string]string `json:"dependencyAliases,omitempty" protobuf:"bytes,5,rep,name=dependencyGroupses"`
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
 	// Once sensor state is set to `error`, no further triggers will be processed.
-	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,5,opt,name=errorOnFailedRound"`
+	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,6,opt,name=errorOnFailedRound"`
 	// EventBusName references to a EventBus name. By default the value is "default"
-	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,6,opt,name=eventBusName"`
+	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,7,opt,name=eventBusName"`
 	// Circuit is a boolean expression of dependency groups
 	// DEPRECATED: Use Switch in triggers instead.
-	DeprecatedCircuit string `json:"circuit,omitempty" protobuf:"bytes,7,opt,name=circuit"`
+	DeprecatedCircuit string `json:"circuit,omitempty" protobuf:"bytes,8,opt,name=circuit"`
 }
 
 // Template holds the information of a sensor deployment template

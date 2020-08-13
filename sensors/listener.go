@@ -252,16 +252,16 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, trigger v1alpha1.Trigger) (string, error) {
 	logger := logging.FromContext(ctx).Desugar()
 
-	// Translate orginal expression which might contain group names
+	// Translate original expression which might contain group names
 	// to an expression only contains dependency names
-	translate := func(orginalExpr string, parameters map[string]string) (string, error) {
-		orginalExpr = strings.ReplaceAll(orginalExpr, "&&", " + \"&&\" + ")
-		orginalExpr = strings.ReplaceAll(orginalExpr, "||", " + \"||\" + ")
-		orginalExpr = strings.ReplaceAll(orginalExpr, "-", "_")
-		orginalExpr = strings.ReplaceAll(orginalExpr, "(", "\"(\"+")
-		orginalExpr = strings.ReplaceAll(orginalExpr, ")", "+\")\"")
+	translate := func(originalExpr string, parameters map[string]string) (string, error) {
+		originalExpr = strings.ReplaceAll(originalExpr, "&&", " + \"&&\" + ")
+		originalExpr = strings.ReplaceAll(originalExpr, "||", " + \"||\" + ")
+		originalExpr = strings.ReplaceAll(originalExpr, "-", "_")
+		originalExpr = strings.ReplaceAll(originalExpr, "(", "\"(\"+")
+		originalExpr = strings.ReplaceAll(originalExpr, ")", "+\")\"")
 
-		program, err := expr.Compile(orginalExpr, expr.Env(parameters))
+		program, err := expr.Compile(originalExpr, expr.Env(parameters))
 		if err != nil {
 			logger.Error("Failed to compile original dependency expression", zap.Error(err))
 			return "", err
