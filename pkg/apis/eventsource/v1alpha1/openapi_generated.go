@@ -1279,10 +1279,10 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 							Format:      "",
 						},
 					},
-					"kafkaVersion": {
+					"oldest": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Specify what kafka version is being connected to enables certain features in sarama",
-							Type:        []string{"string"},
+							Description: "When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
@@ -1294,7 +1294,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"groupName", "kafkaVersion", "rebalanceStrategy"},
+				Required: []string{"groupName"},
 			},
 		},
 	}
@@ -1366,6 +1366,20 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 						SchemaProps: spec.SchemaProps{
 							Description: "Consumer group for kafka client",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"),
+						},
+					},
+					"limitEventsPerSecond": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Sets a limit on how many events get read from kafka per second.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},

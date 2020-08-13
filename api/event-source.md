@@ -3502,16 +3502,18 @@ The name for the consumer group to use
 
 <td>
 
-<code>kafkaVersion</code></br> <em> string </em>
+<code>oldest</code></br> <em> bool </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Specify what kafka version is being connected to enables certain
-features in sarama
+When starting up a new group do we want to start from the oldest event
+(true) or the newest event (false), defaults to false
 
 </p>
 
@@ -3528,6 +3530,8 @@ features in sarama
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -3758,6 +3762,51 @@ event payload.
 <p>
 
 Consumer group for kafka client
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>limitEventsPerSecond</code></br> <em> int64 </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Sets a limit on how many events get read from kafka per second.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>version</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Specify what kafka version is being connected to enables certain
+features in sarama, defaults to 1.0.0
 
 </p>
 

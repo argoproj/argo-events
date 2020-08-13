@@ -316,14 +316,24 @@ type KafkaEventSource struct {
 	// Consumer group for kafka client
 	// +optional
 	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,8,opt,name=consumerGroup"`
+
+	// Sets a limit on how many events get read from kafka per second.
+	// +optional
+	LimitEventsPerSecond int64 `json:"limitEventsPerSecond,omitempty" protobuf:"varint,9,opt,name=limitEventsPerSecond"`
+
+	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
+	// +optional
+	Version string `json:"version" protobuf:"bytes,10,opt,name=version"`
 }
 
 type KafkaConsumerGroup struct {
 	// The name for the consumer group to use
 	GroupName string `json:"groupName" protobuf:"bytes,1,opt,name=groupName"`
-	// Specify what kafka version is being connected to enables certain features in sarama
-	KafkaVersion string `json:"kafkaVersion" protobuf:"bytes,2,opt,name=kafkaVersion"`
+	// When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
+	// +optional
+	Oldest bool `json:"oldest,omitempty" protobuf:"varint,2,opt,name=oldest"`
 	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+	// +optional
 	RebalanceStrategy string `json:"rebalanceStrategy" protobuf:"bytes,3,opt,name=rebalanceStrategy"`
 }
 
