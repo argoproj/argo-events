@@ -452,18 +452,19 @@ message SensorSpec {
   // +optional
   optional Template template = 3;
 
-  // Circuit is a boolean expression of dependency groups
-  optional string circuit = 4;
-
   // DependencyGroups is a list of the groups of events.
-  repeated DependencyGroup dependencyGroups = 5;
+  repeated DependencyGroup dependencyGroups = 4;
 
   // ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
   // Once sensor state is set to `error`, no further triggers will be processed.
-  optional bool errorOnFailedRound = 6;
+  optional bool errorOnFailedRound = 5;
 
   // EventBusName references to a EventBus name. By default the value is "default"
-  optional string eventBusName = 7;
+  optional string eventBusName = 6;
+
+  // Circuit is a boolean expression of dependency groups
+  // DEPRECATED: Use Switch in triggers instead.
+  optional string circuit = 7;
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -669,6 +670,7 @@ message TriggerPolicy {
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
+// DEPRECATED
 message TriggerSwitch {
   // Any acts as a OR operator between dependencies
   repeated string any = 1;
@@ -682,9 +684,10 @@ message TriggerTemplate {
   // Name is a unique name of the action to take.
   optional string name = 1;
 
-  // Switch is the condition to execute the trigger.
+  // Conditions is the conditions to execute the trigger.
+  // For example: "group1 && group2 && dep04"
   // +optional
-  optional TriggerSwitch switch = 2;
+  optional string conditions = 2;
 
   // StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes resource.
   // +optional
@@ -721,6 +724,11 @@ message TriggerTemplate {
   // OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
   // +optional
   optional OpenWhiskTrigger openWhisk = 11;
+
+  // Switch is the condition to execute the trigger.
+  // DEPRECATED: USE Switch instead
+  // +optional
+  optional TriggerSwitch switch = 12;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

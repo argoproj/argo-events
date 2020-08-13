@@ -1736,17 +1736,6 @@ Template
 </tr>
 <tr>
 <td>
-<code>circuit</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Circuit is a boolean expression of dependency groups</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>dependencyGroups</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.DependencyGroup">
@@ -1779,6 +1768,18 @@ string
 </td>
 <td>
 <p>EventBusName references to a EventBus name. By default the value is &ldquo;default&rdquo;</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>circuit</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Circuit is a boolean expression of dependency groups
+DEPRECATED: Use Switch in triggers instead.</p>
 </td>
 </tr>
 </table>
@@ -1857,17 +1858,6 @@ Template
 </tr>
 <tr>
 <td>
-<code>circuit</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Circuit is a boolean expression of dependency groups</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>dependencyGroups</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.DependencyGroup">
@@ -1900,6 +1890,18 @@ string
 </td>
 <td>
 <p>EventBusName references to a EventBus name. By default the value is &ldquo;default&rdquo;</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>circuit</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Circuit is a boolean expression of dependency groups
+DEPRECATED: Use Switch in triggers instead.</p>
 </td>
 </tr>
 </tbody>
@@ -2659,7 +2661,8 @@ StatusPolicy
 </p>
 <p>
 <p>TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
-Depending upon condition type, status of dependency groups is used to evaluate the result.</p>
+Depending upon condition type, status of dependency groups is used to evaluate the result.
+DEPRECATED</p>
 </p>
 <table>
 <thead>
@@ -2723,16 +2726,15 @@ string
 </tr>
 <tr>
 <td>
-<code>switch</code></br>
+<code>conditions</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TriggerSwitch">
-TriggerSwitch
-</a>
+string
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>Switch is the condition to execute the trigger.</p>
+<p>Conditions is the conditions to execute the trigger.
+For example: &ldquo;group1 &amp;&amp; group2 &amp;&amp; dep04&rdquo;</p>
 </td>
 </tr>
 <tr>
@@ -2857,6 +2859,21 @@ OpenWhiskTrigger
 <td>
 <em>(Optional)</em>
 <p>OpenWhisk refers to the trigger designed to invoke OpenWhisk action.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>switch</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.TriggerSwitch">
+TriggerSwitch
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Switch is the condition to execute the trigger.
+DEPRECATED: USE Switch instead</p>
 </td>
 </tr>
 </tbody>

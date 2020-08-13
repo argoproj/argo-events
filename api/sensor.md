@@ -3413,26 +3413,6 @@ Template is the pod specification for the sensor
 
 <td>
 
-<code>circuit</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Circuit is a boolean expression of dependency groups
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>dependencyGroups</code></br> <em>
 <a href="#argoproj.io/v1alpha1.DependencyGroup"> \[\]DependencyGroup
 </a> </em>
@@ -3488,6 +3468,27 @@ processed.
 
 EventBusName references to a EventBus name. By default the value is
 “default”
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>circuit</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Circuit is a boolean expression of dependency groups DEPRECATED: Use
+Switch in triggers instead.
 
 </p>
 
@@ -3637,26 +3638,6 @@ Template is the pod specification for the sensor
 
 <td>
 
-<code>circuit</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Circuit is a boolean expression of dependency groups
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>dependencyGroups</code></br> <em>
 <a href="#argoproj.io/v1alpha1.DependencyGroup"> \[\]DependencyGroup
 </a> </em>
@@ -3712,6 +3693,27 @@ processed.
 
 EventBusName references to a EventBus name. By default the value is
 “default”
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>circuit</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Circuit is a boolean expression of dependency groups DEPRECATED: Use
+Switch in triggers instead.
 
 </p>
 
@@ -5234,7 +5236,7 @@ TriggerSwitch
 
 TriggerSwitch describes condition which must be satisfied in order to
 execute a trigger. Depending upon condition type, status of dependency
-groups is used to evaluate the result.
+groups is used to evaluate the result. DEPRECATED
 
 </p>
 
@@ -5379,8 +5381,7 @@ Name is a unique name of the action to take.
 
 <td>
 
-<code>switch</code></br> <em>
-<a href="#argoproj.io/v1alpha1.TriggerSwitch"> TriggerSwitch </a> </em>
+<code>conditions</code></br> <em> string </em>
 
 </td>
 
@@ -5390,7 +5391,8 @@ Name is a unique name of the action to take.
 
 <p>
 
-Switch is the condition to execute the trigger.
+Conditions is the conditions to execute the trigger. For example:
+“group1 && group2 && dep04”
 
 </p>
 
@@ -5603,6 +5605,30 @@ Slack refers to the trigger designed to send slack notification message.
 <p>
 
 OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>switch</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerSwitch"> TriggerSwitch </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Switch is the condition to execute the trigger. DEPRECATED: USE Switch
+instead
 
 </p>
 
