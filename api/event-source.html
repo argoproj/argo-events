@@ -1850,13 +1850,14 @@ string
 </tr>
 <tr>
 <td>
-<code>kafkaVersion</code></br>
+<code>oldest</code></br>
 <em>
-string
+bool
 </em>
 </td>
 <td>
-<p>Specify what kafka version is being connected to enables certain features in sarama</p>
+<em>(Optional)</em>
+<p>When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false</p>
 </td>
 </tr>
 <tr>
@@ -1867,6 +1868,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.</p>
 </td>
 </tr>
@@ -1984,6 +1986,30 @@ KafkaConsumerGroup
 <td>
 <em>(Optional)</em>
 <p>Consumer group for kafka client</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>limitEventsPerSecond</code></br>
+<em>
+int64
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Sets a limit on how many events get read from kafka per second.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0</p>
 </td>
 </tr>
 </tbody>
