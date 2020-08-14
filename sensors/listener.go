@@ -293,6 +293,10 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 			key := strings.ReplaceAll(depGroup.Name, "-", "_")
 			depGroupMapping[key] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
 		}
+		for k, v := range sensor.Spec.DependencyAliases {
+			key := strings.ReplaceAll(k, "-", "_")
+			depGroupMapping[key] = fmt.Sprintf("(%s)", v)
+		}
 		depExpression, err = translate(conditions, depGroupMapping)
 		if err != nil {
 			return "", err
