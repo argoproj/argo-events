@@ -83,9 +83,9 @@ Make sure there are no errors in any of the event-sources.
                 \    \        __/
                   \____\______/
 
-5.  Great!! You have now learned how to use a `conditions`. Lets update the
-    sensor with a trigger that waits for both dependencies to resolve. This is
-    the normal sensor behavior if `conditions` is not defined.
+5.  Great!! You have now learned how to use `conditions`. Lets update the sensor
+    with a trigger that waits for both dependencies to resolve. This is the
+    normal sensor behavior if `conditions` is not defined.
 
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-02.yaml
 
