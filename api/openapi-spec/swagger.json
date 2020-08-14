@@ -2927,7 +2927,7 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AWSLambdaTrigger"
         },
         "conditions": {
-          "description": "Conditions is the conditions to execute the trigger. For example: \"group1 \u0026\u0026 group2 \u0026\u0026 dep04\"",
+          "description": "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) \u0026\u0026 dep04\"",
           "type": "string"
         },
         "custom": {

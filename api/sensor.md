@@ -5392,7 +5392,7 @@ Name is a unique name of the action to take.
 <p>
 
 Conditions is the conditions to execute the trigger. For example:
-“group1 && group2 && dep04”
+“(dep01 || dep02) && dep04”
 
 </p>
 

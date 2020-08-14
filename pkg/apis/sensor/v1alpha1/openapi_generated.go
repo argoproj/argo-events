@@ -1908,7 +1908,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 					},
 					"conditions": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Conditions is the conditions to execute the trigger. For example: \"group1 && group2 && dep04\"",
+							Description: "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) && dep04\"",
 							Type:        []string{"string"},
 							Format:      "",
 						},

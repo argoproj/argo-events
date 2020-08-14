@@ -284,7 +284,7 @@ type TriggerTemplate struct {
 	// Name is a unique name of the action to take.
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 	// Conditions is the conditions to execute the trigger.
-	// For example: "group1 && group2 && dep04"
+	// For example: "(dep01 || dep02) && dep04"
 	// +optional
 	Conditions string `json:"conditions,omitempty" protobuf:"bytes,2,opt,name=conditions"`
 	// StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes resource.
