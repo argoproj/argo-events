@@ -59,13 +59,13 @@ func main() {
 	}
 
 	// Readyness probe
-	err = mgr.AddReadyzCheck("ready-ping", healthz.Ping)
+	err = mgr.AddReadyzCheck("readiness", healthz.Ping)
 	if err != nil {
 		logger.Desugar().Fatal("unable add a readiness check", zap.Error(err))
 	}
 
 	// Liveness probe
-	err = mgr.AddHealthzCheck("health-ping", healthz.Ping)
+	err = mgr.AddHealthzCheck("liveness", healthz.Ping)
 	if err != nil {
 		logger.Desugar().Fatal("unable add a health check", zap.Error(err))
 	}
