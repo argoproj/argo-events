@@ -26,3 +26,16 @@ spec:
               value: nats-streaming:0.17.0
             - name: NATS_METRICS_EXPORTER_IMAGE
               value: synadia/prometheus-nats-exporter:0.6.2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 3
+            periodSeconds: 3
+

@@ -10,6 +10,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
@@ -45,7 +46,10 @@ func main() {
 	if !defined {
 		logger.Fatalf("required environment variable '%s' not defined", natsMetricsExporterEnvVar)
 	}
-	opts := ctrl.Options{}
+	opts := ctrl.Options{
+		MetricsBindAddress:     ":8080",
+		HealthProbeBindAddress: ":8081",
+	}
 	if namespaced {
 		opts.Namespace = managedNamespace
 	}
@@ -53,10 +57,24 @@ func main() {
 	if err != nil {
 		logger.Desugar().Fatal("unable to get a controller-runtime manager", zap.Error(err))
 	}
+
+	// Readyness probe
+	err = mgr.AddReadyzCheck("ready-ping", healthz.Ping)
+	if err != nil {
+		logger.Desugar().Fatal("unable add a readiness check", zap.Error(err))
+	}
+
+	// Liveness probe
+	err = mgr.AddHealthzCheck("health-ping", healthz.Ping)
+	if err != nil {
+		logger.Desugar().Fatal("unable add a health check", zap.Error(err))
+	}
+
 	err = v1alpha1.AddToScheme(mgr.GetScheme())
 	if err != nil {
 		logger.Desugar().Fatal("unable to add scheme", zap.Error(err))
 	}
+
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
 		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger),
