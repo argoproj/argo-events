@@ -455,20 +455,16 @@ message SensorSpec {
   // DependencyGroups is a list of the groups of events.
   repeated DependencyGroup dependencyGroups = 4;
 
-  // DependencyAliases is the aliases mapping of dependency expressions
-  // For example, "expr01": "(dep01 && dep 02) || dep03"
-  map<string, string> dependencyGroupses = 5;
-
   // ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
   // Once sensor state is set to `error`, no further triggers will be processed.
-  optional bool errorOnFailedRound = 6;
+  optional bool errorOnFailedRound = 5;
 
   // EventBusName references to a EventBus name. By default the value is "default"
-  optional string eventBusName = 7;
+  optional string eventBusName = 6;
 
   // Circuit is a boolean expression of dependency groups
   // DEPRECATED: Use Switch in triggers instead.
-  optional string circuit = 8;
+  optional string circuit = 7;
 }
 
 // SensorStatus contains information about the status of a sensor.

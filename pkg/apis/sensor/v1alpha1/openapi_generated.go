@@ -1331,21 +1331,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
-					"dependencyAliases": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DependencyAliases is the aliases mapping of dependency expressions For example, \"expr01\": \"(dep01 && dep 02) || dep03\"",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
 					"errorOnFailedRound": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails. Once sensor state is set to `error`, no further triggers will be processed.",

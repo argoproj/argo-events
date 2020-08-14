@@ -2591,13 +2591,6 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependency"
           }
         },
-        "dependencyAliases": {
-          "description": "DependencyAliases is the aliases mapping of dependency expressions For example, \"expr01\": \"(dep01 \u0026\u0026 dep 02) || dep03\"",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
         "dependencyGroups": {
           "description": "DependencyGroups is a list of the groups of events.",
           "type": "array",
