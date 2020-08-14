@@ -152,21 +152,6 @@ func TestGetDependencyExpression(t *testing.T) {
 				EventSourceName: "webhook3",
 				EventName:       "example-3",
 			},
-			{
-				Name:            "dep-4",
-				EventSourceName: "webhook4",
-				EventName:       "example-4",
-			},
-			{
-				Name:            "dep_5",
-				EventSourceName: "webhook5",
-				EventName:       "example-5",
-			},
-			{
-				Name:            "dep-6",
-				EventSourceName: "webhook6",
-				EventName:       "example-6",
-			},
 		}
 		sensorCtx := &SensorContext{
 			Sensor: obj,
@@ -175,13 +160,10 @@ func TestGetDependencyExpression(t *testing.T) {
 			{Name: "group-1", Dependencies: []string{"dep-1", "dep_1a"}},
 			{Name: "group_2", Dependencies: []string{"dep-2"}},
 		}
-		obj.Spec.DependencyAliases = map[string]string{
-			"alias-01": "(dep-4 &&dep_5) ||dep-6",
-		}
 		trig := fakeTrigger.DeepCopy()
-		trig.Template.Conditions = "group-1 || group_2 || dep-3 || alias-01"
+		trig.Template.Conditions = "group-1 || group_2 || dep-3"
 		expr, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
 		assert.NoError(t, err)
-		assert.Equal(t, "dep-6 || dep-3 || dep-2 || (dep-4 && dep_5) || (dep-1 && dep_1a)", expr)
+		assert.Equal(t, "dep-3 || dep-2 || (dep-1 && dep_1a)", expr)
 	})
 }
