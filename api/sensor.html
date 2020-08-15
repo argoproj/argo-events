@@ -386,13 +386,15 @@ bool
 </tr>
 <tr>
 <td>
-<code>certFilePath</code></br>
+<code>certSecret</code></br>
 <em>
-string
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
 </em>
 </td>
 <td>
-<p>CertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.</p>
+<p>CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.</p>
 </td>
 </tr>
 <tr>
@@ -443,6 +445,18 @@ map[string]string
 </em>
 </td>
 <td>
+</td>
+</tr>
+<tr>
+<td>
+<code>certFilePath</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
+DEPRECATED: use CertSecret instead</p>
 </td>
 </tr>
 </tbody>
@@ -921,15 +935,15 @@ GitCreds
 </tr>
 <tr>
 <td>
-<code>sshKeyPath</code></br>
+<code>sshKeySecret</code></br>
 <em>
-string
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
 </em>
 </td>
 <td>
-<em>(Optional)</em>
-<p>SSHKeyPath is path to your ssh key path. Use this if you don&rsquo;t want to provide username and password.
-ssh key path must be mounted in sensor pod.</p>
+<p>SSHKeySecret refers to the secret that contains SSH key</p>
 </td>
 </tr>
 <tr>
@@ -993,6 +1007,20 @@ GitRemoteConfig
 <em>(Optional)</em>
 <p>Remote to manage set of tracked repositories. Defaults to &ldquo;origin&rdquo;.
 Refer <a href="https://git-scm.com/docs/git-remote">https://git-scm.com/docs/git-remote</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sshKeyPath</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don&rsquo;t want to provide username and password.
+ssh key path must be mounted in sensor pod.
+DEPRECATED: use SSHKeySecret instead.</p>
 </td>
 </tr>
 </tbody>
@@ -1126,9 +1154,7 @@ string
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -1371,9 +1397,7 @@ Defaults to 500 milliseconds.</p>
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -1522,9 +1546,7 @@ string
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -2140,60 +2162,6 @@ Only valid for operation type <code>update</code></p>
 </em>
 </td>
 <td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.TLSConfig">TLSConfig
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>, 
-<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>, 
-<a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>)
-</p>
-<p>
-<p>TLSConfig refers to TLS configuration for the HTTP client</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>caCertPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>CACertPath refers the file path that contains the CA cert.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>clientCertPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>ClientCertPath refers the file path that contains client cert.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>clientKeyPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>ClientKeyPath refers the file path that contains client key.</p>
 </td>
 </tr>
 </tbody>

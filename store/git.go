@@ -92,8 +92,16 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 			Password: password,
 		}, nil
 	}
-	if g.artifact.SSHKeyPath != "" {
-		return getSSHKeyAuth(g.artifact.SSHKeyPath)
+	if g.artifact.SSHKeySecret != nil {
+		sshKeyPath, err := common.GetSecretVolumePath(g.artifact.SSHKeySecret)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get SSH key from mounted volume")
+		}
+		return getSSHKeyAuth(sshKeyPath)
+	}
+	// DEPRECATED
+	if g.artifact.DeprecatedSSHKeyPath != "" {
+		return getSSHKeyAuth(g.artifact.DeprecatedSSHKeyPath)
 	}
 	return nil, nil
 }

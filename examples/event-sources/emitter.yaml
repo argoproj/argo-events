@@ -43,6 +43,12 @@ spec:
 #      channelKey: channel_key
 #      jsonBody: true
 #      tls:
-#        caCertPath: path-to-ca-cert-key-mounted-in-event-source-pod
-#        clientCertPath: path-to-client-cert-mounted-in-event-source-pod
-#        clientKeyPath: path-to-client-key-mounted-in-event-source-pod
+#        caCertSecret:
+#          name: my-secret
+#          key: ca-cert-key
+#        clientCertSecret:
+#          name: my-secret
+#          key: client-cert-key
+#        clientKeySecret:
+#          name: my-secret
+#          key: client-key-key

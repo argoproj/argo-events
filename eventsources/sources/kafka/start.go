@@ -252,7 +252,7 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 	}
 
 	if kafkaEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
+		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get the tls configuration")
 		}

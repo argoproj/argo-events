@@ -86,14 +86,34 @@ func startServer(router Router, controller *Controller) {
 
 		// start http server
 		go func() {
-			var err error
-			if route.Context.ServerCertPath == "" || route.Context.ServerKeyPath == "" {
-				err = server.ListenAndServe()
-			} else {
-				err = server.ListenAndServeTLS(route.Context.ServerCertPath, route.Context.ServerKeyPath)
-			}
-			if err != nil {
-				route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve", zap.Error(err))
+			switch {
+			case route.Context.ServerCertSecret != nil && route.Context.ServerKeySecret != nil:
+				certPath, err := common.GetSecretVolumePath(route.Context.ServerCertSecret)
+				if err != nil {
+					route.Logger.Errorw("failed to get cert path in mounted volume", "error", err)
+					return
+				}
+				keyPath, err := common.GetSecretVolumePath(route.Context.ServerKeySecret)
+				if err != nil {
+					route.Logger.Errorw("failed to get key path in mounted volume", "error", err)
+					return
+				}
+				err = server.ListenAndServeTLS(certPath, keyPath)
+				if err != nil {
+					route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve with TLS configured", zap.Error(err))
+				}
+			case route.Context.DeprecatedServerCertPath != "" && route.Context.DeprecatedServerKeyPath != "":
+				// DEPRECATED.
+				route.Logger.Warn("ServerCertPath and ServerKeyPath are deprecated, please use ServerCertSecret and ServerKeySecret")
+				err := server.ListenAndServeTLS(route.Context.DeprecatedServerCertPath, route.Context.DeprecatedServerKeyPath)
+				if err != nil {
+					route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve with TLS configured", zap.Error(err))
+				}
+			default:
+				err := server.ListenAndServe()
+				if err != nil {
+					route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve", zap.Error(err))
+				}
 			}
 		}()
 	}

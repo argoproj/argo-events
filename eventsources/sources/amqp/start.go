@@ -67,7 +67,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var conn *amqplib.Connection
 	if err := sources.Connect(backoff, func() error {
 		if amqpEventSource.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS.CACertPath, amqpEventSource.TLS.ClientCertPath, amqpEventSource.TLS.ClientKeyPath)
+			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS)
 			if err != nil {
 				return errors.Wrap(err, "failed to get the tls configuration")
 			}
