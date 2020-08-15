@@ -27,7 +27,11 @@ spec:
 #      port: "13000"
 #      endpoint: "/secure"
 #      method: "POST"
-#      # path to file that is mounted in event-source pod which contains certs
-#      serverCertPath: "/bin/webhook-secure/crt"
-#      # path to file that is mounted in event-source pod which contains private key
-#      serverKeyPath: "/bin/webhook-secure/key"
+#      # k8s secret that contains the cert
+#      serverCertSecret:
+#        name: my-secret
+#        key: cert-key
+#      # k8s secret that contains the private key
+#      serverKeySecret:
+#        name: my-secret
+#        key: pk-key

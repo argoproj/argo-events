@@ -76,7 +76,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	config := nsq.NewConfig()
 
 	if nsqEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(nsqEventSource.TLS.CACertPath, nsqEventSource.TLS.ClientCertPath, nsqEventSource.TLS.ClientKeyPath)
+		tlsConfig, err := common.GetTLSConfig(nsqEventSource.TLS)
 		if err != nil {
 			return errors.Wrap(err, "failed to get the tls configuration")
 		}

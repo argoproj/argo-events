@@ -10,8 +10,6 @@ spec:
           name: argoproj
         - mountPath: /git/argoproj1
           name: argoproj1
-        - mountPath: /secret
-          name: sshkey
         - mountPath: /etc/ssh
           name: known-hosts
     volumes:
@@ -19,9 +17,6 @@ spec:
         emptyDir: {}
       - name: argoproj1
         emptyDir: {}
-      - name: sshkey
-        secret:
-        secretName: git-ssh
       # The name of the key in the secret must be "ssh_known_hosts"
       # Make sure you have your git provider added in the known hosts
       # e.g. create the secret by running, kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
@@ -65,7 +60,9 @@ spec:
             git:
               url: "git@github.com:argoproj/argo.git"
               cloneDirectory: "/git/argoproj1"
-              sshKeyPath: "/secret/key"
+              sshKeySecret:
+                name: git-ssh
+                key: key
               namespace: argo-events
               filePath: "examples/hello-world.yaml"
               branch: "master"
