@@ -57,7 +57,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger":           schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger":     schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":           schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig":              schema_pkg_apis_sensor_v1alpha1_TLSConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template":               schema_pkg_apis_sensor_v1alpha1_Template(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":             schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
@@ -301,11 +300,10 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 							Format:      "",
 						},
 					},
-					"certFilePath": {
+					"certSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "CertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"serverNameOverride": {
@@ -354,12 +352,19 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 							},
 						},
 					},
+					"certFilePath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. DEPRECATED: use CertSecret instead",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"serverURL", "secure", "spec", "payload"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -675,11 +680,10 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds"),
 						},
 					},
-					"sshKeyPath": {
+					"sshKeySecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "SSHKeySecret refers to the secret that contains SSH key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"filePath": {
@@ -716,12 +720,19 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig"),
 						},
 					},
+					"sshKeyPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. DEPRECATED: use SSHKeySecret instead.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "cloneDirectory", "filePath"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -814,7 +825,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the HTTP client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"method": {
@@ -869,7 +880,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -981,7 +992,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the Kafka producer.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"payload": {
@@ -1008,7 +1019,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -1101,7 +1112,7 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the NATS producer.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 				},
@@ -1109,7 +1120,7 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -1537,41 +1548,6 @@ func schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref common.ReferenceCallback) 
 					},
 				},
 				Required: []string{"allow"},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_TLSConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "TLSConfig refers to TLS configuration for the HTTP client",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"caCertPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "CACertPath refers the file path that contains the CA cert.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"clientCertPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ClientCertPath refers the file path that contains client cert.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"clientKeyPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ClientKeyPath refers the file path that contains client key.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
 			},
 		},
 	}

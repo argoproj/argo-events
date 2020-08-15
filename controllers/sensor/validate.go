@@ -378,8 +378,8 @@ func validateCustomTrigger(trigger *v1alpha1.CustomTrigger) error {
 		return errors.New("trigger body can't be empty")
 	}
 	if trigger.Secure {
-		if trigger.CertFilePath == "" {
-			return errors.New("cert file path can't be nil when the trigger server connection is secure")
+		if trigger.CertSecret == nil && trigger.DeprecatedCertFilePath == "" {
+			return errors.New("certSecret can't be nil when the trigger server connection is secure")
 		}
 	}
 	if trigger.Parameters != nil {

@@ -381,7 +381,7 @@ type HTTPTrigger struct {
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
 	// TLS configuration for the HTTP client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
 	// Method refers to the type of the HTTP request.
 	// Refer https://golang.org/src/net/http/method.go for more info.
 	// Default value is POST.
@@ -401,16 +401,6 @@ type HTTPTrigger struct {
 	// Headers for the HTTP request.
 	// +optional
 	Headers map[string]string `json:"headers,omitempty" protobuf:"bytes,8,rep,name=headers"`
-}
-
-// TLSConfig refers to TLS configuration for the HTTP client
-type TLSConfig struct {
-	// CACertPath refers the file path that contains the CA cert.
-	CACertPath string `json:"caCertPath" protobuf:"bytes,1,opt,name=caCertPath"`
-	// ClientCertPath refers the file path that contains client cert.
-	ClientCertPath string `json:"clientCertPath" protobuf:"bytes,2,opt,name=clientCertPath"`
-	// ClientKeyPath refers the file path that contains client key.
-	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,opt,name=clientKeyPath"`
 }
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password
@@ -468,7 +458,7 @@ type KafkaTrigger struct {
 	FlushFrequency int32 `json:"flushFrequency,omitempty" protobuf:"varint,7,opt,name=flushFrequency"`
 	// TLS configuration for the Kafka producer.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
@@ -492,7 +482,7 @@ type NATSTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 	// TLS configuration for the NATS producer.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 }
 
 // CustomTrigger refers to the specification of the custom trigger.
@@ -501,8 +491,8 @@ type CustomTrigger struct {
 	ServerURL string `json:"serverURL" protobuf:"bytes,1,opt,name=serverURL"`
 	// Secure refers to type of the connection between sensor to custom trigger gRPC
 	Secure bool `json:"secure" protobuf:"varint,2,opt,name=secure"`
-	// CertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-	CertFilePath string `json:"certFilePath,omitempty" protobuf:"bytes,3,opt,name=certFilePath"`
+	// CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.
+	CertSecret *corev1.SecretKeySelector `json:"certSecret,omitempty" protobuf:"bytes,3,opt,name=certSecret"`
 	// ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.
 	ServerNameOverride string `json:"serverNameOverride,omitempty" protobuf:"bytes,4,opt,name=serverNameOverride"`
 	// Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
@@ -513,6 +503,9 @@ type CustomTrigger struct {
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
+	// DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
+	// DEPRECATED: use CertSecret instead
+	DeprecatedCertFilePath string `json:"certFilePath,omitempty" protobuf:"bytes,8,opt,name=certFilePath"`
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
@@ -747,10 +740,8 @@ type GitArtifact struct {
 	// Creds contain reference to git username and password
 	// +optional
 	Creds *GitCreds `json:"creds,omitempty" protobuf:"bytes,3,opt,name=creds"`
-	// SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
-	// ssh key path must be mounted in sensor pod.
-	// +optional
-	SSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,4,opt,name=sshKeyPath"`
+	// SSHKeySecret refers to the secret that contains SSH key
+	SSHKeySecret *corev1.SecretKeySelector `json:"sshKeySecret,omitempty" protobuf:"bytes,4,opt,name=sshKeySecret"`
 	// Path to file that contains trigger resource definition
 	FilePath string `json:"filePath" protobuf:"bytes,5,opt,name=filePath"`
 	// Branch to use to pull trigger resource
@@ -767,6 +758,11 @@ type GitArtifact struct {
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
 	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,9,opt,name=remote"`
+	// DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
+	// ssh key path must be mounted in sensor pod.
+	// DEPRECATED: use SSHKeySecret instead.
+	// +optional
+	DeprecatedSSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,10,opt,name=sshKeyPath"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote

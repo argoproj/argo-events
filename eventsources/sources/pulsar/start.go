@@ -77,16 +77,45 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	log.Info("setting client options...")
+	var err error
+	tlsTrustCertsFilePath := ""
+	if pulsarEventSource.TLSTrustCertsSecret != nil {
+		tlsTrustCertsFilePath, err = common.GetSecretVolumePath(pulsarEventSource.TLSTrustCertsSecret)
+		if err != nil {
+			log.Errorw("failed to get TLSTrustCertsFilePath from the volume", "error", err)
+			return err
+		}
+	}
 	clientOpt := pulsar.ClientOptions{
 		URL:                        pulsarEventSource.URL,
-		TLSTrustCertsFilePath:      pulsarEventSource.TLSTrustCertsFilePath,
+		TLSTrustCertsFilePath:      tlsTrustCertsFilePath,
 		TLSAllowInsecureConnection: pulsarEventSource.TLSAllowInsecureConnection,
 		TLSValidateHostname:        pulsarEventSource.TLSValidateHostname,
 	}
 
 	if pulsarEventSource.TLS != nil {
 		log.Info("setting tls auth option...")
-		clientOpt.Authentication = pulsar.NewAuthenticationTLS(pulsarEventSource.TLS.ClientCertPath, pulsarEventSource.TLS.ClientKeyPath)
+		var clientCertPath, clientKeyPath string
+		switch {
+		case pulsarEventSource.TLS.ClientCertSecret != nil && pulsarEventSource.TLS.ClientKeySecret != nil:
+			clientCertPath, err = common.GetSecretVolumePath(pulsarEventSource.TLS.ClientCertSecret)
+			if err != nil {
+				log.Errorw("failed to get ClientCertPath from the volume", "error", err)
+				return err
+			}
+			clientKeyPath, err = common.GetSecretVolumePath(pulsarEventSource.TLS.ClientKeySecret)
+			if err != nil {
+				log.Errorw("failed to get ClientKeyPath from the volume", "error", err)
+				return err
+			}
+		case pulsarEventSource.TLS.DeprecatedClientCertPath != "" && pulsarEventSource.TLS.DeprecatedClientKeyPath != "":
+			// DEPRECATED.
+			clientCertPath = pulsarEventSource.TLS.DeprecatedClientCertPath
+			clientKeyPath = pulsarEventSource.TLS.DeprecatedClientKeyPath
+		default:
+			return errors.New("invalid TLS config")
+		}
+		clientOpt.Authentication = pulsar.NewAuthenticationTLS(clientCertPath, clientKeyPath)
 	}
 
 	var client pulsar.Client

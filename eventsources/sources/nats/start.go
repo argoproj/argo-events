@@ -70,7 +70,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		var opt []natslib.Option
 
 		if natsEventSource.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(natsEventSource.TLS.CACertPath, natsEventSource.TLS.ClientCertPath, natsEventSource.TLS.ClientKeyPath)
+			tlsConfig, err := common.GetTLSConfig(natsEventSource.TLS)
 			if err != nil {
 				return errors.Wrap(err, "failed to get the tls configuration")
 			}
