@@ -214,8 +214,8 @@ will be JSON
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -805,8 +805,8 @@ will be JSON
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -3680,8 +3680,8 @@ Backoff holds parameters applied to connection.
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -3973,8 +3973,8 @@ will be JSON
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -4233,8 +4233,8 @@ will be JSON
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -4437,8 +4437,8 @@ will be JSON
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -4850,7 +4850,9 @@ Configure the service URL for the Pulsar service.
 
 <td>
 
-<code>tlsTrustCertsFilePath</code></br> <em> string </em>
+<code>tlsTrustCertsSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 
 </td>
 
@@ -4860,7 +4862,7 @@ Configure the service URL for the Pulsar service.
 
 <p>
 
-Set the path to the trusted TLS certificate file.
+Trusted TLS certificate secret.
 
 </p>
 
@@ -4917,8 +4919,8 @@ broker.
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -5165,8 +5167,8 @@ DB to use. If not specified, default DB 0 will be used.
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -6873,124 +6875,6 @@ event payload.
 
 </table>
 
-<h3 id="argoproj.io/v1alpha1.TLSConfig">
-
-TLSConfig
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
-<a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
-<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
-<a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
-<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
-<a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
-<a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>,
-<a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>)
-
-</p>
-
-<p>
-
-<p>
-
-TLSConfig refers to TLS configuration for a client.
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>caCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-CACertPath refers the file path that contains the CA cert.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>clientCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ClientCertPath refers the file path that contains client cert.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>clientKeyPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ClientKeyPath refers the file path that contains client key.
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
 <h3 id="argoproj.io/v1alpha1.Template">
 
 Template
@@ -7481,7 +7365,9 @@ URL is the url of the server.
 
 <td>
 
-<code>serverCertPath</code></br> <em> string </em>
+<code>serverCertSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 
 </td>
 
@@ -7501,7 +7387,9 @@ ServerCertPath refers the file that contains the cert.
 
 <td>
 
-<code>serverKeyPath</code></br> <em> string </em>
+<code>serverKeySecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 
 </td>
 
@@ -7558,6 +7446,46 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 
 AuthSecret holds a secret selector that contains a bearer token for
 authentication
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DeprecatedServerCertPath refers the file that contains the cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DeprecatedServerKeyPath refers the file that contains private key
 
 </p>
 

@@ -37,6 +37,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":   schema_argo_events_pkg_apis_common_S3Bucket(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":   schema_argo_events_pkg_apis_common_S3Filter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Status":     schema_argo_events_pkg_apis_common_Status(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":  schema_argo_events_pkg_apis_common_TLSConfig(ref),
 	}
 }
 
@@ -320,5 +321,60 @@ func schema_argo_events_pkg_apis_common_Status(ref common.ReferenceCallback) com
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/common.Condition"},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_TLSConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TLSConfig refers to TLS configuration for a client.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"caCertSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CACertSecret refers to the secret that contains the CA cert",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"clientCertSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientCertSecret refers to the secret that contains the client cert",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"clientKeySecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientKeySecret refers to the secret that contains the client key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"caCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedCACertPath refers the file path that contains the CA cert. Deprecated: use CACertSecret instead",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedClientCertPath refers the file path that contains client cert. Deprecated: use ClientCertSecret instead",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientKeyPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedClientKeyPath refers the file path that contains client key. Deprecated: use ClientKeySecret instead",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }

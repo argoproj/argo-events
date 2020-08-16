@@ -61,7 +61,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource":    schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridFilter":         schema_pkg_apis_eventsource_v1alpha1_StorageGridFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource":         schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig":                 schema_pkg_apis_eventsource_v1alpha1_TLSConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Template":                  schema_pkg_apis_eventsource_v1alpha1_Template(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig":           schema_pkg_apis_eventsource_v1alpha1_WatchPathConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext":            schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref),
@@ -119,7 +118,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the amqp client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"metadata": {
@@ -142,7 +141,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
 	}
 }
 
@@ -329,7 +328,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the emitter client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"metadata": {
@@ -352,7 +351,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1337,7 +1336,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the kafka client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"jsonBody": {
@@ -1387,7 +1386,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"},
 	}
 }
 
@@ -1435,7 +1434,7 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the mqtt client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"metadata": {
@@ -1458,7 +1457,7 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
 	}
 }
 
@@ -1540,7 +1539,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the nats client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"metadata": {
@@ -1563,7 +1562,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
 	}
 }
 
@@ -1611,7 +1610,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the nsq client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"metadata": {
@@ -1634,7 +1633,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
 	}
 }
 
@@ -1759,11 +1758,10 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"tlsTrustCertsFilePath": {
+					"tlsTrustCertsSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Set the path to the trusted TLS certificate file.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Trusted TLS certificate secret.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"tlsAllowInsecureConnection": {
@@ -1783,7 +1781,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the pulsar client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"connectionBackoff": {
@@ -1819,7 +1817,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1873,7 +1871,7 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the redis client.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
 					"metadata": {
@@ -1896,7 +1894,7 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2500,41 +2498,6 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 	}
 }
 
-func schema_pkg_apis_eventsource_v1alpha1_TLSConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "TLSConfig refers to TLS configuration for a client.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"caCertPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "CACertPath refers the file path that contains the CA cert.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"clientCertPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ClientCertPath refers the file path that contains client cert.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"clientKeyPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ClientKeyPath refers the file path that contains client key.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
-			},
-		},
-	}
-}
-
 func schema_pkg_apis_eventsource_v1alpha1_Template(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -2697,18 +2660,16 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 							Format:      "",
 						},
 					},
-					"serverCertPath": {
+					"serverCertSecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ServerCertPath refers the file that contains the cert.",
-							Type:        []string{"string"},
-							Format:      "",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"serverKeyPath": {
+					"serverKeySecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ServerKeyPath refers the file that contains private key",
-							Type:        []string{"string"},
-							Format:      "",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"metadata": {
@@ -2730,6 +2691,20 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 						SchemaProps: spec.SchemaProps{
 							Description: "AuthSecret holds a secret selector that contains a bearer token for authentication",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"serverCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedServerCertPath refers the file that contains the cert.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"serverKeyPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedServerKeyPath refers the file that contains private key",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},

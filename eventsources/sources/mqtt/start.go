@@ -96,7 +96,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("setting up the mqtt broker client...")
 	opts := mqttlib.NewClientOptions().AddBroker(mqttEventSource.URL).SetClientID(mqttEventSource.ClientID)
 	if mqttEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(mqttEventSource.TLS.CACertPath, mqttEventSource.TLS.ClientCertPath, mqttEventSource.TLS.ClientKeyPath)
+		tlsConfig, err := common.GetTLSConfig(mqttEventSource.TLS)
 		if err != nil {
 			return errors.Wrap(err, "failed to get the tls configuration")
 		}

@@ -64,7 +64,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var options []func(client *emitter.Client)
 	if emitterEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(emitterEventSource.TLS.CACertPath, emitterEventSource.TLS.ClientCertPath, emitterEventSource.TLS.ClientKeyPath)
+		tlsConfig, err := common.GetTLSConfig(emitterEventSource.TLS)
 		if err != nil {
 			return errors.Wrap(err, "failed to get the tls configuration")
 		}

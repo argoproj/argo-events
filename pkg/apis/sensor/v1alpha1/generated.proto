@@ -106,8 +106,8 @@ message CustomTrigger {
   // Secure refers to type of the connection between sensor to custom trigger gRPC
   optional bool secure = 2;
 
-  // CertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-  optional string certFilePath = 3;
+  // CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.
+  optional k8s.io.api.core.v1.SecretKeySelector certSecret = 3;
 
   // ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.
   optional string serverNameOverride = 4;
@@ -118,6 +118,10 @@ message CustomTrigger {
   repeated TriggerParameter parameters = 6;
 
   repeated TriggerParameter payload = 7;
+
+  // DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
+  // DEPRECATED: use CertSecret instead
+  optional string certFilePath = 8;
 }
 
 // DataFilter describes constraints and filters for event data
@@ -234,10 +238,8 @@ message GitArtifact {
   // +optional
   optional GitCreds creds = 3;
 
-  // SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
-  // ssh key path must be mounted in sensor pod.
-  // +optional
-  optional string sshKeyPath = 4;
+  // SSHKeySecret refers to the secret that contains SSH key
+  optional k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 4;
 
   // Path to file that contains trigger resource definition
   optional string filePath = 5;
@@ -259,6 +261,12 @@ message GitArtifact {
   // Refer https://git-scm.com/docs/git-remote
   // +optional
   optional GitRemoteConfig remote = 9;
+
+  // DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
+  // ssh key path must be mounted in sensor pod.
+  // DEPRECATED: use SSHKeySecret instead.
+  // +optional
+  optional string sshKeyPath = 10;
 }
 
 // GitCreds contain reference to git username and password
@@ -287,7 +295,7 @@ message HTTPTrigger {
 
   // TLS configuration for the HTTP client.
   // +optional
-  optional TLSConfig tls = 3;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 3;
 
   // Method refers to the type of the HTTP request.
   // Refer https://golang.org/src/net/http/method.go for more info.
@@ -356,7 +364,7 @@ message KafkaTrigger {
 
   // TLS configuration for the Kafka producer.
   // +optional
-  optional TLSConfig tls = 8;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 8;
 
   repeated TriggerParameter payload = 9;
 
@@ -387,7 +395,7 @@ message NATSTrigger {
 
   // TLS configuration for the NATS producer.
   // +optional
-  optional TLSConfig tls = 5;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 5;
 }
 
 // OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
@@ -526,18 +534,6 @@ message StandardK8STrigger {
 // StatusPolicy refers to the policy used to check the state of the trigger using response status
 message StatusPolicy {
   repeated int32 allow = 1;
-}
-
-// TLSConfig refers to TLS configuration for the HTTP client
-message TLSConfig {
-  // CACertPath refers the file path that contains the CA cert.
-  optional string caCertPath = 1;
-
-  // ClientCertPath refers the file path that contains client cert.
-  optional string clientCertPath = 2;
-
-  // ClientKeyPath refers the file path that contains client key.
-  optional string clientKeyPath = 3;
 }
 
 // Template holds the information of a sensor deployment template
