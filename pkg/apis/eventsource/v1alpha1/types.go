@@ -286,7 +286,7 @@ type AMQPEventSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,6,opt,name=jsonBody"`
 	// TLS configuration for the amqp client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
@@ -304,7 +304,7 @@ type KafkaEventSource struct {
 	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
 	// TLS configuration for the kafka client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
@@ -316,14 +316,24 @@ type KafkaEventSource struct {
 	// Consumer group for kafka client
 	// +optional
 	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,8,opt,name=consumerGroup"`
+
+	// Sets a limit on how many events get read from kafka per second.
+	// +optional
+	LimitEventsPerSecond int64 `json:"limitEventsPerSecond,omitempty" protobuf:"varint,9,opt,name=limitEventsPerSecond"`
+
+	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
+	// +optional
+	Version string `json:"version" protobuf:"bytes,10,opt,name=version"`
 }
 
 type KafkaConsumerGroup struct {
 	// The name for the consumer group to use
 	GroupName string `json:"groupName" protobuf:"bytes,1,opt,name=groupName"`
-	// Specify what kafka version is being connected to enables certain features in sarama
-	KafkaVersion string `json:"kafkaVersion" protobuf:"bytes,2,opt,name=kafkaVersion"`
+	// When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
+	// +optional
+	Oldest bool `json:"oldest,omitempty" protobuf:"varint,2,opt,name=oldest"`
 	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+	// +optional
 	RebalanceStrategy string `json:"rebalanceStrategy" protobuf:"bytes,3,opt,name=rebalanceStrategy"`
 }
 
@@ -343,7 +353,7 @@ type MQTTEventSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,5,opt,name=jsonBody"`
 	// TLS configuration for the mqtt client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
@@ -363,7 +373,7 @@ type NATSEventsSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,4,opt,name=jsonBody"`
 	// TLS configuration for the nats client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
@@ -660,7 +670,7 @@ type EmitterEventSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
 	// TLS configuration for the emitter client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
@@ -685,7 +695,7 @@ type RedisEventSource struct {
 	Channels []string `json:"channels" protobuf:"bytes,5,rep,name=channels"`
 	// TLS configuration for the redis client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
@@ -709,7 +719,7 @@ type NSQEventSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,5,opt,name=jsonBody"`
 	// TLS configuration for the nsq client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
@@ -728,9 +738,9 @@ type PulsarEventSource struct {
 	// Configure the service URL for the Pulsar service.
 	// +required
 	URL string `json:"url" protobuf:"bytes,3,name=url"`
-	// Set the path to the trusted TLS certificate file.
+	// Trusted TLS certificate secret.
 	// +optional
-	TLSTrustCertsFilePath string `json:"tlsTrustCertsFilePath,omitempty" protobuf:"bytes,4,opt,name=tlsTrustCertsFilePath"`
+	TLSTrustCertsSecret *corev1.SecretKeySelector `json:"tlsTrustCertsSecret,omitempty" protobuf:"bytes,4,opt,name=tlsTrustCertsSecret"`
 	// Whether the Pulsar client accept untrusted TLS certificate from broker.
 	// +optional
 	TLSAllowInsecureConnection bool `json:"tlsAllowInsecureConnection,omitempty" protobuf:"bytes,5,opt,name=tlsAllowInsecureConnection"`
@@ -739,7 +749,7 @@ type PulsarEventSource struct {
 	TLSValidateHostname bool `json:"tlsValidateHostname,omitempty" protobuf:"bytes,6,opt,name=tlsValidateHostname"`
 	// TLS configuration for the pulsar client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,8,opt,name=connectionBackoff"`
@@ -756,16 +766,6 @@ type PulsarEventSource struct {
 type GenericEventSource struct {
 	// Value of the event source
 	Value string `json:"value" protobuf:"bytes,1,opt,name=value"`
-}
-
-// TLSConfig refers to TLS configuration for a client.
-type TLSConfig struct {
-	// CACertPath refers the file path that contains the CA cert.
-	CACertPath string `json:"caCertPath" protobuf:"bytes,1,opt,name=caCertPath"`
-	// ClientCertPath refers the file path that contains client cert.
-	ClientCertPath string `json:"clientCertPath" protobuf:"bytes,2,opt,name=clientCertPath"`
-	// ClientKeyPath refers the file path that contains client key.
-	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,opt,name=clientKeyPath"`
 }
 
 const (

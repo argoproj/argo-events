@@ -101,9 +101,7 @@ source will be JSON</p>
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -403,9 +401,7 @@ source will be JSON</p>
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -1850,13 +1846,14 @@ string
 </tr>
 <tr>
 <td>
-<code>kafkaVersion</code></br>
+<code>oldest</code></br>
 <em>
-string
+bool
 </em>
 </td>
 <td>
-<p>Specify what kafka version is being connected to enables certain features in sarama</p>
+<em>(Optional)</em>
+<p>When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false</p>
 </td>
 </tr>
 <tr>
@@ -1867,6 +1864,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.</p>
 </td>
 </tr>
@@ -1937,9 +1935,7 @@ github.com/argoproj/argo-events/pkg/apis/common.Backoff
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -1984,6 +1980,30 @@ KafkaConsumerGroup
 <td>
 <em>(Optional)</em>
 <p>Consumer group for kafka client</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>limitEventsPerSecond</code></br>
+<em>
+int64
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Sets a limit on how many events get read from kafka per second.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0</p>
 </td>
 </tr>
 </tbody>
@@ -2066,9 +2086,7 @@ source will be JSON</p>
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -2196,9 +2214,7 @@ source will be JSON</p>
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -2300,9 +2316,7 @@ source will be JSON</p>
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -2510,14 +2524,16 @@ string
 </tr>
 <tr>
 <td>
-<code>tlsTrustCertsFilePath</code></br>
+<code>tlsTrustCertsSecret</code></br>
 <em>
-string
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>Set the path to the trusted TLS certificate file.</p>
+<p>Trusted TLS certificate secret.</p>
 </td>
 </tr>
 <tr>
@@ -2548,9 +2564,7 @@ bool
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -2678,9 +2692,7 @@ int32
 <td>
 <code>tls</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig
-</a>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </em>
 </td>
 <td>
@@ -3541,65 +3553,6 @@ map[string]string
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.TLSConfig">TLSConfig
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>, 
-<a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>, 
-<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>, 
-<a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>, 
-<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>, 
-<a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>, 
-<a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>, 
-<a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>)
-</p>
-<p>
-<p>TLSConfig refers to TLS configuration for a client.</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>caCertPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>CACertPath refers the file path that contains the CA cert.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>clientCertPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>ClientCertPath refers the file path that contains client cert.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>clientKeyPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>ClientKeyPath refers the file path that contains client key.</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="argoproj.io/v1alpha1.Template">Template
 </h3>
 <p>
@@ -3852,9 +3805,11 @@ string
 </tr>
 <tr>
 <td>
-<code>serverCertPath</code></br>
+<code>serverCertSecret</code></br>
 <em>
-string
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
 </em>
 </td>
 <td>
@@ -3863,9 +3818,11 @@ string
 </tr>
 <tr>
 <td>
-<code>serverKeyPath</code></br>
+<code>serverKeySecret</code></br>
 <em>
-string
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
 </em>
 </td>
 <td>
@@ -3896,6 +3853,28 @@ Kubernetes core/v1.SecretKeySelector
 <td>
 <em>(Optional)</em>
 <p>AuthSecret holds a secret selector that contains a bearer token for authentication</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>serverCertPath</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>DeprecatedServerCertPath refers the file that contains the cert.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>serverKeyPath</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>DeprecatedServerKeyPath refers the file that contains private key</p>
 </td>
 </tr>
 </tbody>

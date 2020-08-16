@@ -17,10 +17,7 @@ package http
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -54,23 +51,12 @@ func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor
 		client = &http.Client{}
 
 		if httptrigger.TLS != nil {
-			caCert, err := ioutil.ReadFile(httptrigger.TLS.CACertPath)
+			tlsConfig, err := common.GetTLSConfig(httptrigger.TLS)
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to read ca cert file %s", httptrigger.TLS.CACertPath)
-			}
-			pool := x509.NewCertPool()
-			pool.AppendCertsFromPEM(caCert)
-
-			clientCert, err := tls.LoadX509KeyPair(httptrigger.TLS.ClientCertPath, httptrigger.TLS.ClientKeyPath)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to load client cert key pair %s", httptrigger.TLS.CACertPath)
-			}
-			tlsConfig := tls.Config{
-				RootCAs:      pool,
-				Certificates: []tls.Certificate{clientCert},
+				return nil, errors.Wrap(err, "failed to get the tls configuration")
 			}
 			client.Transport = &http.Transport{
-				TLSClientConfig: &tlsConfig,
+				TLSClientConfig: tlsConfig,
 			}
 		}
 

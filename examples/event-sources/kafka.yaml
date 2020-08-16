@@ -28,8 +28,10 @@ spec:
 #      Use a consumer group, if this is used you do not need to specify a "partition: <id>"
 #      consumerGroup:
 #        groupName: test-group
-#        kafkaVersion: "2.5.0"
+#        oldest: false
 #        rebalanceStrategy: range
+#      limitEventsPerSecond: 1
+#      version: "2.5.0"
 
 #    example-tls:
 #      url: "kafka.argo-events:9092"
@@ -37,6 +39,12 @@ spec:
 #      jsonBody: true
 #      partition: "1"
 #      tls:
-#        caCertPath: path-to-ca-cert-key-mounted-in-event-source
-#        clientCertPath: path-to-client-cert-mounted-in-event-source
-#        clientKeyPath: path-to-client-key-mounted-in-event-source
+#        caCertSecret:
+#          name: my-secret
+#          key: ca-cert-key
+#        clientCertSecret:
+#          name: my-secret
+#          key: client-cert-key
+#        clientKeySecret:
+#          name: my-secret
+#          key: client-key-key

@@ -790,7 +790,9 @@ gRPC
 
 <td>
 
-<code>certFilePath</code></br> <em> string </em>
+<code>certSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 
 </td>
 
@@ -798,8 +800,8 @@ gRPC
 
 <p>
 
-CertFilePath is path to the cert file within sensor for secure
-connection between sensor and custom trigger gRPC server.
+CertSecret refers to the secret that contains cert for secure connection
+between sensor and custom trigger gRPC server.
 
 </p>
 
@@ -882,6 +884,28 @@ gRPC server knows how to interpret.
 </td>
 
 <td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>certFilePath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DeprecatedCertFilePath is path to the cert file within sensor for secure
+connection between sensor and custom trigger gRPC server. DEPRECATED:
+use CertSecret instead
+
+</p>
 
 </td>
 
@@ -1846,19 +1870,17 @@ Creds contain reference to git username and password
 
 <td>
 
-<code>sshKeyPath</code></br> <em> string </em>
+<code>sshKeySecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 
 </td>
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
-SSHKeyPath is path to your ssh key path. Use this if you don’t want to
-provide username and password. ssh key path must be mounted in sensor
-pod.
+SSHKeySecret refers to the secret that contains SSH key
 
 </p>
 
@@ -1972,6 +1994,30 @@ fetch.
 Remote to manage set of tracked repositories. Defaults to “origin”.
 Refer
 <a href="https://git-scm.com/docs/git-remote">https://git-scm.com/docs/git-remote</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>sshKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don’t
+want to provide username and password. ssh key path must be mounted in
+sensor pod. DEPRECATED: use SSHKeySecret instead.
 
 </p>
 
@@ -2245,8 +2291,8 @@ URL refers to the URL to send HTTP request to.
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -2711,8 +2757,8 @@ Defaults to 500 milliseconds.
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -2999,8 +3045,8 @@ Name of the subject to put message on.
 
 <td>
 
-<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
-TLSConfig </a> </em>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 
 </td>
 
@@ -4189,119 +4235,6 @@ Description
 </td>
 
 <td>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.TLSConfig">
-
-TLSConfig
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
-<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
-<a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>)
-
-</p>
-
-<p>
-
-<p>
-
-TLSConfig refers to TLS configuration for the HTTP client
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>caCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-CACertPath refers the file path that contains the CA cert.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>clientCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ClientCertPath refers the file path that contains client cert.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>clientKeyPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ClientKeyPath refers the file path that contains client key.
-
-</p>
 
 </td>
 

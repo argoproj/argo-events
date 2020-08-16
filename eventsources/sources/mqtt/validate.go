@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -43,7 +44,7 @@ func validate(eventSource *v1alpha1.MQTTEventSource) error {
 		return fmt.Errorf("client id must be specified")
 	}
 	if eventSource.TLS != nil {
-		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
+		return apicommon.ValidateTLSConfig(eventSource.TLS)
 	}
 	return nil
 }

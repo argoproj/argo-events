@@ -16,15 +16,13 @@ limitations under the License.
 package nats
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
-	"io/ioutil"
 
 	natslib "github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -52,28 +50,13 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 		opts.Url = natstrigger.URL
 
 		if natstrigger.TLS != nil {
-			if natstrigger.TLS.ClientCertPath != "" && natstrigger.TLS.ClientKeyPath != "" && natstrigger.TLS.CACertPath != "" {
-				cert, err := tls.LoadX509KeyPair(natstrigger.TLS.ClientCertPath, natstrigger.TLS.ClientKeyPath)
-				if err != nil {
-					return nil, err
-				}
-
-				caCert, err := ioutil.ReadFile(natstrigger.TLS.CACertPath)
-				if err != nil {
-					return nil, err
-				}
-
-				caCertPool := x509.NewCertPool()
-				caCertPool.AppendCertsFromPEM(caCert)
-
-				t := &tls.Config{
-					Certificates:       []tls.Certificate{cert},
-					RootCAs:            caCertPool,
-					InsecureSkipVerify: true,
-				}
-				opts.Secure = true
-				opts.TLSConfig = t
+			tlsConfig, err := common.GetTLSConfig(natstrigger.TLS)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to get the tls configuration")
 			}
+			tlsConfig.InsecureSkipVerify = true
+			opts.Secure = true
+			opts.TLSConfig = tlsConfig
 		}
 
 		conn, err = opts.Connect()

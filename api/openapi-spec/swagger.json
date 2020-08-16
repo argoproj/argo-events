@@ -163,6 +163,41 @@
         }
       }
     },
+    "io.argoproj.common.TLSConfig": {
+      "description": "TLSConfig refers to TLS configuration for a client.",
+      "type": "object",
+      "required": [
+        "caCertPath",
+        "clientCertPath",
+        "clientKeyPath"
+      ],
+      "properties": {
+        "caCertPath": {
+          "description": "DeprecatedCACertPath refers the file path that contains the CA cert. Deprecated: use CACertSecret instead",
+          "type": "string"
+        },
+        "caCertSecret": {
+          "description": "CACertSecret refers to the secret that contains the CA cert",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "clientCertPath": {
+          "description": "DeprecatedClientCertPath refers the file path that contains client cert. Deprecated: use ClientCertSecret instead",
+          "type": "string"
+        },
+        "clientCertSecret": {
+          "description": "ClientCertSecret refers to the secret that contains the client cert",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "clientKeyPath": {
+          "description": "DeprecatedClientKeyPath refers the file path that contains client key. Deprecated: use ClientKeySecret instead",
+          "type": "string"
+        },
+        "clientKeySecret": {
+          "description": "ClientKeySecret refers to the secret that contains the client key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.eventbus.v1alpha1.BusConfig": {
       "description": "BusConfig has the finalized configuration for EventBus",
       "type": "object",
@@ -400,7 +435,7 @@
         },
         "tls": {
           "description": "TLS configuration for the amqp client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "url": {
           "description": "URL for rabbitmq service",
@@ -523,7 +558,7 @@
         },
         "tls": {
           "description": "TLS configuration for the emitter client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "username": {
           "description": "Username to use to connect to broker",
@@ -1032,18 +1067,16 @@
     "io.argoproj.eventsource.v1alpha1.KafkaConsumerGroup": {
       "type": "object",
       "required": [
-        "groupName",
-        "kafkaVersion",
-        "rebalanceStrategy"
+        "groupName"
       ],
       "properties": {
         "groupName": {
           "description": "The name for the consumer group to use",
           "type": "string"
         },
-        "kafkaVersion": {
-          "description": "Specify what kafka version is being connected to enables certain features in sarama",
-          "type": "string"
+        "oldest": {
+          "description": "When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false",
+          "type": "boolean"
         },
         "rebalanceStrategy": {
           "description": "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
@@ -1072,6 +1105,11 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
+        "limitEventsPerSecond": {
+          "description": "Sets a limit on how many events get read from kafka per second.",
+          "type": "integer",
+          "format": "int64"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
@@ -1085,7 +1123,7 @@
         },
         "tls": {
           "description": "TLS configuration for the kafka client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "topic": {
           "description": "Topic name",
@@ -1093,6 +1131,10 @@
         },
         "url": {
           "description": "URL to kafka cluster",
+          "type": "string"
+        },
+        "version": {
+          "description": "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
           "type": "string"
         }
       }
@@ -1127,7 +1169,7 @@
         },
         "tls": {
           "description": "TLS configuration for the mqtt client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "topic": {
           "description": "Topic name",
@@ -1186,7 +1228,7 @@
         },
         "tls": {
           "description": "TLS configuration for the nats client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "url": {
           "description": "URL to connect to NATS cluster",
@@ -1228,7 +1270,7 @@
         },
         "tls": {
           "description": "TLS configuration for the nsq client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "topic": {
           "description": "Topic to subscribe to.",
@@ -1311,15 +1353,15 @@
         },
         "tls": {
           "description": "TLS configuration for the pulsar client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "tlsAllowInsecureConnection": {
           "description": "Whether the Pulsar client accept untrusted TLS certificate from broker.",
           "type": "boolean"
         },
-        "tlsTrustCertsFilePath": {
-          "description": "Set the path to the trusted TLS certificate file.",
-          "type": "string"
+        "tlsTrustCertsSecret": {
+          "description": "Trusted TLS certificate secret.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "tlsValidateHostname": {
           "description": "Whether the Pulsar client verify the validity of the host name from broker.",
@@ -1382,7 +1424,7 @@
         },
         "tls": {
           "description": "TLS configuration for the redis client.",
-          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         }
       }
     },
@@ -1726,29 +1768,6 @@
         }
       }
     },
-    "io.argoproj.eventsource.v1alpha1.TLSConfig": {
-      "description": "TLSConfig refers to TLS configuration for a client.",
-      "type": "object",
-      "required": [
-        "caCertPath",
-        "clientCertPath",
-        "clientKeyPath"
-      ],
-      "properties": {
-        "caCertPath": {
-          "description": "CACertPath refers the file path that contains the CA cert.",
-          "type": "string"
-        },
-        "clientCertPath": {
-          "description": "ClientCertPath refers the file path that contains client cert.",
-          "type": "string"
-        },
-        "clientKeyPath": {
-          "description": "ClientKeyPath refers the file path that contains client key.",
-          "type": "string"
-        }
-      }
-    },
     "io.argoproj.eventsource.v1alpha1.Template": {
       "description": "Template holds the information of an EventSource deployment template",
       "type": "object",
@@ -1852,12 +1871,20 @@
           "type": "string"
         },
         "serverCertPath": {
-          "description": "ServerCertPath refers the file that contains the cert.",
+          "description": "DeprecatedServerCertPath refers the file that contains the cert.",
           "type": "string"
         },
+        "serverCertSecret": {
+          "description": "ServerCertPath refers the file that contains the cert.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "serverKeyPath": {
-          "description": "ServerKeyPath refers the file that contains private key",
+          "description": "DeprecatedServerKeyPath refers the file that contains private key",
           "type": "string"
+        },
+        "serverKeySecret": {
+          "description": "ServerKeyPath refers the file that contains private key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "url": {
           "description": "URL is the url of the server.",
@@ -1997,8 +2024,12 @@
       ],
       "properties": {
         "certFilePath": {
-          "description": "CertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.",
+          "description": "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. DEPRECATED: use CertSecret instead",
           "type": "string"
+        },
+        "certSecret": {
+          "description": "CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "parameters": {
           "type": "array",
@@ -2241,8 +2272,12 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitRemoteConfig"
         },
         "sshKeyPath": {
-          "description": "SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod.",
+          "description": "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. DEPRECATED: use SSHKeySecret instead.",
           "type": "string"
+        },
+        "sshKeySecret": {
+          "description": "SSHKeySecret refers to the secret that contains SSH key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "tag": {
           "description": "Tag to use to pull trigger resource",
@@ -2329,7 +2364,7 @@
         },
         "tls": {
           "description": "TLS configuration for the HTTP client.",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "url": {
           "description": "URL refers to the URL to send HTTP request to.",
@@ -2409,7 +2444,7 @@
         },
         "tls": {
           "description": "TLS configuration for the Kafka producer.",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "topic": {
           "description": "Name of the topic. More info at https://kafka.apache.org/documentation/#intro_topics",
@@ -2466,7 +2501,7 @@
         },
         "tls": {
           "description": "TLS configuration for the NATS producer.",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TLSConfig"
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "url": {
           "description": "URL of the NATS cluster.",
@@ -2713,29 +2748,6 @@
             "type": "integer",
             "format": "int32"
           }
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.TLSConfig": {
-      "description": "TLSConfig refers to TLS configuration for the HTTP client",
-      "type": "object",
-      "required": [
-        "caCertPath",
-        "clientCertPath",
-        "clientKeyPath"
-      ],
-      "properties": {
-        "caCertPath": {
-          "description": "CACertPath refers the file path that contains the CA cert.",
-          "type": "string"
-        },
-        "clientCertPath": {
-          "description": "ClientCertPath refers the file path that contains client cert.",
-          "type": "string"
-        },
-        "clientKeyPath": {
-          "description": "ClientKeyPath refers the file path that contains client key.",
-          "type": "string"
         }
       }
     },

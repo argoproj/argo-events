@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
@@ -81,14 +82,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
-	config := sarama.NewConfig()
-
-	version, err := sarama.ParseKafkaVersion(kafkaEventSource.ConsumerGroup.KafkaVersion)
+	config, err := getSaramaConfig(kafkaEventSource, log)
 	if err != nil {
-		log.Errorf("Error parsing Kafka version: %v", err)
 		return err
 	}
-	config.Version = version
 
 	switch kafkaEventSource.ConsumerGroup.RebalanceStrategy {
 	case "sticky":
@@ -100,15 +97,6 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 	default:
 		log.Info("Invalid rebalance strategy, using default: range")
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-	}
-
-	if kafkaEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
-		if err != nil {
-			return errors.Wrap(err, "failed to get the tls configuration")
-		}
-		config.Net.TLS.Config = tlsConfig
-		config.Net.TLS.Enable = true
 	}
 
 	consumer := Consumer{
@@ -169,20 +157,10 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	log.Info("connecting to Kafka cluster...")
 	if err := sources.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
 		var err error
-		config := sarama.NewConfig()
 
-		if kafkaEventSource.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
-			if err != nil {
-				return errors.Wrap(err, "failed to get the tls configuration")
-			}
-			config.Net.TLS.Config = tlsConfig
-			config.Net.TLS.Enable = true
-		} else {
-			consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, nil)
-			if err != nil {
-				return err
-			}
+		config, err := getSaramaConfig(kafkaEventSource, log)
+		if err != nil {
+			return err
 		}
 
 		consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, config)
@@ -259,6 +237,37 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	}
 }
 
+func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) { //nolint:interfacer
+	config := sarama.NewConfig()
+
+	if kafkaEventSource.Version == "" {
+		config.Version = sarama.V1_0_0_0
+	} else {
+		version, err := sarama.ParseKafkaVersion(kafkaEventSource.Version)
+		if err != nil {
+			log.Errorf("Error parsing Kafka version: %v", err)
+			return nil, err
+		}
+		config.Version = version
+	}
+
+	if kafkaEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get the tls configuration")
+		}
+		config.Net.TLS.Config = tlsConfig
+		config.Net.TLS.Enable = true
+	}
+
+	if kafkaEventSource.ConsumerGroup != nil {
+		if kafkaEventSource.ConsumerGroup.Oldest {
+			config.Consumer.Offsets.Initial = sarama.OffsetOldest
+		}
+	}
+	return config, nil
+}
+
 // Consumer represents a Sarama consumer group consumer
 type Consumer struct {
 	ready            chan bool
@@ -309,6 +318,12 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			consumer.logger.Desugar().Error("failed to dispatch kafka event...", zap.Error(err))
 		} else {
 			session.MarkMessage(message, "")
+		}
+		if consumer.kafkaEventSource.LimitEventsPerSecond > 0 {
+			//1000000000 is 1 second in nanoseconds
+			d := (1000000000 / time.Duration(consumer.kafkaEventSource.LimitEventsPerSecond) * time.Nanosecond) * time.Nanosecond
+			consumer.logger.Infof("Sleeping for: %v.", d)
+			time.Sleep(d)
 		}
 	}
 

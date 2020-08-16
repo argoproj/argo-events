@@ -49,10 +49,14 @@ spec:
 #        port: "13000"
 #        method: "POST"
 #        url: "http://mysecondfakeurl.fake"
-#        # path to file that is mounted in event-source pod which contains certs
-#        serverCertPath: "some path in pod"
-#        # path to file that is mounted in event-source pod which contains private key
-#        serverKeyPath: "some path in pod"
+#        # k8s secret that contains the cert
+#        serverCertSecret:
+#          name: my-secret
+#          key: cert-key
+#        # k8s secret that contains the private key
+#        serverKeySecret:
+#          name: my-secret
+#          key: pk-key
 #      events:
 #        - PushEvents
 #      accessToken:

@@ -77,7 +77,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if redisEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS.CACertPath, redisEventSource.TLS.ClientCertPath, redisEventSource.TLS.ClientKeyPath)
+		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS)
 		if err != nil {
 			return errors.Wrap(err, "failed to get the tls configuration")
 		}
