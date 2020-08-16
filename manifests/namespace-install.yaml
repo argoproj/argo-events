@@ -181,7 +181,7 @@ spec:
           value: nats-streaming:0.17.0
         - name: NATS_METRICS_EXPORTER_IMAGE
           value: synadia/prometheus-nats-exporter:0.6.2
-        image: argoproj/eventbus-controller:v1.0.0-rc1
+        image: argoproj/eventbus-controller:v1.0.0-rc2
         imagePullPolicy: Always
         name: eventbus-controller
       serviceAccountName: argo-events-sa
@@ -210,8 +210,8 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: EVENTSOURCE_IMAGE
-          value: argoproj/eventsource:v1.0.0-rc1
-        image: argoproj/eventsource-controller:v1.0.0-rc1
+          value: argoproj/eventsource:v1.0.0-rc2
+        image: argoproj/eventsource-controller:v1.0.0-rc2
         imagePullPolicy: Always
         name: eventsource-controller
       serviceAccountName: argo-events-sa
@@ -240,7 +240,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: SENSOR_IMAGE
-          value: argoproj/sensor:v1.0.0-rc1
-        image: argoproj/sensor-controller:v1.0.0-rc1
+          value: argoproj/sensor:v1.0.0-rc2
+        image: argoproj/sensor-controller:v1.0.0-rc2
         name: sensor-controller
       serviceAccountName: argo-events-sa
