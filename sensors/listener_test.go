@@ -119,13 +119,51 @@ func TestGetDependencyExpression(t *testing.T) {
 			{Name: "group-1", Dependencies: []string{"dep1", "dep1a"}},
 			{Name: "group-2", Dependencies: []string{"dep2"}},
 		}
-		obj.Spec.Circuit = "((group-2) || group-1)"
+		obj.Spec.DeprecatedCircuit = "((group-2) || group-1)"
 		trig := fakeTrigger.DeepCopy()
-		trig.Template.Switch = &v1alpha1.TriggerSwitch{
+		trig.Template.DeprecatedSwitch = &v1alpha1.TriggerSwitch{
 			Any: []string{"group-1"},
 		}
 		expr, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
 		assert.NoError(t, err)
 		assert.Equal(t, "dep1 && dep1a", expr)
+	})
+
+	t.Run("get conditions expression", func(t *testing.T) {
+		obj := sensorObj.DeepCopy()
+		obj.Spec.Dependencies = []v1alpha1.EventDependency{
+			{
+				Name:            "dep-1",
+				EventSourceName: "webhook",
+				EventName:       "example-1",
+			},
+			{
+				Name:            "dep_1a",
+				EventSourceName: "webhook",
+				EventName:       "example-1a",
+			},
+			{
+				Name:            "dep-2",
+				EventSourceName: "webhook2",
+				EventName:       "example-2",
+			},
+			{
+				Name:            "dep-3",
+				EventSourceName: "webhook3",
+				EventName:       "example-3",
+			},
+		}
+		sensorCtx := &SensorContext{
+			Sensor: obj,
+		}
+		obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
+			{Name: "group-1", Dependencies: []string{"dep-1", "dep_1a"}},
+			{Name: "group_2", Dependencies: []string{"dep-2"}},
+		}
+		trig := fakeTrigger.DeepCopy()
+		trig.Template.Conditions = "group-1 || group_2 || dep-3"
+		expr, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
+		assert.NoError(t, err)
+		assert.Equal(t, "dep-3 || dep-2 || (dep-1 && dep_1a)", expr)
 	})
 }

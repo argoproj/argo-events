@@ -13,23 +13,9 @@ spec:
       eventSourceName: minio
       eventName: example
 
-  # group event dependencies
-  dependencyGroups:
-    - name: group_1
-      dependencies:
-        - test-dep-webhook
-    - name: group_2
-      dependencies:
-        - test-dep-minio
-
-  circuit: "group_1 && group_2"
-
   triggers:
     - template:
-        switch:
-          all:
-            - group_1
-            - group_2
+        conditions: "test-dep-webhook && test-dep-minio"
         name: workflow-trigger
         k8s:
           group: argoproj.io
