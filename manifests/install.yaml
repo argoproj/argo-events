@@ -266,7 +266,19 @@ spec:
           value: synadia/prometheus-nats-exporter:0.6.2
         image: argoproj/eventbus-controller:v1.0.0-rc2
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
         name: eventbus-controller
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
       serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1
@@ -294,7 +306,19 @@ spec:
           value: argoproj/eventsource:v1.0.0-rc2
         image: argoproj/eventsource-controller:v1.0.0-rc2
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
         name: eventsource-controller
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
       serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1
@@ -321,5 +345,17 @@ spec:
         - name: SENSOR_IMAGE
           value: argoproj/sensor:v1.0.0-rc2
         image: argoproj/sensor-controller:v1.0.0-rc2
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
         name: sensor-controller
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
       serviceAccountName: argo-events-sa
