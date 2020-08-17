@@ -44,11 +44,12 @@ ENTRYPOINT [ "/bin/eventsource" ]
 ####################################################################################################
 # sensor
 ####################################################################################################
-FROM centos:8 as sensor
-RUN yum -y update && yum -y install ca-certificates openssh openssh-server openssh-clients openssl-libs curl git
+FROM alpine as sensor
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Argo Workflow CLI
-COPY assets/argo-linux-amd64 /usr/local/bin/argo
+COPY assets/argo-linux-amd64 /bin/argo
 RUN argo version || true
 
 COPY dist/sensor /bin/sensor
