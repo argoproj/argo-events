@@ -23,3 +23,15 @@ spec:
                   fieldPath: metadata.namespace
             - name: SENSOR_IMAGE
               value: argoproj/sensor:latest
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 3
+            periodSeconds: 3
