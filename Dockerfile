@@ -49,7 +49,7 @@ COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Argo Workflow CLI
-COPY assets/argo-linux-amd64 /bin/argo
+COPY assets/argo-linux-amd64 /usr/local/bin/argo
 RUN argo version || true
 
 COPY dist/sensor /bin/sensor
