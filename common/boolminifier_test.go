@@ -43,6 +43,10 @@ func TestSimplifyBoolExpression(t *testing.T) {
 			expression: "((a && b) || (c && d)) || c",
 			expect:     "c || (a && b)",
 		},
+		{
+			expression: "a:a && b:b",
+			expect:     "a:a && b:b",
+		},
 	}
 
 	for _, test := range tests {

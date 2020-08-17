@@ -19,6 +19,7 @@ markdown_extensions:
 nav:
   - Overview: 'index.md'
   - 'installation.md'
+  - 'managed-namespace.md'
   - 'quick_start.md'
   - Concepts:
       - 'concepts/architecture.md'
@@ -51,7 +52,7 @@ nav:
       - 'tutorials/03-trigger-sources.md'
       - 'tutorials/04-standard-k8s-resources.md'
       - 'tutorials/05-trigger-custom-resources.md'
-      - 'tutorials/06-circuit-and-switch.md'
+      - 'tutorials/06-trigger-conditions.md'
       - 'tutorials/07-filters.md'
       - 'tutorials/08-policy.md'
   - Triggers:
@@ -64,12 +65,14 @@ nav:
       - 'triggers/openwhisk-trigger.md'
       - 'triggers/slack-trigger.md'
       - 'triggers/build-your-own-trigger.md'
-  - 'developer_guide.md'
   - 'eventsource-deployment-strategies.md'
   - 'eventsource-names.md'
   - 'eventsource-with-multiple-events.md'
-  - 'managed-namespace.md'
+  - 'webhook-authentication.md'
+  - 'webhook-health-check.md'
+  - 'trigger-conditions.md'
   - 'service-accounts.md'
+  - 'developer_guide.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones

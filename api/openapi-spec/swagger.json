@@ -2616,7 +2616,7 @@
       ],
       "properties": {
         "circuit": {
-          "description": "Circuit is a boolean expression of dependency groups",
+          "description": "Circuit is a boolean expression of dependency groups DEPRECATED: Use Switch in triggers instead.",
           "type": "string"
         },
         "dependencies": {
@@ -2904,7 +2904,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.TriggerSwitch": {
-      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
+      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. DEPRECATED",
       "type": "object",
       "properties": {
         "all": {
@@ -2937,6 +2937,10 @@
         "awsLambda": {
           "description": "AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AWSLambdaTrigger"
+        },
+        "conditions": {
+          "description": "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) \u0026\u0026 dep04\"",
+          "type": "string"
         },
         "custom": {
           "description": "CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom trigger.",
@@ -2971,7 +2975,7 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackTrigger"
         },
         "switch": {
-          "description": "Switch is the condition to execute the trigger.",
+          "description": "DeprecatedSwitch is the condition to execute the trigger. DEPRECATED: USE conditions instead",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerSwitch"
         }
       }

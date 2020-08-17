@@ -41,6 +41,7 @@ type tableRow struct {
 // See https://en.wikipedia.org/wiki/Quine%E2%80%93McCluskey_algorithm
 func NewBoolExpression(expression string) (Minifier, error) {
 	expression = strings.ReplaceAll(expression, "-", "\\-")
+	expression = strings.ReplaceAll(expression, ":", "\\:")
 	ex, err := govaluate.NewEvaluableExpression(expression)
 	if err != nil {
 		return nil, err

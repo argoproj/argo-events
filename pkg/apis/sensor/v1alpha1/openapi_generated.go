@@ -1329,13 +1329,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template"),
 						},
 					},
-					"circuit": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Circuit is a boolean expression of dependency groups",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"dependencyGroups": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DependencyGroups is a list of the groups of events.",
@@ -1359,6 +1352,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					"eventBusName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "EventBusName references to a EventBus name. By default the value is \"default\"",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"circuit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Circuit is a boolean expression of dependency groups DEPRECATED: Use Switch in triggers instead.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1831,7 +1831,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback)
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
+				Description: "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. DEPRECATED",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"any": {
@@ -1882,10 +1882,11 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Format:      "",
 						},
 					},
-					"switch": {
+					"conditions": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Switch is the condition to execute the trigger.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"),
+							Description: "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) && dep04\"",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"k8s": {
@@ -1940,6 +1941,12 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 						SchemaProps: spec.SchemaProps{
 							Description: "OpenWhisk refers to the trigger designed to invoke OpenWhisk action.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger"),
+						},
+					},
+					"switch": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeprecatedSwitch is the condition to execute the trigger. DEPRECATED: USE conditions instead",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"),
 						},
 					},
 				},

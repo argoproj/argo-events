@@ -36,12 +36,13 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 		s.Status.MarkDependenciesNotProvided("InvalidDependencies", "Faild to validate dependencies.")
 		return err
 	}
-	if s.Spec.DependencyGroups != nil {
-		if s.Spec.Circuit == "" {
-			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Circuit is empty.")
-			return errors.Errorf("no circuit expression provided to resolve dependency groups")
+	// DEPRECATED.
+	if s.Spec.DeprecatedCircuit != "" {
+		if s.Spec.DependencyGroups == nil {
+			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Dependency groups not provided.")
+			return errors.New("dependency groups not provided")
 		}
-		c := strings.ReplaceAll(s.Spec.Circuit, "-", "\\-")
+		c := strings.ReplaceAll(s.Spec.DeprecatedCircuit, "-", "\\-")
 		expression, err := govaluate.NewEvaluableExpression(c)
 		if err != nil {
 			s.Status.MarkDependenciesNotProvided("InvalidCircuit", "Invalid circurit expression.")
@@ -95,7 +96,8 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	if template.Name == "" {
 		return errors.Errorf("trigger must define a name")
 	}
-	if template.Switch != nil && template.Switch.All != nil && template.Switch.Any != nil {
+	// DEPRECATED.
+	if template.DeprecatedSwitch != nil && template.DeprecatedSwitch.All != nil && template.DeprecatedSwitch.Any != nil {
 		return errors.Errorf("trigger condition can't have both any and all condition")
 	}
 	if template.K8s != nil {

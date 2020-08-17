@@ -251,11 +251,57 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 
 func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, trigger v1alpha1.Trigger) (string, error) {
 	logger := logging.FromContext(ctx).Desugar()
+
+	// Translate original expression which might contain group names
+	// to an expression only contains dependency names
+	translate := func(originalExpr string, parameters map[string]string) (string, error) {
+		originalExpr = strings.ReplaceAll(originalExpr, "&&", " + \"&&\" + ")
+		originalExpr = strings.ReplaceAll(originalExpr, "||", " + \"||\" + ")
+		originalExpr = strings.ReplaceAll(originalExpr, "-", "_")
+		originalExpr = strings.ReplaceAll(originalExpr, "(", "\"(\"+")
+		originalExpr = strings.ReplaceAll(originalExpr, ")", "+\")\"")
+
+		program, err := expr.Compile(originalExpr, expr.Env(parameters))
+		if err != nil {
+			logger.Error("Failed to compile original dependency expression", zap.Error(err))
+			return "", err
+		}
+		result, err := expr.Run(program, parameters)
+		if err != nil {
+			logger.Error("Failed to parse original dependency expression", zap.Error(err))
+			return "", err
+		}
+		newExpr := fmt.Sprintf("%v", result)
+		newExpr = strings.ReplaceAll(newExpr, "\"(\"", "(")
+		newExpr = strings.ReplaceAll(newExpr, "\")\"", ")")
+		return newExpr, nil
+	}
+
 	sensor := sensorCtx.Sensor
 	var depExpression string
-	if len(sensor.Spec.DependencyGroups) > 0 && sensor.Spec.Circuit != "" && trigger.Template.Switch != nil {
+	var err error
+	switch {
+	case trigger.Template.Conditions != "":
+		conditions := trigger.Template.Conditions
+		// Add all the dependency and dependency group to the parameter mappings
+		depGroupMapping := make(map[string]string)
+		for _, dep := range sensor.Spec.Dependencies {
+			key := strings.ReplaceAll(dep.Name, "-", "_")
+			depGroupMapping[key] = dep.Name
+		}
+		for _, depGroup := range sensor.Spec.DependencyGroups {
+			key := strings.ReplaceAll(depGroup.Name, "-", "_")
+			depGroupMapping[key] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
+		}
+		depExpression, err = translate(conditions, depGroupMapping)
+		if err != nil {
+			return "", err
+		}
+	case len(sensor.Spec.DependencyGroups) > 0 && sensor.Spec.DeprecatedCircuit != "" && trigger.Template.DeprecatedSwitch != nil:
+		// DEPRECATED.
+		logger.Warn("Circuit and Switch are deprecated, please use \"conditions\".")
 		temp := ""
-		sw := trigger.Template.Switch
+		sw := trigger.Template.DeprecatedSwitch
 		switch {
 		case len(sw.All) > 0:
 			temp = strings.Join(sw.All, "&&")
@@ -264,31 +310,17 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 		default:
 			return "", errors.New("invalid trigger switch")
 		}
-		groupDepExpr := fmt.Sprintf("(%s) && (%s)", sensor.Spec.Circuit, temp)
+		groupDepExpr := fmt.Sprintf("(%s) && (%s)", sensor.Spec.DeprecatedCircuit, temp)
 		depGroupMapping := make(map[string]string)
 		for _, depGroup := range sensor.Spec.DependencyGroups {
 			key := strings.ReplaceAll(depGroup.Name, "-", "_")
 			depGroupMapping[key] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
 		}
-		groupDepExpr = strings.ReplaceAll(groupDepExpr, "&&", " + \"&&\" + ")
-		groupDepExpr = strings.ReplaceAll(groupDepExpr, "||", " + \"||\" + ")
-		groupDepExpr = strings.ReplaceAll(groupDepExpr, "-", "_")
-		groupDepExpr = strings.ReplaceAll(groupDepExpr, "(", "\"(\"+")
-		groupDepExpr = strings.ReplaceAll(groupDepExpr, ")", "+\")\"")
-		program, err := expr.Compile(groupDepExpr, expr.Env(depGroupMapping))
+		depExpression, err = translate(groupDepExpr, depGroupMapping)
 		if err != nil {
-			logger.Error("Failed to compile group dependency expression", zap.Error(err))
 			return "", err
 		}
-		result, err := expr.Run(program, depGroupMapping)
-		if err != nil {
-			logger.Error("Failed to parse group dependency expression", zap.Error(err))
-			return "", err
-		}
-		depExpression = fmt.Sprintf("%v", result)
-		depExpression = strings.ReplaceAll(depExpression, "\"(\"", "(")
-		depExpression = strings.ReplaceAll(depExpression, "\")\"", ")")
-	} else {
+	default:
 		deps := []string{}
 		for _, dep := range sensor.Spec.Dependencies {
 			deps = append(deps, dep.Name)
