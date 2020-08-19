@@ -45,6 +45,9 @@ ENTRYPOINT [ "/bin/eventsource" ]
 # sensor
 ####################################################################################################
 FROM alpine as sensor
+RUN apk update && apk upgrade && \
+    apk add --no-cache git
+
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
