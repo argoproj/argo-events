@@ -53,6 +53,7 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificat
 
 # Argo Workflow CLI
 COPY assets/argo-linux-amd64 /usr/local/bin/argo
+RUN chmod +x /usr/local/bin/argo
 RUN argo version || true
 
 COPY dist/sensor /bin/sensor
