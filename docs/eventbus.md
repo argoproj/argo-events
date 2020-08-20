@@ -85,6 +85,15 @@ spec:
 - Check [here](../api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy) for the
   full spec.
 
+#### More About Native NATS
+
+- Messages limit is 1,000,000.
+
+- Max age of messages is 72 hours, which means messages over 72 hours will be
+  deleted automatically.
+
+- Max subscription number is 1000.
+
 ### Exotic
 
 To use an existing NATS Streaming service, follow the example below.
