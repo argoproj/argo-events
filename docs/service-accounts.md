@@ -58,9 +58,9 @@ Sensor.
 
 ## Service Account for Trigged Workflows (or other K8s resources)
 
-When your Sensor is used to trigger a Workflow, you need to configure the
-Service Account used in the Workflow spec (**NOT**
-`spec.template.serviceAccountName`) following the
+When the Sensor is used to trigger a Workflow, you need to configure the Service
+Account used in the Workflow spec (**NOT** `spec.template.serviceAccountName`)
+following the
 [instruction](https://github.com/argoproj/argo/blob/master/docs/service-accounts.md)
 of Argo Workflow.
 
