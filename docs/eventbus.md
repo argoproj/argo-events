@@ -85,7 +85,7 @@ spec:
 - Check [here](../api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy) for the
   full spec.
 
-#### More About Native NATS
+#### More About Native NATS EventBus
 
 - Messages limit is 1,000,000.
 
@@ -114,7 +114,7 @@ spec:
         key: secret-key
 ```
 
-## Others
+## More Information
 
 - To view a finalized EventBus config:
 
