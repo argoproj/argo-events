@@ -64,7 +64,6 @@ func (g *GitArtifactReader) getRemote() string {
 }
 
 func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
-	var auth transport.AuthMethod
 	sshKey, err := ioutil.ReadFile(sshKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
@@ -73,7 +72,8 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ssh key. err: %+v", err)
 	}
-	auth = &go_git_ssh.PublicKeys{User: "git", Signer: signer}
+	auth := &go_git_ssh.PublicKeys{User: "git", Signer: signer}
+	auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 	return auth, nil
 }
 

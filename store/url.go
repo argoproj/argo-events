@@ -2,9 +2,10 @@ package store
 
 import (
 	"crypto/tls"
-	"errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -41,7 +42,7 @@ func (reader *URLReader) Read() ([]byte, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		log.Warnf("failed to read %s. status code: %d", reader.urlArtifact.Path, resp.StatusCode)
-		return nil, errors.New("status code " + string(resp.StatusCode))
+		return nil, errors.Errorf("status code %v", resp.StatusCode)
 	}
 
 	content, err := ioutil.ReadAll(resp.Body)
