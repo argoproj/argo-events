@@ -2,7 +2,7 @@
 
 ![alpha](assets/alpha.svg)
 
-> v1.1 and after
+> v1.0 and after
 
 `Conditions` is a new feature to replace `Circuit` and `Switch`. With
 `conditions`, triggers can be executed based on different dependency conditions.
