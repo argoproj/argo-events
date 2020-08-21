@@ -41,39 +41,31 @@ RUN git rev-parse HEAD
 ADD hack/image_arch.sh .
 # eventsource
 RUN . ./image_arch.sh && make dist/eventsource-linux-${IMAGE_ARCH}
-#RUN . ./image_arch.sh && ./dist/workflow-controller-linux-${IMAGE_ARCH} version | grep clean
+
 # eventsource-controller
 RUN . ./image_arch.sh && make dist/eventsource-controller-linux-${IMAGE_ARCH}
-#RUN . ./image_arch.sh && ./dist/workflow-controller-linux-${IMAGE_ARCH} version | grep clean
+
 # sensor
 RUN . ./image_arch.sh && make dist/sensor-linux-${IMAGE_ARCH}
-#RUN . ./image_arch.sh && ./dist/workflow-controller-linux-${IMAGE_ARCH} version | grep clean
+
 # sensor-controller
 RUN . ./image_arch.sh && make dist/sensor-controller-linux-${IMAGE_ARCH}
-#RUN . ./image_arch.sh && ./dist/workflow-controller-linux-${IMAGE_ARCH} version | grep clean
+
 # sensor-controller
 RUN . ./image_arch.sh && make dist/sensor-controller-linux-${IMAGE_ARCH}
-#RUN . ./image_arch.sh && ./dist/workflow-controller-linux-${IMAGE_ARCH} version | grep clean
+
 # sensor-controller
 RUN . ./image_arch.sh && make dist/sensor-controller-linux-${IMAGE_ARCH}
-#RUN . ./image_arch.sh && ./dist/sensor-controller version | grep clean
+
 # eventbus-controller
 RUN . ./image_arch.sh && make dist/eventbus-controller-linux-${IMAGE_ARCH}
-#RUN . ./image_arch.sh && ./dist/eventbus-controller-linux-${IMAGE_ARCH} version | grep clean
-
-####################################################################################################
-# base
-####################################################################################################
-FROM golang:alpine as base
-RUN apk --update add ca-certificates
-RUN apk --no-cache add tzdata
 
 ####################################################################################################
 # eventbus-controller
 ####################################################################################################
 FROM scratch as eventbus-controller
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /go/src/github.com/argoproj/argo-events/dist/eventbus-controller /bin/eventbus-controller
 ENTRYPOINT [ "/bin/eventbus-controller" ]
 
@@ -81,27 +73,27 @@ ENTRYPOINT [ "/bin/eventbus-controller" ]
 # eventsource-controller
 ####################################################################################################
 FROM scratch as eventsource-controller
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/dist/eventsource-controller /bin/eventsource-controller
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /go/src/github.com/argoproj/argo-events/dist/eventsource-controller /bin/eventsource-controller
 ENTRYPOINT [ "/bin/eventsource-controller" ]
 
 ####################################################################################################
 # sensor-controller
 ####################################################################################################
 FROM scratch as sensor-controller
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/dist/sensor-controller /bin/sensor-controller
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /go/src/github.com/argoproj/argo-events/dist/sensor-controller /bin/sensor-controller
 ENTRYPOINT [ "/bin/sensor-controller" ]
 
 ####################################################################################################
 # eventsource
 ####################################################################################################
 FROM scratch as eventsource
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/dist/eventsource /bin/eventsource
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /go/src/github.com/argoproj/argo-events/dist/eventsource /bin/eventsource
 ENTRYPOINT [ "/bin/eventsource" ]
 
 ####################################################################################################
@@ -114,7 +106,7 @@ RUN yum -y update && yum -y install ca-certificates openssh openssh-server opens
 COPY assets/argo-linux-amd64 /usr/local/bin/argo
 RUN argo version || true
 
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/dist/sensor /bin/sensor
+COPY --from=build /go/src/github.com/argoproj/argo-events/dist/sensor /bin/sensor
 
 ENTRYPOINT [ "/bin/sensor" ]
 

@@ -37,7 +37,7 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux eventbus-controller-linux eventsource-controller-linux eventsource-linux
+all: sensor sensor-controller eventbus-controller eventsource-controller eventsource
 
 all-images: sensor-image sensor-controller-image eventbus-controller-image eventsource-controller-image eventsource-image
 
@@ -55,10 +55,10 @@ dist/eventsource-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
 dist/eventsource-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
 dist/eventsource-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
-dist/eventsource: $(CONTROLLER_PKGS)
+dist/eventsource:
 	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
 
-dist/eventsource-%: $(CONTROLLER_PKGS)
+dist/eventsource-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
 
 eventsource-image:
@@ -75,10 +75,10 @@ dist/eventsource-controller-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
 dist/eventsource-controller-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
 dist/eventsource-controller-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
-dist/eventsource-controller: $(CONTROLLER_PKGS)
+dist/eventsource-controller:
 	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource-controller ./controllers/eventsource/cmd
 
-dist/eventsource-controller-%: $(CONTROLLER_PKGS)
+dist/eventsource-controller-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource-controller ./controllers/eventsource/cmd
 
 eventsource-controller-image:
@@ -95,10 +95,10 @@ dist/sensor-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
 dist/sensor-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
 dist/sensor-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
-dist/sensor: $(CONTROLLER_PKGS)
+dist/sensor:
 	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
 
-dist/sensor-%: $(CONTROLLER_PKGS)
+dist/sensor-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
 
 sensor-image:
@@ -115,10 +115,10 @@ dist/sensor-controller-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
 dist/sensor-controller-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
 dist/sensor-controller-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
-dist/sensor-controller: $(CONTROLLER_PKGS)
+dist/sensor-controller:
 	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-controller ./controllers/sensor/cmd
 
-dist/sensor-controller-%: $(CONTROLLER_PKGS)
+dist/sensor-controller-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-controller ./controllers/sensor/cmd
 
 sensor-controller-image:
@@ -129,16 +129,16 @@ sensor-controller-image:
 .PHONY: eventbus-controller
 eventbus-controller: dist/eventbus-controller
 
-dist/eventbus-controller: GOARGS = GOOS= GOARCH=
+dist/eventbus-controller: GOARGS = GOOS=linux GOARCH=amd64
 dist/eventbus-controller-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
 dist/eventbus-controller-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
 dist/eventbus-controller-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
 dist/eventbus-controller-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
-dist/eventbus-controller: $(CONTROLLER_PKGS)
+dist/eventbus-controller:
 	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventbus-controller ./controllers/eventbus/cmd
 
-dist/eventbus-controller-%: $(CONTROLLER_PKGS)
+dist/eventbus-controller-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventbus-controller ./controllers/eventbus/cmd
 
 eventbus-controller-image:
