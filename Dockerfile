@@ -38,22 +38,23 @@ COPY . .
 # check we can use Git
 RUN git rev-parse HEAD
 
-ADD hack/image_arch.sh .
+# Make sure there are not prebuilt binaries
+RUN rm dist/*
 
 # eventbus-controller
-RUN . ./image_arch.sh && make dist/eventbus-controller-linux-${IMAGE_ARCH}
+RUN . hack/image_arch.sh && make dist/eventbus-controller-linux-${IMAGE_ARCH}
 
 # eventsource-controller
-RUN . ./image_arch.sh && make dist/eventsource-controller-linux-${IMAGE_ARCH}
+RUN . hack/image_arch.sh && make dist/eventsource-controller-linux-${IMAGE_ARCH}
 
 # sensor-controller
-RUN . ./image_arch.sh && make dist/sensor-controller-linux-${IMAGE_ARCH}
+RUN . hack/image_arch.sh && make dist/sensor-controller-linux-${IMAGE_ARCH}
 
 # eventsource
-RUN . ./image_arch.sh && make dist/eventsource-linux-${IMAGE_ARCH}
+RUN . hack/image_arch.sh && make dist/eventsource-linux-${IMAGE_ARCH}
 
 # sensor
-RUN . ./image_arch.sh && make dist/sensor-linux-${IMAGE_ARCH}
+RUN . hack/image_arch.sh && make dist/sensor-linux-${IMAGE_ARCH}
 
 
 ####################################################################################################
