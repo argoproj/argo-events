@@ -33,8 +33,8 @@ func validate(eventSource *v1alpha1.PubSubEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.ProjectID == "" {
-		return fmt.Errorf("must specify projectId")
+	if eventSource.TopicProjectID != "" && eventSource.Topic == "" {
+		return fmt.Errorf("you can't specify topicProjectID if you don't specify topic")
 	}
 	if eventSource.Topic == "" && eventSource.SubscriptionID == "" {
 		return fmt.Errorf("must specify topic or subscriptionID")
