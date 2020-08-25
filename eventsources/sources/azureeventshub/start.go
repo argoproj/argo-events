@@ -84,6 +84,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
+		log.Info("received an event from eventshub...")
+
 		eventData := &events.AzureEventsHubEventData{
 			Id:       event.ID,
 			Body:     event.Data,
@@ -98,6 +100,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return errors.Wrapf(err, "failed to marshal the event data for event source %s and message id %s", el.GetEventName(), event.ID)
 		}
 
+		log.Info("dispatching the event to eventbus...")
 		err = dispatch(eventBytes)
 		if err != nil {
 			log.Error("failed to dispatch Azure EventHub event", zap.Error(err))
@@ -113,23 +116,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to get the hub runtime information for %s", el.GetEventName())
 	}
 
-	var listenerHandles []*eventhub.ListenerHandle
+	if runtimeInfo == nil {
+		return errors.Wrapf(err, "runtime information is not available for %s", el.GetEventName())
+	}
 
-	log.Info("handling the partitions...")
+	if runtimeInfo.PartitionIDs == nil {
+		return errors.Wrapf(err, "no partition ids are available for %s", el.GetEventName())
+	}
+
 	for _, partitionID := range runtimeInfo.PartitionIDs {
-		listenerHandle, err := hub.Receive(ctx, partitionID, handler, eventhub.ReceiveWithLatestOffset())
-		if err != nil {
+		if _, err := hub.Receive(ctx, partitionID, handler, eventhub.ReceiveWithLatestOffset()); err != nil {
 			return errors.Wrapf(err, "failed to receive events from partition %s", partitionID)
 		}
-		listenerHandles = append(listenerHandles, listenerHandle)
 	}
 
 	<-ctx.Done()
 	log.Info("stopping listener handlers")
 
-	for _, handler := range listenerHandles {
-		handler.Close(ctx)
-	}
+	hub.Close(context.Background())
 
 	return nil
 }
