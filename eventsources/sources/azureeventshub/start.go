@@ -124,6 +124,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "no partition ids are available for %s", el.GetEventName())
 	}
 
+	log.Info("handling the partitions...")
 	for _, partitionID := range runtimeInfo.PartitionIDs {
 		if _, err := hub.Receive(ctx, partitionID, handler, eventhub.ReceiveWithLatestOffset()); err != nil {
 			return errors.Wrapf(err, "failed to receive events from partition %s", partitionID)
