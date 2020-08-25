@@ -5,8 +5,6 @@ on:
   push:
     tags:
       - v*
-    branches:
-      - master
 
 defaults:
   run:
@@ -33,9 +31,7 @@ jobs:
           /usr/bin/docker buildx inspect --bootstrap
 
           tag=$(basename $GITHUB_REF)
-          if [ $tag = "master" ]; then
-            tag="latest"
-          fi
+
           targets="eventbus-controller eventsource-controller sensor-controller eventsource sensor"
           for target in $targets; do
             docker buildx build \
