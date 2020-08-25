@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -18,30 +18,49 @@ import (
 
 // Generate OpenAPI spec definitions for Workflow Resource
 func main() {
-	if len(os.Args) <= 1 {
+	if len(os.Args) <= 3 {
 		log.Fatal("Supply a version")
 	}
 	version := os.Args[1]
-	if !strings.HasPrefix(version, "v") {
+	kubeSwaggerPath := os.Args[2]
+	output := os.Args[3]
+	if version != "latest" && !strings.HasPrefix(version, "v") {
 		version = "v" + version
 	}
 	referenceCallback := func(name string) spec.Ref {
 		return spec.MustCreateRef("#/definitions/" + common.EscapeJsonPointer(swaggify(name)))
 	}
 	defs := spec.Definitions{}
+	dependencies := []string{}
 	for defName, val := range cv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
+		dependencies = append(dependencies, val.Dependencies...)
 	}
 	for defName, val := range ebv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
+		dependencies = append(dependencies, val.Dependencies...)
 	}
 	for defName, val := range esv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
+		dependencies = append(dependencies, val.Dependencies...)
 	}
 	for defName, val := range sv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
+		dependencies = append(dependencies, val.Dependencies...)
 	}
-	swagger := spec.Swagger{
+
+	k8sDefinitions := getKubernetesSwagger(kubeSwaggerPath)
+	for _, dep := range dependencies {
+		if !strings.Contains(dep, "k8s.io") {
+			continue
+		}
+		d := swaggify(dep)
+		if kd, ok := k8sDefinitions[d]; ok {
+			defs[d] = kd
+		}
+	}
+
+	swagger := &spec.Swagger{
 		SwaggerProps: spec.SwaggerProps{
 			Swagger:     "2.0",
 			Definitions: defs,
@@ -58,7 +77,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	fmt.Println(string(jsonBytes))
+	err = ioutil.WriteFile(output, jsonBytes, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // swaggify converts the github package
@@ -76,4 +98,18 @@ func swaggify(name string) string {
 	}
 	parts[0] = strings.Join(hostParts, ".")
 	return strings.Join(parts, ".")
+}
+
+func getKubernetesSwagger(kubeSwaggerPath string) spec.Definitions {
+	data, err := ioutil.ReadFile(kubeSwaggerPath)
+	if err != nil {
+		panic(err)
+	}
+	swagger := &spec.Swagger{}
+	err = json.Unmarshal(data, swagger)
+	if err != nil {
+		panic(err)
+	}
+	spec.ExpandSpec(swagger, &spec.ExpandOptions{})
+	return swagger.Definitions
 }
