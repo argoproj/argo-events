@@ -110,6 +110,9 @@ func getKubernetesSwagger(kubeSwaggerPath string) spec.Definitions {
 	if err != nil {
 		panic(err)
 	}
-	spec.ExpandSpec(swagger, &spec.ExpandOptions{})
+	err = spec.ExpandSpec(swagger, &spec.ExpandOptions{})
+	if err != nil {
+		panic(err)
+	}
 	return swagger.Definitions
 }
