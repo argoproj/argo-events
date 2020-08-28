@@ -91,7 +91,7 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	sensor.Status.InitConditions()
 	err := ValidateSensor(sensor)
 	if err != nil {
-		log.Error(err, "validation error")
+		log.Errorw("validation error", "error", err)
 	}
 	args := &AdaptorArgs{
 		Image:  r.sensorImage,
