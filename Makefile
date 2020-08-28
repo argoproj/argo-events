@@ -126,7 +126,7 @@ manifests: crds
 
 .PHONY: swagger
 swagger:
-	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
+	./hack/update-swagger.sh ${VERSION}
 
 .PHONY: codegen
 codegen:
