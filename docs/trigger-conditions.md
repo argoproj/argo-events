@@ -7,7 +7,7 @@
 `Conditions` is a new feature to replace `Circuit` and `Switch`. With
 `conditions`, triggers can be executed based on different dependency conditions.
 
-A example with `conditions`:
+An example with `conditions`:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
