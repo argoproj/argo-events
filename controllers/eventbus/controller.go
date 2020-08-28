@@ -70,7 +70,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 		// Finalizer logic should be added here.
 		err := installer.Uninstall(eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
 		if err != nil {
-			log.Error(err, "failed to uninstall")
+			log.Errorw("failed to uninstall", "error", err)
 			return nil
 		}
 		r.removeFinalizer(eventBus)

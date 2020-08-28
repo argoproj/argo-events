@@ -75,7 +75,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 	eventSource.Status.InitConditions()
 	err := ValidateEventSource(eventSource)
 	if err != nil {
-		log.Desugar().Error("validation error", zap.Error(err))
+		log.Errorw("validation error", "error", err)
 		return err
 	}
 	args := &AdaptorArgs{
