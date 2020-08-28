@@ -1,3 +1,9 @@
+# ======================================================================================================================
+# SEE ALSO
+#   - Set up guide:   https://argoproj.github.io/argo-events/setup/gcp-pub-sub/
+#   - Specification:  https://github.com/argoproj/argo-events/blob/stable/api/event-source.md#pubsubeventsource
+# ----------------------------------------------------------------------------------------------------------------------
+
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
@@ -5,16 +11,25 @@ metadata:
 spec:
   pubSub:
     example:
-      # jsonBody specifies that all event body payload coming from this
+      # (optional) jsonBody specifies that all event body payload coming from this
       # source will be JSON
       jsonBody: true
-      # id of your project
+      # (optional) GCP project ID for the subscription.
+      # Required if you run Argo Events outside of GKE/GCE.
+      # (otherwise, the default value is its project)
       projectID: argo-events-XXXXX
-      # (optional) id of project for topic, same as projectID by default
+      # (optional) GCP project ID for the the topic.
+      # By default, it is same as ProjectID.
       # topicProjectID: "project-id"
-      # topic name
+      # (optional) Topic to which the subscription should belongs.
+      # Required if you want the eventsource to create a new subscription.
+      # If you specify this field along with an existing subscription,
+      # it will be verified whether it actually belongs to the specified topic.
       topic: test
-      # subscription ID
+      # (optional) ID of subscription.
+      # Required if you use existing subscription.
+      # The default value will be auto generated hash based on this eventsource setting, so the subscription
+      # might be recreated every time you update the setting, which has a possiblity of event loss.
       subscriptionID: test-sub
       # (optional) Refers to a k8s scret which contains the credential JSON to access pubsub.
       # If it is missing, it implicts to use Workload Identity.
@@ -24,29 +39,28 @@ spec:
       # Deprecated, legacy approach
       # credentialsFile: ""
 
-# Different logic with different "topic" and "subscriptionID" combination
-#
-# topic provided/existing      subscription provided/existing
-#     yy                       yy     verify if topic matches subsciption's topic
-#     yy                       yn     create sub with given ID
-#     yy                       n-     create or reuse sub with auto generated sub ID
-#     yn                       yn     create topic and sub with auto generated sub ID
-#     yn                       yy     invalid
-#     yn                       n-     create topic, create or reuse sub with auto generated sub ID
-#     n-                       yy     ok
-#     n-                       yn     invalid
+# ----------------------------------------------------------------------------------------------------------------------
+# followings are example for using Workload Identity
 
-
-
-#    example-workload-identity:
-#      # jsonBody specifies that all event body payload coming from this
-#      # source will be JSON
-#      jsonBody: true
-#      # id of your project
-#      projectID: argo-events-XXXXX
-#      # (optional) id of project for topic, same as projectID by default
-#      # topicProjectID: "project-id"
-#      # topic name
-#      topic: test
-#      # Empty credentials file when using Workflow Identity
-#      credentialsFile: ""
+#   template:
+#     serviceAccountName: my-sa
+#   pubSub:
+#     example-workload-identity:
+#       # (optional) jsonBody specifies that all event body payload coming from this
+#       # source will be JSON
+#       jsonBody: true
+#       # (optional on GCP) GCP project ID for the the subscription.
+#       # If you run Argo Events on GCP, the default value is its project (otherwise, it is required)
+#       projectID: argo-events-XXXXX
+#       # (optional) GCP project ID for the the topic, same as projectID by default
+#       # topicProjectID: "project-id"
+#       # (optional) Topic on which a subscription will be created. Optional if you use existing subscription
+#       # (if you spcefied in such case, it will be verified whether it matches against the actual one)
+#       topic: test
+#       # (optional) ID of subscription.
+#       # If the subscription does not exist, it will be newly created.
+#       # The default value will be auto generated based on this eventsource setting, so the subscription
+#       # might be recreated every time you update the setting, which has a possiblity of event loss.
+#       subscriptionID: test-sub
+#       # (optional) Refers to a k8s scret which contains the credential JSON to access pubsub.
+#       # If it is missing, it implicts to use Workload Identity.

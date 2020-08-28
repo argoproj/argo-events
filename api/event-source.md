@@ -4540,9 +4540,13 @@ Description
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-ProjectID is the unique identifier for your project on GCP
+ProjectID is GCP project ID for the subscription. Required if you run
+Argo Events outside of GKE/GCE. (otherwise, the default value is its
+project)
 
 </p>
 
@@ -4560,10 +4564,12 @@ ProjectID is the unique identifier for your project on GCP
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-TopicProjectID identifies the project where the topic should exist or be
-created (assumed to be the same as ProjectID by default)
+TopicProjectID is GCP project ID for the the topic. By default, it is
+same as ProjectID.
 
 </p>
 
@@ -4585,7 +4591,10 @@ created (assumed to be the same as ProjectID by default)
 
 <p>
 
-Topic on which a subscription will be created
+Topic to which the subscription should belongs. Required if you want the
+eventsource to create a new subscription. If you specify this field
+along with an existing subscription, it will be verified whether it
+actually belongs to the specified topic.
 
 </p>
 
@@ -4607,7 +4616,10 @@ Topic on which a subscription will be created
 
 <p>
 
-SubscriptionID is given then use it instead of creating a new one
+SubscriptionID is ID of subscription. Required if you use existing
+subscription. The default value will be auto generated hash based on
+this eventsource setting, so the subscription might be recreated every
+time you update the setting, which has a possiblity of event loss.
 
 </p>
 

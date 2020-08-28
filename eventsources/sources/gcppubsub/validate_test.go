@@ -33,7 +33,7 @@ func TestValidateEventSource(t *testing.T) {
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "must specify projectId", err.Error())
+	assert.Equal(t, "must specify topic or subscriptionID", err.Error())
 
 	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "gcp-pubsub.yaml"))
 	assert.Nil(t, err)
