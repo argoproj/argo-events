@@ -10,18 +10,17 @@ resource being watched.
 
 For example, if you want to watch actions on `Deployment` objects, you need to:
 
-1. Create a Service Account
+1.  Create a Service Account
 
         kubectl -n your-namespace create sa my-sa
 
-
-2. Grant RBAC privileges to it
+2.  Grant RBAC privileges to it
 
         kubectl -n your-namespace create role deployments-watcher --verb=list,watch --resource=deployments.apps
 
         kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa
 
-   or (if you want to watch cluster scope)
+    or (if you want to watch cluster scope)
 
         kubectl create clusterrole deployments-watcher --verb=list,watch --resource=deployments.apps
 
@@ -34,9 +33,9 @@ A `Service Account` also can be specified in a Sensor object via
 `argoWorkflow` trigger is defined in the Sensor object.
 
 The sensor examples provided by us use `argo-events-sa` service account to
-execute the triggers, but it is has more permissions than needed, and you may
-want to limit those privileges based on your use-case. It's always a good
-practice to create a service account with minimum privileges to execute it.
+execute the triggers, but it has more permissions than needed, and you may want
+to limit those privileges based on your use-case. It's always a good practice to
+create a service account with minimum privileges to execute it.
 
 ### Argo Workflow Trigger
 
@@ -56,3 +55,13 @@ trigger, make sure to grant `create` permission to that resource.
 
 For these triggers, you **don't** need to specify a Service Account to the
 Sensor.
+
+## Service Account for Trigged Workflows (or other K8s resources)
+
+When the Sensor is used to trigger a Workflow, you might need to configure the
+Service Account used in the Workflow spec (**NOT**
+`spec.template.serviceAccountName`) following Argo Workflow
+[instructions](https://github.com/argoproj/argo/blob/master/docs/service-accounts.md).
+
+If it is used to trigger other K8s resources (i.e. a Deployment), make sure to
+follow least privilege principle.
