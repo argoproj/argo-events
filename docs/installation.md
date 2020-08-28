@@ -25,6 +25,8 @@
            
          * On Openshift, make sure to grant `anyuid` scc to the service account.
 
+                oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
+
 3. Deploy the eventbus,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
@@ -46,6 +48,8 @@
                 kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
          
          * On Openshift, make sure to grant `anyuid` scc to the service account.
+
+                oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
 
 3. Deploy the eventbus,
 
