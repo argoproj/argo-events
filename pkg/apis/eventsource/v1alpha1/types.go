@@ -56,7 +56,7 @@ type EventSourceSpec struct {
 	// Service is the specifications of the service to expose the event source
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,3,opt,name=service"`
-	// Replica is the gateway deployment replicas
+	// Replica is the event source deployment replicas
 	Replica *int32 `json:"replica,omitempty" protobuf:"varint,4,opt,name=replica"`
 
 	// Minio event sources

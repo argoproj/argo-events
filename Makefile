@@ -45,26 +45,6 @@ all-controller-images: sensor-controller-image eventbus-controller-image eventso
 
 .PHONY: all clean test
 
-# EventSource
-.PHONY: eventsource
-eventsource: dist/eventsource
-
-dist/eventsource: GOARGS = GOOS= GOARCH=
-dist/eventsource-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/eventsource-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/eventsource-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/eventsource-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
-
-dist/eventsource:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
-
-dist/eventsource-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
-
-eventsource-image: dist/eventsource-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)  --target eventsource -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) ; fi
-
 # EventSource controller
 .PHONY: eventsource-controller
 eventsource-controller: dist/eventsource-controller
@@ -85,25 +65,25 @@ eventsource-controller-image: dist/eventsource-controller-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG)  --target eventsource-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) ; fi
 
-# Sensor
-.PHONY: sensor
-sensor: dist/sensor
+# EventSource
+.PHONY: eventsource
+eventsource: dist/eventsource
 
-dist/sensor: GOARGS = GOOS= GOARCH=
-dist/sensor-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/sensor-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/sensor-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/sensor-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
+dist/eventsource: GOARGS = GOOS= GOARCH=
+dist/eventsource-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
+dist/eventsource-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
+dist/eventsource-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
+dist/eventsource-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
-dist/sensor:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
+dist/eventsource:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
 
-dist/sensor-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
+dist/eventsource-%:
+	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
 
-sensor-image: dist/sensor-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG)  --target sensor -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
+eventsource-image: dist/eventsource-linux-amd64
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)  --target eventsource -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) ; fi
 
 # Sensor controller
 .PHONY: sensor-controller
@@ -124,6 +104,26 @@ dist/sensor-controller-%:
 sensor-controller-image: dist/sensor-controller-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG)  --target sensor-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
+
+# Sensor
+.PHONY: sensor
+sensor: dist/sensor
+
+dist/sensor: GOARGS = GOOS= GOARCH=
+dist/sensor-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
+dist/sensor-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
+dist/sensor-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
+dist/sensor-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
+
+dist/sensor:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
+
+dist/sensor-%:
+	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
+
+sensor-image: dist/sensor-linux-amd64
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG)  --target sensor -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
 
 # EventBus controller
 .PHONY: eventbus-controller
@@ -176,9 +176,9 @@ codegen:
 	./hack/update-openapigen.sh
 	$(MAKE) swagger
 	./hack/update-api-docs.sh
+	$(MAKE) manifests
 	rm -rf ./vendor
 	go mod tidy
-	$(MAKE) manifests
 
 .PHONY: start
 start:

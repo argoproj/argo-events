@@ -84,7 +84,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		config.TlsV1 = true
 	}
 
-	if err := sources.Connect(common.GetConnectionBackoff(nsqEventSource.ConnectionBackoff), func() error {
+	if err := common.Connect(common.GetConnectionBackoff(nsqEventSource.ConnectionBackoff), func() error {
 		var err error
 		if consumer, err = nsq.NewConsumer(nsqEventSource.Topic, nsqEventSource.Channel, config); err != nil {
 			return err

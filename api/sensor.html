@@ -583,7 +583,7 @@ string
 <h3 id="argoproj.io/v1alpha1.Event">Event
 </h3>
 <p>
-<p>Event represents the cloudevent received from a gateway.</p>
+<p>Event represents the cloudevent received from an event source.</p>
 </p>
 <table>
 <thead>
@@ -625,7 +625,7 @@ EventContext
 <a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
 </p>
 <p>
-<p>EventContext holds the context of the cloudevent received from a gateway.</p>
+<p>EventContext holds the context of the cloudevent received from an event source.</p>
 </p>
 <table>
 <thead>
@@ -1556,21 +1556,6 @@ github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.NodePhase">NodePhase
-(<code>string</code> alias)</p></h3>
-<p>
-<p>NodePhase is the label for the condition of a node</p>
-</p>
-<h3 id="argoproj.io/v1alpha1.NodeType">NodeType
-(<code>string</code> alias)</p></h3>
-<p>
-<p>NodeType is the type of a node</p>
-</p>
-<h3 id="argoproj.io/v1alpha1.NotificationType">NotificationType
-(<code>string</code> alias)</p></h3>
-<p>
-<p>NotificationType represent a type of notifications that are handled by a sensor</p>
-</p>
 <h3 id="argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger
 </h3>
 <p>
@@ -2207,7 +2192,7 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
+<p>ServiceAccountName is the name of the ServiceAccount to use to run sensor pod.
 More info: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/</a></p>
 </td>
 </tr>
@@ -2222,7 +2207,7 @@ Kubernetes core/v1.Container
 </td>
 <td>
 <em>(Optional)</em>
-<p>Container is the main container image to run in the gateway pod</p>
+<p>Container is the main container image to run in the sensor pod</p>
 </td>
 </tr>
 <tr>
@@ -2392,11 +2377,6 @@ TriggerPolicy
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.TriggerCycleState">TriggerCycleState
-(<code>string</code> alias)</p></h3>
-<p>
-<p>TriggerCycleState is the label for the state of the trigger cycle</p>
-</p>
 <h3 id="argoproj.io/v1alpha1.TriggerParameter">TriggerParameter
 </h3>
 <p>

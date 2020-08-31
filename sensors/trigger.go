@@ -18,6 +18,8 @@ package sensors
 import (
 	"context"
 
+	"go.uber.org/zap"
+
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	openwhisk "github.com/argoproj/argo-events/sensors/triggers/apache-openwhisk"
@@ -29,7 +31,6 @@ import (
 	"github.com/argoproj/argo-events/sensors/triggers/nats"
 	"github.com/argoproj/argo-events/sensors/triggers/slack"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
-	"go.uber.org/zap"
 )
 
 // Trigger interface

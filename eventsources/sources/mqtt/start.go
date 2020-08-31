@@ -106,7 +106,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var client mqttlib.Client
 
 	log.Info("connecting to mqtt broker...")
-	if err := sources.Connect(common.GetConnectionBackoff(mqttEventSource.ConnectionBackoff), func() error {
+	if err := common.Connect(common.GetConnectionBackoff(mqttEventSource.ConnectionBackoff), func() error {
 		client = mqttlib.NewClient(opts)
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
 			return token.Error()

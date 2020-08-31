@@ -159,14 +159,14 @@ message DependencyGroup {
   repeated string dependencies = 2;
 }
 
-// Event represents the cloudevent received from a gateway.
+// Event represents the cloudevent received from an event source.
 message Event {
   optional EventContext context = 1;
 
   optional bytes data = 2;
 }
 
-// EventContext holds the context of the cloudevent received from a gateway.
+// EventContext holds the context of the cloudevent received from an event source.
 message EventContext {
   // ID of the event; must be non-empty and unique within the scope of the producer.
   optional string id = 1;
@@ -542,12 +542,12 @@ message Template {
   // Metdata sets the pods's metadata, i.e. annotations and labels
   optional Metadata metadata = 1;
 
-  // ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
+  // ServiceAccountName is the name of the ServiceAccount to use to run sensor pod.
   // More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   // +optional
   optional string serviceAccountName = 2;
 
-  // Container is the main container image to run in the gateway pod
+  // Container is the main container image to run in the sensor pod
   // +optional
   optional k8s.io.api.core.v1.Container container = 3;
 

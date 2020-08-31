@@ -475,7 +475,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 					},
 					"replica": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Replica is the gateway deployment replicas",
+							Description: "Replica is the event source deployment replicas",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},

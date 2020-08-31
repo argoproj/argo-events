@@ -1005,7 +1005,7 @@ Service is the specifications of the service to expose the event source
 
 <p>
 
-Replica is the gateway deployment replicas
+Replica is the event source deployment replicas
 
 </p>
 
@@ -1716,7 +1716,7 @@ Service is the specifications of the service to expose the event source
 
 <p>
 
-Replica is the gateway deployment replicas
+Replica is the event source deployment replicas
 
 </p>
 

@@ -65,7 +65,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var conn *natslib.Conn
 
 	log.Info("connecting to nats cluster...")
-	if err := sources.Connect(common.GetConnectionBackoff(natsEventSource.ConnectionBackoff), func() error {
+	if err := common.Connect(common.GetConnectionBackoff(natsEventSource.ConnectionBackoff), func() error {
 		var err error
 		var opt []natslib.Option
 
