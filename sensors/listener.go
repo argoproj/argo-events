@@ -34,7 +34,6 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
-	"github.com/argoproj/argo-events/eventsources/sources"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
@@ -107,7 +106,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 				triggerNames = append(triggerNames, t.Template.Name)
 			}
 			var conn eventbusdriver.Connection
-			err = sources.Connect(&common.DefaultRetry, func() error {
+			err = common.Connect(&common.DefaultRetry, func() error {
 				var err error
 				conn, err = ebDriver.Connect()
 				return err

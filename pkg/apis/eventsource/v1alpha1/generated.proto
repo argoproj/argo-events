@@ -180,7 +180,7 @@ message EventSourceSpec {
   // +optional
   optional Service service = 3;
 
-  // Replica is the gateway deployment replicas
+  // Replica is the event source deployment replicas
   optional int32 replica = 4;
 
   // Minio event sources

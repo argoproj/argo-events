@@ -321,7 +321,14 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 					if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 						return errors.New("failed to publish event, eventbus connection closed")
 					}
-					return driver.Publish(e.eventBusConn, eventBody)
+					if err = driver.Publish(e.eventBusConn, eventBody); err != nil {
+						logger.Error("failed to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
+							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+						return err
+					}
+					logger.Info("succeeded to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
+						s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+					return nil
 				})
 				if err != nil {
 					logger.Error("failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,

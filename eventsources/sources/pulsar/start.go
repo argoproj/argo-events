@@ -120,7 +120,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var client pulsar.Client
 
-	if err := sources.Connect(common.GetConnectionBackoff(pulsarEventSource.ConnectionBackoff), func() error {
+	if err := common.Connect(common.GetConnectionBackoff(pulsarEventSource.ConnectionBackoff), func() error {
 		var err error
 		if client, err = pulsar.NewClient(clientOpt); err != nil {
 			return err

@@ -1161,7 +1161,7 @@ Event
 
 <p>
 
-Event represents the cloudevent received from a gateway.
+Event represents the cloudevent received from an event source.
 
 </p>
 
@@ -1241,8 +1241,8 @@ EventContext
 
 <p>
 
-EventContext holds the context of the cloudevent received from a
-gateway.
+EventContext holds the context of the cloudevent received from an event
+source.
 
 </p>
 
@@ -3068,61 +3068,6 @@ TLS configuration for the NATS producer.
 
 </table>
 
-<h3 id="argoproj.io/v1alpha1.NodePhase">
-
-NodePhase (<code>string</code> alias)
-
-</p>
-
-</h3>
-
-<p>
-
-<p>
-
-NodePhase is the label for the condition of a node
-
-</p>
-
-</p>
-
-<h3 id="argoproj.io/v1alpha1.NodeType">
-
-NodeType (<code>string</code> alias)
-
-</p>
-
-</h3>
-
-<p>
-
-<p>
-
-NodeType is the type of a node
-
-</p>
-
-</p>
-
-<h3 id="argoproj.io/v1alpha1.NotificationType">
-
-NotificationType (<code>string</code> alias)
-
-</p>
-
-</h3>
-
-<p>
-
-<p>
-
-NotificationType represent a type of notifications that are handled by a
-sensor
-
-</p>
-
-</p>
-
 <h3 id="argoproj.io/v1alpha1.OpenWhiskTrigger">
 
 OpenWhiskTrigger
@@ -4327,7 +4272,7 @@ Metdata sets the pods’s metadata, i.e. annotations and labels
 <p>
 
 ServiceAccountName is the name of the ServiceAccount to use to run
-gateway pod. More info:
+sensor pod. More info:
 <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/</a>
 
 </p>
@@ -4352,7 +4297,7 @@ Kubernetes core/v1.Container </a> </em>
 
 <p>
 
-Container is the main container image to run in the gateway pod
+Container is the main container image to run in the sensor pod
 
 </p>
 
@@ -4678,24 +4623,6 @@ Policy to configure backoff and execution criteria for the trigger
 </tbody>
 
 </table>
-
-<h3 id="argoproj.io/v1alpha1.TriggerCycleState">
-
-TriggerCycleState (<code>string</code> alias)
-
-</p>
-
-</h3>
-
-<p>
-
-<p>
-
-TriggerCycleState is the label for the state of the trigger cycle
-
-</p>
-
-</p>
 
 <h3 id="argoproj.io/v1alpha1.TriggerParameter">
 

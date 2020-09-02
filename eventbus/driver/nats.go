@@ -124,8 +124,10 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 	return conn.Publish(n.subject, message)
 }
 
-// SubscribeCloudEvents is used to subscribe multiple dependency expression
+// SubscribeEventSources is used to subscribe multiple event source dependencies
 // Parameter - ctx, context
+// Parameter - conn, eventbus connection
+// Parameter - closeCh, channel to indicate to close the subscription
 // Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
@@ -147,7 +149,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
 		stan.StartAt(pb.StartPosition_LastReceived),
-		stan.AckWait(1*time.Second),
+		stan.AckWait(3*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
 		log.Errorf("failed to subscribe to subject %s", n.subject)

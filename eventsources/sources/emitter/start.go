@@ -95,7 +95,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("creating a client", zap.Any("channelName", emitterEventSource.ChannelName))
 	client := emitter.NewClient(options...)
 
-	if err := sources.Connect(common.GetConnectionBackoff(emitterEventSource.ConnectionBackoff), func() error {
+	if err := common.Connect(common.GetConnectionBackoff(emitterEventSource.ConnectionBackoff), func() error {
 		if err := client.Connect(); err != nil {
 			return err
 		}

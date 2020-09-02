@@ -680,7 +680,7 @@
           }
         },
         "replica": {
-          "description": "Replica is the gateway deployment replicas",
+          "description": "Replica is the event source deployment replicas",
           "type": "integer",
           "format": "int32"
         },
@@ -2045,7 +2045,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.EventContext": {
-      "description": "EventContext holds the context of the cloudevent received from a gateway.",
+      "description": "EventContext holds the context of the cloudevent received from an event source.",
       "type": "object",
       "required": [
         "id",
@@ -2642,7 +2642,7 @@
       "type": "object",
       "properties": {
         "container": {
-          "description": "Container is the main container image to run in the gateway pod",
+          "description": "Container is the main container image to run in the sensor pod",
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"
         },
         "metadata": {
@@ -2661,7 +2661,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext"
         },
         "serviceAccountName": {
-          "description": "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
+          "description": "ServiceAccountName is the name of the ServiceAccount to use to run sensor pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
           "type": "string"
         },
         "tolerations": {
