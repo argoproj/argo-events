@@ -24,48 +24,6 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
-// NotificationType represent a type of notifications that are handled by a sensor
-type NotificationType string
-
-const (
-	// EventNotification is a notification for an event dependency (from a Gateway)
-	EventNotification NotificationType = "Event"
-	// ResourceUpdateNotification is a notification that an associated resource was updated
-	ResourceUpdateNotification NotificationType = "ResourceUpdate"
-)
-
-// NodeType is the type of a node
-type NodeType string
-
-const (
-	// NodeTypeEventDependency is a node that represents a single event dependency
-	NodeTypeEventDependency NodeType = "EventDependency"
-	// NodeTypeTrigger is a node that represents a single trigger
-	NodeTypeTrigger NodeType = "Trigger"
-	// NodeTypeDependencyGroup is a node that represents a group of event dependencies
-	NodeTypeDependencyGroup NodeType = "DependencyGroup"
-)
-
-// NodePhase is the label for the condition of a node
-type NodePhase string
-
-// possible types of node phases
-const (
-	NodePhaseComplete NodePhase = "Complete" // the node has finished successfully
-	NodePhaseActive   NodePhase = "Active"   // the node is active and waiting on dependencies to resolve
-	NodePhaseError    NodePhase = "Error"    // the node has encountered an error in processing
-	NodePhaseNew      NodePhase = ""         // the node is new
-)
-
-// TriggerCycleState is the label for the state of the trigger cycle
-type TriggerCycleState string
-
-// possible values of trigger cycle states
-const (
-	TriggerCycleSuccess TriggerCycleState = "Success" // all triggers are successfully executed
-	TriggerCycleFailure TriggerCycleState = "Failure" // one or more triggers failed
-)
-
 // KubernetesResourceOperation refers to the type of operation performed on the K8s resource
 type KubernetesResourceOperation string
 
@@ -151,11 +109,11 @@ type SensorSpec struct {
 type Template struct {
 	// Metdata sets the pods's metadata, i.e. annotations and labels
 	Metadata Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	// ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
+	// ServiceAccountName is the name of the ServiceAccount to use to run sensor pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 	// +optional
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,2,opt,name=serviceAccountName"`
-	// Container is the main container image to run in the gateway pod
+	// Container is the main container image to run in the sensor pod
 	// +optional
 	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
 	// Volumes is a list of volumes that can be mounted by containers in a workflow.
@@ -788,13 +746,13 @@ type GitCreds struct {
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
 }
 
-// Event represents the cloudevent received from a gateway.
+// Event represents the cloudevent received from an event source.
 type Event struct {
 	Context *EventContext `json:"context,omitempty" protobuf:"bytes,1,opt,name=context"`
 	Data    []byte        `json:"data" protobuf:"bytes,2,opt,name=data"`
 }
 
-// EventContext holds the context of the cloudevent received from a gateway.
+// EventContext holds the context of the cloudevent received from an event source.
 type EventContext struct {
 	// ID of the event; must be non-empty and unique within the scope of the producer.
 	ID string `json:"id" protobuf:"bytes,1,opt,name=id"`

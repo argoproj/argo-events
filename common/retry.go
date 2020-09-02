@@ -65,3 +65,17 @@ func GetConnectionBackoff(backoff *apicommon.Backoff) *wait.Backoff {
 	}
 	return &result
 }
+
+// Connect is a general connection helper
+func Connect(backoff *wait.Backoff, conn func() error) error {
+	if backoff == nil {
+		backoff = &DefaultRetry
+	}
+	err := wait.ExponentialBackoff(*backoff, func() (bool, error) {
+		if err := conn(); err != nil {
+			return false, nil
+		}
+		return true, nil
+	})
+	return err
+}

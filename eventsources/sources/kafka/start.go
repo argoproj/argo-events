@@ -155,7 +155,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	var consumer sarama.Consumer
 
 	log.Info("connecting to Kafka cluster...")
-	if err := sources.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
+	if err := common.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
 		var err error
 
 		config, err := getSaramaConfig(kafkaEventSource, log)

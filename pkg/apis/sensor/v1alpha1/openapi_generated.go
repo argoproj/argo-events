@@ -456,7 +456,7 @@ func schema_pkg_apis_sensor_v1alpha1_Event(ref common.ReferenceCallback) common.
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Event represents the cloudevent received from a gateway.",
+				Description: "Event represents the cloudevent received from an event source.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"context": {
@@ -483,7 +483,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "EventContext holds the context of the cloudevent received from a gateway.",
+				Description: "EventContext holds the context of the cloudevent received from an event source.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"id": {
@@ -1568,14 +1568,14 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 					},
 					"serviceAccountName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
+							Description: "ServiceAccountName is the name of the ServiceAccount to use to run sensor pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"container": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Container is the main container image to run in the gateway pod",
+							Description: "Container is the main container image to run in the sensor pod",
 							Ref:         ref("k8s.io/api/core/v1.Container"),
 						},
 					},
