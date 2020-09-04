@@ -55,6 +55,12 @@ nav:
       - 'tutorials/06-trigger-conditions.md'
       - 'tutorials/07-filters.md'
       - 'tutorials/08-policy.md'
+  - EventSources:
+      - 'eventsources/deployment-strategies.md'
+      - 'eventsources/multiple-events.md'
+      - 'eventsources/naming.md'
+      - 'eventsources/services.md'
+      - 'eventsources/gcp-pubsub.md'
   - Triggers:
       - 'triggers/argo-workflow.md'
       - 'triggers/aws-lambda.md'
@@ -66,10 +72,6 @@ nav:
       - 'triggers/slack-trigger.md'
       - 'triggers/build-your-own-trigger.md'
   - 'eventbus.md'
-  - 'eventsource-deployment-strategies.md'
-  - 'eventsource-names.md'
-  - 'eventsource-services.md'
-  - 'eventsource-with-multiple-events.md'
   - 'webhook-authentication.md'
   - 'webhook-health-check.md'
   - 'trigger-conditions.md'

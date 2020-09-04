@@ -18,8 +18,8 @@ The common pratice is to create an EventBus named `default` in the namespace. If
 you want to use a different name, or you want to have multiple EventBus in one
 namespace, you need to specifiy `eventBusName` in the spec of EventSource and
 Sensor correspondingly, so that they can find the right one. See EventSource
-[spec](../api/event-source.md#eventsourcespec) and Sensor
-[spec](../api/sensor.md#sensorspec).
+[spec](https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#eventsourcespec) and Sensor
+[spec](https://github.com/argoproj/argo-events/tree/stable/api/sensor.md#sensorspec).
 
 ## NATS Streaming
 
@@ -82,7 +82,7 @@ spec:
   [persistence volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
   for the data.
 
-- Check [here](../api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy) for the
+- Check [here](https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy) for the
   full spec.
 
 #### More About Native NATS EventBus
