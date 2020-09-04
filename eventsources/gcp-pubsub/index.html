@@ -36,7 +36,7 @@
     
     
       
-        <title>Slack Trigger - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>GCP PubSub - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -127,7 +127,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#slack-trigger" tabindex="1" class="md-skip">
+      <a href="#gcp-pubsub" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -152,7 +152,7 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              Slack Trigger
+              GCP PubSub
             </span>
           
         </div>
@@ -752,10 +752,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8" checked>
     
     <label class="md-nav__link" for="nav-8">
       EventSources
@@ -773,7 +775,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../eventsources/deployment-strategies/" title="EventSource Deployment Strategies" class="md-nav__link">
+    <a href="../deployment-strategies/" title="EventSource Deployment Strategies" class="md-nav__link">
       EventSource Deployment Strategies
     </a>
   </li>
@@ -785,7 +787,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../eventsources/multiple-events/" title="EventSource With Multiple Events" class="md-nav__link">
+    <a href="../multiple-events/" title="EventSource With Multiple Events" class="md-nav__link">
       EventSource With Multiple Events
     </a>
   </li>
@@ -797,7 +799,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../eventsources/naming/" title="EventSource Names" class="md-nav__link">
+    <a href="../naming/" title="EventSource Names" class="md-nav__link">
       EventSource Names
     </a>
   </li>
@@ -809,130 +811,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../eventsources/services/" title="EventSource Services" class="md-nav__link">
+    <a href="../services/" title="EventSource Services" class="md-nav__link">
       EventSource Services
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../eventsources/gcp-pubsub/" title="GCP PubSub" class="md-nav__link">
-      GCP PubSub
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9" checked>
-    
-    <label class="md-nav__link" for="nav-9">
-      Triggers
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-9">
-        Triggers
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
-      Argo Workflow Trigger
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../aws-lambda/" title="AWS Lambda" class="md-nav__link">
-      AWS Lambda
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../http-trigger/" title="HTTP Trigger" class="md-nav__link">
-      HTTP Trigger
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../nats-trigger/" title="NATS Trigger" class="md-nav__link">
-      NATS Trigger
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../kafka-trigger/" title="Kafka Trigger" class="md-nav__link">
-      Kafka Trigger
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
-      Kubernetes Object Trigger
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
-      OpenWhisk Trigger
     </a>
   </li>
 
@@ -952,11 +832,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        Slack Trigger
+        GCP PubSub
       </label>
     
-    <a href="./" title="Slack Trigger" class="md-nav__link md-nav__link--active">
-      Slack Trigger
+    <a href="./" title="GCP PubSub" class="md-nav__link md-nav__link--active">
+      GCP PubSub
     </a>
     
       
@@ -970,29 +850,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisite" title="Prerequisite" class="md-nav__link">
-    Prerequisite
+  <a href="#topic-and-subscription-id" title="Topic And Subscription ID" class="md-nav__link">
+    Topic And Subscription ID
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-a-slack-app" title="Create a Slack App" class="md-nav__link">
-    Create a Slack App
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#slack-trigger_1" title="Slack Trigger" class="md-nav__link">
-    Slack Trigger
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameterization" title="Parameterization" class="md-nav__link">
-    Parameterization
+  <a href="#workload-identity" title="Workload Identity" class="md-nav__link">
+    Workload Identity
   </a>
   
 </li>
@@ -1008,13 +874,133 @@
   </li>
 
         
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9">
+    
+    <label class="md-nav__link" for="nav-9">
+      Triggers
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-9">
+        Triggers
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
           
           
           
 
 
   <li class="md-nav__item">
-    <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
+    <a href="../../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
+      Argo Workflow Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/aws-lambda/" title="AWS Lambda" class="md-nav__link">
+      AWS Lambda
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/http-trigger/" title="HTTP Trigger" class="md-nav__link">
+      HTTP Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/nats-trigger/" title="NATS Trigger" class="md-nav__link">
+      NATS Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/kafka-trigger/" title="Kafka Trigger" class="md-nav__link">
+      Kafka Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
+      Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
       Build Your Own Trigger
     </a>
   </li>
@@ -1166,29 +1152,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisite" title="Prerequisite" class="md-nav__link">
-    Prerequisite
+  <a href="#topic-and-subscription-id" title="Topic And Subscription ID" class="md-nav__link">
+    Topic And Subscription ID
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-a-slack-app" title="Create a Slack App" class="md-nav__link">
-    Create a Slack App
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#slack-trigger_1" title="Slack Trigger" class="md-nav__link">
-    Slack Trigger
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameterization" title="Parameterization" class="md-nav__link">
-    Parameterization
+  <a href="#workload-identity" title="Workload Identity" class="md-nav__link">
+    Workload Identity
   </a>
   
 </li>
@@ -1209,143 +1181,72 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/triggers/slack-trigger.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/eventsources/gcp-pubsub.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="slack-trigger">Slack Trigger<a class="headerlink" href="#slack-trigger" title="Permanent link">&para;</a></h1>
-<p>The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario. </p>
-<h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
-<ol>
-<li>
-<p>Deploy the eventbus in the namespace.</p>
-</li>
-<li>
-<p>Make sure to have a Slack workspace setup you wish to send a message to.</p>
-</li>
-<li>
-<p>Create a webhook event-source.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Set up port-forwarding to expose the http server. We will
-   use port-forwarding here.</p>
-<div class="codehilite"><pre><span></span>kubectl port-forward -n argo-events &lt;event-source-pod-name&gt; 12000:12000
-</pre></div>
-
-
-</li>
-</ol>
-<h2 id="create-a-slack-app">Create a Slack App<a class="headerlink" href="#create-a-slack-app" title="Permanent link">&para;</a></h2>
-<p>We need to create a Slack App which will send messages to your Slack Workspace. We will add OAuth Permissions and add the OAuth token to the k8s cluster via a secret.</p>
-<ol>
-<li>
-<p>Create a Slack app by clicking <code>Create New App</code> at the <a href="https://api.slack.com/apps">Slack API Page</a>. Name your app and choose your intended Slack Workspace</p>
-</li>
-<li>
-<p>Navigate to your app, then to <code>Features &gt; OAuth &amp; Permissions</code></p>
-</li>
-<li>
-<p>Scroll down to <code>Scopes</code> and add the scopes <code>channels:join</code>, and <code>chat:write</code></p>
-</li>
-<li>
-<p>Scroll to the top of the <code>OAuth &amp; Permissions</code> page and click <code>Install App to Workspace</code> and follow the install Wizard</p>
-</li>
-<li>
-<p>You should land back on the <code>OAuth &amp; Permissions</code> page. Copy your app's OAuth Access Token. This will allow the trigger to act on behalf of your newly created Slack app.</p>
-</li>
-<li>
-<p>Encode your OAuth token in base64. This can done easily with the command line</p>
-<div class="codehilite"><pre><span></span>echo -n &quot;YOUR-OAUTH-TOKEN&quot; | base64
-</pre></div>
-
-
-</li>
-<li>
-<p>Create a kubernetes secret file <code>slack-secret.yaml</code> with your OAuth token in the following format</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">slack</span><span class="o">-</span><span class="n">secret</span>
-<span class="n">data</span><span class="o">:</span>
-  <span class="n">token</span><span class="o">:</span> <span class="n">YOUR</span><span class="o">-</span><span class="n">BASE64</span><span class="o">-</span><span class="n">ENCODED</span><span class="o">-</span><span class="n">OAUTH</span><span class="o">-</span><span class="n">TOKEN</span>
-</pre></div>
-
-
-</li>
-<li>
-<p>Apply the kubernetes secret</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f slack-secret.yaml
-</pre></div>
-
-
-</li>
-</ol>
-<h2 id="slack-trigger_1">Slack Trigger<a class="headerlink" href="#slack-trigger_1" title="Permanent link">&para;</a></h2>
-<p>We will set up a basic slack trigger and send a default message, and then a dynamic custom message. </p>
-<ol>
-<li>
-<p>Create a sensor with Slack trigger. We will discuss the trigger details in the following sections.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/slack-trigger.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Send a http request to the event-source-pod to fire the Slack trigger. </p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;text&quot;:&quot;Hello, World!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
-
-<p><strong>Note</strong>: The default slack-trigger will send the message "hello world" to the #general channel. You may change the default message and channel in slack-trigger.yaml under triggers.slack.channel and triggers.slack.message.</p>
-</li>
-<li>
-<p>Alternatively, you can dynamically determine the channel and message based on parameterization of your event. </p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;channel&quot;:&quot;random&quot;,&quot;message&quot;:&quot;test message&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
-
-</li>
-<li>
-<p>Great! But, how did the sensor use the event to customize the message and channel from the http request? We will see that in next section.</p>
-</li>
-</ol>
-<h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
-<p>The slack trigger parameters have the following structure,</p>
-<div class="codehilite"><pre><span></span>    parameters:
-      - src:
-          dependencyName: test-dep
-          dataKey: body.channel
-        dest: slack.channel
-      - src:
-          dependencyName: test-dep
-          contextKey: body.message
-        dest: slack.message
-</pre></div>
-
-
-<p>The <code>src</code> is the source of event. It contains,</p>
-<ol>
-<li><code>dependencyName</code>: name of the event dependency to extract the event from.</li>
-<li><code>dataKey</code>: to extract a particular key-value from event's data.</li>
-<li><code>contextKey</code>: to extract a particular key-value from event' context.</li>
-</ol>
-<p>The <code>dest</code> is the destination key within the result payload.</p>
-<p>So, the above trigger paramters will generate a request payload as,</p>
-<div class="codehilite"><pre><span></span>    {
-        &quot;channel&quot;: &quot;channel_to_send_message&quot;,
-        &quot;message&quot;: &quot;message_to_send_to_channel&quot;
-    }
-</pre></div>
-
-
-<p><strong><em>Note</em></strong>: If you define both the <code>contextKey</code> and <code>dataKey</code> within a paramter item, then
-the <code>dataKey</code> takes the precedence.</p>
-<p>You can create any paramater structure you want. To get more info on how to 
-generate complex event payloads, take a look at <a href="https://github.com/tidwall/sjson">this library</a>.</p>
-<p>The complete specification of Slack trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#slacktrigger">here</a>.</p>
+                <h1 id="gcp-pubsub">GCP PubSub<a class="headerlink" href="#gcp-pubsub" title="Permanent link">&para;</a></h1>
+<h2 id="topic-and-subscription-id">Topic And Subscription ID<a class="headerlink" href="#topic-and-subscription-id" title="Permanent link">&para;</a></h2>
+<p>GCP PubSub event source can listen to a PubSub with given <code>topic</code>, or
+<code>subscriptionID</code>. Here is the logic with different <code>topic</code> and <code>subscriptionID</code>
+combination.</p>
+<table>
+<thead>
+<tr>
+<th>Topic Provided/Existing</th>
+<th>Sub ID Provided/Existing</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes/Yes</td>
+<td>Yes/Yes</td>
+<td>Validate if given topic matches subsciption's topic</td>
+</tr>
+<tr>
+<td>Yes/Yes</td>
+<td>Yes/No</td>
+<td>Create a subscription with given ID</td>
+</tr>
+<tr>
+<td>Yes/Yes</td>
+<td>No/-</td>
+<td>Create or re-use subscription with auto generated subID</td>
+</tr>
+<tr>
+<td>Yes/No</td>
+<td>Yes/No</td>
+<td>Create a topic and a subscription with given subID</td>
+</tr>
+<tr>
+<td>Yes/No</td>
+<td>Yes/Yes</td>
+<td>Invalid</td>
+</tr>
+<tr>
+<td>Yes/No</td>
+<td>No/-</td>
+<td>Create a topic, create or re-use subscription w/ auto generated subID</td>
+</tr>
+<tr>
+<td>No/-</td>
+<td>Yes/Yes</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>No/-</td>
+<td>Yes/No</td>
+<td>Invalid</td>
+</tr>
+</tbody>
+</table>
+<h2 id="workload-identity">Workload Identity<a class="headerlink" href="#workload-identity" title="Permanent link">&para;</a></h2>
+<p>If you have configured
+<a href="https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity">Workload Identity</a>
+and want to use it for a PubSub EventSource, leave <code>credentialSecret</code> nil.</p>
+<p>Full spec is available <a href="https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#pubsubeventsource">here</a>.</p>
+<p>See a PubSub EventSource
+<a href="https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml">example</a>.</p>
                 
                   
                 
@@ -1366,7 +1267,7 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../services/" title="EventSource Services" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1375,19 +1276,19 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                OpenWhisk Trigger
+                EventSource Services
               </span>
             </div>
           </a>
         
         
-          <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Build Your Own Trigger
+                Argo Workflow Trigger
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
