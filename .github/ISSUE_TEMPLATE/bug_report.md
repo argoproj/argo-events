@@ -23,7 +23,7 @@ If applicable, add screenshots to help explain your problem.
 **Environment (please complete the following information):**
  - Kubernetes: [e.g. v1.18.6]
  - Argo: [e.g. v2.9.4]
- - Argo Events: [e.g. v0.17.0]
+ - Argo Events: [e.g. v1.0.0]
 
 **Additional context**
 Add any other context about the problem here.

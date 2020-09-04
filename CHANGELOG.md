@@ -1,5 +1,38 @@
 # Changelog
 
+## v1.0.0
+
+### Features & Enhancements
+
++ Pulsar event source. #774
++ Simplified Circuit and Switch with Conditions. #834
++ Simplified TLS config for EventSources and Sensors. #830
++ Kafka Consumer Group. #817
++ Added `NotEqualTo` comparator to data filters. #822
++ Rate limit for Kafka and initial offset support and refactor config. #829
++ Support for re-using existing subscription ID for gcp pubsub. #778
++ Simple health check endpoint for webhooks. #823
++ Simple Authentication for webhook related event sources. #826
++ Connect to git with InsecureIgnoreHostKey. #842
++ Switched to use volumes for injected secrets and configMaps in triggers. #792
++ Added user metadata to eventsources.#797
++ Added liveness and readiness check for controllers. #837 
++ Exposed metadata for sensors and fix metadata for eventsources. #773
++ Upgraded argo cli to v2.10.x. #844 
+
+### Bugfixes 
+
++ Updated log path to be together with data path. #833
++ Switched slack lib and stop using deprecated APIs. #777 
++ Added/fixed tolerations for CRDs. #787
++ Azure eventsource fix. #789 
++ Added logic to ticker loop to ensure subscription always exists with an open connection. #861
++ Corrected response code for slack event source. #811
++ Fixed Azure EventsHub issue. #846
++ Added labels to created k8s objects. #805
++ Retry when connect to eventbus in sensor. #816
++ Fixed Calendar timezone issue. #801 
+
 ## v0.17.0
 
 + Introduced Eventbus #674
