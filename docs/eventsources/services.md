@@ -29,5 +29,5 @@ expose the endpoint for external access, please manage it by using native K8s
 objects (i.e. a Load Balancer type Service, or an Ingress), and remove `service`
 field from the EventSource object.
 
-You can refer to [webhook heath check](webhook-health-check.md) if you need a
+You can refer to [webhook heath check](../webhook-health-check.md) if you need a
 health check endpoint for LB Service or Ingress configuration.
