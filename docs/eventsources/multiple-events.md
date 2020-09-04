@@ -1,6 +1,6 @@
 # EventSource With Multiple Events
 
-![alpha](assets/alpha.svg)
+![alpha](../assets/alpha.svg)
 
 > v0.17.0 and after
 
@@ -67,10 +67,10 @@ spec:
 However, there are some rules need to follow to do it:
 
 - `Rolling Update` types and `Recreate` types can not be configured together,
-  see [EventSource Deployment Strategies](eventsource-deployment-strategies.md).
+  see [EventSource Deployment Strategies](deployment-strategies.md).
 
 - Event Name (i.e. `webhook-example` and `sns-example` above, refer to
-  [EventSource Names](eventsource-names.md)) needs to be unique in the
+  [EventSource Names](naming.md)) needs to be unique in the
   EventSource, same `eventName` is not allowed even they are in different event
   source types.
 

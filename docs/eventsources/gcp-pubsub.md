@@ -23,7 +23,7 @@ If you have configured
 [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
 and want to use it for a PubSub EventSource, leave `credentialSecret` nil.
 
-Full spec is available [here](../../api/event-source.md#pubsubeventsource).
+Full spec is available [here](https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#pubsubeventsource).
 
 See a PubSub EventSource
-[example](../../examples/event-sources/gcp-pubsub.yaml).
+[example](https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml).
