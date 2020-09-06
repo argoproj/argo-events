@@ -47,11 +47,14 @@ func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, natsStreami
 }
 
 func getLabels(bus *v1alpha1.EventBus) map[string]string {
-	return map[string]string{
-		"controller":          "eventbus-controller",
-		"eventbus-name":       bus.Name,
-		common.LabelOwnerName: bus.Name,
+	labels := bus.Labels
+	if labels == nil {
+		labels = make(map[string]string)
 	}
+	labels[common.LabelControllerName] = "eventbus-controller"
+	labels[common.LabelEventBusName] = bus.Name
+	labels[common.LabelOwnerName] = bus.Name
+	return labels
 }
 
 // Uninstall function uninstalls the extra resources who were not cleaned up

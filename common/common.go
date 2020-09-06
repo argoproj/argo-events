@@ -58,7 +58,13 @@ const (
 	// EnvVarEventSource refers to event source name
 	EnvVarEventSource = "EVENT_SOURCE"
 	// LabelEventSourceName is the label for a event source
-	LabelEventSourceName = "eventsource-name"
+	LabelEventSourceName = "events.argoproj.io/eventsource-name"
+)
+
+// EventBus
+const (
+	// LabelEventBusName is label for the eventbus name.
+	LabelEventBusName = "events.argoproj.io/eventbus-name"
 )
 
 var (
@@ -67,8 +73,10 @@ var (
 
 // Miscellaneous Labels
 const (
-	// LabelOwnerName is the label for resource owner name
-	LabelOwnerName = "owner-name"
+	// LabelOwnerName is name of a higher level resource this one is part of.
+	LabelOwnerName = "events.argoproj.io/owner-name"
+	// LabelControllerName identifies the controller used to manage the operation of an application.
+	LabelControllerName = "events.argoproj.io/controller-name"
 	// AnnotationResourceSpecHash is the annotation of a K8s resource spec hash
 	AnnotationResourceSpecHash = "resource-spec-hash"
 )
