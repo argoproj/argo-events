@@ -38,8 +38,8 @@ COPY . .
 # check we can use Git
 RUN git rev-parse HEAD
 
-# Make sure there are not prebuilt binaries
-RUN rm dist/*
+# Make sure there are not prebuilt binaries and force for fresh / clean repos
+RUN rm -f dist/*
 
 # eventbus-controller
 RUN . hack/image_arch.sh && make dist/eventbus-controller-linux-${IMAGE_ARCH}
@@ -100,8 +100,8 @@ FROM alpine as sensor
 RUN apk update && apk upgrade && \
     apk add --no-cache git
 
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Argo Workflow CLI
 COPY assets/argo-linux-amd64 /usr/local/bin/argo
