@@ -379,7 +379,7 @@ func (mh *eventSourceMessageHolder) getDependencyName(eventSourceName, eventName
 	return "", nil
 }
 
-// Ack the stan message and cache the ID  to make sure Exact Once triggering
+// Ack the stan message and cache the ID to make sure Exact Once triggering
 func (mh *eventSourceMessageHolder) ackAndCache(m *stan.Msg, id string) {
 	_ = m.Ack()
 	mh.smap.Store(id, time.Now().UnixNano())
