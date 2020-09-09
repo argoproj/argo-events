@@ -180,7 +180,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 					if now-v > 5*60*1000*1000*1000 {
 						msgHolder.smap.Delete(key)
 						num++
-						log.Debugw("cached ID evicted", "ID", key)
+						log.Debugw("cached ID evicted", "id", key)
 					}
 					return true
 				})
