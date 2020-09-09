@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Knetic/govaluate"
@@ -156,17 +157,53 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		return err
 	}
 	log.Infof("Subscribed to subject %s ...", n.subject)
+
+	// Daemon to evict cache
+	wg := &sync.WaitGroup{}
+	cacheEvictorStopCh := make(chan struct{})
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		log.Info("starting ExactOnce cache clean up daemon ...")
+		ticker := time.NewTicker(60 * time.Second)
+		for {
+			select {
+			case <-cacheEvictorStopCh:
+				log.Info("exiting ExactOnce cache clean up daemon...")
+				return
+			case <-ticker.C:
+				now := time.Now().UnixNano()
+				num := 0
+				msgHolder.smap.Range(func(key, value interface{}) bool {
+					v := value.(int64)
+					// Evict cached ID older than 5 minutes
+					if now-v > 5*60*1000*1000*1000 {
+						msgHolder.smap.Delete(key)
+						num++
+						log.Debugw("cached ID evicted", "ID", key)
+					}
+					return true
+				})
+				log.Infof("finished evicting %v cached IDs, time cost: %v ms", num, (time.Now().UnixNano()-now)/1000/1000)
+			}
+		}
+	}()
+
 	for {
 		select {
 		case <-ctx.Done():
 			log.Info("existing, unsubscribing and closing connection...")
 			_ = sub.Close()
 			log.Infof("subscription on subject %s closed", n.subject)
+			cacheEvictorStopCh <- struct{}{}
+			wg.Wait()
 			return nil
 		case <-closeCh:
 			log.Info("closing subscription...")
 			_ = sub.Close()
 			log.Infof("subscription on subject %s closed", n.subject)
+			cacheEvictorStopCh <- struct{}{}
+			wg.Wait()
 			return nil
 		}
 	}
@@ -202,6 +239,14 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		}
 	}
 
+	// NATS Streaming guarantees At Least Once delivery,
+	// so need to check if the message is duplicate
+	if _, ok := msgHolder.smap.Load(event.ID()); ok {
+		log.Infow("ATTENTION: Duplicate delivered message detected", "message", m)
+		_ = m.Ack()
+		return
+	}
+
 	// Clean up old messages before starting a new round
 	if msgHolder.lastMeetTime > 0 || msgHolder.latestGoodMsgTimestamp > 0 {
 		// ACK all the old messages after conditions meet
@@ -209,7 +254,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 			if depName != "" {
 				msgHolder.reset(depName)
 			}
-			_ = m.Ack()
+			msgHolder.ackAndCache(m, event.ID())
 			return
 		}
 		return
@@ -222,7 +267,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 			return
 		} else if m.Timestamp < existingMsg.timestamp {
 			// Redelivered old message, ack and return
-			_ = m.Ack()
+			msgHolder.ackAndCache(m, event.ID())
 			return
 		}
 	}
@@ -260,7 +305,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	go action(messages)
 
 	msgHolder.reset(depName)
-	_ = m.Ack()
+	msgHolder.ackAndCache(m, event.ID())
 }
 
 // eventSourceMessage is used by messageHolder to hold the latest message
@@ -282,6 +327,8 @@ type eventSourceMessageHolder struct {
 	sourceDepMap map[string]string
 	parameters   map[string]interface{}
 	msgs         map[string]*eventSourceMessage
+	// A sync map used to stop the message ID and ack time, it is used to guarantee Exact Once triggering
+	smap *sync.Map
 }
 
 func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependency) (*eventSourceMessageHolder, error) {
@@ -315,6 +362,7 @@ func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependenc
 		sourceDepMap:           srcDepMap,
 		parameters:             parameters,
 		msgs:                   msgs,
+		smap:                   new(sync.Map),
 	}, nil
 }
 
@@ -329,6 +377,12 @@ func (mh *eventSourceMessageHolder) getDependencyName(eventSourceName, eventName
 		}
 	}
 	return "", nil
+}
+
+// Ack the stan message and cache the ID  to make sure Exact Once triggering
+func (mh *eventSourceMessageHolder) ackAndCache(m *stan.Msg, id string) {
+	_ = m.Ack()
+	mh.smap.Store(id, time.Now().UnixNano())
 }
 
 // Reset the parameter and message that a dependency holds
