@@ -327,7 +327,7 @@ type eventSourceMessageHolder struct {
 	sourceDepMap map[string]string
 	parameters   map[string]interface{}
 	msgs         map[string]*eventSourceMessage
-	// A sync map used to stop the message ID and ack time, it is used to guarantee Exact Once triggering
+	// A sync map used to cache the message IDs, it is used to guarantee Exact Once triggering
 	smap *sync.Map
 }
 
