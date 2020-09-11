@@ -87,7 +87,8 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 	if deploy != nil {
 		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
-			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
+			deploy.SetLabels(expectedDeploy.Labels)
+			deploy.SetAnnotations(expectedDeploy.Annotations)
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
@@ -225,7 +226,8 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    args.Sensor.Namespace,
 			GenerateName: fmt.Sprintf("%s-sensor-", args.Sensor.Name),
-			Labels:       args.Labels,
+			Labels:       mergeLabels(args.Sensor.Labels, args.Labels),
+			Annotations:  args.Sensor.Annotations,
 		},
 		Spec: *deploymentSpec,
 	}
@@ -282,6 +284,19 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 			},
 		},
 	}, nil
+}
+
+func mergeLabels(sensorLabels, given map[string]string) map[string]string {
+	result := map[string]string{}
+	if sensorLabels != nil {
+		for k, v := range sensorLabels {
+			result[k] = v
+		}
+	}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
 }
 
 func labelSelector(labelMap map[string]string) labels.Selector {

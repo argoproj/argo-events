@@ -74,7 +74,8 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 	if deploy != nil {
 		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
-			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
+			deploy.SetLabels(expectedDeploy.Labels)
+			deploy.SetAnnotations(expectedDeploy.Annotations)
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
@@ -265,7 +266,8 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    args.EventSource.Namespace,
 			GenerateName: fmt.Sprintf("%s-eventsource-", args.EventSource.Name),
-			Labels:       args.Labels,
+			Labels:       mergeLabels(args.EventSource.Labels, args.Labels),
+			Annotations:  args.EventSource.Annotations,
 		},
 		Spec: *deploymentSpec,
 	}
@@ -378,9 +380,10 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	ports = append(ports, eventSource.Spec.Service.Ports...)
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
-			Namespace: eventSource.Namespace,
-			Labels:    args.Labels,
+			Name:        fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
+			Namespace:   eventSource.Namespace,
+			Labels:      mergeLabels(args.EventSource.Labels, args.Labels),
+			Annotations: args.EventSource.Annotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:     ports,
@@ -393,6 +396,19 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		return nil, err
 	}
 	return svc, nil
+}
+
+func mergeLabels(eventBusLabels, given map[string]string) map[string]string {
+	result := map[string]string{}
+	if eventBusLabels != nil {
+		for k, v := range eventBusLabels {
+			result[k] = v
+		}
+	}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
 }
 
 func labelSelector(labelMap map[string]string) labels.Selector {
