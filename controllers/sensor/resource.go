@@ -288,10 +288,8 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 
 func mergeLabels(sensorLabels, given map[string]string) map[string]string {
 	result := map[string]string{}
-	if sensorLabels != nil {
-		for k, v := range sensorLabels {
-			result[k] = v
-		}
+	for k, v := range sensorLabels {
+		result[k] = v
 	}
 	for k, v := range given {
 		result[k] = v

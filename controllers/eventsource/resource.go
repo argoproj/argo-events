@@ -400,10 +400,8 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 
 func mergeLabels(eventBusLabels, given map[string]string) map[string]string {
 	result := map[string]string{}
-	if eventBusLabels != nil {
-		for k, v := range eventBusLabels {
-			result[k] = v
-		}
+	for k, v := range eventBusLabels {
+		result[k] = v
 	}
 	for k, v := range given {
 		result[k] = v
