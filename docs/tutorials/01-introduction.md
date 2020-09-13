@@ -90,11 +90,11 @@ If you don't see the event-source and sensor pod in `argo-events` namespace,
   4. Look for any error in event-source or sensor pod.
   5. Inspect the event-source,
 
-        kubectl -n argo-events event-source-object-name -o yaml
+        kubectl -n argo-events get pod event-source-object-name -o yaml
 
      Inspect the sensor,
 
-        kubectl -n argo-events sensor-object-name -o yaml
+        kubectl -n argo-events get pod sensor-object-name -o yaml
 
      and look for any errors within the `Status`.
  
