@@ -87,9 +87,9 @@ func main() {
 // e.g.:
 // github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor
 // to:
-// io.argoproj.events.v1alpha1.Sensor
+// io.argoproj.v1alpha1.Sensor
 func swaggify(name string) string {
-	name = strings.Replace(name, "github.com/argoproj/argo-events/pkg/apis", "events.argoproj.io", -1)
+	name = strings.Replace(name, "github.com/argoproj/argo-events/pkg/apis", "argoproj.io", -1)
 	parts := strings.Split(name, "/")
 	hostParts := strings.Split(parts[0], ".")
 	// reverses something like k8s.io to io.k8s
