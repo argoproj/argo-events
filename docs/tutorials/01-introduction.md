@@ -81,20 +81,17 @@ from event context or data and pass it to the workflow as arguments.
 
 If you don't see the event-source and sensor pod in `argo-events` namespace,
 
-  1. Make sure the correct Role and RoleBindings are applied to the service account
+  1. Inspect the event-source
+  2. Make sure the correct Role and RoleBindings are applied to the service account
      and there are no errors in both event-source and sensor controller.
-  2. Make sure the sensor controller configmap has `namespace` set to 
-     `argo-events`.
   3. Check the logs of event-source and sensor controller. Make sure the controllers
      have processed the event-source and sensor objects and there are no errors.
-  4. Look for any error in event-source or sensor pod.
-  5. Inspect the event-source,
 
-        kubectl -n argo-events get pod event-source-object-name -o yaml
+        kubectl -n argo-events get eventsource event-source-object-name -o yaml
 
      Inspect the sensor,
 
-        kubectl -n argo-events get pod sensor-object-name -o yaml
+        kubectl -n argo-events get sensor sensor-object-name -o yaml
 
      and look for any errors within the `Status`.
  
