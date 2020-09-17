@@ -150,7 +150,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
 		stan.StartAt(pb.StartPosition_NewOnly),
-		stan.AckWait(3*time.Second),
+		stan.AckWait(1*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
 		log.Errorf("failed to subscribe to subject %s", n.subject)
