@@ -28,7 +28,7 @@ WORKDIR /tmp
 ####################################################################################################
 # Argo Build stage which performs the actual build of Argo binaries
 ####################################################################################################
-FROM builder as build
+FROM builder as argo-events-build-base
 
 ARG IMAGE_OS=linux
 
@@ -39,20 +39,42 @@ COPY . .
 RUN git rev-parse HEAD
 
 # Make sure there are not prebuilt binaries
-RUN rm dist/*
+RUN rm -rf dist/*
+
+####################################################################################################	
+# Build eventbus-controller binary	
+####################################################################################################
+FROM argo-events-build-base as eventbus-controller-build
 
 # eventbus-controller
 RUN . hack/image_arch.sh && make dist/eventbus-controller-linux-${IMAGE_ARCH}
 
+####################################################################################################	
+# Build eventsource-controller binary	
+####################################################################################################
+FROM argo-events-build-base as eventsource-controller-build
+
 # eventsource-controller
 RUN . hack/image_arch.sh && make dist/eventsource-controller-linux-${IMAGE_ARCH}
 
+####################################################################################################	
+# Build sensor-controller binary	
+####################################################################################################	
+FROM argo-events-build-base as sensor-controller-build
 # sensor-controller
 RUN . hack/image_arch.sh && make dist/sensor-controller-linux-${IMAGE_ARCH}
 
+####################################################################################################	
+# Build eventsource binary	
+####################################################################################################	
+FROM argo-events-build-base as eventsource-build
 # eventsource
 RUN . hack/image_arch.sh && make dist/eventsource-linux-${IMAGE_ARCH}
 
+####################################################################################################	
+# Build sensor binary	
+####################################################################################################	
+FROM argo-events-build-base as sensor-build
 # sensor
 RUN . hack/image_arch.sh && make dist/sensor-linux-${IMAGE_ARCH}
 
@@ -63,7 +85,7 @@ RUN . hack/image_arch.sh && make dist/sensor-linux-${IMAGE_ARCH}
 FROM scratch as eventbus-controller
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/eventbus-controller /bin/eventbus-controller
+COPY --from=eventbus-controller-build /go/src/github.com/argoproj/argo-events/dist/eventbus-controller /bin/eventbus-controller
 ENTRYPOINT [ "/bin/eventbus-controller" ]
 
 ####################################################################################################
@@ -72,7 +94,7 @@ ENTRYPOINT [ "/bin/eventbus-controller" ]
 FROM scratch as eventsource-controller
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/eventsource-controller /bin/eventsource-controller
+COPY --from=eventsource-controller-build /go/src/github.com/argoproj/argo-events/dist/eventsource-controller /bin/eventsource-controller
 ENTRYPOINT [ "/bin/eventsource-controller" ]
 
 ####################################################################################################
@@ -81,7 +103,7 @@ ENTRYPOINT [ "/bin/eventsource-controller" ]
 FROM scratch as sensor-controller
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/sensor-controller /bin/sensor-controller
+COPY --from=sensor-controller-build /go/src/github.com/argoproj/argo-events/dist/sensor-controller /bin/sensor-controller
 ENTRYPOINT [ "/bin/sensor-controller" ]
 
 ####################################################################################################
@@ -90,7 +112,7 @@ ENTRYPOINT [ "/bin/sensor-controller" ]
 FROM scratch as eventsource
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/eventsource /bin/eventsource
+COPY --from=eventsource-build /go/src/github.com/argoproj/argo-events/dist/eventsource /bin/eventsource
 ENTRYPOINT [ "/bin/eventsource" ]
 
 ####################################################################################################
@@ -100,15 +122,15 @@ FROM alpine as sensor
 RUN apk update && apk upgrade && \
     apk add --no-cache git
 
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Argo Workflow CLI
 COPY assets/argo-linux-amd64 /usr/local/bin/argo
 RUN chmod +x /usr/local/bin/argo
 RUN argo version || true
 
-COPY --from=build /go/src/github.com/argoproj/argo-events/dist/sensor /bin/sensor
+COPY --from=sensor-build /go/src/github.com/argoproj/argo-events/dist/sensor /bin/sensor
 
 ENTRYPOINT [ "/bin/sensor" ]
 
