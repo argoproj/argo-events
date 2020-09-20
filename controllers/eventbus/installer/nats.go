@@ -165,7 +165,6 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 			svc.Spec = expectedSvc.Spec
 			svc.SetLabels(expectedSvc.Labels)
 			svc.SetAnnotations(expectedSvc.Annotations)
-			// svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
