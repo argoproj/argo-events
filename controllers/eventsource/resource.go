@@ -75,7 +75,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
 			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.SetAnnotations(expectedDeploy.Annotations)
+			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
@@ -267,7 +267,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Namespace:    args.EventSource.Namespace,
 			GenerateName: fmt.Sprintf("%s-eventsource-", args.EventSource.Name),
 			Labels:       mergeLabels(args.EventSource.Labels, args.Labels),
-			Annotations:  args.EventSource.Annotations,
 		},
 		Spec: *deploymentSpec,
 	}
@@ -380,10 +379,9 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	ports = append(ports, eventSource.Spec.Service.Ports...)
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
-			Namespace:   eventSource.Namespace,
-			Labels:      mergeLabels(args.EventSource.Labels, args.Labels),
-			Annotations: args.EventSource.Annotations,
+			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
+			Namespace: eventSource.Namespace,
+			Labels:    mergeLabels(args.EventSource.Labels, args.Labels),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:     ports,

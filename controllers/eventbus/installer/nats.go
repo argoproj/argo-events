@@ -164,7 +164,7 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
 			svc.Spec = expectedSvc.Spec
 			svc.SetLabels(expectedSvc.Labels)
-			svc.SetAnnotations(expectedSvc.Annotations)
+			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
@@ -204,8 +204,7 @@ func (i *natsInstaller) createMetricsService(ctx context.Context) (*corev1.Servi
 		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
 			svc.Spec = expectedSvc.Spec
 			svc.SetLabels(expectedSvc.Labels)
-			svc.SetAnnotations(expectedSvc.Annotations)
-			// svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
+			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateMetricsServiceFailed", "Failed to update existing metrics service")
@@ -246,8 +245,7 @@ func (i *natsInstaller) createConfigMap(ctx context.Context) (*corev1.ConfigMap,
 		if cm.Annotations != nil && cm.Annotations[common.AnnotationResourceSpecHash] != expectedCm.Annotations[common.AnnotationResourceSpecHash] {
 			cm.Data = expectedCm.Data
 			cm.SetLabels(expectedCm.Labels)
-			cm.SetAnnotations(expectedCm.Annotations)
-			// cm.Annotations[common.AnnotationResourceSpecHash] = expectedCm.Annotations[common.AnnotationResourceSpecHash]
+			cm.Annotations[common.AnnotationResourceSpecHash] = expectedCm.Annotations[common.AnnotationResourceSpecHash]
 			err := i.client.Update(ctx, cm)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateConfigMapFailed", "Failed to update existing configmap")
@@ -428,7 +426,7 @@ func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, conf
 		if ss.Annotations != nil && ss.Annotations[common.AnnotationResourceSpecHash] != expectedSs.Annotations[common.AnnotationResourceSpecHash] {
 			ss.Spec = expectedSs.Spec
 			ss.SetLabels(expectedSs.Labels)
-			ss.SetAnnotations(expectedSs.Annotations)
+			ss.Annotations[common.AnnotationResourceSpecHash] = expectedSs.Annotations[common.AnnotationResourceSpecHash]
 			err := i.client.Update(ctx, ss)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateStatefulSetFailed", "Failed to update existing statefulset")
@@ -453,10 +451,9 @@ func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, conf
 func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        generateServiceName(i.eventBus),
-			Namespace:   i.eventBus.Namespace,
-			Labels:      i.mergeEventBusLabels(stanServiceLabels(i.labels)),
-			Annotations: i.eventBus.Annotations,
+			Name:      generateServiceName(i.eventBus),
+			Namespace: i.eventBus.Namespace,
+			Labels:    i.mergeEventBusLabels(stanServiceLabels(i.labels)),
 		},
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
@@ -479,10 +476,9 @@ func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 func (i *natsInstaller) buildMetricsService() (*corev1.Service, error) {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        generateMetricsServiceName(i.eventBus),
-			Namespace:   i.eventBus.Namespace,
-			Labels:      i.mergeEventBusLabels(metricsServiceLabels(i.labels)),
-			Annotations: i.eventBus.Annotations,
+			Name:      generateMetricsServiceName(i.eventBus),
+			Namespace: i.eventBus.Namespace,
+			Labels:    i.mergeEventBusLabels(metricsServiceLabels(i.labels)),
 		},
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
@@ -537,10 +533,9 @@ streaming {
 }`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","))
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   i.eventBus.Namespace,
-			Name:        generateConfigMapName(i.eventBus),
-			Labels:      i.mergeEventBusLabels(i.labels),
-			Annotations: i.eventBus.Annotations,
+			Namespace: i.eventBus.Namespace,
+			Name:      generateConfigMapName(i.eventBus),
+			Labels:    i.mergeEventBusLabels(i.labels),
 		},
 		Data: map[string]string{
 			configMapKey: conf,
@@ -609,10 +604,9 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 	}
 	ss := &appv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   i.eventBus.Namespace,
-			Name:        generateStatefulSetName(i.eventBus),
-			Labels:      i.mergeEventBusLabels(i.labels),
-			Annotations: i.eventBus.Annotations,
+			Namespace: i.eventBus.Namespace,
+			Name:      generateStatefulSetName(i.eventBus),
+			Labels:    i.mergeEventBusLabels(i.labels),
 		},
 		Spec: *spec,
 	}

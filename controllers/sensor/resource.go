@@ -88,7 +88,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
 			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.SetAnnotations(expectedDeploy.Annotations)
+			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
@@ -227,7 +227,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Namespace:    args.Sensor.Namespace,
 			GenerateName: fmt.Sprintf("%s-sensor-", args.Sensor.Name),
 			Labels:       mergeLabels(args.Sensor.Labels, args.Labels),
-			Annotations:  args.Sensor.Annotations,
 		},
 		Spec: *deploymentSpec,
 	}
