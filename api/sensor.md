@@ -1606,26 +1606,6 @@ Description
 
 <td>
 
-<code>name</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Name is the name of event filter
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>time</code></br> <em> <a href="#argoproj.io/v1alpha1.TimeFilter">
 TimeFilter </a> </em>
 

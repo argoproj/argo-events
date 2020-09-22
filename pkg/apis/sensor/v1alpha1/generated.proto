@@ -207,17 +207,14 @@ message EventDependency {
 
 // EventDependencyFilter defines filters and constraints for a event.
 message EventDependencyFilter {
-  // Name is the name of event filter
-  optional string name = 1;
-
   // Time filter on the event with escalation
-  optional TimeFilter time = 2;
+  optional TimeFilter time = 1;
 
   // Context filter constraints
-  optional EventContext context = 3;
+  optional EventContext context = 2;
 
   // Data filter constraints with escalation
-  repeated DataFilter data = 4;
+  repeated DataFilter data = 3;
 }
 
 // FileArtifact contains information about an artifact in a filesystem

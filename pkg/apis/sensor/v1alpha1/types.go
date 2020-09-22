@@ -164,15 +164,13 @@ type DependencyGroup struct {
 
 // EventDependencyFilter defines filters and constraints for a event.
 type EventDependencyFilter struct {
-	// Name is the name of event filter
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 	// Time filter on the event with escalation
-	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
+	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,1,opt,name=time"`
 	// Context filter constraints
-	Context *EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+	Context *EventContext `json:"context,omitempty" protobuf:"bytes,2,opt,name=context"`
 
 	// Data filter constraints with escalation
-	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,4,rep,name=data"`
+	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 }
 
 // TimeFilter describes a window in time.

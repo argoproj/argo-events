@@ -55,7 +55,6 @@ The data filter offers `comparator` “>=”, “>”, “=”, “!=”, “<�
 e.g.,
 
               filters:
-                name: data-filter
                 data:
                   - path: body.value
                     type: number
