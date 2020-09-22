@@ -259,7 +259,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	}
 	return &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
-			MatchLabels: podTemplateLabels,
+			MatchLabels: args.Labels,
 		},
 		Replicas: &replicas,
 		Strategy: appv1.DeploymentStrategy{
