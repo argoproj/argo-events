@@ -1,7 +1,7 @@
 package github
 
 import (
-	gh "github.com/google/go-github/github"
+	gh "github.com/google/go-github/v31/github"
 )
 
 // sliceEqual returns true if the two provided string slices are equal.

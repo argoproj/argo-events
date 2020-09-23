@@ -19,11 +19,12 @@ package github
 import (
 	"context"
 	"encoding/json"
-	"github.com/argoproj/argo-events/gateways/server"
-	"github.com/argoproj/argo-events/pkg/apis/events"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -31,7 +32,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/store"
 	"github.com/ghodss/yaml"
-	gh "github.com/google/go-github/github"
+	gh "github.com/google/go-github/v31/github"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -154,9 +155,9 @@ func (router *Router) PostActivate() error {
 	}
 
 	logger.Infoln("configuring GitHub hook...")
-	formattedUrl := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
+	formattedURL := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
 	hookConfig := map[string]interface{}{
-		"url": &formattedUrl,
+		"url": &formattedURL,
 	}
 
 	if githubEventSource.ContentType != "" {
@@ -229,7 +230,7 @@ func (router *Router) PostActivate() error {
 			return errors.Errorf("failed to list existing webhooks. err: %+v", err)
 		}
 
-		hook = getHook(hooks, formattedUrl, githubEventSource.Events)
+		hook = getHook(hooks, formattedURL, githubEventSource.Events)
 		if hook == nil {
 			return errors.New("failed to find existing webhook")
 		}

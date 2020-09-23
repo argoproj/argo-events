@@ -8,17 +8,15 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - go-dep-cache-{{ checksum "Gopkg.lock" }}-v4
+            - go-dep-cache-{{ checksum "go.sum" }}-v4
             - go-dep-cache-
       - run:
           name: Install dependencies
           command: |
             apk update && apk add curl git build-base bash
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep version
-            dep ensure -v
+            go mod vendor
       - save_cache:
-          key: go-dep-cache-{{ checksum "Gopkg.lock" }}-v4
+          key: go-dep-cache-{{ checksum "go.sum" }}-v4
           paths:
             - ./vendor
   # build runs the build of the linux artifacts and persists the packages to the circleci workspace
@@ -30,7 +28,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - go-dep-cache-{{ checksum "Gopkg.lock" }}-v4
+            - go-dep-cache-{{ checksum "go.sum" }}-v4
             - go-dep-cache-
       - run: go get -u github.com/gobuffalo/packr/packr
       - run:

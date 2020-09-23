@@ -4,7 +4,7 @@ metadata:
   name: amqp
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: default
   subscription:
     http:
       port: 9300
