@@ -635,6 +635,16 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 	if i.eventBus.Spec.NATS.Native.MetricsContainerTemplate != nil {
 		metricsContainerResources = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.Resources
 	}
+	podTemplateLabels := make(map[string]string)
+	if i.eventBus.Spec.NATS.Native.Metadata != nil &&
+		len(i.eventBus.Spec.NATS.Native.Metadata.Labels) > 0 {
+		for k, v := range i.eventBus.Spec.NATS.Native.Metadata.Labels {
+			podTemplateLabels[k] = v
+		}
+	}
+	for k, v := range i.labels {
+		podTemplateLabels[k] = v
+	}
 	spec := appv1.StatefulSetSpec{
 		Replicas:    &replicas,
 		ServiceName: serviceName,
@@ -643,7 +653,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: i.labels,
+				Labels: podTemplateLabels,
 			},
 			Spec: corev1.PodSpec{
 				NodeSelector: i.eventBus.Spec.NATS.Native.NodeSelector,
@@ -727,6 +737,9 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				},
 			},
 		},
+	}
+	if i.eventBus.Spec.NATS.Native.Metadata != nil {
+		spec.Template.SetAnnotations(i.eventBus.Spec.NATS.Native.Metadata.Annotations)
 	}
 	if i.eventBus.Spec.NATS.Native.Persistence != nil {
 		volMode := corev1.PersistentVolumeFilesystem

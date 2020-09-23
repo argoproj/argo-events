@@ -242,14 +242,15 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
 	}
-	if args.Sensor.Spec.Template.Container != nil {
+	if args.Sensor.Spec.Template != nil && args.Sensor.Spec.Template.Container != nil {
 		if err := mergo.Merge(&sensorContainer, args.Sensor.Spec.Template.Container, mergo.WithOverride); err != nil {
 			return nil, err
 		}
 	}
 	sensorContainer.Name = "main"
 	podTemplateLabels := make(map[string]string)
-	if len(args.Sensor.Spec.Template.Metadata.Labels) > 0 {
+	if args.Sensor.Spec.Template != nil && args.Sensor.Spec.Template.Metadata != nil &&
+		len(args.Sensor.Spec.Template.Metadata.Labels) > 0 {
 		for k, v := range args.Sensor.Spec.Template.Metadata.Labels {
 			podTemplateLabels[k] = v
 		}
@@ -257,7 +258,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	for k, v := range args.Labels {
 		podTemplateLabels[k] = v
 	}
-	return &appv1.DeploymentSpec{
+	spec := &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: args.Labels,
 		},
@@ -268,21 +269,26 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels:      podTemplateLabels,
-				Annotations: args.Sensor.Spec.Template.Metadata.Annotations,
+				Labels: podTemplateLabels,
 			},
 			Spec: corev1.PodSpec{
-				ServiceAccountName: args.Sensor.Spec.Template.ServiceAccountName,
 				Containers: []corev1.Container{
 					sensorContainer,
 				},
-				Volumes:         args.Sensor.Spec.Template.Volumes,
-				SecurityContext: args.Sensor.Spec.Template.SecurityContext,
-				NodeSelector:    args.Sensor.Spec.Template.NodeSelector,
-				Tolerations:     args.Sensor.Spec.Template.Tolerations,
 			},
 		},
-	}, nil
+	}
+	if args.Sensor.Spec.Template != nil {
+		if args.Sensor.Spec.Template.Metadata != nil {
+			spec.Template.SetAnnotations(args.Sensor.Spec.Template.Metadata.Annotations)
+		}
+		spec.Template.Spec.ServiceAccountName = args.Sensor.Spec.Template.ServiceAccountName
+		spec.Template.Spec.Volumes = args.Sensor.Spec.Template.Volumes
+		spec.Template.Spec.SecurityContext = args.Sensor.Spec.Template.SecurityContext
+		spec.Template.Spec.NodeSelector = args.Sensor.Spec.Template.NodeSelector
+		spec.Template.Spec.Tolerations = args.Sensor.Spec.Template.Tolerations
+	}
+	return spec, nil
 }
 
 func mergeLabels(sensorLabels, given map[string]string) map[string]string {

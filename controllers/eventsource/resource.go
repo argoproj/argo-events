@@ -289,14 +289,15 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
 	}
-	if args.EventSource.Spec.Template.Container != nil {
+	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Container != nil {
 		if err := mergo.Merge(&eventSourceContainer, args.EventSource.Spec.Template.Container, mergo.WithOverride); err != nil {
 			return nil, err
 		}
 	}
 	eventSourceContainer.Name = "main"
 	podTemplateLabels := make(map[string]string)
-	if len(args.EventSource.Spec.Template.Metadata.Labels) > 0 {
+	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Metadata != nil &&
+		len(args.EventSource.Spec.Template.Metadata.Labels) > 0 {
 		for k, v := range args.EventSource.Spec.Template.Metadata.Labels {
 			podTemplateLabels[k] = v
 		}
@@ -312,21 +313,25 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		Replicas: &replicas,
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels:      podTemplateLabels,
-				Annotations: args.EventSource.Spec.Template.Metadata.Annotations,
+				Labels: podTemplateLabels,
 			},
 			Spec: corev1.PodSpec{
-				ServiceAccountName: args.EventSource.Spec.Template.ServiceAccountName,
 				Containers: []corev1.Container{
 					eventSourceContainer,
 				},
-				Volumes:         args.EventSource.Spec.Template.Volumes,
-				SecurityContext: args.EventSource.Spec.Template.SecurityContext,
-				NodeSelector:    args.EventSource.Spec.Template.NodeSelector,
-				Tolerations:     args.EventSource.Spec.Template.Tolerations,
-				Affinity:        args.EventSource.Spec.Template.Affinity,
 			},
 		},
+	}
+	if args.EventSource.Spec.Template != nil {
+		if args.EventSource.Spec.Template.Metadata != nil {
+			spec.Template.SetAnnotations(args.EventSource.Spec.Template.Metadata.Annotations)
+		}
+		spec.Template.Spec.ServiceAccountName = args.EventSource.Spec.Template.ServiceAccountName
+		spec.Template.Spec.Volumes = args.EventSource.Spec.Template.Volumes
+		spec.Template.Spec.SecurityContext = args.EventSource.Spec.Template.SecurityContext
+		spec.Template.Spec.NodeSelector = args.EventSource.Spec.Template.NodeSelector
+		spec.Template.Spec.Tolerations = args.EventSource.Spec.Template.Tolerations
+		spec.Template.Spec.Affinity = args.EventSource.Spec.Template.Affinity
 	}
 	allEventTypes := eventsources.GetEventingServers(args.EventSource)
 	recreateTypes := make(map[apicommon.EventSourceType]bool)
