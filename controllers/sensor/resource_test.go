@@ -45,7 +45,7 @@ var (
 			Namespace: testNamespace,
 		},
 		Spec: v1alpha1.SensorSpec{
-			Template: v1alpha1.Template{
+			Template: &v1alpha1.Template{
 				ServiceAccountName: "fake-sa",
 				Container: &corev1.Container{
 					VolumeMounts: []corev1.VolumeMount{

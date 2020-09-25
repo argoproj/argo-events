@@ -52,7 +52,7 @@ type EventSourceSpec struct {
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,1,opt,name=eventBusName"`
 	// Template is the pod specification for the event source
 	// +optional
-	Template Template `json:"template,omitempty" protobuf:"bytes,2,opt,name=template"`
+	Template *Template `json:"template,omitempty" protobuf:"bytes,2,opt,name=template"`
 	// Service is the specifications of the service to expose the event source
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,3,opt,name=service"`
@@ -112,7 +112,7 @@ type EventSourceSpec struct {
 // Template holds the information of an EventSource deployment template
 type Template struct {
 	// Metdata sets the pods's metadata, i.e. annotations and labels
-	Metadata Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	Metadata *apicommon.Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// ServiceAccountName is the name of the ServiceAccount to use to run event source pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 	// +optional
@@ -140,12 +140,6 @@ type Template struct {
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,8,rep,name=nodeSelector"`
-}
-
-// Metadata holds the annotations and labels of an event source pod
-type Metadata struct {
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,rep,name=annotations"`
-	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 }
 
 // Service holds the service information eventsource exposes
