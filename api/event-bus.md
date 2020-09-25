@@ -927,6 +927,27 @@ If specified, the pod’s tolerations.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Metadata </em>
+
+</td>
+
+<td>
+
+<p>
+
+Metdata sets the pods’s metadata, i.e. annotations and labels
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

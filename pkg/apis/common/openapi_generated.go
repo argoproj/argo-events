@@ -32,6 +32,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/common.Amount":     schema_argo_events_pkg_apis_common_Amount(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":    schema_argo_events_pkg_apis_common_Backoff(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Condition":  schema_argo_events_pkg_apis_common_Condition(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":   schema_argo_events_pkg_apis_common_Metadata(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Resource":   schema_argo_events_pkg_apis_common_Resource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact": schema_argo_events_pkg_apis_common_S3Artifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":   schema_argo_events_pkg_apis_common_S3Bucket(ref),
@@ -142,6 +143,47 @@ func schema_argo_events_pkg_apis_common_Condition(ref common.ReferenceCallback) 
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_Metadata(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Metadata holds the annotations and labels of an event source pod",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"annotations": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 

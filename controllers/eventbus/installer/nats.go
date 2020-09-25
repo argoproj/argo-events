@@ -163,6 +163,7 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 		// Revisit it later to see if it is needed to compare the spec.
 		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
 			svc.Spec = expectedSvc.Spec
+			svc.SetLabels(expectedSvc.Labels)
 			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
@@ -202,6 +203,7 @@ func (i *natsInstaller) createMetricsService(ctx context.Context) (*corev1.Servi
 	if svc != nil {
 		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
 			svc.Spec = expectedSvc.Spec
+			svc.SetLabels(expectedSvc.Labels)
 			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
@@ -242,6 +244,7 @@ func (i *natsInstaller) createConfigMap(ctx context.Context) (*corev1.ConfigMap,
 		// TODO: Potential issue about comparing hash
 		if cm.Annotations != nil && cm.Annotations[common.AnnotationResourceSpecHash] != expectedCm.Annotations[common.AnnotationResourceSpecHash] {
 			cm.Data = expectedCm.Data
+			cm.SetLabels(expectedCm.Labels)
 			cm.Annotations[common.AnnotationResourceSpecHash] = expectedCm.Annotations[common.AnnotationResourceSpecHash]
 			err := i.client.Update(ctx, cm)
 			if err != nil {
@@ -355,8 +358,8 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			log.Infow("created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
 		} else {
 			sSecret.Data = expectedSSecret.Data
-			sSecret.ObjectMeta.Labels = expectedSSecret.Labels
-			sSecret.ObjectMeta.Annotations = expectedSSecret.Annotations
+			sSecret.SetLabels(expectedSSecret.Labels)
+			sSecret.SetAnnotations(expectedSSecret.Annotations)
 			err = i.client.Update(ctx, sSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServerAuthSecretFailed", "Failed to update the server auth secret")
@@ -384,6 +387,8 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			log.Infow("created client auth secret", "clientAuthSecretName", expectedCSecret.Name)
 		} else {
 			cSecret.Data = expectedCSecret.Data
+			cSecret.SetLabels(expectedCSecret.Labels)
+			cSecret.SetAnnotations(expectedCSecret.Annotations)
 			err = i.client.Update(ctx, cSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateClientAuthSecretFailed", "Failed to update the client auth secret")
@@ -420,6 +425,7 @@ func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, conf
 		// Revisit it later to see if it is needed to compare the spec.
 		if ss.Annotations != nil && ss.Annotations[common.AnnotationResourceSpecHash] != expectedSs.Annotations[common.AnnotationResourceSpecHash] {
 			ss.Spec = expectedSs.Spec
+			ss.SetLabels(expectedSs.Labels)
 			ss.Annotations[common.AnnotationResourceSpecHash] = expectedSs.Annotations[common.AnnotationResourceSpecHash]
 			err := i.client.Update(ctx, ss)
 			if err != nil {
@@ -447,7 +453,7 @@ func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      generateServiceName(i.eventBus),
 			Namespace: i.eventBus.Namespace,
-			Labels:    stanServiceLabels(i.labels),
+			Labels:    i.mergeEventBusLabels(stanServiceLabels(i.labels)),
 		},
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
@@ -472,7 +478,7 @@ func (i *natsInstaller) buildMetricsService() (*corev1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      generateMetricsServiceName(i.eventBus),
 			Namespace: i.eventBus.Namespace,
-			Labels:    metricsServiceLabels(i.labels),
+			Labels:    i.mergeEventBusLabels(metricsServiceLabels(i.labels)),
 		},
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
@@ -529,7 +535,7 @@ streaming {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
 			Name:      generateConfigMapName(i.eventBus),
-			Labels:    i.labels,
+			Labels:    i.mergeEventBusLabels(i.labels),
 		},
 		Data: map[string]string{
 			configMapKey: conf,
@@ -600,7 +606,7 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
 			Name:      generateStatefulSetName(i.eventBus),
-			Labels:    i.labels,
+			Labels:    i.mergeEventBusLabels(i.labels),
 		},
 		Spec: *spec,
 	}
@@ -629,6 +635,16 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 	if i.eventBus.Spec.NATS.Native.MetricsContainerTemplate != nil {
 		metricsContainerResources = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.Resources
 	}
+	podTemplateLabels := make(map[string]string)
+	if i.eventBus.Spec.NATS.Native.Metadata != nil &&
+		len(i.eventBus.Spec.NATS.Native.Metadata.Labels) > 0 {
+		for k, v := range i.eventBus.Spec.NATS.Native.Metadata.Labels {
+			podTemplateLabels[k] = v
+		}
+	}
+	for k, v := range i.labels {
+		podTemplateLabels[k] = v
+	}
 	spec := appv1.StatefulSetSpec{
 		Replicas:    &replicas,
 		ServiceName: serviceName,
@@ -637,7 +653,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: i.labels,
+				Labels: podTemplateLabels,
 			},
 			Spec: corev1.PodSpec{
 				NodeSelector: i.eventBus.Spec.NATS.Native.NodeSelector,
@@ -721,6 +737,9 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				},
 			},
 		},
+	}
+	if i.eventBus.Spec.NATS.Native.Metadata != nil {
+		spec.Template.SetAnnotations(i.eventBus.Spec.NATS.Native.Metadata.Annotations)
 	}
 	if i.eventBus.Spec.NATS.Native.Persistence != nil {
 		volMode := corev1.PersistentVolumeFilesystem
@@ -877,6 +896,19 @@ func (i *natsInstaller) getPVCs(ctx context.Context, labels map[string]string) (
 		return nil, err
 	}
 	return pvcl.Items, nil
+}
+
+func (i *natsInstaller) mergeEventBusLabels(given map[string]string) map[string]string {
+	result := map[string]string{}
+	if i.eventBus.Labels != nil {
+		for k, v := range i.eventBus.Labels {
+			result[k] = v
+		}
+	}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
 }
 
 // generate a random string as token with given length

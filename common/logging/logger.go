@@ -51,7 +51,7 @@ func NewArgoEventsLogger() *zap.SugaredLogger {
 		config = zap.NewProductionConfig()
 	}
 	// Config customization goes here if any
-	//
+	config.OutputPaths = []string{"stdout"}
 	logger, err := config.Build()
 	if err != nil {
 		panic(err)

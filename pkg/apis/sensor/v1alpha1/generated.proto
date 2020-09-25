@@ -371,13 +371,6 @@ message KafkaTrigger {
   optional string partitioningKey = 10;
 }
 
-// Metadata holds the annotations and labels of an event source pod
-message Metadata {
-  map<string, string> annotations = 1;
-
-  map<string, string> labels = 2;
-}
-
 // NATSTrigger refers to the specification of the NATS trigger.
 message NATSTrigger {
   // URL of the NATS cluster.
@@ -537,7 +530,7 @@ message StatusPolicy {
 // Template holds the information of a sensor deployment template
 message Template {
   // Metdata sets the pods's metadata, i.e. annotations and labels
-  optional Metadata metadata = 1;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 1;
 
   // ServiceAccountName is the name of the ServiceAccount to use to run sensor pod.
   // More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/

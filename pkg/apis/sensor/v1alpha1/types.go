@@ -92,7 +92,7 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 	// Template is the pod specification for the sensor
 	// +optional
-	Template Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
+	Template *Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
 	// DependencyGroups is a list of the groups of events.
 	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,4,rep,name=dependencyGroups"`
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
@@ -108,7 +108,7 @@ type SensorSpec struct {
 // Template holds the information of a sensor deployment template
 type Template struct {
 	// Metdata sets the pods's metadata, i.e. annotations and labels
-	Metadata Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	Metadata *apicommon.Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// ServiceAccountName is the name of the ServiceAccount to use to run sensor pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 	// +optional
@@ -133,12 +133,6 @@ type Template struct {
 	// If specified, the pod's tolerations.
 	// +optional
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,7,rep,name=tolerations"`
-}
-
-// Metadata holds the annotations and labels of an event source pod
-type Metadata struct {
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,rep,name=annotations"`
-	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 }
 
 // EventDependency describes a dependency
