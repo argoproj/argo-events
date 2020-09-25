@@ -21,6 +21,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	common "github.com/argoproj/argo-events/pkg/apis/common"
 	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
@@ -256,6 +257,11 @@ func (in *NativeStrategy) DeepCopyInto(out *NativeStrategy) {
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
+	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = new(common.Metadata)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }

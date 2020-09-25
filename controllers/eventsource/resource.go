@@ -74,6 +74,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 	if deploy != nil {
 		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
+			deploy.SetLabels(expectedDeploy.Labels)
 			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
 			err = client.Update(ctx, deploy)
 			if err != nil {
@@ -265,7 +266,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    args.EventSource.Namespace,
 			GenerateName: fmt.Sprintf("%s-eventsource-", args.EventSource.Name),
-			Labels:       args.Labels,
+			Labels:       mergeLabels(args.EventSource.Labels, args.Labels),
 		},
 		Spec: *deploymentSpec,
 	}
@@ -288,14 +289,15 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
 	}
-	if args.EventSource.Spec.Template.Container != nil {
+	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Container != nil {
 		if err := mergo.Merge(&eventSourceContainer, args.EventSource.Spec.Template.Container, mergo.WithOverride); err != nil {
 			return nil, err
 		}
 	}
 	eventSourceContainer.Name = "main"
 	podTemplateLabels := make(map[string]string)
-	if len(args.EventSource.Spec.Template.Metadata.Labels) > 0 {
+	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Metadata != nil &&
+		len(args.EventSource.Spec.Template.Metadata.Labels) > 0 {
 		for k, v := range args.EventSource.Spec.Template.Metadata.Labels {
 			podTemplateLabels[k] = v
 		}
@@ -306,26 +308,30 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 
 	spec := &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
-			MatchLabels: podTemplateLabels,
+			MatchLabels: args.Labels,
 		},
 		Replicas: &replicas,
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels:      podTemplateLabels,
-				Annotations: args.EventSource.Spec.Template.Metadata.Annotations,
+				Labels: podTemplateLabels,
 			},
 			Spec: corev1.PodSpec{
-				ServiceAccountName: args.EventSource.Spec.Template.ServiceAccountName,
 				Containers: []corev1.Container{
 					eventSourceContainer,
 				},
-				Volumes:         args.EventSource.Spec.Template.Volumes,
-				SecurityContext: args.EventSource.Spec.Template.SecurityContext,
-				NodeSelector:    args.EventSource.Spec.Template.NodeSelector,
-				Tolerations:     args.EventSource.Spec.Template.Tolerations,
-				Affinity:        args.EventSource.Spec.Template.Affinity,
 			},
 		},
+	}
+	if args.EventSource.Spec.Template != nil {
+		if args.EventSource.Spec.Template.Metadata != nil {
+			spec.Template.SetAnnotations(args.EventSource.Spec.Template.Metadata.Annotations)
+		}
+		spec.Template.Spec.ServiceAccountName = args.EventSource.Spec.Template.ServiceAccountName
+		spec.Template.Spec.Volumes = args.EventSource.Spec.Template.Volumes
+		spec.Template.Spec.SecurityContext = args.EventSource.Spec.Template.SecurityContext
+		spec.Template.Spec.NodeSelector = args.EventSource.Spec.Template.NodeSelector
+		spec.Template.Spec.Tolerations = args.EventSource.Spec.Template.Tolerations
+		spec.Template.Spec.Affinity = args.EventSource.Spec.Template.Affinity
 	}
 	allEventTypes := eventsources.GetEventingServers(args.EventSource)
 	recreateTypes := make(map[apicommon.EventSourceType]bool)
@@ -380,7 +386,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
 			Namespace: eventSource.Namespace,
-			Labels:    args.Labels,
+			Labels:    mergeLabels(args.EventSource.Labels, args.Labels),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:     ports,
@@ -393,6 +399,17 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		return nil, err
 	}
 	return svc, nil
+}
+
+func mergeLabels(eventBusLabels, given map[string]string) map[string]string {
+	result := map[string]string{}
+	for k, v := range eventBusLabels {
+		result[k] = v
+	}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
 }
 
 func labelSelector(labelMap map[string]string) labels.Selector {

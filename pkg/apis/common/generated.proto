@@ -70,6 +70,13 @@ message Condition {
   optional string message = 5;
 }
 
+// Metadata holds the annotations and labels of an event source pod
+message Metadata {
+  map<string, string> annotations = 1;
+
+  map<string, string> labels = 2;
+}
+
 // Resource represent arbitrary structured data.
 message Resource {
   optional bytes value = 1;

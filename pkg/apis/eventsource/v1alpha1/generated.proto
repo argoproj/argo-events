@@ -493,13 +493,6 @@ message MQTTEventSource {
   map<string, string> metadata = 7;
 }
 
-// Metadata holds the annotations and labels of an event source pod
-message Metadata {
-  map<string, string> annotations = 1;
-
-  map<string, string> labels = 2;
-}
-
 // NATSEventsSource refers to event-source for NATS related events
 message NATSEventsSource {
   // URL to connect to NATS cluster
@@ -909,7 +902,7 @@ message StripeEventSource {
 // Template holds the information of an EventSource deployment template
 message Template {
   // Metdata sets the pods's metadata, i.e. annotations and labels
-  optional Metadata metadata = 1;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 1;
 
   // ServiceAccountName is the name of the ServiceAccount to use to run event source pod.
   // More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
