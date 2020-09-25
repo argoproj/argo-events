@@ -2206,9 +2206,6 @@
     "io.argoproj.sensor.v1alpha1.EventDependencyFilter": {
       "description": "EventDependencyFilter defines filters and constraints for a event.",
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
         "context": {
           "description": "Context filter constraints",
@@ -2220,10 +2217,6 @@
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
           }
-        },
-        "name": {
-          "description": "Name is the name of event filter",
-          "type": "string"
         },
         "time": {
           "description": "Time filter on the event with escalation",
