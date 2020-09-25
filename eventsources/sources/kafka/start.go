@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -106,7 +107,8 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 		kafkaEventSource: kafkaEventSource,
 	}
 
-	client, err := sarama.NewConsumerGroup([]string{kafkaEventSource.URL}, kafkaEventSource.ConsumerGroup.GroupName, config)
+	urls := strings.Split(kafkaEventSource.URL, ",")
+	client, err := sarama.NewConsumerGroup(urls, kafkaEventSource.ConsumerGroup.GroupName, config)
 	if err != nil {
 		log.Errorf("Error creating consumer group client: %v", err)
 		return err
@@ -163,7 +165,8 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 			return err
 		}
 
-		consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, config)
+		urls := strings.Split(kafkaEventSource.URL, ",")
+		consumer, err = sarama.NewConsumer(urls, config)
 		if err != nil {
 			return err
 		}
