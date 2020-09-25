@@ -25,16 +25,16 @@ Then add `authSecret` to your `webhook` EventSource.
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-name: webhook
+  name: webhook
 spec:
-webhook:
-  example:
-  port: "12000"
-  endpoint: /example
-  method: POST
-  authSecret:
-    name: my-webhook-token
-    key: my-token
+  webhook:
+    example:
+      port: "12000"
+      endpoint: /example
+      method: POST
+      authSecret:
+        name: my-webhook-token
+        key: my-token
 ```
 
 Now you can authenticate your webhook endpoint with the configured token.

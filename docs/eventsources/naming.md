@@ -9,7 +9,7 @@ dependencies:
     eventName: example
 ```
 
-The `eventSourceName` ad `eventName` might be confusing. Take the following
+The `eventSourceName` and `eventName` might be confusing. Take the following
 EventSource example, the `eventSourceName` and `eventName` are described as
 below.
 

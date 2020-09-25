@@ -36,6 +36,7 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -284,7 +285,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 						logger.Error("failed to reconnect to eventbus", zap.Error(err))
 						continue
 					}
-					logger.Info("reconnected the NATS streaming server...")
+					logger.Info("reconnected to eventbus successfully")
 				}
 			}
 		}
