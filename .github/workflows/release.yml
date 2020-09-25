@@ -30,3 +30,16 @@ jobs:
           files: release.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker Login
+        uses: Azure/docker-login@v1
+        with:
+          username: ${{ secrets.DOCKERIO_USERNAME }}
+          password: ${{ secrets.DOCKERIO_PASSWORD }}
+
+      - name: Build & Push Linux Docker Images
+        env:
+          DOCKERIO_ORG: ${{ secrets.DOCKERIO_ORG }}
+        run: |
+          tag=$(basename $GITHUB_REF)
+          make eventsource-image sensor-image eventbus-controller-image eventsource-controller-image sensor-controller-image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${DOCKERIO_ORG} DOCKER_PUSH=true
