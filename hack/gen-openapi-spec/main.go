@@ -87,7 +87,7 @@ func main() {
 // e.g.:
 // github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor
 // to:
-// io.argoproj.workflow.v1alpha1.Workflow
+// io.argoproj.v1alpha1.Sensor
 func swaggify(name string) string {
 	name = strings.Replace(name, "github.com/argoproj/argo-events/pkg/apis", "argoproj.io", -1)
 	parts := strings.Split(name, "/")

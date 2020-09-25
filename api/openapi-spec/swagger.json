@@ -148,6 +148,21 @@
         }
       }
     },
+    "io.argoproj.common.Status": {
+      "description": "Status is a common structure which can be used for Status field.",
+      "type": "object",
+      "properties": {
+        "conditions": {
+          "description": "Conditions are the latest available observations of a resource's current state.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.common.Condition"
+          },
+          "x-kubernetes-patch-merge-key": "type",
+          "x-kubernetes-patch-strategy": "merge"
+        }
+      }
+    },
     "io.argoproj.common.TLSConfig": {
       "description": "TLSConfig refers to TLS configuration for a client.",
       "type": "object",
@@ -226,6 +241,33 @@
         },
         "status": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.EventBusStatus"
+        }
+      }
+    },
+    "io.argoproj.eventbus.v1alpha1.EventBusList": {
+      "description": "EventBusList is the list of eventbus resources",
+      "type": "object",
+      "required": [
+        "metadata",
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.EventBus"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
         }
       }
     },
@@ -549,6 +591,33 @@
         },
         "status": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceStatus"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.EventSourceList": {
+      "description": "EventSourceList is the list of eventsource resources",
+      "type": "object",
+      "required": [
+        "metadata",
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSource"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
         }
       }
     },
@@ -2044,6 +2113,22 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.Event": {
+      "description": "Event represents the cloudevent received from an event source.",
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "context": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventContext"
+        },
+        "data": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.EventContext": {
       "description": "EventContext holds the context of the cloudevent received from an event source.",
       "type": "object",
@@ -2490,6 +2575,33 @@
         },
         "status": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SensorStatus"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.SensorList": {
+      "description": "SensorList is the list of Sensor resources",
+      "type": "object",
+      "required": [
+        "metadata",
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Sensor"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
         }
       }
     },
