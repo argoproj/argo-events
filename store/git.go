@@ -19,6 +19,7 @@ package store
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
@@ -106,7 +107,7 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	return nil, nil
 }
 
-func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error) {
+func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([]byte, error) {
 	auth, err := g.getGitAuth()
 	if err != nil {
 		return nil, err
@@ -178,7 +179,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 		}
 	}
 
-	return ioutil.ReadFile(fmt.Sprintf("%s/%s", g.artifact.CloneDirectory, g.artifact.FilePath))
+	return ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, g.artifact.FilePath))
 }
 
 func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
@@ -200,7 +201,17 @@ func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
 }
 
 func (g *GitArtifactReader) Read() ([]byte, error) {
-	r, err := git.PlainOpen(g.artifact.CloneDirectory)
+	cloneDir := g.artifact.CloneDirectory
+	if cloneDir == "" {
+		tempDir, err := ioutil.TempDir("", "git-tmp")
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create a temp file to clone the repository")
+		}
+		defer os.Remove(tempDir)
+		cloneDir = tempDir
+	}
+
+	r, err := git.PlainOpen(cloneDir)
 	if err != nil {
 		if err != git.ErrRepositoryNotExists {
 			return nil, fmt.Errorf("failed to open repository. err: %+v", err)
@@ -225,10 +236,10 @@ func (g *GitArtifactReader) Read() ([]byte, error) {
 			cloneOpt.Depth = 1
 		}
 
-		r, err = git.PlainClone(g.artifact.CloneDirectory, false, cloneOpt)
+		r, err = git.PlainClone(cloneDir, false, cloneOpt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to clone repository. err: %+v", err)
 		}
 	}
-	return g.readFromRepository(r)
+	return g.readFromRepository(r, cloneDir)
 }
