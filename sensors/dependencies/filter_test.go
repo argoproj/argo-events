@@ -374,7 +374,6 @@ func TestFilterEvent(t *testing.T) {
 	eventTime := time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC)
 
 	filter := v1alpha1.EventDependencyFilter{
-		Name: "test-filter",
 		Time: &v1alpha1.TimeFilter{
 			Start: "09:09:09",
 			Stop:  "19:19:19",

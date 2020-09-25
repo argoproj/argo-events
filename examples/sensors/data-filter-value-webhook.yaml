@@ -10,7 +10,6 @@ spec:
       eventSourceName: webhook
       eventName: example
       filters:
-        name: data-filter
         data:
           - path: body.value
             type: number

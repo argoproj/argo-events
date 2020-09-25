@@ -592,13 +592,6 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 				Description: "EventDependencyFilter defines filters and constraints for a event.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name is the name of event filter",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"time": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Time filter on the event with escalation",
@@ -625,7 +618,6 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
