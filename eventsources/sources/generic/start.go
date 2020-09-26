@@ -106,7 +106,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 			logger.Info("dispatching event...")
 			if err := dispatch(eventBytes); err != nil {
-				logger.Infow("failed to dispatch the event", zap.Error(err))
+				logger.Errorw("failed to dispatch the event", zap.Error(err))
 				continue
 			}
 		}
