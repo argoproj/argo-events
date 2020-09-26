@@ -10,3 +10,4 @@ debug.test
 *.iml
 .coverage
 *.out
+site/
