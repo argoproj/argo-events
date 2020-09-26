@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: generic
+spec:
+  generic:
+    example:
+      # URL of the gRPC server that implements event source
+      url: "http://my-grpc-server"
+      # Config represents the configuration required to run the event source
+      config: |-
+        key1: value1
+        key2: value2

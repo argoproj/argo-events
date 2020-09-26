@@ -915,15 +915,51 @@ func schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref common.Referenc
 				Description: "GenericEventSource refers to a generic event source. It can be used to implement a custom event source.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"value": {
+					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Value of the event source",
+							Description: "URL of the gRPC server that implements the event source.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
+					"config": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Config is the event source configuration",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"insecure": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Insecure determines the type of connection.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"value"},
+				Required: []string{"url", "config"},
 			},
 		},
 	}

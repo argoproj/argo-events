@@ -82,24 +82,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	doneCh := make(chan struct{})
 
-	logger := log.With("bucketName", minioEventSource.Bucket.Name).Desugar()
+	logger := log.With("bucketName", minioEventSource.Bucket.Name)
 	log.Info("started listening to bucket notifications...")
 	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events, doneCh) {
 		if notification.Err != nil {
-			logger.Error("invalid notification", zap.Error(err))
+			logger.Errorw("invalid notification", zap.Error(err))
 			continue
 		}
 
 		eventData := &events.MinioEventData{Notification: notification.Records, Metadata: minioEventSource.Metadata}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
-			logger.Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
+			logger.Errorw("failed to marshal the event data, rejecting the event...", zap.Error(err))
 			continue
 		}
 
 		log.Info("dispatching the event on data channel...")
 		if err = dispatch(eventBytes); err != nil {
-			logger.Error("failed to dispatch minio event", zap.Error(err))
+			logger.Errorw("failed to dispatch minio event", zap.Error(err))
 		}
 	}
 
