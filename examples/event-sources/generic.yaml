@@ -5,8 +5,9 @@ metadata:
 spec:
   generic:
     example:
+      insecure: true
       # URL of the gRPC server that implements event source
-      url: "http://my-grpc-server"
+      url: "generic-event-source-server.argo-events.svc:8080"
       # Config represents the configuration required to run the event source
       config: |-
         key1: value1
