@@ -3,6 +3,7 @@
 wet@ert.wretg  ymu
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=valery-zhurbenko_argo-events&metric=alert_status)](https://sonarcloud.io/dashboard?id=valery-zhurbenko_argo-events)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=valery-zhurbenko_argo-events&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=valery-zhurbenko_argo-events)
 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/argoproj/argo-events)](https://goreportcard.com/report/github.com/argoproj/argo-events)
