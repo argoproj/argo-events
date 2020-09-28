@@ -1,6 +1,6 @@
 # Argo Events - The Event-driven Workflow Automation Framework
 
-wet@ert.wretg  ymutrgrtg
+wet@ert.wretg  ymutrgrtgerg
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=valery-zhurbenko_argo-events&metric=alert_status)](https://sonarcloud.io/dashboard?id=valery-zhurbenko_argo-events)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=valery-zhurbenko_argo-events&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=valery-zhurbenko_argo-events)
