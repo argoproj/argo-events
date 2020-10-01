@@ -635,7 +635,7 @@ Description
 
 <p>
 
-NATS host url
+NATS streaming url
 
 </p>
 
@@ -653,11 +653,9 @@ NATS host url
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
-Cluster ID for nats streaming, if it’s missing, treat it as NATS server
+Cluster ID for nats streaming
 
 </p>
 
@@ -941,6 +939,28 @@ github.com/argoproj/argo-events/pkg/apis/common.Metadata </em>
 <p>
 
 Metdata sets the pods’s metadata, i.e. annotations and labels
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>maxAge</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Max Age of existing messages, i.e. “72h”, “4h35m”
 
 </p>
 

@@ -271,14 +271,14 @@ func schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "NATS host url",
+							Description: "NATS streaming url",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"clusterID": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Cluster ID for nats streaming, if it's missing, treat it as NATS server",
+							Description: "Cluster ID for nats streaming",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -379,6 +379,13 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 						SchemaProps: spec.SchemaProps{
 							Description: "Metdata sets the pods's metadata, i.e. annotations and labels",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Metadata"),
+						},
+					},
+					"maxAge": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Max Age of existing messages, i.e. \"72h\", “4h35m”",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},

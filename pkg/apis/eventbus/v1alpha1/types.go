@@ -83,6 +83,9 @@ type NativeStrategy struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,8,rep,name=tolerations"`
 	// Metdata sets the pods's metadata, i.e. annotations and labels
 	Metadata *common.Metadata `json:"metadata,omitempty" protobuf:"bytes,9,opt,name=metadata"`
+	// Max Age of existing messages, i.e. "72h", “4h35m”
+	// +optional
+	MaxAge *string `json:"maxAge,omitempty" protobuf:"bytes,10,opt,name=maxAge"`
 }
 
 // ContainerTemplate defines customized spec for a container
@@ -116,10 +119,9 @@ type BusConfig struct {
 
 // NATSConfig holds the config of NATS
 type NATSConfig struct {
-	// NATS host url
+	// NATS streaming url
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	// Cluster ID for nats streaming, if it's missing, treat it as NATS server
-	// +optional
+	// Cluster ID for nats streaming
 	ClusterID *string `json:"clusterID,omitempty" protobuf:"bytes,2,opt,name=clusterID"`
 	// Auth strategy, default to AuthStrategyNone
 	// +optional

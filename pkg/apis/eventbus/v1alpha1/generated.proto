@@ -86,11 +86,10 @@ message NATSBus {
 
 // NATSConfig holds the config of NATS
 message NATSConfig {
-  // NATS host url
+  // NATS streaming url
   optional string url = 1;
 
-  // Cluster ID for nats streaming, if it's missing, treat it as NATS server
-  // +optional
+  // Cluster ID for nats streaming
   optional string clusterID = 2;
 
   // Auth strategy, default to AuthStrategyNone
@@ -134,6 +133,10 @@ message NativeStrategy {
 
   // Metdata sets the pods's metadata, i.e. annotations and labels
   optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 9;
+
+  // Max Age of existing messages, i.e. "72h", “4h35m”
+  // +optional
+  optional string maxAge = 10;
 }
 
 // PersistenceStrategy defines the strategy of persistence

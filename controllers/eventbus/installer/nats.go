@@ -504,6 +504,14 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if replicas < 3 {
 		replicas = 3
 	}
+	maxAge := common.NATSStreamingMaxAge
+	if i.eventBus.Spec.NATS.Native.MaxAge != nil {
+		maxAge = *i.eventBus.Spec.NATS.Native.MaxAge
+	}
+	_, err := time.ParseDuration(maxAge)
+	if err != nil {
+		return nil, err
+	}
 	peers := []string{}
 	for j := 0; j < replicas; j++ {
 		peers = append(peers, fmt.Sprintf("\"%s-%s\"", ssName, strconv.Itoa(j)))
@@ -528,9 +536,9 @@ streaming {
 	log_path: /data/stan/logs
   }
   store_limits {
-    max_age: 72h
+    max_age: %s
   }
-}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","))
+}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","), maxAge)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
