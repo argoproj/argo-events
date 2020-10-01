@@ -19,7 +19,7 @@ The HTTP trigger specification is available [here](https://github.com/argoproj/a
 
 Consider a scenario where your REST API server needs to consume events from event-sources S3, GitHub, SQS etc. Usually, you'd end up writing
 the integration yourself in the server code, although server logic has nothing to do any of the event-sources. This is where Argo Events HTTP trigger
-can hel. The HTTP trigger takes the task of consuming events from event-sources away from API server and seamlessly integrates these events via REST API calls.
+can help. The HTTP trigger takes the task of consuming events from event-sources away from API server and seamlessly integrates these events via REST API calls.
 
 
 We will set up a basic go http server and connect it with the minio events.
