@@ -265,7 +265,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	// Start a new round
 	if existingMsg, ok := msgHolder.msgs[depName]; ok {
 		if m.Timestamp == existingMsg.timestamp {
-			// Redelivered latest messge, update delivery timestamp and return
+			// Re-delivered latest messge, update delivery timestamp and return
 			existingMsg.lastDeliveredTime = now
 			msgHolder.msgs[depName] = existingMsg
 			return
@@ -285,6 +285,8 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	// Use last delivery timestamp to determine that.
 	hasStale := false
 	for k, v := range msgHolder.msgs {
+		// Since the message is not acked, the server will keep re-sending it.
+		// If a message being held didn't get re-delivered in the last 10 minutes, treat it as stale.
 		if (now - v.lastDeliveredTime) > 10*60 {
 			msgHolder.reset(k)
 			hasStale = true
