@@ -948,6 +948,32 @@ Metdata sets the pods’s metadata, i.e. annotations and labels
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>securityContext</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+Kubernetes core/v1.PodSecurityContext </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+SecurityContext holds pod-level security attributes and common container
+settings. Optional: Defaults to empty. See type description for default
+values of each field.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

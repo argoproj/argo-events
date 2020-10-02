@@ -83,6 +83,10 @@ type NativeStrategy struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,8,rep,name=tolerations"`
 	// Metdata sets the pods's metadata, i.e. annotations and labels
 	Metadata *common.Metadata `json:"metadata,omitempty" protobuf:"bytes,9,opt,name=metadata"`
+	// SecurityContext holds pod-level security attributes and common container settings.
+	// Optional: Defaults to empty.  See type description for default values of each field.
+	// +optional
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,10,opt,name=securityContext"`
 }
 
 // ContainerTemplate defines customized spec for a container
