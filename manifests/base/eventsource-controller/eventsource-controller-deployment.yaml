@@ -13,6 +13,8 @@ spec:
         app: eventsource-controller
     spec:
       serviceAccountName: argo-events-sa
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: eventsource-controller
           image: argoproj/eventsource-controller:latest

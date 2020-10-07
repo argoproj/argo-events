@@ -13,6 +13,8 @@ spec:
         app: eventbus-controller
     spec:
       serviceAccountName: argo-events-sa
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: eventbus-controller
           image: argoproj/eventbus-controller:latest
@@ -38,4 +40,5 @@ spec:
               port: 8081
             initialDelaySeconds: 3
             periodSeconds: 3
+
 

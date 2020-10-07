@@ -12,6 +12,8 @@ FROM scratch as eventbus-controller
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventbus-controller /bin/eventbus-controller
+
+USER 9731
 ENTRYPOINT [ "/bin/eventbus-controller" ]
 
 ####################################################################################################
@@ -21,6 +23,8 @@ FROM scratch as eventsource-controller
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/eventsource-controller /bin/eventsource-controller
+
+USER 9731
 ENTRYPOINT [ "/bin/eventsource-controller" ]
 
 ####################################################################################################
@@ -30,6 +34,8 @@ FROM scratch as sensor-controller
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY dist/sensor-controller /bin/sensor-controller
+
+USER 9731
 ENTRYPOINT [ "/bin/sensor-controller" ]
 
 ####################################################################################################

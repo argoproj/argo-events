@@ -279,6 +279,8 @@ spec:
             port: 8081
           initialDelaySeconds: 3
           periodSeconds: 3
+      securityContext:
+        runAsNonRoot: true
       serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1
@@ -319,6 +321,8 @@ spec:
             port: 8081
           initialDelaySeconds: 3
           periodSeconds: 3
+      securityContext:
+        runAsNonRoot: true
       serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1
@@ -358,4 +362,6 @@ spec:
             port: 8081
           initialDelaySeconds: 3
           periodSeconds: 3
+      securityContext:
+        runAsNonRoot: true
       serviceAccountName: argo-events-sa
