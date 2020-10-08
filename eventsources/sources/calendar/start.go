@@ -84,7 +84,7 @@ func (el *EventListener) initializePersistence(ctx context.Context, persistence 
 	}
 	return nil
 }
-func (el *EventListener) GetPersistenceKey() string{
+func (el *EventListener) GetPersistenceKey() string {
 	return fmt.Sprintf("%s.%s", el.EventSourceName, el.EventName)
 }
 
