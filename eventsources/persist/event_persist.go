@@ -48,7 +48,7 @@ func NewConfigMapPersist(client kubernetes.Interface, configmap *v1alpha1.Config
 			if err != nil {
 				return nil, err
 			}
-		}else {
+		} else {
 			return nil, err
 		}
 	}
@@ -78,7 +78,7 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 			if err != nil {
 				return err
 			}
-		}else {
+		} else {
 			return err
 		}
 	}
