@@ -19,6 +19,7 @@ package calendar
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -83,11 +84,14 @@ func (el *EventListener) initializePersistence(ctx context.Context, persistence 
 	}
 	return nil
 }
+func (el *EventListener) GetPersistenceKey() string{
+	return fmt.Sprintf("%s.%s", el.EventSourceName, el.EventName)
+}
 
 func (el *EventListener) GetStartingTime() time.Time {
 	lastT := time.Now()
 	if el.CalendarEventSource.Catchup && el.EventPersistence.IsEnabled() {
-		lastEvent, err := el.EventPersistence.Get(el.EventName)
+		lastEvent, err := el.EventPersistence.Get(el.GetPersistenceKey())
 		if err != nil {
 			el.log.Error("failed to get last persisted events. ", zap.Error(err))
 		}
@@ -181,7 +185,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if err != nil {
 			el.log.Error("failed to dispatch calendar event", zap.Error(err))
 		}
-		event := persist.Event{EventSource: el.EventName, EventPayload: string(payload)}
+		event := persist.Event{EventKey: el.GetPersistenceKey(), EventPayload: string(payload)}
 		err = el.EventPersistence.Save(&event)
 		if err != nil {
 			el.log.Error("failed to dispatch calendar event", zap.Error(err))

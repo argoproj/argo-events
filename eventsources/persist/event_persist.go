@@ -18,15 +18,23 @@ type EventPersist interface {
 }
 
 type Event struct {
-	EventSource  string
+	EventKey     string
 	EventPayload string
 }
 
 type ConfigMapPersist struct {
-	kubeClient kubernetes.Interface
-	name       string
-	namespace  string
-	configMap  *v1.ConfigMap
+	kubeClient       kubernetes.Interface
+	name             string
+	namespace        string
+	configMap        *v1.ConfigMap
+	createIfNotExist bool
+}
+
+func CreateConfigmap(client kubernetes.Interface, name, namespace string) (*v1.ConfigMap, error) {
+	cm := v1.ConfigMap{}
+	cm.Name = name
+	cm.Namespace = namespace
+	return client.CoreV1().ConfigMaps(namespace).Create(&cm)
 }
 
 func NewConfigMapPersist(client kubernetes.Interface, configmap *v1alpha1.ConfigMapPersistence, namespace string) (EventPersist, error) {
@@ -36,19 +44,21 @@ func NewConfigMapPersist(client kubernetes.Interface, configmap *v1alpha1.Config
 	cm, err := client.CoreV1().ConfigMaps(namespace).Get(configmap.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) && configmap.CreateIfNotExist {
-			cm = &v1.ConfigMap{}
-			cm.Name = configmap.Name
-			cm.Namespace = namespace
-			cm, err = client.CoreV1().ConfigMaps(namespace).Create(cm)
+			cm, err = CreateConfigmap(client, configmap.Name, namespace)
+			if err != nil {
+				return nil, err
+			}
+		}else {
+			return nil, err
 		}
-		return nil, err
 	}
 
 	cmp := ConfigMapPersist{
-		kubeClient: client,
-		name:       configmap.Name,
-		namespace:  namespace,
-		configMap:  cm,
+		kubeClient:       client,
+		name:             configmap.Name,
+		namespace:        namespace,
+		configMap:        cm,
+		createIfNotExist: configmap.CreateIfNotExist,
 	}
 	return &cmp, nil
 }
@@ -63,12 +73,19 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 	}
 	cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.name, metav1.GetOptions{})
 	if err != nil {
-		return err
+		if apierr.IsNotFound(err) && cmp.createIfNotExist {
+			cm, err = CreateConfigmap(cmp.kubeClient, cmp.name, cmp.namespace)
+			if err != nil {
+				return err
+			}
+		}else {
+			return err
+		}
 	}
 	if len(cm.Data) == 0 {
 		cm.Data = make(map[string]string)
 	}
-	cm.Data[event.EventSource] = event.EventPayload
+	cm.Data[event.EventKey] = event.EventPayload
 	cmp.configMap, err = cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Update(cm)
 	if err != nil {
 		return err
@@ -85,7 +102,7 @@ func (cmp *ConfigMapPersist) Get(key string) (*Event, error) {
 	if !exist {
 		return nil, nil
 	}
-	return &Event{EventSource: key, EventPayload: payload}, nil
+	return &Event{EventKey: key, EventPayload: payload}, nil
 }
 
 type NullPersistence struct {
