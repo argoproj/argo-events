@@ -549,6 +549,9 @@
     "io.argoproj.eventsource.v1alpha1.ConfigMapPersistence": {
       "type": "object",
       "properties": {
+        "createIfNotExist": {
+          "type": "boolean"
+        },
         "name": {
           "description": "Name of the configmap",
           "type": "string"

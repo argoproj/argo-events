@@ -301,6 +301,12 @@ func schema_pkg_apis_eventsource_v1alpha1_ConfigMapPersistence(ref common.Refere
 							Format:      "",
 						},
 					},
+					"createIfNotExist": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
 				},
 			},
 		},

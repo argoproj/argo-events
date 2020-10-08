@@ -195,8 +195,8 @@ type EventPersistence struct {
 
 type ConfigMapPersistence struct {
 	// Name of the configmap
-	Name string `json:"name,omitempty" protobuf:"bytes,1,rep,name=name"`
-	CreateIfNotExist bool `json:"createIfNotExist,omitempty" protobuf:"bytes,2,rep,name=createIfNotExist"
+	Name             string `json:"name,omitempty" protobuf:"bytes,1,rep,name=name"`
+	CreateIfNotExist bool   `json:"createIfNotExist,omitempty" protobuf:"varint,2,opt,name=createIfNotExist"`
 }
 
 // FileEventSource describes an event-source for file related events.

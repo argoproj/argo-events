@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	apierr "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )

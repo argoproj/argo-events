@@ -117,6 +117,8 @@ message CalendarEventSource {
 message ConfigMapPersistence {
   // Name of the configmap
   optional string name = 1;
+
+  optional bool createIfNotExist = 2;
 }
 
 // EmitterEventSource describes the event source for emitter
