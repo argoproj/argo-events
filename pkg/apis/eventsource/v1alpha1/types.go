@@ -182,6 +182,21 @@ type CalendarEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Catchup enables to triggered the missed schedule when eventsource restarts
+	Catchup bool `json:"catchup,omitempty" protobuf:"bytes,7,rep,name=catchup"`
+	// Persistence hold the configuration for event persistence
+	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,8,rep,name=persistence"`
+}
+
+type EventPersistence struct {
+	// ConfigMap holds configmap details for persistence
+	ConfigMap *ConfigMapPersistence `json:"configMap,omitempty" protobuf:"bytes,1,rep,name=configMap"`
+}
+
+type ConfigMapPersistence struct {
+	// Name of the configmap
+	Name string `json:"name,omitempty" protobuf:"bytes,1,rep,name=name"`
+	CreateIfNotExist bool `json:"createIfNotExist,omitempty" protobuf:"bytes,2,rep,name=createIfNotExist"
 }
 
 // FileEventSource describes an event-source for file related events.

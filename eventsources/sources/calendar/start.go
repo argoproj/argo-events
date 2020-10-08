@@ -19,14 +19,19 @@ package calendar
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron"
 	"go.uber.org/zap"
+	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/eventsources/persist"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -37,6 +42,8 @@ type EventListener struct {
 	EventSourceName     string
 	EventName           string
 	CalendarEventSource v1alpha1.CalendarEventSource
+	log                 *zap.Logger
+	EventPersistence    persist.EventPersist
 }
 
 // GetEventSourceName returns name of event source
@@ -54,23 +61,80 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 	return apicommon.CalendarEvent
 }
 
-// StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+// initializePersistence initialize the persistence object.
+// This func can move to eventing.go once we start supporting persistence for all sources.
+func (el *EventListener) initializePersistence(ctx context.Context, persistence *v1alpha1.EventPersistence) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
-	log.Info("started processing the calendar event source...")
+	log.Info("Initializing Persistence")
+	if persistence.ConfigMap != nil {
+		config := config.GetConfigOrDie()
+		kubeclientset := kubernetes.NewForConfigOrDie(config)
+		namespace, defined := os.LookupEnv("POD_NAMESPACE")
+		if !defined {
+			log.Fatal("required environment variable 'POD_NAMESPACE' not defined")
+		}
+		log.Info(namespace)
+		var err error
+		el.EventPersistence, err = persist.NewConfigMapPersist(kubeclientset, persistence.ConfigMap, namespace)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (el *EventListener) GetStartingTime() time.Time {
+	lastT := time.Now()
+	if el.CalendarEventSource.Catchup && el.EventPersistence.IsEnabled() {
+		lastEvent, err := el.EventPersistence.Get(el.EventName)
+		if err != nil {
+			el.log.Error("failed to get last persisted events. ", zap.Error(err))
+		}
+		if lastEvent != nil && lastEvent.EventPayload != "" {
+			var eventData events.CalendarEventData
+			err := json.Unmarshal([]byte(lastEvent.EventPayload), &eventData)
+			if err != nil {
+				el.log.Info(" ", zap.Error(err))
+			}
+			eventTime := strings.Split(eventData.EventTime, " m=")
+			lastT, err = time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", eventTime[0])
+			if err != nil {
+				el.log.Error("failed to parse the persisted last event timestamp", zap.Error(err))
+				lastT = time.Now()
+			}
+		}
+	}
+	return lastT
+}
+
+// StartListening starts listening events
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+	el.log = logging.FromContext(ctx).
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+	el.log.Info("started processing the calendar event source...")
 
 	calendarEventSource := &el.CalendarEventSource
-	log.Info("resolving calendar schedule...")
+	el.log.Info("resolving calendar schedule...")
 	schedule, err := resolveSchedule(calendarEventSource)
 	if err != nil {
 		return err
 	}
 
-	log.Info("parsing exclusion dates if any...")
+	el.log.Info("parsing exclusion dates if any...")
 	exDates, err := common.ParseExclusionDates(calendarEventSource.ExclusionDates)
 	if err != nil {
 		return err
+	}
+
+	el.EventPersistence = &persist.NullPersistence{}
+	if calendarEventSource.Persistence != nil {
+		err = el.initializePersistence(ctx, calendarEventSource.Persistence)
+		if err != nil {
+			return err
+		}
+	} else {
+		el.log.Info("Persistence disabled")
 	}
 
 	var next Next
@@ -88,10 +152,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return nextT
 	}
 
-	lastT := time.Now()
+	lastT := el.GetStartingTime()
+
 	var location *time.Location
 	if calendarEventSource.Timezone != "" {
-		log.Info("loading location for the schedule...", zap.Any("location", calendarEventSource.Timezone))
+		el.log.Info("loading location for the schedule...", zap.Any("location", calendarEventSource.Timezone))
 		location, err = time.LoadLocation(calendarEventSource.Timezone)
 		if err != nil {
 			return errors.Wrapf(err, "failed to load location for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
@@ -99,34 +164,63 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		lastT = lastT.In(location)
 	}
 
+	sendEventFunc := func(tx time.Time) error {
+		response := &events.CalendarEventData{
+			EventTime:   tx.String(),
+			UserPayload: calendarEventSource.UserPayload,
+			Metadata:    calendarEventSource.Metadata,
+		}
+		payload, err := json.Marshal(response)
+		if err != nil {
+			el.log.Error("failed to marshal the event data", zap.Error(err))
+			// no need to continue as further event payloads will suffer same fate as this one.
+			return errors.Wrapf(err, "failed to marshal the event data for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
+		}
+		el.log.Info("dispatching calendar event...")
+		err = dispatch(payload)
+		if err != nil {
+			el.log.Error("failed to dispatch calendar event", zap.Error(err))
+		}
+		event := persist.Event{EventSource: el.EventName, EventPayload: string(payload)}
+		err = el.EventPersistence.Save(&event)
+		if err != nil {
+			el.log.Error("failed to dispatch calendar event", zap.Error(err))
+		}
+		return nil
+	}
+
+	el.log.Info("Calendar event start time:", zap.Any("Time", lastT.Format(time.RFC822)))
 	for {
 		t := next(lastT)
+
+		// Catchup scenario
+		// Trigger the event immediately if the current schedule time is earlier then
+		if time.Now().After(t) {
+			el.log.Info("triggering catchup events", zap.Any(logging.LabelTime, t.UTC().String()))
+			lastT = t
+			if location != nil {
+				lastT = lastT.In(location)
+			}
+			err = sendEventFunc(t)
+			if err != nil {
+			}
+			continue
+		}
+
 		timer := time.After(time.Until(t))
-		log.Info("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
+		el.log.Info("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
 		select {
 		case tx := <-timer:
 			lastT = tx
 			if location != nil {
 				lastT = lastT.In(location)
 			}
-			response := &events.CalendarEventData{
-				EventTime:   tx.String(),
-				UserPayload: calendarEventSource.UserPayload,
-				Metadata:    calendarEventSource.Metadata,
-			}
-			payload, err := json.Marshal(response)
+			err = sendEventFunc(tx)
 			if err != nil {
-				log.Error("failed to marshal the event data", zap.Error(err))
-				// no need to continue as further event payloads will suffer same fate as this one.
-				return errors.Wrapf(err, "failed to marshal the event data for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
-			}
-			log.Info("dispatching calendar event...")
-			err = dispatch(payload)
-			if err != nil {
-				log.Error("failed to dispatch calendar event", zap.Error(err))
+
 			}
 		case <-ctx.Done():
-			log.Info("exiting calendar event listener...")
+			el.log.Info("exiting calendar event listener...")
 			return nil
 		}
 	}
