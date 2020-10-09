@@ -367,7 +367,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 
 <p>
 
-SharedAccessKey is the the generated value of the key
+SharedAccessKey is the generated value of the key
 
 </p>
 
@@ -1280,7 +1280,7 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSu
 
 <p>
 
-PubSub eevnt sources
+PubSub event sources
 
 </p>
 
@@ -1991,7 +1991,7 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSu
 
 <p>
 
-PubSub eevnt sources
+PubSub event sources
 
 </p>
 
@@ -4489,7 +4489,7 @@ project)
 
 <p>
 
-TopicProjectID is GCP project ID for the the topic. By default, it is
+TopicProjectID is GCP project ID for the topic. By default, it is
 same as ProjectID.
 
 </p>
@@ -4540,7 +4540,7 @@ actually belongs to the specified topic.
 SubscriptionID is ID of subscription. Required if you use existing
 subscription. The default value will be auto generated hash based on
 this eventsource setting, so the subscription might be recreated every
-time you update the setting, which has a possiblity of event loss.
+time you update the setting, which has a possibility of event loss.
 
 </p>
 
@@ -4565,7 +4565,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 
 CredentialSecret references to the secret that contains JSON credentials
-to access GCP. If it is missing, it implicts to use Workload Identity to
+to access GCP. If it is missing, it implicitly uses Workload Identity to
 access.
 <a href="https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity">https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity</a>
 
@@ -6868,7 +6868,7 @@ github.com/argoproj/argo-events/pkg/apis/common.Metadata </em>
 
 <p>
 
-Metdata sets the pods’s metadata, i.e. annotations and labels
+Metadata sets the pods’s metadata, i.e. annotations and labels
 
 </p>
 

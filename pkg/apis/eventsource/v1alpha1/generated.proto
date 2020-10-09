@@ -72,7 +72,7 @@ message AzureEventsHubEventSource {
   // SharedAccessKeyName is the name you chose for your application's SAS keys
   optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 2;
 
-  // SharedAccessKey is the the generated value of the key
+  // SharedAccessKey is the generated value of the key
   optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 3;
 
   // Event Hub path/name
@@ -216,7 +216,7 @@ message EventSourceSpec {
   // SQS event sources
   map<string, SQSEventSource> sqs = 15;
 
-  // PubSub eevnt sources
+  // PubSub event sources
   map<string, PubSubEventSource> pubSub = 16;
 
   // Github event sources
@@ -556,7 +556,7 @@ message PubSubEventSource {
   // +optional
   optional string projectID = 1;
 
-  // TopicProjectID is GCP project ID for the the topic.
+  // TopicProjectID is GCP project ID for the topic.
   // By default, it is same as ProjectID.
   // +optional
   optional string topicProjectID = 2;
@@ -571,12 +571,12 @@ message PubSubEventSource {
   // SubscriptionID is ID of subscription.
   // Required if you use existing subscription.
   // The default value will be auto generated hash based on this eventsource setting, so the subscription
-  // might be recreated every time you update the setting, which has a possiblity of event loss.
+  // might be recreated every time you update the setting, which has a possibility of event loss.
   // +optional
   optional string subscriptionID = 4;
 
   // CredentialSecret references to the secret that contains JSON credentials to access GCP.
-  // If it is missing, it implicts to use Workload Identity to access.
+  // If it is missing, it implicitly uses Workload Identity to access.
   // https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
   // +optional
   optional k8s.io.api.core.v1.SecretKeySelector credentialSecret = 5;
@@ -901,7 +901,7 @@ message StripeEventSource {
 
 // Template holds the information of an EventSource deployment template
 message Template {
-  // Metdata sets the pods's metadata, i.e. annotations and labels
+  // Metadata sets the pods's metadata, i.e. annotations and labels
   optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 1;
 
   // ServiceAccountName is the name of the ServiceAccount to use to run event source pod.

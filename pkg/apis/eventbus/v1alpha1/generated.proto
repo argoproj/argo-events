@@ -132,7 +132,7 @@ message NativeStrategy {
   // +optional
   repeated k8s.io.api.core.v1.Toleration tolerations = 8;
 
-  // Metdata sets the pods's metadata, i.e. annotations and labels
+  // Metadata sets the pods's metadata, i.e. annotations and labels
   optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 9;
 }
 

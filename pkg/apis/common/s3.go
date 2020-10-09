@@ -40,7 +40,7 @@ type S3Bucket struct {
 	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
 }
 
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+// S3Filter represents filters to apply to bucket notifications for specifying constraints on objects
 type S3Filter struct {
 	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
 	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`

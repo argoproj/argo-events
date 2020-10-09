@@ -1512,7 +1512,7 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 				Properties: map[string]spec.Schema{
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Metdata sets the pods's metadata, i.e. annotations and labels",
+							Description: "Metadata sets the pods's metadata, i.e. annotations and labels",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Metadata"),
 						},
 					},

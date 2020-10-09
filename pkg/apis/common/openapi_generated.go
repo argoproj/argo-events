@@ -310,7 +310,7 @@ func schema_argo_events_pkg_apis_common_S3Filter(ref common.ReferenceCallback) c
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects",
+				Description: "S3Filter represents filters to apply to bucket notifications for specifying constraints on objects",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"prefix": {
