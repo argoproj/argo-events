@@ -490,7 +490,7 @@ github.com/argoproj/argo-events/pkg/apis/common.Metadata </em>
 </td>
 <td>
 <p>
-Metdata sets the pods’s metadata, i.e. annotations and labels
+Metadata sets the pods’s metadata, i.e. annotations and labels
 </p>
 </td>
 </tr>

@@ -81,7 +81,7 @@ type EventSourceSpec struct {
 	SNS map[string]SNSEventSource `json:"sns,omitempty" protobuf:"bytes,14,rep,name=sns"`
 	// SQS event sources
 	SQS map[string]SQSEventSource `json:"sqs,omitempty" protobuf:"bytes,15,rep,name=sqs"`
-	// PubSub eevnt sources
+	// PubSub event sources
 	PubSub map[string]PubSubEventSource `json:"pubSub,omitempty" protobuf:"bytes,16,rep,name=pubSub"`
 	// Github event sources
 	Github map[string]GithubEventSource `json:"github,omitempty" protobuf:"bytes,17,rep,name=github"`
@@ -111,7 +111,7 @@ type EventSourceSpec struct {
 
 // Template holds the information of an EventSource deployment template
 type Template struct {
-	// Metdata sets the pods's metadata, i.e. annotations and labels
+	// Metadata sets the pods's metadata, i.e. annotations and labels
 	Metadata *apicommon.Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// ServiceAccountName is the name of the ServiceAccount to use to run event source pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -443,7 +443,7 @@ type PubSubEventSource struct {
 	// (otherwise, the default value is its project)
 	// +optional
 	ProjectID string `json:"projectID" protobuf:"bytes,1,opt,name=projectID"`
-	// TopicProjectID is GCP project ID for the the topic.
+	// TopicProjectID is GCP project ID for the topic.
 	// By default, it is same as ProjectID.
 	// +optional
 	TopicProjectID string `json:"topicProjectID" protobuf:"bytes,2,opt,name=topicProjectID"`
@@ -456,11 +456,11 @@ type PubSubEventSource struct {
 	// SubscriptionID is ID of subscription.
 	// Required if you use existing subscription.
 	// The default value will be auto generated hash based on this eventsource setting, so the subscription
-	// might be recreated every time you update the setting, which has a possiblity of event loss.
+	// might be recreated every time you update the setting, which has a possibility of event loss.
 	// +optional
 	SubscriptionID string `json:"subscriptionID" protobuf:"bytes,4,opt,name=subscriptionID"`
 	// CredentialSecret references to the secret that contains JSON credentials to access GCP.
-	// If it is missing, it implicts to use Workload Identity to access.
+	// If it is missing, it implicitly uses Workload Identity to access.
 	// https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
 	// +optional
 	CredentialSecret *corev1.SecretKeySelector `json:"credentialSecret,omitempty" protobuf:"bytes,5,opt,name=credentialSecret"`
@@ -636,7 +636,7 @@ type AzureEventsHubEventSource struct {
 	FQDN string `json:"fqdn" protobuf:"bytes,1,opt,name=fqdn"`
 	// SharedAccessKeyName is the name you chose for your application's SAS keys
 	SharedAccessKeyName *corev1.SecretKeySelector `json:"sharedAccessKeyName,omitempty" protobuf:"bytes,2,opt,name=sharedAccessKeyName"`
-	// SharedAccessKey is the the generated value of the key
+	// SharedAccessKey is the generated value of the key
 	SharedAccessKey *corev1.SecretKeySelector `json:"sharedAccessKey,omitempty" protobuf:"bytes,3,opt,name=sharedAccessKey"`
 	// Event Hub path/name
 	HubName string `json:"hubName" protobuf:"bytes,4,opt,name=hubName"`

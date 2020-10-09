@@ -151,7 +151,7 @@
       }
     },
     "io.argoproj.common.S3Filter": {
-      "description": "S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects",
+      "description": "S3Filter represents filters to apply to bucket notifications for specifying constraints on objects",
       "type": "object",
       "required": [
         "prefix",
@@ -369,7 +369,7 @@
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.ContainerTemplate"
         },
         "metadata": {
-          "description": "Metdata sets the pods's metadata, i.e. annotations and labels",
+          "description": "Metadata sets the pods's metadata, i.e. annotations and labels",
           "$ref": "#/definitions/io.argoproj.common.Metadata"
         },
         "metricsContainerTemplate": {
@@ -489,7 +489,7 @@
           }
         },
         "sharedAccessKey": {
-          "description": "SharedAccessKey is the the generated value of the key",
+          "description": "SharedAccessKey is the generated value of the key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "sharedAccessKeyName": {
@@ -779,7 +779,7 @@
           }
         },
         "pubSub": {
-          "description": "PubSub eevnt sources",
+          "description": "PubSub event sources",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.PubSubEventSource"
@@ -1319,7 +1319,7 @@
       ],
       "properties": {
         "credentialSecret": {
-          "description": "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicts to use Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
+          "description": "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicitly uses Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "credentialsFile": {
@@ -1346,7 +1346,7 @@
           "type": "string"
         },
         "subscriptionID": {
-          "description": "SubscriptionID is ID of subscription. Required if you use existing subscription. The default value will be auto generated hash based on this eventsource setting, so the subscription might be recreated every time you update the setting, which has a possiblity of event loss.",
+          "description": "SubscriptionID is ID of subscription. Required if you use existing subscription. The default value will be auto generated hash based on this eventsource setting, so the subscription might be recreated every time you update the setting, which has a possibility of event loss.",
           "type": "string"
         },
         "topic": {
@@ -1354,7 +1354,7 @@
           "type": "string"
         },
         "topicProjectID": {
-          "description": "TopicProjectID is GCP project ID for the the topic. By default, it is same as ProjectID.",
+          "description": "TopicProjectID is GCP project ID for the topic. By default, it is same as ProjectID.",
           "type": "string"
         }
       }
@@ -1812,7 +1812,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"
         },
         "metadata": {
-          "description": "Metdata sets the pods's metadata, i.e. annotations and labels",
+          "description": "Metadata sets the pods's metadata, i.e. annotations and labels",
           "$ref": "#/definitions/io.argoproj.common.Metadata"
         },
         "nodeSelector": {
@@ -2766,7 +2766,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"
         },
         "metadata": {
-          "description": "Metdata sets the pods's metadata, i.e. annotations and labels",
+          "description": "Metadata sets the pods's metadata, i.e. annotations and labels",
           "$ref": "#/definitions/io.argoproj.common.Metadata"
         },
         "nodeSelector": {
