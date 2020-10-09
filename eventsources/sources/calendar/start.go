@@ -167,7 +167,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		lastT = lastT.In(location)
 	}
-
 	sendEventFunc := func(tx time.Time) error {
 		response := &events.CalendarEventData{
 			EventTime:   tx.String(),
@@ -207,6 +206,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			err = sendEventFunc(t)
 			if err != nil {
+				el.log.Error("failed to send calendar event", zap.Error(err))
 			}
 			continue
 		}
@@ -221,7 +221,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			err = sendEventFunc(tx)
 			if err != nil {
-
+				el.log.Error("failed to send calendar event", zap.Error(err))
 			}
 		case <-ctx.Done():
 			el.log.Info("exiting calendar event listener...")
