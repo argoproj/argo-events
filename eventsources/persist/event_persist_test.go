@@ -12,7 +12,6 @@ import (
 )
 
 func TestConfigMapPersist(t *testing.T) {
-
 	kubeClient := fake.NewSimpleClientset()
 	conf := &v1alpha1.ConfigMapPersistence{
 		Name:             "test-config",
