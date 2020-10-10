@@ -44,6 +44,7 @@ EventSource object, defaults to 1.
 - Redis
 - Resource
 - Calendar
+- Generic
 
 ### Replicas Of Recreate Types
 

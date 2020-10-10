@@ -8,7 +8,9 @@ spec:
       insecure: true
       # URL of the gRPC server that implements event source
       url: "generic-event-source-server.argo-events.svc:8080"
-      # Config represents the configuration required to run the event source
+      # Config represents the configuration required to run the event source.
+      # The configuration will be sent over to eventsource server and should be used
+      # by the server accordingly to consume events from external sources.
       config: |-
         key1: value1
         key2: value2
