@@ -193,10 +193,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Name:      "POD_NAME",
 			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}},
 		},
-		{
-			Name:      "POD_NAMESPACE",
-			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}},
-		},
 	}
 
 	busConfigBytes, err := json.Marshal(eventBus.Status.Config)

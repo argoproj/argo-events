@@ -185,18 +185,19 @@ type CalendarEventSource struct {
 	// Catchup enables to triggered the missed schedule when eventsource restarts
 	Catchup bool `json:"catchup,omitempty" protobuf:"bytes,7,rep,name=catchup"`
 	// Persistence hold the configuration for event persistence
-	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,8,rep,name=persistence"`
+	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,8,name=persistence"`
 }
 
 type EventPersistence struct {
 	// ConfigMap holds configmap details for persistence
-	ConfigMap *ConfigMapPersistence `json:"configMap,omitempty" protobuf:"bytes,1,rep,name=configMap"`
+	ConfigMap *ConfigMapPersistence `json:"configMap,omitempty" protobuf:"bytes,1,name=configMap"`
 }
 
 type ConfigMapPersistence struct {
 	// Name of the configmap
-	Name             string `json:"name,omitempty" protobuf:"bytes,1,rep,name=name"`
-	CreateIfNotExist bool   `json:"createIfNotExist,omitempty" protobuf:"varint,2,opt,name=createIfNotExist"`
+	Name string `json:"name,omitempty" protobuf:"bytes,1,name=name"`
+	// CreateIfNotExist will create configmap if it doesn't exists
+	CreateIfNotExist bool `json:"createIfNotExist,omitempty" protobuf:"varint,2,opt,name=createIfNotExist"`
 }
 
 // FileEventSource describes an event-source for file related events.

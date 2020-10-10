@@ -24,24 +24,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-	cronlib "github.com/robfig/cron"
-	"go.uber.org/zap"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/persist"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/pkg/errors"
+	cronlib "github.com/robfig/cron"
+	"go.uber.org/zap"
+	"k8s.io/client-go/kubernetes"
 )
 
 // EventListener implements Eventing for calendar based events
 type EventListener struct {
 	EventSourceName     string
 	EventName           string
+	Namespace           string
 	CalendarEventSource v1alpha1.CalendarEventSource
 	log                 *zap.Logger
 	EventPersistence    persist.EventPersist
@@ -65,51 +64,55 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // initializePersistence initialize the persistence object.
 // This func can move to eventing.go once we start supporting persistence for all sources.
 func (el *EventListener) initializePersistence(ctx context.Context, persistence *v1alpha1.EventPersistence) error {
-	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
-	log.Info("Initializing Persistence")
+	el.log.Info("Initializing Persistence")
 	if persistence.ConfigMap != nil {
-		config := config.GetConfigOrDie()
-		kubeclientset := kubernetes.NewForConfigOrDie(config)
-		namespace, defined := os.LookupEnv("POD_NAMESPACE")
-		if !defined {
-			log.Fatal("required environment variable 'POD_NAMESPACE' not defined")
-		}
-		log.Info(namespace)
-		var err error
-		el.EventPersistence, err = persist.NewConfigMapPersist(kubeclientset, persistence.ConfigMap, namespace)
+		kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+
+		restConfig, err := common.GetClientConfig(kubeConfig)
 		if err != nil {
+			return errors.Wrapf(err, "failed to get a K8s rest config for the event source %s", el.GetEventName())
+		}
+		kubeClientset, err := kubernetes.NewForConfig(restConfig)
+		if err != nil {
+			return errors.Wrapf(err, "failed to set up a K8s client for the event source %s", el.GetEventName())
+		}
+
+		el.EventPersistence, err = persist.NewConfigMapPersist(kubeClientset, persistence.ConfigMap, el.Namespace)
+		if err != nil {
+
 			return err
 		}
 	}
 	return nil
 }
-func (el *EventListener) GetPersistenceKey() string {
+func (el *EventListener) getPersistenceKey() string {
 	return fmt.Sprintf("%s.%s", el.EventSourceName, el.EventName)
 }
 
-func (el *EventListener) GetStartingTime() time.Time {
+func (el *EventListener) getExecutionTime() (time.Time, error) {
 	lastT := time.Now()
 	if el.CalendarEventSource.Catchup && el.EventPersistence.IsEnabled() {
-		lastEvent, err := el.EventPersistence.Get(el.GetPersistenceKey())
+		lastEvent, err := el.EventPersistence.Get(el.getPersistenceKey())
 		if err != nil {
-			el.log.Error("failed to get last persisted events. ", zap.Error(err))
+			el.log.Error("failed to get last persisted event.", zap.Error(err))
+			return lastT, errors.Wrap(err, "failed to get last persisted event.")
 		}
 		if lastEvent != nil && lastEvent.EventPayload != "" {
 			var eventData events.CalendarEventData
 			err := json.Unmarshal([]byte(lastEvent.EventPayload), &eventData)
 			if err != nil {
-				el.log.Info(" ", zap.Error(err))
+				el.log.Info("failed to marshal last persisted event.", zap.Error(err))
+				return lastT, errors.Wrap(err, "failed to marshal last persisted event.")
 			}
 			eventTime := strings.Split(eventData.EventTime, " m=")
 			lastT, err = time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", eventTime[0])
 			if err != nil {
 				el.log.Error("failed to parse the persisted last event timestamp", zap.Error(err))
-				lastT = time.Now()
+				return lastT, errors.Wrap(err, "failed to parse the persisted last event timestamp.")
 			}
 		}
 	}
-	return lastT
+	return lastT, nil
 }
 
 // StartListening starts listening events
@@ -156,7 +159,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return nextT
 	}
 
-	lastT := el.GetStartingTime()
+	lastT, err := el.getExecutionTime()
+	if err != nil {
+		return err
+	}
 
 	var location *time.Location
 	if calendarEventSource.Timezone != "" {
@@ -168,12 +174,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		lastT = lastT.In(location)
 	}
 	sendEventFunc := func(tx time.Time) error {
-		response := &events.CalendarEventData{
+		eventData := &events.CalendarEventData{
 			EventTime:   tx.String(),
 			UserPayload: calendarEventSource.UserPayload,
 			Metadata:    calendarEventSource.Metadata,
 		}
-		payload, err := json.Marshal(response)
+		payload, err := json.Marshal(eventData)
 		if err != nil {
 			el.log.Error("failed to marshal the event data", zap.Error(err))
 			// no need to continue as further event payloads will suffer same fate as this one.
@@ -183,11 +189,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		err = dispatch(payload)
 		if err != nil {
 			el.log.Error("failed to dispatch calendar event", zap.Error(err))
+			return errors.Wrapf(err, "failed to dispatch calendar event")
 		}
-		event := persist.Event{EventKey: el.GetPersistenceKey(), EventPayload: string(payload)}
-		err = el.EventPersistence.Save(&event)
-		if err != nil {
-			el.log.Error("failed to dispatch calendar event", zap.Error(err))
+		if el.EventPersistence != nil && el.EventPersistence.IsEnabled() {
+			event := persist.Event{EventKey: el.getPersistenceKey(), EventPayload: string(payload)}
+			err = el.EventPersistence.Save(&event)
+			if err != nil {
+				el.log.Error("failed to persist calendar event", zap.Error(err))
+			}
 		}
 		return nil
 	}
