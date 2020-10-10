@@ -120,7 +120,7 @@ type Template struct {
 	// Container is the main container image to run in the event source pod
 	// +optional
 	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
-	// Volumes is a list of volumes that can be mounted by containers in a eventsource.
+	// Volumes is a list of volumes that can be mounted by containers in an eventsource.
 	// +patchStrategy=merge
 	// +patchMergeKey=name
 	// +optional

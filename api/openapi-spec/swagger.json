@@ -1829,7 +1829,7 @@
           }
         },
         "volumes": {
-          "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+          "description": "Volumes is a list of volumes that can be mounted by containers in an eventsource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.k8s.api.core.v1.Volume"

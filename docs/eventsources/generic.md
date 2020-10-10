@@ -1,7 +1,6 @@
 # Generic EventSource
 
-Generic eventsource extends Argo-Events eventsources via a simple gRPC contract. This is specifically useful when you want
-to onboard a custom eventsource implementation.
+Generic eventsource extends Argo-Events eventsources via a simple gRPC contract. This is specifically useful when you want to onboard a custom eventsource implementation.
 
 ## Contract
 

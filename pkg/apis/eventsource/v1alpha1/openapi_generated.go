@@ -2526,7 +2526,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Template(ref common.ReferenceCallback)
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+							Description: "Volumes is a list of volumes that can be mounted by containers in an eventsource.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{

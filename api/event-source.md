@@ -7026,8 +7026,8 @@ Container is the main container image to run in the event source pod
 
 <p>
 
-Volumes is a list of volumes that can be mounted by containers in a
-workflow.
+Volumes is a list of volumes that can be mounted by containers in an
+eventsource.
 
 </p>
 
