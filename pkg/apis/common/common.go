@@ -66,6 +66,7 @@ var (
 		ResourceEvent,
 		HDFSEvent,
 		FileEvent,
+		GenericEvent,
 	}
 )
 

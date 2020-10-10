@@ -3,16 +3,16 @@ package generic
 import (
 	"context"
 	"encoding/json"
-	"io"
+	"time"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 )
 
 // EventListener implements Eventing for generic event source
@@ -20,6 +20,7 @@ type EventListener struct {
 	EventSourceName    string
 	EventName          string
 	GenericEventSource v1alpha1.GenericEventSource
+	conn               *grpc.ClientConn
 }
 
 // GetEventSourceName returns name of event source
@@ -46,69 +47,67 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	logger.Info("started processing the generic event source...")
 	defer sources.Recover(el.GetEventName())
 
+	logger.Info("connecting to eventsource server in 5 seconds...")
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-ctx.Done():
+			logger.Info("closing client connection and exiting eventsource...")
+			el.conn.Close()
+			return nil
+		case <-ticker.C:
+			if el.conn == nil || el.conn.GetState() == connectivity.Shutdown || el.conn.GetState() == connectivity.TransientFailure {
+				logger.Info("dialing eventsource server...")
+				eventStream, err := el.connect()
+				if err != nil {
+					logger.Error("failed to reconnect eventsource server, reconnecting in 5 seconds...", zap.Error(err))
+					continue
+				}
+				logger.Info("connected to eventsource server successfully, started event stream...")
+				for {
+					event, err := eventStream.Recv()
+					if err != nil {
+						logger.Errorw("failed to receive events from the event stream, reconnecting in 5 seconds...", zap.Error(err))
+						// close the connection and retry in next cycle.
+						el.conn.Close()
+						break
+					}
+					logger.Info("received an event from server")
+					eventData := &events.GenericEventData{
+						Metadata: el.GenericEventSource.Metadata,
+					}
+					if el.GenericEventSource.JSONBody {
+						eventData.Body = (*json.RawMessage)(&event.Payload)
+					}
+					eventBytes, err := json.Marshal(eventData)
+					if err != nil {
+						logger.Errorw("failed to marshal the event data", zap.Error(err))
+						continue
+					}
+					logger.Info("dispatching event...")
+					if err := dispatch(eventBytes); err != nil {
+						logger.Errorw("failed to dispatch the event", zap.Error(err))
+					}
+				}
+			}
+		}
+	}
+}
+
+func (el *EventListener) connect() (Eventing_StartEventSourceClient, error) {
 	var opt []grpc.DialOption
 	opt = append(opt, grpc.WithBlock())
 	if el.GenericEventSource.Insecure {
 		opt = append(opt, grpc.WithInsecure())
 	}
-
-	logger.Info("dialing gRPC server...")
-	clientConn, err := grpc.DialContext(ctx, el.GenericEventSource.URL, opt...)
+	conn, err := grpc.DialContext(context.Background(), el.GenericEventSource.URL, opt...)
 	if err != nil {
-		return errors.Wrapf(err, "failed to prepare gRPC client for %s", el.GetEventName())
+		return nil, err
 	}
-
-	client := NewEventingClient(clientConn)
-
-	logger.Info("starting event stream...")
-	eventStream, err := client.StartEventSource(ctx, &EventSource{
+	el.conn = conn
+	client := NewEventingClient(el.conn)
+	return client.StartEventSource(context.Background(), &EventSource{
 		Name:   el.GetEventName(),
 		Config: []byte(el.GenericEventSource.Config),
 	})
-	if err != nil {
-		return errors.Wrapf(err, "failed to start the event source stream for %s", el.GetEventName())
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			logger.Info("event source is stopped")
-			clientConn.Close()
-			return nil
-
-		default:
-			event, err := eventStream.Recv()
-			if err != nil {
-				if err == io.EOF {
-					logger.Info("event source is stopped by the server")
-					return nil
-				}
-
-				clientConn.Close()
-				return errors.Wrapf(err, "failed to receive event stream from %s", el.GetEventName())
-			}
-
-			logger.Info("received an event from server")
-
-			eventData := &events.GenericEventData{
-				Metadata: el.GenericEventSource.Metadata,
-			}
-
-			if el.GenericEventSource.JSONBody {
-				eventData.Body = (*json.RawMessage)(&event.Payload)
-			}
-
-			eventBytes, err := json.Marshal(eventData)
-			if err != nil {
-				logger.Errorw("failed to marshal the event data", zap.Error(err))
-				continue
-			}
-
-			logger.Info("dispatching event...")
-			if err := dispatch(eventBytes); err != nil {
-				logger.Errorw("failed to dispatch the event", zap.Error(err))
-				continue
-			}
-		}
-	}
 }
