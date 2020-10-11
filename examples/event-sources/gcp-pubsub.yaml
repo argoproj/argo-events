@@ -18,7 +18,7 @@ spec:
       # Required if you run Argo Events outside of GKE/GCE.
       # (otherwise, the default value is its project)
       projectID: argo-events-XXXXX
-      # (optional) GCP project ID for the the topic.
+      # (optional) GCP project ID for the topic.
       # By default, it is same as ProjectID.
       # topicProjectID: "project-id"
       # (optional) Topic to which the subscription should belongs.
@@ -29,10 +29,10 @@ spec:
       # (optional) ID of subscription.
       # Required if you use existing subscription.
       # The default value will be auto generated hash based on this eventsource setting, so the subscription
-      # might be recreated every time you update the setting, which has a possiblity of event loss.
+      # might be recreated every time you update the setting, which has a possibility of event loss.
       subscriptionID: test-sub
-      # (optional) Refers to a k8s scret which contains the credential JSON to access pubsub.
-      # If it is missing, it implicts to use Workload Identity.
+      # (optional) Refers to a k8s secret which contains the credential JSON to access pubsub.
+      # If it is missing, it implicitly uses Workload Identity.
       credentialSecret:
         name: my-secret
         key: secret-key
@@ -49,18 +49,18 @@ spec:
 #       # (optional) jsonBody specifies that all event body payload coming from this
 #       # source will be JSON
 #       jsonBody: true
-#       # (optional on GCP) GCP project ID for the the subscription.
+#       # (optional on GCP) GCP project ID for the subscription.
 #       # If you run Argo Events on GCP, the default value is its project (otherwise, it is required)
 #       projectID: argo-events-XXXXX
-#       # (optional) GCP project ID for the the topic, same as projectID by default
+#       # (optional) GCP project ID for the topic, same as projectID by default
 #       # topicProjectID: "project-id"
 #       # (optional) Topic on which a subscription will be created. Optional if you use existing subscription
-#       # (if you spcefied in such case, it will be verified whether it matches against the actual one)
+#       # (if you specified in such case, it will be verified whether it matches against the actual one)
 #       topic: test
 #       # (optional) ID of subscription.
 #       # If the subscription does not exist, it will be newly created.
 #       # The default value will be auto generated based on this eventsource setting, so the subscription
-#       # might be recreated every time you update the setting, which has a possiblity of event loss.
+#       # might be recreated every time you update the setting, which has a possibility of event loss.
 #       subscriptionID: test-sub
-#       # (optional) Refers to a k8s scret which contains the credential JSON to access pubsub.
-#       # If it is missing, it implicts to use Workload Identity.
+#       # (optional) Refers to a k8s secret which contains the credential JSON to access pubsub.
+#       # If it is missing, it implicitly uses Workload Identity.

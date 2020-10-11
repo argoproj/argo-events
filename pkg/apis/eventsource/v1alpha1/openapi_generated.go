@@ -166,7 +166,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 					},
 					"sharedAccessKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SharedAccessKey is the the generated value of the key",
+							Description: "SharedAccessKey is the generated value of the key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -635,7 +635,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 					},
 					"pubSub": {
 						SchemaProps: spec.SchemaProps{
-							Description: "PubSub eevnt sources",
+							Description: "PubSub event sources",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
@@ -1307,7 +1307,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "URL to kafka cluster",
+							Description: "URL to kafka cluster, multiple URLs separated by comma",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1611,7 +1611,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					},
 					"topicProjectID": {
 						SchemaProps: spec.SchemaProps{
-							Description: "TopicProjectID is GCP project ID for the the topic. By default, it is same as ProjectID.",
+							Description: "TopicProjectID is GCP project ID for the topic. By default, it is same as ProjectID.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1625,14 +1625,14 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					},
 					"subscriptionID": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SubscriptionID is ID of subscription. Required if you use existing subscription. The default value will be auto generated hash based on this eventsource setting, so the subscription might be recreated every time you update the setting, which has a possiblity of event loss.",
+							Description: "SubscriptionID is ID of subscription. Required if you use existing subscription. The default value will be auto generated hash based on this eventsource setting, so the subscription might be recreated every time you update the setting, which has a possibility of event loss.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"credentialSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicts to use Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
+							Description: "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicitly uses Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -2465,7 +2465,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Template(ref common.ReferenceCallback)
 				Properties: map[string]spec.Schema{
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Metdata sets the pods's metadata, i.e. annotations and labels",
+							Description: "Metadata sets the pods's metadata, i.e. annotations and labels",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Metadata"),
 						},
 					},

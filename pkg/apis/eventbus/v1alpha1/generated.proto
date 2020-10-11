@@ -131,12 +131,17 @@ message NativeStrategy {
   // +optional
   repeated k8s.io.api.core.v1.Toleration tolerations = 8;
 
-  // Metdata sets the pods's metadata, i.e. annotations and labels
+  // Metadata sets the pods's metadata, i.e. annotations and labels
   optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 9;
+
+  // SecurityContext holds pod-level security attributes and common container settings.
+  // Optional: Defaults to empty.  See type description for default values of each field.
+  // +optional
+  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 10;
 
   // Max Age of existing messages, i.e. "72h", “4h35m”
   // +optional
-  optional string maxAge = 10;
+  optional string maxAge = 11;
 }
 
 // PersistenceStrategy defines the strategy of persistence

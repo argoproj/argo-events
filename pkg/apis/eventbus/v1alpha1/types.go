@@ -81,11 +81,15 @@ type NativeStrategy struct {
 	// If specified, the pod's tolerations.
 	// +optional
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,8,rep,name=tolerations"`
-	// Metdata sets the pods's metadata, i.e. annotations and labels
+	// Metadata sets the pods's metadata, i.e. annotations and labels
 	Metadata *common.Metadata `json:"metadata,omitempty" protobuf:"bytes,9,opt,name=metadata"`
+	// SecurityContext holds pod-level security attributes and common container settings.
+	// Optional: Defaults to empty.  See type description for default values of each field.
+	// +optional
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,10,opt,name=securityContext"`
 	// Max Age of existing messages, i.e. "72h", “4h35m”
 	// +optional
-	MaxAge *string `json:"maxAge,omitempty" protobuf:"bytes,10,opt,name=maxAge"`
+	MaxAge *string `json:"maxAge,omitempty" protobuf:"bytes,11,opt,name=maxAge"`
 }
 
 // ContainerTemplate defines customized spec for a container

@@ -41,7 +41,7 @@ The specification for the Git source is available [here](https://github.com/argo
         kubectl -n argo-events get wf
 
 ## S3
-You can refer to the K8s resource stored on S3 complaint store as the trigger source.
+You can refer to the K8s resource stored on S3 compliant store as the trigger source.
 
 For this tutorial, lets set up a minio server which is S3 compliant store.
 
