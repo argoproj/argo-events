@@ -288,7 +288,7 @@ type AMQPEventSource struct {
 
 // KafkaEventSource refers to event-source for Kafka related events
 type KafkaEventSource struct {
-	// URL to kafka cluster
+	// URL to kafka cluster, multiple URLs separated by comma
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 	// Partition name
 	Partition string `json:"partition" protobuf:"bytes,2,opt,name=partition"`

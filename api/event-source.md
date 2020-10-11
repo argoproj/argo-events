@@ -3607,7 +3607,7 @@ Description
 
 <p>
 
-URL to kafka cluster
+URL to kafka cluster, multiple URLs separated by comma
 
 </p>
 
