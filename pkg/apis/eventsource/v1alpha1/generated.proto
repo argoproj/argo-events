@@ -427,7 +427,7 @@ message KafkaConsumerGroup {
 
 // KafkaEventSource refers to event-source for Kafka related events
 message KafkaEventSource {
-  // URL to kafka cluster
+  // URL to kafka cluster, multiple URLs separated by comma
   optional string url = 1;
 
   // Partition name

@@ -1307,7 +1307,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "URL to kafka cluster",
+							Description: "URL to kafka cluster, multiple URLs separated by comma",
 							Type:        []string{"string"},
 							Format:      "",
 						},

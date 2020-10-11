@@ -1152,7 +1152,7 @@
           "type": "string"
         },
         "url": {
-          "description": "URL to kafka cluster",
+          "description": "URL to kafka cluster, multiple URLs separated by comma",
           "type": "string"
         },
         "version": {
