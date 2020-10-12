@@ -108,8 +108,6 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 }
 
 func (cmp *ConfigMapPersist) Get(key string) (*Event, error) {
-	cmp.lock.Lock()
-	defer cmp.lock.Unlock()
 	cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.name, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) {
