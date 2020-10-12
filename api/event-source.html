@@ -1337,13 +1337,60 @@ map[string]string
 <tbody>
 <tr>
 <td>
-<code>value</code></br>
+<code>url</code></br>
 <em>
 string
 </em>
 </td>
 <td>
-<p>Value of the event source</p>
+<p>URL of the gRPC server that implements the event source.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>config</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Config is the event source configuration</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>insecure</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>Insecure determines the type of connection.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JSONBody specifies that all event body payload coming from this
+source will be JSON</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Metadata holds the user defined metadata which will passed along the event payload.</p>
 </td>
 </tr>
 </tbody>
@@ -3590,7 +3637,7 @@ Kubernetes core/v1.Container
 </td>
 <td>
 <em>(Optional)</em>
-<p>Volumes is a list of volumes that can be mounted by containers in a workflow.</p>
+<p>Volumes is a list of volumes that can be mounted by containers in an eventsource.</p>
 </td>
 </tr>
 <tr>

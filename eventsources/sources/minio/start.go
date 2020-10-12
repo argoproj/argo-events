@@ -55,7 +55,8 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName(),
+			zap.String("bucketName", el.MinioEventSource.Bucket.Name))
 	defer sources.Recover(el.GetEventName())
 
 	log.Info("starting minio event source...")
@@ -82,24 +83,23 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	doneCh := make(chan struct{})
 
-	logger := log.With("bucketName", minioEventSource.Bucket.Name).Desugar()
 	log.Info("started listening to bucket notifications...")
 	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events, doneCh) {
 		if notification.Err != nil {
-			logger.Error("invalid notification", zap.Error(err))
+			log.Errorw("invalid notification", zap.Error(err))
 			continue
 		}
 
 		eventData := &events.MinioEventData{Notification: notification.Records, Metadata: minioEventSource.Metadata}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
-			logger.Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
+			log.Errorw("failed to marshal the event data, rejecting the event...", zap.Error(err))
 			continue
 		}
 
 		log.Info("dispatching the event on data channel...")
 		if err = dispatch(eventBytes); err != nil {
-			logger.Error("failed to dispatch minio event", zap.Error(err))
+			log.Errorw("failed to dispatch minio event", zap.Error(err))
 		}
 	}
 

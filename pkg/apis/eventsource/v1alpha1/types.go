@@ -120,7 +120,7 @@ type Template struct {
 	// Container is the main container image to run in the event source pod
 	// +optional
 	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
-	// Volumes is a list of volumes that can be mounted by containers in a workflow.
+	// Volumes is a list of volumes that can be mounted by containers in an eventsource.
 	// +patchStrategy=merge
 	// +patchMergeKey=name
 	// +optional
@@ -768,8 +768,19 @@ type PulsarEventSource struct {
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 type GenericEventSource struct {
-	// Value of the event source
-	Value string `json:"value" protobuf:"bytes,1,opt,name=value"`
+	// URL of the gRPC server that implements the event source.
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
+	// Config is the event source configuration
+	Config string `json:"config" protobuf:"bytes,2,name=config"`
+	// Insecure determines the type of connection.
+	Insecure bool `json:"insecure,omitempty" protobuf:"varint,3,opt,name=insecure"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,4,opt,name=jsonBody"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
 }
 
 const (
