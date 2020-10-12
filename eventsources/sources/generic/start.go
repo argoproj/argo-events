@@ -62,7 +62,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				logger.Info("dialing eventsource server...")
 				eventStream, err := el.connect()
 				if err != nil {
-					logger.Error("failed to reconnect eventsource server, reconnecting in 5 seconds...", zap.Error(err))
+					logger.Error("failed to connect eventsource server, reconnecting in 5 seconds...", zap.Error(err))
 					continue
 				}
 				logger.Info("connected to eventsource server successfully, started event stream...")
