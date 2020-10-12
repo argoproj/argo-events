@@ -53,7 +53,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		select {
 		case <-ctx.Done():
 			logger.Info("closing client connection and exiting eventsource...")
-			el.conn.Close()
+			if el.conn != nil && (el.conn.GetState() == connectivity.Ready || el.conn.GetState() == connectivity.Connecting) {
+				el.conn.Close()
+			}
 			return nil
 		case <-ticker.C:
 			if el.conn == nil || el.conn.GetState() == connectivity.Shutdown || el.conn.GetState() == connectivity.TransientFailure {
