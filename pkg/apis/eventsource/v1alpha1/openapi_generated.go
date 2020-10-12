@@ -303,8 +303,9 @@ func schema_pkg_apis_eventsource_v1alpha1_ConfigMapPersistence(ref common.Refere
 					},
 					"createIfNotExist": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"boolean"},
-							Format: "",
+							Description: "CreateIfNotExist will create configmap if it doesn't exists",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},

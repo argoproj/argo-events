@@ -118,6 +118,7 @@ message ConfigMapPersistence {
   // Name of the configmap
   optional string name = 1;
 
+  // CreateIfNotExist will create configmap if it doesn't exists
   optional bool createIfNotExist = 2;
 }
 
