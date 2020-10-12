@@ -298,8 +298,23 @@ message FileEventSource {
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 message GenericEventSource {
-  // Value of the event source
-  optional string value = 1;
+  // URL of the gRPC server that implements the event source.
+  optional string url = 1;
+
+  // Config is the event source configuration
+  optional string config = 2;
+
+  // Insecure determines the type of connection.
+  optional bool insecure = 3;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 4;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 5;
 }
 
 // GithubEventSource refers to event-source for github related events
@@ -445,7 +460,7 @@ message KafkaConsumerGroup {
 
 // KafkaEventSource refers to event-source for Kafka related events
 message KafkaEventSource {
-  // URL to kafka cluster
+  // URL to kafka cluster, multiple URLs separated by comma
   optional string url = 1;
 
   // Partition name
@@ -931,7 +946,7 @@ message Template {
   // +optional
   optional k8s.io.api.core.v1.Container container = 3;
 
-  // Volumes is a list of volumes that can be mounted by containers in a workflow.
+  // Volumes is a list of volumes that can be mounted by containers in an eventsource.
   // +patchStrategy=merge
   // +patchMergeKey=name
   // +optional

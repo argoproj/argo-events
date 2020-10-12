@@ -18,6 +18,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
 	"github.com/argoproj/argo-events/eventsources/sources/file"
 	"github.com/argoproj/argo-events/eventsources/sources/gcppubsub"
+	"github.com/argoproj/argo-events/eventsources/sources/generic"
 	"github.com/argoproj/argo-events/eventsources/sources/github"
 	"github.com/argoproj/argo-events/eventsources/sources/gitlab"
 	"github.com/argoproj/argo-events/eventsources/sources/hdfs"
@@ -222,6 +223,13 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v})
 		}
 		result[apicommon.PulsarEvent] = servers
+	}
+	if len(eventSource.Spec.Generic) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Generic {
+			servers = append(servers, &generic.EventListener{EventSourceName: eventSource.Name, EventName: k, GenericEventSource: v})
+		}
+		result[apicommon.GenericEvent] = servers
 	}
 	return result
 }

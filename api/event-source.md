@@ -369,6 +369,9 @@ Name of the configmap
 <code>createIfNotExist</code></br> <em> bool </em>
 </td>
 <td>
+<p>
+CreateIfNotExist will create configmap if it doesn’t exists
+</p>
 </td>
 </tr>
 </tbody>
@@ -1467,11 +1470,55 @@ Description
 <tbody>
 <tr>
 <td>
-<code>value</code></br> <em> string </em>
+<code>url</code></br> <em> string </em>
 </td>
 <td>
 <p>
-Value of the event source
+URL of the gRPC server that implements the event source.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>config</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Config is the event source configuration
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>insecure</code></br> <em> bool </em>
+</td>
+<td>
+<p>
+Insecure determines the type of connection.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
 </p>
 </td>
 </tr>
@@ -2021,7 +2068,7 @@ Description
 </td>
 <td>
 <p>
-URL to kafka cluster
+URL to kafka cluster, multiple URLs separated by comma
 </p>
 </td>
 </tr>
@@ -3765,8 +3812,8 @@ Container is the main container image to run in the event source pod
 <td>
 <em>(Optional)</em>
 <p>
-Volumes is a list of volumes that can be mounted by containers in a
-workflow.
+Volumes is a list of volumes that can be mounted by containers in an
+eventsource.
 </p>
 </td>
 </tr>
