@@ -61,6 +61,7 @@ nav:
       - 'eventsources/naming.md'
       - 'eventsources/services.md'
       - 'eventsources/gcp-pubsub.md'
+      - 'eventsources/generic.md'
   - Triggers:
       - 'triggers/argo-workflow.md'
       - 'triggers/aws-lambda.md'
