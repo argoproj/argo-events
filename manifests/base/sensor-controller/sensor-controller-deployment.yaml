@@ -15,6 +15,7 @@ spec:
       serviceAccountName: argo-events-sa
       securityContext:
         runAsNonRoot: true
+        runAsUser: 9731
       containers:
         - name: sensor-controller
           image: argoproj/sensor-controller:latest

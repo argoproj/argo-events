@@ -198,6 +198,7 @@ spec:
           periodSeconds: 3
       securityContext:
         runAsNonRoot: true
+        runAsUser: 9731
       serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1
@@ -242,6 +243,7 @@ spec:
           periodSeconds: 3
       securityContext:
         runAsNonRoot: true
+        runAsUser: 9731
       serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1
@@ -285,4 +287,5 @@ spec:
           periodSeconds: 3
       securityContext:
         runAsNonRoot: true
+        runAsUser: 9731
       serviceAccountName: argo-events-sa
