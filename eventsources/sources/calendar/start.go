@@ -79,7 +79,6 @@ func (el *EventListener) initializePersistence(ctx context.Context, persistence 
 
 		el.EventPersistence, err = persist.NewConfigMapPersist(kubeClientset, persistence.ConfigMap, el.Namespace)
 		if err != nil {
-
 			return err
 		}
 	}
