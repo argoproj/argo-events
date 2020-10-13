@@ -266,13 +266,6 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 							},
 						},
 					},
-					"catchup": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Catchup enables to triggered the missed schedule when eventsource restarts",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
 					"persistence": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Persistence hold the configuration for event persistence",
@@ -403,6 +396,13 @@ func schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref common.ReferenceC
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
+					"catchup": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Catchup enables to triggered the missed schedule when eventsource restarts",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"configMap": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ConfigMap holds configmap details for persistence",

@@ -310,17 +310,6 @@ event payload.
 </tr>
 <tr>
 <td>
-<code>catchup</code></br> <em> bool </em>
-</td>
-<td>
-<p>
-Catchup enables to triggered the missed schedule when eventsource
-restarts
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>persistence</code></br> <em>
 <a href="#argoproj.io/v1alpha1.EventPersistence"> EventPersistence </a>
 </em>
@@ -528,6 +517,17 @@ Description
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<code>catchup</code></br> <em> bool </em>
+</td>
+<td>
+<p>
+Catchup enables to triggered the missed schedule when eventsource
+restarts
+</p>
+</td>
+</tr>
 <tr>
 <td>
 <code>configMap</code></br> <em>

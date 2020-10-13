@@ -91,7 +91,7 @@ func (el *EventListener) getPersistenceKey() string {
 
 func (el *EventListener) getExecutionTime() (time.Time, error) {
 	lastT := time.Now()
-	if el.CalendarEventSource.Catchup && el.EventPersistence.IsEnabled() {
+	if el.EventPersistence.IsEnabled() && el.CalendarEventSource.Persistence.Catchup {
 		lastEvent, err := el.EventPersistence.Get(el.getPersistenceKey())
 		if err != nil {
 			el.log.Error("failed to get last persisted event.", zap.Error(err))

@@ -2,16 +2,16 @@ package persist
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/util/retry"
 	"sync"
 
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -78,7 +78,7 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 	}
 	cmp.lock.Lock()
 	defer cmp.lock.Unlock()
-	err := wait.ExponentialBackoff(retry.DefaultBackoff, func() (done bool, err error) {
+	err := wait.ExponentialBackoff(common.DefaultRetry, func() (done bool, err error) {
 		cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.name, metav1.GetOptions{})
 		if err != nil {
 			if apierr.IsNotFound(err) && cmp.createIfNotExist {

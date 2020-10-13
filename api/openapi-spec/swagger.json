@@ -510,10 +510,6 @@
         "interval"
       ],
       "properties": {
-        "catchup": {
-          "description": "Catchup enables to triggered the missed schedule when eventsource restarts",
-          "type": "boolean"
-        },
         "exclusionDates": {
           "type": "array",
           "items": {
@@ -616,6 +612,10 @@
     "io.argoproj.eventsource.v1alpha1.EventPersistence": {
       "type": "object",
       "properties": {
+        "catchup": {
+          "description": "Catchup enables to triggered the missed schedule when eventsource restarts",
+          "type": "boolean"
+        },
         "configMap": {
           "description": "ConfigMap holds configmap details for persistence",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.ConfigMapPersistence"
