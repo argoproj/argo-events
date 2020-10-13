@@ -40,15 +40,15 @@ The structure of the event the Webhook sensor receives from the event-source ove
             }
         }
 
-1. `Context`: This is the CloudEvent context and it is populated by the event-source regardless of 
+1. `Context`: This is the CloudEvent context and it is populated by the event-source regardless of
 type of HTTP request.
 
 2. `Data`: Data contains following fields,
    1. `Header`: The `header` within event `data` contains the headers in the HTTP request that was dispatched
    to the event-source. The event-source extracts the headers from the request and put it in
-   the the `header` within event `data`. 
+   the `header` within event `data`.
 
-   2. `Body`: This is the request payload from the HTTP request.
+   1. `Body`: This is the request payload from the HTTP request.
 
 ### Event Context
 Now that we have an understanding of the structure of the event the webhook sensor receives from
@@ -65,7 +65,7 @@ the event-source over the eventbus, lets see how we can use the event context to
 3. Inspect the output of the Argo workflow that was created.
 
         argo logs name_of_the_workflow
-   
+
    You will see the following output,
 
         _________
@@ -88,7 +88,7 @@ the workflow to print the value of the `type`.
 
 ### Event Data
 Now, it is time to use the event data and parameterize the Argo workflow trigger.
-We will extract the `message` from request payload and get the Argo workflow to 
+We will extract the `message` from request payload and get the Argo workflow to
 print the message.
 
 1. Update the `Webhook Sensor` and add the `dataKey` in the parameter at index 0.
@@ -105,20 +105,20 @@ print the message.
 
    You will see the following output,
 
-         __________________________ 
+         __________________________
         < this is my first webhook >
-         -------------------------- 
+         --------------------------
             \
              \
-              \     
-                            ##        .            
-                      ## ## ##       ==            
-                   ## ## ## ##      ===            
-               /""""""""""""""""___/ ===        
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-               \______ o          __/            
-                \    \        __/             
-                  \____\______/   
+              \
+                            ##        .
+                      ## ## ##       ==
+                   ## ## ## ##      ===
+               /""""""""""""""""___/ ===
+          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+               \______ o          __/
+                \    \        __/
+                  \____\______/
 
 
 Yay!! The Argo workflow printed the message. You can add however many number of parameters
@@ -146,20 +146,20 @@ important when the `key` you defined in the parameter doesn't exist in the event
 
    You will see the following output,
 
-        _______________________ 
+        _______________________
         < wow! a default value. >
-        ----------------------- 
+        -----------------------
            \
             \
-             \     
-                           ##        .            
-                     ## ## ##       ==            
-                  ## ## ## ##      ===            
-              /""""""""""""""""___/ ===        
-         ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-              \______ o          __/            
-               \    \        __/             
-                 \____\______/   
+             \
+                           ##        .
+                     ## ## ##       ==
+                  ## ## ## ##      ===
+              /""""""""""""""""___/ ===
+         ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+              \______ o          __/
+               \    \        __/
+                 \____\______/
 
 
 <br/>
@@ -231,25 +231,25 @@ and you will see an Argo workflow being sprung with name like `webhook-foobar-xx
 
 Check the output of the workflow, it should print something like,
 
-         ____________________________ 
+         ____________________________
         < Hello There!! from Example >
-         ---------------------------- 
+         ----------------------------
             \
              \
-              \     
-                            ##        .            
-                      ## ## ##       ==            
-                   ## ## ## ##      ===            
-               /""""""""""""""""___/ ===        
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-               \______ o          __/            
-                \    \        __/             
-                  \____\______/   
+              \
+                            ##        .
+                      ## ## ##       ==
+                   ## ## ## ##      ===
+               /""""""""""""""""___/ ===
+          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+               \______ o          __/
+                \    \        __/
+                  \____\______/
 
 <br/>
 
 ### Operations
-Sometimes you need the ability to append or prepend a parameter value to 
+Sometimes you need the ability to append or prepend a parameter value to
 an existing value in trigger resource. This is where the `operation` field within
 a parameter comes handy.
 
@@ -269,20 +269,20 @@ a parameter comes handy.
 
    You will see the following output,
 
-         __________________ 
+         __________________
         < hey!!hello world >
-         ------------------ 
+         ------------------
             \
              \
-              \     
-                            ##        .            
-                      ## ## ##       ==            
-                   ## ## ## ##      ===            
-               /""""""""""""""""___/ ===        
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-               \______ o          __/            
-                \    \        __/             
-                  \____\______/   
+              \
+                            ##        .
+                      ## ## ##       ==
+                   ## ## ## ##      ===
+               /""""""""""""""""___/ ===
+          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+               \______ o          __/
+                \    \        __/
+                  \____\______/
 
 
 ## Trigger Template Parameterization
@@ -292,7 +292,7 @@ you need to parameterize the trigger template itself. This comes handy when you 
 the trigger resource stored on some external source like S3, Git, etc. and you need
 to replace the url of the source on the fly in trigger template.
 
-Imagine a scenario where you want to parameterize the parameters of trigger to 
+Imagine a scenario where you want to parameterize the parameters of trigger to
 parameterize the trigger resource. What?...
 
 The sensor you have been using in this tutorial has one parameter defined in the
@@ -314,22 +314,22 @@ applying a parameter at the trigger template level.
 
    You will see the following output,
 
-        ___________ 
+        ___________
         < amazing!! >
-        ----------- 
+        -----------
         \
          \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
-        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
-              \____\______/      
+          \
+                        ##        .
+                  ## ## ##       ==
+               ## ## ## ##      ===
+           /""""""""""""""""___/ ===
+        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+           \______ o          __/
+            \    \        __/
+              \____\______/
 
 
 Great!! You have now learned how to apply parameters at trigger resource and template level.
-Keep in mind that you can apply default values and operations like prepend and append for 
+Keep in mind that you can apply default values and operations like prepend and append for
 trigger template parameters as well.
