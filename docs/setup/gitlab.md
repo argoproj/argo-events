@@ -24,7 +24,8 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-GitLab event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#gitlabeventsource).
+GitLab event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#gitlabeventsource). <br />
+Example event-source yaml file is [here](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/gitlab.yaml).
 
 ## Setup
 
