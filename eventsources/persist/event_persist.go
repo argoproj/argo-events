@@ -2,13 +2,10 @@ package persist
 
 import (
 	"fmt"
-	"sync"
-
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
@@ -31,7 +28,6 @@ type ConfigMapPersist struct {
 	name             string
 	namespace        string
 	createIfNotExist bool
-	lock             sync.Mutex
 }
 
 func createConfigmap(client kubernetes.Interface, name, namespace string) (*v1.ConfigMap, error) {
@@ -63,7 +59,6 @@ func NewConfigMapPersist(client kubernetes.Interface, configmap *v1alpha1.Config
 		name:             configmap.Name,
 		namespace:        namespace,
 		createIfNotExist: configmap.CreateIfNotExist,
-		lock:             sync.Mutex{},
 	}
 	return &cmp, nil
 }
@@ -76,18 +71,17 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 	if event == nil {
 		return errors.Errorf("event object is nil")
 	}
-	cmp.lock.Lock()
-	defer cmp.lock.Unlock()
-	err := wait.ExponentialBackoff(common.DefaultRetry, func() (done bool, err error) {
+	//Using Connect util func for backoff retry if K8s API returns error
+	err := common.Connect(&common.DefaultRetry, func() error {
 		cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.name, metav1.GetOptions{})
 		if err != nil {
 			if apierr.IsNotFound(err) && cmp.createIfNotExist {
 				cm, err = createConfigmap(cmp.kubeClient, cmp.name, cmp.namespace)
 				if err != nil {
-					return err == nil, err
+					return err
 				}
 			} else {
-				return err == nil, err
+				return err
 			}
 		}
 
@@ -98,7 +92,7 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 		cm.Data[event.EventKey] = event.EventPayload
 		_, err = cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Update(cm)
 
-		return err == nil, err
+		return err
 	})
 
 	if err != nil {

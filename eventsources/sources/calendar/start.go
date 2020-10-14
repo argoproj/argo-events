@@ -43,7 +43,7 @@ type EventListener struct {
 	Namespace           string
 	CalendarEventSource v1alpha1.CalendarEventSource
 	log                 *zap.Logger
-	EventPersistence    persist.EventPersist
+	eventPersistence    persist.EventPersist
 }
 
 // GetEventSourceName returns name of event source
@@ -77,21 +77,23 @@ func (el *EventListener) initializePersistence(ctx context.Context, persistence 
 			return errors.Wrapf(err, "failed to set up a K8s client for the event source %s", el.GetEventName())
 		}
 
-		el.EventPersistence, err = persist.NewConfigMapPersist(kubeClientset, persistence.ConfigMap, el.Namespace)
+		el.eventPersistence, err = persist.NewConfigMapPersist(kubeClientset, persistence.ConfigMap, el.Namespace)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
 }
+
 func (el *EventListener) getPersistenceKey() string {
 	return fmt.Sprintf("%s.%s", el.EventSourceName, el.EventName)
 }
 
+// getExecutionTime return starting schedule time for execution
 func (el *EventListener) getExecutionTime() (time.Time, error) {
 	lastT := time.Now()
-	if el.EventPersistence.IsEnabled() && el.CalendarEventSource.Persistence.Catchup {
-		lastEvent, err := el.EventPersistence.Get(el.getPersistenceKey())
+	if el.eventPersistence.IsEnabled() && el.CalendarEventSource.Persistence.Catchup {
+		lastEvent, err := el.eventPersistence.Get(el.getPersistenceKey())
 		if err != nil {
 			el.log.Error("failed to get last persisted event.", zap.Error(err))
 			return lastT, errors.Wrap(err, "failed to get last persisted event.")
@@ -133,7 +135,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return err
 	}
 
-	el.EventPersistence = &persist.NullPersistence{}
+	el.eventPersistence = &persist.NullPersistence{}
 	if calendarEventSource.Persistence != nil {
 		err = el.initializePersistence(ctx, calendarEventSource.Persistence)
 		if err != nil {
@@ -190,9 +192,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			el.log.Error("failed to dispatch calendar event", zap.Error(err))
 			return errors.Wrapf(err, "failed to dispatch calendar event")
 		}
-		if el.EventPersistence != nil && el.EventPersistence.IsEnabled() {
+		if el.eventPersistence != nil && el.eventPersistence.IsEnabled() {
 			event := persist.Event{EventKey: el.getPersistenceKey(), EventPayload: string(payload)}
-			err = el.EventPersistence.Save(&event)
+			err = el.eventPersistence.Save(&event)
 			if err != nil {
 				el.log.Error("failed to persist calendar event", zap.Error(err))
 			}
