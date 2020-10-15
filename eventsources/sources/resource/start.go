@@ -19,16 +19,16 @@ package resource
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
@@ -109,14 +109,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return errors.Wrapf(err, "failed to create the label selector for the event source %s", el.GetEventName())
 		}
 		options.LabelSelector = sel.String()
-	}
-
-	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Fields != nil {
-		sel, err := FieldSelector(resourceEventSource.Filter.Fields)
-		if err != nil {
-			return errors.Wrapf(err, "failed to create the field selector for the event source %s", el.GetEventName())
-		}
-		options.FieldSelector = sel.String()
 	}
 
 	tweakListOptions := func(op *metav1.ListOptions) {
@@ -247,23 +239,6 @@ func LabelSelector(selectors []v1alpha1.Selector) (labels.Selector, error) {
 	return labels.NewSelector().Add(labelRequirements...), nil
 }
 
-// FieldSelector returns field selector for resource filtering
-func FieldSelector(selectors []v1alpha1.Selector) (fields.Selector, error) {
-	var result []fields.Selector
-	for _, sel := range selectors {
-		op := selection.Equals
-		if sel.Operation != "" {
-			op = selection.Operator(sel.Operation)
-		}
-		selector, err := fields.ParseSelector(fmt.Sprintf("%s%s%s", sel.Key, op, sel.Value))
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, selector)
-	}
-	return fields.AndSelectors(result...), nil
-}
-
 // helper method to check if the object passed the user defined filters
 func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTime time.Time, log *zap.SugaredLogger) bool {
 	// no filters are applied.
@@ -272,17 +247,56 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTim
 	}
 	uObj := event.Obj.(*unstructured.Unstructured)
 	if len(filter.Prefix) > 0 && !strings.HasPrefix(uObj.GetName(), filter.Prefix) {
-		log.Infof("resource name does not match prefix. resource-name: %s, prefix: %s\n", uObj.GetName(), filter.Prefix)
+		log.Debugf("resource name does not match prefix. resource-name: %s, prefix: %s\n", uObj.GetName(), filter.Prefix)
 		return false
 	}
 	created := uObj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		log.Infof("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s\n", created.UTC().String(), filter.CreatedBy.UTC().String())
+		log.Debugf("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s\n", created.UTC().String(), filter.CreatedBy.UTC().String())
 		return false
 	}
 	if filter.AfterStart && created.UTC().Before(startTime.UTC()) {
-		log.Infof("resource is created before service start time. creation-timestamp: %s, start-timestamp: %s\n", created.UTC().String(), startTime.UTC().String())
+		log.Debugf("resource is created before service start time. creation-timestamp: %s, start-timestamp: %s\n", created.UTC().String(), startTime.UTC().String())
 		return false
+	}
+	if len(filter.Fields) > 0 {
+		jsData, err := uObj.MarshalJSON()
+		if err != nil {
+			log.Errorw("failed to marshal informer event", zap.Error(err))
+			return false
+		}
+
+		return filterFields(jsData, filter.Fields, log)
+	}
+	return true
+}
+
+func filterFields(jsonData []byte, selectors []v1alpha1.Selector, log *zap.SugaredLogger) bool {
+	for _, selector := range selectors {
+		res := gjson.GetBytes(jsonData, selector.Key)
+		if !res.Exists() {
+			return false
+		}
+		exp, err := regexp.Compile(selector.Value)
+		if err != nil {
+			log.Errorw("invalid regex", zap.Error(err))
+			return false
+		}
+		match := exp.Match([]byte(res.Str))
+
+		switch selection.Operator(selector.Operation) {
+		case selection.Equals, selection.DoubleEquals:
+			if !match {
+				return false
+			}
+		case selection.NotEquals:
+			if match {
+				return false
+			}
+		default:
+			log.Errorf("invalid operator, only %v, %v and %v are supported", selection.Equals, selection.DoubleEquals, selection.NotEquals)
+			return false
+		}
 	}
 	return true
 }

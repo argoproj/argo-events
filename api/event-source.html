@@ -2883,8 +2883,11 @@ Refer <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects
 </td>
 <td>
 <em>(Optional)</em>
-<p>Fields provide listing options to K8s API to watch resource/s.
-Refer <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a> for more info.</p>
+<p>Fields provide field filters similar to K8s field selector
+(see <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a>).
+Unlike K8s field selector, it supports arbitrary fileds like &ldquo;spec.serviceAccountName&rdquo;,
+and the value could be a string or a regex.
+Same as K8s field selector, operator &ldquo;=&rdquo;, &ldquo;==&rdquo; and &ldquo;!=&rdquo; are supported.</p>
 </td>
 </tr>
 <tr>
@@ -3703,7 +3706,7 @@ More info: <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>,
+<a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>)
 </p>
 <p>
@@ -3755,12 +3758,12 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
-<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
-<a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
-<a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
-<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
-<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>,
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>, 
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.StripeEventSource">StripeEventSource</a>)
 </p>
 <p>
