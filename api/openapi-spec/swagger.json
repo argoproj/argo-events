@@ -890,11 +890,31 @@
       "description": "GenericEventSource refers to a generic event source. It can be used to implement a custom event source.",
       "type": "object",
       "required": [
-        "value"
+        "url",
+        "config"
       ],
       "properties": {
-        "value": {
-          "description": "Value of the event source",
+        "config": {
+          "description": "Config is the event source configuration",
+          "type": "string"
+        },
+        "insecure": {
+          "description": "Insecure determines the type of connection.",
+          "type": "boolean"
+        },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "url": {
+          "description": "URL of the gRPC server that implements the event source.",
           "type": "string"
         }
       }
@@ -1817,7 +1837,7 @@
           }
         },
         "volumes": {
-          "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+          "description": "Volumes is a list of volumes that can be mounted by containers in an eventsource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.k8s.api.core.v1.Volume"
