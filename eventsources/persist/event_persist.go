@@ -1,7 +1,6 @@
 package persist
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
