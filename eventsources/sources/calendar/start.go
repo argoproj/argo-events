@@ -112,6 +112,19 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 				return lastT, errors.Wrap(err, "failed to parse the persisted last event timestamp.")
 			}
 		}
+
+		if el.CalendarEventSource.Persistence.MaxCatchupDuration != "" {
+			duration, err := time.ParseDuration(el.CalendarEventSource.Persistence.MaxCatchupDuration)
+			if err != nil {
+				return lastT, err
+			}
+
+			// Set maxCatchupDuration in execution time if last persisted event time is greater than maxCatchupDuration
+			if duration < time.Now().Sub(lastT) {
+				el.log.Info("set MaxCatchupDuration on execution time", zap.Any("MaxCatchupDuration", el.CalendarEventSource.Persistence.MaxCatchupDuration))
+				lastT = time.Now().Add(-duration)
+			}
+		}
 	}
 	return lastT, nil
 }

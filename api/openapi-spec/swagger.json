@@ -619,6 +619,10 @@
         "configMap": {
           "description": "ConfigMap holds configmap details for persistence",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.ConfigMapPersistence"
+        },
+        "maxCatchupDuration": {
+          "description": "MaxCatchupDuration holds max catchup duration",
+          "type": "string"
         }
       }
     },

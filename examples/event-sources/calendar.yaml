@@ -8,15 +8,16 @@ spec:
       # creates an event every 10 seconds
       interval: 10s
 
-
 #    example-with-catchup:
 #    # Catchup the missed events from last Event timestamp. last event will be persisted in configmap.
 #      schedule: "* * * * *"
 #      persistence:
 #        catchup: true
+#        maxCatchupDuration: 5w
 #        configMap:
 #          createIfNotExist: true
 #          name: test-configmap
+#
 #    example-with-schedule:
 #      # schedules an event at 30 minutes past each hour
 #      schedule: "30 * * * *"

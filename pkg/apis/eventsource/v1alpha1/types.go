@@ -189,8 +189,10 @@ type CalendarEventSource struct {
 type EventPersistence struct {
 	// Catchup enables to triggered the missed schedule when eventsource restarts
 	Catchup bool `json:"catchup,omitempty" protobuf:"varint,1,opt,name=catchup"`
+	// MaxCatchupDuration holds max catchup duration
+	MaxCatchupDuration string `json:"maxCatchupDuration,omitempty" protobuf:"bytes,2,opt,name=maxCatchupDuration"`
 	// ConfigMap holds configmap details for persistence
-	ConfigMap *ConfigMapPersistence `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configMap"`
+	ConfigMap *ConfigMapPersistence `json:"configMap,omitempty" protobuf:"bytes,3,opt,name=configMap"`
 }
 
 type ConfigMapPersistence struct {

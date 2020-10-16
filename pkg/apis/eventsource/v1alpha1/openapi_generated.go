@@ -403,6 +403,13 @@ func schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"maxCatchupDuration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxCatchupDuration holds max catchup duration",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"configMap": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ConfigMap holds configmap details for persistence",
