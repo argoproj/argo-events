@@ -120,7 +120,7 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 			}
 
 			// Set maxCatchupDuration in execution time if last persisted event time is greater than maxCatchupDuration
-			if duration < time.Now().Sub(lastT) {
+			if duration < time.Since(lastT) {
 				el.log.Info("set MaxCatchupDuration on execution time", zap.Any("MaxCatchupDuration", el.CalendarEventSource.Persistence.MaxCatchupDuration))
 				lastT = time.Now().Add(-duration)
 			}
