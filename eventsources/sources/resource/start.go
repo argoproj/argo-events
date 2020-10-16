@@ -247,16 +247,16 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTim
 	}
 	uObj := event.Obj.(*unstructured.Unstructured)
 	if len(filter.Prefix) > 0 && !strings.HasPrefix(uObj.GetName(), filter.Prefix) {
-		log.Debugf("resource name does not match prefix. resource-name: %s, prefix: %s\n", uObj.GetName(), filter.Prefix)
+		log.Infof("resource name does not match prefix. resource-name: %s, prefix: %s\n", uObj.GetName(), filter.Prefix)
 		return false
 	}
 	created := uObj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		log.Debugf("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s\n", created.UTC().String(), filter.CreatedBy.UTC().String())
+		log.Infof("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s\n", created.UTC().String(), filter.CreatedBy.UTC().String())
 		return false
 	}
 	if filter.AfterStart && created.UTC().Before(startTime.UTC()) {
-		log.Debugf("resource is created before service start time. creation-timestamp: %s, start-timestamp: %s\n", created.UTC().String(), startTime.UTC().String())
+		log.Infof("resource is created before service start time. creation-timestamp: %s, start-timestamp: %s\n", created.UTC().String(), startTime.UTC().String())
 		return false
 	}
 	if len(filter.Fields) > 0 {
