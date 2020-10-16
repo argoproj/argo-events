@@ -86,11 +86,10 @@ message NATSBus {
 
 // NATSConfig holds the config of NATS
 message NATSConfig {
-  // NATS host url
+  // NATS streaming url
   optional string url = 1;
 
-  // Cluster ID for nats streaming, if it's missing, treat it as NATS server
-  // +optional
+  // Cluster ID for nats streaming
   optional string clusterID = 2;
 
   // Auth strategy, default to AuthStrategyNone
@@ -139,6 +138,10 @@ message NativeStrategy {
   // Optional: Defaults to empty.  See type description for default values of each field.
   // +optional
   optional k8s.io.api.core.v1.PodSecurityContext securityContext = 10;
+
+  // Max Age of existing messages, i.e. "72h", “4h35m”
+  // +optional
+  optional string maxAge = 11;
 }
 
 // PersistenceStrategy defines the strategy of persistence
