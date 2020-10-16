@@ -268,6 +268,11 @@ func (in *NativeStrategy) DeepCopyInto(out *NativeStrategy) {
 		*out = new(v1.PodSecurityContext)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.MaxAge != nil {
+		in, out := &in.MaxAge, &out.MaxAge
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 
