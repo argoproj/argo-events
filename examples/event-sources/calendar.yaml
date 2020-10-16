@@ -13,7 +13,7 @@ spec:
 #      schedule: "* * * * *"
 #      persistence:
 #        catchup: true
-#        maxCatchupDuration: 5w
+#        maxCatchupDuration: 5m
 #        configMap:
 #          createIfNotExist: true
 #          name: test-configmap
