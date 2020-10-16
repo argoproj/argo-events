@@ -329,7 +329,7 @@ Description
 </td>
 <td>
 <p>
-NATS host url
+NATS streaming url
 </p>
 </td>
 </tr>
@@ -338,9 +338,8 @@ NATS host url
 <code>clusterID</code></br> <em> string </em>
 </td>
 <td>
-<em>(Optional)</em>
 <p>
-Cluster ID for nats streaming, if it’s missing, treat it as NATS server
+Cluster ID for nats streaming
 </p>
 </td>
 </tr>
@@ -506,6 +505,17 @@ Kubernetes core/v1.PodSecurityContext </a> </em>
 SecurityContext holds pod-level security attributes and common container
 settings. Optional: Defaults to empty. See type description for default
 values of each field.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxAge</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Max Age of existing messages, i.e. “72h”, “4h35m”
 </p>
 </td>
 </tr>

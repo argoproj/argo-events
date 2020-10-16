@@ -260,10 +260,14 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		return
 	}
 
+	now := time.Now().Unix()
+
 	// Start a new round
 	if existingMsg, ok := msgHolder.msgs[depName]; ok {
 		if m.Timestamp == existingMsg.timestamp {
-			// Redelivered latest messge, return
+			// Re-delivered latest messge, update delivery timestamp and return
+			existingMsg.lastDeliveredTime = now
+			msgHolder.msgs[depName] = existingMsg
 			return
 		} else if m.Timestamp < existingMsg.timestamp {
 			// Redelivered old message, ack and return
@@ -272,16 +276,24 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		}
 	}
 	// New message, set and check
-	msgHolder.msgs[depName] = &eventSourceMessage{seq: m.Sequence, timestamp: m.Timestamp, event: event}
+	msgHolder.msgs[depName] = &eventSourceMessage{seq: m.Sequence, timestamp: m.Timestamp, event: event, lastDeliveredTime: now}
 	msgHolder.parameters[depName] = true
 
-	// Check if there's any message older than 3 days, which is the default exiration time of event bus messages.
-	now := time.Now().UnixNano()
+	// Check if there's any stale message being held.
+	// Stale message could be message age has been longer than NATS streaming max message age,
+	// which means it has ben deleted from NATS server side, but it's still held here.
+	// Use last delivery timestamp to determine that.
+	hasStale := false
 	for k, v := range msgHolder.msgs {
-		if (now - v.timestamp) > 3*24*60*60*1000000000 {
+		// Since the message is not acked, the server will keep re-sending it.
+		// If a message being held didn't get re-delivered in the last 10 minutes, treat it as stale.
+		if (now - v.lastDeliveredTime) > 10*60 {
 			msgHolder.reset(k)
-			return
+			hasStale = true
 		}
+	}
+	if hasStale {
+		return
 	}
 
 	result, err := msgHolder.expr.Evaluate(msgHolder.parameters)
@@ -313,6 +325,8 @@ type eventSourceMessage struct {
 	seq       uint64
 	timestamp int64
 	event     *cloudevents.Event
+	// timestamp of last delivered
+	lastDeliveredTime int64
 }
 
 // eventSourceMessageHolder is a struct used to hold the message information of subscribed dependencies
