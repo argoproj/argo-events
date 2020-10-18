@@ -31,7 +31,7 @@ require (
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/protobuf v1.3.5
+	github.com/golang/protobuf v1.4.0
 	github.com/google/go-cmp v0.4.0
 	github.com/google/go-github/v31 v31.0.0
 	github.com/google/gofuzz v1.1.0 // indirect
@@ -46,6 +46,7 @@ require (
 	github.com/imdario/mergo v0.3.9
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/ktrysmt/go-bitbucket v0.6.4
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
@@ -55,10 +56,9 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/go-nats v1.7.2
-	github.com/nats-io/nats-streaming-server v0.17.0 // indirect
-	github.com/nats-io/nats.go v1.9.1
-	github.com/nats-io/nkeys v0.1.4 // indirect
-	github.com/nats-io/stan.go v0.6.0
+	github.com/nats-io/nats-streaming-server v0.18.0 // indirect
+	github.com/nats-io/nats.go v1.10.0
+	github.com/nats-io/stan.go v0.7.0
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/pelletier/go-toml v1.7.0 // indirect
