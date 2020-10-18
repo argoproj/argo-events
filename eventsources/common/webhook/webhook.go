@@ -22,12 +22,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/mux"
-	"go.uber.org/zap"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 )
 
 // NewController returns a webhook controller
