@@ -182,6 +182,7 @@ func (router *Router) PostActivate() error {
 			return err
 		}
 		log.Info("successfully updated the existing webhook")
+		return nil
 	}
 
 	if _, err = client.Repositories.Webhooks.Create(opt); err != nil {
