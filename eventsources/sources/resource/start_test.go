@@ -17,10 +17,10 @@ limitations under the License.
 package resource
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,6 +53,23 @@ func TestFilter(t *testing.T) {
 						Value:     "my-workflow",
 					},
 				},
+				Fields: []v1alpha1.Selector{
+					{
+						Key:       "metadata.name",
+						Operation: "==",
+						Value:     "fak*",
+					},
+					{
+						Key:       "status.phase",
+						Operation: "!=",
+						Value:     "Error",
+					},
+					{
+						Key:       "spec.serviceAccountName",
+						Operation: "=",
+						Value:     "test*",
+					},
+				},
 			},
 		}
 		pod := &corev1.Pod{
@@ -64,12 +81,20 @@ func TestFilter(t *testing.T) {
 					"name":                        "my-workflow",
 				},
 			},
+			Spec: corev1.PodSpec{
+				ServiceAccountName: "test-sa",
+			},
+			Status: corev1.PodStatus{
+				Phase: "Running",
+			},
 		}
 		pod, err := fake.NewSimpleClientset().CoreV1().Pods("fake").Create(pod)
 		convey.So(err, convey.ShouldBeNil)
 
 		outmap := make(map[string]interface{})
-		err = mapstructure.Decode(pod, &outmap)
+		jsonData, err := json.Marshal(pod)
+		convey.So(err, convey.ShouldBeNil)
+		err = json.Unmarshal(jsonData, &outmap)
 		convey.So(err, convey.ShouldBeNil)
 
 		pass := passFilters(&InformerEvent{

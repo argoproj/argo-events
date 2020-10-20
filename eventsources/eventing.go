@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -259,7 +260,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 	logger := logging.FromContext(ctx).Desugar()
 	logger.Info("Starting event source server...")
 	servers := GetEventingServers(e.eventSource)
-	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, e.hostname)
+	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, strings.ReplaceAll(e.hostname, ".", "_"))
 	if err != nil {
 		logger.Error("failed to get eventbus driver", zap.Error(err))
 		return err

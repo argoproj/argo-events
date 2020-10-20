@@ -5823,9 +5823,11 @@ for more info.
 
 <p>
 
-Fields provide listing options to K8s API to watch resource/s. Refer
-<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a>
-for more info.
+Fields provide field filters similar to K8s field selector (see
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a>).
+Unlike K8s field selector, it supports arbitrary fileds like
+“spec.serviceAccountName”, and the value could be a string or a regex.
+Same as K8s field selector, operator “=”, “==” and “\!=” are supported.
 
 </p>
 

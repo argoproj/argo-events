@@ -345,11 +345,11 @@
           "type": "string"
         },
         "clusterID": {
-          "description": "Cluster ID for nats streaming, if it's missing, treat it as NATS server",
+          "description": "Cluster ID for nats streaming",
           "type": "string"
         },
         "url": {
-          "description": "NATS host url",
+          "description": "NATS streaming url",
           "type": "string"
         }
       }
@@ -367,6 +367,10 @@
         "containerTemplate": {
           "description": "ContainerTemplate contains customized spec for NATS container",
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.ContainerTemplate"
+        },
+        "maxAge": {
+          "description": "Max Age of existing messages, i.e. \"72h\", “4h35m”",
+          "type": "string"
         },
         "metadata": {
           "description": "Metadata sets the pods's metadata, i.e. annotations and labels",
@@ -1554,7 +1558,7 @@
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
         },
         "fields": {
-          "description": "Fields provide listing options to K8s API to watch resource/s. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.",
+          "description": "Fields provide field filters similar to K8s field selector (see https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/). Unlike K8s field selector, it supports arbitrary fileds like \"spec.serviceAccountName\", and the value could be a string or a regex. Same as K8s field selector, operator \"=\", \"==\" and \"!=\" are supported.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Selector"

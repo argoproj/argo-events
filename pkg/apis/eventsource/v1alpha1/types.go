@@ -262,8 +262,11 @@ type ResourceFilter struct {
 	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.
 	// +optional
 	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
-	// Fields provide listing options to K8s API to watch resource/s.
-	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
+	// Fields provide field filters similar to K8s field selector
+	// (see https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).
+	// Unlike K8s field selector, it supports arbitrary fileds like "spec.serviceAccountName",
+	// and the value could be a string or a regex.
+	// Same as K8s field selector, operator "=", "==" and "!=" are supported.
 	// +optional
 	Fields []Selector `json:"fields,omitempty" protobuf:"bytes,3,rep,name=fields"`
 	// If resource is created before the specified time then the event is treated as valid.

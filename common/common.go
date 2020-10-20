@@ -39,6 +39,8 @@ const (
 	EnvVarEventBusSubject = "EVENTBUS_SUBJECT"
 	// volumeMount path for eventbus auth file
 	EventBusAuthFileMountPath = "/etc/eventbus/auth"
+	// Default NATS Streaming messages max age
+	NATSStreamingMaxAge = "72h"
 )
 
 // Sensor constants
