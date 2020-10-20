@@ -17,9 +17,9 @@ override LDFLAGS += \
   -X ${PACKAGE}.gitTreeState=${GIT_TREE_STATE}
 
 #  docker image publishing options
-DOCKER_PUSH?=false
-IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=v1.0.0
+DOCKER_PUSH?=true
+IMAGE_NAMESPACE?=sarabala1979
+IMAGE_TAG?=latest
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE

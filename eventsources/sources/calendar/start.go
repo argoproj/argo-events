@@ -228,7 +228,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			err = sendEventFunc(t)
 			if err != nil {
-				el.log.Error("failed to send calendar event", zap.Error(err))
+				el.log.Error("failed to dispatch calendar event", zap.Error(err))
+				time.Sleep(100 * time.Millisecond)
 				continue
 			}
 			lastT = t

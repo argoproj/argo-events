@@ -4,20 +4,20 @@ metadata:
   name: calendar
 spec:
   calendar:
-    example-with-interval:
-      # creates an event every 10 seconds
-      interval: 10s
+#    example-with-interval:
+#      # creates an event every 10 seconds
+#      interval: 10s
 
-#    example-with-catchup:
-#    # Catchup the missed events from last Event timestamp. last event will be persisted in configmap.
-#      schedule: "* * * * *"
-#      persistence:
-#        catchup:
-#          enabled: true
-#          maxDuration: 5m
-#        configMap:
-#          createIfNotExist: true
-#          name: test-configmap
+    example-with-catchup:
+    # Catchup the missed events from last Event timestamp. last event will be persisted in configmap.
+      schedule: "* * * * *"
+      persistence:
+        catchup:
+          enabled: true
+          maxDuration: 5m
+        configMap:
+          createIfNotExist: true
+          name: test-configmap
 #
 #    example-with-schedule:
 #      # schedules an event at 30 minutes past each hour
