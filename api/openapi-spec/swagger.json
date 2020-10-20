@@ -546,6 +546,19 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.CatchupConfiguration": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Enabled enables to triggered the missed schedule when eventsource restarts",
+          "type": "boolean"
+        },
+        "maxDuration": {
+          "description": "MaxDuration holds max catchup duration",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.ConfigMapPersistence": {
       "type": "object",
       "properties": {
@@ -614,15 +627,11 @@
       "properties": {
         "catchup": {
           "description": "Catchup enables to triggered the missed schedule when eventsource restarts",
-          "type": "boolean"
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.CatchupConfiguration"
         },
         "configMap": {
           "description": "ConfigMap holds configmap details for persistence",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.ConfigMapPersistence"
-        },
-        "maxCatchupDuration": {
-          "description": "MaxCatchupDuration holds max catchup duration",
-          "type": "string"
         }
       }
     },

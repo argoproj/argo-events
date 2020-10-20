@@ -111,6 +111,14 @@ message CalendarEventSource {
   optional EventPersistence persistence = 7;
 }
 
+message CatchupConfiguration {
+  // Enabled enables to triggered the missed schedule when eventsource restarts
+  optional bool enabled = 1;
+
+  // MaxDuration holds max catchup duration
+  optional string maxDuration = 2;
+}
+
 message ConfigMapPersistence {
   // Name of the configmap
   optional string name = 1;
@@ -159,13 +167,10 @@ message EmitterEventSource {
 
 message EventPersistence {
   // Catchup enables to triggered the missed schedule when eventsource restarts
-  optional bool catchup = 1;
-
-  // MaxCatchupDuration holds max catchup duration
-  optional string maxCatchupDuration = 2;
+  optional CatchupConfiguration catchup = 1;
 
   // ConfigMap holds configmap details for persistence
-  optional ConfigMapPersistence configMap = 3;
+  optional ConfigMapPersistence configMap = 2;
 }
 
 // EventSource is the definition of a eventsource resource

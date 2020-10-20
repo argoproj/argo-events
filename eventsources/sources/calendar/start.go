@@ -92,7 +92,7 @@ func (el *EventListener) getPersistenceKey() string {
 // getExecutionTime return starting schedule time for execution
 func (el *EventListener) getExecutionTime() (time.Time, error) {
 	lastT := time.Now()
-	if el.eventPersistence.IsEnabled() && el.CalendarEventSource.Persistence.Catchup {
+	if el.eventPersistence.IsEnabled() && el.CalendarEventSource.Persistence.IsCatchUpEnabled() {
 		lastEvent, err := el.eventPersistence.Get(el.getPersistenceKey())
 		if err != nil {
 			el.log.Error("failed to get last persisted event.", zap.Error(err))
@@ -113,15 +113,15 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 			}
 		}
 
-		if el.CalendarEventSource.Persistence.MaxCatchupDuration != "" {
-			duration, err := time.ParseDuration(el.CalendarEventSource.Persistence.MaxCatchupDuration)
+		if el.CalendarEventSource.Persistence.Catchup.MaxDuration != "" {
+			duration, err := time.ParseDuration(el.CalendarEventSource.Persistence.Catchup.MaxDuration)
 			if err != nil {
 				return lastT, err
 			}
 
 			// Set maxCatchupDuration in execution time if last persisted event time is greater than maxCatchupDuration
 			if duration < time.Since(lastT) {
-				el.log.Info("set MaxCatchupDuration on execution time", zap.Any("MaxCatchupDuration", el.CalendarEventSource.Persistence.MaxCatchupDuration))
+				el.log.Info("set Catchup MaxDuration on execution time", zap.Any("MaxDuration", el.CalendarEventSource.Persistence.Catchup.MaxDuration))
 				lastT = time.Now().Add(-duration)
 			}
 		}
@@ -223,14 +223,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		// Trigger the event immediately if the current schedule time is earlier then
 		if time.Now().After(t) {
 			el.log.Info("triggering catchup events", zap.Any(logging.LabelTime, t.UTC().String()))
-			lastT = t
 			if location != nil {
 				lastT = lastT.In(location)
 			}
 			err = sendEventFunc(t)
 			if err != nil {
 				el.log.Error("failed to send calendar event", zap.Error(err))
+				continue
 			}
+			lastT = t
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}

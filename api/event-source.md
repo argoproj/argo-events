@@ -621,6 +621,92 @@ Persistence hold the configuration for event persistence
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.CatchupConfiguration">
+
+CatchupConfiguration
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventPersistence">EventPersistence</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>enabled</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<p>
+
+Enabled enables to triggered the missed schedule when eventsource
+restarts
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>maxDuration</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+MaxDuration holds max catchup duration
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.ConfigMapPersistence">
 
 ConfigMapPersistence
@@ -1003,7 +1089,9 @@ Description
 
 <td>
 
-<code>catchup</code></br> <em> bool </em>
+<code>catchup</code></br> <em>
+<a href="#argoproj.io/v1alpha1.CatchupConfiguration">
+CatchupConfiguration </a> </em>
 
 </td>
 
@@ -1013,26 +1101,6 @@ Description
 
 Catchup enables to triggered the missed schedule when eventsource
 restarts
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>maxCatchupDuration</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-MaxCatchupDuration holds max catchup duration
 
 </p>
 

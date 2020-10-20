@@ -32,6 +32,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource":           schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource": schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource":       schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration":      schema_pkg_apis_eventsource_v1alpha1_CatchupConfiguration(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ConfigMapPersistence":      schema_pkg_apis_eventsource_v1alpha1_ConfigMapPersistence(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource":        schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence":          schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref),
@@ -281,6 +282,32 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 	}
 }
 
+func schema_pkg_apis_eventsource_v1alpha1_CatchupConfiguration(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"enabled": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Enabled enables to triggered the missed schedule when eventsource restarts",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"maxDuration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxDuration holds max catchup duration",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_eventsource_v1alpha1_ConfigMapPersistence(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -399,15 +426,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref common.ReferenceC
 					"catchup": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Catchup enables to triggered the missed schedule when eventsource restarts",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-					"maxCatchupDuration": {
-						SchemaProps: spec.SchemaProps{
-							Description: "MaxCatchupDuration holds max catchup duration",
-							Type:        []string{"string"},
-							Format:      "",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration"),
 						},
 					},
 					"configMap": {
@@ -420,7 +439,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ConfigMapPersistence"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ConfigMapPersistence"},
 	}
 }
 
