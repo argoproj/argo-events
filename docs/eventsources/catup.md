@@ -1,7 +1,5 @@
 # Calender EventSource - Catchup 
-Catchup feature allow Calender eventsources to execute the missed schedules from last run. This feature is very similar 
-to Airflow Catchup feature.
-
+Catchup feature allow Calender eventsources to execute the missed schedules from last run.
 ## Enable Catchup forEventSource Definition
 User can configure catchup on each events in eventsource.
 
