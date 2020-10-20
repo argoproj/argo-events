@@ -17,10 +17,16 @@ limitations under the License.
 package awssns
 
 import (
+	"bytes"
 	"context"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"regexp"
 
 	snslib "github.com/aws/aws-sdk-go/service/sns"
@@ -40,11 +46,36 @@ import (
 var (
 	// controller controls the webhook operations
 	controller = webhook.NewController()
+
+	// used for SNS verification
+	snsSigKeys      = map[string][]string{}
+	snsKeyRealNames = map[string]string{
+		"MessageID": "MessageId",
+		"TopicARN":  "TopicArn",
+	}
 )
 
 // set up route activation and deactivation channels
 func init() {
 	go webhook.ProcessRouteStatus(controller)
+
+	snsSigKeys[messageTypeNotification] = []string{
+		"Message",
+		"MessageID",
+		"Subject",
+		"Timestamp",
+		"TopicARN",
+		"Type",
+	}
+	snsSigKeys[messageTypeSubscriptionConfirmation] = []string{
+		"Message",
+		"MessageID",
+		"SubscribeURL",
+		"Timestamp",
+		"Token",
+		"TopicARN",
+		"Type",
+	}
 }
 
 // Implement Router
@@ -89,6 +120,15 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		logger.Error("failed to convert request payload into sns notification", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		return
+	}
+
+	// SNS Signature Verification
+	if router.verifySNS {
+		err = notification.verify()
+		if err != nil {
+			logger.Error("failed to verify sns message", zap.Error(err))
+			common.SendErrorResponse(writer, err.Error())
+		}
 	}
 
 	switch notification.Type {
@@ -224,4 +264,59 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		Route:       route,
 		eventSource: &el.SNSEventSource,
 	}, controller, dispatch)
+}
+
+func (m *httpNotification) verify() error {
+	msgSig, err := base64.StdEncoding.DecodeString(m.Signature)
+	if err != nil {
+		return errors.Wrap(err, "failed to base64 decode signature")
+	}
+
+	res, err := http.Get(m.SigningCertURL)
+	if err != nil {
+		return errors.Wrap(err, "failed to fetch signing cert")
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return errors.Wrap(err, "failed to read signing cert body")
+	}
+
+	p, _ := pem.Decode(body)
+	if p == nil {
+		return errors.New("nothing found in pem encoded bytes")
+	}
+
+	cert, err := x509.ParseCertificate(p.Bytes)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse signing cert")
+	}
+
+	err = cert.CheckSignature(x509.SHA1WithRSA, m.sigSerialized(), msgSig)
+	if err != nil {
+		return errors.Wrap(err, "message signature check error")
+	}
+
+	return nil
+}
+
+func (m *httpNotification) sigSerialized() []byte {
+	buf := &bytes.Buffer{}
+	v := reflect.ValueOf(m)
+
+	for _, key := range snsSigKeys[m.Type] {
+		field := reflect.Indirect(v).FieldByName(key)
+		val := field.String()
+		if !field.IsValid() || val == "" {
+			continue
+		}
+		if rn, ok := snsKeyRealNames[key]; ok {
+			key = rn
+		}
+		buf.WriteString(key + "\n")
+		buf.WriteString(val + "\n")
+	}
+
+	return buf.Bytes()
 }

@@ -17,14 +17,6 @@ limitations under the License.
 package awssns
 
 import (
-	"bytes"
-	"crypto/x509"
-	"encoding/base64"
-	"encoding/pem"
-	"github.com/pkg/errors"
-	"io/ioutil"
-	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
@@ -47,6 +39,8 @@ type Router struct {
 	session *snslib.SNS
 	// subscriptionArn is sns arn
 	subscriptionArn *string
+	// verifySNS is bool to verify sns message or not
+	verifySNS bool
 }
 
 // Json http notifications
@@ -67,64 +61,4 @@ type httpNotification struct {
 	Signature        string    `json:"Signature"`
 	SigningCertURL   string    `json:"SigningCertURL"`
 	UnsubscribeURL   string    `json:"UnsubscribeURL,omitempty"` // Only for notifications
-}
-
-func (m *httpNotification) verify() error {
-	msgSig, err := base64.StdEncoding.DecodeString(m.Signature)
-	if err != nil {
-		return errors.Wrap(err, "failed to base64 decode signature")
-	}
-
-	res, err := http.Get(m.SigningCertURL)
-	if err != nil {
-		return errors.Wrap(err, "failed to fetch signing cert")
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return errors.Wrap(err, "failed to read signing cert body")
-	}
-
-	p, _ := pem.Decode(body)
-	if p == nil {
-		return errors.New("nothing found in pem encoded bytes")
-	}
-
-	cert, err := x509.ParseCertificate(p.Bytes)
-	if err != nil {
-		return errors.Wrap(err, "failed to parse signing cert")
-	}
-
-	err = cert.CheckSignature(x509.SHA1WithRSA, m.sigSerialized(), msgSig)
-	if err != nil {
-		return errors.Wrap(err, "message signature check error")
-	}
-
-	return nil
-}
-
-func (m *httpNotification) sigSerialized() []byte {
-	buf := &bytes.Buffer{}
-	v := reflect.ValueOf(m)
-	snsSigKeys := map[string][]string{}
-	snsKeyRealNames := map[string]string{
-		"MessageID": "MessageId",
-		"TopicARN":  "TopicArn",
-	}
-
-	for _, key := range snsSigKeys[m.Type] {
-		field := reflect.Indirect(v).FieldByName(key)
-		val := field.String()
-		if !field.IsValid() || val == "" {
-			continue
-		}
-		if rn, ok := snsKeyRealNames[key]; ok {
-			key = rn
-		}
-		buf.WriteString(key + "\n")
-		buf.WriteString(val + "\n")
-	}
-
-	return buf.Bytes()
 }
