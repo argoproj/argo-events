@@ -51,7 +51,7 @@ require (
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/minio/minio-go v1.0.1-0.20190523192347-c6c2912aa552
 	github.com/mitchellh/copystructure v1.0.0 // indirect
-	github.com/mitchellh/mapstructure v1.3.0
+	github.com/mitchellh/mapstructure v1.3.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/go-nats v1.7.2
