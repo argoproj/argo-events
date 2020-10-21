@@ -8,7 +8,7 @@ spec:
   dependencies:
     - name: test-dep
       eventSourceName: calendar
-      eventName: example-with-catchup
+      eventName: example-with-interval
   triggers:
     - template:
         name: calendar-workflow-trigger
@@ -42,5 +42,4 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                dataKey: eventTime
               dest: spec.arguments.parameters.0.value
