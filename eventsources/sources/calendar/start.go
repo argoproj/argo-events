@@ -226,7 +226,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			err = sendEventFunc(t)
 			if err != nil {
 				el.log.Error("failed to dispatch calendar event", zap.Error(err))
-
 				if el.eventPersistence.IsEnabled() {
 					time.Sleep(100 * time.Millisecond)
 					continue
@@ -236,6 +235,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			if location != nil {
 				lastT = lastT.In(location)
 			}
+			continue
 		}
 
 		timer := time.After(time.Until(t))
