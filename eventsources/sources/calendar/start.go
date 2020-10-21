@@ -229,26 +229,31 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			err = sendEventFunc(t)
 			if err != nil {
 				el.log.Error("failed to dispatch calendar event", zap.Error(err))
-				time.Sleep(100 * time.Millisecond)
-				continue
+
+				if el.eventPersistence.IsEnabled() {
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
 			}
 			lastT = t
-			time.Sleep(100 * time.Millisecond)
-			continue
 		}
 
 		timer := time.After(time.Until(t))
 		el.log.Info("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
 		select {
 		case tx := <-timer:
-			lastT = tx
 			if location != nil {
 				lastT = lastT.In(location)
 			}
 			err = sendEventFunc(tx)
 			if err != nil {
-				el.log.Error("failed to send calendar event", zap.Error(err))
+				el.log.Error("failed to dispatch calendar event", zap.Error(err))
+				if el.eventPersistence.IsEnabled() {
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
 			}
+			lastT = tx
 		case <-ctx.Done():
 			el.log.Info("exiting calendar event listener...")
 			return nil
