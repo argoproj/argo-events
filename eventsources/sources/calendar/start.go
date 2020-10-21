@@ -223,9 +223,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		// Trigger the event immediately if the current schedule time is earlier then
 		if time.Now().After(t) {
 			el.log.Info("triggering catchup events", zap.Any(logging.LabelTime, t.UTC().String()))
-			if location != nil {
-				lastT = lastT.In(location)
-			}
 			err = sendEventFunc(t)
 			if err != nil {
 				el.log.Error("failed to dispatch calendar event", zap.Error(err))
@@ -236,15 +233,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 			}
 			lastT = t
+			if location != nil {
+				lastT = lastT.In(location)
+			}
 		}
 
 		timer := time.After(time.Until(t))
 		el.log.Info("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
 		select {
 		case tx := <-timer:
-			if location != nil {
-				lastT = lastT.In(location)
-			}
 			err = sendEventFunc(tx)
 			if err != nil {
 				el.log.Error("failed to dispatch calendar event", zap.Error(err))
@@ -254,6 +251,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 			}
 			lastT = tx
+			if location != nil {
+				lastT = lastT.In(location)
+			}
 		case <-ctx.Done():
 			el.log.Info("exiting calendar event listener...")
 			return nil
