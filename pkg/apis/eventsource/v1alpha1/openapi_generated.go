@@ -32,7 +32,10 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource":           schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource": schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource":       schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration":      schema_pkg_apis_eventsource_v1alpha1_CatchupConfiguration(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ConfigMapPersistence":      schema_pkg_apis_eventsource_v1alpha1_ConfigMapPersistence(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource":        schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence":          schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSource":               schema_pkg_apis_eventsource_v1alpha1_EventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceList":           schema_pkg_apis_eventsource_v1alpha1_EventSourceList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceSpec":           schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref),
@@ -264,8 +267,68 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 							},
 						},
 					},
+					"persistence": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Persistence hold the configuration for event persistence",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence"),
+						},
+					},
 				},
 				Required: []string{"schedule", "interval"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_CatchupConfiguration(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"enabled": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Enabled enables to triggered the missed schedule when eventsource restarts",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"maxDuration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxDuration holds max catchup duration",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_ConfigMapPersistence(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the configmap",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"createIfNotExist": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CreateIfNotExist will create configmap if it doesn't exists",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
 			},
 		},
 	}
@@ -351,6 +414,32 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"catchup": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Catchup enables to triggered the missed schedule when eventsource restarts",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration"),
+						},
+					},
+					"configMap": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ConfigMap holds configmap details for persistence",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ConfigMapPersistence"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ConfigMapPersistence"},
 	}
 }
 

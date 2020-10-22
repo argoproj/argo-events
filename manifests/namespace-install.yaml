@@ -220,12 +220,12 @@ spec:
       - args:
         - --namespaced
         env:
-        - name: EVENTSOURCE_IMAGE
-          value: argoproj/eventsource:latest
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: EVENTSOURCE_IMAGE
+          value: argoproj/eventsource:latest
         image: argoproj/eventsource-controller:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -265,12 +265,12 @@ spec:
       - args:
         - --namespaced
         env:
-        - name: SENSOR_IMAGE
-          value: argoproj/sensor:latest
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: SENSOR_IMAGE
+          value: argoproj/sensor:latest
         image: argoproj/sensor-controller:latest
         livenessProbe:
           httpGet:
