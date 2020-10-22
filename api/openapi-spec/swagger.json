@@ -531,6 +531,10 @@
             "type": "string"
           }
         },
+        "persistence": {
+          "description": "Persistence hold the configuration for event persistence",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventPersistence"
+        },
         "schedule": {
           "description": "Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
           "type": "string"
@@ -543,6 +547,32 @@
           "description": "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated. Please use Metadata instead.",
           "type": "string",
           "format": "byte"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.CatchupConfiguration": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Enabled enables to triggered the missed schedule when eventsource restarts",
+          "type": "boolean"
+        },
+        "maxDuration": {
+          "description": "MaxDuration holds max catchup duration",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.ConfigMapPersistence": {
+      "type": "object",
+      "properties": {
+        "createIfNotExist": {
+          "description": "CreateIfNotExist will create configmap if it doesn't exists",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Name of the configmap",
+          "type": "string"
         }
       }
     },
@@ -593,6 +623,19 @@
         "username": {
           "description": "Username to use to connect to broker",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.EventPersistence": {
+      "type": "object",
+      "properties": {
+        "catchup": {
+          "description": "Catchup enables to triggered the missed schedule when eventsource restarts",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.CatchupConfiguration"
+        },
+        "configMap": {
+          "description": "ConfigMap holds configmap details for persistence",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.ConfigMapPersistence"
         }
       }
     },
