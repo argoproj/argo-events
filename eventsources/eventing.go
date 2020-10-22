@@ -81,7 +81,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSo
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Calendar {
-			servers = append(servers, &calendar.EventListener{EventSourceName: eventSource.Name, EventName: k, CalendarEventSource: v})
+			servers = append(servers, &calendar.EventListener{EventSourceName: eventSource.Name, EventName: k, CalendarEventSource: v, Namespace: eventSource.Namespace})
 		}
 		result[apicommon.CalendarEvent] = servers
 	}

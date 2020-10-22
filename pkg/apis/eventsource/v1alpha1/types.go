@@ -182,6 +182,33 @@ type CalendarEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Persistence hold the configuration for event persistence
+	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,7,opt,name=persistence"`
+}
+
+type EventPersistence struct {
+	// Catchup enables to triggered the missed schedule when eventsource restarts
+	Catchup *CatchupConfiguration `json:"catchup,omitempty" protobuf:"bytes,1,opt,name=catchup"`
+	// ConfigMap holds configmap details for persistence
+	ConfigMap *ConfigMapPersistence `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configMap"`
+}
+
+func (ep *EventPersistence) IsCatchUpEnabled() bool {
+	return ep.Catchup != nil && ep.Catchup.Enabled
+}
+
+type CatchupConfiguration struct {
+	// Enabled enables to triggered the missed schedule when eventsource restarts
+	Enabled bool `json:"enabled,omitempty" protobuf:"varint,1,opt,name=enabled"`
+	// MaxDuration holds max catchup duration
+	MaxDuration string `json:"maxDuration,omitempty" protobuf:"bytes,2,opt,name=maxDuration"`
+}
+
+type ConfigMapPersistence struct {
+	// Name of the configmap
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	// CreateIfNotExist will create configmap if it doesn't exists
+	CreateIfNotExist bool `json:"createIfNotExist,omitempty" protobuf:"varint,2,opt,name=createIfNotExist"`
 }
 
 // FileEventSource describes an event-source for file related events.

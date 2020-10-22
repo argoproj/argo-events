@@ -291,6 +291,99 @@ map[string]string
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>persistence</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.EventPersistence">
+EventPersistence
+</a>
+</em>
+</td>
+<td>
+<p>Persistence hold the configuration for event persistence</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.CatchupConfiguration">CatchupConfiguration
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventPersistence">EventPersistence</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>enabled</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>Enabled enables to triggered the missed schedule when eventsource restarts</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxDuration</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>MaxDuration holds max catchup duration</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.ConfigMapPersistence">ConfigMapPersistence
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventPersistence">EventPersistence</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name of the configmap</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>createIfNotExist</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>CreateIfNotExist will create configmap if it doesn&rsquo;t exists</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource
@@ -419,6 +512,50 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.EventPersistence">EventPersistence
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.CalendarEventSource">CalendarEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>catchup</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.CatchupConfiguration">
+CatchupConfiguration
+</a>
+</em>
+</td>
+<td>
+<p>Catchup enables to triggered the missed schedule when eventsource restarts</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>configMap</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.ConfigMapPersistence">
+ConfigMapPersistence
+</a>
+</em>
+</td>
+<td>
+<p>ConfigMap holds configmap details for persistence</p>
 </td>
 </tr>
 </tbody>

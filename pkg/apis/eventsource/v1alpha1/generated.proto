@@ -106,6 +106,25 @@ message CalendarEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 6;
+
+  // Persistence hold the configuration for event persistence
+  optional EventPersistence persistence = 7;
+}
+
+message CatchupConfiguration {
+  // Enabled enables to triggered the missed schedule when eventsource restarts
+  optional bool enabled = 1;
+
+  // MaxDuration holds max catchup duration
+  optional string maxDuration = 2;
+}
+
+message ConfigMapPersistence {
+  // Name of the configmap
+  optional string name = 1;
+
+  // CreateIfNotExist will create configmap if it doesn't exists
+  optional bool createIfNotExist = 2;
 }
 
 // EmitterEventSource describes the event source for emitter
@@ -144,6 +163,14 @@ message EmitterEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 9;
+}
+
+message EventPersistence {
+  // Catchup enables to triggered the missed schedule when eventsource restarts
+  optional CatchupConfiguration catchup = 1;
+
+  // ConfigMap holds configmap details for persistence
+  optional ConfigMapPersistence configMap = 2;
 }
 
 // EventSource is the definition of a eventsource resource
