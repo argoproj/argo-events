@@ -106,7 +106,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("listening to messages on channel...")
 	for {
 		select {
-		case msg := <-delivery:
+		case msg, ok := <-delivery:
+			if !ok {
+				log.Error("failed to read message from amqp channel, channel closed")
+				return errors.New("channel closed")
+			}
 			log.Info("received the message", zap.Any("message-id", msg.MessageId))
 			body := &events.AMQPEventData{
 				ContentType:     msg.ContentType,
