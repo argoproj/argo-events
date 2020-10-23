@@ -28,9 +28,9 @@ import (
 // DefaultRetry is a default retry backoff settings when retrying API calls
 var DefaultRetry = wait.Backoff{
 	Steps:    5,
-	Duration: 10 * time.Millisecond,
+	Duration: 1 * time.Second,
 	Factor:   1.0,
-	Jitter:   0.1,
+	Jitter:   5,
 }
 
 // IsRetryableKubeAPIError returns if the error is a retryable kubernetes error
