@@ -30,7 +30,7 @@ var DefaultRetry = wait.Backoff{
 	Steps:    5,
 	Duration: 1 * time.Second,
 	Factor:   1.0,
-	Jitter:   5,
+	Jitter:   1,
 }
 
 // IsRetryableKubeAPIError returns if the error is a retryable kubernetes error
