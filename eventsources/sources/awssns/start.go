@@ -92,7 +92,6 @@ func (router *Router) GetRoute() *webhook.Route {
 // HandleRoute handles new routes
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.Route
-	router.verifySNS = true
 
 	logger := route.Logger.With(
 		logging.LabelEndpoint, route.Context.Endpoint,
@@ -124,7 +123,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	// SNS Signature Verification
-	if router.verifySNS {
+	if router.eventSource.ValidateSignature {
 		err = notification.verify()
 		if err != nil {
 			logger.Error("failed to verify sns message", zap.Error(err))

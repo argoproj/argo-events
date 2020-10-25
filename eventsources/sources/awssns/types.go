@@ -39,8 +39,6 @@ type Router struct {
 	session *snslib.SNS
 	// subscriptionArn is sns arn
 	subscriptionArn *string
-	// verifySNS is bool to verify sns message or not
-	verifySNS bool
 }
 
 // Json http notifications

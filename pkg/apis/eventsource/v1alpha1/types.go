@@ -421,6 +421,9 @@ type SNSEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// ValidateSignature is boolean that can be set to true for SNS signature verification
+	// +optional
+	ValidateSignature bool `json:"validateSignature,omitempty" protobuf:"bytes,8,opt,name=validateSignature"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
