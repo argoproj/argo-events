@@ -80,6 +80,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					}
 					if el.GenericEventSource.JSONBody {
 						eventData.Body = (*json.RawMessage)(&event.Payload)
+					} else {
+						eventData.Body = event.Payload
 					}
 					eventBytes, err := json.Marshal(eventData)
 					if err != nil {
