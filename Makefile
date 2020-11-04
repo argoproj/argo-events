@@ -47,7 +47,7 @@ all-controller-images: sensor-controller-image eventbus-controller-image eventso
 
 # EventSource controller
 .PHONY: eventsource-controller
-eventsource-controller: dist/eventsource-controller
+eventsource-controller: dist/eventsource-controller-linux-amd64
 
 dist/eventsource-controller: GOARGS = GOOS= GOARCH=
 dist/eventsource-controller-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
@@ -67,7 +67,7 @@ eventsource-controller-image: dist/eventsource-controller-linux-amd64
 
 # EventSource
 .PHONY: eventsource
-eventsource: dist/eventsource
+eventsource: dist/eventsource-linux-amd64
 
 dist/eventsource: GOARGS = GOOS= GOARCH=
 dist/eventsource-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
@@ -87,7 +87,7 @@ eventsource-image: dist/eventsource-linux-amd64
 
 # Sensor controller
 .PHONY: sensor-controller
-sensor-controller: dist/sensor-controller
+sensor-controller: dist/sensor-controller-linux-amd64
 
 dist/sensor-controller: GOARGS = GOOS= GOARCH=
 dist/sensor-controller-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
@@ -107,7 +107,7 @@ sensor-controller-image: dist/sensor-controller-linux-amd64
 
 # Sensor
 .PHONY: sensor
-sensor: dist/sensor
+sensor: dist/sensor-linux-amd64
 
 dist/sensor: GOARGS = GOOS= GOARCH=
 dist/sensor-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
@@ -127,7 +127,7 @@ sensor-image: dist/sensor-linux-amd64
 
 # EventBus controller
 .PHONY: eventbus-controller
-eventbus-controller: dist/eventbus-controller
+eventbus-controller: dist/eventbus-controller-linux-amd64
 
 dist/eventbus-controller: GOARGS = GOOS=linux GOARCH=amd64
 dist/eventbus-controller-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
