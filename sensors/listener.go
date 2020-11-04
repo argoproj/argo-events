@@ -219,8 +219,10 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[string]cloudevents.Event, triggers []v1alpha1.Trigger) error {
 	log := logging.FromContext(ctx)
 	eventsMapping := make(map[string]*v1alpha1.Event)
+	depNames := make([]string, 0, len(events))
 	for k, v := range events {
 		eventsMapping[k] = convertEvent(v)
+		depNames = append(depNames, k)
 	}
 	for _, trigger := range triggers {
 		if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
@@ -262,7 +264,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 		if err := triggerImpl.ApplyPolicy(newObj); err != nil {
 			return err
 		}
-		log.Infow("successfully processed the trigger", "triggerName", trigger.Template.Name)
+		log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name), zap.Any("triggeredBy", depNames))
 	}
 	return nil
 }
