@@ -811,6 +811,9 @@ type GenericEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
+	// AuthSecret holds a secret selector that contains a bearer token for authentication
+	// +optional
+	AuthSecret *corev1.SecretKeySelector `json:"authSecret,omitempty" protobuf:"bytes,6,opt,name=authSecret"`
 }
 
 const (
