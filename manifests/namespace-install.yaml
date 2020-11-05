@@ -181,7 +181,7 @@ spec:
           value: nats-streaming:0.17.0
         - name: NATS_METRICS_EXPORTER_IMAGE
           value: synadia/prometheus-nats-exporter:0.6.2
-        image: argoproj/eventbus-controller:latest
+        image: argoproj/eventbus-controller:v1.1.0-rc1
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -220,13 +220,13 @@ spec:
       - args:
         - --namespaced
         env:
+        - name: EVENTSOURCE_IMAGE
+          value: argoproj/eventsource:v1.1.0-rc1
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: EVENTSOURCE_IMAGE
-          value: argoproj/eventsource:latest
-        image: argoproj/eventsource-controller:latest
+        image: argoproj/eventsource-controller:v1.1.0-rc1
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -265,13 +265,13 @@ spec:
       - args:
         - --namespaced
         env:
+        - name: SENSOR_IMAGE
+          value: argoproj/sensor:v1.1.0-rc1
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: SENSOR_IMAGE
-          value: argoproj/sensor:latest
-        image: argoproj/sensor-controller:latest
+        image: argoproj/sensor-controller:v1.1.0-rc1
         livenessProbe:
           httpGet:
             path: /healthz
