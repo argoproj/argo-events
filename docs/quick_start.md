@@ -23,8 +23,8 @@ Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo/) i
    Once the sensor object is created, sensor controller will create corresponding pod and a service. 
 
 1. Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.
-
-        kubectl -n argo-events port-forward <event-source-pod-name> 12000:12000
+      
+        kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
 
 1. Use either Curl or Postman to send a post request to the http://localhost:12000/example
 
