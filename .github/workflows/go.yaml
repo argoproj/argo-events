@@ -64,13 +64,15 @@ jobs:
           curl -OL https://github.com/jgm/pandoc/releases/download/2.11.1/$PANDOC_ZIP
           sudo tar xvzf $PANDOC_ZIP --strip-components 1 -C /usr/local/bin
           rm -f $PANDOC_ZIP
+      - name: Get dependencies
+        run: go mod download
       - name: Make codegen
         env:
           GOPATH: /home/runner/go
         run: |
-          git fetch --tags
-          mkdir -p /home/runner/go/src/github.com/argoproj
-          ln -s "$PWD" /home/runner/go/src/github.com/argoproj/argo-events
+          #git fetch --tags
+          #mkdir -p /home/runner/go/src/github.com/argoproj
+          #ln -s "$PWD" /home/runner/go/src/github.com/argoproj/argo-events
           # we use -B to force make to always make targets
           make -B codegen
       - name: Ensure nothing changed
