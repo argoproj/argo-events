@@ -10,7 +10,7 @@ add_header() {
 }
 
 if [ "$(command -v controller-gen)" = "" ]; then
-  go install ./vendor/sigs.k8s.io/controller-tools/cmd/controller-gen
+  go install -mod=vendor ./vendor/sigs.k8s.io/controller-tools/cmd/controller-gen
 fi
 
 header "Generating CRDs"

@@ -8,14 +8,16 @@ source $(dirname $0)/library.sh
 header "generating proto files"
 
 ensure_vendor
+
 make_fake_paths
-
 export GOPATH="${FAKE_GOPATH}"
-export GO111MODULE="off"
-
 cd "${FAKE_REPOPATH}"
 
-go install ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
+go install -mod=vendor ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
+go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogo
+go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogofast
+
+export GO111MODULE="off"
 
 ${GOPATH}/bin/go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
