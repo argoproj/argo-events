@@ -19,7 +19,11 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${FAKE_REPOPATH}"; ls -d -1 ./vendor/k8s.io/cod
 
 #### fix the plural issue of code-generator  ####
 for i in `grep '"Endpoints": "Endpoints"' -R vendor/k8s.io/code-generator/ | grep -v EventBus | awk -F\: '{print $1}'`; do
-  sed -i "" "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
+  if [ "$(uname -s)" = "Darwin" ]; then
+    sed -i "" "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
+  elif [ "$(uname -s)" = "Linux" ]; then
+    sed "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
+  fi
 done
 
 subheader "running codegen for sensor"
