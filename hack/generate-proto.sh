@@ -9,11 +9,11 @@ header "generating proto files"
 
 ensure_vendor
 
-if [ "`command -v protoc-gen-gogofast`" = "" ]; then
+if [ "`command -v protoc-gen-gogo`" = "" ]; then
   go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogo
 fi
 
-if [ "`command -v protoc-gen-grpc-gateway`" = "" ]; then
+if [ "`command -v protoc-gen-gogofast`" = "" ]; then
   go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogofast
 fi
 
