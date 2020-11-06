@@ -17,6 +17,8 @@ if [ "`command -v protoc-gen-gogofast`" = "" ]; then
   go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogofast
 fi
 
+ls -l $GOPATH/bin
+
 make_fake_paths
 export GOPATH="${FAKE_GOPATH}"
 cd "${FAKE_REPOPATH}"
