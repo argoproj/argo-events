@@ -30,7 +30,7 @@ spec:
 #      url: "tcp://mqtt.argo-events:1883"
 #      topic: "bar"
 #      jsonBody: true
-#      clientId: 2345
+#      clientId: "2345"
 #      tls:
 #        caCertSecret:
 #          name: my-secret
