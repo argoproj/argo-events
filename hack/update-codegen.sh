@@ -22,7 +22,7 @@ for i in `grep '"Endpoints": "Endpoints"' -R vendor/k8s.io/code-generator/ | gre
   if [ "$(uname -s)" = "Darwin" ]; then
     sed -i "" "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
   elif [ "$(uname -s)" = "Linux" ]; then
-    sed "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
+    sed -i "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
   fi
 done
 
