@@ -18,6 +18,7 @@ if [ "`command -v protoc-gen-gogofast`" = "" ]; then
 fi
 
 ls -l $GOPATH/bin
+echo $PATH
 
 make_fake_paths
 export GOPATH="${FAKE_GOPATH}"
@@ -26,7 +27,7 @@ cd "${FAKE_REPOPATH}"
 go install -mod=vendor ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
 
 export GO111MODULE="off"
-
+echo $PATH
 ${GOPATH}/bin/go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
         --packages=github.com/argoproj/argo-events/pkg/apis/common \
