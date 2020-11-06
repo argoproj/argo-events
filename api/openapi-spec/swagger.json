@@ -1612,6 +1612,10 @@
           "description": "TopicArn",
           "type": "string"
         },
+        "validateSignature": {
+          "description": "ValidateSignature is boolean that can be set to true for SNS signature verification",
+          "type": "boolean"
+        },
         "webhook": {
           "description": "Webhook configuration for http server",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"

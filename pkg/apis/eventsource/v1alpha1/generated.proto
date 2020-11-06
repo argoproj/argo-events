@@ -790,6 +790,10 @@ message SNSEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 7;
+
+  // ValidateSignature is boolean that can be set to true for SNS signature verification
+  // +optional
+  optional bool validateSignature = 8;
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
