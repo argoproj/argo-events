@@ -28,6 +28,7 @@ import (
 	customtrigger "github.com/argoproj/argo-events/sensors/triggers/custom-trigger"
 	"github.com/argoproj/argo-events/sensors/triggers/http"
 	"github.com/argoproj/argo-events/sensors/triggers/kafka"
+	logtrigger "github.com/argoproj/argo-events/sensors/triggers/log"
 	"github.com/argoproj/argo-events/sensors/triggers/nats"
 	"github.com/argoproj/argo-events/sensors/triggers/slack"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
@@ -118,5 +119,15 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 		}
 		return result
 	}
+
+	if trigger.Template.Log != nil {
+		result, err := logtrigger.NewLogTrigger(sensorCtx.Sensor, trigger, log)
+		if err != nil {
+			log.Error("failed to invoke the trigger", zap.Any("trigger", trigger.Template.Name), zap.Error(err))
+			return nil
+		}
+		return result
+	}
+
 	return nil
 }
