@@ -56,9 +56,8 @@ If you're making a change to the `pkg/apis`  package, please ensure you re-run t
 * Install `gen-crd-api-reference-docs`
 
 ```
-go get github.com/ahmetb/gen-crd-api-reference-docs
-cd $GOPATH/github.com/ahmetb/gen-crd-api-reference-docs
-go build
+GO111MODULE=on go get github.com/ahmetb/gen-crd-api-reference-docs
+GO111MODULE=on go get github.com/gogo/protobuf/protoc-gen-gogo
 ```
 
 * [install pandoc](https://pandoc.org/installing.html)
