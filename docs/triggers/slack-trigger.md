@@ -23,7 +23,7 @@ We need to create a Slack App which will send messages to your Slack Workspace. 
 
 2. Navigate to your app, then to `Features > OAuth & Permissions`
 
-3. Scroll down to `Scopes` and add the scopes `channels:join`, and `chat:write`
+3. Scroll down to `Scopes` and add the scopes `channels:join`, `channels:read` and `chat:write`
 
 4. Scroll to the top of the `OAuth & Permissions` page and click `Install App to Workspace` and follow the install Wizard
 
