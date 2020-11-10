@@ -3,8 +3,6 @@ kind: Sensor
 metadata:
   name: log
 spec:
-  template:
-    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       eventSourceName: calendar
