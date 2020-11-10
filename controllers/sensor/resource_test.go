@@ -95,38 +95,6 @@ var (
 		},
 	}
 
-	sensorObjNoTemplate = &v1alpha1.Sensor{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "fake-sensor",
-			Namespace: testNamespace,
-		},
-		Spec: v1alpha1.SensorSpec{
-			Triggers: []v1alpha1.Trigger{
-				{
-					Template: &v1alpha1.TriggerTemplate{
-						Name: "fake-trigger",
-						K8s: &v1alpha1.StandardK8STrigger{
-							GroupVersionResource: metav1.GroupVersionResource{
-								Group:    "k8s.io",
-								Version:  "",
-								Resource: "pods",
-							},
-							Operation: "create",
-							Source:    &v1alpha1.ArtifactLocation{},
-						},
-					},
-				},
-			},
-			Dependencies: []v1alpha1.EventDependency{
-				{
-					Name:            "fake-dep",
-					EventSourceName: "fake-source",
-					EventName:       "fake-one",
-				},
-			},
-		},
-	}
-
 	fakeEventBus = &eventbusv1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
