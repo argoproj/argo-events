@@ -47,6 +47,11 @@ var (
 		Spec: v1alpha1.SensorSpec{
 			Template: &v1alpha1.Template{
 				ServiceAccountName: "fake-sa",
+				ImagePullSecrets: []corev1.LocalObjectReference{
+					{
+						Name: "test",
+					},
+				},
 				Container: &corev1.Container{
 					VolumeMounts: []corev1.VolumeMount{
 						{
@@ -156,7 +161,7 @@ var (
 )
 
 func Test_BuildDeployment(t *testing.T) {
-	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
+	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObj}
 	t.Run("test build with eventbus", func(t *testing.T) {
 		for _, sObj := range sensorObjs {
 			args := &AdaptorArgs{
@@ -177,6 +182,7 @@ func Test_BuildDeployment(t *testing.T) {
 				}
 			}
 			assert.True(t, hasAuthVolume)
+			assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		}
 	})
 }

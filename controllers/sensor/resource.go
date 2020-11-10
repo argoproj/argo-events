@@ -287,6 +287,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		spec.Template.Spec.SecurityContext = args.Sensor.Spec.Template.SecurityContext
 		spec.Template.Spec.NodeSelector = args.Sensor.Spec.Template.NodeSelector
 		spec.Template.Spec.Tolerations = args.Sensor.Spec.Template.Tolerations
+		spec.Template.Spec.ImagePullSecrets = args.Sensor.Spec.Template.ImagePullSecrets
 	}
 	return spec, nil
 }

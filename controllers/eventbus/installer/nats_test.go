@@ -41,6 +41,11 @@ var (
 			NATS: &v1alpha1.NATSBus{
 				Native: &v1alpha1.NativeStrategy{
 					Auth: &v1alpha1.AuthStrategyToken,
+					ImagePullSecrets: []corev1.LocalObjectReference{
+						{
+							Name: "test",
+						},
+					},
 				},
 			},
 		},
@@ -215,5 +220,20 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
 		assert.True(t, len(ss.Spec.VolumeClaimTemplates) > 0)
+	})
+
+	t.Run("installation with image pull secrets", func(t *testing.T) {
+		cl := fake.NewFakeClient(testEventBus)
+		installer := &natsInstaller{
+			client:         cl,
+			eventBus:       testEventBus,
+			streamingImage: testStreamingImage,
+			metricsImage:   testMetricsImage,
+			labels:         testLabels,
+			logger:         logging.NewArgoEventsLogger(),
+		}
+		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
+		assert.NoError(t, err)
+		assert.True(t, len(ss.Spec.Template.Spec.ImagePullSecrets) > 0)
 	})
 }
