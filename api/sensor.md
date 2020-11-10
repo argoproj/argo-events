@@ -1479,6 +1479,15 @@ KubernetesResourceOperation refers to the type of operation performed on
 the K8s resource
 </p>
 </p>
+<h3 id="argoproj.io/v1alpha1.LogTrigger">
+LogTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+</p>
 <h3 id="argoproj.io/v1alpha1.NATSTrigger">
 NATSTrigger
 </h3>
@@ -2845,6 +2854,18 @@ Slack refers to the trigger designed to send slack notification message.
 <em>(Optional)</em>
 <p>
 OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>log</code></br> <em> <a href="#argoproj.io/v1alpha1.LogTrigger">
+LogTrigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Log refers to the trigger designed to invoke log the event.
 </p>
 </td>
 </tr>
