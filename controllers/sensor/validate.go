@@ -514,9 +514,6 @@ func validateK8sTriggerPolicy(policy *v1alpha1.K8SResourcePolicy) error {
 	if policy.Labels == nil {
 		return errors.New("resource labels are not specified")
 	}
-	if &policy.Backoff == nil {
-		return errors.New("backoff is not specified")
-	}
 	return nil
 }
 

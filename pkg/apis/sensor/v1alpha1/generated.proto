@@ -160,6 +160,7 @@ message DependencyGroup {
 }
 
 // Event represents the cloudevent received from an event source.
+// +protobuf.options.(gogoproto.goproto_stringer)=false
 message Event {
   optional EventContext context = 1;
 
@@ -167,6 +168,7 @@ message Event {
 }
 
 // EventContext holds the context of the cloudevent received from an event source.
+// +protobuf.options.(gogoproto.goproto_stringer)=false
 message EventContext {
   // ID of the event; must be non-empty and unique within the scope of the producer.
   optional string id = 1;
@@ -369,6 +371,9 @@ message KafkaTrigger {
   // Defaults to broker url.
   // +optional.
   optional string partitioningKey = 10;
+}
+
+message LogTrigger {
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.
@@ -710,6 +715,10 @@ message TriggerTemplate {
   // OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
   // +optional
   optional OpenWhiskTrigger openWhisk = 11;
+
+  // Log refers to the trigger designed to invoke log the event.
+  // +optional
+  optional LogTrigger log = 13;
 
   // DeprecatedSwitch is the condition to execute the trigger.
   // DEPRECATED: USE conditions instead

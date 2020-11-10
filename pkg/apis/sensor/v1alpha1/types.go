@@ -17,6 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/base64"
+	"fmt"
+	"mime"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -264,6 +268,9 @@ type TriggerTemplate struct {
 	// OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
 	// +optional
 	OpenWhisk *OpenWhiskTrigger `json:"openWhisk,omitempty" protobuf:"bytes,11,opt,name=openWhisk"`
+	// Log refers to the trigger designed to invoke log the event.
+	// +optional
+	Log *LogTrigger `json:"log,omitempty" protobuf:"bytes,13,opt,name=log"`
 	// DeprecatedSwitch is the condition to execute the trigger.
 	// DEPRECATED: USE conditions instead
 	// +optional
@@ -509,6 +516,8 @@ type OpenWhiskTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
+type LogTrigger struct{}
+
 // TriggerParameterOperation represents how to set a trigger destination
 // resource key
 type TriggerParameterOperation string
@@ -739,12 +748,29 @@ type GitCreds struct {
 }
 
 // Event represents the cloudevent received from an event source.
+// +protobuf.options.(gogoproto.goproto_stringer)=false
 type Event struct {
 	Context *EventContext `json:"context,omitempty" protobuf:"bytes,1,opt,name=context"`
 	Data    []byte        `json:"data" protobuf:"bytes,2,opt,name=data"`
 }
 
+// returns a string representation of the data, either as the text (e.g. if it is text) or as base 64 encoded string
+func (e Event) DataString() string {
+	mediaType, _, _ := mime.ParseMediaType(e.Context.DataContentType)
+	switch mediaType {
+	case "application/json", "text/plain":
+		return string(e.Data)
+	default:
+		return base64.StdEncoding.EncodeToString(e.Data)
+	}
+}
+
+func (e Event) String() string {
+	return fmt.Sprintf(`{"context:" "%v", "data": "%v"}`, e.Context, e.DataString())
+}
+
 // EventContext holds the context of the cloudevent received from an event source.
+// +protobuf.options.(gogoproto.goproto_stringer)=false
 type EventContext struct {
 	// ID of the event; must be non-empty and unique within the scope of the producer.
 	ID string `json:"id" protobuf:"bytes,1,opt,name=id"`
@@ -760,6 +786,10 @@ type EventContext struct {
 	Subject string `json:"subject" protobuf:"bytes,6,opt,name=subject"`
 	// Time - A Timestamp when the event happened.
 	Time metav1.Time `json:"time" protobuf:"bytes,7,opt,name=time"`
+}
+
+func (e EventContext) String() string {
+	return fmt.Sprintf(`{"id:" "%s", "source": "%s", "specversion": "%s", "type": "%s", "datacontenttype": "%s", "subject": "%s", "time": "%s"}`, e.ID, e.Source, e.SpecVersion, e.Type, e.DataContentType, e.Subject, e.Time)
 }
 
 // HasLocation whether or not an artifact has a location defined

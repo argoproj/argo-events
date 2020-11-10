@@ -6,8 +6,8 @@ import (
 )
 
 func (el *EventListener) ValidateEventSource(ctx context.Context) error {
-	if &el.GenericEventSource == nil {
-		return fmt.Errorf("event source can't be empty")
+	if el == nil {
+		return fmt.Errorf("event listener can't be nil")
 	}
 	if el.GenericEventSource.URL == "" {
 		return fmt.Errorf("server url can't be empty")
