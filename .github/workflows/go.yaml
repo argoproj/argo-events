@@ -75,7 +75,6 @@ jobs:
         env:
           GOPATH: /home/runner/go
         run: |
-          # we use -B to force make to always make targets
           make -B codegen
       - name: Ensure nothing changed
         run: git diff --exit-code
