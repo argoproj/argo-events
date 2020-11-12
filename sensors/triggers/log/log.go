@@ -1,15 +1,19 @@
 package log
 
 import (
+	"errors"
+	"time"
+
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 type LogTrigger struct {
-	Sensor  *v1alpha1.Sensor
-	Trigger *v1alpha1.Trigger
-	Logger  *zap.Logger
+	Sensor      *v1alpha1.Sensor
+	Trigger     *v1alpha1.Trigger
+	Logger      *zap.Logger
+	LastLogTime time.Time
 }
 
 func NewLogTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*LogTrigger, error) {
@@ -24,7 +28,14 @@ func (t *LogTrigger) ApplyResourceParameters(_ map[string]*v1alpha1.Event, resou
 	return resource, nil
 }
 
-func (t *LogTrigger) Execute(events map[string]*v1alpha1.Event, _ interface{}) (interface{}, error) {
+func (t *LogTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+	log, ok := resource.(*v1alpha1.LogTrigger)
+	if !ok {
+		return nil, errors.New("failed to interpret the fetched trigger resource")
+	}
+	if t.LastLogTime.Add(time.Duration(log.IntervalSeconds) * time.Second).After(time.Now()) {
+		return nil, nil
+	}
 	for dependencyName, event := range events {
 		t.Logger.Info(
 			event.DataString(),
@@ -33,6 +44,7 @@ func (t *LogTrigger) Execute(events map[string]*v1alpha1.Event, _ interface{}) (
 			zap.Any("eventContext", event.Context),
 		)
 	}
+	t.LastLogTime = time.Now()
 	return nil, nil
 }
 

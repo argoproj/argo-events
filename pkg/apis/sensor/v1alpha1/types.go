@@ -516,7 +516,11 @@ type OpenWhiskTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
-type LogTrigger struct{}
+type LogTrigger struct {
+	// Only print messages every interval. Useful to prevent logging too much data for busy events.
+	// +optional
+	IntervalSeconds uint64 `json:"intervalSeconds,omitempty" protobuf:"varint,1,opt,name=intervalSeconds"`
+}
 
 // TriggerParameterOperation represents how to set a trigger destination
 // resource key

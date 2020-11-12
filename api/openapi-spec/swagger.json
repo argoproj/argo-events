@@ -2523,7 +2523,14 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.LogTrigger": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "intervalSeconds": {
+          "description": "Only print messages every interval. Useful to prevent logging too much data for busy events.",
+          "type": "integer",
+          "format": "int64"
+        }
+      }
     },
     "io.argoproj.sensor.v1alpha1.NATSTrigger": {
       "description": "NATSTrigger refers to the specification of the NATS trigger.",

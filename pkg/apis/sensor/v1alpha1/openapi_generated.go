@@ -1020,6 +1020,15 @@ func schema_pkg_apis_sensor_v1alpha1_LogTrigger(ref common.ReferenceCallback) co
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"intervalSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Only print messages every interval. Useful to prevent logging too much data for busy events.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+				},
 			},
 		},
 	}
