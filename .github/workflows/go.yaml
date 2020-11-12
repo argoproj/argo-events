@@ -72,9 +72,8 @@ jobs:
       - name: Get dependencies
         run: go mod download
       - name: Make codegen
-        env:
-          GOPATH: /home/runner/go
         run: |
+          echo 'GOPATH=/home/runner/go' >> $GITHUB_ENV
           make -B codegen
       - name: Ensure nothing changed
         run: git diff --exit-code
