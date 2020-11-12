@@ -33,19 +33,22 @@ func (t *LogTrigger) Execute(events map[string]*v1alpha1.Event, resource interfa
 	if !ok {
 		return nil, errors.New("failed to interpret the fetched trigger resource")
 	}
-	if t.LastLogTime.Add(time.Duration(log.IntervalSeconds) * time.Second).After(time.Now()) {
-		return nil, nil
+	if t.shouldLog(log) {
+		for dependencyName, event := range events {
+			t.Logger.Info(
+				event.DataString(),
+				zap.String("triggerName", t.Trigger.Template.Name),
+				zap.String("dependencyName", dependencyName),
+				zap.Any("eventContext", event.Context),
+			)
+		}
+		t.LastLogTime = time.Now()
 	}
-	for dependencyName, event := range events {
-		t.Logger.Info(
-			event.DataString(),
-			zap.String("triggerName", t.Trigger.Template.Name),
-			zap.String("dependencyName", dependencyName),
-			zap.Any("eventContext", event.Context),
-		)
-	}
-	t.LastLogTime = time.Now()
 	return nil, nil
+}
+
+func (t *LogTrigger) shouldLog(log *v1alpha1.LogTrigger) bool {
+	return time.Now().After(t.LastLogTime.Add(log.GetInterval()))
 }
 
 func (t *LogTrigger) ApplyPolicy(interface{}) error {
