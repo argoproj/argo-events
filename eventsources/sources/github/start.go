@@ -145,8 +145,8 @@ func (router *Router) PostActivate() error {
 		router.hookSecret = webhookSecretCreds.secret
 	}
 
-	if githubEventSource.APIToken == nil {
-		logger.Info("no api credential specified, skipping webhook creation...")
+	if githubEventSource.APIToken == nil || githubEventSource.Webhook.URL == "" {
+		logger.Info("no api credential or webhook url specified, skipping webhook creation...")
 		return nil
 	}
 
@@ -256,12 +256,12 @@ func (router *Router) PostInactivate() error {
 
 	githubEventSource := router.githubEventSource
 
-	if githubEventSource.APIToken == nil {
-		logger := router.route.Logger.With(map[string]interface{}{
-			"repository": githubEventSource.Repository,
-		})
+	if githubEventSource.APIToken == nil || githubEventSource.Webhook.URL == "" {
+		logger := router.route.Logger.With(
+			"repository", githubEventSource.Repository,
+		)
 
-		logger.Info("no api credential specified, skipping webhook deletion...")
+		logger.Info("no api credential or webhook url specified, skipping webhook deletion...")
 		return nil
 	}
 
