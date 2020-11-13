@@ -90,6 +90,14 @@ type NativeStrategy struct {
 	// Max Age of existing messages, i.e. "72h", “4h35m”
 	// +optional
 	MaxAge *string `json:"maxAge,omitempty" protobuf:"bytes,11,opt,name=maxAge"`
+	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
+	// If specified, these secrets will be passed to individual puller implementations for them to use. For example,
+	// in the case of docker, only DockerConfig type secrets are honored.
+	// More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+	// +optional
+	// +patchMergeKey=name
+	// +patchStrategy=merge
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,12,rep,name=imagePullSecrets"`
 }
 
 // ContainerTemplate defines customized spec for a container
