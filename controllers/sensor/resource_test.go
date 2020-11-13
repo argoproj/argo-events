@@ -47,6 +47,11 @@ var (
 		Spec: v1alpha1.SensorSpec{
 			Template: &v1alpha1.Template{
 				ServiceAccountName: "fake-sa",
+				ImagePullSecrets: []corev1.LocalObjectReference{
+					{
+						Name: "test",
+					},
+				},
 				Container: &corev1.Container{
 					VolumeMounts: []corev1.VolumeMount{
 						{
@@ -64,38 +69,6 @@ var (
 					},
 				},
 			},
-			Triggers: []v1alpha1.Trigger{
-				{
-					Template: &v1alpha1.TriggerTemplate{
-						Name: "fake-trigger",
-						K8s: &v1alpha1.StandardK8STrigger{
-							GroupVersionResource: metav1.GroupVersionResource{
-								Group:    "k8s.io",
-								Version:  "",
-								Resource: "pods",
-							},
-							Operation: "create",
-							Source:    &v1alpha1.ArtifactLocation{},
-						},
-					},
-				},
-			},
-			Dependencies: []v1alpha1.EventDependency{
-				{
-					Name:            "fake-dep",
-					EventSourceName: "fake-source",
-					EventName:       "fake-one",
-				},
-			},
-		},
-	}
-
-	sensorObjNoTemplate = &v1alpha1.Sensor{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "fake-sensor",
-			Namespace: testNamespace,
-		},
-		Spec: v1alpha1.SensorSpec{
 			Triggers: []v1alpha1.Trigger{
 				{
 					Template: &v1alpha1.TriggerTemplate{
@@ -156,7 +129,7 @@ var (
 )
 
 func Test_BuildDeployment(t *testing.T) {
-	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
+	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObj}
 	t.Run("test build with eventbus", func(t *testing.T) {
 		for _, sObj := range sensorObjs {
 			args := &AdaptorArgs{
@@ -177,6 +150,7 @@ func Test_BuildDeployment(t *testing.T) {
 				}
 			}
 			assert.True(t, hasAuthVolume)
+			assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		}
 	})
 }

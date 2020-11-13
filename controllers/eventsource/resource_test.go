@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 const (
@@ -25,6 +26,13 @@ var (
 func Test_BuildDeployment(t *testing.T) {
 	testEventSource := fakeEmptyEventSource()
 	testEventSource.Spec.HDFS = fakeHDFSEventSourceMap("test")
+	testEventSource.Spec.Template = &v1alpha1.Template{
+		ImagePullSecrets: []corev1.LocalObjectReference{
+			{
+				Name: "test",
+			},
+		},
+	}
 	t.Run("test build HDFS", func(t *testing.T) {
 		args := &AdaptorArgs{
 			Image:       testImage,
@@ -50,6 +58,7 @@ func Test_BuildDeployment(t *testing.T) {
 			}
 		}
 		assert.True(t, hasAuthVolume)
+		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		assert.True(t, cmRefs > 0)
 		assert.True(t, secretRefs > 0)
 	})
