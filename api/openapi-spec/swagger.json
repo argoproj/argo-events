@@ -408,6 +408,10 @@
           "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
           "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext"
         },
+        "serviceAccountName": {
+          "description": "ServiceAccountName to apply to NATS StatefulSet",
+          "type": "string"
+        },
         "tolerations": {
           "description": "If specified, the pod's tolerations.",
           "type": "array",

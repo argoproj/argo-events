@@ -151,6 +151,10 @@ message NativeStrategy {
   // +patchMergeKey=name
   // +patchStrategy=merge
   repeated k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 12;
+
+  // ServiceAccountName to apply to NATS StatefulSet
+  // +optional
+  optional string serviceAccountName = 13;
 }
 
 // PersistenceStrategy defines the strategy of persistence
