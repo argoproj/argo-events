@@ -205,13 +205,24 @@ filter:
 
 		case v1alpha1.JSONTypeString:
 			for _, value := range f.Value {
-				exp, err := regexp.Compile(value)
-				if err != nil {
-					return false, err
-				}
+				switch f.Comparator {
+				case v1alpha1.EqualTo:
+					if res.Str == value {
+						continue filter
+					}
+				case v1alpha1.NotEqualTo:
+					if res.Str != value {
+						continue filter
+					}
+				default:
+					exp, err := regexp.Compile(value)
+					if err != nil {
+						return false, err
+					}
 
-				if exp.Match([]byte(res.Str)) {
-					continue filter
+					if exp.Match([]byte(res.Str)) {
+						continue filter
+					}
 				}
 			}
 			return false, nil

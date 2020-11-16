@@ -156,6 +156,48 @@ func TestFilterData(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "string filter EqualTo, JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"v"},
+						Comparator: "=",
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"v\"}"),
+				},
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter NotEqualTo, JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"b"},
+						Comparator: "!=",
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"v\"}"),
+				},
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
 			name: "number filter, JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
