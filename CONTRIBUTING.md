@@ -18,7 +18,7 @@ Open an issue. Please include descriptions of the following:
 Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster. This guide includes steps for `Minikube` for local development, but if you have another cluster you can ignore the Minikube specific step 3.
 
 ### Requirements
-- Golang 1.12
+- Golang 1.13
 - Docker
 - [dep](https://golang.github.io/dep/docs/installation.html)
 
