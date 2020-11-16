@@ -537,6 +537,17 @@ only DockerConfig type secrets are honored. More info:
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>serviceAccountName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ServiceAccountName to apply to NATS StatefulSet
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.PersistenceStrategy">

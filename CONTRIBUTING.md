@@ -20,7 +20,6 @@ Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster.
 ### Requirements
 - Golang 1.13
 - Docker
-- [dep](https://golang.github.io/dep/docs/installation.html)
 
 ### Installation & Setup
 
@@ -33,7 +32,6 @@ cd $GOPATH/src/github.com/argoproj/argo-events
 #### 2. Vendor dependencies
 ```
 GO111MODULE=on go get github.com/cloudevents/sdk-go
-dep ensure -vendor-only
 ```
 
 #### 3. Start Minikube and point Docker Client to Minikube's Docker Daemon
@@ -57,7 +55,7 @@ If you're making a change to the `pkg/apis`  package, please ensure you re-run t
 
 ```
 go get github.com/ahmetb/gen-crd-api-reference-docs
-cd $GOPATH/github.com/ahmetb/gen-crd-api-reference-docs
+cd $GOPATH/src/github.com/ahmetb/gen-crd-api-reference-docs
 go build
 ```
 

@@ -98,6 +98,9 @@ type NativeStrategy struct {
 	// +patchMergeKey=name
 	// +patchStrategy=merge
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,12,rep,name=imagePullSecrets"`
+	// ServiceAccountName to apply to NATS StatefulSet
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,13,opt,name=serviceAccountName"`
 }
 
 // ContainerTemplate defines customized spec for a container

@@ -46,6 +46,7 @@ var (
 							Name: "test",
 						},
 					},
+					ServiceAccountName: "test",
 				},
 			},
 		},
@@ -235,5 +236,22 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
 		assert.True(t, len(ss.Spec.Template.Spec.ImagePullSecrets) > 0)
+	})
+}
+
+func TestBuildServiceAccountStatefulSetSpec(t *testing.T) {
+	t.Run("installation with Service Account Name", func(t *testing.T) {
+		cl := fake.NewFakeClient(testEventBus)
+		installer := &natsInstaller{
+			client:         cl,
+			eventBus:       testEventBus,
+			streamingImage: testStreamingImage,
+			metricsImage:   testMetricsImage,
+			labels:         testLabels,
+			logger:         logging.NewArgoEventsLogger(),
+		}
+		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
+		assert.NoError(t, err)
+		assert.True(t, len(ss.Spec.Template.Spec.ServiceAccountName) > 0)
 	})
 }
