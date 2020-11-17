@@ -1488,6 +1488,32 @@ LogTrigger
 </p>
 <p>
 </p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>intervalSeconds</code></br> <em> uint64 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Only print messages every interval. Useful to prevent logging too much
+data for busy events.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.NATSTrigger">
 NATSTrigger
 </h3>
