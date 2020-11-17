@@ -10,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Add to PATH
+        run: |
+          echo /home/runner/go/bin >> $GITHUB_PATH
       - name: golangci-lint
         run: |
           echo 'GOPATH=/home/runner/go' >> $GITHUB_ENV
-          echo /home/runner/go/bin >> $GITHUB_PATH
           make lint
