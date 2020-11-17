@@ -79,7 +79,6 @@ require (
 	github.com/xanzy/go-gitlab v0.33.0
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
-	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/sys v0.0.0-20200724161237-0e2f3a69832c // indirect
 	google.golang.org/api v0.15.0
