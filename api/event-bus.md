@@ -519,6 +519,35 @@ Max Age of existing messages, i.e. “72h”, “4h35m”
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>imagePullSecrets</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#localobjectreference-v1-core">
+\[\]Kubernetes core/v1.LocalObjectReference </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ImagePullSecrets is an optional list of references to secrets in the
+same namespace to use for pulling any of the images used by this
+PodSpec. If specified, these secrets will be passed to individual puller
+implementations for them to use. For example, in the case of docker,
+only DockerConfig type secrets are honored. More info:
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images\#specifying-imagepullsecrets-on-a-pod</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>serviceAccountName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ServiceAccountName to apply to NATS StatefulSet
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.PersistenceStrategy">

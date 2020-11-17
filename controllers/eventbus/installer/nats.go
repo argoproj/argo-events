@@ -660,9 +660,11 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				Labels: podTemplateLabels,
 			},
 			Spec: corev1.PodSpec{
-				NodeSelector:    i.eventBus.Spec.NATS.Native.NodeSelector,
-				Tolerations:     i.eventBus.Spec.NATS.Native.Tolerations,
-				SecurityContext: i.eventBus.Spec.NATS.Native.SecurityContext,
+				NodeSelector:       i.eventBus.Spec.NATS.Native.NodeSelector,
+				Tolerations:        i.eventBus.Spec.NATS.Native.Tolerations,
+				SecurityContext:    i.eventBus.Spec.NATS.Native.SecurityContext,
+				ImagePullSecrets:   i.eventBus.Spec.NATS.Native.ImagePullSecrets,
+				ServiceAccountName: i.eventBus.Spec.NATS.Native.ServiceAccountName,
 				Volumes: []corev1.Volume{
 					{
 						Name: "config-volume",
