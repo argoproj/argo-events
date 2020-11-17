@@ -13,5 +13,5 @@ jobs:
       - name: golangci-lint
         run: |
           echo 'GOPATH=/home/runner/go' >> $GITHUB_ENV
-          echo '/home/runner/go/bin' >> $GITHUB_PATH
+          echo /home/runner/go/bin >> $GITHUB_PATH
           make lint
