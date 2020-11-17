@@ -374,6 +374,9 @@ message KafkaTrigger {
 }
 
 message LogTrigger {
+  // Only print messages every interval. Useful to prevent logging too much data for busy events.
+  // +optional
+  optional uint64 intervalSeconds = 1;
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.
