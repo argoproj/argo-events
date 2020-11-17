@@ -8,6 +8,7 @@ Available event-sources:
 1. AMQP
 1. AWS SNS
 1. AWS SQS
+1. Azure Events Hub
 1. Cron Schedules
 1. GCP PubSub
 1. GitHub
@@ -26,7 +27,6 @@ Available event-sources:
 1. NSQ
 1. Emitter
 1. Redis
-1. Azure Events Hub
 
 
 ## Specification

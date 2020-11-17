@@ -90,13 +90,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	hook := router.hook
-	secret := ""
-	if s, ok := hook.Config["secret"]; ok {
-		secret = s.(string)
-	}
-
-	body, err := parseValidateRequest(request, []byte(secret))
+	body, err := parseValidateRequest(request, []byte(router.hookSecret))
 	if err != nil {
 		logger.Desugar().Error("request is not valid event notification, discarding it", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
@@ -142,6 +136,20 @@ func (router *Router) PostActivate() error {
 		"repository", githubEventSource.Repository,
 	)
 
+	logger.Info("retrieving webhook secret credentials...")
+	if githubEventSource.WebhookSecret != nil {
+		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret)
+		if err != nil {
+			return errors.Errorf("failed to retrieve webhook secret. err: %+v", err)
+		}
+		router.hookSecret = webhookSecretCreds.secret
+	}
+
+	if githubEventSource.APIToken == nil || githubEventSource.Webhook.URL == "" {
+		logger.Info("no api credential or webhook url specified, skipping webhook creation...")
+		return nil
+	}
+
 	logger.Info("retrieving api token credentials...")
 	apiTokenCreds, err := router.getCredentials(githubEventSource.APIToken)
 	if err != nil {
@@ -169,13 +177,8 @@ func (router *Router) PostActivate() error {
 		hookConfig["insecure_ssl"] = "0"
 	}
 
-	logger.Info("retrieving webhook secret credentials...")
-	if githubEventSource.WebhookSecret != nil {
-		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret)
-		if err != nil {
-			return errors.Errorf("failed to retrieve webhook secret. err: %+v", err)
-		}
-		hookConfig["secret"] = webhookSecretCreds.secret
+	if router.hookSecret != "" {
+		hookConfig["secret"] = router.hookSecret
 	}
 
 	router.hook = &gh.Hook{
@@ -252,6 +255,15 @@ func (router *Router) PostInactivate() error {
 	defer cancel()
 
 	githubEventSource := router.githubEventSource
+
+	if githubEventSource.APIToken == nil || githubEventSource.Webhook.URL == "" {
+		logger := router.route.Logger.With(
+			"repository", githubEventSource.Repository,
+		)
+
+		logger.Info("no api credential or webhook url specified, skipping webhook deletion...")
+		return nil
+	}
 
 	if githubEventSource.DeleteHookOnFinish {
 		logger := router.route.Logger.With(
