@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v1
-        with:
-          version: v1.26
+        run: |
+          echo 'GOPATH=/home/runner/go' >> $GITHUB_ENV
+          echo '/home/runner/go/bin' >> $GITHUB_PATH
+          make lint
