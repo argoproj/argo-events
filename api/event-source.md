@@ -1650,7 +1650,10 @@ Repository refers to GitHub repo name i.e. argo-events
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
+<p>
 APIToken refers to a K8s secret containing github api token
+</p>
 </td>
 </tr>
 <tr>

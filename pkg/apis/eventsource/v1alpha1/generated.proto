@@ -343,6 +343,7 @@ message GithubEventSource {
   repeated string events = 5;
 
   // APIToken refers to a K8s secret containing github api token
+  // +optional
   optional k8s.io.api.core.v1.SecretKeySelector apiToken = 6;
 
   // WebhookSecret refers to K8s secret containing GitHub webhook secret
