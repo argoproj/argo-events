@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"mime"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -524,7 +525,15 @@ type OpenWhiskTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
-type LogTrigger struct{}
+type LogTrigger struct {
+	// Only print messages every interval. Useful to prevent logging too much data for busy events.
+	// +optional
+	IntervalSeconds uint64 `json:"intervalSeconds,omitempty" protobuf:"varint,1,opt,name=intervalSeconds"`
+}
+
+func (in *LogTrigger) GetInterval() time.Duration {
+	return time.Duration(in.IntervalSeconds) * time.Second
+}
 
 // TriggerParameterOperation represents how to set a trigger destination
 // resource key
@@ -764,13 +773,25 @@ type Event struct {
 
 // returns a string representation of the data, either as the text (e.g. if it is text) or as base 64 encoded string
 func (e Event) DataString() string {
-	mediaType, _, _ := mime.ParseMediaType(e.Context.DataContentType)
+	if e.Data == nil {
+		return ""
+	}
+	mediaType := e.getMediaType()
 	switch mediaType {
 	case "application/json", "text/plain":
 		return string(e.Data)
 	default:
 		return base64.StdEncoding.EncodeToString(e.Data)
 	}
+}
+
+func (e Event) getMediaType() string {
+	dataContentType := ""
+	if e.Context != nil {
+		dataContentType = e.Context.DataContentType
+	}
+	mediaType, _, _ := mime.ParseMediaType(dataContentType)
+	return mediaType
 }
 
 func (e Event) String() string {
