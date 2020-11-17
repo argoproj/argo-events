@@ -34,7 +34,7 @@ type ResourceLabels struct {
 
 func (rl *ResourceLabels) ApplyPolicy() error {
 	from := rl.Trigger.Policy.K8s.Backoff
-	if rl.Trigger.Policy.K8s == nil || rl.Trigger.Policy.K8s.Labels == nil || &from == nil {
+	if rl.Trigger.Policy.K8s == nil || rl.Trigger.Policy.K8s.Labels == nil {
 		return nil
 	}
 
