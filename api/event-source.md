@@ -3216,6 +3216,18 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>validateSignature</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ValidateSignature is boolean that can be set to true for SNS signature
+verification
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.SQSEventSource">
