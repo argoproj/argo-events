@@ -48,20 +48,8 @@ make all
 Follow [README](README.md#install) to install components.
 
 ## Changing Types
-If you're making a change to the `pkg/apis`  package, please ensure you re-run the K8 code-generator scripts found in the `/hack` folder.
+If you're making a change to the `pkg/apis`  package, please ensure you re-run:
 
-* Ensure you have the `generate-groups.sh` script at the path: `vendor/k8s.io/code-generator/`.
-* Install `gen-crd-api-reference-docs`
-
-```
-go get github.com/ahmetb/gen-crd-api-reference-docs
-cd $GOPATH/src/github.com/ahmetb/gen-crd-api-reference-docs
-go build
-```
-
-* [install pandoc](https://pandoc.org/installing.html)
-
-* Regenerate the code and documentation
 
 ```
 make codegen

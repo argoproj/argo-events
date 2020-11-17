@@ -34,6 +34,8 @@ spec:
         - "*"
 
       # apiToken refers to K8s secret that stores the github api token
+      # if apiToken is provided controller will create webhook on GitHub repo
+      # +optional
       apiToken:
         # Name of the K8s secret that contains the access token
         name: github-access
@@ -55,6 +57,22 @@ spec:
       active: true
       # The media type used to serialize the payloads
       contentType: json
+      
+    example-without-api-credentials:
+      owner: "argoproj"
+      repository: "argo"
+      webhook:
+        endpoint: "/push"
+        port: "13000"
+        method: "POST"
+      events:
+        - "*"
+      webhookSecret:
+        name: github-access
+        key: secret
+      insecure: true
+      active: true
+      contentType: "json"
 
 #    example-with-secure-connection:
 #      owner: "argoproj"

@@ -56,6 +56,8 @@ type Router struct {
 	githubClient *github.Client
 	// hook represents a GitHub (web and service) hook for a repository.
 	hook *github.Hook
+	// hookSecret is a GitHub webhook secret
+	hookSecret string
 }
 
 // cred stores the api access token or webhook secret

@@ -37,9 +37,6 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	if githubEventSource.Owner == "" {
 		return fmt.Errorf("owner cannot be empty")
 	}
-	if githubEventSource.APIToken == nil {
-		return fmt.Errorf("api token can't be empty")
-	}
 	if githubEventSource.Events == nil || len(githubEventSource.Events) < 1 {
 		return fmt.Errorf("events must be defined")
 	}
