@@ -180,6 +180,13 @@ codegen:
 	rm -rf ./vendor
 	go mod tidy
 
+go-diagrams/diagram.dot: ./hack/diagram/main.go
+	rm -Rf go-diagrams
+	go run ./hack/diagram
+
+docs/assets/diagram.png: go-diagrams/diagram.dot
+	cd go-diagrams && dot -Tpng diagram.dot -o ../docs/assets/diagram.png
+
 .PHONY: start
 start:
 	kustomize build --load_restrictor=none test/manifests > /tmp/argo-events.yaml
