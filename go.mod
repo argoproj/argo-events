@@ -26,14 +26,14 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/go-openapi/spec v0.19.7
-	github.com/go-openapi/swag v0.19.8 // indirect
+	github.com/go-openapi/spec v0.19.8
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/go-resty/resty/v2 v2.3.0
+	github.com/go-swagger/go-swagger v0.25.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/protobuf v1.3.5
-	github.com/google/go-cmp v0.4.0
+	github.com/golang/protobuf v1.4.2
+	github.com/google/go-cmp v0.5.0
 	github.com/google/go-github/v31 v31.0.0
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/uuid v1.1.2
@@ -47,12 +47,9 @@ require (
 	github.com/imdario/mergo v0.3.9
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/json-iterator/go v1.1.9 // indirect
-	github.com/magiconair/properties v1.8.1 // indirect
-	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/minio/minio-go v1.0.1-0.20190523192347-c6c2912aa552
 	github.com/mitchellh/copystructure v1.0.0 // indirect
-	github.com/mitchellh/mapstructure v1.3.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/go-nats v1.7.2
@@ -62,7 +59,6 @@ require (
 	github.com/nats-io/stan.go v0.6.0
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
 	github.com/nsqio/go-nsq v1.0.8
-	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pierrec/lz4 v2.5.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.1.0 // indirect
@@ -74,8 +70,7 @@ require (
 	github.com/slack-go/slack v0.6.5
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v1.6.4
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.3.2
+	github.com/spf13/viper v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.6.1
 	github.com/stripe/stripe-go v70.15.0+incompatible
@@ -83,14 +78,12 @@ require (
 	github.com/tidwall/sjson v1.1.1
 	github.com/xanzy/go-gitlab v0.33.0
 	go.uber.org/zap v1.14.1
-	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
+	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/sys v0.0.0-20200724161237-0e2f3a69832c // indirect
-	golang.org/x/tools v0.0.0-20200408132156-9ee5ef7a2c0d // indirect
 	google.golang.org/api v0.15.0
-	google.golang.org/genproto v0.0.0-20200408120641-fbb3ad325eb7 // indirect
 	google.golang.org/grpc v1.28.1
-	gopkg.in/ini.v1 v1.55.0 // indirect
 	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	gopkg.in/jcmturner/rpc.v0 v0.0.2 // indirect
@@ -104,7 +97,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20200316234421-82d701f24f9d
 	k8s.io/utils v0.0.0-20200327001022-6496210b90e8 // indirect
 	sigs.k8s.io/controller-runtime v0.5.4
-	sigs.k8s.io/controller-tools v0.2.5
+	sigs.k8s.io/controller-tools v0.2.9
 	sigs.k8s.io/yaml v1.2.0
 )
 
