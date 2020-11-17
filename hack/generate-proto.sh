@@ -8,14 +8,28 @@ source $(dirname $0)/library.sh
 header "generating proto files"
 
 ensure_vendor
+
+if [ "`command -v protoc-gen-gogo`" = "" ]; then
+  go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogo
+fi
+
+if [ "`command -v protoc-gen-gogofast`" = "" ]; then
+  go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogofast
+fi
+
+if [ "`command -v goimports`" = "" ]; then
+  export GO111MODULE="off"
+  go get golang.org/x/tools/cmd/goimports
+  export GO111MODULE="on"
+fi
+
 make_fake_paths
-
 export GOPATH="${FAKE_GOPATH}"
-export GO111MODULE="off"
-
 cd "${FAKE_REPOPATH}"
 
-go install ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
+go install -mod=vendor ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
+
+export GO111MODULE="off"
 
 ${GOPATH}/bin/go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
