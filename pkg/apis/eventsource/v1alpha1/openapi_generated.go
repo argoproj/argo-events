@@ -2179,6 +2179,13 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 							},
 						},
 					},
+					"validateSignature": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ValidateSignature is boolean that can be set to true for SNS signature verification",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"topicArn", "region"},
 			},
