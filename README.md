@@ -14,7 +14,7 @@
 
 ## Features 
 
-* Supports events from [20+ event sources](https://argoproj.github.io/argo-events/concepts/event_source/) and [10+ triggers](https://argoproj.github.io/argo-events/concepts/triggers/).
+* Supports events from [20+ event sources](https://argoproj.github.io/argo-events/concepts/event_source/) and [10+ triggers](https://argoproj.github.io/argo-events/concepts/trigger/).
 * Ability to customize business-level constraint logic for workflow automation.
 * Manage everything from simple, linear, real-time to complex, multi-source events.
 * [CloudEvents](https://cloudevents.io/) compliant.
