@@ -7,67 +7,45 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 ## What is Argo Events?
-**Argo Events** is an event-driven workflow automation framework for Kubernetes 
-which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. 
-on events from variety of sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
 
-<br/>
-<br/>
+**Argo Events** is an event-driven workflow automation framework for Kubernetes. It allows you to trigger 10 different actions (such as the creation of Kubernetes objects, invoke workflows or serverless workloads) on over 20 different events (such as webhook, S3 drop, cron schedule, messaging queues - e.g. Kafaka, GCP PubPub, SNS, SQS).
 
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/argo-events-top-level.png?raw=true" alt="High Level Overview"/>
-</p>
-
-<br/>
+[![Argo Events in 3 minutes](https://img.youtube.com/vi/Aqi1zyTpM44/0.jpg)](https://youtu.be/Aqi1zyTpM44)
 
 ## Features 
-* Supports events from 20+ event sources.
+
+* Supports events from [20+ event sources](https://argoproj.github.io/argo-events/concepts/event_source/) and [10+ triggers](https://argoproj.github.io/argo-events/concepts/triggers/).
 * Ability to customize business-level constraint logic for workflow automation.
 * Manage everything from simple, linear, real-time to complex, multi-source events.
-* Supports Kubernetes Objects, Argo Workflow, AWS Lambda, Serverless, etc. as triggers.
 * [CloudEvents](https://cloudevents.io/) compliant.
 
 ## Getting Started
+
 Follow these [instruction](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
 
 ## Documentation
-- [Concepts](https://argoproj.github.io/argo-events/concepts/architecture/).
-- [Argo Events in action](https://argoproj.github.io/argo-events/quick_start/).
-- [Deploy event-sources and sensors](https://argoproj.github.io/argo-events/setup/webhook/).
-- [Deep dive into Argo Events](https://argoproj.github.io/argo-events/tutorials/01-introduction/).  
 
-## Triggers
+- [Concepts](https://argoproj.github.io/argo-events/concepts/architecture/)
+- [Argo Events in action](https://argoproj.github.io/argo-events/quick_start/)
+- [Deploy event-sources and sensors](https://argoproj.github.io/argo-events/setup/webhook/)
+- [Deep dive into Argo Events](https://argoproj.github.io/argo-events/tutorials/01-introduction/)
 
-1. AWS Lambda
-1. Apache OpenWhisk
-1. Argo Rollouts
-1. Argo Workflows
-1. Custom Trigger / Build Your Own Trigger
-1. HTTP Requests / Serverless Workloads (OpenFaas, Kubeless, KNative etc.)
-1. Kafka Messages
-1. NATS Messages
-1. Slack Notifications
-1. Standard K8s Objects
+## Blogs and Presentations
 
-## Event Sources
-
-Argo-Events supports 20+ event sources. The complete list of event sources is available [here](https://argoproj.github.io/argo-events/concepts/event_source/).
+* [Argo Events Deep-dive](https://youtu.be/U4tCYcCK20w)
+* [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
+* [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
+* TGI Kubernetes with Joe Beda: [CloudEvents and Argo Events](https://www.youtube.com/watch?v=LQbBgQnUs_k&list=PL7bmigfV0EqQzxcNpmcdTJ9eFRPBe-iZa&index=2&t=0s)
 
 ## Who uses Argo Events?
 
 [Official Argo Events user list](USERS.md)
 
-## Community Blogs and Presentations
-
-* [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
-* [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
-* TGI Kubernetes with Joe Beda: [CloudEvents and Argo Events](https://www.youtube.com/watch?v=LQbBgQnUs_k&list=PL7bmigfV0EqQzxcNpmcdTJ9eFRPBe-iZa&index=2&t=0s)
-
 ## Contribute
 
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md).
 
-[Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look at our [Contributing Guidelines](./CONTRIBUTING.md).
+[Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested take a look at our [Contributing Guidelines](./CONTRIBUTING.md).
 
 ## License
 
