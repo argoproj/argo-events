@@ -16,6 +16,7 @@ require (
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.1.1
 	github.com/aws/aws-sdk-go v1.30.7
+	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/cloudevents/sdk-go/v2 v2.1.0
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
@@ -35,7 +36,7 @@ require (
 	github.com/google/go-cmp v0.5.0
 	github.com/google/go-github/v31 v31.0.0
 	github.com/google/gofuzz v1.1.0 // indirect
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/googleapis/gnostic v0.4.0 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gorilla/mux v1.7.3
@@ -78,7 +79,6 @@ require (
 	github.com/xanzy/go-gitlab v0.33.0
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
-	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/sys v0.0.0-20200724161237-0e2f3a69832c // indirect
 	google.golang.org/api v0.15.0
