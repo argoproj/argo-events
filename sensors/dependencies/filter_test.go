@@ -160,9 +160,9 @@ func TestFilterData(t *testing.T) {
 			args: args{
 				data: []v1alpha1.DataFilter{
 					{
-						Path:  "k",
-						Type:  v1alpha1.JSONTypeString,
-						Value: []string{"v"},
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeString,
+						Value:      []string{"v"},
 						Comparator: "=",
 					},
 				},
@@ -181,9 +181,9 @@ func TestFilterData(t *testing.T) {
 			args: args{
 				data: []v1alpha1.DataFilter{
 					{
-						Path:  "k",
-						Type:  v1alpha1.JSONTypeString,
-						Value: []string{"b"},
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeString,
+						Value:      []string{"b"},
 						Comparator: "!=",
 					},
 				},
