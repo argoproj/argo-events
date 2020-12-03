@@ -15,7 +15,7 @@ spec:
           stop: "23:04:05"
     - name: test-another-dep
       eventSourceName: webhook
-      eventName: example
+      eventName: example1
       filters:
         time:
           # start > stop, stop is treated as next day of start,
