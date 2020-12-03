@@ -1,4 +1,4 @@
-# Argo Events - The Event-driven Workflow Automation Framework
+# Argo Events - The Event-driven Workflow Automation Framework - DERP
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/argoproj/argo-events)](https://goreportcard.com/report/github.com/argoproj/argo-events)
 [![slack](https://img.shields.io/badge/slack-argoproj-brightgreen.svg?logo=slack)](https://argoproj.github.io/community/join-slack)
