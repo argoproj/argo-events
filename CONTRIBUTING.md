@@ -54,3 +54,7 @@ If you're making a change to the `pkg/apis`  package, please ensure you re-run:
 ```
 make codegen
 ```
+
+### Test Policy
+
+Changes without either unit or e2e tests are unlikely to be accepted. 
