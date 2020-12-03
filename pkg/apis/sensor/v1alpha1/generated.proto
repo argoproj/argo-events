@@ -160,6 +160,7 @@ message DependencyGroup {
 }
 
 // Event represents the cloudevent received from an event source.
+// +protobuf.options.(gogoproto.goproto_stringer)=false
 message Event {
   optional EventContext context = 1;
 
@@ -167,6 +168,7 @@ message Event {
 }
 
 // EventContext holds the context of the cloudevent received from an event source.
+// +protobuf.options.(gogoproto.goproto_stringer)=false
 message EventContext {
   // ID of the event; must be non-empty and unique within the scope of the producer.
   optional string id = 1;
@@ -371,6 +373,12 @@ message KafkaTrigger {
   optional string partitioningKey = 10;
 }
 
+message LogTrigger {
+  // Only print messages every interval. Useful to prevent logging too much data for busy events.
+  // +optional
+  optional uint64 intervalSeconds = 1;
+}
+
 // NATSTrigger refers to the specification of the NATS trigger.
 message NATSTrigger {
   // URL of the NATS cluster.
@@ -561,6 +569,15 @@ message Template {
   // If specified, the pod's tolerations.
   // +optional
   repeated k8s.io.api.core.v1.Toleration tolerations = 7;
+
+  // ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
+  // If specified, these secrets will be passed to individual puller implementations for them to use. For example,
+  // in the case of docker, only DockerConfig type secrets are honored.
+  // More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+  // +optional
+  // +patchMergeKey=name
+  // +patchStrategy=merge
+  repeated k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 8;
 }
 
 // TimeFilter describes a window in time.
@@ -710,6 +727,10 @@ message TriggerTemplate {
   // OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
   // +optional
   optional OpenWhiskTrigger openWhisk = 11;
+
+  // Log refers to the trigger designed to invoke log the event.
+  // +optional
+  optional LogTrigger log = 13;
 
   // DeprecatedSwitch is the condition to execute the trigger.
   // DEPRECATED: USE conditions instead

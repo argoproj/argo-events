@@ -140,6 +140,14 @@ type Template struct {
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,8,rep,name=nodeSelector"`
+	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
+	// If specified, these secrets will be passed to individual puller implementations for them to use. For example,
+	// in the case of docker, only DockerConfig type secrets are honored.
+	// More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+	// +optional
+	// +patchMergeKey=name
+	// +patchStrategy=merge
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,9,rep,name=imagePullSecrets"`
 }
 
 // Service holds the service information eventsource exposes
@@ -421,6 +429,9 @@ type SNSEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// ValidateSignature is boolean that can be set to true for SNS signature verification
+	// +optional
+	ValidateSignature bool `json:"validateSignature,omitempty" protobuf:"varint,8,opt,name=validateSignature"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -508,6 +519,7 @@ type GithubEventSource struct {
 
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
 	// APIToken refers to a K8s secret containing github api token
+	// +optional
 	APIToken *corev1.SecretKeySelector `json:"apiToken,omitempty" protobuf:"bytes,6,opt,name=apiToken"`
 	// WebhookSecret refers to K8s secret containing GitHub webhook secret
 	// https://developer.github.com/webhooks/securing/

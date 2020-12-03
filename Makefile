@@ -19,7 +19,7 @@ override LDFLAGS += \
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=v1.0.0
+IMAGE_TAG?=latest
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
@@ -179,6 +179,13 @@ codegen:
 	$(MAKE) manifests
 	rm -rf ./vendor
 	go mod tidy
+
+go-diagrams/diagram.dot: ./hack/diagram/main.go
+	rm -Rf go-diagrams
+	go run ./hack/diagram
+
+docs/assets/diagram.png: go-diagrams/diagram.dot
+	cd go-diagrams && dot -Tpng diagram.dot -o ../docs/assets/diagram.png
 
 .PHONY: start
 start:

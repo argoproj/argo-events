@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: log
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: calendar
+      eventName: example-with-interval
+  triggers:
+    - template:
+        name: log-trigger
+        log:
+          intervalSeconds: 20

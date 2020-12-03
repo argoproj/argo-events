@@ -1429,6 +1429,36 @@ Defaults to broker url.</p>
 <p>
 <p>KubernetesResourceOperation refers to the type of operation performed on the K8s resource</p>
 </p>
+<h3 id="argoproj.io/v1alpha1.LogTrigger">LogTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>intervalSeconds</code></br>
+<em>
+uint64
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Only print messages every interval. Useful to prevent logging too much data for busy events.</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.NATSTrigger">NATSTrigger
 </h3>
 <p>
@@ -2215,6 +2245,23 @@ More info: <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod
 <p>If specified, the pod&rsquo;s tolerations.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>imagePullSecrets</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#localobjectreference-v1-core">
+[]Kubernetes core/v1.LocalObjectReference
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
+If specified, these secrets will be passed to individual puller implementations for them to use. For example,
+in the case of docker, only DockerConfig type secrets are honored.
+More info: <a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a></p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TimeFilter">TimeFilter
@@ -2755,6 +2802,20 @@ OpenWhiskTrigger
 <td>
 <em>(Optional)</em>
 <p>OpenWhisk refers to the trigger designed to invoke OpenWhisk action.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>log</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.LogTrigger">
+LogTrigger
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Log refers to the trigger designed to invoke log the event.</p>
 </td>
 </tr>
 <tr>

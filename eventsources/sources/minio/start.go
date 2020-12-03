@@ -86,7 +86,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("started listening to bucket notifications...")
 	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events, doneCh) {
 		if notification.Err != nil {
-			log.Errorw("invalid notification", zap.Error(err))
+			log.Errorw("invalid notification", zap.Error(notification.Err))
 			continue
 		}
 

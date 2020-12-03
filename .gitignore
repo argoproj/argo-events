@@ -11,3 +11,4 @@ debug.test
 .coverage
 *.out
 site/
+/go-diagrams/
