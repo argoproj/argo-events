@@ -19,6 +19,7 @@ package sensor
 import (
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -39,4 +40,51 @@ func TestValidateSensor(t *testing.T) {
 		err = ValidateSensor(sensor)
 		assert.Nil(t, err)
 	}
+}
+
+func TestValidDepencies(t *testing.T) {
+	t.Run("test duplicate deps", func(t *testing.T) {
+		sObj := sensorObj.DeepCopy()
+		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
+			Name:            "fake-dep2",
+			EventSourceName: "fake-source",
+			EventName:       "fake-one",
+		})
+		err := ValidateSensor(sObj)
+		assert.NotNil(t, err)
+		assert.Equal(t, true, strings.Contains(err.Error(), "more than once"))
+	})
+
+	t.Run("test empty event source name", func(t *testing.T) {
+		sObj := sensorObj.DeepCopy()
+		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
+			Name:      "fake-dep2",
+			EventName: "fake-one",
+		})
+		err := ValidateSensor(sObj)
+		assert.NotNil(t, err)
+		assert.Equal(t, true, strings.Contains(err.Error(), "must define the EventSourceName"))
+	})
+
+	t.Run("test empty event name", func(t *testing.T) {
+		sObj := sensorObj.DeepCopy()
+		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
+			Name:            "fake-dep2",
+			EventSourceName: "fake-source",
+		})
+		err := ValidateSensor(sObj)
+		assert.NotNil(t, err)
+		assert.Equal(t, true, strings.Contains(err.Error(), "must define the EventName"))
+	})
+
+	t.Run("test empty event name", func(t *testing.T) {
+		sObj := sensorObj.DeepCopy()
+		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
+			EventSourceName: "fake-source2",
+			EventName:       "fake-one2",
+		})
+		err := ValidateSensor(sObj)
+		assert.NotNil(t, err)
+		assert.Equal(t, true, strings.Contains(err.Error(), "must define a name"))
+	})
 }

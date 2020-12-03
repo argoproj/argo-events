@@ -17,6 +17,7 @@ limitations under the License.
 package sensor
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -33,7 +34,7 @@ import (
 // Exporting this function so that external APIs can use this to validate sensor resource.
 func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err := validateDependencies(s.Spec.Dependencies); err != nil {
-		s.Status.MarkDependenciesNotProvided("InvalidDependencies", "Faild to validate dependencies.")
+		s.Status.MarkDependenciesNotProvided("InvalidDependencies", err.Error())
 		return err
 	}
 	// DEPRECATED.
@@ -394,7 +395,7 @@ func validateCustomTrigger(trigger *v1alpha1.CustomTrigger) error {
 	return nil
 }
 
-// validateTriggerParameters validates resource and template parameters if any
+// validateTriggerTemplateParameters validates resource and template parameters if any
 func validateTriggerTemplateParameters(trigger *v1alpha1.Trigger) error {
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
@@ -435,18 +436,24 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 	if len(eventDependencies) < 1 {
 		return errors.New("no event dependencies found")
 	}
+	comboKeys := make(map[string]bool)
 	for _, dep := range eventDependencies {
 		if dep.Name == "" {
 			return errors.New("event dependency must define a name")
 		}
 		if dep.EventSourceName == "" {
-			return errors.New("event dependency must define the EventSource name")
+			return errors.New("event dependency must define the EventSourceName")
 		}
 
 		if dep.EventName == "" {
-			return errors.New("event dependency must define the event name")
+			return errors.New("event dependency must define the EventName")
 		}
-
+		// EventSourceName + EventName can not be referenced more than once in one Sensor object.
+		comboKey := fmt.Sprintf("%s-$$$-%s", dep.EventSourceName, dep.EventName)
+		if _, existing := comboKeys[comboKey]; existing {
+			return errors.Errorf("%s and %s are referenced more than once in this Sensor object", dep.EventSourceName, dep.EventName)
+		}
+		comboKeys[comboKey] = true
 		if err := validateEventFilter(dep.Filters); err != nil {
 			return err
 		}
