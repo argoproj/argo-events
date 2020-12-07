@@ -129,7 +129,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		for {
 			select {
 			case event := <-informerEventCh:
-				objBody, err := json.Marshal(event)
+				objBody, err := json.Marshal(event.Obj)
 				if err != nil {
 					log.Desugar().Error("failed to marshal the resource, rejecting the event...", zap.Error(err))
 					continue
