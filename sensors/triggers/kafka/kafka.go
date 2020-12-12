@@ -49,6 +49,16 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		var err error
 		config := sarama.NewConfig()
 
+		if kafkatrigger.Version == "" {
+			config.Version = sarama.V1_0_0_0
+		} else {
+			version, err := sarama.ParseKafkaVersion(kafkatrigger.Version)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to parse Kafka version")
+			}
+			config.Version = version
+		}
+
 		if kafkatrigger.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(kafkatrigger.TLS)
 			if err != nil {

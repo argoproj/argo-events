@@ -1006,6 +1006,13 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "topic", "partition", "payload"},
 			},
