@@ -126,6 +126,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		if err := request.ParseForm(); err != nil {
 			logger.Desugar().Error("failed to parse form data", zap.Error(err))
 			common.SendInternalErrorResponse(writer, err.Error())
+			return
 		}
 
 		switch {
