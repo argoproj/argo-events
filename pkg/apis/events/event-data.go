@@ -230,6 +230,8 @@ type ResourceEventData struct {
 	EventType string `json:"type"`
 	// Resource body.
 	Body *json.RawMessage `json:"body"`
+	// Prior state of the resource body (if it exists)
+	OldBody *json.RawMessage `json:"oldBody"`
 	// Resource group name.
 	Group string `json:"group"`
 	// Resource version.
