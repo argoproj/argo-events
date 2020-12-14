@@ -147,6 +147,42 @@ func TestInteractionHandler(t *testing.T) {
 	})
 }
 
+func TestSlackCommandHandler(t *testing.T) {
+	convey.Convey("Given a route that receives a slash command event", t, func() {
+		router := &Router{
+			route:            webhook.GetFakeRoute(),
+			slackEventSource: &v1alpha1.SlackEventSource{},
+		}
+
+		convey.Convey("Test a slash command message", func() {
+			writer := &webhook.FakeHttpWriter{}
+			// Test values pulled from example here: https://api.slack.com/interactivity/slash-commands#app_command_handling
+			payload := []byte(`token=gIkuvaNzQIHg97ATvDxqgjtO&team_id=T0001&team_domain=example&enterprise_id=E0001&enterprise_name=Globular%20Construct%20Inc&channel_id=C2147483705&channel_name=test&user_id=U2147483697&user_name=Steve&command=/weather&text=94070&response_url=https://hooks.slack.com/commands/1234/5678&trigger_id=13345224609.738474920.8088930838d88f008e0&api_app_id=A123456`)
+			out := make(chan []byte)
+			router.route.Active = true
+
+			go func() {
+				out <- <-router.route.DataCh
+			}()
+
+			var buf bytes.Buffer
+			buf.Write(payload)
+
+			headers := make(map[string][]string)
+			headers["Content-Type"] = append(headers["Content-Type"], "application/x-www-form-urlencoded")
+			router.HandleRoute(writer, &http.Request{
+				Method: http.MethodPost,
+				Header: headers,
+				Body:   ioutil.NopCloser(strings.NewReader(buf.String())),
+			})
+			result := <-out
+			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
+			convey.So(string(result), convey.ShouldContainSubstring, "\"command\":\"/weather\"")
+			convey.So(string(result), convey.ShouldContainSubstring, "\"token\":\"gIkuvaNzQIHg97ATvDxqgjtO\"")
+		})
+	})
+}
+
 func TestEventHandler(t *testing.T) {
 	convey.Convey("Given a route that receives an event", t, func() {
 		router := &Router{
