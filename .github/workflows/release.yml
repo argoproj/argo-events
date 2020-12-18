@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - master
 
 jobs:
   release:
@@ -42,4 +44,7 @@ jobs:
           DOCKERIO_ORG: ${{ secrets.DOCKERIO_ORG }}
         run: |
           tag=$(basename $GITHUB_REF)
+          if [ $tag = "master" ]; then
+            tag="latest"
+          fi
           make eventsource-image sensor-image eventbus-controller-image eventsource-controller-image sensor-controller-image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${DOCKERIO_ORG} DOCKER_PUSH=true
