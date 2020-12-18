@@ -13,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	argoevents "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common/logging"
@@ -108,10 +107,6 @@ func main() {
 	if err := c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventBus{}, IsController: true}); err != nil {
 		logger.Desugar().Fatal("unable to watch Services", zap.Error(err))
 	}
-
-	logger.Info("setting up validation webhook server")
-	hookServer := mgr.GetWebhookServer()
-	hookServer.Register("/validate-eventbus", &webhook.Admission{Handler: &eventbus.Validator{Client: mgr.GetClient()}})
 
 	logger.Infow("starting eventbus controller", "version", argoevents.GetVersion())
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {

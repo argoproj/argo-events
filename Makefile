@@ -37,9 +37,9 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor sensor-controller eventbus-controller eventsource-controller eventsource
+all: sensor sensor-controller eventbus-controller eventsource-controller eventsource events-webhook
 
-all-images: sensor-image sensor-controller-image eventbus-controller-image eventsource-controller-image eventsource-image
+all-images: sensor-image sensor-controller-image eventbus-controller-image eventsource-controller-image eventsource-image events-webhook-image
 
 all-controller-images: sensor-controller-image eventbus-controller-image eventsource-controller-image
 
@@ -144,6 +144,26 @@ dist/eventbus-controller-%:
 eventbus-controller-image: dist/eventbus-controller-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
+
+# Webhook
+.PHONY: events-webhook
+events-webhook: dist/events-webhook-linux-amd64
+
+dist/events-webhook: GOARGS = GOOS= GOARCH=
+dist/events-webhook-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
+dist/events-webhook-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
+dist/events-webhook-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
+dist/events-webhook-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
+
+dist/events-webhook:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/events-webhook ./webhook/cmd/main.go
+
+dist/events-webhook-%:
+	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/events-webhook ./webhook/cmd/main.go
+
+events-webhook-image: dist/events-webhook-linux-amd64
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)events-webhook:$(IMAGE_TAG)  --target events-webhook -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)events-webhook:$(IMAGE_TAG) ; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
