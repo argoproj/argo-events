@@ -6,7 +6,6 @@ on:
       - 'v*'
     branches:
       - master
-      - fix-latest
 
 jobs:
   release:
