@@ -3,16 +3,20 @@ package generic
 import (
 	"context"
 	"encoding/json"
+	fmt "fmt"
 	"time"
 
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/metadata"
+
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 )
 
 // EventListener implements Eventing for generic event source
@@ -110,7 +114,16 @@ func (el *EventListener) connect() (Eventing_StartEventSourceClient, error) {
 	}
 	el.conn = conn
 	client := NewEventingClient(el.conn)
-	return client.StartEventSource(context.Background(), &EventSource{
+	ctx := context.Background()
+	if el.GenericEventSource.AuthSecret != nil {
+		token, err := common.GetSecretFromVolume(el.GenericEventSource.AuthSecret)
+		if err != nil {
+			return nil, err
+		}
+		auth := fmt.Sprintf("Bearer %s", token)
+		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("authorization", auth))
+	}
+	return client.StartEventSource(ctx, &EventSource{
 		Name:   el.GetEventName(),
 		Config: []byte(el.GenericEventSource.Config),
 	})
