@@ -324,6 +324,10 @@ message GenericEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 5;
+
+  // AuthSecret holds a secret selector that contains a bearer token for authentication
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector authSecret = 6;
 }
 
 // GithubEventSource refers to event-source for github related events

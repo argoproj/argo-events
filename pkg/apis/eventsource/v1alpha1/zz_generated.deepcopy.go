@@ -544,6 +544,11 @@ func (in *GenericEventSource) DeepCopyInto(out *GenericEventSource) {
 			(*out)[key] = val
 		}
 	}
+	if in.AuthSecret != nil {
+		in, out := &in.AuthSecret, &out.AuthSecret
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

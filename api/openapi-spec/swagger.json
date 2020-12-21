@@ -950,6 +950,10 @@
         "config"
       ],
       "properties": {
+        "authSecret": {
+          "description": "AuthSecret holds a secret selector that contains a bearer token for authentication",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "config": {
           "description": "Config is the event source configuration",
           "type": "string"
