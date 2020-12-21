@@ -371,6 +371,10 @@ message KafkaTrigger {
   // Defaults to broker url.
   // +optional.
   optional string partitioningKey = 10;
+
+  // Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
+  // +optional
+  optional string version = 11;
 }
 
 message LogTrigger {

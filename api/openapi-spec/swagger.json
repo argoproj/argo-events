@@ -2549,6 +2549,10 @@
         "url": {
           "description": "URL of the Kafka broker.",
           "type": "string"
+        },
+        "version": {
+          "description": "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
+          "type": "string"
         }
       }
     },
