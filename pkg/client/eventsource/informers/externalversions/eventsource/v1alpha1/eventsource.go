@@ -19,6 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	time "time"
 
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -61,13 +62,13 @@ func NewFilteredEventSourceInformer(client versioned.Interface, namespace string
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ArgoprojV1alpha1().EventSources(namespace).List(options)
+				return client.ArgoprojV1alpha1().EventSources(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ArgoprojV1alpha1().EventSources(namespace).Watch(options)
+				return client.ArgoprojV1alpha1().EventSources(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&eventsourcev1alpha1.EventSource{},

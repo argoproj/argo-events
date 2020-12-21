@@ -16,6 +16,7 @@ limitations under the License.
 package slack
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -64,7 +65,7 @@ func getSlackTrigger() *SlackTrigger {
 
 func TestSlackTrigger_FetchResource(t *testing.T) {
 	trigger := getSlackTrigger()
-	resource, err := trigger.FetchResource()
+	resource, err := trigger.FetchResource(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 

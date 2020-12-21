@@ -110,7 +110,7 @@ func init() {
 func TestBadInstallation(t *testing.T) {
 	t.Run("bad installation", func(t *testing.T) {
 		installer := &natsInstaller{
-			client:         fake.NewFakeClient(testEventBusBad),
+			client:         fake.NewClientBuilder().Build(),
 			eventBus:       testEventBusBad,
 			streamingImage: testStreamingImage,
 			metricsImage:   testMetricsImage,
@@ -124,7 +124,7 @@ func TestBadInstallation(t *testing.T) {
 
 func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
-		cl := fake.NewFakeClient(testEventBus)
+		cl := fake.NewClientBuilder().Build()
 		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
@@ -173,7 +173,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 
 func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
-		cl := fake.NewFakeClient(testEventBusAuthNone)
+		cl := fake.NewClientBuilder().Build()
 		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
@@ -209,7 +209,7 @@ func TestInstallationAuthNone(t *testing.T) {
 
 func TestBuildPersistStatefulSetSpec(t *testing.T) {
 	t.Run("installation with persistence", func(t *testing.T) {
-		cl := fake.NewFakeClient(testEventBusPersist)
+		cl := fake.NewClientBuilder().Build()
 		installer := &natsInstaller{
 			client:         cl,
 			eventBus:       testEventBusPersist,
@@ -224,7 +224,7 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 	})
 
 	t.Run("installation with image pull secrets", func(t *testing.T) {
-		cl := fake.NewFakeClient(testEventBus)
+		cl := fake.NewClientBuilder().Build()
 		installer := &natsInstaller{
 			client:         cl,
 			eventBus:       testEventBus,
@@ -241,7 +241,7 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 
 func TestBuildServiceAccountStatefulSetSpec(t *testing.T) {
 	t.Run("installation with Service Account Name", func(t *testing.T) {
-		cl := fake.NewFakeClient(testEventBus)
+		cl := fake.NewClientBuilder().Build()
 		installer := &natsInstaller{
 			client:         cl,
 			eventBus:       testEventBus,

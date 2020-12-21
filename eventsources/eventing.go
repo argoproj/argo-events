@@ -258,7 +258,7 @@ func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *ev
 }
 
 // Start function
-func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) error {
+func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	logger := logging.FromContext(ctx).Desugar()
 	logger.Info("Starting event source server...")
 	servers := GetEventingServers(e.eventSource)
@@ -276,7 +276,6 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 	}
 	defer e.eventBusConn.Close()
 
-	cctx, cancel := context.WithCancel(ctx)
 	connWG := &sync.WaitGroup{}
 
 	// Daemon to reconnect
@@ -287,7 +286,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 		ticker := time.NewTicker(5 * time.Second)
 		for {
 			select {
-			case <-cctx.Done():
+			case <-ctx.Done():
 				logger.Info("exiting eventbus connection daemon...")
 				return
 			case <-ticker.C:
@@ -308,7 +307,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 	for _, ss := range servers {
 		for _, server := range ss {
 			// Validation has been done in eventsource-controller, it's harmless to do it again here.
-			err := server.ValidateEventSource(cctx)
+			err := server.ValidateEventSource(ctx)
 			if err != nil {
 				logger.Error("Validation failed", zap.Error(err), zap.Any(logging.LabelEventName,
 					server.GetEventName()), zap.Any(logging.LabelEventSourceType, server.GetEventSourceType()))
@@ -324,7 +323,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 					Factor:   1,
 					Jitter:   30,
 				}, func() error {
-					return s.StartListening(cctx, func(data []byte) error {
+					return s.StartListening(ctx, func(data []byte) error {
 						event := cloudevents.NewEvent()
 						event.SetID(fmt.Sprintf("%x", uuid.New()))
 						event.SetType(string(s.GetEventSourceType()))
@@ -368,15 +367,13 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 
 	for {
 		select {
-		case <-stopCh:
+		case <-ctx.Done():
 			logger.Info("Shutting down...")
-			cancel()
 			<-eventServersWGDone
 			connWG.Wait()
 			return nil
 		case <-eventServersWGDone:
 			logger.Error("Erroring out, no active event server running")
-			cancel()
 			connWG.Wait()
 			return errors.New("no active event server running")
 		}

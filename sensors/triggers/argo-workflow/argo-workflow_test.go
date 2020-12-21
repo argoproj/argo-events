@@ -16,6 +16,7 @@ limitations under the License.
 package argo_workflow
 
 import (
+	"context"
 	"testing"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -94,7 +95,7 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 
 func TestFetchResource(t *testing.T) {
 	trigger := getFakeWfTrigger()
-	resource, err := trigger.FetchResource()
+	resource, err := trigger.FetchResource(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 	obj, ok := resource.(*unstructured.Unstructured)

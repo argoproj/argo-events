@@ -16,6 +16,7 @@ limitations under the License.
 package apache_openwhisk
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -58,7 +59,7 @@ func getFakeTriggerImpl() *TriggerImpl {
 
 func TestTriggerImpl_FetchResource(t *testing.T) {
 	trigger := getFakeTriggerImpl()
-	obj, err := trigger.FetchResource()
+	obj, err := trigger.FetchResource(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, obj)
 	trigger1, ok := obj.(*v1alpha1.OpenWhiskTrigger)
@@ -120,12 +121,12 @@ func TestTriggerImpl_ApplyPolicy(t *testing.T) {
 		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
 	response := &http.Response{StatusCode: 200}
-	err := trigger.ApplyPolicy(response)
+	err := trigger.ApplyPolicy(context.Background(), response)
 	assert.Nil(t, err)
 
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
 		Status: &v1alpha1.StatusPolicy{Allow: []int32{300}},
 	}
-	err = trigger.ApplyPolicy(response)
+	err = trigger.ApplyPolicy(context.Background(), response)
 	assert.NotNil(t, err)
 }

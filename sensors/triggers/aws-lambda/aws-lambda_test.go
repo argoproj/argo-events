@@ -16,6 +16,7 @@ limitations under the License.
 package aws_lambda
 
 import (
+	"context"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -71,7 +72,7 @@ func getAWSTrigger() *AWSLambdaTrigger {
 
 func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
 	trigger := getAWSTrigger()
-	resource, err := trigger.FetchResource()
+	resource, err := trigger.FetchResource(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -138,6 +139,6 @@ func TestAWSLambdaTrigger_ApplyPolicy(t *testing.T) {
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
 		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
-	err := trigger.ApplyPolicy(response)
+	err := trigger.ApplyPolicy(context.Background(), response)
 	assert.Nil(t, err)
 }

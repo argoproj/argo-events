@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"os"
@@ -76,9 +75,8 @@ func main() {
 
 	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject)
 	logger = logger.With("sensorName", sensor.Name)
-	ctx := logging.WithLogger(context.Background(), logger)
-	stopCh := signals.SetupSignalHandler()
-	if err := sensorExecutionCtx.ListenEvents(ctx, stopCh); err != nil {
+	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+	if err := sensorExecutionCtx.ListenEvents(ctx); err != nil {
 		logger.Desugar().Fatal("failed to listen to events", zap.Error(err))
 	}
 }
