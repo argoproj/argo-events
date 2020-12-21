@@ -1463,6 +1463,18 @@ to broker url.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>version</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Specify what kafka version is being connected to enables certain
+features in sarama, defaults to 1.0.0
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.KubernetesResourceOperation">
