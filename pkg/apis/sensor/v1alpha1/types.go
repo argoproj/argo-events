@@ -442,7 +442,7 @@ type KafkaTrigger struct {
 
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
-	Version string `json:"version" protobuf:"bytes,11,opt,name=version"`
+	Version string `json:"version,omitempty" protobuf:"bytes,11,opt,name=version"`
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.
