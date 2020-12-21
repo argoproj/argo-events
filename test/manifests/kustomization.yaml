@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../manifests/namespace-install
+  - ../../examples/eventbus/native.yaml
 
 commonLabels:
   "app.kubernetes.io/part-of": "argo-events"
