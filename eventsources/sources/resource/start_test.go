@@ -89,7 +89,7 @@ func TestFilter(t *testing.T) {
 				Phase: "Running",
 			},
 		}
-		pod, err := fake.NewSimpleClientset().CoreV1().Pods("fake").Create(context.Background(), pod, metav1.CreateOptions{})
+		pod, err := fake.NewSimpleClientset().CoreV1().Pods("fake").Create(context.TODO(), pod, metav1.CreateOptions{})
 		convey.So(err, convey.ShouldBeNil)
 
 		outmap := make(map[string]interface{})

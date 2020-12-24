@@ -38,7 +38,7 @@ func TestGetCredentials(t *testing.T) {
 		},
 		Data: map[string][]byte{"access": []byte("token"), "secret": []byte("value")},
 	}
-	_, err := fakeClient.CoreV1().Secrets("testing").Create(context.Background(), mySecretCredentials, metav1.CreateOptions{})
+	_, err := fakeClient.CoreV1().Secrets("testing").Create(context.TODO(), mySecretCredentials, metav1.CreateOptions{})
 	assert.Nil(t, err)
 
 	// creds should be nil for unknown minio type

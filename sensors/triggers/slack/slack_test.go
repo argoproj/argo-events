@@ -65,7 +65,7 @@ func getSlackTrigger() *SlackTrigger {
 
 func TestSlackTrigger_FetchResource(t *testing.T) {
 	trigger := getSlackTrigger()
-	resource, err := trigger.FetchResource(context.Background())
+	resource, err := trigger.FetchResource(context.TODO())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 

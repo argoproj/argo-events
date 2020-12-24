@@ -72,7 +72,7 @@ func getAWSTrigger() *AWSLambdaTrigger {
 
 func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
 	trigger := getAWSTrigger()
-	resource, err := trigger.FetchResource(context.Background())
+	resource, err := trigger.FetchResource(context.TODO())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -139,6 +139,6 @@ func TestAWSLambdaTrigger_ApplyPolicy(t *testing.T) {
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
 		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
-	err := trigger.ApplyPolicy(context.Background(), response)
+	err := trigger.ApplyPolicy(context.TODO(), response)
 	assert.Nil(t, err)
 }

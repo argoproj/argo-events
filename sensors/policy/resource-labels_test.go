@@ -91,7 +91,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 		Group:    trigger.Template.K8s.GroupVersionResource.Group,
 	})
 
-	ctx := context.Background()
+	ctx := context.TODO()
 
 	tests := []struct {
 		name       string

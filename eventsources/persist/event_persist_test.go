@@ -18,7 +18,7 @@ func TestConfigMapPersist(t *testing.T) {
 		Name:             "test-config",
 		CreateIfNotExist: true,
 	}
-	ctx := context.Background()
+	ctx := context.TODO()
 	cp, err := NewConfigMapPersist(ctx, kubeClient, conf, "default")
 	assert.NoError(t, err)
 	assert.True(t, cp.IsEnabled())

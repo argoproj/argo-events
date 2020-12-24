@@ -87,7 +87,7 @@ func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
-	resource, err := impl.FetchResource(context.Background())
+	resource, err := impl.FetchResource(context.TODO())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -154,7 +154,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
-	ctx := context.Background()
+	ctx := context.TODO()
 
 	resource, err := impl.Execute(ctx, nil, deployment)
 	assert.Nil(t, err)

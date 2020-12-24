@@ -67,7 +67,7 @@ func TestKafkaTrigger_FetchResource(t *testing.T) {
 		"fake-trigger": producer,
 	})
 	assert.Nil(t, err)
-	obj, err := trigger.FetchResource(context.Background())
+	obj, err := trigger.FetchResource(context.TODO())
 	assert.Nil(t, err)
 	assert.NotNil(t, obj)
 	trigger1, ok := obj.(*v1alpha1.KafkaTrigger)
@@ -154,7 +154,7 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 
 	producer.ExpectInputAndSucceed()
 
-	result, err := trigger.Execute(context.Background(), testEvents, trigger.Trigger.Template.Kafka)
+	result, err := trigger.Execute(context.TODO(), testEvents, trigger.Trigger.Template.Kafka)
 	assert.Nil(t, err)
 	assert.Nil(t, result)
 }

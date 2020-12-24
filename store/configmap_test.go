@@ -44,7 +44,7 @@ spec:
 	}
 
 	convey.Convey("Given a configmap", t, func() {
-		cm, err := kubeClientset.CoreV1().ConfigMaps("fake-ns").Create(context.Background(), configmap, metav1.CreateOptions{})
+		cm, err := kubeClientset.CoreV1().ConfigMaps("fake-ns").Create(context.TODO(), configmap, metav1.CreateOptions{})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(cm, convey.ShouldNotBeNil)
 
