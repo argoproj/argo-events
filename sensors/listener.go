@@ -74,6 +74,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 		depMapping[d.Name] = d
 	}
 
+	cctx, cancel := context.WithCancel(ctx)
 	wg := &sync.WaitGroup{}
 	for k, v := range triggerMapping {
 		wg.Add(1)
@@ -105,7 +106,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			// Generate clientID with hash code
 			hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
 			clientID := fmt.Sprintf("client-%v", common.Hasher(hashKey))
-			ebDriver, err := eventbus.GetDriver(ctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
+			ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
 			if err != nil {
 				logger.Error("failed to get event bus driver", zap.Error(err))
 				return
@@ -144,7 +145,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			}
 
 			actionFunc := func(events map[string]cloudevents.Event) {
-				err := sensorCtx.triggerActions(ctx, events, triggers)
+				err := sensorCtx.triggerActions(cctx, events, triggers)
 				if err != nil {
 					logger.Error("failed to trigger actions", zap.Error(err))
 				}
@@ -163,7 +164,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 
 					logger.Sugar().Infof("started subscribing to events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 
-					err = ebDriver.SubscribeEventSources(ctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
+					err = ebDriver.SubscribeEventSources(cctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
 					if err != nil {
 						logger.Error("failed to subscribe to event bus", zap.Any("clientID", clientID), zap.Error(err))
 						return
@@ -177,7 +178,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			ticker := time.NewTicker(5 * time.Second)
 			for {
 				select {
-				case <-ctx.Done():
+				case <-cctx.Done():
 					logger.Sugar().Infof("exiting eventbus connection daemon for client %s...", clientID)
 					ticker.Stop()
 					wg1.Wait()
@@ -210,6 +211,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 	logger.Info("Sensor started.")
 	<-ctx.Done()
 	logger.Info("Shutting down...")
+	cancel()
 	wg.Wait()
 	return nil
 }

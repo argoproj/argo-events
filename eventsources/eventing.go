@@ -276,6 +276,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	}
 	defer e.eventBusConn.Close()
 
+	cctx, cancel := context.WithCancel(ctx)
 	connWG := &sync.WaitGroup{}
 
 	// Daemon to reconnect
@@ -286,7 +287,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 		ticker := time.NewTicker(5 * time.Second)
 		for {
 			select {
-			case <-ctx.Done():
+			case <-cctx.Done():
 				logger.Info("exiting eventbus connection daemon...")
 				return
 			case <-ticker.C:
@@ -307,7 +308,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	for _, ss := range servers {
 		for _, server := range ss {
 			// Validation has been done in eventsource-controller, it's harmless to do it again here.
-			err := server.ValidateEventSource(ctx)
+			err := server.ValidateEventSource(cctx)
 			if err != nil {
 				logger.Error("Validation failed", zap.Error(err), zap.Any(logging.LabelEventName,
 					server.GetEventName()), zap.Any(logging.LabelEventSourceType, server.GetEventSourceType()))
@@ -323,7 +324,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 					Factor:   1,
 					Jitter:   30,
 				}, func() error {
-					return s.StartListening(ctx, func(data []byte) error {
+					return s.StartListening(cctx, func(data []byte) error {
 						event := cloudevents.NewEvent()
 						event.SetID(fmt.Sprintf("%x", uuid.New()))
 						event.SetType(string(s.GetEventSourceType()))
@@ -369,11 +370,13 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			logger.Info("Shutting down...")
+			cancel()
 			<-eventServersWGDone
 			connWG.Wait()
 			return nil
 		case <-eventServersWGDone:
 			logger.Error("Erroring out, no active event server running")
+			cancel()
 			connWG.Wait()
 			return errors.New("no active event server running")
 		}
