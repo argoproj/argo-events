@@ -105,7 +105,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, errors.Wrap(err, "failed to retrieve the slack token")
 	}
 
-	api := slack.New(slackToken, slack.OptionDebug(true))
+	api := slack.New(slackToken, slack.OptionDebug(false))
 
 	params := &slack.GetConversationsParameters{
 		Limit: 200,
