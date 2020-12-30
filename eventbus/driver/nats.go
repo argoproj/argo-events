@@ -128,12 +128,13 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // SubscribeEventSources is used to subscribe multiple event source dependencies
 // Parameter - ctx, context
 // Parameter - conn, eventbus connection
+// Parameter - group, queue group name
 // Parameter - closeCh, channel to indicate to close the subscription
 // Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, closeCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	log := n.logger.With("clientID", n.clientID)
 	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
 	if err != nil {
@@ -143,9 +144,9 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	if !ok {
 		return errors.New("not a NATS streaming connection")
 	}
-	// use clientID as durable name?
-	durableName := n.clientID
-	sub, err := nsc.stanConn.Subscribe(n.subject, func(m *stan.Msg) {
+	// use group name as durable name
+	durableName := group
+	sub, err := nsc.stanConn.QueueSubscribe(n.subject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
