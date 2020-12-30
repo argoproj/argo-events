@@ -36,8 +36,7 @@ func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImag
 	return &reconciler{client: client, scheme: scheme, eventSourceImage: eventSourceImage, logger: logger}
 }
 
-func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	eventSource := &v1alpha1.EventSource{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventSource); err != nil {
 		if apierrors.IsNotFound(err) {

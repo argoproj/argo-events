@@ -16,6 +16,7 @@ limitations under the License.
 package aws_lambda
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -64,7 +65,7 @@ func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alph
 }
 
 // FetchResource fetches the trigger resource
-func (t *AWSLambdaTrigger) FetchResource() (interface{}, error) {
+func (t *AWSLambdaTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	return t.Trigger.Template.AWSLambda, nil
 }
 
@@ -90,7 +91,7 @@ func (t *AWSLambdaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.E
 }
 
 // Execute executes the trigger
-func (t *AWSLambdaTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *AWSLambdaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.AWSLambdaTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
@@ -117,7 +118,7 @@ func (t *AWSLambdaTrigger) Execute(events map[string]*v1alpha1.Event, resource i
 }
 
 // ApplyPolicy applies the policy on the trigger execution response
-func (t *AWSLambdaTrigger) ApplyPolicy(resource interface{}) error {
+func (t *AWSLambdaTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
 		return nil
 	}
@@ -128,5 +129,5 @@ func (t *AWSLambdaTrigger) ApplyPolicy(resource interface{}) error {
 	}
 
 	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.GetAllow())
-	return p.ApplyPolicy()
+	return p.ApplyPolicy(ctx)
 }

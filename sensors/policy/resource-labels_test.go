@@ -17,6 +17,7 @@ limitations under the License.
 package policy
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -90,6 +91,8 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 		Group:    trigger.Template.K8s.GroupVersionResource.Group,
 	})
 
+	ctx := context.TODO()
+
 	tests := []struct {
 		name       string
 		updateFunc func(deployment *unstructured.Unstructured) (*unstructured.Unstructured, error)
@@ -104,7 +107,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 				}
 				labels["complete"] = "true"
 				deployment.SetLabels(labels)
-				return namespacableClient.Namespace("fake").Update(deployment, metav1.UpdateOptions{})
+				return namespacableClient.Namespace("fake").Update(ctx, deployment, metav1.UpdateOptions{})
 			},
 			testFunc: func(err error) {
 				assert.Nil(t, err)
@@ -119,7 +122,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 				}
 				labels["complete"] = "false"
 				deployment.SetLabels(labels)
-				return namespacableClient.Namespace("fake").Update(deployment, metav1.UpdateOptions{})
+				return namespacableClient.Namespace("fake").Update(ctx, deployment, metav1.UpdateOptions{})
 			},
 			testFunc: func(err error) {
 				assert.NotNil(t, err)
@@ -139,7 +142,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 			var err error
 			uObj, err = test.updateFunc(uObj)
 			assert.Nil(t, err)
-			err = resourceLabelsPolicy.ApplyPolicy()
+			err = resourceLabelsPolicy.ApplyPolicy(ctx)
 			test.testFunc(err)
 		})
 	}

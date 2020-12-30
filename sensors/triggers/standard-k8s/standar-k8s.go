@@ -17,6 +17,7 @@ limitations under the License.
 package standard_k8s
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
@@ -68,7 +69,7 @@ func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic
 }
 
 // FetchResource fetches the trigger resource from external source
-func (k8sTrigger *StandardK8sTrigger) FetchResource() (interface{}, error) {
+func (k8sTrigger *StandardK8sTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	trigger := k8sTrigger.Trigger
 	if trigger.Template.K8s.Source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
@@ -106,7 +107,7 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource() (interface{}, error) {
 		if objNamespace == "" {
 			return nil, fmt.Errorf("resource namespace must be specified for fetching live object")
 		}
-		rObj, err = k8sTrigger.namespableDynamicClient.Namespace(objNamespace).Get(objName, metav1.GetOptions{})
+		rObj, err = k8sTrigger.namespableDynamicClient.Namespace(objNamespace).Get(ctx, objName, metav1.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -129,7 +130,7 @@ func (k8sTrigger *StandardK8sTrigger) ApplyResourceParameters(events map[string]
 }
 
 // Execute executes the trigger
-func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger := k8sTrigger.Trigger
 
 	obj, ok := resource.(*unstructured.Unstructured)
@@ -170,15 +171,15 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 		labels["events.argoproj.io/trigger"] = trigger.Template.Name
 		labels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
 		obj.SetLabels(labels)
-		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(ctx, obj, metav1.CreateOptions{})
 
 	case v1alpha1.Update:
 		k8sTrigger.Logger.Info("updating the object...")
 
-		oldObj, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
+		oldObj, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(ctx, obj.GetName(), metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
 			k8sTrigger.Logger.Info("object not found, creating the object...")
-			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		} else if err != nil {
 			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
 		}
@@ -187,15 +188,15 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 			return nil, errors.Errorf("failed to update the object. err: %+v\n", err)
 		}
 
-		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(oldObj, metav1.UpdateOptions{})
+		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(ctx, oldObj, metav1.UpdateOptions{})
 
 	case v1alpha1.Patch:
 		k8sTrigger.Logger.Info("patching the object...")
 
-		_, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
+		_, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(ctx, obj.GetName(), metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
 			k8sTrigger.Logger.Info("object not found, creating the object...")
-			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		} else if err != nil {
 			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
 		}
@@ -209,7 +210,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 			return nil, errors.Errorf("failed to marshal object into JSON schema. err: %+v\n", err)
 		}
 
-		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Patch(obj.GetName(), k8sTrigger.Trigger.Template.K8s.PatchStrategy, body, metav1.PatchOptions{})
+		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Patch(ctx, obj.GetName(), k8sTrigger.Trigger.Template.K8s.PatchStrategy, body, metav1.PatchOptions{})
 
 	default:
 		return nil, errors.Errorf("unknown operation type %s", string(op))
@@ -217,7 +218,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(events map[string]*v1alpha1.Event,
 }
 
 // ApplyPolicy applies the policy on the trigger
-func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(resource interface{}) error {
+func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	trigger := k8sTrigger.Trigger
 
 	if trigger.Policy == nil || trigger.Policy.K8s == nil || trigger.Policy.K8s.Labels == nil {
@@ -234,7 +235,7 @@ func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(resource interface{}) error {
 		return nil
 	}
 
-	err := p.ApplyPolicy()
+	err := p.ApplyPolicy(ctx)
 	if err != nil {
 		switch err {
 		case wait.ErrWaitTimeout:

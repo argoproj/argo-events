@@ -17,6 +17,7 @@ limitations under the License.
 package aws
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -67,7 +68,7 @@ func TestAWS(t *testing.T) {
 	})
 
 	convey.Convey("Given kubernetes secret that hold credentials, create AWS credential", t, func() {
-		secret, err := client.CoreV1().Secrets(namespace).Create(&corev1.Secret{
+		secret, err := client.CoreV1().Secrets(namespace).Create(context.TODO(), &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      secretName,
 				Namespace: namespace,
@@ -76,7 +77,7 @@ func TestAWS(t *testing.T) {
 				LabelAccessKey: []byte(accessKey),
 				LabelSecretKey: []byte(secretKey),
 			},
-		})
+		}, metav1.CreateOptions{})
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(secret, convey.ShouldNotBeNil)

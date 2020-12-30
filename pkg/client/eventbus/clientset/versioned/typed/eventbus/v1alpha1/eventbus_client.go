@@ -26,7 +26,7 @@ import (
 
 type ArgoprojV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	EventBusGetter
+	EventBusesGetter
 }
 
 // ArgoprojV1alpha1Client is used to interact with features provided by the argoproj.io group.
@@ -34,8 +34,8 @@ type ArgoprojV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ArgoprojV1alpha1Client) EventBus(namespace string) EventBusInterface {
-	return newEventBus(c, namespace)
+func (c *ArgoprojV1alpha1Client) EventBuses(namespace string) EventBusInterface {
+	return newEventBuses(c, namespace)
 }
 
 // NewForConfig creates a new ArgoprojV1alpha1Client for the given config.
