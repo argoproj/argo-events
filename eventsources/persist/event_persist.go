@@ -1,6 +1,7 @@
 package persist
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -25,27 +26,28 @@ type Event struct {
 }
 
 type ConfigMapPersist struct {
+	ctx              context.Context
 	kubeClient       kubernetes.Interface
 	name             string
 	namespace        string
 	createIfNotExist bool
 }
 
-func createConfigmap(client kubernetes.Interface, name, namespace string) (*v1.ConfigMap, error) {
+func createConfigmap(ctx context.Context, client kubernetes.Interface, name, namespace string) (*v1.ConfigMap, error) {
 	cm := v1.ConfigMap{}
 	cm.Name = name
 	cm.Namespace = namespace
-	return client.CoreV1().ConfigMaps(namespace).Create(&cm)
+	return client.CoreV1().ConfigMaps(namespace).Create(ctx, &cm, metav1.CreateOptions{})
 }
 
-func NewConfigMapPersist(client kubernetes.Interface, configmap *v1alpha1.ConfigMapPersistence, namespace string) (EventPersist, error) {
+func NewConfigMapPersist(ctx context.Context, client kubernetes.Interface, configmap *v1alpha1.ConfigMapPersistence, namespace string) (EventPersist, error) {
 	if configmap == nil {
 		return nil, fmt.Errorf("persistence configuration is nil")
 	}
-	_, err := client.CoreV1().ConfigMaps(namespace).Get(configmap.Name, metav1.GetOptions{})
+	_, err := client.CoreV1().ConfigMaps(namespace).Get(ctx, configmap.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) && configmap.CreateIfNotExist {
-			_, err = createConfigmap(client, configmap.Name, namespace)
+			_, err = createConfigmap(ctx, client, configmap.Name, namespace)
 			if err != nil {
 				if !apierr.IsAlreadyExists(err) {
 					return nil, err
@@ -56,6 +58,7 @@ func NewConfigMapPersist(client kubernetes.Interface, configmap *v1alpha1.Config
 		}
 	}
 	cmp := ConfigMapPersist{
+		ctx:              ctx,
 		kubeClient:       client,
 		name:             configmap.Name,
 		namespace:        namespace,
@@ -74,10 +77,10 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 	}
 	//Using Connect util func for backoff retry if K8s API returns error
 	err := common.Connect(&common.DefaultRetry, func() error {
-		cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.name, metav1.GetOptions{})
+		cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.ctx, cmp.name, metav1.GetOptions{})
 		if err != nil {
 			if apierr.IsNotFound(err) && cmp.createIfNotExist {
-				cm, err = createConfigmap(cmp.kubeClient, cmp.name, cmp.namespace)
+				cm, err = createConfigmap(cmp.ctx, cmp.kubeClient, cmp.name, cmp.namespace)
 				if err != nil {
 					return err
 				}
@@ -91,7 +94,7 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 		}
 
 		cm.Data[event.EventKey] = event.EventPayload
-		_, err = cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Update(cm)
+		_, err = cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Update(cmp.ctx, cm, metav1.UpdateOptions{})
 
 		return err
 	})
@@ -103,7 +106,7 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 }
 
 func (cmp *ConfigMapPersist) Get(key string) (*Event, error) {
-	cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.name, metav1.GetOptions{})
+	cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.ctx, cmp.name, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) {
 			return nil, nil

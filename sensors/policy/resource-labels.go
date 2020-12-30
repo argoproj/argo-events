@@ -17,6 +17,8 @@ limitations under the License.
 package policy
 
 import (
+	"context"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -32,7 +34,7 @@ type ResourceLabels struct {
 	Obj     *unstructured.Unstructured
 }
 
-func (rl *ResourceLabels) ApplyPolicy() error {
+func (rl *ResourceLabels) ApplyPolicy(ctx context.Context) error {
 	from := rl.Trigger.Policy.K8s.Backoff
 	if rl.Trigger.Policy.K8s == nil || rl.Trigger.Policy.K8s.Labels == nil {
 		return nil
@@ -51,7 +53,7 @@ func (rl *ResourceLabels) ApplyPolicy() error {
 		backoff.Jitter = jitter
 	}
 	err := wait.ExponentialBackoff(backoff, func() (bool, error) {
-		obj, err := rl.Client.Namespace(rl.Obj.GetNamespace()).Get(rl.Obj.GetName(), metav1.GetOptions{})
+		obj, err := rl.Client.Namespace(rl.Obj.GetNamespace()).Get(ctx, rl.Obj.GetName(), metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}

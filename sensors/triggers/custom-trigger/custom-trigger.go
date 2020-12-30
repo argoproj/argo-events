@@ -121,7 +121,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 }
 
 // FetchResource fetches the trigger resource from external source
-func (ct *CustomTrigger) FetchResource() (interface{}, error) {
+func (ct *CustomTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	specBody, err := yaml.Marshal(ct.Trigger.Template.CustomTrigger.Spec)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse the custom trigger spec body")
@@ -168,7 +168,7 @@ func (ct *CustomTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Eve
 }
 
 // Execute executes the trigger
-func (ct *CustomTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (ct *CustomTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	obj, ok := resource.([]byte)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource for the execution")
@@ -203,7 +203,7 @@ func (ct *CustomTrigger) Execute(events map[string]*v1alpha1.Event, resource int
 }
 
 // ApplyPolicy applies the policy on the trigger
-func (ct *CustomTrigger) ApplyPolicy(resource interface{}) error {
+func (ct *CustomTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	obj, ok := resource.([]byte)
 	if !ok {
 		return errors.New("failed to interpret the trigger resource for the policy application")
@@ -211,7 +211,7 @@ func (ct *CustomTrigger) ApplyPolicy(resource interface{}) error {
 
 	ct.Logger.Debug("resource to apply policy on", zap.Any("resource", string(obj)))
 
-	result, err := ct.triggerClient.ApplyPolicy(context.Background(), &triggers.ApplyPolicyRequest{
+	result, err := ct.triggerClient.ApplyPolicy(ctx, &triggers.ApplyPolicyRequest{
 		Request: obj,
 	})
 	if err != nil {

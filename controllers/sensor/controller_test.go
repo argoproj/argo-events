@@ -37,7 +37,7 @@ const (
 func TestReconcile(t *testing.T) {
 	t.Run("test reconcile without eventbus", func(t *testing.T) {
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(sensorObj)
+		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
 			client:      cl,
 			scheme:      scheme.Scheme,
@@ -51,7 +51,7 @@ func TestReconcile(t *testing.T) {
 
 	t.Run("test reconcile with eventbus", func(t *testing.T) {
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(sensorObj)
+		cl := fake.NewClientBuilder().Build()
 		testBus := fakeEventBus.DeepCopy()
 		testBus.Status.MarkDeployed("test", "test")
 		testBus.Status.MarkConfigured()

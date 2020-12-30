@@ -16,6 +16,7 @@ limitations under the License.
 package http
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -59,7 +60,7 @@ func getFakeHTTPTrigger() *HTTPTrigger {
 
 func TestHTTPTrigger_FetchResource(t *testing.T) {
 	trigger := getFakeHTTPTrigger()
-	obj, err := trigger.FetchResource()
+	obj, err := trigger.FetchResource(context.TODO())
 	assert.Nil(t, err)
 	assert.NotNil(t, obj)
 	trigger1, ok := obj.(*v1alpha1.HTTPTrigger)
@@ -124,12 +125,12 @@ func TestHTTPTrigger_ApplyPolicy(t *testing.T) {
 		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
 	response := &http.Response{StatusCode: 200}
-	err := trigger.ApplyPolicy(response)
+	err := trigger.ApplyPolicy(context.TODO(), response)
 	assert.Nil(t, err)
 
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
 		Status: &v1alpha1.StatusPolicy{Allow: []int32{300}},
 	}
-	err = trigger.ApplyPolicy(response)
+	err = trigger.ApplyPolicy(context.TODO(), response)
 	assert.NotNil(t, err)
 }

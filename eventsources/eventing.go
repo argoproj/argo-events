@@ -258,7 +258,7 @@ func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *ev
 }
 
 // Start function
-func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) error {
+func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	logger := logging.FromContext(ctx).Desugar()
 	logger.Info("Starting event source server...")
 	servers := GetEventingServers(e.eventSource)
@@ -368,7 +368,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context, stopCh <-chan struct{}) 
 
 	for {
 		select {
-		case <-stopCh:
+		case <-ctx.Done():
 			logger.Info("Shutting down...")
 			cancel()
 			<-eventServersWGDone

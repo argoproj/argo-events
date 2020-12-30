@@ -16,6 +16,7 @@ limitations under the License.
 package apache_openwhisk
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -92,7 +93,7 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 
 // FetchResource fetches the trigger. As the OpenWhisk trigger simply executes a http request, there
 // is no need to fetch any resource from external source
-func (t *TriggerImpl) FetchResource() (interface{}, error) {
+func (t *TriggerImpl) FetchResource(ctx context.Context) (interface{}, error) {
 	return t.Trigger.Template.OpenWhisk, nil
 }
 
@@ -127,7 +128,7 @@ func (t *TriggerImpl) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 }
 
 // Execute executes the trigger
-func (t *TriggerImpl) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *TriggerImpl) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	var payload []byte
 	var err error
 
@@ -156,7 +157,7 @@ func (t *TriggerImpl) Execute(events map[string]*v1alpha1.Event, resource interf
 }
 
 // ApplyPolicy applies policy on the trigger
-func (t *TriggerImpl) ApplyPolicy(resource interface{}) error {
+func (t *TriggerImpl) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
 		return nil
 	}
@@ -167,5 +168,5 @@ func (t *TriggerImpl) ApplyPolicy(resource interface{}) error {
 
 	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.GetAllow())
 
-	return p.ApplyPolicy()
+	return p.ApplyPolicy(ctx)
 }

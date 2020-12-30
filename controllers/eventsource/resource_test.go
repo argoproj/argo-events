@@ -68,7 +68,7 @@ func TestResourceReconcile(t *testing.T) {
 	testEventSource := fakeEmptyEventSource()
 	testEventSource.Spec.HDFS = fakeHDFSEventSourceMap("test")
 	t.Run("test resource reconcile without eventbus", func(t *testing.T) {
-		cl := fake.NewFakeClient(testEventSource)
+		cl := fake.NewClientBuilder().Build()
 		args := &AdaptorArgs{
 			Image:       testImage,
 			EventSource: testEventSource,
@@ -81,7 +81,7 @@ func TestResourceReconcile(t *testing.T) {
 
 	t.Run("test resource reconcile with eventbus", func(t *testing.T) {
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(testEventSource)
+		cl := fake.NewClientBuilder().Build()
 		testBus := fakeEventBus.DeepCopy()
 		testBus.Status.MarkDeployed("test", "test")
 		testBus.Status.MarkConfigured()

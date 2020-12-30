@@ -157,7 +157,7 @@ func Test_BuildDeployment(t *testing.T) {
 
 func TestResourceReconcile(t *testing.T) {
 	t.Run("test resource reconcile without eventbus", func(t *testing.T) {
-		cl := fake.NewFakeClient(sensorObj)
+		cl := fake.NewClientBuilder().Build()
 		args := &AdaptorArgs{
 			Image:  testImage,
 			Sensor: sensorObj,
@@ -170,7 +170,7 @@ func TestResourceReconcile(t *testing.T) {
 
 	t.Run("test resource reconcile with eventbus", func(t *testing.T) {
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(sensorObj)
+		cl := fake.NewClientBuilder().Build()
 		testBus := fakeEventBus.DeepCopy()
 		testBus.Status.MarkDeployed("test", "test")
 		testBus.Status.MarkConfigured()

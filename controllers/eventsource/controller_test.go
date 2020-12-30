@@ -146,7 +146,7 @@ func TestReconcile(t *testing.T) {
 		testEventSource := fakeEmptyEventSource()
 		testEventSource.Spec.Calendar = fakeCalendarEventSourceMap("test")
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(testEventSource)
+		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
 			client:           cl,
 			scheme:           scheme.Scheme,
@@ -162,7 +162,7 @@ func TestReconcile(t *testing.T) {
 		testEventSource := fakeEmptyEventSource()
 		testEventSource.Spec.Calendar = fakeCalendarEventSourceMap("test")
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(testEventSource)
+		cl := fake.NewClientBuilder().Build()
 		testBus := fakeEventBus.DeepCopy()
 		testBus.Status.MarkDeployed("test", "test")
 		testBus.Status.MarkConfigured()

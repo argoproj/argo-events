@@ -77,7 +77,7 @@ func TestReconcileNative(t *testing.T) {
 	t.Run("native nats installation", func(t *testing.T) {
 		testBus := nativeBus.DeepCopy()
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(testBus)
+		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
 			client:             cl,
 			scheme:             scheme.Scheme,
@@ -97,7 +97,7 @@ func TestReconcileExotic(t *testing.T) {
 	t.Run("native nats exotic", func(t *testing.T) {
 		testBus := exoticBus.DeepCopy()
 		ctx := context.TODO()
-		cl := fake.NewFakeClient(testBus)
+		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
 			client:             cl,
 			scheme:             scheme.Scheme,
@@ -114,7 +114,7 @@ func TestReconcileExotic(t *testing.T) {
 func TestNeedsUpdate(t *testing.T) {
 	t.Run("needs update", func(t *testing.T) {
 		testBus := nativeBus.DeepCopy()
-		cl := fake.NewFakeClient(testBus)
+		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
 			client:             cl,
 			scheme:             scheme.Scheme,

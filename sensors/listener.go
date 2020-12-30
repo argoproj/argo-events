@@ -19,6 +19,7 @@ package sensors
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -49,8 +50,19 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 	subscribe()
 }
 
+func (sensorCtx *SensorContext) getGroupAndClientID(depExpression string) (string, string) {
+	// Generate clientID with hash code
+	hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	hashVal := common.Hasher(hashKey)
+	group := fmt.Sprintf("client-%v", hashVal)
+	clientID := fmt.Sprintf("client-%v-%v", hashVal, r1.Intn(100))
+	return group, clientID
+}
+
 // ListenEvents watches and handles events received from the gateway.
-func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan struct{}) error {
+func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 	logger := logging.FromContext(ctx).Desugar()
 	sensor := sensorCtx.Sensor
 	// Get a mapping of dependencyExpression: []triggers
@@ -103,9 +115,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 				deps = append(deps, d)
 			}
 
-			// Generate clientID with hash code
-			hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
-			clientID := fmt.Sprintf("client-%v", common.Hasher(hashKey))
+			group, clientID := sensorCtx.getGroupAndClientID(depExpression)
 			ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
 			if err != nil {
 				logger.Error("failed to get event bus driver", zap.Error(err))
@@ -164,7 +174,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 
 					logger.Sugar().Infof("started subscribing to events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 
-					err = ebDriver.SubscribeEventSources(cctx, conn, closeSubCh, depExpression, deps, filterFunc, actionFunc)
+					err = ebDriver.SubscribeEventSources(cctx, conn, group, closeSubCh, depExpression, deps, filterFunc, actionFunc)
 					if err != nil {
 						logger.Error("failed to subscribe to event bus", zap.Any("clientID", clientID), zap.Error(err))
 						return
@@ -209,7 +219,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 		}(k, v)
 	}
 	logger.Info("Sensor started.")
-	<-stopCh
+	<-ctx.Done()
 	logger.Info("Shutting down...")
 	cancel()
 	wg.Wait()
@@ -238,7 +248,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 		}
 
 		log.Debugw("fetching trigger resource if any", "triggerName", trigger.Template.Name)
-		obj, err := triggerImpl.FetchResource()
+		obj, err := triggerImpl.FetchResource(ctx)
 		if err != nil {
 			return err
 		}
@@ -254,14 +264,14 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 		}
 
 		log.Debugw("executing the trigger resource", "triggerName", trigger.Template.Name)
-		newObj, err := triggerImpl.Execute(eventsMapping, updatedObj)
+		newObj, err := triggerImpl.Execute(ctx, eventsMapping, updatedObj)
 		if err != nil {
 			return err
 		}
 		log.Debugw("trigger resource successfully executed", "triggerName", trigger.Template.Name)
 
 		log.Debugw("applying trigger policy", "triggerName", trigger.Template.Name)
-		if err := triggerImpl.ApplyPolicy(newObj); err != nil {
+		if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
 			return err
 		}
 		log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name), zap.Any("triggeredBy", depNames))

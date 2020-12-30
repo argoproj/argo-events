@@ -16,6 +16,7 @@ limitations under the License.
 package slack
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -50,7 +51,7 @@ func NewSlackTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger 
 	}, nil
 }
 
-func (t *SlackTrigger) FetchResource() (interface{}, error) {
+func (t *SlackTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	return t.Trigger.Template.Slack, nil
 }
 
@@ -79,7 +80,7 @@ func (t *SlackTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event
 }
 
 // Execute executes the trigger
-func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	t.Logger.Info("executing SlackTrigger")
 	_, ok := resource.(*v1alpha1.SlackTrigger)
 	if !ok {
@@ -151,6 +152,6 @@ func (t *SlackTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 }
 
 // No Policies for SlackTrigger
-func (t *SlackTrigger) ApplyPolicy(resource interface{}) error {
+func (t *SlackTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	return nil
 }

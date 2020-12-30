@@ -77,7 +77,7 @@ func (el *EventListener) initializePersistence(ctx context.Context, persistence 
 			return errors.Wrapf(err, "failed to set up a K8s client for the event source %s", el.GetEventName())
 		}
 
-		el.eventPersistence, err = persist.NewConfigMapPersist(kubeClientset, persistence.ConfigMap, el.Namespace)
+		el.eventPersistence, err = persist.NewConfigMapPersist(ctx, kubeClientset, persistence.ConfigMap, el.Namespace)
 		if err != nil {
 			return err
 		}
