@@ -16,6 +16,7 @@ limitations under the License.
 package nats
 
 import (
+	"context"
 	"encoding/json"
 
 	natslib "github.com/nats-io/go-nats"
@@ -77,7 +78,7 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 
 // FetchResource fetches the trigger. As the NATS trigger is simply a NATS client, there
 // is no need to fetch any resource from external source
-func (t *NATSTrigger) FetchResource() (interface{}, error) {
+func (t *NATSTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	return t.Trigger.Template.NATS, nil
 }
 
@@ -108,7 +109,7 @@ func (t *NATSTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 }
 
 // Execute executes the trigger
-func (t *NATSTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *NATSTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.NATSTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
@@ -131,6 +132,6 @@ func (t *NATSTrigger) Execute(events map[string]*v1alpha1.Event, resource interf
 }
 
 // ApplyPolicy applies policy on the trigger
-func (t *NATSTrigger) ApplyPolicy(resource interface{}) error {
+func (t *NATSTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	return nil
 }

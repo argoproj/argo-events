@@ -17,6 +17,8 @@ limitations under the License.
 package policy
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 )
 
@@ -36,7 +38,7 @@ func NewStatusPolicy(status int, statuses []int) *StatusPolicy {
 	}
 }
 
-func (hp *StatusPolicy) ApplyPolicy() error {
+func (hp *StatusPolicy) ApplyPolicy(ctx context.Context) error {
 	for _, status := range hp.Statuses {
 		if hp.Status == status {
 			return nil

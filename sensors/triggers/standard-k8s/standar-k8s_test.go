@@ -17,6 +17,7 @@ limitations under the License.
 package standard_k8s
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -86,7 +87,7 @@ func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
-	resource, err := impl.FetchResource()
+	resource, err := impl.FetchResource(context.TODO())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -153,8 +154,9 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
+	ctx := context.TODO()
 
-	resource, err := impl.Execute(nil, deployment)
+	resource, err := impl.Execute(ctx, nil, deployment)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -168,7 +170,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 
 	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Update
 	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
-	resource, err = impl.Execute(nil, uObj)
+	resource, err = impl.Execute(ctx, nil, uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
@@ -185,7 +187,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	sensorObj.Spec.Triggers[0].Template.K8s.PatchStrategy = k8stypes.MergePatchType
 
 	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
-	resource, err = impl.Execute(nil, uObj)
+	resource, err = impl.Execute(ctx, nil, uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 	uObj, ok = resource.(*unstructured.Unstructured)

@@ -26,8 +26,10 @@ import (
 )
 
 // SensorLister helps list Sensors.
+// All objects returned here must be treated as read-only.
 type SensorLister interface {
 	// List lists all Sensors in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.Sensor, err error)
 	// Sensors returns an object that can list and get Sensors.
 	Sensors(namespace string) SensorNamespaceLister
@@ -58,10 +60,13 @@ func (s *sensorLister) Sensors(namespace string) SensorNamespaceLister {
 }
 
 // SensorNamespaceLister helps list and get Sensors.
+// All objects returned here must be treated as read-only.
 type SensorNamespaceLister interface {
 	// List lists all Sensors in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.Sensor, err error)
 	// Get retrieves the Sensor from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.Sensor, error)
 	SensorNamespaceListerExpansion
 }

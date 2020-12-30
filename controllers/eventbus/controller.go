@@ -37,8 +37,7 @@ func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingIm
 	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, natsMetricsImage: natsMetricsImage, logger: logger}
 }
 
-func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	eventBus := &v1alpha1.EventBus{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventBus); err != nil {
 		if apierrors.IsNotFound(err) {

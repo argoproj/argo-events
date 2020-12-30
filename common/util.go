@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -112,8 +113,8 @@ func ErrEventSourceTypeMismatch(eventSourceType string) string {
 }
 
 // GetSecretValue retrieves the secret value from the secret in namespace with name and key
-func GetSecretValue(client kubernetes.Interface, namespace string, selector *v1.SecretKeySelector) (string, error) {
-	secret, err := client.CoreV1().Secrets(namespace).Get(selector.Name, metav1.GetOptions{})
+func GetSecretValue(ctx context.Context, client kubernetes.Interface, namespace string, selector *v1.SecretKeySelector) (string, error) {
+	secret, err := client.CoreV1().Secrets(namespace).Get(ctx, selector.Name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}

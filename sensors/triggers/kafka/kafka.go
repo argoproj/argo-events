@@ -16,6 +16,7 @@ limitations under the License.
 package kafka
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
@@ -103,7 +104,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 // FetchResource fetches the trigger. As the Kafka trigger is simply a Kafka producer, there
 // is no need to fetch any resource from external source
-func (t *KafkaTrigger) FetchResource() (interface{}, error) {
+func (t *KafkaTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	return t.Trigger.Template.Kafka, nil
 }
 
@@ -134,7 +135,7 @@ func (t *KafkaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event
 }
 
 // Execute executes the trigger
-func (t *KafkaTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.KafkaTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
@@ -168,6 +169,6 @@ func (t *KafkaTrigger) Execute(events map[string]*v1alpha1.Event, resource inter
 }
 
 // ApplyPolicy applies policy on the trigger
-func (t *KafkaTrigger) ApplyPolicy(resource interface{}) error {
+func (t *KafkaTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	return nil
 }

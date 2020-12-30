@@ -62,7 +62,7 @@ func (sensorCtx *SensorContext) getGroupAndClientID(depExpression string) (strin
 }
 
 // ListenEvents watches and handles events received from the gateway.
-func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan struct{}) error {
+func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 	logger := logging.FromContext(ctx).Desugar()
 	sensor := sensorCtx.Sensor
 	// Get a mapping of dependencyExpression: []triggers
@@ -219,7 +219,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context, stopCh <-chan 
 		}(k, v)
 	}
 	logger.Info("Sensor started.")
-	<-stopCh
+	<-ctx.Done()
 	logger.Info("Shutting down...")
 	cancel()
 	wg.Wait()
@@ -248,7 +248,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 		}
 
 		log.Debugw("fetching trigger resource if any", "triggerName", trigger.Template.Name)
-		obj, err := triggerImpl.FetchResource()
+		obj, err := triggerImpl.FetchResource(ctx)
 		if err != nil {
 			return err
 		}
@@ -264,14 +264,14 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 		}
 
 		log.Debugw("executing the trigger resource", "triggerName", trigger.Template.Name)
-		newObj, err := triggerImpl.Execute(eventsMapping, updatedObj)
+		newObj, err := triggerImpl.Execute(ctx, eventsMapping, updatedObj)
 		if err != nil {
 			return err
 		}
 		log.Debugw("trigger resource successfully executed", "triggerName", trigger.Template.Name)
 
 		log.Debugw("applying trigger policy", "triggerName", trigger.Template.Name)
-		if err := triggerImpl.ApplyPolicy(newObj); err != nil {
+		if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
 			return err
 		}
 		log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name), zap.Any("triggeredBy", depNames))

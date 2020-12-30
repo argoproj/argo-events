@@ -19,6 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	time "time"
 
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -61,13 +62,13 @@ func NewFilteredSensorInformer(client versioned.Interface, namespace string, res
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ArgoprojV1alpha1().Sensors(namespace).List(options)
+				return client.ArgoprojV1alpha1().Sensors(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ArgoprojV1alpha1().Sensors(namespace).Watch(options)
+				return client.ArgoprojV1alpha1().Sensors(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&sensorv1alpha1.Sensor{},

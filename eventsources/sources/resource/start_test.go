@@ -17,6 +17,7 @@ limitations under the License.
 package resource
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 	"time"
@@ -88,7 +89,7 @@ func TestFilter(t *testing.T) {
 				Phase: "Running",
 			},
 		}
-		pod, err := fake.NewSimpleClientset().CoreV1().Pods("fake").Create(pod)
+		pod, err := fake.NewSimpleClientset().CoreV1().Pods("fake").Create(context.TODO(), pod, metav1.CreateOptions{})
 		convey.So(err, convey.ShouldBeNil)
 
 		outmap := make(map[string]interface{})

@@ -1,6 +1,7 @@
 package persist
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,10 +18,11 @@ func TestConfigMapPersist(t *testing.T) {
 		Name:             "test-config",
 		CreateIfNotExist: true,
 	}
-	cp, err := NewConfigMapPersist(kubeClient, conf, "default")
+	ctx := context.TODO()
+	cp, err := NewConfigMapPersist(ctx, kubeClient, conf, "default")
 	assert.NoError(t, err)
 	assert.True(t, cp.IsEnabled())
-	cm, err := kubeClient.CoreV1().ConfigMaps("default").Get("test-config", v1.GetOptions{})
+	cm, err := kubeClient.CoreV1().ConfigMaps("default").Get(ctx, "test-config", v1.GetOptions{})
 	assert.NoError(t, err)
 	assert.NotNil(t, cm)
 	assert.Nil(t, cm.Data)
@@ -44,7 +46,7 @@ func TestConfigMapPersist(t *testing.T) {
 	})
 
 	t.Run("GetWithDeletedMap", func(t *testing.T) {
-		err = kubeClient.CoreV1().ConfigMaps("default").Delete("test-config", &v1.DeleteOptions{})
+		err = kubeClient.CoreV1().ConfigMaps("default").Delete(ctx, "test-config", v1.DeleteOptions{})
 		assert.NoError(t, err)
 		event1, err := cp.Get("test.test")
 		assert.NoError(t, err)
@@ -52,7 +54,7 @@ func TestConfigMapPersist(t *testing.T) {
 	})
 
 	t.Run("SaveAndGetEventWithDeletedMap", func(t *testing.T) {
-		err = kubeClient.CoreV1().ConfigMaps("default").Delete("test-config", &v1.DeleteOptions{})
+		err = kubeClient.CoreV1().ConfigMaps("default").Delete(ctx, "test-config", v1.DeleteOptions{})
 		assert.True(t, apierr.IsNotFound(err))
 		event := Event{
 			EventKey:     "test.test",
