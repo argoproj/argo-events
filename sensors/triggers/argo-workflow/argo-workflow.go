@@ -16,6 +16,7 @@ limitations under the License.
 package argo_workflow
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -65,7 +66,7 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 }
 
 // FetchResource fetches the trigger resource from external source
-func (t *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
+func (t *ArgoWorkflowTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	trigger := t.Trigger
 	return triggers.FetchKubernetesResource(trigger.Template.ArgoWorkflow.Source)
 }
@@ -83,7 +84,7 @@ func (t *ArgoWorkflowTrigger) ApplyResourceParameters(events map[string]*v1alpha
 }
 
 // Execute executes the trigger
-func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger := t.Trigger
 
 	op := v1alpha1.Submit
@@ -172,9 +173,9 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 	})
 
 	if op != v1alpha1.Submit {
-		return t.namespableDynamicClient.Namespace(namespace).Get(name, metav1.GetOptions{})
+		return t.namespableDynamicClient.Namespace(namespace).Get(ctx, name, metav1.GetOptions{})
 	}
-	l, err := t.namespableDynamicClient.Namespace(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorFromSet(submittedWFLabels).String()})
+	l, err := t.namespableDynamicClient.Namespace(namespace).List(ctx, metav1.ListOptions{LabelSelector: labels.SelectorFromSet(submittedWFLabels).String()})
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (t *ArgoWorkflowTrigger) Execute(events map[string]*v1alpha1.Event, resourc
 }
 
 // ApplyPolicy applies the policy on the trigger
-func (t *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}) error {
+func (t *ArgoWorkflowTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	trigger := t.Trigger
 
 	if trigger.Policy == nil || trigger.Policy.K8s == nil || trigger.Policy.K8s.Labels == nil {
@@ -202,7 +203,7 @@ func (t *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}) error {
 		return nil
 	}
 
-	err := p.ApplyPolicy()
+	err := p.ApplyPolicy(ctx)
 	if err != nil {
 		switch err {
 		case wait.ErrWaitTimeout:

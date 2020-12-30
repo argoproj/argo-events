@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"os"
@@ -55,9 +54,8 @@ func main() {
 
 	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname)
 	logger = logger.With(logging.LabelEventSourceName, eventSource.Name)
-	ctx := logging.WithLogger(context.Background(), logger)
-	stopCh := signals.SetupSignalHandler()
-	if err := adaptor.Start(ctx, stopCh); err != nil {
+	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+	if err := adaptor.Start(ctx); err != nil {
 		logger.Desugar().Fatal("failed to start eventsource server", zap.Error(err))
 	}
 }

@@ -52,8 +52,7 @@ func NewReconciler(client client.Client, scheme *runtime.Scheme, sensorImage str
 	return &reconciler{client: client, scheme: scheme, sensorImage: sensorImage, logger: logger}
 }
 
-func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	sensor := &v1alpha1.Sensor{}
 	if err := r.client.Get(ctx, req.NamespacedName, sensor); err != nil {
 		if apierrors.IsNotFound(err) {

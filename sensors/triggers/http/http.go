@@ -17,6 +17,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -79,7 +80,7 @@ func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor
 
 // FetchResource fetches the trigger. As the HTTP trigger simply executes a http request, there
 // is no need to fetch any resource from external source
-func (t *HTTPTrigger) FetchResource() (interface{}, error) {
+func (t *HTTPTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	if t.Trigger.Template.HTTP.Method == "" {
 		t.Trigger.Template.HTTP.Method = http.MethodPost
 	}
@@ -113,7 +114,7 @@ func (t *HTTPTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 }
 
 // Execute executes the trigger
-func (t *HTTPTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	var payload []byte
 	var err error
 
@@ -173,7 +174,7 @@ func (t *HTTPTrigger) Execute(events map[string]*v1alpha1.Event, resource interf
 }
 
 // ApplyPolicy applies policy on the trigger
-func (t *HTTPTrigger) ApplyPolicy(resource interface{}) error {
+func (t *HTTPTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
 		return nil
 	}
@@ -184,5 +185,5 @@ func (t *HTTPTrigger) ApplyPolicy(resource interface{}) error {
 
 	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.GetAllow())
 
-	return p.ApplyPolicy()
+	return p.ApplyPolicy(ctx)
 }

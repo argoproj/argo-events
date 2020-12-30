@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -16,7 +17,7 @@ func TestLogTrigger(t *testing.T) {
 		Logger:  logger,
 		Trigger: &sv1.Trigger{Template: &sv1.TriggerTemplate{}},
 	}
-	_, err := l.Execute(map[string]*sv1.Event{"my-event": {}}, &sv1.LogTrigger{})
+	_, err := l.Execute(context.TODO(), map[string]*sv1.Event{"my-event": {}}, &sv1.LogTrigger{})
 	assert.NoError(t, err)
 
 	assert.True(t, l.shouldLog(&sv1.LogTrigger{}))

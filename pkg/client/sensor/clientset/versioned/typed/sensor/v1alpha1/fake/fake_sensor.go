@@ -19,6 +19,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -39,7 +41,7 @@ var sensorsResource = schema.GroupVersionResource{Group: "argoproj.io", Version:
 var sensorsKind = schema.GroupVersionKind{Group: "argoproj.io", Version: "v1alpha1", Kind: "Sensor"}
 
 // Get takes name of the sensor, and returns the corresponding sensor object, and an error if there is any.
-func (c *FakeSensors) Get(name string, options v1.GetOptions) (result *v1alpha1.Sensor, err error) {
+func (c *FakeSensors) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Sensor, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(sensorsResource, c.ns, name), &v1alpha1.Sensor{})
 
@@ -50,7 +52,7 @@ func (c *FakeSensors) Get(name string, options v1.GetOptions) (result *v1alpha1.
 }
 
 // List takes label and field selectors, and returns the list of Sensors that match those selectors.
-func (c *FakeSensors) List(opts v1.ListOptions) (result *v1alpha1.SensorList, err error) {
+func (c *FakeSensors) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.SensorList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(sensorsResource, sensorsKind, c.ns, opts), &v1alpha1.SensorList{})
 
@@ -72,14 +74,14 @@ func (c *FakeSensors) List(opts v1.ListOptions) (result *v1alpha1.SensorList, er
 }
 
 // Watch returns a watch.Interface that watches the requested sensors.
-func (c *FakeSensors) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeSensors) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(sensorsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a sensor and creates it.  Returns the server's representation of the sensor, and an error, if there is any.
-func (c *FakeSensors) Create(sensor *v1alpha1.Sensor) (result *v1alpha1.Sensor, err error) {
+func (c *FakeSensors) Create(ctx context.Context, sensor *v1alpha1.Sensor, opts v1.CreateOptions) (result *v1alpha1.Sensor, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(sensorsResource, c.ns, sensor), &v1alpha1.Sensor{})
 
@@ -90,7 +92,7 @@ func (c *FakeSensors) Create(sensor *v1alpha1.Sensor) (result *v1alpha1.Sensor, 
 }
 
 // Update takes the representation of a sensor and updates it. Returns the server's representation of the sensor, and an error, if there is any.
-func (c *FakeSensors) Update(sensor *v1alpha1.Sensor) (result *v1alpha1.Sensor, err error) {
+func (c *FakeSensors) Update(ctx context.Context, sensor *v1alpha1.Sensor, opts v1.UpdateOptions) (result *v1alpha1.Sensor, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(sensorsResource, c.ns, sensor), &v1alpha1.Sensor{})
 
@@ -101,7 +103,7 @@ func (c *FakeSensors) Update(sensor *v1alpha1.Sensor) (result *v1alpha1.Sensor, 
 }
 
 // Delete takes name of the sensor and deletes it. Returns an error if one occurs.
-func (c *FakeSensors) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeSensors) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(sensorsResource, c.ns, name), &v1alpha1.Sensor{})
 
@@ -109,15 +111,15 @@ func (c *FakeSensors) Delete(name string, options *v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeSensors) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(sensorsResource, c.ns, listOptions)
+func (c *FakeSensors) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(sensorsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.SensorList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched sensor.
-func (c *FakeSensors) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Sensor, err error) {
+func (c *FakeSensors) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Sensor, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(sensorsResource, c.ns, name, pt, data, subresources...), &v1alpha1.Sensor{})
 

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -20,7 +21,7 @@ func NewLogTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *z
 	return &LogTrigger{Sensor: sensor, Trigger: trigger, Logger: logger}, nil
 }
 
-func (t *LogTrigger) FetchResource() (interface{}, error) {
+func (t *LogTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	return t.Trigger.Template.Log, nil
 }
 
@@ -28,7 +29,7 @@ func (t *LogTrigger) ApplyResourceParameters(_ map[string]*v1alpha1.Event, resou
 	return resource, nil
 }
 
-func (t *LogTrigger) Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+func (t *LogTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	log, ok := resource.(*v1alpha1.LogTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the fetched trigger resource")
@@ -51,6 +52,6 @@ func (t *LogTrigger) shouldLog(log *v1alpha1.LogTrigger) bool {
 	return time.Now().After(t.LastLogTime.Add(log.GetInterval()))
 }
 
-func (t *LogTrigger) ApplyPolicy(interface{}) error {
+func (t *LogTrigger) ApplyPolicy(context.Context, interface{}) error {
 	return nil
 }

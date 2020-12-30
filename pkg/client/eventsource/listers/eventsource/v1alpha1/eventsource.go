@@ -26,8 +26,10 @@ import (
 )
 
 // EventSourceLister helps list EventSources.
+// All objects returned here must be treated as read-only.
 type EventSourceLister interface {
 	// List lists all EventSources in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.EventSource, err error)
 	// EventSources returns an object that can list and get EventSources.
 	EventSources(namespace string) EventSourceNamespaceLister
@@ -58,10 +60,13 @@ func (s *eventSourceLister) EventSources(namespace string) EventSourceNamespaceL
 }
 
 // EventSourceNamespaceLister helps list and get EventSources.
+// All objects returned here must be treated as read-only.
 type EventSourceNamespaceLister interface {
 	// List lists all EventSources in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.EventSource, err error)
 	// Get retrieves the EventSource from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.EventSource, error)
 	EventSourceNamespaceListerExpansion
 }

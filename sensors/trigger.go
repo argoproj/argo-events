@@ -37,13 +37,13 @@ import (
 // Trigger interface
 type Trigger interface {
 	// FetchResource fetches the trigger resource from external source
-	FetchResource() (interface{}, error)
+	FetchResource(context.Context) (interface{}, error)
 	// ApplyResourceParameters applies parameters to the trigger resource
 	ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error)
 	// Execute executes the trigger
-	Execute(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error)
+	Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error)
 	// ApplyPolicy applies the policy on the trigger
-	ApplyPolicy(resource interface{}) error
+	ApplyPolicy(ctx context.Context, resource interface{}) error
 }
 
 // GetTrigger returns a trigger

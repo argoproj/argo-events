@@ -25,12 +25,14 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// EventBusLister helps list EventBus.
+// EventBusLister helps list EventBuses.
+// All objects returned here must be treated as read-only.
 type EventBusLister interface {
-	// List lists all EventBus in the indexer.
+	// List lists all EventBuses in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error)
-	// EventBus returns an object that can list and get EventBus.
-	EventBus(namespace string) EventBusNamespaceLister
+	// EventBuses returns an object that can list and get EventBuses.
+	EventBuses(namespace string) EventBusNamespaceLister
 	EventBusListerExpansion
 }
 
@@ -44,7 +46,7 @@ func NewEventBusLister(indexer cache.Indexer) EventBusLister {
 	return &eventBusLister{indexer: indexer}
 }
 
-// List lists all EventBus in the indexer.
+// List lists all EventBuses in the indexer.
 func (s *eventBusLister) List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error) {
 	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
 		ret = append(ret, m.(*v1alpha1.EventBus))
@@ -52,16 +54,19 @@ func (s *eventBusLister) List(selector labels.Selector) (ret []*v1alpha1.EventBu
 	return ret, err
 }
 
-// EventBus returns an object that can list and get EventBus.
-func (s *eventBusLister) EventBus(namespace string) EventBusNamespaceLister {
+// EventBuses returns an object that can list and get EventBuses.
+func (s *eventBusLister) EventBuses(namespace string) EventBusNamespaceLister {
 	return eventBusNamespaceLister{indexer: s.indexer, namespace: namespace}
 }
 
-// EventBusNamespaceLister helps list and get EventBus.
+// EventBusNamespaceLister helps list and get EventBuses.
+// All objects returned here must be treated as read-only.
 type EventBusNamespaceLister interface {
-	// List lists all EventBus in the indexer for a given namespace.
+	// List lists all EventBuses in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error)
 	// Get retrieves the EventBus from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.EventBus, error)
 	EventBusNamespaceListerExpansion
 }
@@ -73,7 +78,7 @@ type eventBusNamespaceLister struct {
 	namespace string
 }
 
-// List lists all EventBus in the indexer for a given namespace.
+// List lists all EventBuses in the indexer for a given namespace.
 func (s eventBusNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error) {
 	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
 		ret = append(ret, m.(*v1alpha1.EventBus))
