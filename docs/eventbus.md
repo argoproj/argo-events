@@ -4,7 +4,7 @@
 
 > v0.17.0 and after
 
-EventBus is a kubernetes
+EventBus is a Kubernetes
 [Custom Resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 which is used for events transmission from EventSources to Sensors. Currently
 EventBus is backed by
@@ -29,7 +29,7 @@ Streaming service with `exotic` NATS EventBus.
 
 ### Native
 
-A simplest `native` NATS EeventBus example:
+A simplest `native` NATS EventBus example:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
