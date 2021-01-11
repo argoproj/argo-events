@@ -1,0 +1,290 @@
+kind: CustomResourceDefinition
+metadata:
+  name: eventbus.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: EventBus
+    listKind: EventBusList
+    plural: eventbus
+    shortNames:
+    - eb
+    singular: eventbus
+  scope: Namespaced
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: eventsources.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: EventSource
+    listKind: EventSourceList
+    plural: eventsources
+    shortNames:
+    - es
+    singular: eventsource
+  scope: Namespaced
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: sensors.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: Sensor
+    listKind: SensorList
+    plural: sensors
+    shortNames:
+    - sn
+    singular: sensor
+  scope: Namespaced
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-events-sa
+  namespace: argo-events
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-events-role
+  namespace: argo-events
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflows
+  - workflows/finalizers
+  - workflowtemplates
+  - workflowtemplates/finalizers
+  - cronworkflows
+  - cronworkflows/finalizers
+  - clusterworkflowtemplates
+  - clusterworkflowtemplates/finalizers
+  - sensors
+  - sensors/finalizers
+  - eventsources
+  - eventsources/finalizers
+  - eventbus
+  - eventbus/finalizers
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - configmaps
+  - secrets
+  - services
+  - events
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - statefulsets
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-events-role-binding
+  namespace: argo-events
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-events-role
+subjects:
+- kind: ServiceAccount
+  name: argo-events-sa
+  namespace: argo-events
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventbus-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventbus-controller
+  template:
+    metadata:
+      labels:
+        app: eventbus-controller
+    spec:
+      containers:
+      - args:
+        - --namespaced
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: NATS_STREAMING_IMAGE
+          value: nats-streaming:0.17.0
+        - name: NATS_METRICS_EXPORTER_IMAGE
+          value: synadia/prometheus-nats-exporter:0.6.2
+        image: argoproj/eventbus-controller:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        name: eventbus-controller
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 9731
+      serviceAccountName: argo-events-sa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventsource-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventsource-controller
+  template:
+    metadata:
+      labels:
+        app: eventsource-controller
+    spec:
+      containers:
+      - args:
+        - --namespaced
+        env:
+        - name: EVENTSOURCE_IMAGE
+          value: argoproj/eventsource:latest
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: argoproj/eventsource-controller:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        name: eventsource-controller
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 9731
+      serviceAccountName: argo-events-sa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-controller
+  template:
+    metadata:
+      labels:
+        app: sensor-controller
+    spec:
+      containers:
+      - args:
+        - --namespaced
+        env:
+        - name: SENSOR_IMAGE
+          value: argoproj/sensor:latest
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: argoproj/sensor-controller:latest
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        name: sensor-controller
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 9731
+      serviceAccountName: argo-events-sa
