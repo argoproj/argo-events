@@ -333,7 +333,7 @@ message K8SResourcePolicy {
 
 // KafkaTrigger refers to the specification of the Kafka trigger.
 message KafkaTrigger {
-  // URL of the Kafka broker.
+  // URL of the Kafka broker, multiple URLs separated by comma.
   optional string url = 1;
 
   // Name of the topic.

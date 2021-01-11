@@ -18,6 +18,7 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/Shopify/sarama"
@@ -86,7 +87,8 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		}
 		config.Producer.RequiredAcks = ra
 
-		producer, err = sarama.NewAsyncProducer([]string{kafkatrigger.URL}, config)
+		urls := strings.Split(kafkatrigger.URL, ",")
+		producer, err = sarama.NewAsyncProducer(urls, config)
 		if err != nil {
 			return nil, err
 		}
