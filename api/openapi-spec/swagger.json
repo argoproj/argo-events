@@ -2547,7 +2547,7 @@
           "type": "string"
         },
         "url": {
-          "description": "URL of the Kafka broker.",
+          "description": "URL of the Kafka broker, multiple URLs separated by comma.",
           "type": "string"
         },
         "version": {

@@ -929,7 +929,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "URL of the Kafka broker.",
+							Description: "URL of the Kafka broker, multiple URLs separated by comma.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
