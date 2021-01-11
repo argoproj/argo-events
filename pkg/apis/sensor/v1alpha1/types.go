@@ -406,7 +406,7 @@ type AWSLambdaTrigger struct {
 
 // KafkaTrigger refers to the specification of the Kafka trigger.
 type KafkaTrigger struct {
-	// URL of the Kafka broker.
+	// URL of the Kafka broker, multiple URLs separated by comma.
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 	// Name of the topic.
 	// More info at https://kafka.apache.org/documentation/#intro_topics

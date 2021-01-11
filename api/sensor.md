@@ -1362,7 +1362,7 @@ Description
 </td>
 <td>
 <p>
-URL of the Kafka broker.
+URL of the Kafka broker, multiple URLs separated by comma.
 </p>
 </td>
 </tr>
