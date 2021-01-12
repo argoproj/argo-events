@@ -322,6 +322,95 @@ type AMQPEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
+	// ExchangeDeclare holds the configuration for the exchange on the server
+	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare
+	// +optional
+	ExchangeDeclare *AMQPExchangeDeclareConfig `json:"exchangeDeclare,omitempty" protobuf:"bytes,9,opt,name=exchangeDeclare"`
+	// QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers.
+	// Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches
+	// the same parameters
+	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare
+	// +optional
+	QueueDeclare *AMQPQueueDeclareConfig `json:"queueDeclare,omitempty" protobuf:"bytes,10,opt,name=queueDeclare"`
+	// QueueBind holds the configuration that binds an exchange to a queue so that publishings to the
+	// exchange will be routed to the queue when the publishing routing key matches the binding routing key
+	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueBind
+	// +optional
+	QueueBind *AMQPQueueBindConfig `json:"queueBind,omitempty" protobuf:"bytes,11,opt,name=queueBind"`
+	// Consume holds the configuration to immediately starts delivering queued messages
+	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.Consume
+	// +optional
+	Consume *AMQPConsumeConfig `json:"consume,omitempty" protobuf:"bytes,12,opt,name=consume"`
+}
+
+// AMQPExchangeDeclareConfig holds the configuration for the exchange on the server
+// +k8s:openapi-gen=true
+type AMQPExchangeDeclareConfig struct {
+	// Durable keeps the exchange also after the server restarts
+	// +optional
+	Durable bool `json:"durable,omitempty" protobuf:"varint,1,opt,name=durable"`
+	// AutoDelete removes the exchange when no bindings are active
+	// +optional
+	AutoDelete bool `json:"autoDelete,omitempty" protobuf:"varint,2,opt,name=autoDelete"`
+	// Internal when true does not accept publishings
+	// +optional
+	Internal bool `json:"internal,omitempty" protobuf:"varint,3,opt,name=internal"`
+	// NowWait when true does not wait for a confirmation from the server
+	// +optional
+	NoWait bool `json:"noWait,omitempty" protobuf:"varint,4,opt,name=noWait"`
+}
+
+// AMQPQueueDeclareConfig holds the configuration of a queue to hold messages and deliver to consumers.
+// Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches
+// the same parameters
+// +k8s:openapi-gen=true
+type AMQPQueueDeclareConfig struct {
+	// Name of the queue. If empty the server auto-generates a unique name for this queue
+	// +optional
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	// Durable keeps the queue also after the server restarts
+	// +optional
+	Durable bool `json:"durable,omitempty" protobuf:"varint,2,opt,name=durable"`
+	// AutoDelete removes the queue when no consumers are active
+	// +optional
+	AutoDelete bool `json:"autoDelete,omitempty" protobuf:"varint,3,opt,name=autoDelete"`
+	// Exclusive sets the queues to be accessible only by the connection that declares them and will be
+	// deleted wgen the connection closes
+	// +optional
+	Exclusive bool `json:"exclusive,omitempty" protobuf:"varint,4,opt,name=exclusive"`
+	// NowWait when true, the queue assumes to be declared on the server
+	// +optional
+	NoWait bool `json:"noWait,omitempty" protobuf:"varint,5,opt,name=noWait"`
+}
+
+// AMQPQueueBindConfig holds the configuration that binds an exchange to a queue so that publishings to the
+// exchange will be routed to the queue when the publishing routing key matches the binding routing key
+// +k8s:openapi-gen=true
+type AMQPQueueBindConfig struct {
+	// NowWait false and the queue could not be bound, the channel will be closed with an error
+	// +optional
+	NoWait bool `json:"noWait,omitempty" protobuf:"varint,1,opt,name=noWait"`
+}
+
+// AMQPConsumeConfig holds the configuration to immediately starts delivering queued messages
+// +k8s:openapi-gen=true
+type AMQPConsumeConfig struct {
+	// ConsumerTag is the identity of the consumer included in every delivery
+	// +optional
+	ConsumerTag string `json:"consumerTag,omitempty" protobuf:"bytes,1,opt,name=consumerTag"`
+	// AutoAck when true, the server will acknowledge deliveries to this consumer prior to writing
+	// the delivery to the network
+	// +optional
+	AutoAck bool `json:"autoAck,omitempty" protobuf:"varint,2,opt,name=autoAck"`
+	// Exclusive when true, the server will ensure that this is the sole consumer from this queue
+	// +optional
+	Exclusive bool `json:"exclusive,omitempty" protobuf:"varint,3,opt,name=exclusive"`
+	// NoLocal flag is not supported by RabbitMQ
+	// +optional
+	NoLocal bool `json:"noLocal,omitempty" protobuf:"varint,4,opt,name=noLocal"`
+	// NowWait when true, do not wait for the server to confirm the request and immediately begin deliveries
+	// +optional
+	NoWait bool `json:"noWait,omitempty" protobuf:"varint,5,opt,name=noWait"`
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
