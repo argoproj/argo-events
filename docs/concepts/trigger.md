@@ -15,3 +15,4 @@ A Trigger is the resource/workload executed by the sensor once the event depende
 1. NATS Messages
 1. Slack Notifications
 1. Create any Kubernetes Objects
+1. Log (for debugging event bus messages)
