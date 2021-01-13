@@ -94,10 +94,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	log.Info("checking parameters and set defaults...")
-	err = setDefaults(amqpEventSource)
-	if err != nil {
-		return errors.Wrapf(err, "failed to set defaults for the event source %s", el.GetEventName())
-	}
+	setDefaults(amqpEventSource)
 
 	log.Info("setting up the delivery channel...")
 	delivery, err := getDelivery(ch, amqpEventSource)
@@ -163,7 +160,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 // setDefaults sets the default values in case the user hasn't defined them
 // helps also to keep retro-compatibility with current dpeloyments
-func setDefaults(eventSource *v1alpha1.AMQPEventSource) error {
+func setDefaults(eventSource *v1alpha1.AMQPEventSource) {
 	if eventSource.ExchangeDeclare == nil {
 		eventSource.ExchangeDeclare = &v1alpha1.AMQPExchangeDeclareConfig{
 			Durable:    true,
@@ -198,7 +195,6 @@ func setDefaults(eventSource *v1alpha1.AMQPEventSource) error {
 			NoWait:      false,
 		}
 	}
-	return nil
 }
 
 // getDelivery sets up a channel for message deliveries
