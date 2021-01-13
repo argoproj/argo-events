@@ -40,6 +40,13 @@ jobs:
           username: ${{ secrets.DOCKERIO_USERNAME }}
           password: ${{ secrets.DOCKERIO_PASSWORD }}
 
+      - name: Docker Login
+        uses: Azure/docker-login@v1
+        with:
+          login-server: quay.io
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
+
       - name: Build & Push Linux Docker Images
         env:
           DOCKERIO_ORG: ${{ secrets.DOCKERIO_ORG }}
@@ -49,3 +56,4 @@ jobs:
             tag="latest"
           fi
           make eventsource-image sensor-image eventbus-controller-image eventsource-controller-image sensor-controller-image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${DOCKERIO_ORG} DOCKER_PUSH=true
+          make quay-release
