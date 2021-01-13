@@ -29,6 +29,31 @@ import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "v1alpha1";
 
+// AMQPConsumeConfig holds the configuration to immediately starts delivering queued messages
+// +k8s:openapi-gen=true
+message AMQPConsumeConfig {
+  // ConsumerTag is the identity of the consumer included in every delivery
+  // +optional
+  optional string consumerTag = 1;
+
+  // AutoAck when true, the server will acknowledge deliveries to this consumer prior to writing
+  // the delivery to the network
+  // +optional
+  optional bool autoAck = 2;
+
+  // Exclusive when true, the server will ensure that this is the sole consumer from this queue
+  // +optional
+  optional bool exclusive = 3;
+
+  // NoLocal flag is not supported by RabbitMQ
+  // +optional
+  optional bool noLocal = 4;
+
+  // NowWait when true, do not wait for the server to confirm the request and immediately begin deliveries
+  // +optional
+  optional bool noWait = 5;
+}
+
 // AMQPEventSource refers to an event-source for AMQP stream events
 message AMQPEventSource {
   // URL for rabbitmq service
@@ -60,6 +85,85 @@ message AMQPEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 8;
+
+  // ExchangeDeclare holds the configuration for the exchange on the server
+  // For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare
+  // +optional
+  optional AMQPExchangeDeclareConfig exchangeDeclare = 9;
+
+  // QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers.
+  // Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches
+  // the same parameters
+  // For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare
+  // +optional
+  optional AMQPQueueDeclareConfig queueDeclare = 10;
+
+  // QueueBind holds the configuration that binds an exchange to a queue so that publishings to the
+  // exchange will be routed to the queue when the publishing routing key matches the binding routing key
+  // For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueBind
+  // +optional
+  optional AMQPQueueBindConfig queueBind = 11;
+
+  // Consume holds the configuration to immediately starts delivering queued messages
+  // For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.Consume
+  // +optional
+  optional AMQPConsumeConfig consume = 12;
+}
+
+// AMQPExchangeDeclareConfig holds the configuration for the exchange on the server
+// +k8s:openapi-gen=true
+message AMQPExchangeDeclareConfig {
+  // Durable keeps the exchange also after the server restarts
+  // +optional
+  optional bool durable = 1;
+
+  // AutoDelete removes the exchange when no bindings are active
+  // +optional
+  optional bool autoDelete = 2;
+
+  // Internal when true does not accept publishings
+  // +optional
+  optional bool internal = 3;
+
+  // NowWait when true does not wait for a confirmation from the server
+  // +optional
+  optional bool noWait = 4;
+}
+
+// AMQPQueueBindConfig holds the configuration that binds an exchange to a queue so that publishings to the
+// exchange will be routed to the queue when the publishing routing key matches the binding routing key
+// +k8s:openapi-gen=true
+message AMQPQueueBindConfig {
+  // NowWait false and the queue could not be bound, the channel will be closed with an error
+  // +optional
+  optional bool noWait = 1;
+}
+
+// AMQPQueueDeclareConfig holds the configuration of a queue to hold messages and deliver to consumers.
+// Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches
+// the same parameters
+// +k8s:openapi-gen=true
+message AMQPQueueDeclareConfig {
+  // Name of the queue. If empty the server auto-generates a unique name for this queue
+  // +optional
+  optional string name = 1;
+
+  // Durable keeps the queue also after the server restarts
+  // +optional
+  optional bool durable = 2;
+
+  // AutoDelete removes the queue when no consumers are active
+  // +optional
+  optional bool autoDelete = 3;
+
+  // Exclusive sets the queues to be accessible only by the connection that declares them and will be
+  // deleted wgen the connection closes
+  // +optional
+  optional bool exclusive = 4;
+
+  // NowWait when true, the queue assumes to be declared on the server
+  // +optional
+  optional bool noWait = 5;
 }
 
 // AzureEventsHubEventSource describes the event source for azure events hub

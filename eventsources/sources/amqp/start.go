@@ -93,6 +93,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to open the channel for the event source %s", el.GetEventName())
 	}
 
+	log.Info("checking parameters and set defaults...")
+	setDefaults(amqpEventSource)
+
 	log.Info("setting up the delivery channel...")
 	delivery, err := getDelivery(ch, amqpEventSource)
 	if err != nil {
@@ -155,24 +158,92 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
+// setDefaults sets the default values in case the user hasn't defined them
+// helps also to keep retro-compatibility with current dpeloyments
+func setDefaults(eventSource *v1alpha1.AMQPEventSource) {
+	if eventSource.ExchangeDeclare == nil {
+		eventSource.ExchangeDeclare = &v1alpha1.AMQPExchangeDeclareConfig{
+			Durable:    true,
+			AutoDelete: false,
+			Internal:   false,
+			NoWait:     false,
+		}
+	}
+
+	if eventSource.QueueDeclare == nil {
+		eventSource.QueueDeclare = &v1alpha1.AMQPQueueDeclareConfig{
+			Name:       "",
+			Durable:    false,
+			AutoDelete: false,
+			Exclusive:  true,
+			NoWait:     false,
+		}
+	}
+
+	if eventSource.QueueBind == nil {
+		eventSource.QueueBind = &v1alpha1.AMQPQueueBindConfig{
+			NoWait: false,
+		}
+	}
+
+	if eventSource.Consume == nil {
+		eventSource.Consume = &v1alpha1.AMQPConsumeConfig{
+			ConsumerTag: "",
+			AutoAck:     true,
+			Exclusive:   false,
+			NoLocal:     false,
+			NoWait:      false,
+		}
+	}
+}
+
 // getDelivery sets up a channel for message deliveries
 func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-chan amqplib.Delivery, error) {
-	err := ch.ExchangeDeclare(eventSource.ExchangeName, eventSource.ExchangeType, true, false, false, false, nil)
+	err := ch.ExchangeDeclare(
+		eventSource.ExchangeName,
+		eventSource.ExchangeType,
+		eventSource.ExchangeDeclare.Durable,
+		eventSource.ExchangeDeclare.AutoDelete,
+		eventSource.ExchangeDeclare.Internal,
+		eventSource.ExchangeDeclare.NoWait,
+		nil,
+	)
 	if err != nil {
 		return nil, errors.Errorf("failed to declare exchange with name %s and type %s. err: %+v", eventSource.ExchangeName, eventSource.ExchangeType, err)
 	}
 
-	q, err := ch.QueueDeclare("", false, false, true, false, nil)
+	q, err := ch.QueueDeclare(
+		eventSource.QueueDeclare.Name,
+		eventSource.QueueDeclare.Durable,
+		eventSource.QueueDeclare.AutoDelete,
+		eventSource.QueueDeclare.Exclusive,
+		eventSource.QueueDeclare.NoWait,
+		nil,
+	)
 	if err != nil {
 		return nil, errors.Errorf("failed to declare queue: %s", err)
 	}
 
-	err = ch.QueueBind(q.Name, eventSource.RoutingKey, eventSource.ExchangeName, false, nil)
+	err = ch.QueueBind(
+		q.Name,
+		eventSource.RoutingKey,
+		eventSource.ExchangeName,
+		eventSource.QueueBind.NoWait,
+		nil,
+	)
 	if err != nil {
 		return nil, errors.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", eventSource.ExchangeType, eventSource.ExchangeName, eventSource.RoutingKey, err)
 	}
 
-	delivery, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	delivery, err := ch.Consume(
+		q.Name,
+		eventSource.Consume.ConsumerTag,
+		eventSource.Consume.AutoAck,
+		eventSource.Consume.Exclusive,
+		eventSource.Consume.NoLocal,
+		eventSource.Consume.NoWait,
+		nil,
+	)
 	if err != nil {
 		return nil, errors.Errorf("failed to begin consuming messages: %s", err)
 	}
