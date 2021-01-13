@@ -17,6 +17,91 @@ Package v1alpha1 is the v1alpha1 version of the API.
 Resource Types:
 <ul>
 </ul>
+<h3 id="argoproj.io/v1alpha1.AMQPConsumeConfig">
+AMQPConsumeConfig
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>)
+</p>
+<p>
+<p>
+AMQPConsumeConfig holds the configuration to immediately starts
+delivering queued messages
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>consumerTag</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ConsumerTag is the identity of the consumer included in every delivery
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>autoAck</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AutoAck when true, the server will acknowledge deliveries to this
+consumer prior to writing the delivery to the network
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exclusive</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Exclusive when true, the server will ensure that this is the sole
+consumer from this queue
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>noLocal</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+NoLocal flag is not supported by RabbitMQ
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>noWait</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+NowWait when true, do not wait for the server to confirm the request and
+immediately begin deliveries
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.AMQPEventSource">
 AMQPEventSource
 </h3>
@@ -127,6 +212,267 @@ TLS configuration for the amqp client.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exchangeDeclare</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AMQPExchangeDeclareConfig">
+AMQPExchangeDeclareConfig </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ExchangeDeclare holds the configuration for the exchange on the server
+For more information, visit
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare">https://godoc.org/github.com/streadway/amqp\#Channel.ExchangeDeclare</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueDeclare</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AMQPQueueDeclareConfig">
+AMQPQueueDeclareConfig </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+QueueDeclare holds the configuration of a queue to hold messages and
+deliver to consumers. Declaring creates a queue if it doesn’t already
+exist, or ensures that an existing queue matches the same parameters For
+more information, visit
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare">https://godoc.org/github.com/streadway/amqp\#Channel.QueueDeclare</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueBind</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AMQPQueueBindConfig"> AMQPQueueBindConfig
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+QueueBind holds the configuration that binds an exchange to a queue so
+that publishings to the exchange will be routed to the queue when the
+publishing routing key matches the binding routing key For more
+information, visit
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueBind">https://godoc.org/github.com/streadway/amqp\#Channel.QueueBind</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>consume</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AMQPConsumeConfig"> AMQPConsumeConfig
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Consume holds the configuration to immediately starts delivering queued
+messages For more information, visit
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.Consume">https://godoc.org/github.com/streadway/amqp\#Channel.Consume</a>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.AMQPExchangeDeclareConfig">
+AMQPExchangeDeclareConfig
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>)
+</p>
+<p>
+<p>
+AMQPExchangeDeclareConfig holds the configuration for the exchange on
+the server
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>durable</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Durable keeps the exchange also after the server restarts
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>autoDelete</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AutoDelete removes the exchange when no bindings are active
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>internal</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Internal when true does not accept publishings
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>noWait</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+NowWait when true does not wait for a confirmation from the server
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.AMQPQueueBindConfig">
+AMQPQueueBindConfig
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>)
+</p>
+<p>
+<p>
+AMQPQueueBindConfig holds the configuration that binds an exchange to a
+queue so that publishings to the exchange will be routed to the queue
+when the publishing routing key matches the binding routing key
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>noWait</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+NowWait false and the queue could not be bound, the channel will be
+closed with an error
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.AMQPQueueDeclareConfig">
+AMQPQueueDeclareConfig
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>)
+</p>
+<p>
+<p>
+AMQPQueueDeclareConfig holds the configuration of a queue to hold
+messages and deliver to consumers. Declaring creates a queue if it
+doesn’t already exist, or ensures that an existing queue matches the
+same parameters
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Name of the queue. If empty the server auto-generates a unique name for
+this queue
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>durable</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Durable keeps the queue also after the server restarts
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>autoDelete</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AutoDelete removes the queue when no consumers are active
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exclusive</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Exclusive sets the queues to be accessible only by the connection that
+declares them and will be deleted wgen the connection closes
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>noWait</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+NowWait when true, the queue assumes to be declared on the server
 </p>
 </td>
 </tr>
