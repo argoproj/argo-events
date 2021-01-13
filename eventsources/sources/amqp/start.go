@@ -93,6 +93,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to open the channel for the event source %s", el.GetEventName())
 	}
 
+	log.Info("checking parameters and set defaults...")
+	err = setDefaults(amqpEventSource)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set defaults for the event source %s", el.GetEventName())
+	}
+
 	log.Info("setting up the delivery channel...")
 	delivery, err := getDelivery(ch, amqpEventSource)
 	if err != nil {
@@ -153,6 +159,46 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		}
 	}
+}
+
+// setDefaults sets the default values in case the user hasn't defined them
+// helps also to keep retro-compatibility with current dpeloyments
+func setDefaults(eventSource *v1alpha1.AMQPEventSource) error {
+	if eventSource.ExchangeDeclare == nil {
+		eventSource.ExchangeDeclare = &v1alpha1.AMQPExchangeDeclareConfig{
+			Durable:    true,
+			AutoDelete: false,
+			Internal:   false,
+			NoWait:     false,
+		}
+	}
+
+	if eventSource.QueueDeclare == nil {
+		eventSource.QueueDeclare = &v1alpha1.AMQPQueueDeclareConfig{
+			Name:       "",
+			Durable:    false,
+			AutoDelete: false,
+			Exclusive:  true,
+			NoWait:     false,
+		}
+	}
+
+	if eventSource.QueueBind == nil {
+		eventSource.QueueBind = &v1alpha1.AMQPQueueBindConfig{
+			NoWait: false,
+		}
+	}
+
+	if eventSource.Consume == nil {
+		eventSource.Consume = &v1alpha1.AMQPConsumeConfig{
+			ConsumerTag: "",
+			AutoAck:     true,
+			Exclusive:   false,
+			NoLocal:     false,
+			NoWait:      false,
+		}
+	}
+	return nil
 }
 
 // getDelivery sets up a channel for message deliveries
