@@ -203,4 +203,19 @@ lint: $(GOPATH)/bin/golangci-lint
 	go mod tidy
 	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
 
+.PHONY: quay-release
+quay-release: eventbus-controller-image sensor-controller-image sensor-image eventsource-image eventsource-controller-image
+	docker tag $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) quay.io/$(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)
+	docker push quay.io/$(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)
 
+	docker tag $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) quay.io/$(IMAGE_PREFIX)sensor:$(IMAGE_TAG)
+	docker push quay.io/$(IMAGE_PREFIX)sensor:$(IMAGE_TAG)
+
+	docker tag $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) quay.io/$(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG)
+	docker push quay.io/$(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG)
+
+	docker tag $(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG) quay.io/$(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG)
+	docker push quay.io/$(IMAGE_PREFIX)eventsource-controller:$(IMAGE_TAG)
+
+	docker tag $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) quay.io/$(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)
+	docker push quay.io/$(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)
