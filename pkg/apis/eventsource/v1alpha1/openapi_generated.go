@@ -29,7 +29,11 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPConsumeConfig":         schema_pkg_apis_eventsource_v1alpha1_AMQPConsumeConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource":           schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPExchangeDeclareConfig": schema_pkg_apis_eventsource_v1alpha1_AMQPExchangeDeclareConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueBindConfig":       schema_pkg_apis_eventsource_v1alpha1_AMQPQueueBindConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueDeclareConfig":    schema_pkg_apis_eventsource_v1alpha1_AMQPQueueDeclareConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource": schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource":       schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration":      schema_pkg_apis_eventsource_v1alpha1_CatchupConfiguration(ref),
@@ -66,6 +70,54 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Template":                  schema_pkg_apis_eventsource_v1alpha1_Template(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig":           schema_pkg_apis_eventsource_v1alpha1_WatchPathConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext":            schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref),
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_AMQPConsumeConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AMQPConsumeConfig holds the configuration to immediately starts delivering queued messages",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"consumerTag": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ConsumerTag is the identity of the consumer included in every delivery",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"autoAck": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AutoAck when true, the server will acknowledge deliveries to this consumer prior to writing the delivery to the network",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"exclusive": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Exclusive when true, the server will ensure that this is the sole consumer from this queue",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"noLocal": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NoLocal flag is not supported by RabbitMQ",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"noWait": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NowWait when true, do not wait for the server to confirm the request and immediately begin deliveries",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -138,12 +190,145 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 							},
 						},
 					},
+					"exchangeDeclare": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ExchangeDeclare holds the configuration for the exchange on the server For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPExchangeDeclareConfig"),
+						},
+					},
+					"queueDeclare": {
+						SchemaProps: spec.SchemaProps{
+							Description: "QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueDeclareConfig"),
+						},
+					},
+					"queueBind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "QueueBind holds the configuration that binds an exchange to a queue so that publishings to the exchange will be routed to the queue when the publishing routing key matches the binding routing key For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueBind",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueBindConfig"),
+						},
+					},
+					"consume": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Consume holds the configuration to immediately starts delivering queued messages For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.Consume",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPConsumeConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "exchangeName", "exchangeType", "routingKey"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPConsumeConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPExchangeDeclareConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueBindConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueDeclareConfig"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_AMQPExchangeDeclareConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AMQPExchangeDeclareConfig holds the configuration for the exchange on the server",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"durable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Durable keeps the exchange also after the server restarts",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"autoDelete": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AutoDelete removes the exchange when no bindings are active",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"internal": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Internal when true does not accept publishings",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"noWait": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NowWait when true does not wait for a confirmation from the server",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_AMQPQueueBindConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AMQPQueueBindConfig holds the configuration that binds an exchange to a queue so that publishings to the exchange will be routed to the queue when the publishing routing key matches the binding routing key",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"noWait": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NowWait false and the queue could not be bound, the channel will be closed with an error",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_AMQPQueueDeclareConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AMQPQueueDeclareConfig holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the queue. If empty the server auto-generates a unique name for this queue",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"durable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Durable keeps the queue also after the server restarts",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"autoDelete": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AutoDelete removes the queue when no consumers are active",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"exclusive": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Exclusive sets the queues to be accessible only by the connection that declares them and will be deleted wgen the connection closes",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"noWait": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NowWait when true, the queue assumes to be declared on the server",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
