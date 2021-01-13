@@ -82,8 +82,8 @@ We will set up a basic go http server and connect it with the minio events.
 
 ### Request Payload
 
-In order to construct a request payload based on the event data, sensor offers 
-`payload` field as a part of the HTP trigger.
+In order to construct a request payload based on the event data, the sensor offers 
+`payload` field as a part of the HTTP trigger.
 
 Let's examine a HTTP trigger,
 
