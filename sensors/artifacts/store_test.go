@@ -14,14 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package store
+package artifacts
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 type FakeWorkflowArtifactReader struct{}
@@ -38,6 +42,26 @@ func TestFetchArtifact(t *testing.T) {
 	assert.Equal(t, "Workflow", obj.GetKind())
 }
 
+func TestGetCredentials(t *testing.T) {
+	fakeClient := fake.NewSimpleClientset()
+
+	mySecretCredentials := &apiv1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "testing",
+		},
+		Data: map[string][]byte{"access": []byte("token"), "secret": []byte("value")},
+	}
+	_, err := fakeClient.CoreV1().Secrets("testing").Create(context.TODO(), mySecretCredentials, metav1.CreateOptions{})
+	assert.Nil(t, err)
+
+	// creds should be nil for unknown minio type
+	unknownArtifact := &v1alpha1.ArtifactLocation{}
+	creds, err := GetCredentials(unknownArtifact)
+	assert.Nil(t, creds)
+	assert.Nil(t, err)
+}
+
 func TestGetArtifactReader(t *testing.T) {
 	// test unknown failure
 	location := &v1alpha1.ArtifactLocation{}
@@ -50,7 +74,7 @@ func TestGetArtifactReader(t *testing.T) {
 }
 
 func TestDecodeSensor(t *testing.T) {
-	b, err := ioutil.ReadFile("../examples/sensors/multi-trigger-sensor.yaml")
+	b, err := ioutil.ReadFile("../../examples/sensors/multi-trigger-sensor.yaml")
 	assert.Nil(t, err)
 	_, err = decodeAndUnstructure(b)
 	assert.Nil(t, err)
