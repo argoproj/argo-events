@@ -1,0 +1,14 @@
+#
+# Update the versions in this file.
+#
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - events-webhook
+
+images:
+  - name: argoproj/events-webhook
+    newTag: latest
+

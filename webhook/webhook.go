@@ -337,7 +337,7 @@ func (ac *AdmissionController) getOrGenerateKeyCertsFromSecret(ctx context.Conte
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		secret, err = ac.Client.CoreV1().Secrets(newSecret.Namespace).Create(ctx, newSecret, metav1.CreateOptions{})
+		_, err = ac.Client.CoreV1().Secrets(newSecret.Namespace).Create(ctx, newSecret, metav1.CreateOptions{})
 		if err != nil && !apierrors.IsAlreadyExists(err) {
 			return nil, nil, nil, err
 		}

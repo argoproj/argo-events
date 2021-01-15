@@ -16,7 +16,7 @@ type eventbus struct {
 
 // NewEventBusValidator returns a validator for EventBus
 func NewEventBusValidator(client kubernetes.Interface, old, new *eventbusv1alpha1.EventBus) Validator {
-	return &eventbus{oldeb: old, neweb: new}
+	return &eventbus{client: client, oldeb: old, neweb: new}
 }
 
 func (eb *eventbus) ValidateCreate(ctx context.Context) (bool, string, error) {

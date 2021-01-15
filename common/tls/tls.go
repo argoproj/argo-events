@@ -55,7 +55,6 @@ func createServerCertTemplate(org string, hosts []string, notAfter time.Time) (*
 // Sign the cert
 func createCert(template, parent *x509.Certificate, pub, parentPriv interface{}) (
 	cert *x509.Certificate, certPEM []byte, err error) {
-
 	certDER, err := x509.CreateCertificate(rand.Reader, template, parent, pub, parentPriv)
 	if err != nil {
 		return
