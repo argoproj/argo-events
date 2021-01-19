@@ -6,7 +6,6 @@ on:
       - 'v*'
     branches:
       - master
-      - quay-test
 
 jobs:
   release:
