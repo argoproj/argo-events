@@ -36,9 +36,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/artifacts"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
-	"github.com/argoproj/argo-events/store"
 )
 
 // StandardK8STrigger implements Trigger interface for standard Kubernetes resources
@@ -74,11 +74,11 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource(ctx context.Context) (interf
 	if trigger.Template.K8s.Source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
 	}
-	creds, err := store.GetCredentials(trigger.Template.K8s.Source)
+	creds, err := artifacts.GetCredentials(trigger.Template.K8s.Source)
 	if err != nil {
 		return nil, err
 	}
-	reader, err := store.GetArtifactReader(trigger.Template.K8s.Source, creds)
+	reader, err := artifacts.GetArtifactReader(trigger.Template.K8s.Source, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource(ctx context.Context) (interf
 
 	// uObj will either hold the resource definition stored in the trigger or just
 	// a stub to provide enough information to fetch the object from K8s cluster
-	uObj, err := store.FetchArtifact(reader)
+	uObj, err := artifacts.FetchArtifact(reader)
 	if err != nil {
 		return nil, err
 	}
