@@ -14,13 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package store
+package artifacts
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -38,6 +41,31 @@ func FetchArtifact(reader ArtifactReader) (*unstructured.Unstructured, error) {
 		return nil, err
 	}
 	return decodeAndUnstructure(obj)
+}
+
+type Credentials struct {
+	accessKey string
+	secretKey string
+}
+
+// GetCredentials for this minio
+func GetCredentials(art *v1alpha1.ArtifactLocation) (*Credentials, error) {
+	if art.S3 != nil {
+		accessKey, err := common.GetSecretFromVolume(art.S3.AccessKey)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve accessKey")
+		}
+		secretKey, err := common.GetSecretFromVolume(art.S3.SecretKey)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to retrieve secretKey")
+		}
+		return &Credentials{
+			accessKey: strings.TrimSpace(accessKey),
+			secretKey: strings.TrimSpace(secretKey),
+		}, nil
+	}
+
+	return nil, nil
 }
 
 // GetArtifactReader returns the ArtifactReader for this location

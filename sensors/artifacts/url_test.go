@@ -1,4 +1,4 @@
-package store
+package artifacts
 
 import (
 	"fmt"
