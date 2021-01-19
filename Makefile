@@ -182,7 +182,7 @@ crds:
 .PHONY: manifests
 manifests: crds
 	kustomize build manifests/cluster-install > manifests/install.yaml
-	kustomize build manifests/cluster-install-no-extention > manifests/install-no-extension.yaml
+	kustomize build manifests/cluster-install-with-extension > manifests/install-with-extension.yaml
 	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
 
 .PHONY: swagger

@@ -119,7 +119,7 @@ func (ac *AdmissionController) Run(ctx context.Context) error {
 // configuration types.
 func (ac *AdmissionController) register(
 	ctx context.Context, client clientadmissionregistrationv1.ValidatingWebhookConfigurationInterface, caCert []byte) error {
-	failurePolicy := admissionregistrationv1.Fail
+	failurePolicy := admissionregistrationv1.Ignore
 
 	var rules []admissionregistrationv1.RuleWithOperations
 	for gvk := range ac.Handlers {
