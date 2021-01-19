@@ -21,22 +21,22 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/store"
+	"github.com/argoproj/argo-events/sensors/artifacts"
 )
 
 func FetchKubernetesResource(source *v1alpha1.ArtifactLocation) (*unstructured.Unstructured, error) {
 	if source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
 	}
-	creds, err := store.GetCredentials(source)
+	creds, err := artifacts.GetCredentials(source)
 	if err != nil {
 		return nil, err
 	}
-	reader, err := store.GetArtifactReader(source, creds)
+	reader, err := artifacts.GetArtifactReader(source, creds)
 	if err != nil {
 		return nil, err
 	}
-	uObj, err := store.FetchArtifact(reader)
+	uObj, err := artifacts.FetchArtifact(reader)
 	if err != nil {
 		return nil, err
 	}
