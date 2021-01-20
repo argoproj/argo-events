@@ -129,6 +129,7 @@ func (ac *AdmissionController) register(
 			Operations: []admissionregistrationv1.OperationType{
 				admissionregistrationv1.Create,
 				admissionregistrationv1.Update,
+				admissionregistrationv1.Delete,
 			},
 			Rule: admissionregistrationv1.Rule{
 				APIGroups:   []string{gvk.Group},
@@ -254,7 +255,7 @@ func (ac *AdmissionController) ServeHTTP(w http.ResponseWriter, r *http.Request)
 func (ac *AdmissionController) admit(ctx context.Context, request *admissionv1.AdmissionRequest) *admissionv1.AdmissionResponse {
 	log := logging.FromContext(ctx)
 	switch request.Operation {
-	case admissionv1.Create, admissionv1.Update:
+	case admissionv1.Create, admissionv1.Update, admissionv1.Delete:
 	default:
 		log.Infof("Operation not interested: %v %v", request.Kind, request.Operation)
 		return &admissionv1.AdmissionResponse{Allowed: true}
@@ -278,6 +279,15 @@ func (ac *AdmissionController) admit(ctx context.Context, request *admissionv1.A
 		result, message, err := validator.ValidateUpdate(ctx)
 		if err != nil {
 			return makeErrorStatus("Object UPDATE validation failed: %v", err)
+		}
+		if result {
+			return &admissionv1.AdmissionResponse{Allowed: true}
+		}
+		return makeErrorStatus(message)
+	case admissionv1.Delete:
+		result, message, err := validator.ValidateDelete(ctx)
+		if err != nil {
+			return makeErrorStatus("Object DELETE validation failed: %v", err)
 		}
 		if result {
 			return &admissionv1.AdmissionResponse{Allowed: true}

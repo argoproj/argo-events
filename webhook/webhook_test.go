@@ -90,14 +90,6 @@ func TestConnectAllowed(t *testing.T) {
 		resp := ac.admit(contextWithLogger(t), req)
 		assert.True(t, resp.Allowed)
 	})
-
-	t.Run("test DELETE allowed", func(t *testing.T) {
-		req := &admissionv1.AdmissionRequest{
-			Operation: admissionv1.Connect,
-		}
-		resp := ac.admit(contextWithLogger(t), req)
-		assert.True(t, resp.Allowed)
-	})
 }
 
 func TestUnknownKindFails(t *testing.T) {
@@ -153,7 +145,7 @@ func TestRunExit(t *testing.T) {
 	g.Go(func() error {
 		return ac.Run(ctx)
 	})
-	syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
+	_ = syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
 	err := g.Wait()
 	assert.Nil(t, err)
 	_, err = net.Dial("tcp", fmt.Sprintf(":%d", opts.Port))
