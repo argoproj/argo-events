@@ -11,6 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -122,10 +123,10 @@ func TestNeedsUpdate(t *testing.T) {
 			logger:             logging.NewArgoEventsLogger(),
 		}
 		assert.False(t, r.needsUpdate(nativeBus, testBus))
-		r.addFinalizer(testBus)
+		controllerutil.AddFinalizer(testBus, finalizerName)
 		assert.True(t, contains(testBus.Finalizers, finalizerName))
 		assert.True(t, r.needsUpdate(nativeBus, testBus))
-		r.removeFinalizer(testBus)
+		controllerutil.RemoveFinalizer(testBus, finalizerName)
 		assert.False(t, contains(testBus.Finalizers, finalizerName))
 		assert.False(t, r.needsUpdate(nativeBus, testBus))
 		testBus.Status.MarkConfigured()

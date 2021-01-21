@@ -7,9 +7,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/sets"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/common"
@@ -47,15 +47,18 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", eventSource.Namespace).With("eventSource", eventSource.Name)
-	evCopy := eventSource.DeepCopy()
-	reconcileErr := r.reconcile(ctx, evCopy)
+	esCopy := eventSource.DeepCopy()
+	reconcileErr := r.reconcile(ctx, esCopy)
 	if reconcileErr != nil {
-		log.Desugar().Error("reconcile error", zap.Error(reconcileErr))
+		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
-	if r.needsUpdate(eventSource, evCopy) {
-		if err := r.client.Update(ctx, evCopy); err != nil {
+	if r.needsUpdate(eventSource, esCopy) {
+		if err := r.client.Update(ctx, esCopy); err != nil {
 			return reconcile.Result{}, err
 		}
+	}
+	if err := r.client.Status().Update(ctx, esCopy); err != nil {
+		return reconcile.Result{}, err
 	}
 	return ctrl.Result{}, reconcileErr
 }
@@ -65,16 +68,18 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 	log := r.logger.With("namespace", eventSource.Namespace).With("eventSource", eventSource.Name)
 	if !eventSource.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventsource")
-		// Finalizer logic should be added here.
-		r.removeFinalizer(eventSource)
+		if controllerutil.ContainsFinalizer(eventSource, finalizerName) {
+			// Finalizer logic should be added here.
+			controllerutil.RemoveFinalizer(eventSource, finalizerName)
+		}
 		return nil
 	}
-	r.addFinalizer(eventSource)
+	controllerutil.AddFinalizer(eventSource, finalizerName)
 
 	eventSource.Status.InitConditions()
 	err := ValidateEventSource(eventSource)
 	if err != nil {
-		log.Errorw("validation error", "error", err)
+		log.Errorw("validation error", zap.Error(err))
 		return err
 	}
 	args := &AdaptorArgs{
@@ -89,23 +94,8 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 	return Reconcile(r.client, args, log)
 }
 
-func (r *reconciler) addFinalizer(s *v1alpha1.EventSource) {
-	finalizers := sets.NewString(s.Finalizers...)
-	finalizers.Insert(finalizerName)
-	s.Finalizers = finalizers.List()
-}
-
-func (r *reconciler) removeFinalizer(s *v1alpha1.EventSource) {
-	finalizers := sets.NewString(s.Finalizers...)
-	finalizers.Delete(finalizerName)
-	s.Finalizers = finalizers.List()
-}
-
 func (r *reconciler) needsUpdate(old, new *v1alpha1.EventSource) bool {
 	if old == nil {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(old.Status, new.Status) {
 		return true
 	}
 	if !equality.Semantic.DeepEqual(old.Finalizers, new.Finalizers) {

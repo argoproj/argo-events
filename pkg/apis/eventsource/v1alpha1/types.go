@@ -28,6 +28,7 @@ import (
 // EventSource is the definition of a eventsource resource
 // +genclient
 // +kubebuilder:resource:shortName=es
+// +kubebuilder:subresource:status
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type EventSource struct {

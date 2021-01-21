@@ -69,6 +69,7 @@ const (
 // +genclient
 // +genclient:noStatus
 // +kubebuilder:resource:shortName=sn
+// +kubebuilder:subresource:status
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
