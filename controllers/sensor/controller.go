@@ -23,9 +23,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/sets"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/common"
@@ -59,19 +59,22 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			r.logger.Warnw("WARNING: sensor not found", "request", req)
 			return reconcile.Result{}, nil
 		}
-		r.logger.Errorw("unable to get sensor ctl", "request", req, "error", err)
+		r.logger.Errorw("unable to get sensor ctl", zap.Any("request", req), zap.Error(err))
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", sensor.Namespace).With("sensor", sensor.Name)
 	sensorCopy := sensor.DeepCopy()
 	reconcileErr := r.reconcile(ctx, sensorCopy)
 	if reconcileErr != nil {
-		log.Errorw("reconcile error", "error", reconcileErr)
+		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
 	if r.needsUpdate(sensor, sensorCopy) {
 		if err := r.client.Update(ctx, sensorCopy); err != nil {
 			return reconcile.Result{}, err
 		}
+	}
+	if err := r.client.Status().Update(ctx, sensorCopy); err != nil {
+		return reconcile.Result{}, err
 	}
 	return ctrl.Result{}, reconcileErr
 }
@@ -81,11 +84,13 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	log := r.logger.With("namespace", sensor.Namespace).With("sensor", sensor.Name)
 	if !sensor.DeletionTimestamp.IsZero() {
 		log.Info("deleting sensor")
-		// Finalizer logic should be added here.
-		r.removeFinalizer(sensor)
+		if controllerutil.ContainsFinalizer(sensor, finalizerName) {
+			// Finalizer logic should be added here.
+			controllerutil.RemoveFinalizer(sensor, finalizerName)
+		}
 		return nil
 	}
-	r.addFinalizer(sensor)
+	controllerutil.AddFinalizer(sensor, finalizerName)
 
 	sensor.Status.InitConditions()
 	err := ValidateSensor(sensor)
@@ -105,23 +110,8 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	return Reconcile(r.client, args, log)
 }
 
-func (r *reconciler) addFinalizer(s *v1alpha1.Sensor) {
-	finalizers := sets.NewString(s.Finalizers...)
-	finalizers.Insert(finalizerName)
-	s.Finalizers = finalizers.List()
-}
-
-func (r *reconciler) removeFinalizer(s *v1alpha1.Sensor) {
-	finalizers := sets.NewString(s.Finalizers...)
-	finalizers.Delete(finalizerName)
-	s.Finalizers = finalizers.List()
-}
-
 func (r *reconciler) needsUpdate(old, new *v1alpha1.Sensor) bool {
 	if old == nil {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(old.Status, new.Status) {
 		return true
 	}
 	if !equality.Semantic.DeepEqual(old.Finalizers, new.Finalizers) {
