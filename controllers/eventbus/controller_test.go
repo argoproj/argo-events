@@ -130,7 +130,7 @@ func TestNeedsUpdate(t *testing.T) {
 		assert.False(t, contains(testBus.Finalizers, finalizerName))
 		assert.False(t, r.needsUpdate(nativeBus, testBus))
 		testBus.Status.MarkConfigured()
-		assert.True(t, r.needsUpdate(nativeBus, testBus))
+		assert.False(t, r.needsUpdate(nativeBus, testBus))
 	})
 }
 
