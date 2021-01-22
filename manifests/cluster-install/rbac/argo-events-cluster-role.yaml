@@ -39,10 +39,13 @@ rules:
       - clusterworkflowtemplates/finalizers
       - sensors
       - sensors/finalizers
+      - sensors/status
       - eventsources
       - eventsources/finalizers
+      - eventsources/status
       - eventbus
       - eventbus/finalizers
+      - eventbus/status
   - apiGroups:
       - ""
     resources:

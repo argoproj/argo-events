@@ -10,10 +10,13 @@ rules:
     resources:
       - sensors
       - sensors/finalizers
+      - sensors/status
       - eventsources
       - eventsources/finalizers
+      - eventsources/status
       - eventbus
       - eventbus/finalizers
+      - eventbus/status
     verbs:
       - get
       - list
