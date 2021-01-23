@@ -56,6 +56,28 @@ func fakeEventBus() *eventbusv1alpha1.EventBus {
 	}
 }
 
+func fakeExoticEventBus() *eventbusv1alpha1.EventBus {
+	cID := "test-cluster-id"
+	return &eventbusv1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test-ns",
+			Name:      "test-name",
+		},
+		Spec: eventbusv1alpha1.EventBusSpec{
+			NATS: &eventbusv1alpha1.NATSBus{
+				Exotic: &eventbusv1alpha1.NATSConfig{
+					ClusterID: &cID,
+					URL:       "nats://adsaf:1234",
+				},
+			},
+		},
+	}
+}
+
 func fakeSensor() *sensorv1alpha1.Sensor {
 	return &sensorv1alpha1.Sensor{
 		ObjectMeta: metav1.ObjectMeta{

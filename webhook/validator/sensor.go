@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 
+	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/client-go/kubernetes"
 
 	sensorcontroller "github.com/argoproj/argo-events/controllers/sensor"
@@ -20,20 +21,23 @@ func NewSensorValidator(client kubernetes.Interface, old, new *sensorv1alpha1.Se
 	return &sensor{client: client, oldSensor: old, newSensor: new}
 }
 
-func (s *sensor) ValidateCreate(ctx context.Context) (bool, string, error) {
-	if err := sensorcontroller.ValidateSensor(s.newSensor); err != nil {
-		return false, err.Error(), nil
+func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
+	if s.oldSensor.Generation == s.newSensor.Generation {
+		AllowedResponse()
 	}
-	return true, "", nil
+	if err := sensorcontroller.ValidateSensor(s.newSensor); err != nil {
+		return DeniedResponse(err.Error())
+	}
+	return AllowedResponse()
 }
 
-func (s *sensor) ValidateUpdate(ctx context.Context) (bool, string, error) {
+func (s *sensor) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionResponse {
 	if err := sensorcontroller.ValidateSensor(s.newSensor); err != nil {
-		return false, err.Error(), nil
+		return DeniedResponse(err.Error())
 	}
-	return true, "", nil
+	return AllowedResponse()
 }
 
-func (s *sensor) ValidateDelete(ctx context.Context) (bool, string, error) {
-	return true, "", nil
+func (s *sensor) ValidateDelete(ctx context.Context) *admissionv1.AdmissionResponse {
+	return AllowedResponse()
 }

@@ -260,49 +260,20 @@ func (ac *AdmissionController) admit(ctx context.Context, request *admissionv1.A
 		log.Infof("Operation not interested: %v %v", request.Kind, request.Operation)
 		return &admissionv1.AdmissionResponse{Allowed: true}
 	}
-	validator, err := validator.GetValidator(ctx, ac.Client, request.Kind, request.OldObject.Raw, request.Object.Raw)
+	v, err := validator.GetValidator(ctx, ac.Client, request.Kind, request.OldObject.Raw, request.Object.Raw)
 	if err != nil {
-		return makeErrorStatus("failed to get a validator: %v", err)
+		return validator.DeniedResponse("failed to get a validator: %v", err)
 	}
 
 	switch request.Operation {
 	case admissionv1.Create:
-		result, message, err := validator.ValidateCreate(ctx)
-		if err != nil {
-			return makeErrorStatus("Object CREATE validation failed: %v", err)
-		}
-		if result {
-			return &admissionv1.AdmissionResponse{Allowed: true}
-		}
-		return makeErrorStatus(message)
+		return v.ValidateCreate(ctx)
 	case admissionv1.Update:
-		result, message, err := validator.ValidateUpdate(ctx)
-		if err != nil {
-			return makeErrorStatus("Object UPDATE validation failed: %v", err)
-		}
-		if result {
-			return &admissionv1.AdmissionResponse{Allowed: true}
-		}
-		return makeErrorStatus(message)
+		return v.ValidateUpdate(ctx)
 	case admissionv1.Delete:
-		result, message, err := validator.ValidateDelete(ctx)
-		if err != nil {
-			return makeErrorStatus("Object DELETE validation failed: %v", err)
-		}
-		if result {
-			return &admissionv1.AdmissionResponse{Allowed: true}
-		}
-		return makeErrorStatus(message)
+		return v.ValidateDelete(ctx)
 	default:
-		return &admissionv1.AdmissionResponse{Allowed: true}
-	}
-}
-
-func makeErrorStatus(reason string, args ...interface{}) *admissionv1.AdmissionResponse {
-	result := apierrors.NewBadRequest(fmt.Sprintf(reason, args...)).Status()
-	return &admissionv1.AdmissionResponse{
-		Result:  &result,
-		Allowed: false,
+		return validator.AllowedResponse()
 	}
 }
 

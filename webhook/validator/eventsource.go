@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 
+	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/client-go/kubernetes"
 
 	eventsourcecontroller "github.com/argoproj/argo-events/controllers/eventsource"
@@ -20,20 +21,23 @@ func NewEventSourceValidator(client kubernetes.Interface, old, new *eventsourcev
 	return &eventsource{client: client, oldes: old, newes: new}
 }
 
-func (es *eventsource) ValidateCreate(ctx context.Context) (bool, string, error) {
+func (es *eventsource) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
 	if err := eventsourcecontroller.ValidateEventSource(es.newes); err != nil {
-		return false, err.Error(), nil
+		return DeniedResponse(err.Error())
 	}
-	return true, "", nil
+	return AllowedResponse()
 }
 
-func (es *eventsource) ValidateUpdate(ctx context.Context) (bool, string, error) {
-	if err := eventsourcecontroller.ValidateEventSource(es.newes); err != nil {
-		return false, err.Error(), nil
+func (es *eventsource) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionResponse {
+	if es.oldes.Generation == es.newes.Generation {
+		return AllowedResponse()
 	}
-	return true, "", nil
+	if err := eventsourcecontroller.ValidateEventSource(es.newes); err != nil {
+		return DeniedResponse(err.Error())
+	}
+	return AllowedResponse()
 }
 
-func (es *eventsource) ValidateDelete(ctx context.Context) (bool, string, error) {
-	return true, "", nil
+func (es *eventsource) ValidateDelete(ctx context.Context) *admissionv1.AdmissionResponse {
+	return AllowedResponse()
 }

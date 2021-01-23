@@ -2,11 +2,11 @@ package validator
 
 import (
 	"context"
-	"fmt"
 
-	"k8s.io/apimachinery/pkg/api/equality"
+	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/client-go/kubernetes"
 
+	eventbuscontroller "github.com/argoproj/argo-events/controllers/eventbus"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
@@ -21,29 +21,58 @@ func NewEventBusValidator(client kubernetes.Interface, old, new *eventbusv1alpha
 	return &eventbus{client: client, oldeb: old, neweb: new}
 }
 
-func (eb *eventbus) ValidateCreate(ctx context.Context) (bool, string, error) {
-	fmt.Printf("CREATE - old: %v\n", eb.oldeb)
-	if eb.neweb.Spec.NATS != nil && eb.neweb.Spec.NATS.Native != nil && eb.neweb.Spec.NATS.Native.Replicas < 3 {
-		return false, "Replicas must be no less than 3", nil
+func (eb *eventbus) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
+	if err := eventbuscontroller.ValidateEventBus(eb.neweb); err != nil {
+		return DeniedResponse(err.Error())
 	}
-	return true, "", nil
+	return AllowedResponse()
 }
 
-func (eb *eventbus) ValidateUpdate(ctx context.Context) (bool, string, error) {
-	fmt.Printf("UPDATE - old: %v\n", eb.oldeb)
-	fmt.Printf("UPDATE - new: %v\n", eb.neweb)
-	if equality.Semantic.DeepEqual(eb.oldeb.Spec, eb.neweb.Spec) {
-		return true, "", nil
+func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionResponse {
+	if eb.oldeb.Generation == eb.neweb.Generation {
+		return AllowedResponse()
 	}
-
-	if eb.neweb.Spec.NATS != nil && eb.neweb.Spec.NATS.Native != nil && eb.neweb.Spec.NATS.Native.Replicas < 3 {
-		return false, "Replicas must be no less than 3", nil
+	if err := eventbuscontroller.ValidateEventBus(eb.neweb); err != nil {
+		return DeniedResponse(err.Error())
 	}
-	return true, "", nil
+	if eb.neweb.Spec.NATS != nil {
+		if eb.oldeb.Spec.NATS == nil {
+			return DeniedResponse("Can not change event bus implmementation")
+		}
+		oldNats := eb.oldeb.Spec.NATS
+		newNats := eb.neweb.Spec.NATS
+		if newNats.Native != nil {
+			if oldNats.Native == nil {
+				return DeniedResponse("Can not change NATS event bus implmementation from exotic to native")
+			}
+			if authChanged(oldNats.Native.Auth, newNats.Native.Auth) {
+				return DeniedResponse("Auth strategy is not allowed to be updated")
+			}
+		} else if newNats.Exotic != nil {
+			if oldNats.Exotic == nil {
+				return DeniedResponse("Can not change NATS event bus implmementation from native to exotic")
+			}
+			if authChanged(oldNats.Exotic.Auth, newNats.Exotic.Auth) {
+				return DeniedResponse("Auth strategy is not allowed to be updated")
+			}
+		}
+	}
+	return AllowedResponse()
 }
 
-func (eb *eventbus) ValidateDelete(ctx context.Context) (bool, string, error) {
-	fmt.Printf("Delete - new: %v\n", eb.neweb)
-	fmt.Printf("Delete - old: %v\n", eb.oldeb)
-	return true, "", nil
+func (eb *eventbus) ValidateDelete(ctx context.Context) *admissionv1.AdmissionResponse {
+	return AllowedResponse()
+}
+
+func authChanged(old, new *eventbusv1alpha1.AuthStrategy) bool {
+	if old == nil && new == nil {
+		return false
+	}
+	if old == nil {
+		return *new != eventbusv1alpha1.AuthStrategyNone
+	}
+	if new == nil {
+		return *old != eventbusv1alpha1.AuthStrategyNone
+	}
+	return *new != *old
 }

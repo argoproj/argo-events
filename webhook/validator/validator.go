@@ -3,8 +3,11 @@ package validator
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/pkg/errors"
+	admissionv1 "k8s.io/api/admission/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
@@ -19,12 +22,12 @@ import (
 
 // Validator is an interface for CRD objects
 type Validator interface {
-	ValidateCreate(context.Context) (bool, string, error)
-	ValidateUpdate(context.Context) (bool, string, error)
-	ValidateDelete(context.Context) (bool, string, error)
+	ValidateCreate(context.Context) *admissionv1.AdmissionResponse
+	ValidateUpdate(context.Context) *admissionv1.AdmissionResponse
+	ValidateDelete(context.Context) *admissionv1.AdmissionResponse
 }
 
-// GetValidator returns a Validator
+// GetValidator returns a Validator instance
 func GetValidator(ctx context.Context, client kubernetes.Interface, kind metav1.GroupVersionKind, oldBytes []byte, newBytes []byte) (Validator, error) {
 	log := logging.FromContext(ctx)
 	switch kind.Kind {
@@ -84,5 +87,21 @@ func GetValidator(ctx context.Context, client kubernetes.Interface, kind metav1.
 		return NewSensorValidator(client, old, new), nil
 	default:
 		return nil, errors.Errorf("unrecognized GVK %v", kind)
+	}
+}
+
+// DeniedResponse constructs a denied AdmissionResonse
+func DeniedResponse(reason string, args ...interface{}) *admissionv1.AdmissionResponse {
+	result := apierrors.NewBadRequest(fmt.Sprintf(reason, args...)).Status()
+	return &admissionv1.AdmissionResponse{
+		Result:  &result,
+		Allowed: false,
+	}
+}
+
+// AllowedResponse constructs an allowed AdmissionResonse
+func AllowedResponse() *admissionv1.AdmissionResponse {
+	return &admissionv1.AdmissionResponse{
+		Allowed: true,
 	}
 }

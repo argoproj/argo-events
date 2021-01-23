@@ -77,8 +77,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 	controllerutil.AddFinalizer(eventSource, finalizerName)
 
 	eventSource.Status.InitConditions()
-	err := ValidateEventSource(eventSource)
-	if err != nil {
+	if err := ValidateEventSource(eventSource); err != nil {
 		log.Errorw("validation error", zap.Error(err))
 		return err
 	}
