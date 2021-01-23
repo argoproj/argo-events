@@ -3,6 +3,7 @@ package installer
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -253,5 +254,35 @@ func TestBuildServiceAccountStatefulSetSpec(t *testing.T) {
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
 		assert.True(t, len(ss.Spec.Template.Spec.ServiceAccountName) > 0)
+	})
+}
+
+func TestBuildConfigMap(t *testing.T) {
+	t.Run("test build config map", func(t *testing.T) {
+		cl := fake.NewClientBuilder().Build()
+		installer := &natsInstaller{
+			client:         cl,
+			eventBus:       testEventBus,
+			streamingImage: testStreamingImage,
+			metricsImage:   testMetricsImage,
+			labels:         testLabels,
+			logger:         logging.NewArgoEventsLogger(),
+		}
+		cm, err := installer.buildConfigMap()
+		assert.NoError(t, err)
+		assert.NotNil(t, cm)
+		conf, ok := cm.Data[configMapKey]
+		assert.True(t, ok)
+		assert.True(t, strings.Contains(conf, "routes:"))
+		svcName := generateServiceName(testEventBus)
+		ssName := generateStatefulSetName(testEventBus)
+		r := fmt.Sprintf("nats://%s-%s.%s.%s.svc:%s", ssName, "0", svcName, testNamespace, strconv.Itoa(int(clusterPort)))
+		lines := strings.Split(conf, `\n`)
+		for _, l := range lines {
+			l = strings.Trim(l, " ")
+			if strings.HasPrefix(l, "routes:") {
+				assert.True(t, strings.Contains(l, r))
+			}
+		}
 	})
 }

@@ -509,16 +509,16 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 		return nil, err
 	}
 	peers := []string{}
+	routes := []string{}
 	for j := 0; j < replicas; j++ {
 		peers = append(peers, fmt.Sprintf("\"%s-%s\"", ssName, strconv.Itoa(j)))
+		routes = append(routes, fmt.Sprintf("nats://%s-%s.%s.%s.svc:%s", ssName, strconv.Itoa(j), svcName, i.eventBus.Namespace, strconv.Itoa(int(clusterPort))))
 	}
 	conf := fmt.Sprintf(`http: %s
 include ./auth.conf
 cluster {
   port: %s
-  routes [
-   nats://%s:%s
-  ]
+  routes: [%s]
   cluster_advertise: $CLUSTER_ADVERTISE
   connect_retries: 10
 }
@@ -534,7 +534,7 @@ streaming {
   store_limits {
     max_age: %s
   }
-}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","), maxAge)
+}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), strings.Join(routes, ","), clusterID, strings.Join(peers, ","), maxAge)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
