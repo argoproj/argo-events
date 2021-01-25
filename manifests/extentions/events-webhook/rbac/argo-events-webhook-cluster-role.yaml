@@ -35,3 +35,13 @@ rules:
       - delete
       - patch
       - watch
+  - apiGroups:
+      - argoproj.io
+    verbs:
+      - get
+      - list
+      - watch
+    resources:
+      - eventbus
+      - eventsources
+      - sensors

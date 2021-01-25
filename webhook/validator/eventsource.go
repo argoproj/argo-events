@@ -2,7 +2,6 @@ package validator
 
 import (
 	"context"
-	"os"
 
 	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -15,26 +14,24 @@ import (
 	eventsourcecontroller "github.com/argoproj/argo-events/controllers/eventsource"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
+	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 type eventsource struct {
-	client         kubernetes.Interface
-	eventBusClient *eventbusclient.Clientset
+	client            kubernetes.Interface
+	eventBusClient    eventbusclient.Interface
+	eventSourceClient eventsourceclient.Interface
+	sensorClient      sensorclient.Interface
 
 	oldes *eventsourcev1alpha1.EventSource
 	newes *eventsourcev1alpha1.EventSource
 }
 
 // NewEventSourceValidator returns a validator for EventSource
-func NewEventSourceValidator(client kubernetes.Interface, old, new *eventsourcev1alpha1.EventSource) Validator {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-	ebClient := eventbusclient.NewForConfigOrDie(restConfig)
-
-	return &eventsource{client: client, oldes: old, newes: new, eventBusClient: ebClient}
+func NewEventSourceValidator(client kubernetes.Interface, ebClient eventbusclient.Interface,
+	esClient eventsourceclient.Interface, sClient sensorclient.Interface, old, new *eventsourcev1alpha1.EventSource) Validator {
+	return &eventsource{client: client, eventBusClient: ebClient, eventSourceClient: esClient, sensorClient: sClient, oldes: old, newes: new}
 }
 
 func (es *eventsource) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
@@ -44,9 +41,9 @@ func (es *eventsource) ValidateCreate(ctx context.Context) *admissionv1.Admissio
 	}
 	ebName := es.newes.Spec.EventBusName
 	if ebName == "" {
-		ebName = "default"
+		ebName = common.DefaultEventBusName
 	}
-	eb, err := es.eventBusClient.ArgoprojV1alpha1().EventBuses(es.newes.Namespace).Get(ctx, ebName, metav1.GetOptions{})
+	eb, err := es.eventBusClient.ArgoprojV1alpha1().EventBus(es.newes.Namespace).Get(ctx, ebName, metav1.GetOptions{})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			return DeniedResponse("An EventBus named \"%s\" needs to be created first", ebName)

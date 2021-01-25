@@ -18,6 +18,9 @@ import (
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorpkg "github.com/argoproj/argo-events/pkg/apis/sensor"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
+	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 // Validator is an interface for CRD objects
@@ -28,7 +31,9 @@ type Validator interface {
 }
 
 // GetValidator returns a Validator instance
-func GetValidator(ctx context.Context, client kubernetes.Interface, kind metav1.GroupVersionKind, oldBytes []byte, newBytes []byte) (Validator, error) {
+func GetValidator(ctx context.Context, client kubernetes.Interface, ebClient eventbusclient.Interface,
+	esClient eventsourceclient.Interface, sensorClient sensorclient.Interface,
+	kind metav1.GroupVersionKind, oldBytes []byte, newBytes []byte) (Validator, error) {
 	log := logging.FromContext(ctx)
 	switch kind.Kind {
 	case eventbuspkg.Kind:
@@ -48,7 +53,7 @@ func GetValidator(ctx context.Context, client kubernetes.Interface, kind metav1.
 				return nil, err
 			}
 		}
-		return NewEventBusValidator(client, old, new), nil
+		return NewEventBusValidator(client, ebClient, esClient, sensorClient, old, new), nil
 	case eventsourcepkg.Kind:
 		var new *eventsourcev1alpha1.EventSource
 		if len(newBytes) > 0 {
@@ -66,7 +71,7 @@ func GetValidator(ctx context.Context, client kubernetes.Interface, kind metav1.
 				return nil, err
 			}
 		}
-		return NewEventSourceValidator(client, old, new), nil
+		return NewEventSourceValidator(client, ebClient, esClient, sensorClient, old, new), nil
 	case sensorpkg.Kind:
 		var new *sensorv1alpha1.Sensor
 		if len(newBytes) > 0 {
@@ -84,7 +89,7 @@ func GetValidator(ctx context.Context, client kubernetes.Interface, kind metav1.
 				return nil, err
 			}
 		}
-		return NewSensorValidator(client, old, new), nil
+		return NewSensorValidator(client, ebClient, esClient, sensorClient, old, new), nil
 	default:
 		return nil, errors.Errorf("unrecognized GVK %v", kind)
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
@@ -14,7 +15,7 @@ var (
 	testEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test-ns",
-			Name:      "default",
+			Name:      common.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{

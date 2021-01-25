@@ -11,10 +11,25 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	fakeClient "k8s.io/client-go/kubernetes/fake"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	fakeeventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/fake"
+	fakeeventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/fake"
+	fakesensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
+)
+
+const (
+	testNamespace = "test-ns"
+)
+
+var (
+	fakeK8sClient         = fakeClient.NewSimpleClientset()
+	fakeEventBusClient    = fakeeventbusclient.NewSimpleClientset()
+	fakeEventSourceClient = fakeeventsourceclient.NewSimpleClientset()
+	fakeSensorClient      = fakesensorclient.NewSimpleClientset()
 )
 
 func contextWithLogger(t *testing.T) context.Context {
@@ -37,19 +52,13 @@ func fakeEventBus() *eventbusv1alpha1.EventBus {
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test-ns",
-			Name:      "test-name",
+			Namespace: testNamespace,
+			Name:      common.DefaultEventBusName,
 		},
 		Spec: eventbusv1alpha1.EventBusSpec{
 			NATS: &eventbusv1alpha1.NATSBus{
 				Native: &eventbusv1alpha1.NativeStrategy{
 					Auth: &eventbusv1alpha1.AuthStrategyToken,
-					ImagePullSecrets: []corev1.LocalObjectReference{
-						{
-							Name: "test",
-						},
-					},
-					ServiceAccountName: "test",
 				},
 			},
 		},
@@ -64,7 +73,7 @@ func fakeExoticEventBus() *eventbusv1alpha1.EventBus {
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test-ns",
+			Namespace: testNamespace,
 			Name:      "test-name",
 		},
 		Spec: eventbusv1alpha1.EventBusSpec{
@@ -82,7 +91,7 @@ func fakeSensor() *sensorv1alpha1.Sensor {
 	return &sensorv1alpha1.Sensor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-sensor",
-			Namespace: "test-ns",
+			Namespace: testNamespace,
 		},
 		Spec: sensorv1alpha1.SensorSpec{
 			Template: &sensorv1alpha1.Template{
@@ -143,7 +152,7 @@ func fakeCalendarEventSourceMap(name string) map[string]eventsourcev1alpha1.Cale
 func fakeCalendarEventSource() *eventsourcev1alpha1.EventSource {
 	return &eventsourcev1alpha1.EventSource{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test-ns",
+			Namespace: testNamespace,
 			Name:      "test-es",
 		},
 		Spec: eventsourcev1alpha1.EventSourceSpec{
@@ -153,25 +162,24 @@ func fakeCalendarEventSource() *eventsourcev1alpha1.EventSource {
 }
 
 func TestGetValidator(t *testing.T) {
-	client := fakeClient.NewSimpleClientset()
 	t.Run("test get EventBus validator", func(t *testing.T) {
 		byts, err := json.Marshal(fakeEventBus())
 		assert.NoError(t, err)
-		v, err := GetValidator(contextWithLogger(t), client, fromSchemaGVK(eventbusv1alpha1.SchemaGroupVersionKind), nil, byts)
+		v, err := GetValidator(contextWithLogger(t), fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, fromSchemaGVK(eventbusv1alpha1.SchemaGroupVersionKind), nil, byts)
 		assert.NoError(t, err)
 		assert.NotNil(t, v)
 	})
 	t.Run("test get EventSource validator", func(t *testing.T) {
 		byts, err := json.Marshal(fakeCalendarEventSource())
 		assert.NoError(t, err)
-		v, err := GetValidator(contextWithLogger(t), client, fromSchemaGVK(eventsourcev1alpha1.SchemaGroupVersionKind), nil, byts)
+		v, err := GetValidator(contextWithLogger(t), fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, fromSchemaGVK(eventsourcev1alpha1.SchemaGroupVersionKind), nil, byts)
 		assert.NoError(t, err)
 		assert.NotNil(t, v)
 	})
 	t.Run("test get Sensor validator", func(t *testing.T) {
 		byts, err := json.Marshal(fakeSensor())
 		assert.NoError(t, err)
-		v, err := GetValidator(contextWithLogger(t), client, fromSchemaGVK(sensorv1alpha1.SchemaGroupVersionKind), nil, byts)
+		v, err := GetValidator(contextWithLogger(t), fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, fromSchemaGVK(sensorv1alpha1.SchemaGroupVersionKind), nil, byts)
 		assert.NoError(t, err)
 		assert.NotNil(t, v)
 	})

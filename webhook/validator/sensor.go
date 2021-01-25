@@ -2,7 +2,6 @@ package validator
 
 import (
 	"context"
-	"os"
 
 	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -15,26 +14,24 @@ import (
 	sensorcontroller "github.com/argoproj/argo-events/controllers/sensor"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
+	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 type sensor struct {
-	client         kubernetes.Interface
-	eventBusClient *eventbusclient.Clientset
+	client            kubernetes.Interface
+	eventBusClient    eventbusclient.Interface
+	eventSourceClient eventsourceclient.Interface
+	sensorClient      sensorclient.Interface
 
 	oldSensor *sensorv1alpha1.Sensor
 	newSensor *sensorv1alpha1.Sensor
 }
 
 // NewSensorValidator returns a validator for Sensor
-func NewSensorValidator(client kubernetes.Interface, old, new *sensorv1alpha1.Sensor) Validator {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-	ebClient := eventbusclient.NewForConfigOrDie(restConfig)
-
-	return &sensor{client: client, oldSensor: old, newSensor: new, eventBusClient: ebClient}
+func NewSensorValidator(client kubernetes.Interface, ebClient eventbusclient.Interface,
+	esClient eventsourceclient.Interface, sClient sensorclient.Interface, old, new *sensorv1alpha1.Sensor) Validator {
+	return &sensor{client: client, eventBusClient: ebClient, eventSourceClient: esClient, sensorClient: sClient, oldSensor: old, newSensor: new}
 }
 
 func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
@@ -44,9 +41,9 @@ func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionRespo
 	}
 	ebName := s.newSensor.Spec.EventBusName
 	if ebName == "" {
-		ebName = "default"
+		ebName = common.DefaultEventBusName
 	}
-	eb, err := s.eventBusClient.ArgoprojV1alpha1().EventBuses(s.newSensor.Namespace).Get(ctx, ebName, metav1.GetOptions{})
+	eb, err := s.eventBusClient.ArgoprojV1alpha1().EventBus(s.newSensor.Namespace).Get(ctx, ebName, metav1.GetOptions{})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			return DeniedResponse("An EventBus named \"%s\" needs to be created first", ebName)
