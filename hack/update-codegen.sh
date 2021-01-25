@@ -17,15 +17,6 @@ cd "${FAKE_REPOPATH}"
 
 CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${FAKE_REPOPATH}"; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
 
-#### fix the plural issue of code-generator  ####
-for i in `grep '"Endpoints": "Endpoints"' -R vendor/k8s.io/code-generator/ | grep -v EventBus | awk -F\: '{print $1}'`; do
-  if [ "$(uname -s)" = "Darwin" ]; then
-    sed -i "" "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
-  elif [ "$(uname -s)" = "Linux" ]; then
-    sed -i "s/\"Endpoints\": \"Endpoints\"/\"Endpoints\": \"Endpoints\", \"EventBus\": \"EventBus\"/g" $i
-  fi
-done
-
 subheader "running codegen for sensor"
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   github.com/argoproj/argo-events/pkg/client/sensor github.com/argoproj/argo-events/pkg/apis \
@@ -39,9 +30,15 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   --go-header-file hack/custom-boilerplate.go.txt
 
 subheader "running codegen for eventbus"
-bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
+bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
   github.com/argoproj/argo-events/pkg/client/eventbus github.com/argoproj/argo-events/pkg/apis \
   "eventbus:v1alpha1" \
+  --go-header-file hack/custom-boilerplate.go.txt
+
+bash -x ${CODEGEN_PKG}/generate-groups.sh "client,informer,lister" \
+  github.com/argoproj/argo-events/pkg/client/eventbus github.com/argoproj/argo-events/pkg/apis \
+  "eventbus:v1alpha1" \
+  --plural-exceptions EventBus:EventBus \
   --go-header-file hack/custom-boilerplate.go.txt
 
 subheader "running codegen for common"
