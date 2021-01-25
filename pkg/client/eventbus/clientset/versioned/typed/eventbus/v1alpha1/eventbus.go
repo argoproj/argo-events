@@ -30,10 +30,10 @@ import (
 	rest "k8s.io/client-go/rest"
 )
 
-// EventBusesGetter has a method to return a EventBusInterface.
+// EventBusGetter has a method to return a EventBusInterface.
 // A group's client should implement this interface.
-type EventBusesGetter interface {
-	EventBuses(namespace string) EventBusInterface
+type EventBusGetter interface {
+	EventBus(namespace string) EventBusInterface
 }
 
 // EventBusInterface has methods to work with EventBus resources.
@@ -50,26 +50,26 @@ type EventBusInterface interface {
 	EventBusExpansion
 }
 
-// eventBuses implements EventBusInterface
-type eventBuses struct {
+// eventBus implements EventBusInterface
+type eventBus struct {
 	client rest.Interface
 	ns     string
 }
 
-// newEventBuses returns a EventBuses
-func newEventBuses(c *ArgoprojV1alpha1Client, namespace string) *eventBuses {
-	return &eventBuses{
+// newEventBus returns a EventBus
+func newEventBus(c *ArgoprojV1alpha1Client, namespace string) *eventBus {
+	return &eventBus{
 		client: c.RESTClient(),
 		ns:     namespace,
 	}
 }
 
 // Get takes name of the eventBus, and returns the corresponding eventBus object, and an error if there is any.
-func (c *eventBuses) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.EventBus, err error) {
+func (c *eventBus) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.EventBus, err error) {
 	result = &v1alpha1.EventBus{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
 		Do(ctx).
@@ -77,8 +77,8 @@ func (c *eventBuses) Get(ctx context.Context, name string, options v1.GetOptions
 	return
 }
 
-// List takes label and field selectors, and returns the list of EventBuses that match those selectors.
-func (c *eventBuses) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.EventBusList, err error) {
+// List takes label and field selectors, and returns the list of EventBus that match those selectors.
+func (c *eventBus) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.EventBusList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -86,7 +86,7 @@ func (c *eventBuses) List(ctx context.Context, opts v1.ListOptions) (result *v1a
 	result = &v1alpha1.EventBusList{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Do(ctx).
@@ -94,8 +94,8 @@ func (c *eventBuses) List(ctx context.Context, opts v1.ListOptions) (result *v1a
 	return
 }
 
-// Watch returns a watch.Interface that watches the requested eventBuses.
-func (c *eventBuses) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+// Watch returns a watch.Interface that watches the requested eventBus.
+func (c *eventBus) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -103,18 +103,18 @@ func (c *eventBuses) Watch(ctx context.Context, opts v1.ListOptions) (watch.Inte
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Watch(ctx)
 }
 
 // Create takes the representation of a eventBus and creates it.  Returns the server's representation of the eventBus, and an error, if there is any.
-func (c *eventBuses) Create(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.CreateOptions) (result *v1alpha1.EventBus, err error) {
+func (c *eventBus) Create(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.CreateOptions) (result *v1alpha1.EventBus, err error) {
 	result = &v1alpha1.EventBus{}
 	err = c.client.Post().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(eventBus).
 		Do(ctx).
@@ -123,11 +123,11 @@ func (c *eventBuses) Create(ctx context.Context, eventBus *v1alpha1.EventBus, op
 }
 
 // Update takes the representation of a eventBus and updates it. Returns the server's representation of the eventBus, and an error, if there is any.
-func (c *eventBuses) Update(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.UpdateOptions) (result *v1alpha1.EventBus, err error) {
+func (c *eventBus) Update(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.UpdateOptions) (result *v1alpha1.EventBus, err error) {
 	result = &v1alpha1.EventBus{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		Name(eventBus.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(eventBus).
@@ -138,11 +138,11 @@ func (c *eventBuses) Update(ctx context.Context, eventBus *v1alpha1.EventBus, op
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *eventBuses) UpdateStatus(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.UpdateOptions) (result *v1alpha1.EventBus, err error) {
+func (c *eventBus) UpdateStatus(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.UpdateOptions) (result *v1alpha1.EventBus, err error) {
 	result = &v1alpha1.EventBus{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		Name(eventBus.Name).
 		SubResource("status").
 		VersionedParams(&opts, scheme.ParameterCodec).
@@ -153,10 +153,10 @@ func (c *eventBuses) UpdateStatus(ctx context.Context, eventBus *v1alpha1.EventB
 }
 
 // Delete takes name of the eventBus and deletes it. Returns an error if one occurs.
-func (c *eventBuses) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
+func (c *eventBus) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		Name(name).
 		Body(&opts).
 		Do(ctx).
@@ -164,14 +164,14 @@ func (c *eventBuses) Delete(ctx context.Context, name string, opts v1.DeleteOpti
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *eventBuses) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+func (c *eventBus) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
 	var timeout time.Duration
 	if listOpts.TimeoutSeconds != nil {
 		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(&opts).
@@ -180,11 +180,11 @@ func (c *eventBuses) DeleteCollection(ctx context.Context, opts v1.DeleteOptions
 }
 
 // Patch applies the patch and returns the patched eventBus.
-func (c *eventBuses) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.EventBus, err error) {
+func (c *eventBus) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.EventBus, err error) {
 	result = &v1alpha1.EventBus{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
-		Resource("eventbuses").
+		Resource("eventbus").
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
