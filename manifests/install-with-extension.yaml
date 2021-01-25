@@ -12,6 +12,8 @@ spec:
     - eb
     singular: eventbus
   scope: Namespaced
+  subresources:
+    status: {}
   version: v1alpha1
   versions:
   - name: v1alpha1
@@ -32,6 +34,8 @@ spec:
     - es
     singular: eventsource
   scope: Namespaced
+  subresources:
+    status: {}
   version: v1alpha1
   versions:
   - name: v1alpha1
@@ -52,6 +56,8 @@ spec:
     - sn
     singular: sensor
   scope: Namespaced
+  subresources:
+    status: {}
   version: v1alpha1
   versions:
   - name: v1alpha1
@@ -82,10 +88,13 @@ rules:
   resources:
   - sensors
   - sensors/finalizers
+  - sensors/status
   - eventsources
   - eventsources/finalizers
+  - eventsources/status
   - eventbus
   - eventbus/finalizers
+  - eventbus/status
   verbs:
   - create
   - delete
@@ -108,10 +117,13 @@ rules:
   resources:
   - sensors
   - sensors/finalizers
+  - sensors/status
   - eventsources
   - eventsources/finalizers
+  - eventsources/status
   - eventbus
   - eventbus/finalizers
+  - eventbus/status
   verbs:
   - create
   - delete
@@ -134,10 +146,13 @@ rules:
   resources:
   - sensors
   - sensors/finalizers
+  - sensors/status
   - eventsources
   - eventsources/finalizers
+  - eventsources/status
   - eventbus
   - eventbus/finalizers
+  - eventbus/status
   verbs:
   - get
   - list
@@ -175,10 +190,13 @@ rules:
   - clusterworkflowtemplates/finalizers
   - sensors
   - sensors/finalizers
+  - sensors/status
   - eventsources
   - eventsources/finalizers
+  - eventsources/status
   - eventbus
   - eventbus/finalizers
+  - eventbus/status
   verbs:
   - create
   - delete
