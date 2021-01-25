@@ -19,9 +19,11 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 
 Using the validation webhook brings following benefits:
 
-1. It notifies the error before the faulty spec is persisted into K8s etcd.
+1. It notifies the error before the faulty spec is persisted into K8s etcd, so
+   that we don't need to check the condition errors in the `status` field to see
+   if there's any error in the spec.
 
-e.g. Creating a `exotic` NATS EventBus without `ClusterID` specified:
+e.g. Creating an `exotic` NATS EventBus without `ClusterID` specified:
 
 ```sh
 cat <<EOF | kubectl create -f -
@@ -36,10 +38,15 @@ cat <<EOF | kubectl create -f -
 Error from server (BadRequest): error when creating "STDIN": admission webhook "webhook.argo-events.argoproj.io" denied the request: ClusterID is missing
 ```
 
-2. It validates spec update behavior.
+2. Spec updating behavior also can be validated.
 
-For example, updating Auth Strategy for a native NATS EventBus will get a denied
-response as following:
+Updating existing specs requires more validation, besides checking if the new
+spec is valid, we also need to check if there's any immutable fields being
+updated. However, this can not be done in the controller reconciliation, but it
+can be achieved by using the validating webhook.
+
+For example, updating Auth Strategy for a native NATS EventBus is prohibited, a
+denied response as following will be returned.
 
 ```sh
 Error from server (BadRequest): error when applying patch:
