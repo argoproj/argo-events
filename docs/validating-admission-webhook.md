@@ -42,8 +42,8 @@ Error from server (BadRequest): error when creating "STDIN": admission webhook "
 
 Updating existing specs requires more validation, besides checking if the new
 spec is valid, we also need to check if there's any immutable fields being
-updated. However, this can not be done in the controller reconciliation, but it
-can be achieved by using the validating webhook.
+updated. This can not be done in the controller reconciliation, but we can do it
+by using the validating webhook.
 
 For example, updating Auth Strategy for a native NATS EventBus is prohibited, a
 denied response as following will be returned.
