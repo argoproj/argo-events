@@ -247,7 +247,7 @@ func (ac *AdmissionController) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		review.Request.Kind, review.Request.Namespace, review.Request.Name, reviewResponse)
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, fmt.Sprintf("could encode response: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not encode response: %v", err), http.StatusInternalServerError)
 		return
 	}
 }
