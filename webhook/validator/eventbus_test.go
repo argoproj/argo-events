@@ -54,3 +54,7 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		assert.False(t, r.Allowed)
 	})
 }
+
+func TestValidateEventBusDelete(t *testing.T) {
+
+}
