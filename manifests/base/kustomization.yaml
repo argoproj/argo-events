@@ -14,11 +14,11 @@ resources:
 
 images:
   - name: argoproj/sensor-controller
-    newTag: v1.2.0
+    newTag: v1.2.1
   - name: argoproj/eventbus-controller
-    newTag: v1.2.0
+    newTag: v1.2.1
   - name: argoproj/eventsource-controller
-    newTag: v1.2.0
+    newTag: v1.2.1
 
 patchesStrategicMerge:
   - |-
@@ -33,7 +33,7 @@ patchesStrategicMerge:
             - name: eventsource-controller
               env:
                 - name: EVENTSOURCE_IMAGE
-                  value: argoproj/eventsource:v1.2.0
+                  value: argoproj/eventsource:v1.2.1
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -46,4 +46,4 @@ patchesStrategicMerge:
             - name: sensor-controller
               env:
                 - name: SENSOR_IMAGE
-                  value: argoproj/sensor:v1.2.0
+                  value: argoproj/sensor:v1.2.1
