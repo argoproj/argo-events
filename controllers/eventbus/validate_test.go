@@ -47,7 +47,7 @@ func TestValidate(t *testing.T) {
 		eb.Spec.NATS.Exotic = &v1alpha1.NATSConfig{}
 		err := ValidateEventBus(eb)
 		assert.Error(t, err)
-		assert.True(t, strings.Contains(err.Error(), "ClusterID is missing"))
+		assert.True(t, strings.Contains(err.Error(), "\"spec.nats.exotic.clusterID\" is missing"))
 	})
 
 	t.Run("test exotic eventbus empty URL", func(t *testing.T) {
@@ -59,6 +59,6 @@ func TestValidate(t *testing.T) {
 		}
 		err := ValidateEventBus(eb)
 		assert.Error(t, err)
-		assert.True(t, strings.Contains(err.Error(), "URL is missing"))
+		assert.True(t, strings.Contains(err.Error(), "\"spec.nats.exotic.url\" is missing"))
 	})
 }
