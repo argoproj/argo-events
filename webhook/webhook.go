@@ -159,6 +159,7 @@ func (ac *AdmissionController) register(
 
 	sideEffects := admissionregistrationv1.SideEffectClassNone
 
+	port := int32(ac.Options.Port)
 	webhook := &admissionregistrationv1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ac.Options.WebhookName,
@@ -172,6 +173,7 @@ func (ac *AdmissionController) register(
 				Service: &admissionregistrationv1.ServiceReference{
 					Namespace: ac.Options.Namespace,
 					Name:      ac.Options.ServiceName,
+					Port:      &port,
 				},
 				CABundle: caCert,
 			},
