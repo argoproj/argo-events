@@ -74,7 +74,7 @@ type Options struct {
 	ClientAuth tls.ClientAuthType
 }
 
-// AdmissionController implements a webhook to validate specs
+// AdmissionController implements a webhook for validation
 type AdmissionController struct {
 	Client            kubernetes.Interface
 	EventBusClient    eventbusclient.Interface
@@ -122,8 +122,7 @@ func (ac *AdmissionController) Run(ctx context.Context) error {
 	}
 }
 
-// Register registers the external admission webhook for pilot
-// configuration types.
+// Register registers the validating admission webhook
 func (ac *AdmissionController) register(
 	ctx context.Context, client clientadmissionregistrationv1.ValidatingWebhookConfigurationInterface, caCert []byte) error {
 	failurePolicy := admissionregistrationv1.Ignore
@@ -212,8 +211,7 @@ func (ac *AdmissionController) register(
 	return nil
 }
 
-// ServeHTTP implements the external admission webhook for mutating
-// serving resources.
+// ServeHTTP implements the validating admission webhook
 func (ac *AdmissionController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ac.Logger.Infof("Webhook ServeHTTP request=%#v", r)
 
@@ -352,7 +350,7 @@ func (ac *AdmissionController) getOrGenerateKeyCertsFromSecret(ctx context.Conte
 
 // GetAPIServerExtensionCACert gets the K8s aggregate apiserver
 // client CA cert used by validator. This certificate is provided by
-// kubernetes. We do not control its name or location.
+// kubernetes.
 func (ac *AdmissionController) getAPIServerExtensionCACert(ctx context.Context) ([]byte, error) {
 	const name = "extension-apiserver-authentication"
 	c, err := ac.Client.CoreV1().ConfigMaps(metav1.NamespaceSystem).Get(ctx, name, metav1.GetOptions{})
@@ -362,7 +360,7 @@ func (ac *AdmissionController) getAPIServerExtensionCACert(ctx context.Context) 
 	const caFileName = "requestheader-client-ca-file"
 	pem, ok := c.Data[caFileName]
 	if !ok {
-		return nil, errors.Errorf("cannot find %s in ConfigMap %s: ConfigMap.Data is %#v", caFileName, name, c.Data)
+		return nil, errors.Errorf("cannot find %s in ConfigMap %s", caFileName, name)
 	}
 	return []byte(pem), nil
 }
@@ -388,7 +386,7 @@ func (ac *AdmissionController) configureCerts(ctx context.Context, clientAuth tl
 	return tlsConfig, caCert, nil
 }
 
-// makeTLSConfig makes a TLS configuration suitable for use with the server
+// makeTLSConfig makes a TLS configuration
 func makeTLSConfig(serverCert, serverKey, caCert []byte, clientAuthType tls.ClientAuthType) (*tls.Config, error) {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
