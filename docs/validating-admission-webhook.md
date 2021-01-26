@@ -17,11 +17,11 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 
 ## Benefits
 
-Using the validation webhook brings following benefits:
+Using the validation webhook has following benefits:
 
-1. It notifies the error before the faulty spec is persisted into K8s etcd, so
-   that we don't need to check the condition errors in the `status` field to see
-   if there's any error in the spec.
+1. It notifies the error at the time applying the faulty spec, so that you don't
+   need to check the CRD object `status` field to see if there's any condition
+   errors later on.
 
 e.g. Creating an `exotic` NATS EventBus without `ClusterID` specified:
 
@@ -35,10 +35,10 @@ cat <<EOF | kubectl create -f -
 >   nats:
 >     exotic: {}
 > EOF
-Error from server (BadRequest): error when creating "STDIN": admission webhook "webhook.argo-events.argoproj.io" denied the request: ClusterID is missing
+Error from server (BadRequest): error when creating "STDIN": admission webhook "webhook.argo-events.argoproj.io" denied the request: "spec.nats.exotic.clusterID" is missing
 ```
 
-2. Spec updating behavior also can be validated.
+2. Spec updating behavior can be validated.
 
 Updating existing specs requires more validation, besides checking if the new
 spec is valid, we also need to check if there's any immutable fields being
@@ -54,5 +54,15 @@ Error from server (BadRequest): error when applying patch:
 to:
 Resource: "argoproj.io/v1alpha1, Resource=eventbus", GroupVersionKind: "argoproj.io/v1alpha1, Kind=EventBus"
 Name: "default", Namespace: "argo-events"
-for: "test-eventbus.yaml": admission webhook "webhook.argo-events.argoproj.io" denied the request: Auth strategy is not allowed to be updated
+for: "test-eventbus.yaml": admission webhook "webhook.argo-events.argoproj.io" denied the request: "spec.nats.native.auth" is immutable, can not be updated
+```
+
+3. Spec deleting validation.
+
+The webhook valiates EventBus objects deleting behaivor, any EventBus with
+EventSource or Sensor connected can not be deleted.
+
+```sh
+kcl delete eventbus default
+Error from server (BadRequest): admission webhook "webhook.argo-events.argoproj.io" denied the request: Can not delete an EventBus with 2 EventSources connected
 ```
