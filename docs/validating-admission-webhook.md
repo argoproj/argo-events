@@ -60,7 +60,8 @@ for: "test-eventbus.yaml": admission webhook "webhook.argo-events.argoproj.io" d
 3. Spec deleting validation.
 
 The webhook valiates EventBus objects deleting behaivor, any EventBus with
-EventSource or Sensor connected can not be deleted.
+EventSource or Sensor connected can not be deleted, this prevents some
+unexpected disasters from happening.
 
 ```sh
 kcl delete eventbus default
