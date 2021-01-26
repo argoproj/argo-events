@@ -7,7 +7,6 @@ rules:
       - ""
     resources:
       - secrets
-      - configmaps
     verbs:
       - get
       - list
@@ -15,6 +14,14 @@ rules:
       - update
       - delete
       - patch
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
       - watch
   - apiGroups:
       - apps

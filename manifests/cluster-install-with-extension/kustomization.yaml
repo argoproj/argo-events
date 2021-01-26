@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - ../cluster-install
-  - ../extentions
+  - ../extensions
 
 namespace: argo-events
 
