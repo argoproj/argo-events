@@ -351,7 +351,7 @@ func (ac *AdmissionController) getOrGenerateKeyCertsFromSecret(ctx context.Conte
 }
 
 // GetAPIServerExtensionCACert gets the K8s aggregate apiserver
-// client CA cert used by validator. This certificate is provided
+// client CA cert used by validator. This certificate is provided by
 // kubernetes. We do not control its name or location.
 func (ac *AdmissionController) getAPIServerExtensionCACert(ctx context.Context) ([]byte, error) {
 	const name = "extension-apiserver-authentication"
