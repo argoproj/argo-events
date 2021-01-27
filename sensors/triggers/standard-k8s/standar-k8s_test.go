@@ -34,6 +34,8 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	core "k8s.io/client-go/testing"
+	k8stesting "k8s.io/client-go/testing"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -193,4 +195,22 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	uObj, ok = resource.(*unstructured.Unstructured)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, "bar", uObj.GetLabels()["foo"])
+
+	deleted := false
+
+	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Delete
+
+	client.Fake.PrependReactor("delete", "deployments", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		deleteAction := action.(core.DeleteAction)
+		if deleteAction.GetName() == deployment.GetName() && deleteAction.GetNamespace() == deployment.GetNamespace() {
+			deleted = true
+		}
+		return true, nil, nil
+	})
+
+	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], logging.NewArgoEventsLogger().Desugar())
+	resource, err = impl.Execute(ctx, nil, uObj)
+	assert.Nil(t, err)
+	assert.Nil(t, resource)
+	assert.True(t, deleted)
 }

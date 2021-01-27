@@ -161,7 +161,8 @@ func validateK8STrigger(trigger *v1alpha1.StandardK8STrigger) error {
 		return errors.New("must provide group, version and resource for the resource")
 	}
 	switch trigger.Operation {
-	case "", v1alpha1.Create, v1alpha1.Patch, v1alpha1.Update:
+	case "", v1alpha1.Create, v1alpha1.Patch, v1alpha1.Update, v1alpha1.Delete:
+
 	default:
 		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
