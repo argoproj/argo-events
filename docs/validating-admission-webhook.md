@@ -56,14 +56,3 @@ Resource: "argoproj.io/v1alpha1, Resource=eventbus", GroupVersionKind: "argoproj
 Name: "default", Namespace: "argo-events"
 for: "test-eventbus.yaml": admission webhook "webhook.argo-events.argoproj.io" denied the request: "spec.nats.native.auth" is immutable, can not be updated
 ```
-
-3. Spec deleting validation.
-
-The webhook valiates EventBus objects deleting behaivor, any EventBus with
-EventSource or Sensor connected can not be deleted, this prevents some
-unexpected disasters from happening.
-
-```sh
-kcl delete eventbus default
-Error from server (BadRequest): admission webhook "webhook.argo-events.argoproj.io" denied the request: Can not delete an EventBus with 2 EventSources connected
-```

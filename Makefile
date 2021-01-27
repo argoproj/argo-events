@@ -182,8 +182,8 @@ crds:
 .PHONY: manifests
 manifests: crds
 	kustomize build manifests/cluster-install > manifests/install.yaml
-	kustomize build manifests/cluster-install-with-extension > manifests/install-with-extension.yaml
 	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
+	kustomize build manifests/extensions/validating-webhook > manifests/install-validating-webhook.yaml
 
 .PHONY: swagger
 swagger:

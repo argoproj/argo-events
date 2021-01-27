@@ -3,14 +3,9 @@ package validator
 import (
 	"context"
 
-	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/common/logging"
 	sensorcontroller "github.com/argoproj/argo-events/controllers/sensor"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
@@ -35,24 +30,8 @@ func NewSensorValidator(client kubernetes.Interface, ebClient eventbusclient.Int
 }
 
 func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
-	log := logging.FromContext(ctx)
 	if err := sensorcontroller.ValidateSensor(s.newSensor); err != nil {
 		return DeniedResponse(err.Error())
-	}
-	ebName := s.newSensor.Spec.EventBusName
-	if ebName == "" {
-		ebName = common.DefaultEventBusName
-	}
-	eb, err := s.eventBusClient.ArgoprojV1alpha1().EventBus(s.newSensor.Namespace).Get(ctx, ebName, metav1.GetOptions{})
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return DeniedResponse("An EventBus named \"%s\" needs to be created first", ebName)
-		}
-		log.Errorw("failed to retrieve EventBus", zap.Error(err))
-		return DeniedResponse("Failed to retrieve the EventBus, %s", err.Error())
-	}
-	if !eb.Status.IsReady() {
-		return DeniedResponse("EventBus \"%s\" is not in a good shape", ebName)
 	}
 	return AllowedResponse()
 }

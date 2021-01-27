@@ -16,8 +16,8 @@
 2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
-        # OR install with a validating admission controller
-        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-with-extension.yaml
+        # Install with a validating admission controller
+        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
 
 
        NOTE: 
@@ -67,8 +67,6 @@ Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/stab
 
     bases:
       - github.com/argoproj/argo-events/manifests/cluster-install
-      # OR
-      - github.com/argoproj/argo-events/manifests/cluster-install-with-extension
       # OR
       - github.com/argoproj/argo-events/manifests/namespace-install
 

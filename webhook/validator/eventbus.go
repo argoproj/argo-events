@@ -3,13 +3,9 @@ package validator
 import (
 	"context"
 
-	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/common/logging"
 	eventbuscontroller "github.com/argoproj/argo-events/controllers/eventbus"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
@@ -73,60 +69,7 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 }
 
 func (eb *eventbus) ValidateDelete(ctx context.Context) *admissionv1.AdmissionResponse {
-	log := logging.FromContext(ctx)
-	linkedEventSources, err := eb.connectedEventSources(ctx, eb.oldeb.Namespace, eb.oldeb.Name)
-	if err != nil {
-		log.Errorw("failed to query connected EventSources", zap.Error(err))
-		return DeniedResponse("Failed to query connected EventSources: %s", err.Error())
-	}
-	if linkedEventSources > 0 {
-		return DeniedResponse("Can not delete an EventBus with %v EventSources connected", linkedEventSources)
-	}
-	linkedSensors, err := eb.connectedSensors(ctx, eb.oldeb.Namespace, eb.oldeb.Name)
-	if err != nil {
-		log.Errorw("failed to query linked Sensors", zap.Error(err))
-		return DeniedResponse("Failed to query connected Sensors: %s", err.Error())
-	}
-	if linkedSensors > 0 {
-		return DeniedResponse("Can not delete an EventBus with %v Sensors connected", linkedSensors)
-	}
 	return AllowedResponse()
-}
-
-func (eb *eventbus) connectedEventSources(ctx context.Context, namespace, eventBusName string) (int, error) {
-	esList, err := eb.eventSourceClient.ArgoprojV1alpha1().EventSources(namespace).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return 0, err
-	}
-	result := 0
-	for _, es := range esList.Items {
-		ebName := es.Spec.EventBusName
-		if ebName == "" {
-			ebName = common.DefaultEventBusName
-		}
-		if ebName == eventBusName {
-			result++
-		}
-	}
-	return result, nil
-}
-
-func (eb *eventbus) connectedSensors(ctx context.Context, namespace, eventBusName string) (int, error) {
-	sList, err := eb.sensorClient.ArgoprojV1alpha1().Sensors(namespace).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return 0, err
-	}
-	result := 0
-	for _, s := range sList.Items {
-		sName := s.Spec.EventBusName
-		if sName == "" {
-			sName = common.DefaultEventBusName
-		}
-		if sName == eventBusName {
-			result++
-		}
-	}
-	return result, nil
 }
 
 func authChanged(old, new *eventbusv1alpha1.AuthStrategy) bool {
