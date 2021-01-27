@@ -109,7 +109,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 
 	params := &slack.GetConversationsParameters{
 		Limit: 200,
-		Types: []string{"public_channel,private_channel"},
+		Types: []string{"public_channel","private_channel"},
 	}
 	channelID := ""
 	for {
