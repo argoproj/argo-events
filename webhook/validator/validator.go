@@ -27,7 +27,6 @@ import (
 type Validator interface {
 	ValidateCreate(context.Context) *admissionv1.AdmissionResponse
 	ValidateUpdate(context.Context) *admissionv1.AdmissionResponse
-	ValidateDelete(context.Context) *admissionv1.AdmissionResponse
 }
 
 // GetValidator returns a Validator instance

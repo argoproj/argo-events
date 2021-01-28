@@ -92,6 +92,17 @@ func TestConnectAllowed(t *testing.T) {
 	})
 }
 
+func TestDeleteAllowed(t *testing.T) {
+	ac := fakeAdmissionController(t, fakeOptions())
+	t.Run("test DELETE allowed", func(t *testing.T) {
+		req := &admissionv1.AdmissionRequest{
+			Operation: admissionv1.Delete,
+		}
+		resp := ac.admit(contextWithLogger(t), req)
+		assert.True(t, resp.Allowed)
+	})
+}
+
 func TestUnknownKindFails(t *testing.T) {
 	ac := fakeAdmissionController(t, fakeOptions())
 

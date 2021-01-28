@@ -68,10 +68,6 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 	return AllowedResponse()
 }
 
-func (eb *eventbus) ValidateDelete(ctx context.Context) *admissionv1.AdmissionResponse {
-	return AllowedResponse()
-}
-
 func authChanged(old, new *eventbusv1alpha1.AuthStrategy) bool {
 	if old == nil && new == nil {
 		return false

@@ -262,7 +262,7 @@ func (ac *AdmissionController) ServeHTTP(w http.ResponseWriter, r *http.Request)
 func (ac *AdmissionController) admit(ctx context.Context, request *admissionv1.AdmissionRequest) *admissionv1.AdmissionResponse {
 	log := logging.FromContext(ctx)
 	switch request.Operation {
-	case admissionv1.Create, admissionv1.Update, admissionv1.Delete:
+	case admissionv1.Create, admissionv1.Update:
 	default:
 		log.Infof("Operation not interested: %v %v", request.Kind, request.Operation)
 		return &admissionv1.AdmissionResponse{Allowed: true}
@@ -278,8 +278,6 @@ func (ac *AdmissionController) admit(ctx context.Context, request *admissionv1.A
 		return v.ValidateCreate(ctx)
 	case admissionv1.Update:
 		return v.ValidateUpdate(ctx)
-	case admissionv1.Delete:
-		return v.ValidateDelete(ctx)
 	default:
 		return validator.AllowedResponse()
 	}

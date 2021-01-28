@@ -42,7 +42,3 @@ func (es *eventsource) ValidateUpdate(ctx context.Context) *admissionv1.Admissio
 	}
 	return es.ValidateCreate(ctx)
 }
-
-func (es *eventsource) ValidateDelete(ctx context.Context) *admissionv1.AdmissionResponse {
-	return AllowedResponse()
-}

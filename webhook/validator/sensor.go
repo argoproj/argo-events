@@ -42,7 +42,3 @@ func (s *sensor) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRespo
 	}
 	return s.ValidateCreate(ctx)
 }
-
-func (s *sensor) ValidateDelete(ctx context.Context) *admissionv1.AdmissionResponse {
-	return AllowedResponse()
-}
