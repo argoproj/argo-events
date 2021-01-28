@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/Masterminds/sprig"
+	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
