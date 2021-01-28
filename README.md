@@ -13,8 +13,6 @@
 
 [![Argo Events in 3 minutes](https://img.youtube.com/vi/Aqi1zyTpM44/0.jpg)](https://youtu.be/Aqi1zyTpM44)
 
-[![Argo Events in 35 minutes](https://img.youtube.com/vi/sUPkGChvD54/0.jpg)](https://youtu.be/sUPkGChvD54)
-
 ## Features 
 
 * Supports events from [20+ event sources](https://argoproj.github.io/argo-events/concepts/event_source/) and [10+ triggers](https://argoproj.github.io/argo-events/concepts/trigger/).
@@ -35,6 +33,7 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 
 ## Blogs and Presentations
 
+* [Argo Events - Event-Based Dependency Manager for Kubernetes](https://youtu.be/sUPkGChvD54)
 * [Argo Events Deep-dive](https://youtu.be/U4tCYcCK20w)
 * [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
 * [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
