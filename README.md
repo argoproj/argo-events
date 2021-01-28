@@ -13,6 +13,8 @@
 
 [![Argo Events in 3 minutes](https://img.youtube.com/vi/Aqi1zyTpM44/0.jpg)](https://youtu.be/Aqi1zyTpM44)
 
+[![Argo Events in 35 minutes](https://img.youtube.com/vi/sUPkGChvD54/0.jpg)](https://youtu.be/sUPkGChvD54)
+
 ## Features 
 
 * Supports events from [20+ event sources](https://argoproj.github.io/argo-events/concepts/event_source/) and [10+ triggers](https://argoproj.github.io/argo-events/concepts/trigger/).
