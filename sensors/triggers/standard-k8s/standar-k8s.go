@@ -218,6 +218,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 
 		if err != nil && apierrors.IsNotFound(err) {
 			k8sTrigger.Logger.Info("object not found, nothing to delete...")
+			return nil, nil
 		} else if err != nil {
 			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
 		}
