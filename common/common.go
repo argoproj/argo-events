@@ -83,6 +83,14 @@ const (
 	MediaTypeYAML string = "application/yaml"
 )
 
+// Metrics releated
+const (
+	EventSourceMetricsPort = 7777
+	SensorMetricsPort      = 7777
+	ControllerMetricsPort  = 7777
+	EventBusMetricsPort    = 7777
+)
+
 var (
 	SecretKeySelectorType    = reflect.TypeOf(&corev1.SecretKeySelector{})
 	ConfigMapKeySelectorType = reflect.TypeOf(&corev1.ConfigMapKeySelector{})

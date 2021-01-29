@@ -1,0 +1,78 @@
+# Prometheus Metrics
+
+![alpha](assets/alpha.svg)
+
+> v1.3 and after
+
+## User Metrics
+
+Each of generated EventSource, Sensor and EventBus PODs exposes an HTTP endpoint
+for its metrics, which include things like how many events were generated, how
+many actions were triggered, and so on. To let your Prometheus server discover
+those user metrics, add following to your configuration.
+
+```txt
+    - job_name: 'argo-events'
+      kubernetes_sd_configs:
+      - role: pod
+        selectors:
+        - role: pod
+          label: 'controller in (eventsource-controller,sensor-controller,eventbus-controller)'
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_eventbus_name, __meta_kubernetes_pod_label_controller]
+        action: replace
+        regex: (.+);eventbus-controller
+        replacement: $1
+        target_label: 'eventbus_name'
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_controller]
+        action: replace
+        regex: (.+);eventbus-controller
+        replacement: $1
+        target_label: 'namespace'
+      - source_labels: [__address__, __meta_kubernetes_pod_label_controller]
+        action: drop
+        regex: (.+):(\d222);eventbus-controller
+```
+
+### EventSource
+
+- `event_service_running_total` - How many configured events in the EventSource
+  object are actively running.
+- `argo_events_events_sent_total` - How many events have been sent successfully.
+- `events_sent_failed_total` - How many events failed to send.
+
+### Sensor
+
+- `action_triggered_total` - How many actions have been triggered successfully.
+- `action_failed_total` - How many actions failed
+
+### EventBus
+
+For `native` NATS EventBus, check this
+[link](https://github.com/nats-io/prometheus-nats-exporter) for the metrics
+explanation.
+
+## Controller Metrics
+
+If you are interested in Argo Events controller metrics, add following to your
+Prometheus configuration.
+
+```txt
+    - job_name: 'argo-events-controllers'
+      kubernetes_sd_configs:
+      - role: pod
+        selectors:
+        - role: pod
+          label: 'app in (eventsource-controller,sensor-controller,eventbus-controller)'
+      relabel_configs:
+      - source_labels: [__address__, __meta_kubernetes_pod_label_app]
+        action: replace
+        regex: (.+);(eventsource-controller|sensor-controller|eventbus-controller)
+        replacement: $1:7777
+        target_label: '__address__'
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app]
+        action: replace
+        regex: (.+);(eventsource-controller|sensor-controller|eventbus-controller)
+        replacement: $1
+        target_label: 'namespace'
+```

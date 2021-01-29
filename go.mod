@@ -32,7 +32,7 @@ require (
 	github.com/go-swagger/go-swagger v0.25.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
 	github.com/gogo/protobuf v1.3.2
-	github.com/golang/protobuf v1.4.2
+	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.2
 	github.com/google/go-github/v31 v31.0.0
 	github.com/google/uuid v1.1.2
@@ -55,6 +55,7 @@ require (
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/pierrec/lz4 v2.5.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.9.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/robfig/cron v1.2.0

@@ -19,6 +19,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"go.uber.org/zap"
@@ -31,6 +32,7 @@ import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors"
+	"github.com/argoproj/argo-events/sensors/metrics"
 )
 
 func main() {
@@ -73,9 +75,11 @@ func main() {
 
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
-	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject)
 	logger = logger.With("sensorName", sensor.Name)
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+	m := metrics.NewMetrics(sensor.Namespace, sensor.Name)
+	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
+	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, m)
 	if err := sensorExecutionCtx.ListenEvents(ctx); err != nil {
 		logger.Desugar().Fatal("failed to listen to events", zap.Error(err))
 	}
