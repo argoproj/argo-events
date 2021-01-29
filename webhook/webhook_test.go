@@ -5,12 +5,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	"syscall"
 	"testing"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/sync/errgroup"
 	admissionv1 "k8s.io/api/admission/v1"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -144,7 +142,7 @@ func createWebhook(ac *AdmissionController, wh *admissionregistrationv1.Validati
 	}
 }
 
-func TestRunExit(t *testing.T) {
+func TestRun(t *testing.T) {
 	opts := fakeOptions()
 	ac := fakeAdmissionController(t, opts)
 	createDeployment(ac)
@@ -152,14 +150,8 @@ func TestRunExit(t *testing.T) {
 	createWebhook(ac, webhook)
 
 	ctx := contextWithLoggerAndCancel(t)
-	var g errgroup.Group
-	g.Go(func() error {
-		return ac.Run(ctx)
-	})
-	_ = syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
-	err := g.Wait()
-	assert.Nil(t, err)
-	_, err = net.Dial("tcp", fmt.Sprintf(":%d", opts.Port))
+	go ac.Run(ctx)
+	_, err := net.Dial("tcp", fmt.Sprintf(":%d", opts.Port))
 	assert.NotNil(t, err)
 }
 
