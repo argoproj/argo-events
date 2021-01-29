@@ -212,6 +212,23 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Patch(ctx, obj.GetName(), k8sTrigger.Trigger.Template.K8s.PatchStrategy, body, metav1.PatchOptions{})
 
+	case v1alpha1.Delete:
+		k8sTrigger.Logger.Info("deleting the object...")
+		_, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(ctx, obj.GetName(), metav1.GetOptions{})
+
+		if err != nil && apierrors.IsNotFound(err) {
+			k8sTrigger.Logger.Info("object not found, nothing to delete...")
+			return nil, nil
+		} else if err != nil {
+			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
+		}
+
+		err = k8sTrigger.namespableDynamicClient.Namespace(namespace).Delete(ctx, obj.GetName(), metav1.DeleteOptions{})
+		if err != nil {
+			return nil, errors.Errorf("failed to delete object. err: %+v\n", err)
+		}
+		return nil, nil
+
 	default:
 		return nil, errors.Errorf("unknown operation type %s", string(op))
 	}
