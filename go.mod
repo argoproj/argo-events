@@ -72,7 +72,6 @@ require (
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 	google.golang.org/api v0.15.1
 	google.golang.org/grpc v1.28.1
 	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect

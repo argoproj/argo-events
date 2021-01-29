@@ -150,7 +150,9 @@ func TestRun(t *testing.T) {
 	createWebhook(ac, webhook)
 
 	ctx := contextWithLoggerAndCancel(t)
-	go ac.Run(ctx)
+	go func() {
+		_ = ac.Run(ctx)
+	}()
 	_, err := net.Dial("tcp", fmt.Sprintf(":%d", opts.Port))
 	assert.NotNil(t, err)
 }
