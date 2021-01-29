@@ -38,6 +38,7 @@ const (
 	Create KubernetesResourceOperation = "create" // create the resource
 	Update KubernetesResourceOperation = "update" // updates the resource
 	Patch  KubernetesResourceOperation = "patch"  // patch resource
+	Delete KubernetesResourceOperation = "delete" // deletes the resource
 )
 
 // ArgoWorkflowOperation refers to the type of the operation performed on the Argo Workflow
