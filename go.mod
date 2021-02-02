@@ -92,7 +92,7 @@ require (
 
 replace k8s.io/api => k8s.io/api v0.19.6
 
-replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.19.6
+replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.20.2
 
 replace k8s.io/apimachinery => k8s.io/apimachinery v0.19.7-rc.0
 
