@@ -1,6 +1,6 @@
 module github.com/argoproj/argo-events
 
-go 1.13
+go 1.15
 
 require (
 	cloud.google.com/go v0.52.0
