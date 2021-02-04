@@ -170,7 +170,6 @@ swagger:
 
 .PHONY: codegen
 codegen:
-	go mod vendor
 	./hack/generate-proto.sh
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh

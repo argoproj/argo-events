@@ -7,7 +7,7 @@ set -o pipefail
 source $(dirname $0)/library.sh
 header "running codegen"
 
-ensure_vendor
+go mod vendor
 make_fake_paths
 
 export GOPATH="${FAKE_GOPATH}"

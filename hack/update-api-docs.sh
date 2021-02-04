@@ -10,7 +10,7 @@ source $(dirname $0)/library.sh
 header "updating api docs"
 
 ensure_pandoc
-ensure_vendor
+go mod vendor
 make_fake_paths
 
 export GOPATH="${FAKE_GOPATH}"

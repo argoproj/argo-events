@@ -2,7 +2,7 @@
 set -eu -o pipefail
 
 source $(dirname $0)/library.sh
-ensure_vendor
+go mod vendor
 
 add_header() {
   cat "$1" | ./hack/auto-gen-msg.sh >tmp
