@@ -34,6 +34,10 @@ function make_fake_paths() {
   mkdir -p "$(dirname "${FAKE_REPOPATH}")" && ln -s "${REPO_ROOT}" "${FAKE_REPOPATH}"
 }
 
+ensure_vendor() {	
+  go mod vendor
+}	
+
 ensure_pandoc() {
   if [ "`command -v pandoc`" = "" ]; then
     warning "Please install pandoc with - brew install pandoc"

@@ -7,7 +7,7 @@ set -o pipefail
 source $(dirname $0)/library.sh
 header "updating open-apis"
 
-go mod vendor
+ensure_vendor
 make_fake_paths
 
 export GOPATH="${FAKE_GOPATH}"

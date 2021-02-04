@@ -7,7 +7,7 @@ set -o pipefail
 source $(dirname $0)/library.sh
 header "generating proto files"
 
-go mod vendor
+ensure_vendor
 
 if [ "`command -v protoc-gen-gogo`" = "" ]; then
   go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogo
