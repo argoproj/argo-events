@@ -1406,7 +1406,10 @@ func (m *Amount) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -1563,7 +1566,10 @@ func (m *Backoff) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -1774,7 +1780,10 @@ func (m *Condition) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -1934,7 +1943,7 @@ func (m *Metadata) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if (skippy < 0) || (iNdEx+skippy) < 0 {
+					if skippy < 0 {
 						return ErrInvalidLengthGenerated
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -2061,7 +2070,7 @@ func (m *Metadata) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if (skippy < 0) || (iNdEx+skippy) < 0 {
+					if skippy < 0 {
 						return ErrInvalidLengthGenerated
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -2078,7 +2087,10 @@ func (m *Metadata) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -2162,7 +2174,10 @@ func (m *Resource) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -2582,7 +2597,7 @@ func (m *S3Artifact) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if (skippy < 0) || (iNdEx+skippy) < 0 {
+					if skippy < 0 {
 						return ErrInvalidLengthGenerated
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -2599,7 +2614,10 @@ func (m *S3Artifact) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -2713,7 +2731,10 @@ func (m *S3Bucket) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -2827,7 +2848,10 @@ func (m *S3Filter) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -2911,7 +2935,10 @@ func (m *Status) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
@@ -3165,7 +3192,10 @@ func (m *TLSConfig) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthGenerated
 			}
 			if (iNdEx + skippy) > l {
