@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: events-webhook
+  template:
+    metadata:
+      labels:
+        app: events-webhook
+    spec:
+      containers:
+      - name: webhook
+        image: argoproj/events-webhook:latest
+        imagePullPolicy: Always
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      serviceAccountName: argo-events-webhook-sa
