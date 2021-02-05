@@ -54,5 +54,5 @@ jobs:
           if [ $tag = "master" ]; then
             tag="latest"
           fi
-          make eventsource-image sensor-image eventbus-controller-image eventsource-controller-image sensor-controller-image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${DOCKERIO_ORG} DOCKER_PUSH=true
+          make eventsource-image sensor-image eventbus-controller-image eventsource-controller-image sensor-controller-image events-webhook-image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${DOCKERIO_ORG} DOCKER_PUSH=true
           make quay-release
