@@ -44,23 +44,5 @@ func validate(eventSource *v1alpha1.NATSEventsSource) error {
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)
 	}
-	switch eventSource.Auth {
-	case v1alpha1.NATSAuthBasic:
-		if eventSource.Username == nil || eventSource.Password == nil {
-			return errors.New("Username and Password secrets must be specified")
-		}
-	case v1alpha1.NATSAuthToken:
-		if eventSource.Token == nil {
-			return errors.New("Token secret must be specified")
-		}
-	case v1alpha1.NATSAuthNKEY:
-		if eventSource.NKey == nil {
-			return errors.New("NKey secret must be specified")
-		}
-	case v1alpha1.NATSAuthCredential:
-		if eventSource.Credential == nil {
-			return errors.New("Credential secret must be specified")
-		}
-	}
 	return nil
 }

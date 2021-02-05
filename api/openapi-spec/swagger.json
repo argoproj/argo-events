@@ -38,6 +38,20 @@
         }
       }
     },
+    "io.argoproj.common.BasicAuth": {
+      "description": "BasicAuth contains the reference to K8s secrets that holds the username and password",
+      "type": "object",
+      "properties": {
+        "password": {
+          "description": "Password refers to the Kubernetes secret that holds the password required for basic auth.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "username": {
+          "description": "Username refers to the Kubernetes secret that holds the username required for basic auth.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.common.Condition": {
       "description": "Condition contains details about resource state",
       "type": "object",
@@ -1391,6 +1405,28 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.NATSAuth": {
+      "description": "NATSAuth refers to the auth info for NATS EventSource",
+      "type": "object",
+      "properties": {
+        "basic": {
+          "description": "Baisc auth with username and password",
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth"
+        },
+        "credential": {
+          "description": "credential used to connect",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "nkey": {
+          "description": "NKey used to connect",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "token": {
+          "description": "Token used to connect",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.NATSEventsSource": {
       "description": "NATSEventsSource refers to event-source for NATS related events",
       "type": "object",
@@ -1400,16 +1436,12 @@
       ],
       "properties": {
         "auth": {
-          "description": "Auth strategy, defaults to none. If \"auth: basic\" is used, \"Username\" and \"Password\" are required. If \"auth: token\" is used, \"Token\" is required. If \"auth: nkey\" is used, \"NKey\" is required. If \"auth: credential\" is used, \"Credential\" is required.",
-          "type": "string"
+          "description": "Auth information",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.NATSAuth"
         },
         "connectionBackoff": {
           "description": "ConnectionBackoff holds backoff applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
-        },
-        "credential": {
-          "description": "credential used to connect, use it together with \"auth: credential\"",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -1422,14 +1454,6 @@
             "type": "string"
           }
         },
-        "nkey": {
-          "description": "NKey used to connect, use it together with \"auth: nkey\"",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "password": {
-          "description": "Password used to connect, use \"username\" and \"password\" together with \"auth: basic\"",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
         "subject": {
           "description": "Subject holds the name of the subject onto which messages are published",
           "type": "string"
@@ -1438,17 +1462,9 @@
           "description": "TLS configuration for the nats client.",
           "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
-        "token": {
-          "description": "Token used to connect, use it together with \"auth: token\"",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
         "url": {
           "description": "URL to connect to NATS cluster",
           "type": "string"
-        },
-        "username": {
-          "description": "Username used to connect, use \"username\" and \"password\" together with \"auth: basic\"",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
     },
@@ -2226,20 +2242,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.BasicAuth": {
-      "description": "BasicAuth contains the reference to K8s secrets that holds the username and password",
-      "type": "object",
-      "properties": {
-        "password": {
-          "description": "Password refers to the Kubernetes secret that holds the password required for basic auth.",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "username": {
-          "description": "Username refers to the Kubernetes secret that holds the username required for basic auth.",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.CustomTrigger": {
       "description": "CustomTrigger refers to the specification of the custom trigger.",
       "type": "object",
@@ -2552,7 +2554,7 @@
       "properties": {
         "basicAuth": {
           "description": "BasicAuth configuration for the http request.",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.BasicAuth"
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth"
         },
         "headers": {
           "description": "Headers for the HTTP request.",

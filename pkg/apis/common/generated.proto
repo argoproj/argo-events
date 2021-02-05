@@ -46,6 +46,15 @@ message Backoff {
   optional int32 steps = 4;
 }
 
+// BasicAuth contains the reference to K8s secrets that holds the username and password
+message BasicAuth {
+  // Username refers to the Kubernetes secret that holds the username required for basic auth.
+  optional k8s.io.api.core.v1.SecretKeySelector username = 1;
+
+  // Password refers to the Kubernetes secret that holds the password required for basic auth.
+  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+}
+
 // Condition contains details about resource state
 message Condition {
   // Condition type.

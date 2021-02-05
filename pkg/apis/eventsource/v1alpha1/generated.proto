@@ -645,6 +645,25 @@ message MQTTEventSource {
   map<string, string> metadata = 7;
 }
 
+// NATSAuth refers to the auth info for NATS EventSource
+message NATSAuth {
+  // Baisc auth with username and password
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.BasicAuth basic = 1;
+
+  // Token used to connect
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector token = 2;
+
+  // NKey used to connect
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector nkey = 3;
+
+  // credential used to connect
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector credential = 4;
+}
+
 // NATSEventsSource refers to event-source for NATS related events
 message NATSEventsSource {
   // URL to connect to NATS cluster
@@ -669,33 +688,9 @@ message NATSEventsSource {
   // +optional
   map<string, string> metadata = 6;
 
-  // Auth strategy, defaults to none.
-  // If "auth: basic" is used, "Username" and "Password" are required.
-  // If "auth: token" is used, "Token" is required.
-  // If "auth: nkey" is used, "NKey" is required.
-  // If "auth: credential" is used, "Credential" is required.
+  // Auth information
   // +optional
-  optional string auth = 7;
-
-  // Username used to connect, use "username" and "password" together with "auth: basic"
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector username = 8;
-
-  // Password used to connect, use "username" and "password" together with "auth: basic"
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 9;
-
-  // Token used to connect, use it together with "auth: token"
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector token = 10;
-
-  // NKey used to connect, use it together with "auth: nkey"
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector nkey = 11;
-
-  // credential used to connect, use it together with "auth: credential"
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector credential = 12;
+  optional NATSAuth auth = 7;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub

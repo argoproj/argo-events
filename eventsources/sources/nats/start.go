@@ -70,39 +70,42 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		opt = append(opt, natslib.Secure(tlsConfig))
 	}
-	switch natsEventSource.Auth {
-	case v1alpha1.NATSAuthBasic:
-		username, err := common.GetSecretFromVolume(natsEventSource.Username)
-		if err != nil {
-			return err
+
+	if natsEventSource.Auth != nil {
+		switch {
+		case natsEventSource.Auth.Basic != nil:
+			username, err := common.GetSecretFromVolume(natsEventSource.Auth.Basic.Username)
+			if err != nil {
+				return err
+			}
+			password, err := common.GetSecretFromVolume(natsEventSource.Auth.Basic.Password)
+			if err != nil {
+				return err
+			}
+			opt = append(opt, natslib.UserInfo(username, password))
+		case natsEventSource.Auth.Token != nil:
+			token, err := common.GetSecretFromVolume(natsEventSource.Auth.Token)
+			if err != nil {
+				return err
+			}
+			opt = append(opt, natslib.Token(token))
+		case natsEventSource.Auth.NKey != nil:
+			nkeyFile, err := common.GetSecretVolumePath(natsEventSource.Auth.NKey)
+			if err != nil {
+				return err
+			}
+			o, err := natslib.NkeyOptionFromSeed(nkeyFile)
+			if err != nil {
+				return errors.Wrap(err, "failed to get NKey")
+			}
+			opt = append(opt, o)
+		case natsEventSource.Auth.Credential != nil:
+			cFile, err := common.GetSecretVolumePath(natsEventSource.Auth.Credential)
+			if err != nil {
+				return err
+			}
+			opt = append(opt, natslib.UserCredentials(cFile))
 		}
-		password, err := common.GetSecretFromVolume(natsEventSource.Password)
-		if err != nil {
-			return err
-		}
-		opt = append(opt, natslib.UserInfo(username, password))
-	case v1alpha1.NATSAuthToken:
-		token, err := common.GetSecretFromVolume(natsEventSource.Token)
-		if err != nil {
-			return err
-		}
-		opt = append(opt, natslib.Token(token))
-	case v1alpha1.NATSAuthNKEY:
-		nkeyFile, err := common.GetSecretVolumePath(natsEventSource.NKey)
-		if err != nil {
-			return err
-		}
-		o, err := natslib.NkeyOptionFromSeed(nkeyFile)
-		if err != nil {
-			return errors.Wrap(err, "failed to get NKey")
-		}
-		opt = append(opt, o)
-	case v1alpha1.NATSAuthCredential:
-		cFile, err := common.GetSecretVolumePath(natsEventSource.Credential)
-		if err != nil {
-			return err
-		}
-		opt = append(opt, natslib.UserCredentials(cFile))
 	}
 
 	var conn *natslib.Conn

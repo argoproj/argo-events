@@ -2688,8 +2688,7 @@ event payload.
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.NATSAuth">
-NATSAuth (<code>string</code> alias)
-</p>
+NATSAuth
 </h3>
 <p>
 (<em>Appears on:</em>
@@ -2697,9 +2696,74 @@ NATSAuth (<code>string</code> alias)
 </p>
 <p>
 <p>
-NATSAuth is the auth strategy of NATS EventSource
+NATSAuth refers to the auth info for NATS EventSource
 </p>
 </p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>basic</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.BasicAuth </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Baisc auth with username and password
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>token</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Token used to connect
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nkey</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+NKey used to connect
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>credential</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+credential used to connect
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.NATSEventsSource">
 NATSEventsSource
 </h3>
@@ -2799,77 +2863,7 @@ NATSAuth </a> </em>
 <td>
 <em>(Optional)</em>
 <p>
-Auth strategy, defaults to none. If “auth: basic” is used, “Username”
-and “Password” are required. If “auth: token” is used, “Token” is
-required. If “auth: nkey” is used, “NKey” is required. If “auth:
-credential” is used, “Credential” is required.
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>username</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Username used to connect, use “username” and “password” together with
-“auth: basic”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>password</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Password used to connect, use “username” and “password” together with
-“auth: basic”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>token</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Token used to connect, use it together with “auth: token”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>nkey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-NKey used to connect, use it together with “auth: nkey”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>credential</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-credential used to connect, use it together with “auth: credential”
+Auth information
 </p>
 </td>
 </tr>
