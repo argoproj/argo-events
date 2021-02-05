@@ -66,3 +66,13 @@ RUN argo version
 COPY dist/sensor /bin/sensor
 
 ENTRYPOINT [ "/bin/sensor" ]
+
+####################################################################################################
+# events-webhook
+####################################################################################################
+FROM scratch as events-webhook
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY dist/events-webhook /bin/events-webhook
+ENTRYPOINT [ "/bin/events-webhook" ]
+
