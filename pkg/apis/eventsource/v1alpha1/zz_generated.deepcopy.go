@@ -878,6 +878,31 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 			(*out)[key] = val
 		}
 	}
+	if in.Username != nil {
+		in, out := &in.Username, &out.Username
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Password != nil {
+		in, out := &in.Password, &out.Password
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Token != nil {
+		in, out := &in.Token, &out.Token
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.NKey != nil {
+		in, out := &in.NKey, &out.NKey
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Credential != nil {
+		in, out := &in.Credential, &out.Credential
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

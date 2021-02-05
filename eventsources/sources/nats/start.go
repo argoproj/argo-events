@@ -62,21 +62,53 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	natsEventSource := &el.NATSEventSource
 
-	var conn *natslib.Conn
+	var opt []natslib.Option
+	if natsEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(natsEventSource.TLS)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		opt = append(opt, natslib.Secure(tlsConfig))
+	}
+	switch natsEventSource.Auth {
+	case v1alpha1.NATSAuthBasic:
+		username, err := common.GetSecretFromVolume(natsEventSource.Username)
+		if err != nil {
+			return err
+		}
+		password, err := common.GetSecretFromVolume(natsEventSource.Password)
+		if err != nil {
+			return err
+		}
+		opt = append(opt, natslib.UserInfo(username, password))
+	case v1alpha1.NATSAuthToken:
+		token, err := common.GetSecretFromVolume(natsEventSource.Token)
+		if err != nil {
+			return err
+		}
+		opt = append(opt, natslib.Token(token))
+	case v1alpha1.NATSAuthNKEY:
+		nkeyFile, err := common.GetSecretVolumePath(natsEventSource.NKey)
+		if err != nil {
+			return err
+		}
+		o, err := natslib.NkeyOptionFromSeed(nkeyFile)
+		if err != nil {
+			return errors.Wrap(err, "failed to get NKey")
+		}
+		opt = append(opt, o)
+	case v1alpha1.NATSAuthCredential:
+		cFile, err := common.GetSecretVolumePath(natsEventSource.Credential)
+		if err != nil {
+			return err
+		}
+		opt = append(opt, natslib.UserCredentials(cFile))
+	}
 
+	var conn *natslib.Conn
 	log.Info("connecting to nats cluster...")
 	if err := common.Connect(common.GetConnectionBackoff(natsEventSource.ConnectionBackoff), func() error {
 		var err error
-		var opt []natslib.Option
-
-		if natsEventSource.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(natsEventSource.TLS)
-			if err != nil {
-				return errors.Wrap(err, "failed to get the tls configuration")
-			}
-			opt = append(opt, natslib.Secure(tlsConfig))
-		}
-
 		if conn, err = natslib.Connect(natsEventSource.URL, opt...); err != nil {
 			return err
 		}
@@ -84,6 +116,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}); err != nil {
 		return errors.Wrapf(err, "failed to connect to the nats server for event source %s", el.GetEventName())
 	}
+	defer conn.Close()
 
 	if natsEventSource.JSONBody {
 		log.Info("assuming all events have a json body...")

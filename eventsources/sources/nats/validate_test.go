@@ -52,3 +52,28 @@ func TestValidateEventSource(t *testing.T) {
 		assert.NoError(t, err)
 	}
 }
+
+func TestValidateEventSourceMissingAuthSecret(t *testing.T) {
+	listener := &EventListener{}
+
+	err := listener.ValidateEventSource(context.Background())
+	assert.Error(t, err)
+	assert.Equal(t, "url must be specified", err.Error())
+
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "nats.yaml"))
+	assert.Nil(t, err)
+
+	var eventSource *v1alpha1.EventSource
+	err = yaml.Unmarshal(content, &eventSource)
+	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.NATS)
+
+	for _, value := range eventSource.Spec.NATS {
+		value.Auth = v1alpha1.NATSAuthToken
+		l := &EventListener{
+			NATSEventSource: value,
+		}
+		err := l.ValidateEventSource(context.Background())
+		assert.Equal(t, err.Error(), "Token secret must be specified")
+	}
+}

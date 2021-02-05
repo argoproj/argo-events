@@ -668,6 +668,34 @@ message NATSEventsSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 6;
+
+  // Auth strategy, defaults to none.
+  // If "auth: basic" is used, "Username" and "Password" are required.
+  // If "auth: token" is used, "Token" is required.
+  // If "auth: nkey" is used, "NKey" is required.
+  // If "auth: credential" is used, "Credential" is required.
+  // +optional
+  optional string auth = 7;
+
+  // Username used to connect, use "username" and "password" together with "auth: basic"
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector username = 8;
+
+  // Password used to connect, use "username" and "password" together with "auth: basic"
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector password = 9;
+
+  // Token used to connect, use it together with "auth: token"
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector token = 10;
+
+  // NKey used to connect, use it together with "auth: nkey"
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector nkey = 11;
+
+  // credential used to connect, use it together with "auth: credential"
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector credential = 12;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub

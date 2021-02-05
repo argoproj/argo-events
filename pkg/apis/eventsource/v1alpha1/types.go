@@ -481,6 +481,18 @@ type MQTTEventSource struct {
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 }
 
+// NATSAuth is the auth strategy of NATS EventSource
+type NATSAuth string
+
+// possible auth strategies
+var (
+	NATSAuthNone       NATSAuth = ""
+	NATSAuthBasic      NATSAuth = "basic"
+	NATSAuthToken      NATSAuth = "token"
+	NATSAuthNKEY       NATSAuth = "nkey"
+	NATSAuthCredential NATSAuth = "credential"
+)
+
 // NATSEventsSource refers to event-source for NATS related events
 type NATSEventsSource struct {
 	// URL to connect to NATS cluster
@@ -499,6 +511,28 @@ type NATSEventsSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Auth strategy, defaults to none.
+	// If "auth: basic" is used, "Username" and "Password" are required.
+	// If "auth: token" is used, "Token" is required.
+	// If "auth: nkey" is used, "NKey" is required.
+	// If "auth: credential" is used, "Credential" is required.
+	// +optional
+	Auth NATSAuth `json:"auth,omitempty" protobuf:"bytes,7,rep,name=auth"`
+	// Username used to connect, use "username" and "password" together with "auth: basic"
+	// +optional
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,8,opt,name=username"`
+	// Password used to connect, use "username" and "password" together with "auth: basic"
+	// +optional
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,9,opt,name=password"`
+	// Token used to connect, use it together with "auth: token"
+	// +optional
+	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,10,opt,name=token"`
+	// NKey used to connect, use it together with "auth: nkey"
+	// +optional
+	NKey *corev1.SecretKeySelector `json:"nkey,omitempty" protobuf:"bytes,11,opt,name=nkey"`
+	// credential used to connect, use it together with "auth: credential"
+	// +optional
+	Credential *corev1.SecretKeySelector `json:"credential,omitempty" protobuf:"bytes,12,opt,name=credential"`
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events

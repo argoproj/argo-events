@@ -1833,12 +1833,49 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 							},
 						},
 					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Auth strategy, defaults to none. If \"auth: basic\" is used, \"Username\" and \"Password\" are required. If \"auth: token\" is used, \"Token\" is required. If \"auth: nkey\" is used, \"NKey\" is required. If \"auth: credential\" is used, \"Credential\" is required.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username used to connect, use \"username\" and \"password\" together with \"auth: basic\"",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password used to connect, use \"username\" and \"password\" together with \"auth: basic\"",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"token": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Token used to connect, use it together with \"auth: token\"",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"nkey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NKey used to connect, use it together with \"auth: nkey\"",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"credential": {
+						SchemaProps: spec.SchemaProps{
+							Description: "credential used to connect, use it together with \"auth: credential\"",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 				Required: []string{"url", "subject"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
