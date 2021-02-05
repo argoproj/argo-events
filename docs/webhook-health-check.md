@@ -1,6 +1,6 @@
 # Webhook Health Check
 
-![alpha](assets/alpha.svg)
+![GA](assets/ga.svg)
 
 > v1.0 and after
 

@@ -1,6 +1,6 @@
 # EventBus
 
-![alpha](assets/alpha.svg)
+![GA](assets/ga.svg)
 
 > v0.17.0 and after
 

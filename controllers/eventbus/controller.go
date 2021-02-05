@@ -82,6 +82,11 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	controllerutil.AddFinalizer(eventBus, finalizerName)
 
 	eventBus.Status.InitConditions()
+	if err := ValidateEventBus(eventBus); err != nil {
+		log.Errorw("validation failed", zap.Error(err))
+		eventBus.Status.MarkDeployFailed("InvalidSpec", err.Error())
+		return err
+	}
 	return installer.Install(eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
 }
 

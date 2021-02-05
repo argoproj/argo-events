@@ -49,6 +49,8 @@ var (
 		},
 	}
 
+	cID = "test-cluster-id"
+
 	exoticBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -61,7 +63,8 @@ var (
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
 				Exotic: &v1alpha1.NATSConfig{
-					URL: testURL,
+					ClusterID: &cID,
+					URL:       testURL,
 				},
 			},
 		},

@@ -1,6 +1,6 @@
 # EventSource With Multiple Events
 
-![alpha](../assets/alpha.svg)
+![GA](../assets/ga.svg)
 
 > v0.17.0 and after
 
@@ -70,9 +70,8 @@ However, there are some rules need to follow to do it:
   see [EventSource Deployment Strategies](deployment-strategies.md).
 
 - Event Name (i.e. `webhook-example` and `sns-example` above, refer to
-  [EventSource Names](naming.md)) needs to be unique in the
-  EventSource, same `eventName` is not allowed even they are in different event
-  source types.
+  [EventSource Names](naming.md)) needs to be unique in the EventSource, same
+  `eventName` is not allowed even they are in different event source types.
 
   The reason for that is, we use `eventSourceName` and `eventName` as the
   dependency attributes in Sensor.
