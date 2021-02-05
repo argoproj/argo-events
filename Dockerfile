@@ -51,14 +51,28 @@ FROM alpine as sensor
 RUN apk update && apk upgrade && \
     apk add --no-cache git
 
+ENV ARGO_VERSION=v2.12.7
+
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Argo Workflow CLI
-COPY assets/argo-linux-amd64 /usr/local/bin/argo
-RUN chmod +x /usr/local/bin/argo
-RUN argo version || true
+RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz
+RUN gunzip argo-linux-amd64.gz
+RUN chmod +x argo-linux-amd64
+RUN mv ./argo-linux-amd64 /usr/local/bin/argo
+RUN argo version
 
 COPY dist/sensor /bin/sensor
 
 ENTRYPOINT [ "/bin/sensor" ]
+
+####################################################################################################
+# events-webhook
+####################################################################################################
+FROM scratch as events-webhook
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY dist/events-webhook /bin/events-webhook
+ENTRYPOINT [ "/bin/events-webhook" ]
+

@@ -37,9 +37,9 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor sensor-controller eventbus-controller eventsource-controller eventsource
+all: sensor sensor-controller eventbus-controller eventsource-controller eventsource events-webhook
 
-all-images: sensor-image sensor-controller-image eventbus-controller-image eventsource-controller-image eventsource-image
+all-images: sensor-image sensor-controller-image eventbus-controller-image eventsource-controller-image eventsource-image events-webhook-image
 
 all-controller-images: sensor-controller-image eventbus-controller-image eventsource-controller-image
 
@@ -145,6 +145,26 @@ eventbus-controller-image: dist/eventbus-controller-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
 
+# Webhook
+.PHONY: events-webhook
+events-webhook: dist/events-webhook-linux-amd64
+
+dist/events-webhook: GOARGS = GOOS= GOARCH=
+dist/events-webhook-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
+dist/events-webhook-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
+dist/events-webhook-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
+dist/events-webhook-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
+
+dist/events-webhook:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/events-webhook ./webhook/cmd/main.go
+
+dist/events-webhook-%:
+	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/events-webhook ./webhook/cmd/main.go
+
+events-webhook-image: dist/events-webhook-linux-amd64
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_PREFIX)events-webhook:$(IMAGE_TAG)  --target events-webhook -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)events-webhook:$(IMAGE_TAG) ; fi
+
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
@@ -163,6 +183,7 @@ crds:
 manifests: crds
 	kustomize build manifests/cluster-install > manifests/install.yaml
 	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
+	kustomize build manifests/extensions/validating-webhook > manifests/install-validating-webhook.yaml
 
 .PHONY: swagger
 swagger:
@@ -170,7 +191,6 @@ swagger:
 
 .PHONY: codegen
 codegen:
-	go mod vendor
 	./hack/generate-proto.sh
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
@@ -219,3 +239,6 @@ quay-release: eventbus-controller-image sensor-controller-image sensor-image eve
 
 	docker tag $(IMAGE_PREFIX)eventsource:$(IMAGE_TAG) quay.io/$(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)
 	docker push quay.io/$(IMAGE_PREFIX)eventsource:$(IMAGE_TAG)
+
+	docker tag $(IMAGE_PREFIX)events-webhook:$(IMAGE_TAG) quay.io/$(IMAGE_PREFIX)events-webhook:$(IMAGE_TAG)
+	docker push quay.io/$(IMAGE_PREFIX)events-webhook:$(IMAGE_TAG)
