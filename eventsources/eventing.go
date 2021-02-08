@@ -295,6 +295,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 			case <-ticker.C:
 				if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 					logger.Info("NATS connection lost, reconnecting...")
+					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 					clientID := generateClientID(e.hostname)
 					driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 					if err != nil {
