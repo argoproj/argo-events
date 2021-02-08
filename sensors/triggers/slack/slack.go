@@ -124,7 +124,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 				break
 			}
 		}
-		if len(channels) < params.Limit || nextCursor == "" {
+		if nextCursor == "" {
 			break
 		}
 		params.Cursor = nextCursor
