@@ -52,15 +52,16 @@ rules:
 
 ### EventSource
 
-- `event_service_running_total` - How many configured events in the EventSource
-  object are actively running.
+- `argo_events_event_service_running_total` - How many configured events in the
+  EventSource object are actively running.
 - `argo_events_events_sent_total` - How many events have been sent successfully.
-- `events_sent_failed_total` - How many events failed to send.
+- `argo_events_events_sent_failed_total` - How many events failed to send.
 
 ### Sensor
 
-- `action_triggered_total` - How many actions have been triggered successfully.
-- `action_failed_total` - How many actions failed
+- `argo_events_action_triggered_total` - How many actions have been triggered
+  successfully.
+- `argo_events_action_failed_total` - How many actions failed
 
 ### EventBus
 
@@ -92,3 +93,27 @@ Prometheus configuration.
         replacement: $1
         target_label: 'namespace'
 ```
+
+## Golden Signals
+
+Following metrics are considered as
+[Golden Signals](https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals)
+of monitoring your applictions running with Argo Events.
+
+- Latency
+
+TBD.
+
+- Traffic
+
+  - `argo_events_events_sent_total`
+  - `argo_events_action_triggered_total`
+
+- Errors
+
+  - `argo_events_events_sent_failed_total`
+  - `argo_events_action_failed_total`
+
+- Saturation
+
+TBD.

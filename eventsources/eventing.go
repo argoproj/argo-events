@@ -320,8 +320,8 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 				continue
 			}
 			wg.Add(1)
-			e.metrics.IncRunningServices(server.GetEventSourceName())
 			go func(s EventingServer) {
+				e.metrics.IncRunningServices(s.GetEventSourceName())
 				defer e.metrics.DecRunningServices(s.GetEventSourceName())
 				defer wg.Done()
 				if err = common.Connect(&wait.Backoff{
