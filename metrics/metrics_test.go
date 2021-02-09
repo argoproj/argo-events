@@ -13,7 +13,7 @@ import (
 
 func TestRun(t *testing.T) {
 	port := 9090
-	m := NewMetrics("test-ns", "test-sensor")
+	m := NewMetrics("test-ns")
 	go m.Run(logging.WithLogger(context.Background(), logging.NewArgoEventsLogger()), fmt.Sprintf(":%d", port))
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/metrics", port))
 	assert.Nil(t, err)

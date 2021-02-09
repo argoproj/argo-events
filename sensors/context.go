@@ -28,9 +28,9 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
+	sensormetrics "github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensormetrics "github.com/argoproj/argo-events/sensors/metrics"
 )
 
 // SensorContext contains execution context for Sensor

@@ -155,7 +155,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			}
 
 			actionFunc := func(events map[string]cloudevents.Event) {
-				if err := sensorCtx.triggerActions(cctx, events, triggers); err != nil {
+				if err := sensorCtx.triggerActions(cctx, sensor, events, triggers); err != nil {
 					logger.Error("failed to trigger actions", zap.Error(err))
 				}
 			}
@@ -225,7 +225,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 	return nil
 }
 
-func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[string]cloudevents.Event, triggers []v1alpha1.Trigger) error {
+func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1alpha1.Sensor, events map[string]cloudevents.Event, triggers []v1alpha1.Trigger) error {
 	log := logging.FromContext(ctx)
 	eventsMapping := make(map[string]*v1alpha1.Event)
 	depNames := make([]string, 0, len(events))
@@ -236,7 +236,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 	for _, trigger := range triggers {
 		if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
 			log.Errorf("failed to apply template parameters, %v", err)
-			sensorCtx.metrics.ActionFailed(trigger.Template.Name)
+			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 			return err
 		}
 
@@ -250,7 +250,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 		log.Debugw("fetching trigger resource if any", "triggerName", trigger.Template.Name)
 		obj, err := triggerImpl.FetchResource(ctx)
 		if err != nil {
-			sensorCtx.metrics.ActionFailed(trigger.Template.Name)
+			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 			return err
 		}
 		if obj == nil {
@@ -261,25 +261,25 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, events map[s
 		log.Debugw("applying resource parameters if any", "triggerName", trigger.Template.Name)
 		updatedObj, err := triggerImpl.ApplyResourceParameters(eventsMapping, obj)
 		if err != nil {
-			sensorCtx.metrics.ActionFailed(trigger.Template.Name)
+			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 			return err
 		}
 
 		log.Debugw("executing the trigger resource", "triggerName", trigger.Template.Name)
 		newObj, err := triggerImpl.Execute(ctx, eventsMapping, updatedObj)
 		if err != nil {
-			sensorCtx.metrics.ActionFailed(trigger.Template.Name)
+			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 			return err
 		}
 		log.Debugw("trigger resource successfully executed", "triggerName", trigger.Template.Name)
 
 		log.Debugw("applying trigger policy", "triggerName", trigger.Template.Name)
 		if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
-			sensorCtx.metrics.ActionFailed(trigger.Template.Name)
+			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 			return err
 		}
 		log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name), zap.Any("triggeredBy", depNames))
-		sensorCtx.metrics.ActionTriggered(trigger.Template.Name)
+		sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
 	}
 	return nil
 }

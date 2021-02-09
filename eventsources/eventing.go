@@ -18,7 +18,6 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
-	eventsourcemetrics "github.com/argoproj/argo-events/eventsources/metrics"
 	"github.com/argoproj/argo-events/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
@@ -43,6 +42,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/eventsources/sources/webhook"
+	eventsourcemetrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -320,9 +320,9 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 				continue
 			}
 			wg.Add(1)
-			e.metrics.IncRunningServices()
+			e.metrics.IncRunningServices(server.GetEventSourceName())
 			go func(s EventingServer) {
-				defer e.metrics.DecRunningServices()
+				defer e.metrics.DecRunningServices(s.GetEventSourceName())
 				defer wg.Done()
 				if err = common.Connect(&wait.Backoff{
 					Steps:    10,
@@ -351,12 +351,12 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 						if err = driver.Publish(e.eventBusConn, eventBody); err != nil {
 							logger.Error("failed to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
-							e.metrics.EventSentFailed(s.GetEventName())
+							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							return err
 						}
 						logger.Info("succeeded to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
-						e.metrics.EventSent(s.GetEventName())
+						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 						return nil
 					})
 				}); err != nil {

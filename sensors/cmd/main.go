@@ -29,10 +29,10 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors"
-	"github.com/argoproj/argo-events/sensors/metrics"
 )
 
 func main() {
@@ -77,7 +77,7 @@ func main() {
 
 	logger = logger.With("sensorName", sensor.Name)
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
-	m := metrics.NewMetrics(sensor.Namespace, sensor.Name)
+	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
 	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, m)
 	if err := sensorExecutionCtx.ListenEvents(ctx); err != nil {
