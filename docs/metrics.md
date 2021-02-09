@@ -34,6 +34,22 @@ those user metrics, add following to your configuration.
         regex: (.+):(\d222);eventbus-controller
 ```
 
+Also please make sure your Prometheus Service Account has the permission to do
+POD discovery. A sample `ClusterRole` like below needs to be added or merged,
+and grant it to your Service Account.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: pod-discovery
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs: ["get", "list", "watch"]
+```
+
 ### EventSource
 
 - `event_service_running_total` - How many configured events in the EventSource
