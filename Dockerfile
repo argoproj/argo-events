@@ -47,7 +47,7 @@ ENTRYPOINT [ "/bin/eventsource" ]
 ####################################################################################################
 # sensor
 ####################################################################################################
-FROM alpine as sensor
+FROM alpine:3.12.3 as sensor
 RUN apk update && apk upgrade && \
     apk add --no-cache git
 
