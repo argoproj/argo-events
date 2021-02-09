@@ -14,7 +14,7 @@ if [ "$(command -v controller-gen)" = "" ]; then
 fi
 
 header "Generating CRDs"
-controller-gen crd:trivialVersions=true,maxDescLen=0 paths=./pkg/apis/... output:dir=manifests/base/crds
+controller-gen crd:crdVersions=v1,trivialVersions=true,maxDescLen=0 paths=./pkg/apis/... output:dir=manifests/base/crds
 
 find manifests/base/crds -name 'argoproj.io*.yaml' | while read -r file; do
   echo "Patching ${file}"
