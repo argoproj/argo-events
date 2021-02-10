@@ -89,15 +89,6 @@ message ArtifactLocation {
   optional github.com.argoproj.argo_events.pkg.apis.common.Resource resource = 7;
 }
 
-// BasicAuth contains the reference to K8s secrets that holds the username and password
-message BasicAuth {
-  // Username refers to the Kubernetes secret that holds the username required for basic auth.
-  optional k8s.io.api.core.v1.SecretKeySelector username = 1;
-
-  // Password refers to the Kubernetes secret that holds the password required for basic auth.
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
-}
-
 // CustomTrigger refers to the specification of the custom trigger.
 message CustomTrigger {
   // ServerURL is the url of the gRPC server that executes custom trigger
@@ -311,7 +302,7 @@ message HTTPTrigger {
 
   // BasicAuth configuration for the http request.
   // +optional
-  optional BasicAuth basicAuth = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.BasicAuth basicAuth = 7;
 
   // Headers for the HTTP request.
   // +optional

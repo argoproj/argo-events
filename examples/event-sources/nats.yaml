@@ -39,4 +39,43 @@ spec:
 #          name: my-secret
 #          key: client-key-key
 
+#    example-auth-basic:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        basic:
+#          username:
+#            name: my-secret
+#            key: name
+#          password:
+#            name: my-secret
+#            key: password
+
+#    example-auth-nkey:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        nkey:
+#          name: my-secret
+#          key: my-key
+
+#    example-auth-token:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        token:
+#          name: my-secret
+#          key: my-token
+
+#    example-auth-credential:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        credential:
+#          name: my-secret
+#          key: my-credential
 
