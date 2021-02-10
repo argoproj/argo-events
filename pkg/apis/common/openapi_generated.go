@@ -31,6 +31,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 	return map[string]common.OpenAPIDefinition{
 		"github.com/argoproj/argo-events/pkg/apis/common.Amount":     schema_argo_events_pkg_apis_common_Amount(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":    schema_argo_events_pkg_apis_common_Backoff(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth":  schema_argo_events_pkg_apis_common_BasicAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Condition":  schema_argo_events_pkg_apis_common_Condition(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":   schema_argo_events_pkg_apis_common_Metadata(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Resource":   schema_argo_events_pkg_apis_common_Resource(ref),
@@ -93,6 +94,33 @@ func schema_argo_events_pkg_apis_common_Backoff(ref common.ReferenceCallback) co
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/common.Amount"},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_BasicAuth(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "BasicAuth contains the reference to K8s secrets that holds the username and password",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username refers to the Kubernetes secret that holds the username required for basic auth.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password refers to the Kubernetes secret that holds the password required for basic auth.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

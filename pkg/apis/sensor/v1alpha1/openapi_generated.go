@@ -32,7 +32,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger":       schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger":    schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":       schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth":              schema_pkg_apis_sensor_v1alpha1_BasicAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":          schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":             schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup":        schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref),
@@ -249,33 +248,6 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/common.Resource", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact", "k8s.io/api/core/v1.ConfigMapKeySelector"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_BasicAuth(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "BasicAuth contains the reference to K8s secrets that holds the username and password",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"username": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Username refers to the Kubernetes secret that holds the username required for basic auth.",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"password": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Password refers to the Kubernetes secret that holds the password required for basic auth.",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -849,7 +821,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 					"basicAuth": {
 						SchemaProps: spec.SchemaProps{
 							Description: "BasicAuth configuration for the http request.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.BasicAuth"),
 						},
 					},
 					"headers": {
@@ -872,7 +844,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
