@@ -52,16 +52,27 @@ rules:
 
 ### EventSource
 
-- `argo_events_event_service_running_total` - How many configured events in the
-  EventSource object are actively running.
-- `argo_events_events_sent_total` - How many events have been sent successfully.
-- `argo_events_events_sent_failed_total` - How many events failed to send.
+#### argo_events_event_service_running_total
+
+How many configured events in the EventSource object are actively running.
+
+#### argo_events_events_sent_total
+
+How many events have been sent successfully.
+
+#### argo_events_events_sent_failed_total
+
+How many events failed to send.
 
 ### Sensor
 
-- `argo_events_action_triggered_total` - How many actions have been triggered
-  successfully.
-- `argo_events_action_failed_total` - How many actions failed
+#### argo_events_action_triggered_total
+
+How many actions have been triggered successfully.
+
+#### argo_events_action_failed_total
+
+How many actions failed
 
 ### EventBus
 

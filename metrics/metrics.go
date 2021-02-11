@@ -38,7 +38,7 @@ func NewMetrics(namespace string) *Metrics {
 		runningEventServices: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: prefix,
 			Name:      "event_service_running_total",
-			Help:      "How many configured events in the EventSource object are actively running",
+			Help:      "How many configured events in the EventSource object are actively running. https://argoproj.github.io/argo-events/metrics/#argo_events_event_service_running_total",
 			ConstLabels: prometheus.Labels{
 				labelNamespace: namespace,
 			},
@@ -46,7 +46,7 @@ func NewMetrics(namespace string) *Metrics {
 		eventsSent: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: prefix,
 			Name:      "events_sent_total",
-			Help:      "How many events have been sent successfully",
+			Help:      "How many events have been sent successfully. https://argoproj.github.io/argo-events/metrics/#argo_events_events_sent_total",
 			ConstLabels: prometheus.Labels{
 				labelNamespace: namespace,
 			},
@@ -54,7 +54,7 @@ func NewMetrics(namespace string) *Metrics {
 		eventsSentFailed: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: prefix,
 			Name:      "events_sent_failed_total",
-			Help:      "How many events failed to send",
+			Help:      "How many events failed to send. https://argoproj.github.io/argo-events/metrics/#argo_events_events_sent_failed_total",
 			ConstLabels: prometheus.Labels{
 				labelNamespace: namespace,
 			},
@@ -62,7 +62,7 @@ func NewMetrics(namespace string) *Metrics {
 		actionTriggered: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: prefix,
 			Name:      "action_triggered_total",
-			Help:      "How many actions have been triggered successfully",
+			Help:      "How many actions have been triggered successfully. https://argoproj.github.io/argo-events/metrics/#argo_events_action_triggered_total",
 			ConstLabels: prometheus.Labels{
 				labelNamespace: namespace,
 			},
@@ -70,7 +70,7 @@ func NewMetrics(namespace string) *Metrics {
 		actionFailed: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: prefix,
 			Name:      "action_failed_total",
-			Help:      "How many actions failed",
+			Help:      "How many actions failed. https://argoproj.github.io/argo-events/metrics/#argo_events_action_failed_total",
 			ConstLabels: prometheus.Labels{
 				labelNamespace: namespace,
 			},
