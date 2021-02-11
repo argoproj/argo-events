@@ -8,16 +8,16 @@
 
 Starting from v1.3, a
 [Validating Admission Webhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook)
-is introduced to the project. To install Argo Events with the validating
-webhook, use following command (update the version):
+is introduced to the project. To install the validating webhook, use following
+command (change the version):
 
 ```shell
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/{version}/manifests/install-with-extension.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/{version}/manifests/install-validating-webhook.yaml
 ```
 
 ## Benefits
 
-Using the validation webhook has following benefits:
+Using the validating webhook has following benefits:
 
 1. It notifies the error at the time applying the faulty spec, so that you don't
    need to check the CRD object `status` field to see if there's any condition

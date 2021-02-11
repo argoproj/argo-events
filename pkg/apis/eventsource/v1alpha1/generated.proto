@@ -645,6 +645,25 @@ message MQTTEventSource {
   map<string, string> metadata = 7;
 }
 
+// NATSAuth refers to the auth info for NATS EventSource
+message NATSAuth {
+  // Baisc auth with username and password
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.BasicAuth basic = 1;
+
+  // Token used to connect
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector token = 2;
+
+  // NKey used to connect
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector nkey = 3;
+
+  // credential used to connect
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector credential = 4;
+}
+
 // NATSEventsSource refers to event-source for NATS related events
 message NATSEventsSource {
   // URL to connect to NATS cluster
@@ -668,6 +687,10 @@ message NATSEventsSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 6;
+
+  // Auth information
+  // +optional
+  optional NATSAuth auth = 7;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub

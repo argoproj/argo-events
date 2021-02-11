@@ -2631,6 +2631,79 @@ map[string]string
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.NATSAuth">NATSAuth
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>)
+</p>
+<p>
+<p>NATSAuth refers to the auth info for NATS EventSource</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>basic</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.BasicAuth
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Baisc auth with username and password</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>token</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Token used to connect</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nkey</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>NKey used to connect</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>credential</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>credential used to connect</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource
 </h3>
 <p>
@@ -2716,6 +2789,20 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>auth</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.NATSAuth">
+NATSAuth
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Auth information</p>
 </td>
 </tr>
 </tbody>

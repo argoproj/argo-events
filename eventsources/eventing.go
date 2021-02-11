@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"strings"
 	"sync"
 	"time"
@@ -266,7 +267,8 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	logger := logging.FromContext(ctx).Desugar()
 	logger.Info("Starting event source server...")
 	servers := GetEventingServers(e.eventSource)
-	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, strings.ReplaceAll(e.hostname, ".", "_"))
+	clientID := generateClientID(e.hostname)
+	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 	if err != nil {
 		logger.Error("failed to get eventbus driver", zap.Error(err))
 		return err
@@ -297,6 +299,13 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 			case <-ticker.C:
 				if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 					logger.Info("NATS connection lost, reconnecting...")
+					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
+					clientID := generateClientID(e.hostname)
+					driver, err := eventbus.GetDriver(cctx, *e.eventBusConfig, e.eventBusSubject, clientID)
+					if err != nil {
+						logger.Error("failed to get eventbus driver during reconnection", zap.Error(err))
+						continue
+					}
 					e.eventBusConn, err = driver.Connect()
 					if err != nil {
 						logger.Error("failed to reconnect to eventbus", zap.Error(err))
@@ -389,4 +398,11 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 			return errors.New("no active event server running")
 		}
 	}
+}
+
+func generateClientID(hostname string) string {
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(hostname, ".", "_"), r1.Intn(1000))
+	return clientID
 }
