@@ -303,59 +303,6 @@ Resource is generic template for K8s resource
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.BasicAuth">
-BasicAuth
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
-</p>
-<p>
-<p>
-BasicAuth contains the reference to K8s secrets that holds the username
-and password
-</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>username</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<p>
-Username refers to the Kubernetes secret that holds the username
-required for basic auth.
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>password</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<p>
-Password refers to the Kubernetes secret that holds the password
-required for basic auth.
-</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="argoproj.io/v1alpha1.Comparator">
 Comparator (<code>string</code> alias)
 </p>
@@ -1237,7 +1184,7 @@ Timeout refers to the HTTP request timeout in seconds. Default value is
 <tr>
 <td>
 <code>basicAuth</code></br> <em>
-<a href="#argoproj.io/v1alpha1.BasicAuth"> BasicAuth </a> </em>
+github.com/argoproj/argo-events/pkg/apis/common.BasicAuth </em>
 </td>
 <td>
 <em>(Optional)</em>

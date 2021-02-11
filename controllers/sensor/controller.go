@@ -93,8 +93,7 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	controllerutil.AddFinalizer(sensor, finalizerName)
 
 	sensor.Status.InitConditions()
-	err := ValidateSensor(sensor)
-	if err != nil {
+	if err := ValidateSensor(sensor); err != nil {
 		log.Errorw("validation error", "error", err)
 		return err
 	}

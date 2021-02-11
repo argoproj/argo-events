@@ -38,6 +38,7 @@ const (
 	Create KubernetesResourceOperation = "create" // create the resource
 	Update KubernetesResourceOperation = "update" // updates the resource
 	Patch  KubernetesResourceOperation = "patch"  // patch resource
+	Delete KubernetesResourceOperation = "delete" // deletes the resource
 )
 
 // ArgoWorkflowOperation refers to the type of the operation performed on the Argo Workflow
@@ -371,18 +372,10 @@ type HTTPTrigger struct {
 	Timeout int64 `json:"timeout,omitempty" protobuf:"varint,6,opt,name=timeout"`
 	// BasicAuth configuration for the http request.
 	// +optional
-	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
+	BasicAuth *apicommon.BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
 	// Headers for the HTTP request.
 	// +optional
 	Headers map[string]string `json:"headers,omitempty" protobuf:"bytes,8,rep,name=headers"`
-}
-
-// BasicAuth contains the reference to K8s secrets that holds the username and password
-type BasicAuth struct {
-	// Username refers to the Kubernetes secret that holds the username required for basic auth.
-	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
-	// Password refers to the Kubernetes secret that holds the password required for basic auth.
-	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
 }
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function

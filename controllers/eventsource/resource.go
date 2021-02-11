@@ -38,7 +38,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 	ctx := context.Background()
 	eventSource := args.EventSource
 	eventBus := &eventbusv1alpha1.EventBus{}
-	eventBusName := "default"
+	eventBusName := common.DefaultEventBusName
 	if len(eventSource.Spec.EventBusName) > 0 {
 		eventBusName = eventSource.Spec.EventBusName
 	}

@@ -499,6 +499,25 @@ type NATSEventsSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Auth information
+	// +optional
+	Auth *NATSAuth `json:"auth,omitempty" protobuf:"bytes,7,opt,name=auth"`
+}
+
+// NATSAuth refers to the auth info for NATS EventSource
+type NATSAuth struct {
+	// Baisc auth with username and password
+	// +optional
+	Basic *apicommon.BasicAuth `json:"basic,omitempty" protobuf:"bytes,1,opt,name=basic"`
+	// Token used to connect
+	// +optional
+	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,opt,name=token"`
+	// NKey used to connect
+	// +optional
+	NKey *corev1.SecretKeySelector `json:"nkey,omitempty" protobuf:"bytes,3,opt,name=nkey"`
+	// credential used to connect
+	// +optional
+	Credential *corev1.SecretKeySelector `json:"credential,omitempty" protobuf:"bytes,4,opt,name=credential"`
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events

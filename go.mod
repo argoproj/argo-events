@@ -1,6 +1,6 @@
 module github.com/argoproj/argo-events
 
-go 1.13
+go 1.15
 
 require (
 	cloud.google.com/go v0.52.0
@@ -25,12 +25,13 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/go-openapi/spec v0.19.8
+	github.com/go-openapi/inflect v0.19.0
+	github.com/go-openapi/spec v0.20.2
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/go-swagger/go-swagger v0.25.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
-	github.com/gogo/protobuf v1.3.1
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.4.2
 	github.com/google/go-cmp v0.5.2
 	github.com/google/go-github/v31 v31.0.0
@@ -86,7 +87,7 @@ require (
 	k8s.io/klog v0.3.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20200805222855-6aeccd4b50c6
 	sigs.k8s.io/controller-runtime v0.7.0
-	sigs.k8s.io/controller-tools v0.2.9
+	sigs.k8s.io/controller-tools v0.4.1
 	sigs.k8s.io/yaml v1.2.0
 )
 

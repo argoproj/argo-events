@@ -78,6 +78,7 @@ nav:
   - 'webhook-health-check.md'
   - 'trigger-conditions.md'
   - 'service-accounts.md'
+  - 'validating-admission-webhook.md'
   - 'developer_guide.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
