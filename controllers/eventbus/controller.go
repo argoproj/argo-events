@@ -71,9 +71,9 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 		log.Info("deleting eventbus")
 		if controllerutil.ContainsFinalizer(eventBus, finalizerName) {
 			// Finalizer logic should be added here.
-			if err := installer.Uninstall(eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log); err != nil {
+			if err := installer.Uninstall(ctx, eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log); err != nil {
 				log.Errorw("failed to uninstall", zap.Error(err))
-				return nil
+				return err
 			}
 			controllerutil.RemoveFinalizer(eventBus, finalizerName)
 		}
@@ -87,7 +87,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 		eventBus.Status.MarkDeployFailed("InvalidSpec", err.Error())
 		return err
 	}
-	return installer.Install(eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
+	return installer.Install(ctx, eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
 }
 
 func (r *reconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {
