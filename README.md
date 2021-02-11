@@ -33,6 +33,7 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 
 ## Blogs and Presentations
 
+* [Automation of Everything - How To Combine Argo Events, Workflows & Pipelines, CD, and Rollouts](https://youtu.be/XNXJtxkUKeY)
 * [Argo Events - Event-Based Dependency Manager for Kubernetes](https://youtu.be/sUPkGChvD54)
 * [Argo Events Deep-dive](https://youtu.be/U4tCYcCK20w)
 * [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)

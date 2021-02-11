@@ -63,6 +63,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 
 ## Community Blogs and Presentations
 
+* [Automation of Everything - How To Combine Argo Events, Workflows & Pipelines, CD, and Rollouts](https://youtu.be/XNXJtxkUKeY)
 * [Argo Events - Event-Based Dependency Manager for Kubernetes](https://youtu.be/sUPkGChvD54)
 * [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
 * [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
