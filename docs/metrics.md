@@ -113,7 +113,7 @@ of monitoring your applictions running with Argo Events.
 
 - Latency
 
-TBD.
+  - TBD.
 
 - Traffic
 
@@ -127,4 +127,4 @@ TBD.
 
 - Saturation
 
-TBD.
+  - TBD.
