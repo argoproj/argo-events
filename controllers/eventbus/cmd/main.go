@@ -21,6 +21,8 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/eventbus"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 const (
@@ -76,6 +78,16 @@ func main() {
 	err = v1alpha1.AddToScheme(mgr.GetScheme())
 	if err != nil {
 		logger.Fatalw("unable to add scheme", zap.Error(err))
+	}
+
+	err = eventsourcev1alpha1.AddToScheme(mgr.GetScheme())
+	if err != nil {
+		logger.Fatalw("unable to add EventSource scheme", zap.Error(err))
+	}
+
+	err = sensorv1alpha1.AddToScheme(mgr.GetScheme())
+	if err != nil {
+		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
 	// A controller with DefaultControllerRateLimiter

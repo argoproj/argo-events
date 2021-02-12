@@ -64,10 +64,6 @@ func main() {
 	if err != nil {
 		logger.Fatalw("unable to get a controller-runtime manager", zap.Error(err))
 	}
-	err = v1alpha1.AddToScheme(mgr.GetScheme())
-	if err != nil {
-		logger.Fatalw("unable to add EventSource scheme", zap.Error(err))
-	}
 
 	// Readyness probe
 	err = mgr.AddReadyzCheck("readiness", healthz.Ping)
@@ -79,6 +75,11 @@ func main() {
 	err = mgr.AddHealthzCheck("liveness", healthz.Ping)
 	if err != nil {
 		logger.Fatalw("unable add a health check", zap.Error(err))
+	}
+
+	err = v1alpha1.AddToScheme(mgr.GetScheme())
+	if err != nil {
+		logger.Fatalw("unable to add EventSource scheme", zap.Error(err))
 	}
 
 	err = eventbusv1alpha1.AddToScheme(mgr.GetScheme())
