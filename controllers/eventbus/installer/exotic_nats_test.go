@@ -46,7 +46,7 @@ func TestInstallationExotic(t *testing.T) {
 	})
 }
 
-func TestUNinstallationExotic(t *testing.T) {
+func TestUninstallationExotic(t *testing.T) {
 	t.Run("uninstallation with exotic nats config", func(t *testing.T) {
 		installer := NewExoticNATSInstaller(testExoticBus, logging.NewArgoEventsLogger())
 		err := installer.Uninstall(context.TODO())
