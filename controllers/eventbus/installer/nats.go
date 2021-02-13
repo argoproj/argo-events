@@ -64,12 +64,11 @@ func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, streami
 }
 
 // Install creats a StatefulSet and a Service for NATS
-func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
+func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error) {
 	natsObj := i.eventBus.Spec.NATS
 	if natsObj == nil || natsObj.Native == nil {
 		return nil, errors.New("invalid request")
 	}
-	ctx := context.Background()
 
 	svc, err := i.createStanService(ctx)
 	if err != nil {
@@ -118,13 +117,12 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 }
 
 // Uninstall deletes those objects not handeled by cascade deletion.
-func (i *natsInstaller) Uninstall() error {
-	ctx := context.Background()
+func (i *natsInstaller) Uninstall(ctx context.Context) error {
 	return i.uninstallPVCs(ctx)
 }
 
 func (i *natsInstaller) uninstallPVCs(ctx context.Context) error {
-	// StatefulSet doens't clean up PVC, needs to do it separately
+	// StatefulSet doesn't clean up PVC, needs to do it separately
 	// https://github.com/kubernetes/kubernetes/issues/55045
 	log := i.logger
 	pvcs, err := i.getPVCs(ctx, i.labels)

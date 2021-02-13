@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"context"
 	"errors"
 
 	"go.uber.org/zap"
@@ -23,7 +24,7 @@ func NewExoticNATSInstaller(eventBus *v1alpha1.EventBus, logger *zap.SugaredLogg
 	}
 }
 
-func (i *exoticNATSInstaller) Install() (*v1alpha1.BusConfig, error) {
+func (i *exoticNATSInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error) {
 	natsObj := i.eventBus.Spec.NATS
 	if natsObj == nil || natsObj.Exotic == nil {
 		return nil, errors.New("invalid request")
@@ -37,7 +38,7 @@ func (i *exoticNATSInstaller) Install() (*v1alpha1.BusConfig, error) {
 	return busConfig, nil
 }
 
-func (i *exoticNATSInstaller) Uninstall() error {
+func (i *exoticNATSInstaller) Uninstall(ctx context.Context) error {
 	i.logger.Info("nothing to uninstall")
 	return nil
 }
