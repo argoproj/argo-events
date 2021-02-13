@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,17 +39,17 @@ var (
 func TestInstallationExotic(t *testing.T) {
 	t.Run("installation with exotic nats config", func(t *testing.T) {
 		installer := NewExoticNATSInstaller(testExoticBus, logging.NewArgoEventsLogger())
-		conf, err := installer.Install()
+		conf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, conf.NATS)
 		assert.Equal(t, conf.NATS.URL, testExoticURL)
 	})
 }
 
-func TestUNinstallationExotic(t *testing.T) {
+func TestUninstallationExotic(t *testing.T) {
 	t.Run("uninstallation with exotic nats config", func(t *testing.T) {
 		installer := NewExoticNATSInstaller(testExoticBus, logging.NewArgoEventsLogger())
-		err := installer.Uninstall()
+		err := installer.Uninstall(context.TODO())
 		assert.NoError(t, err)
 	})
 }

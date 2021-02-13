@@ -23,6 +23,8 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/eventbus"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 const (
@@ -64,20 +66,25 @@ func main() {
 	}
 
 	// Readyness probe
-	err = mgr.AddReadyzCheck("readiness", healthz.Ping)
-	if err != nil {
+	if err := mgr.AddReadyzCheck("readiness", healthz.Ping); err != nil {
 		logger.Fatalw("unable add a readiness check", zap.Error(err))
 	}
 
 	// Liveness probe
-	err = mgr.AddHealthzCheck("liveness", healthz.Ping)
-	if err != nil {
+	if err := mgr.AddHealthzCheck("liveness", healthz.Ping); err != nil {
 		logger.Fatalw("unable add a health check", zap.Error(err))
 	}
 
-	err = v1alpha1.AddToScheme(mgr.GetScheme())
-	if err != nil {
+	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("unable to add scheme", zap.Error(err))
+	}
+
+	if err := eventsourcev1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		logger.Fatalw("unable to add EventSource scheme", zap.Error(err))
+	}
+
+	if err := sensorv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
 	// A controller with DefaultControllerRateLimiter

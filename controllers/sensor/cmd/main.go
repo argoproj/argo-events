@@ -83,25 +83,23 @@ func main() {
 	}
 
 	// Readyness probe
-	err = mgr.AddReadyzCheck("readiness", healthz.Ping)
-	if err != nil {
+	if err := mgr.AddReadyzCheck("readiness", healthz.Ping); err != nil {
 		logger.Fatalw("unable add a readiness check", zap.Error(err))
 	}
 
 	// Liveness probe
-	err = mgr.AddHealthzCheck("liveness", healthz.Ping)
-	if err != nil {
+	if err := mgr.AddHealthzCheck("liveness", healthz.Ping); err != nil {
 		logger.Fatalw("unable add a health check", zap.Error(err))
 	}
 
-	err = v1alpha1.AddToScheme(mgr.GetScheme())
-	if err != nil {
+	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
-	err = eventbusv1alpha1.AddToScheme(mgr.GetScheme())
-	if err != nil {
+
+	if err := eventbusv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("uunable to add EventBus scheme", zap.Error(err))
 	}
+
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(sensor.ControllerName, mgr, controller.Options{
 		Reconciler: sensor.NewReconciler(mgr.GetClient(), mgr.GetScheme(), sensorImage, logger),

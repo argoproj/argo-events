@@ -118,7 +118,7 @@ func TestBadInstallation(t *testing.T) {
 			labels:         testLabels,
 			logger:         logging.NewArgoEventsLogger(),
 		}
-		_, err := installer.Install()
+		_, err := installer.Install(context.TODO())
 		assert.Error(t, err)
 	})
 }
@@ -127,7 +127,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
 		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
-		busconf, err := installer.Install()
+		busconf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
 		assert.NotEmpty(t, busconf.NATS.URL)
@@ -176,7 +176,7 @@ func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
 		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
-		busconf, err := installer.Install()
+		busconf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
 		assert.NotEmpty(t, busconf.NATS.URL)

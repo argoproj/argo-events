@@ -1,31 +1,34 @@
 package installer
 
 import (
-	"errors"
+	"context"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // Installer is an interface for event bus installation
 type Installer interface {
-	Install() (*v1alpha1.BusConfig, error)
+	Install(ctx context.Context) (*v1alpha1.BusConfig, error)
 	// Uninsall only needs to handle those resources not cascade deleted.
 	// For example, undeleted PVCs not automatically deleted when deleting a StatefulSet
-	Uninstall() error
+	Uninstall(ctx context.Context) error
 }
 
 // Install function installs the event bus
-func Install(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) error {
+func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) error {
 	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
 		logger.Desugar().Error("failed to an installer", zap.Error(err))
 		return err
 	}
-	busConfig, err := installer.Install()
+	busConfig, err := installer.Install(ctx)
 	if err != nil {
 		logger.Desugar().Error("installation error", zap.Error(err))
 		return err
@@ -54,16 +57,77 @@ func getLabels(bus *v1alpha1.EventBus) map[string]string {
 	}
 }
 
-// Uninstall function uninstalls the extra resources who were not cleaned up
-// when an eventbus was deleted. Most of the time this is not needed as all
+// Uninstall function will be run before the EventBus object is deleted,
+// usually it could be used to uninstall the extra resources who would not be cleaned
+// up when an EventBus is deleted. Most of the time this is not needed as all
 // the dependency resources should have been deleted by owner references cascade
 // deletion, but things like PVC created by StatefulSet need to be cleaned up
 // separately.
-func Uninstall(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) error {
+//
+// It could also be used to check if the EventBus object can be safely deleted.
+func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) error {
+	linkedEventSources, err := linkedEventSources(ctx, eventBus.Namespace, eventBus.Name, client)
+	if err != nil {
+		logger.Errorw("failed to query linked EventSources", zap.Error(err))
+		return errors.Wrap(err, "failed to check if there is any EventSource linked")
+	}
+	if linkedEventSources > 0 {
+		return errors.Errorf("Can not delete an EventBus with %v EventSources connected", linkedEventSources)
+	}
+
+	linkedSensors, err := linkedSensors(ctx, eventBus.Namespace, eventBus.Name, client)
+	if err != nil {
+		logger.Errorw("failed to query linked Sensors", zap.Error(err))
+		return errors.Wrap(err, "failed to check if there is any Sensor linked")
+	}
+	if linkedSensors > 0 {
+		return errors.Errorf("Can not delete an EventBus with %v Sensors connected", linkedSensors)
+	}
+
 	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
 		logger.Desugar().Error("failed to get an installer", zap.Error(err))
 		return err
 	}
-	return installer.Uninstall()
+	return installer.Uninstall(ctx)
+}
+
+func linkedEventSources(ctx context.Context, namespace, eventBusName string, c client.Client) (int, error) {
+	esl := &eventsourcev1alpha1.EventSourceList{}
+	if err := c.List(ctx, esl, &client.ListOptions{
+		Namespace: namespace,
+	}); err != nil {
+		return 0, err
+	}
+	result := 0
+	for _, es := range esl.Items {
+		ebName := es.Spec.EventBusName
+		if ebName == "" {
+			ebName = common.DefaultEventBusName
+		}
+		if ebName == eventBusName {
+			result++
+		}
+	}
+	return result, nil
+}
+
+func linkedSensors(ctx context.Context, namespace, eventBusName string, c client.Client) (int, error) {
+	sl := &sensorv1alpha1.SensorList{}
+	if err := c.List(ctx, sl, &client.ListOptions{
+		Namespace: namespace,
+	}); err != nil {
+		return 0, err
+	}
+	result := 0
+	for _, s := range sl.Items {
+		sName := s.Spec.EventBusName
+		if sName == "" {
+			sName = common.DefaultEventBusName
+		}
+		if sName == eventBusName {
+			result++
+		}
+	}
+	return result, nil
 }
