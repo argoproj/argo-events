@@ -1,0 +1,101 @@
+package fixtures
+
+import (
+	"io/ioutil"
+	"strings"
+	"testing"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/yaml"
+
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
+	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
+	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
+)
+
+type Given struct {
+	t                 *testing.T
+	eventBusClient    eventbuspkg.EventBusInterface
+	eventSourceClient eventsourcepkg.EventSourceInterface
+	sensorClient      sensorpkg.SensorInterface
+	eventBus          *eventbusv1alpha1.EventBus
+	eventSource       *eventsourcev1alpha1.EventSource
+	sensor            *sensorv1alpha1.Sensor
+	kubeClient        kubernetes.Interface
+}
+
+// creates an EventBus based on the parameter, this may be:
+//
+// 1. A file name if it starts with "@"
+// 2. Raw YAML.
+func (g *Given) EventBus(text string) *Given {
+	g.t.Helper()
+	g.eventBus = &eventbusv1alpha1.EventBus{}
+	g.readResource(text, g.eventBus)
+	return g
+}
+
+// creates an EventSource based on the parameter, this may be:
+//
+// 1. A file name if it starts with "@"
+// 2. Raw YAML.
+func (g *Given) EventSource(text string) *Given {
+	g.t.Helper()
+	g.eventSource = &eventsourcev1alpha1.EventSource{}
+	g.readResource(text, g.eventSource)
+	return g
+}
+
+// creates a Sensor based on the parameter, this may be:
+//
+// 1. A file name if it starts with "@"
+// 2. Raw YAML.
+func (g *Given) Sensor(text string) *Given {
+	g.t.Helper()
+	g.sensor = &sensorv1alpha1.Sensor{}
+	g.readResource(text, g.sensor)
+	return g
+}
+
+func (g *Given) readResource(text string, v metav1.Object) {
+	g.t.Helper()
+	var file string
+	if strings.HasPrefix(text, "@") {
+		file = strings.TrimPrefix(text, "@")
+	} else {
+		f, err := ioutil.TempFile("", "argo-events-e2e")
+		if err != nil {
+			g.t.Fatal(err)
+		}
+		_, err = f.Write([]byte(text))
+		if err != nil {
+			g.t.Fatal(err)
+		}
+		err = f.Close()
+		if err != nil {
+			g.t.Fatal(err)
+		}
+		file = f.Name()
+	}
+
+	f, err := ioutil.ReadFile(file)
+	if err != nil {
+		g.t.Fatal(err)
+	}
+	err = yaml.Unmarshal(f, v)
+	if err != nil {
+		g.t.Fatal(err)
+	}
+	g.checkLabels(v)
+}
+
+func (g *Given) checkLabels(m metav1.Object) {
+	g.t.Helper()
+	if m.GetLabels()[Label] == "" {
+		g.t.Fatalf("%s%s does not have %s label", m.GetName(), m.GetGenerateName(), Label)
+	}
+}
