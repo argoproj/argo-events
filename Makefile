@@ -168,6 +168,9 @@ events-webhook-image: dist/events-webhook-linux-amd64
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
+test-functional:
+	go test -v -timeout 5m -count 1 --tags functional -p 1 ./test/e2e
+
 coverage:
 	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/)
 	go tool cover -func=profile.cov

@@ -36,6 +36,13 @@ func (g *Given) EventBus(text string) *Given {
 	g.t.Helper()
 	g.eventBus = &eventbusv1alpha1.EventBus{}
 	g.readResource(text, g.eventBus)
+	l := g.eventBus.GetLabels()
+	if l == nil {
+		l = map[string]string{}
+	}
+	l[Label] = "true"
+	g.eventBus.SetLabels(l)
+	g.eventBus.SetName(EventBusName)
 	return g
 }
 
@@ -47,6 +54,13 @@ func (g *Given) EventSource(text string) *Given {
 	g.t.Helper()
 	g.eventSource = &eventsourcev1alpha1.EventSource{}
 	g.readResource(text, g.eventSource)
+	l := g.eventSource.GetLabels()
+	if l == nil {
+		l = map[string]string{}
+	}
+	l[Label] = "true"
+	g.eventSource.SetLabels(l)
+	g.eventSource.Spec.EventBusName = EventBusName
 	return g
 }
 
@@ -58,6 +72,13 @@ func (g *Given) Sensor(text string) *Given {
 	g.t.Helper()
 	g.sensor = &sensorv1alpha1.Sensor{}
 	g.readResource(text, g.sensor)
+	l := g.sensor.GetLabels()
+	if l == nil {
+		l = map[string]string{}
+	}
+	l[Label] = "true"
+	g.sensor.SetLabels(l)
+	g.sensor.Spec.EventBusName = EventBusName
 	return g
 }
 
@@ -90,12 +111,17 @@ func (g *Given) readResource(text string, v metav1.Object) {
 	if err != nil {
 		g.t.Fatal(err)
 	}
-	g.checkLabels(v)
 }
 
-func (g *Given) checkLabels(m metav1.Object) {
-	g.t.Helper()
-	if m.GetLabels()[Label] == "" {
-		g.t.Fatalf("%s%s does not have %s label", m.GetName(), m.GetGenerateName(), Label)
+func (g *Given) When() *When {
+	return &When{
+		t:                 g.t,
+		eventBusClient:    g.eventBusClient,
+		eventSourceClient: g.eventSourceClient,
+		sensorClient:      g.sensorClient,
+		eventBus:          g.eventBus,
+		eventSource:       g.eventSource,
+		sensor:            g.sensor,
+		kubeClient:        g.kubeClient,
 	}
 }
