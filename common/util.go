@@ -213,44 +213,65 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 
 	var caCertPath, clientCertPath, clientKeyPath string
 	var err error
-	switch {
-	case config.CACertSecret != nil && config.ClientCertSecret != nil && config.ClientKeySecret != nil:
+	if config.CACertSecret != nil {
 		caCertPath, err = GetSecretVolumePath(config.CACertSecret)
 		if err != nil {
 			return nil, err
 		}
+	} else if config.DeprecatedCACertPath != "" {
+		// DEPRECATED.
+		caCertPath = config.DeprecatedCACertPath
+	}
+
+	if config.ClientCertSecret != nil {
 		clientCertPath, err = GetSecretVolumePath(config.ClientCertSecret)
 		if err != nil {
 			return nil, err
 		}
+	} else if config.DeprecatedClientCertPath != "" {
+		// DEPRECATED.
+		clientCertPath = config.DeprecatedClientCertPath
+	}
+
+	if config.ClientKeySecret != nil {
 		clientKeyPath, err = GetSecretVolumePath(config.ClientKeySecret)
 		if err != nil {
 			return nil, err
 		}
-	case config.DeprecatedCACertPath != "" && config.DeprecatedClientCertPath != "" && config.DeprecatedClientKeyPath != "":
+	} else if config.DeprecatedClientKeyPath != "" {
 		// DEPRECATED.
-		caCertPath = config.DeprecatedCACertPath
-		clientCertPath = config.DeprecatedClientCertPath
 		clientKeyPath = config.DeprecatedClientKeyPath
-	default:
-		return nil, errors.New("invalid tls config, please configure caCertSecret, clientCertSecret and clientKeySecret")
 	}
 
-	caCert, err := ioutil.ReadFile(caCertPath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read ca cert file %s", caCertPath)
+	if len(caCertPath)+len(clientCertPath)+len(clientKeyPath) == 0 {
+		// None of 3 is configured
+		return nil, errors.New("invalid tls config, neither of caCertSecret, clientCertSecret and clientKeySecret is configured")
 	}
-	pool := x509.NewCertPool()
-	pool.AppendCertsFromPEM(caCert)
 
-	clientCert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to load client cert key pair %s", caCertPath)
+	if len(clientCertPath)+len(clientKeyPath) > 0 && len(clientCertPath)*len(clientKeyPath) == 0 {
+		// Only one of clientCertSecret and clientKeySecret is configured
+		return nil, errors.New("invalid tls config, both of clientCertSecret and clientKeySecret need to be configured")
 	}
-	return &tls.Config{
-		RootCAs:      pool,
-		Certificates: []tls.Certificate{clientCert},
-	}, nil
+
+	c := &tls.Config{}
+	if len(caCertPath) > 0 {
+		caCert, err := ioutil.ReadFile(caCertPath)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to read ca cert file %s", caCertPath)
+		}
+		pool := x509.NewCertPool()
+		pool.AppendCertsFromPEM(caCert)
+		c.RootCAs = pool
+	}
+
+	if len(clientCertPath) > 0 && len(clientKeyPath) > 0 {
+		clientCert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to load client cert key pair %s", caCertPath)
+		}
+		c.Certificates = []tls.Certificate{clientCert}
+	}
+	return c, nil
 }
 
 // VolumesFromSecretsOrConfigMaps builds volumes and volumeMounts spec based on
