@@ -210,7 +210,7 @@ statefulSetWatch:
 			p, ok := event.Object.(*corev1.Pod)
 			if ok {
 				if p.Status.Phase == corev1.PodRunning {
-					if _, ok := podNames[p.GetName()]; !ok {
+					if _, existing := podNames[p.GetName()]; !existing {
 						podNames[p.GetName()] = true
 					}
 				}

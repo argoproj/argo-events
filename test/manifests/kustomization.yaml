@@ -5,5 +5,7 @@ resources:
   - ../../manifests/namespace-install
   - ../../examples/eventbus/native.yaml
 
+namespace: argo-events
+
 commonLabels:
   "app.kubernetes.io/part-of": "argo-events"

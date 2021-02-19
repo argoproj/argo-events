@@ -43,10 +43,11 @@ func (t *Then) ExpectEventBusDeleted() *Then {
 func (t *Then) ExpectEventSourcePodLogContains(regex string) *Then {
 	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", t.eventSource.Name)
 	ctx := context.Background()
-	podName, err := podNameByLabelSelectors(ctx, t.kubeClient, Namespace, labelSelector)
+	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
 		t.t.Fatalf("error getting event source pod name: %v", err)
 	}
+	podName := podList.Items[0].GetName()
 	t.t.Logf("EventSource POD name: %s", podName)
 	timeout := defaultTimeout
 	cctx, cancel := context.WithTimeout(ctx, timeout)
@@ -64,10 +65,11 @@ func (t *Then) ExpectEventSourcePodLogContains(regex string) *Then {
 func (t *Then) ExpectSensorPodLogContains(regex string) *Then {
 	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", t.sensor.Name)
 	ctx := context.Background()
-	podName, err := podNameByLabelSelectors(ctx, t.kubeClient, Namespace, labelSelector)
+	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
-		t.t.Fatalf("error getting sensor pod name: %v", err)
+		t.t.Fatalf("error getting event source pod name: %v", err)
 	}
+	podName := podList.Items[0].GetName()
 	t.t.Logf("Sensor POD name: %s", podName)
 	timeout := defaultTimeout
 	cctx, cancel := context.WithTimeout(ctx, timeout)

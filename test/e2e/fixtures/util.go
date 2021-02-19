@@ -2,15 +2,11 @@ package fixtures
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 func Exec(name string, args ...string) (string, error) {
@@ -46,13 +42,4 @@ func runWithTimeout(cmd *exec.Cmd) (string, error) {
 	case err := <-done:
 		return buf.String(), err
 	}
-}
-
-func podNameByLabelSelectors(ctx context.Context, client kubernetes.Interface, namespace, labelSelector string) (string, error) {
-	opts := metav1.ListOptions{LabelSelector: labelSelector}
-	l, err := client.CoreV1().Pods(Namespace).List(ctx, opts)
-	if err != nil {
-		return "", err
-	}
-	return l.Items[0].GetName(), nil
 }
