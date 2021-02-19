@@ -26,12 +26,12 @@ import (
 const (
 	Namespace      = "argo-events"
 	Label          = "argo-events-e2e"
+	LabelValue     = "true"
 	EventBusName   = "argo-events-e2e"
 	defaultTimeout = 60 * time.Second
 )
 
 var (
-	foreground = metav1.DeletePropagationForeground
 	background = metav1.DeletePropagationBackground
 
 	e2eEventBus = `apiVersion: argoproj.io/v1alpha1

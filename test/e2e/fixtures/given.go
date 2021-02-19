@@ -40,7 +40,7 @@ func (g *Given) EventBus(text string) *Given {
 	if l == nil {
 		l = map[string]string{}
 	}
-	l[Label] = "true"
+	l[Label] = LabelValue
 	g.eventBus.SetLabels(l)
 	g.eventBus.SetName(EventBusName)
 	return g
@@ -58,7 +58,7 @@ func (g *Given) EventSource(text string) *Given {
 	if l == nil {
 		l = map[string]string{}
 	}
-	l[Label] = "true"
+	l[Label] = LabelValue
 	g.eventSource.SetLabels(l)
 	g.eventSource.Spec.EventBusName = EventBusName
 	return g
@@ -76,7 +76,7 @@ func (g *Given) Sensor(text string) *Given {
 	if l == nil {
 		l = map[string]string{}
 	}
-	l[Label] = "true"
+	l[Label] = LabelValue
 	g.sensor.SetLabels(l)
 	g.sensor.Spec.EventBusName = EventBusName
 	return g
