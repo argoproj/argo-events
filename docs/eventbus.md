@@ -50,6 +50,7 @@ persistent volumes, the StatefulSet PODs will be created with anti-affinity
 rule.
 
 ```yaml
+apiVersion: argoproj.io/v1alpha1
 kind: EventBus
 metadata:
   name: default
