@@ -136,7 +136,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	}
 	// Only join if not joined? Maybe a join API call is easier.
 	// Not applicable for private channels since bot cannot join private channels
-	if isPrivateChannel != true {
+	if !isPrivateChannel {
 		c, _, _, err := api.JoinConversation(channelID)
 		t.Logger.Debug("successfully joined channel", zap.Any("channel", c))
 		if err != nil {
