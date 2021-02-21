@@ -15,6 +15,262 @@ spec:
   scope: Namespaced
   versions:
   - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              nats:
+                properties:
+                  exotic:
+                    properties:
+                      accessSecret:
+                        properties:
+                          key:
+                            type: string
+                          name:
+                            type: string
+                          optional:
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                      auth:
+                        type: string
+                      clusterID:
+                        type: string
+                      url:
+                        type: string
+                    type: object
+                  native:
+                    properties:
+                      antiAffinity:
+                        type: boolean
+                      auth:
+                        type: string
+                      containerTemplate:
+                        properties:
+                          resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                        type: object
+                      imagePullSecrets:
+                        items:
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                        type: array
+                      maxAge:
+                        type: string
+                      metadata:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          labels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                      metricsContainerTemplate:
+                        properties:
+                          resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      persistence:
+                        properties:
+                          accessMode:
+                            type: string
+                          storageClassName:
+                            type: string
+                          volumeSize:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                      securityContext:
+                        properties:
+                          fsGroup:
+                            format: int64
+                            type: integer
+                          fsGroupChangePolicy:
+                            type: string
+                          runAsGroup:
+                            format: int64
+                            type: integer
+                          runAsNonRoot:
+                            type: boolean
+                          runAsUser:
+                            format: int64
+                            type: integer
+                          seLinuxOptions:
+                            properties:
+                              level:
+                                type: string
+                              role:
+                                type: string
+                              type:
+                                type: string
+                              user:
+                                type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
+                            type: object
+                          supplementalGroups:
+                            items:
+                              format: int64
+                              type: integer
+                            type: array
+                          sysctls:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                          windowsOptions:
+                            properties:
+                              gmsaCredentialSpec:
+                                type: string
+                              gmsaCredentialSpecName:
+                                type: string
+                              runAsUserName:
+                                type: string
+                            type: object
+                        type: object
+                      serviceAccountName:
+                        type: string
+                      tolerations:
+                        items:
+                          properties:
+                            effect:
+                              type: string
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            tolerationSeconds:
+                              format: int64
+                              type: integer
+                            value:
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                type: object
+            type: object
+          status:
+            properties:
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              config:
+                properties:
+                  nats:
+                    properties:
+                      accessSecret:
+                        properties:
+                          key:
+                            type: string
+                          name:
+                            type: string
+                          optional:
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                      auth:
+                        type: string
+                      clusterID:
+                        type: string
+                      url:
+                        type: string
+                    type: object
+                type: object
+            type: object
+        required:
+        - metadata
+        - spec
+        - status
+        type: object
     served: true
     storage: true
     subresources:

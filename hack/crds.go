@@ -22,10 +22,10 @@ func cleanCRD(filename string) {
 	delete(metadata, "creationTimestamp")
 	spec := crd["spec"].(map[string]interface{})
 	delete(spec, "validation")
-	for _, v := range spec["versions"].([]interface{}) {
-		v1 := v.(map[string]interface{})
-		delete(v1, "schema")
-	}
+	//for _, v := range spec["versions"].([]interface{}) {
+	//	v1 := v.(map[string]interface{})
+	//	delete(v1, "schema")
+	//}
 	data, err = yaml.Marshal(crd)
 	if err != nil {
 		panic(err)
