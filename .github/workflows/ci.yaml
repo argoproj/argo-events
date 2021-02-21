@@ -100,8 +100,6 @@ jobs:
           echo /usr/local/bin >> $GITHUB_PATH
       - name: Install and start K3S v1.18.8+k3s1
         run: curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.18.8+k3s1 INSTALL_K3S_CHANNEL=stable INSTALL_K3S_EXEC=--docker K3S_KUBECONFIG_MODE=644 sh - &
-      - name: Install K3D
-        run: curl -sfL https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=v4.2.0 bash &
       - name: Create Kubeconfig
         run: |
           mkdir -p ~/.kube
@@ -112,7 +110,7 @@ jobs:
           GOPATH: /home/runner/go
         run: |
           git fetch --tags
-          KUBECONFIG=~/.kube/config make start K3D=true
+          KUBECONFIG=~/.kube/config make start K3D=false
       - name: Run tests
         env:
           GOPATH: /home/runner/go
