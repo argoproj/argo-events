@@ -23,12 +23,14 @@ const (
 
 // Metrics represents EventSource metrics information
 type Metrics struct {
-	namespace            string
-	runningEventServices *prometheus.GaugeVec
-	eventsSent           *prometheus.CounterVec
-	eventsSentFailed     *prometheus.CounterVec
-	actionTriggered      *prometheus.CounterVec
-	actionFailed         *prometheus.CounterVec
+	namespace               string
+	runningEventServices    *prometheus.GaugeVec
+	eventsSent              *prometheus.CounterVec
+	eventsSentFailed        *prometheus.CounterVec
+	eventProcessingDuration *prometheus.SummaryVec
+	actionTriggered         *prometheus.CounterVec
+	actionFailed            *prometheus.CounterVec
+	actionDuration          *prometheus.SummaryVec
 }
 
 // NewMetrics returns a Metrics instance
@@ -59,6 +61,14 @@ func NewMetrics(namespace string) *Metrics {
 				labelNamespace: namespace,
 			},
 		}, []string{labelEventSourceName, labelEventName}),
+		eventProcessingDuration: prometheus.NewSummaryVec(prometheus.SummaryOpts{
+			Namespace: prefix,
+			Name:      "event_processing_duration_milliseconds",
+			Help:      "Summary of durations of event processing. https://argoproj.github.io/argo-events/metrics/#argo_events_event_processing_duration_milliseconds",
+			ConstLabels: prometheus.Labels{
+				labelNamespace: namespace,
+			},
+		}, []string{labelEventSourceName, labelEventName}),
 		actionTriggered: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: prefix,
 			Name:      "action_triggered_total",
@@ -75,6 +85,14 @@ func NewMetrics(namespace string) *Metrics {
 				labelNamespace: namespace,
 			},
 		}, []string{labelSensorName, labelTriggerName}),
+		actionDuration: prometheus.NewSummaryVec(prometheus.SummaryOpts{
+			Namespace: prefix,
+			Name:      "action_duration_milliseconds",
+			Help:      "Summary of durations of trigging actions. https://argoproj.github.io/argo-events/metrics/#argo_events_action_duration_milliseconds",
+			ConstLabels: prometheus.Labels{
+				labelNamespace: namespace,
+			},
+		}, []string{labelSensorName, labelTriggerName}),
 	}
 }
 
@@ -84,6 +102,7 @@ func (m *Metrics) Collect(ch chan<- prometheus.Metric) {
 	m.eventsSentFailed.Collect(ch)
 	m.actionTriggered.Collect(ch)
 	m.actionFailed.Collect(ch)
+	m.actionDuration.Collect(ch)
 }
 
 func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
@@ -92,6 +111,7 @@ func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
 	m.eventsSentFailed.Describe(ch)
 	m.actionTriggered.Describe(ch)
 	m.actionFailed.Describe(ch)
+	m.actionDuration.Describe(ch)
 }
 
 func (m *Metrics) IncRunningServices(eventSourceName string) {
@@ -110,12 +130,20 @@ func (m *Metrics) EventSentFailed(eventSourceName, eventName string) {
 	m.eventsSentFailed.WithLabelValues(eventSourceName, eventName).Inc()
 }
 
+func (m *Metrics) EventProcessingDuration(eventSourceName, eventName string, num float64) {
+	m.eventProcessingDuration.WithLabelValues(eventSourceName, eventName).Observe(num)
+}
+
 func (m *Metrics) ActionTriggered(sensorName, triggerName string) {
 	m.actionTriggered.WithLabelValues(sensorName, triggerName).Inc()
 }
 
 func (m *Metrics) ActionFailed(sensorName, triggerName string) {
 	m.actionFailed.WithLabelValues(sensorName, triggerName).Inc()
+}
+
+func (m *Metrics) ActionDuration(sensorName, triggerName string, num float64) {
+	m.actionDuration.WithLabelValues(sensorName, triggerName).Observe(num)
 }
 
 // Run starts a metrics server

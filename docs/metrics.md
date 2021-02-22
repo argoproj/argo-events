@@ -64,6 +64,11 @@ How many events have been sent successfully.
 
 How many events failed to send.
 
+#### argo_events_event_processing_duration_milliseconds
+
+Event processing duration (from getting the event to send it to EventBus) in
+minlliseconds - TBD.
+
 ### Sensor
 
 #### argo_events_action_triggered_total
@@ -72,7 +77,11 @@ How many actions have been triggered successfully.
 
 #### argo_events_action_failed_total
 
-How many actions failed
+How many actions failed.
+
+#### argo_events_action_duration_milliseconds
+
+Action triggering duration.
 
 ### EventBus
 
@@ -113,7 +122,8 @@ of monitoring your applictions running with Argo Events.
 
 - Latency
 
-  - TBD.
+  - `argo_events_event_processing_duration_milliseconds`
+  - `argo_events_action_duration_milliseconds`
 
 - Traffic
 
@@ -127,4 +137,5 @@ of monitoring your applictions running with Argo Events.
 
 - Saturation
 
-  - TBD.
+  - `argo_events_event_service_running_total`.
+  - Other Kubernetes metrics such as CPU or memory.
