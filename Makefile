@@ -32,7 +32,7 @@ ifneq (${GIT_TAG},)
 VERSION=$(GIT_TAG)
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
-
+VERSION=v1.4.4
 # Build the project images
 .DELETE_ON_ERROR:
 all: sensor sensor-controller eventbus-controller eventsource-controller eventsource events-webhook
