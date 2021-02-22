@@ -9,16 +9,16 @@ GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
 GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ; else echo "dirty"; fi)
 
+#  docker image publishing options
+DOCKER_PUSH?=false
+IMAGE_NAMESPACE?=argoproj
+VERSION?=latest
+
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
   -X ${PACKAGE}.buildDate=${BUILD_DATE} \
   -X ${PACKAGE}.gitCommit=${GIT_COMMIT} \
   -X ${PACKAGE}.gitTreeState=${GIT_TREE_STATE}
-
-#  docker image publishing options
-DOCKER_PUSH?=false
-IMAGE_NAMESPACE?=argoproj
-VERSION?=latest
 
 K3D?=false
 
@@ -32,7 +32,7 @@ ifneq (${GIT_TAG},)
 VERSION=$(GIT_TAG)
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
-VERSION=v1.4.4
+
 # Build the project images
 .DELETE_ON_ERROR:
 all: sensor sensor-controller eventbus-controller eventsource-controller eventsource events-webhook
