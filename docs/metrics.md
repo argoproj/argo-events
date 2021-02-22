@@ -67,7 +67,7 @@ How many events failed to send.
 #### argo_events_event_processing_duration_milliseconds
 
 Event processing duration (from getting the event to send it to EventBus) in
-minlliseconds - TBD.
+milliseconds - TBD.
 
 ### Sensor
 
