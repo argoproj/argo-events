@@ -114,5 +114,5 @@ jobs:
       - name: Run tests
         env:
           GOPATH: /home/runner/go
-        run: KUBECONFIG=~/.kube/config make test-functional
+        run: KUBECONFIG=~/.kube/config VERSION=v1.4.4 make test-functional
 
