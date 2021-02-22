@@ -4,7 +4,6 @@ DIST_DIR=${CURRENT_DIR}/dist
 
 DOCKERFILE:=Dockerfile
 
-VERSION:=latest
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
@@ -19,7 +18,7 @@ override LDFLAGS += \
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=latest
+VERSION?=latest
 
 K3D?=false
 
@@ -31,7 +30,6 @@ endif
 
 ifneq (${GIT_TAG},)
 VERSION=$(GIT_TAG)
-IMAGE_TAG=${GIT_TAG}
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
 
@@ -62,9 +60,9 @@ dist/eventsource-controller-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource-controller ./controllers/eventsource/cmd
 
 eventsource-controller-image: dist/eventsource-controller-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource-controller:$(IMAGE_TAG)  --target eventsource-controller -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventsource-controller:$(IMAGE_TAG); fi
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource-controller:$(IMAGE_TAG); fi
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION)  --target eventsource-controller -f $(DOCKERFILE) .
+	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION); fi
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION); fi
 
 # EventSource
 .PHONY: eventsource
@@ -83,9 +81,9 @@ dist/eventsource-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
 
 eventsource-image: dist/eventsource-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource:$(IMAGE_TAG)  --target eventsource -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventsource:$(IMAGE_TAG); fi
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource:$(IMAGE_TAG); fi
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource:$(VERSION)  --target eventsource -f $(DOCKERFILE) .
+	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventsource:$(VERSION); fi
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource:$(VERSION); fi
 
 # Sensor controller
 .PHONY: sensor-controller
@@ -104,9 +102,9 @@ dist/sensor-controller-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-controller ./controllers/sensor/cmd
 
 sensor-controller-image: dist/sensor-controller-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor-controller:$(IMAGE_TAG)  --target sensor-controller -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/sensor-controller:$(IMAGE_TAG); fi
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor-controller:$(IMAGE_TAG); fi
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION)  --target sensor-controller -f $(DOCKERFILE) .
+	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION); fi
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION); fi
 
 # Sensor
 .PHONY: sensor
@@ -125,9 +123,9 @@ dist/sensor-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
 
 sensor-image: dist/sensor-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor:$(IMAGE_TAG)  --target sensor -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/sensor:$(IMAGE_TAG); fi
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor:$(IMAGE_TAG); fi
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor:$(VERSION)  --target sensor -f $(DOCKERFILE) .
+	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/sensor:$(VERSION); fi
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor:$(VERSION); fi
 
 # EventBus controller
 .PHONY: eventbus-controller
@@ -146,9 +144,9 @@ dist/eventbus-controller-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventbus-controller ./controllers/eventbus/cmd
 
 eventbus-controller-image: dist/eventbus-controller-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventbus-controller:$(IMAGE_TAG)  --target eventbus-controller -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventbus-controller:$(IMAGE_TAG); fi
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventbus-controller:$(IMAGE_TAG); fi
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION)  --target eventbus-controller -f $(DOCKERFILE) .
+	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION); fi
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION); fi
 
 # Webhook
 .PHONY: events-webhook
@@ -167,9 +165,9 @@ dist/events-webhook-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/events-webhook ./webhook/cmd/main.go
 
 events-webhook-image: dist/events-webhook-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/events-webhook:$(IMAGE_TAG)  --target events-webhook -f $(DOCKERFILE) .
-	if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/events-webhook:$(IMAGE_TAG); fi
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/events-webhook:$(IMAGE_TAG); fi
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/events-webhook:$(VERSION)  --target events-webhook -f $(DOCKERFILE) .
+	if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/events-webhook:$(VERSION); fi
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/events-webhook:$(VERSION); fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
@@ -232,20 +230,20 @@ lint: $(GOPATH)/bin/golangci-lint
 
 .PHONY: quay-release
 quay-release: eventbus-controller-image sensor-controller-image sensor-image eventsource-image eventsource-controller-image
-	docker tag $(IMAGE_NAMESPACE)/eventbus-controller:$(IMAGE_TAG) quay.io/$(IMAGE_NAMESPACE)/eventbus-controller:$(IMAGE_TAG)
-	docker push quay.io/$(IMAGE_NAMESPACE)/eventbus-controller:$(IMAGE_TAG)
+	docker tag $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION)
+	docker push quay.io/$(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION)
 
-	docker tag $(IMAGE_NAMESPACE)/sensor:$(IMAGE_TAG) quay.io/$(IMAGE_NAMESPACE)/sensor:$(IMAGE_TAG)
-	docker push quay.io/$(IMAGE_NAMESPACE)/sensor:$(IMAGE_TAG)
+	docker tag $(IMAGE_NAMESPACE)/sensor:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/sensor:$(VERSION)
+	docker push quay.io/$(IMAGE_NAMESPACE)/sensor:$(VERSION)
 
-	docker tag $(IMAGE_NAMESPACE)/sensor-controller:$(IMAGE_TAG) quay.io/$(IMAGE_NAMESPACE)/sensor-controller:$(IMAGE_TAG)
-	docker push quay.io/$(IMAGE_NAMESPACE)/sensor-controller:$(IMAGE_TAG)
+	docker tag $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/sensor-controller:$(VERSION)
+	docker push quay.io/$(IMAGE_NAMESPACE)/sensor-controller:$(VERSION)
 
-	docker tag $(IMAGE_NAMESPACE)/eventsource-controller:$(IMAGE_TAG) quay.io/$(IMAGE_NAMESPACE)/eventsource-controller:$(IMAGE_TAG)
-	docker push quay.io/$(IMAGE_NAMESPACE)/eventsource-controller:$(IMAGE_TAG)
+	docker tag $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION)
+	docker push quay.io/$(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION)
 
-	docker tag $(IMAGE_NAMESPACE)/eventsource:$(IMAGE_TAG) quay.io/$(IMAGE_NAMESPACE)/eventsource:$(IMAGE_TAG)
-	docker push quay.io/$(IMAGE_NAMESPACE)/eventsource:$(IMAGE_TAG)
+	docker tag $(IMAGE_NAMESPACE)/eventsource:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/eventsource:$(VERSION)
+	docker push quay.io/$(IMAGE_NAMESPACE)/eventsource:$(VERSION)
 
-	docker tag $(IMAGE_NAMESPACE)/events-webhook:$(IMAGE_TAG) quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(IMAGE_TAG)
-	docker push quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(IMAGE_TAG)
+	docker tag $(IMAGE_NAMESPACE)/events-webhook:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(VERSION)
+	docker push quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(VERSION)
