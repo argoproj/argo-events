@@ -92,7 +92,6 @@ func (s *E2ESuite) DeleteResources() {
 	resources := []schema.GroupVersionResource{
 		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
 		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
-		{Group: "argoproj.io", Version: "v1alpha1", Resource: "workflows"},
 	}
 
 	ctx := context.Background()
