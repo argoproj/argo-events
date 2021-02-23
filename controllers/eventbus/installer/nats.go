@@ -663,6 +663,8 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				SecurityContext:    i.eventBus.Spec.NATS.Native.SecurityContext,
 				ImagePullSecrets:   i.eventBus.Spec.NATS.Native.ImagePullSecrets,
 				ServiceAccountName: i.eventBus.Spec.NATS.Native.ServiceAccountName,
+				PriorityClassName:  i.eventBus.Spec.NATS.Native.PriorityClassName,
+				Priority:           i.eventBus.Spec.NATS.Native.Priority,
 				Volumes: []corev1.Volume{
 					{
 						Name: "config-volume",

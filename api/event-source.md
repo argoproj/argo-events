@@ -4400,6 +4400,39 @@ only DockerConfig type secrets are honored. More info:
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>priorityClassName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+If specified, indicates the EventSource pod’s priority.
+“system-node-critical” and “system-cluster-critical” are two special
+keywords which indicate the highest priorities with the former being the
+highest priority. Any other name must be defined by creating a
+PriorityClass object with that name. If not specified, the pod priority
+will be default or zero if there is no default. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>priority</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+The priority value. Various system components use this field to find the
+priority of the EventSource pod. When Priority Admission Controller is
+enabled, it prevents users from setting this field. The admission
+controller populates this field from PriorityClassName. The higher the
+value, the higher the priority. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/</a>
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.WatchPathConfig">

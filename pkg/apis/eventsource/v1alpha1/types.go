@@ -149,6 +149,23 @@ type Template struct {
 	// +patchMergeKey=name
 	// +patchStrategy=merge
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,9,rep,name=imagePullSecrets"`
+	// If specified, indicates the EventSource pod's priority. "system-node-critical"
+	// and "system-cluster-critical" are two special keywords which indicate the
+	// highest priorities with the former being the highest priority. Any other
+	// name must be defined by creating a PriorityClass object with that name.
+	// If not specified, the pod priority will be default or zero if there is no
+	// default.
+	// More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+	// +optional
+	PriorityClassName string `json:"priorityClassName,omitempty" protobuf:"bytes,10,opt,name=priorityClassName"`
+	// The priority value. Various system components use this field to find the
+	// priority of the EventSource pod. When Priority Admission Controller is enabled,
+	// it prevents users from setting this field. The admission controller populates
+	// this field from PriorityClassName.
+	// The higher the value, the higher the priority.
+	// More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+	// +optional
+	Priority *int32 `json:"priority,omitempty" protobuf:"bytes,11,opt,name=priority"`
 }
 
 // Service holds the service information eventsource exposes
