@@ -20,8 +20,6 @@ override LDFLAGS += \
   -X ${PACKAGE}.gitCommit=${GIT_COMMIT} \
   -X ${PACKAGE}.gitTreeState=${GIT_TREE_STATE}
 
-K3D?=false
-
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
 $(error IMAGE_NAMESPACE must be set to push images (e.g. IMAGE_NAMESPACE=argoproj))
@@ -61,7 +59,6 @@ dist/eventsource-controller-%:
 
 eventsource-controller-image: dist/eventsource-controller-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION)  --target eventsource-controller -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION); fi
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION); fi
 
 # EventSource
@@ -82,7 +79,6 @@ dist/eventsource-%:
 
 eventsource-image: dist/eventsource-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource:$(VERSION)  --target eventsource -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventsource:$(VERSION); fi
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource:$(VERSION); fi
 
 # Sensor controller
@@ -103,7 +99,6 @@ dist/sensor-controller-%:
 
 sensor-controller-image: dist/sensor-controller-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION)  --target sensor-controller -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION); fi
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION); fi
 
 # Sensor
@@ -124,7 +119,6 @@ dist/sensor-%:
 
 sensor-image: dist/sensor-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor:$(VERSION)  --target sensor -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/sensor:$(VERSION); fi
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor:$(VERSION); fi
 
 # EventBus controller
@@ -145,7 +139,6 @@ dist/eventbus-controller-%:
 
 eventbus-controller-image: dist/eventbus-controller-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION)  --target eventbus-controller -f $(DOCKERFILE) .
-	@if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION); fi
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION); fi
 
 # Webhook
@@ -166,7 +159,6 @@ dist/events-webhook-%:
 
 events-webhook-image: dist/events-webhook-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/events-webhook:$(VERSION)  --target events-webhook -f $(DOCKERFILE) .
-	if [ "$(K3D)" = "true" ]; then k3d image import $(IMAGE_NAMESPACE)/events-webhook:$(VERSION); fi
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/events-webhook:$(VERSION); fi
 
 test:
