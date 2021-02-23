@@ -112,6 +112,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		Types: []string{"public_channel", "private_channel"},
 	}
 	channelID := ""
+	isPrivateChannel := false
 	for {
 		channels, nextCursor, err := api.GetConversations(params)
 		if err != nil {
@@ -121,6 +122,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		for _, c := range channels {
 			if c.Name == channel {
 				channelID = c.ID
+				isPrivateChannel = c.IsPrivate
 				break
 			}
 		}
@@ -133,11 +135,14 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, errors.Errorf("failed to get channelID of %s", channel)
 	}
 	// Only join if not joined? Maybe a join API call is easier.
-	c, _, _, err := api.JoinConversation(channelID)
-	t.Logger.Debug("successfully joined channel", zap.Any("channel", c))
-	if err != nil {
-		t.Logger.Error("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
-		return nil, errors.Wrapf(err, "failed to join channel %s", channel)
+	// Not applicable for private channels since bot cannot join private channels
+	if !isPrivateChannel {
+		c, _, _, err := api.JoinConversation(channelID)
+		t.Logger.Debug("successfully joined channel", zap.Any("channel", c))
+		if err != nil {
+			t.Logger.Error("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
+			return nil, errors.Wrapf(err, "failed to join channel %s", channel)
+		}
 	}
 
 	t.Logger.Info("posting to channel...", zap.Any("channelName", channel))
