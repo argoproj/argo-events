@@ -103,16 +103,16 @@ jobs:
       - name: Create a cluster and registry
         run: |
           k3d registry create e2e-registry --port 5111
-          k3d cluster create e2e --kubeconfig-update-default --registry-use k3d-e2e-registry:5111
+          k3d cluster create e2e --registry-use k3d-e2e-registry:5111
+          k3d kubeconfig get e2e > ~/.kube/config
           echo '127.0.0.1 k3d-e2e-registry' | sudo tee -a /etc/hosts
       - name: Install Argo Events
         env:
           GOPATH: /home/runner/go
         run: |
-          #git fetch --tags
-          IMAGE_NAMESPACE=k3d-e2e-registry:5111 VERSION=${{ github.sha }} DOCKER_PUSH=true  make start
+          KUBECONFIG=~/.kube/config IMAGE_NAMESPACE=k3d-e2e-registry:5111 VERSION=${{ github.sha }} DOCKER_PUSH=true  make start
       - name: Run tests
         env:
           GOPATH: /home/runner/go
-        run: make test-functional
+        run: KUBECONFIG=~/.kube/config make test-functional
 
