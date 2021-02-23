@@ -102,7 +102,7 @@ jobs:
         run: curl -sfL https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash &
       - name: Create a cluster and registry
         run: |
-          k3d registry create k3d-e2e-registry --port 5111
+          k3d registry create e2e-registry --port 5111
           k3d cluster create e2e --kubeconfig-update-default --registry-use k3d-e2e-registry:5111
       - name: Install Argo Events
         env:
