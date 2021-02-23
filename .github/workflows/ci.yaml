@@ -110,7 +110,7 @@ jobs:
         env:
           GOPATH: /home/runner/go
         run: |
-          KUBECONFIG=~/.kube/argo-events-e2e-config IMAGE_NAMESPACE=k3d-e2e-registry:5111 VERSION=${{ github.sha }} DOCKER_PUSH=true  make start
+          KUBECONFIG=~/.kube/argo-events-e2e-config IMAGE_NAMESPACE=k3d-e2e-registry:5111 VERSION=${{ github.sha }} DOCKER_PUSH=true make start
       - name: Run tests
         env:
           GOPATH: /home/runner/go
