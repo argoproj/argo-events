@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -888,6 +888,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -990,6 +1002,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1081,6 +1105,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1216,7 +1252,7 @@
 <p>GitHub event-source programmatically configures webhooks for projects on GitHub and helps sensor trigger the workloads on events.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>        {
+<div class="codehilite"><pre><span></span><code>        {
             &quot;context&quot;: {
               &quot;type&quot;: &quot;type_of_event_source&quot;,
               &quot;specversion&quot;: &quot;cloud_events_version&quot;,
@@ -1231,11 +1267,11 @@
                 &quot;headers&quot;: &quot;Headers from the Gitlab event&quot;,
             }
         }
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>GitHub event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#githubeventsource">here</a>.</p>
+<p>GitHub event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#githubeventsource">here</a>. <br />
+Example event-source yaml file is <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/github.yaml">here</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
@@ -1244,29 +1280,26 @@
 </li>
 <li>
 <p>Base64 encode your api token key,</p>
-<div class="codehilite"><pre><span></span>echo -n &lt;api-token-key&gt; | base64
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>echo -n &lt;api-token-key&gt; | base64
+</code></pre></div>
 
 </li>
 <li>
 <p>Create a secret called <code>github-access</code>.</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">github</span><span class="o">-</span><span class="n">access</span>
 <span class="n">type</span><span class="o">:</span> <span class="n">Opaque</span>
 <span class="n">data</span><span class="o">:</span>
   <span class="n">token</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy the secret into K8s cluster</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f github-access.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f github-access.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1277,9 +1310,8 @@
 </li>
 <li>
 <p>Create the event source by running the following command. Make sure to replace the <code>url</code> field.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f &lt;event-source-file-updated-in-previous-step&gt;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f &lt;event-source-file-updated-in-previous-step&gt;
+</code></pre></div>
 
 </li>
 <li>
@@ -1288,9 +1320,8 @@
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1371,7 +1402,7 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

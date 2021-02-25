@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -888,6 +888,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -990,6 +1002,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1081,6 +1105,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1216,23 +1252,22 @@
 <p>NATS event-source listens to NATS subject notifications and helps sensor trigger the workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
-        &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;time&quot;: &quot;event_time&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
-        },
-        &quot;data&quot;: {
-          &quot;subject&quot;: &quot;name_of_the_nats_subject&quot;,
-          &quot;body&quot;: &quot;message_payload&quot;
-        }
-    }
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    <span class="p">{</span>
+        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;specversion&quot;</span><span class="p">:</span> <span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_nats_subject&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="s2">&quot;message_payload&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>NATS event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#natseventssource">here</a>.</p>
@@ -1241,7 +1276,7 @@
 <li>Make sure to have NATS cluster deployed in the Kubernetes. If you don't have one already installed, please refer https://github.com/nats-io/nats-operator for details.</li>
 </ol>
 <p>NATS cluster setup for test purposes,</p>
-<div class="codehilite"><pre><span></span>    apiVersion: v1
+<div class="codehilite"><pre><span></span><code>    apiVersion: v1
     kind: Service
     metadata:
       name: nats
@@ -1292,36 +1327,31 @@
                 port: 8222
               initialDelaySeconds: 10
               timeoutSeconds: 5
-</pre></div>
-
+</code></pre></div>
 
 <ol>
 <li>
 <p>Create the event source by running the following command.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nats.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nats.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/nats.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/nats.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>If you are running NATS on local K8s cluster, make sure to <code>port-forward</code> to pod,</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;nats-pod-name&gt; 4222:4222
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;nats-pod-name&gt; 4222:4222
+</code></pre></div>
 
 </li>
 <li>
 <p>Publish a message for the subject specified in the event source. Refer the nats example to publish a message to the subject https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe.</p>
-<div class="codehilite"><pre><span></span>go run main.go -s localhost foo &#39;{&quot;message&quot;: &quot;hello&quot;}&#39;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="s1">&#39;{&quot;message&quot;: &quot;hello&quot;}&#39;</span><span class="w"></span>
+</code></pre></div>
 
 </li>
 <li>
@@ -1399,7 +1429,7 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

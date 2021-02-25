@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -921,6 +933,18 @@
   <li class="md-nav__item">
     <a href="../k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../log/" title="Log" class="md-nav__link">
+      Log
     </a>
   </li>
 
@@ -1097,6 +1121,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
     <a href="../../developer_guide/" title="Developer Guide" class="md-nav__link">
       Developer Guide
     </a>
@@ -1232,7 +1268,7 @@ TektonCD or AirFlow pipelines on GitHub events.</p>
 run a gRPC server that implements the interface that the sensor expects.</p>
 <h3 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">&para;</a></h3>
 <p>The interface exposed via proto file,</p>
-<div class="codehilite"><pre><span></span>    // Trigger offers services to build a custom trigger
+<div class="codehilite"><pre><span></span><code>    // Trigger offers services to build a custom trigger
     service Trigger {
         // FetchResource fetches the resource to be triggered.
         rpc FetchResource(FetchResourceRequest) returns (FetchResourceResponse);
@@ -1241,8 +1277,7 @@ run a gRPC server that implements the interface that the sensor expects.</p>
         // ApplyPolicy applies policies on the trigger execution result.
         rpc ApplyPolicy(ApplyPolicyRequest) returns (ApplyPolicyResponse);
     }
-</pre></div>
-
+</code></pre></div>
 
 <p>The complete proto file is available <a href="https://github.com/argoproj/argo-events/blob/master/sensors/triggers/trigger.proto">here</a>.</p>
 <p>Let's walk through the contract,</p>
@@ -1264,50 +1299,49 @@ run a gRPC server that implements the interface that the sensor expects.</p>
 </ol>
 <h3 id="how-to-define-the-custom-trigger-in-a-sensor">How to define the Custom Trigger in a sensor?<a class="headerlink" href="#how-to-define-the-custom-trigger-in-a-sensor" title="Permanent link">&para;</a></h3>
 <p>Let's look at the following sensor,</p>
-<div class="codehilite"><pre><span></span>    apiVersion: argoproj.io/v1alpha1
-    kind: Sensor
-    metadata:
-      name: webhook-sensor
-    spec:
-      template:
-        spec:
-          containers:
-            - name: sensor
-              image: metalgearsolid/sensor:v0.15.0
-              imagePullPolicy: Always
-          serviceAccountName: argo-events-sa
-      dependencies:
-        - name: test-dep
-          eventSourceName: webhook
-          eventName: example
-      triggers:
-        - template:
-            name: webhook-workflow-trigger
-            custom:
-              # the url of the trigger server.
-              serverURL: tekton-trigger.argo-events.svc:9000
-              # spec is map of string-&gt;string and it is sent over to trigger server.
-              # the spec can be anything you want as per your use-case, just make sure the trigger server understands the spec map.
-              spec:
-                url: &quot;https://raw.githubusercontent.com/VaibhavPage/tekton-cd-trigger/master/example.yaml&quot;
-              # These parameters are applied on resource fetched and returned by the trigger server.
-              # e.g. consider a trigger server which invokes TektonCD pipeline runs, then
-              # the trigger server can return a TektonCD PipelineRun resource.
-              # The parameters are then applied on that PipelineRun resource.
-              parameters:
-                - src:
-                    dependencyName: test-dep
-                    dataKey: body.namespace
-                  dest: metadata.namespace
-          # These parameters are applied on entire template body.
-          # So that you can parameterize anything under `custom` key such as `serverURL`, `spec` etc.
-          parameters:
-            - src:
-                dependencyName: test-dep
-                dataKey: body.url
-              dest: custom.spec.url
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    <span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="p">.</span><span class="k">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+    <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
+    <span class="n">metadata</span><span class="o">:</span>
+      <span class="k">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
+    <span class="n">spec</span><span class="o">:</span>
+      <span class="n">template</span><span class="o">:</span>
+        <span class="n">spec</span><span class="o">:</span>
+          <span class="n">containers</span><span class="o">:</span>
+            <span class="o">-</span> <span class="k">name</span><span class="o">:</span> <span class="n">sensor</span>
+              <span class="n">image</span><span class="o">:</span> <span class="n">metalgearsolid</span><span class="o">/</span><span class="n">sensor</span><span class="o">:</span><span class="n">v0</span><span class="mf">.15.0</span>
+              <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="k">Always</span>
+          <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">-</span><span class="n">sa</span>
+      <span class="n">dependencies</span><span class="o">:</span>
+        <span class="o">-</span> <span class="k">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+          <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">webhook</span>
+          <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
+      <span class="k">triggers</span><span class="o">:</span>
+        <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
+            <span class="k">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">workflow</span><span class="o">-</span><span class="k">trigger</span>
+            <span class="n">custom</span><span class="o">:</span>
+              <span class="c1"># the url of the trigger server.</span>
+              <span class="n">serverURL</span><span class="o">:</span> <span class="n">tekton</span><span class="o">-</span><span class="k">trigger</span><span class="p">.</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="p">.</span><span class="n">svc</span><span class="o">:</span><span class="mi">9000</span>
+              <span class="c1"># spec is map of string-&gt;string and it is sent over to trigger server.</span>
+              <span class="c1"># the spec can be anything you want as per your use-case, just make sure the trigger server understands the spec map.</span>
+              <span class="n">spec</span><span class="o">:</span>
+                <span class="n">url</span><span class="o">:</span> <span class="s2">&quot;https://raw.githubusercontent.com/VaibhavPage/tekton-cd-trigger/master/example.yaml&quot;</span>
+              <span class="c1"># These parameters are applied on resource fetched and returned by the trigger server.</span>
+              <span class="c1"># e.g. consider a trigger server which invokes TektonCD pipeline runs, then</span>
+              <span class="c1"># the trigger server can return a TektonCD PipelineRun resource.</span>
+              <span class="c1"># The parameters are then applied on that PipelineRun resource.</span>
+              <span class="n">parameters</span><span class="o">:</span>
+                <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
+                    <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                    <span class="n">dataKey</span><span class="o">:</span> <span class="n">body</span><span class="p">.</span><span class="n">namespace</span>
+                  <span class="n">dest</span><span class="o">:</span> <span class="n">metadata</span><span class="p">.</span><span class="n">namespace</span>
+          <span class="c1"># These parameters are applied on entire template body.</span>
+          <span class="c1"># So that you can parameterize anything under `custom` key such as `serverURL`, `spec` etc.</span>
+          <span class="n">parameters</span><span class="o">:</span>
+            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
+                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                <span class="n">dataKey</span><span class="o">:</span> <span class="n">body</span><span class="p">.</span><span class="n">url</span>
+              <span class="n">dest</span><span class="o">:</span> <span class="n">custom</span><span class="p">.</span><span class="n">spec</span><span class="p">.</span><span class="n">url</span>
+</code></pre></div>
 
 <p>The sensor definition should look familiar to you. The only difference is the <code>custom</code> key under <code>triggers -&gt; template</code>.
 The specification under <code>custom</code> key defines the custom trigger.</p>
@@ -1400,7 +1434,7 @@ The specification under <code>custom</code> key defines the custom trigger.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

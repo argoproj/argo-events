@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -881,6 +881,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -983,6 +995,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1074,6 +1098,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1204,7 +1240,7 @@
 please set up the AWS SNS event-source.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
         &quot;context&quot;: {
           &quot;type&quot;: &quot;type_of_event_source&quot;,
           &quot;specversion&quot;: &quot;cloud_events_version&quot;,
@@ -1222,8 +1258,7 @@ please set up the AWS SNS event-source.</p>
           ]
         }
     }
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1232,21 +1267,19 @@ please set up the AWS SNS event-source.</p>
 </li>
 <li>
 <p>If you are running Minio locally, make sure to <code>port-forward</code> to minio pod in order to make the service available outside local K8s cluster.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;minio-pod-name&gt; 9000:9000
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;minio-pod-name&gt; 9000:9000
+</code></pre></div>
 
 </li>
 <li>
 <p>Configure the minio client <code>mc</code>.</p>
-<div class="codehilite"><pre><span></span>mc config host add minio http://localhost:9000 minio minio123
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>mc config host add minio http://localhost:9000 minio minio123
+</code></pre></div>
 
 </li>
 <li>
 <p>Create a K8s secret that holds the access and secret key. This secret will be referred in the minio event source definition that we are going to install in a later step.</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">data</span><span class="o">:</span>
   <span class="err">#</span> <span class="n">base64</span> <span class="n">of</span> <span class="n">minio</span>
   <span class="n">accesskey</span><span class="o">:</span> <span class="n">bWluaW8</span><span class="o">=</span>
@@ -1256,29 +1289,25 @@ please set up the AWS SNS event-source.</p>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">artifacts</span><span class="o">-</span><span class="n">minio</span>
   <span class="kd">namespace</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
 <p>The event source we are going to use configures notifications for a bucket called <code>input</code>. </p>
-<div class="codehilite"><pre><span></span>mc mb minio/input
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>mc mb minio/input
+</code></pre></div>
 
 </li>
 <li>
 <p>Let's install event source in the <code>argo-events</code> namespace,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Let's create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1359,7 +1388,7 @@ please set up the AWS SNS event-source.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

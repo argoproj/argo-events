@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -895,6 +895,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -997,6 +1009,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1088,6 +1112,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1230,7 +1266,7 @@
 <p>GCP Pub/Sub event-source subscribes to messages published by GCP publisher and helps sensor trigger workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
     <span class="s2">&quot;context&quot;</span><span class="o">:</span> <span class="p">{</span>
       <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
       <span class="s2">&quot;specversion&quot;</span><span class="o">:</span> <span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
@@ -1249,8 +1285,7 @@
         <span class="s2">&quot;body&quot;</span><span class="o">:</span> <span class="s2">&quot;body refers to the message data&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>GCP Pub/Sub event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/stable/api/event-source.md#pubsubeventsource">here</a>.</p>
@@ -1408,7 +1443,7 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

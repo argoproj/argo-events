@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -881,6 +881,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -983,6 +995,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1074,6 +1098,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1217,28 +1253,25 @@ create the Kubernetes resource of your choice.</li>
 </ol>
 <p>You will notice that the <code>group</code> key is empty, that means we want to use <code>core</code> group.
    For any other groups, you need to specify the <code>group</code> key.</p>
-<div class="codehilite"><pre><span></span>    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
+</code></pre></div>
 
 <ol>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Now, you should see a pod being created.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events get po
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get po
+</code></pre></div>
 
 </li>
 </ol>
 <p>Output</p>
-<div class="codehilite"><pre><span></span>    _________________________________________ 
+<div class="codehilite"><pre><span></span><code>    _________________________________________ 
     / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
     | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
     | ventID&quot;:&quot;30306463666539362d346666642d34 |
@@ -1263,35 +1296,31 @@ create the Kubernetes resource of your choice.</li>
          \______ o          __/            
           \    \        __/             
             \____\______/
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p>Lets create a sensor with a K8s deployment as trigger.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Now, you should see a deployment being created. Get the corresponding pod.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events get deployments
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get deployments
+</code></pre></div>
 
 </li>
 </ol>
 <p>Output</p>
-<div class="codehilite"><pre><span></span>    _________________________________________ 
+<div class="codehilite"><pre><span></span><code>    _________________________________________ 
     / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
     | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
     | ventID&quot;:&quot;30306463666539362d346666642d34 |
@@ -1316,7 +1345,7 @@ create the Kubernetes resource of your choice.</li>
          \______ o          __/            
           \    \        __/             
             \____\______/
-</pre></div>
+</code></pre></div>
                 
                   
                 
@@ -1386,7 +1415,7 @@ create the Kubernetes resource of your choice.</li>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

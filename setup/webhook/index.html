@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -888,6 +888,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -990,6 +1002,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1081,6 +1105,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1217,23 +1253,22 @@
 http requests.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source to the sensor looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
-        &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;time&quot;: &quot;event_time&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
-        },
-        &quot;data&quot;: {
-          &quot;header&quot;: {/* the headers from the request received by the event-source from the external entity */},
-          &quot;body&quot;: { /* the payload of the request received by the event-source from the external entity */},
-        }
-    }
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    <span class="p">{</span>
+        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;specversion&quot;</span><span class="p">:</span> <span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;header&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">/*</span> <span class="n">the</span> <span class="n">headers</span> <span class="n">from</span> <span class="n">the</span> <span class="n">request</span> <span class="n">received</span> <span class="n">by</span> <span class="n">the</span> <span class="n">event</span><span class="o">-</span><span class="n">source</span> <span class="n">from</span> <span class="n">the</span> <span class="n">external</span> <span class="n">entity</span> <span class="o">*/</span><span class="p">},</span>
+          <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">/*</span> <span class="n">the</span> <span class="n">payload</span> <span class="n">of</span> <span class="n">the</span> <span class="n">request</span> <span class="n">received</span> <span class="n">by</span> <span class="n">the</span> <span class="n">event</span><span class="o">-</span><span class="n">source</span> <span class="n">from</span> <span class="n">the</span> <span class="n">external</span> <span class="n">entity</span> <span class="o">*/</span><span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>Webhook event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#webhookcontext">here</a>.</p>
@@ -1241,17 +1276,15 @@ http requests.</p>
 <ol>
 <li>
 <p>Install the event source in the <code>argo-events</code> namespace,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>The event-source pod is listening for HTTP requests on port <code>12000</code> and endpoint <code>/example</code>.
     It's time to create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1329,7 +1362,7 @@ http requests.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

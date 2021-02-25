@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -881,6 +881,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -983,6 +995,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1074,6 +1098,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1202,7 +1238,7 @@
 <p>AMQP event-source listens to messages on the MQ and helps sensor trigger the workloads.  </p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
         &quot;context&quot;: {
           &quot;type&quot;: &quot;type_of_event_source&quot;,
           &quot;specversion&quot;: &quot;cloud_events_version&quot;,
@@ -1229,15 +1265,14 @@
             &quot;body&quot;: &quot;Body represents the messsage body&quot;,
         }
     }
-</pre></div>
-
+</code></pre></div>
 
 <p><br/></p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p>Lets set up RabbitMQ locally,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Service</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">labels</span><span class="o">:</span>
@@ -1272,8 +1307,7 @@
           <span class="n">resources</span><span class="o">:</span>
             <span class="n">limits</span><span class="o">:</span>
               <span class="n">cpu</span><span class="o">:</span> <span class="mi">100</span><span class="n">m</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
@@ -1281,16 +1315,14 @@
 </li>
 <li>
 <p>Expose the RabbitMQ server to local publisher using <code>port-forward</code>,</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;rabbitmq-pod-name&gt; 5672:5672
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;rabbitmq-pod-name&gt; 5672:5672
+</code></pre></div>
 
 </li>
 <li>
 <p>Create the event source by running the following command.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/amqp.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/amqp.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1298,28 +1330,25 @@
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/amqp.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/amqp.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Lets set up a rabbitmq publisher. If you don't have <code>pika</code> installed, run,</p>
-<div class="codehilite"><pre><span></span>python -m pip install pika --upgrade
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>python -m pip install pika --upgrade
+</code></pre></div>
 
 </li>
 <li>
 <p>Open a python REPL and run following code to publish a message on <code>exhange</code> called <code>test</code>. </p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">pika</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">pika</span>
 <span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span>
 <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
 <span class="n">channel</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span>
                       <span class="n">routing_key</span><span class="o">=</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span>
                       <span class="n">body</span><span class="o">=</span><span class="s1">&#39;{&quot;message&quot;: &quot;hello&quot;}&#39;</span><span class="p">)</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
@@ -1397,7 +1426,7 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

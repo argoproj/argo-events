@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -895,6 +895,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -997,6 +1009,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1088,6 +1112,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1230,7 +1266,7 @@
 <p>Resource event-source watches change notifications for K8s object and helps sensor trigger the workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
         &quot;context&quot;: {
           &quot;type&quot;: &quot;type_of_event_source&quot;,
           &quot;specversion&quot;: &quot;cloud_events_version&quot;,
@@ -1248,8 +1284,7 @@
           &quot;resource&quot;: &quot;resource_name&quot;
         }
     }
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>Resource event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#resourceeventsource">here</a>.</p>
@@ -1257,16 +1292,14 @@
 <ol>
 <li>
 <p>Create the event source by running the following command. </p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/resource.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/resource.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/resource.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/resource.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1275,22 +1308,21 @@
 </li>
 <li>
 <p>Lets create a workflow called <code>my-workflow</code> with label <code>app: my-workflow</code></p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Workflow</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">my</span><span class="o">-</span><span class="n">workflow</span>
-  <span class="n">labels</span><span class="o">:</span>
-    <span class="n">app</span><span class="o">:</span> <span class="n">my</span><span class="o">-</span><span class="n">workflow</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">entrypoint</span><span class="o">:</span> <span class="n">whalesay</span>
-  <span class="n">templates</span><span class="o">:</span>
-  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">whalesay</span>
-    <span class="n">container</span><span class="o">:</span>
-      <span class="n">image</span><span class="o">:</span> <span class="n">docker</span><span class="o">/</span><span class="n">whalesay</span><span class="o">:</span><span class="n">latest</span>
-      <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="n">cowsay</span><span class="o">]</span>
-      <span class="n">args</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;hello world&quot;</span><span class="o">]</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nl">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="nl">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Workflow</span><span class="w"></span>
+<span class="nl">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">my</span><span class="o">-</span><span class="n">workflow</span><span class="w"></span>
+<span class="w">  </span><span class="nl">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nl">app</span><span class="p">:</span><span class="w"> </span><span class="n">my</span><span class="o">-</span><span class="n">workflow</span><span class="w"></span>
+<span class="nl">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nl">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="n">whalesay</span><span class="w"></span>
+<span class="w">  </span><span class="nl">templates</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">whalesay</span><span class="w"></span>
+<span class="w">    </span><span class="nl">container</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nc">image</span><span class="err">:</span><span class="w"> </span><span class="n">docker</span><span class="o">/</span><span class="nl">whalesay</span><span class="p">:</span><span class="n">latest</span><span class="w"></span>
+<span class="w">      </span><span class="nl">command</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">cowsay</span><span class="o">]</span><span class="w"></span>
+<span class="w">      </span><span class="nl">args</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">&quot;hello world&quot;</span><span class="o">]</span><span class="w"></span>
+</code></pre></div>
 
 </li>
 <li>
@@ -1300,41 +1332,39 @@
 <h2 id="list-options">List Options<a class="headerlink" href="#list-options" title="Permanent link">&para;</a></h2>
 <p>The Resource Event-Source allows to configure the list options through <code>labels</code> and <code>field</code> selectors for setting up a watch on objects.</p>
 <p>In the example above, we had set up the list option as follows,</p>
-<div class="codehilite"><pre><span></span>    filter:
-    # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
-    # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
+<div class="codehilite"><pre><span></span><code>    <span class="nv">filter</span>:
+    # <span class="nv">labels</span> <span class="nv">and</span> <span class="nv">filters</span> <span class="nv">are</span> <span class="nv">meant</span> <span class="nv">to</span> <span class="nv">provide</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">filter</span> <span class="nv">the</span> <span class="nv">object</span> <span class="nv">list</span> <span class="nv">that</span> <span class="nv">are</span> <span class="nv">being</span> <span class="nv">watched</span>.
+    # <span class="nv">Please</span> <span class="nv">read</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">labels</span><span class="o">/</span>#<span class="nv">api</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">details</span>.
 
-        # labels provide listing options to K8s API to watch objects
-        labels:
-          - key: app
-            # Supported operations like ==, !=, etc.
-            # Defaults to ==.
-            # Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
-            # optional.
-            operation: &quot;==&quot;
-            value: my-workflow
-</pre></div>
-
+        # <span class="nv">labels</span> <span class="nv">provide</span> <span class="nv">listing</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">to</span> <span class="nv">watch</span> <span class="nv">objects</span>
+        <span class="nv">labels</span>:
+          <span class="o">-</span> <span class="nv">key</span>: <span class="nv">app</span>
+            # <span class="nv">Supported</span> <span class="nv">operations</span> <span class="nv">like</span> <span class="o">==</span>, <span class="o">!=</span>, <span class="nv">etc</span>.
+            # <span class="nv">Defaults</span> <span class="nv">to</span> <span class="o">==</span>.
+            # <span class="nv">Refer</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">labels</span><span class="o">/</span>#<span class="nv">label</span><span class="o">-</span><span class="nv">selectors</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">info</span>.
+            # <span class="nv">optional</span>.
+            <span class="nv">operation</span>: <span class="s2">&quot;</span><span class="s">==</span><span class="s2">&quot;</span>
+            <span class="nv">value</span>: <span class="nv">my</span><span class="o">-</span><span class="nv">workflow</span>
+</code></pre></div>
 
 <p>The <code>key-operation-value</code> items under the <code>filter -&gt; labels</code> are used by the event-source to filter the objects
 that are eligible for the watch. So, in the present case, the event-source will set up a watch for those
 objects who have label "app: my-workflow". You can add more <code>key-operation-value</code> items to the list as per your use-case.   </p>
 <p>Similarly, you can pass <code>field</code> selectors to the watch list options, e.g.,</p>
-<div class="codehilite"><pre><span></span>  filter:
-    # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
-    # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
+<div class="codehilite"><pre><span></span><code>  <span class="nv">filter</span>:
+    # <span class="nv">labels</span> <span class="nv">and</span> <span class="nv">filters</span> <span class="nv">are</span> <span class="nv">meant</span> <span class="nv">to</span> <span class="nv">provide</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">filter</span> <span class="nv">the</span> <span class="nv">object</span> <span class="nv">list</span> <span class="nv">that</span> <span class="nv">are</span> <span class="nv">being</span> <span class="nv">watched</span>.
+    # <span class="nv">Please</span> <span class="nv">read</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">labels</span><span class="o">/</span>#<span class="nv">api</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">details</span>.
 
-    # fields provide listing options to K8s API to watch objects
-    fields:
-      - key: metadata.name
-        # Supported operations like ==, !=, &lt;=, &gt;= etc.
-        # Defaults to ==.
-        # Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
-        # optional.
-        operation: ==
-        value: my-workflow
-</pre></div>
-
+    # <span class="nv">fields</span> <span class="nv">provide</span> <span class="nv">listing</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">to</span> <span class="nv">watch</span> <span class="nv">objects</span>
+    <span class="nv">fields</span>:
+      <span class="o">-</span> <span class="nv">key</span>: <span class="nv">metadata</span>.<span class="nv">name</span>
+        # <span class="nv">Supported</span> <span class="nv">operations</span> <span class="nv">like</span> <span class="o">==</span>, <span class="o">!=</span>, <span class="o">&lt;=</span>, <span class="o">&gt;=</span> <span class="nv">etc</span>.
+        # <span class="nv">Defaults</span> <span class="nv">to</span> <span class="o">==</span>.
+        # <span class="nv">Refer</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">field</span><span class="o">-</span><span class="nv">selectors</span><span class="o">/</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">info</span>.
+        # <span class="nv">optional</span>.
+        <span class="nv">operation</span>: <span class="o">==</span>
+        <span class="nv">value</span>: <span class="nv">my</span><span class="o">-</span><span class="nv">workflow</span>
+</code></pre></div>
 
 <p><strong>Note:</strong> The <code>label</code> and <code>fields</code> under <code>filter</code> are used at the time of setting up the watch by the event-source. If you want to filter the objects
 based on the <code>annotations</code> or some other fields, use the <code>Data Filters</code> available in the sensor.</p>
@@ -1409,7 +1439,7 @@ based on the <code>annotations</code> or some other fields, use the <code>Data F
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

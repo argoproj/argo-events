@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -874,6 +874,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -976,6 +988,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1067,6 +1091,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1185,7 +1221,7 @@
                 
                 
                 <h1 id="eventsource-with-multiple-events">EventSource With Multiple Events<a class="headerlink" href="#eventsource-with-multiple-events" title="Permanent link">&para;</a></h1>
-<p><img alt="alpha" src="../../assets/alpha.svg" /></p>
+<p><img alt="GA" src="../../assets/ga.svg" /></p>
 <blockquote>
 <p>v0.17.0 and after</p>
 </blockquote>
@@ -1193,22 +1229,21 @@
 one event source type, or mixed event source types with some limitations.</p>
 <h2 id="single-eventsource-type">Single EventSource Type<a class="headerlink" href="#single-eventsource-type" title="Permanent link">&para;</a></h2>
 <p>A single type EventSource configuration:</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">EventSource</span>
-<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook</span>
-<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">webhook</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">example</span><span class="p p-Indicator">:</span>
-      <span class="l l-Scalar l-Scalar-Plain">port</span><span class="p p-Indicator">:</span> <span class="s">&quot;12000&quot;</span>
-      <span class="l l-Scalar l-Scalar-Plain">endpoint</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">/example</span>
-      <span class="l l-Scalar l-Scalar-Plain">method</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
-    <span class="l l-Scalar l-Scalar-Plain">example-foo</span><span class="p p-Indicator">:</span>
-      <span class="l l-Scalar l-Scalar-Plain">port</span><span class="p p-Indicator">:</span> <span class="s">&quot;13000&quot;</span>
-      <span class="l l-Scalar l-Scalar-Plain">endpoint</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">/example2</span>
-      <span class="l l-Scalar l-Scalar-Plain">method</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventSource</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">webhook</span><span class="p">:</span>
+    <span class="nt">example</span><span class="p">:</span>
+      <span class="nt">port</span><span class="p">:</span> <span class="s">&quot;12000&quot;</span>
+      <span class="nt">endpoint</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/example</span>
+      <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
+    <span class="nt">example-foo</span><span class="p">:</span>
+      <span class="nt">port</span><span class="p">:</span> <span class="s">&quot;13000&quot;</span>
+      <span class="nt">endpoint</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/example2</span>
+      <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
+</code></pre></div>
 
 <p>For the example above, there are 2 events configured in the EventSource named
 <code>webhook</code>. Please use different <code>port</code> numbers for different events, this is the
@@ -1217,31 +1252,30 @@ limitation also applies to <code>webhook</code> extended event source types such
 <code>github</code>, <code>sns</code>.</p>
 <h2 id="mixed-eventsource-types">Mixed EventSource Types<a class="headerlink" href="#mixed-eventsource-types" title="Permanent link">&para;</a></h2>
 <p>EventSource is allowed to have mixed types of events configured.</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">EventSource</span>
-<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">mixed-sources</span>
-<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">webhook</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">webhook-example</span><span class="p p-Indicator">:</span> <span class="c1"># eventName</span>
-      <span class="l l-Scalar l-Scalar-Plain">port</span><span class="p p-Indicator">:</span> <span class="s">&quot;12000&quot;</span>
-      <span class="l l-Scalar l-Scalar-Plain">endpoint</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">/example</span>
-      <span class="l l-Scalar l-Scalar-Plain">method</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
-  <span class="l l-Scalar l-Scalar-Plain">sns</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">sns-example</span><span class="p p-Indicator">:</span> <span class="c1"># eventName</span>
-      <span class="l l-Scalar l-Scalar-Plain">topicArn</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">arn:aws:sns:us-east-1:XXXXXXXX:test</span>
-      <span class="l l-Scalar l-Scalar-Plain">webhook</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">endpoint</span><span class="p p-Indicator">:</span> <span class="s">&quot;/&quot;</span>
-        <span class="l l-Scalar l-Scalar-Plain">port</span><span class="p p-Indicator">:</span> <span class="s">&quot;15000&quot;</span>
-      <span class="l l-Scalar l-Scalar-Plain">accessKey</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-key</span>
-        <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-name</span>
-      <span class="l l-Scalar l-Scalar-Plain">secretKey</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-secret-key</span>
-        <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-secret-name</span>
-      <span class="l l-Scalar l-Scalar-Plain">region</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventSource</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mixed-sources</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">webhook</span><span class="p">:</span>
+    <span class="nt">webhook-example</span><span class="p">:</span> <span class="c1"># eventName</span>
+      <span class="nt">port</span><span class="p">:</span> <span class="s">&quot;12000&quot;</span>
+      <span class="nt">endpoint</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/example</span>
+      <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
+  <span class="nt">sns</span><span class="p">:</span>
+    <span class="nt">sns-example</span><span class="p">:</span> <span class="c1"># eventName</span>
+      <span class="nt">topicArn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">arn:aws:sns:us-east-1:XXXXXXXX:test</span>
+      <span class="nt">webhook</span><span class="p">:</span>
+        <span class="nt">endpoint</span><span class="p">:</span> <span class="s">&quot;/&quot;</span>
+        <span class="nt">port</span><span class="p">:</span> <span class="s">&quot;15000&quot;</span>
+      <span class="nt">accessKey</span><span class="p">:</span>
+        <span class="nt">key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my-key</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my-name</span>
+      <span class="nt">secretKey</span><span class="p">:</span>
+        <span class="nt">key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my-secret-key</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my-secret-name</span>
+      <span class="nt">region</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
+</code></pre></div>
 
 <p>However, there are some rules need to follow to do it:</p>
 <ul>
@@ -1251,9 +1285,8 @@ limitation also applies to <code>webhook</code> extended event source types such
 </li>
 <li>
 <p>Event Name (i.e. <code>webhook-example</code> and <code>sns-example</code> above, refer to
-  <a href="../naming/">EventSource Names</a>) needs to be unique in the
-  EventSource, same <code>eventName</code> is not allowed even they are in different event
-  source types.</p>
+  <a href="../naming/">EventSource Names</a>) needs to be unique in the EventSource, same
+  <code>eventName</code> is not allowed even they are in different event source types.</p>
 </li>
 </ul>
 <p>The reason for that is, we use <code>eventSourceName</code> and <code>eventName</code> as the
@@ -1327,7 +1360,7 @@ limitation also applies to <code>webhook</code> extended event source types such
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -990,6 +1002,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1081,6 +1105,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1232,30 +1268,26 @@
 </li>
 <li>
 <p>Let's set up a webhook event-source to process incoming requests.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Let's expose the webhook event-source pod using <code>port-forward</code> so that we can make a request to it.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
+</code></pre></div>
 
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
@@ -1280,13 +1312,12 @@ provided by the Argo CLI such as,</p>
 <li>Suspend</li>
 </ol>
 <p>To make use of Argo CLI operations, The sensor provides the <code>argoWorkflow</code> trigger template,</p>
-<div class="codehilite"><pre><span></span>    argoWorkflow:
+<div class="codehilite"><pre><span></span><code>    argoWorkflow:
       group: argoproj.io
       version: v1alpha1
       resource: workflows
       operation: submit  # submit, resubmit, resume, retry or suspend
-</pre></div>
-
+</code></pre></div>
 
 <p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/special-workflow-trigger.yaml">here</a>.</p>
                 
@@ -1309,7 +1340,7 @@ provided by the Argo CLI such as,</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../../eventsources/gcp-pubsub/" title="GCP PubSub" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../../eventsources/generic/" title="Generic EventSource" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1318,7 +1349,7 @@ provided by the Argo CLI such as,</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                GCP PubSub
+                Generic EventSource
               </span>
             </div>
           </a>
@@ -1358,7 +1389,7 @@ provided by the Argo CLI such as,</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -997,6 +1009,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1088,6 +1112,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1252,7 +1288,7 @@ that are not native to AWS.</p>
 </li>
 <li>
 <p>Create a secret called <code>aws-secret</code> as follows,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
@@ -1260,46 +1296,40 @@ that are not native to AWS.</p>
 <span class="n">data</span><span class="o">:</span>
   <span class="n">accesskey</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
   <span class="n">secretkey</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
 <p>Create a basic lambda function called <code>hello</code> either using AWS cli or console.</p>
-<div class="codehilite"><pre><span></span>exports.handler = async (event, context) =&gt; {
-    console.log(&#39;name =&#39;, event.name);
-    return event.name;
-};
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">exports</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">async</span> <span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;name =&#39;</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">name</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">event</span><span class="o">.</span><span class="n">name</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Let's set up webhook event-source to invoke the lambda over http requests.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Let's expose the webhook event-source using <code>port-forward</code> so that we can make a request to it.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy the webhook sensor with AWS Lambda trigger</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-lambda-trigger.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-lambda-trigger.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Once the sensor pod is in running state, make a <code>curl</code> request to webhook event-source pod,</p>
-<div class="codehilite"><pre><span></span> curl -d &#39;{&quot;name&quot;:&quot;foo&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code> curl -d &#39;{&quot;name&quot;:&quot;foo&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
@@ -1313,31 +1343,29 @@ that are not native to AWS.</p>
 is invoked when sensor receives an event from the eventbus. In order to construct a request payload based on the event data, sensor offers 
 <code>payload</code> field as a part of the lambda trigger.</p>
 <p>Let's examine a lambda trigger,</p>
-<div class="codehilite"><pre><span></span>            awsLambda:
-              functionName: hello
-              accessKey:
-                name: aws-secret
-                key: accesskey
-              secretKey:
-                name: aws-secret
-                key: secretkey
-              namespace: argo-events
-              region: us-east-1
-              payload:
-                - src:
-                    dependencyName: test-dep
-                    dataKey: body.name
-                  dest: name
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>            <span class="n">awsLambda</span><span class="p">:</span>
+              <span class="n">functionName</span><span class="p">:</span> <span class="n">hello</span>
+              <span class="n">accessKey</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">accesskey</span>
+              <span class="n">secretKey</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">secretkey</span>
+              <span class="n">namespace</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+              <span class="n">region</span><span class="p">:</span> <span class="n">us</span><span class="o">-</span><span class="n">east</span><span class="o">-</span><span class="mi">1</span>
+              <span class="n">payload</span><span class="p">:</span>
+                <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                    <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                    <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">name</span>
+                  <span class="n">dest</span><span class="p">:</span> <span class="n">name</span>
+</code></pre></div>
 
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a request payload like below,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
       &quot;name&quot;: &quot;foo&quot; // name field from event data
     }
-</pre></div>
-
+</code></pre></div>
 
 <p>The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>. </p>
 <p><strong>Note</strong>: Take a look at <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">Parameterization</a> in order to understand how to extract particular key-value from
@@ -1346,28 +1374,27 @@ event data.</p>
 <p>Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
 you want to define a generic trigger template in the sensor and populate values like function name, payload values on the fly.</p>
 <p>Consider a scenario where you don't want to hard-code the function name and let the event data populate it.</p>
-<div class="codehilite"><pre><span></span>            awsLambda:
-              functionName: hello // this will be replaced.
-              accessKey:
-                name: aws-secret
-                key: accesskey
-              secretKey:
-                name: aws-secret
-                key: secretkey
-              namespace: argo-events
-              region: us-east-1
-              payload:
-                - src:
-                    dependencyName: test-dep
-                    dataKey: body.message
-                  dest: message
-              parameters:
-                - src:
-                    dependencyName: test-dep
-                    dataKey: body.function_name
-                  dest: functionName
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>            <span class="n">awsLambda</span><span class="p">:</span>
+              <span class="n">functionName</span><span class="p">:</span> <span class="n">hello</span> <span class="o">//</span> <span class="n">this</span> <span class="n">will</span> <span class="n">be</span> <span class="n">replaced</span><span class="o">.</span>
+              <span class="n">accessKey</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">accesskey</span>
+              <span class="n">secretKey</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">secretkey</span>
+              <span class="n">namespace</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+              <span class="n">region</span><span class="p">:</span> <span class="n">us</span><span class="o">-</span><span class="n">east</span><span class="o">-</span><span class="mi">1</span>
+              <span class="n">payload</span><span class="p">:</span>
+                <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                    <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                    <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">message</span>
+                  <span class="n">dest</span><span class="p">:</span> <span class="n">message</span>
+              <span class="n">parameters</span><span class="p">:</span>
+                <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                    <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                    <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">function_name</span>
+                  <span class="n">dest</span><span class="p">:</span> <span class="n">functionName</span>
+</code></pre></div>
 
 <p>With <code>parameters</code> the sensor will replace the function name <code>hello</code> with the value of field <code>function_name</code> from event data.</p>
 <p>You can learn more about trigger parameterization <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
@@ -1375,28 +1402,27 @@ you want to define a generic trigger template in the sensor and populate values 
 <p>Trigger policy helps you determine the status of the lambda invocation and decide whether to stop or continue sensor. </p>
 <p>To determine whether the lamda was successful or not, Lambda trigger provides a <code>Status</code> policy.
 The <code>Status</code> holds a list of response statuses that are considered valid.</p>
-<div class="codehilite"><pre><span></span>                    awsLambda:
-                      functionName: hello
-                      accessKey:
-                        name: aws-secret
-                        key: accesskey
-                      secretKey:
-                        name: aws-secret
-                        key: secretkey
-                      namespace: argo-events
-                      region: us-east-1
-                      payload:
-                        - src:
-                            dependencyName: test-dep
-                            dataKey: body.message
-                          dest: message
-                      policy:
-                        status:
-                            allow:
-                                - 200
-                                - 201
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>                    <span class="n">awsLambda</span><span class="p">:</span>
+                      <span class="n">functionName</span><span class="p">:</span> <span class="n">hello</span>
+                      <span class="n">accessKey</span><span class="p">:</span>
+                        <span class="n">name</span><span class="p">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
+                        <span class="n">key</span><span class="p">:</span> <span class="n">accesskey</span>
+                      <span class="n">secretKey</span><span class="p">:</span>
+                        <span class="n">name</span><span class="p">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
+                        <span class="n">key</span><span class="p">:</span> <span class="n">secretkey</span>
+                      <span class="n">namespace</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+                      <span class="n">region</span><span class="p">:</span> <span class="n">us</span><span class="o">-</span><span class="n">east</span><span class="o">-</span><span class="mi">1</span>
+                      <span class="n">payload</span><span class="p">:</span>
+                        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                            <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">message</span>
+                          <span class="n">dest</span><span class="p">:</span> <span class="n">message</span>
+                      <span class="n">policy</span><span class="p">:</span>
+                        <span class="n">status</span><span class="p">:</span>
+                            <span class="n">allow</span><span class="p">:</span>
+                                <span class="o">-</span> <span class="mi">200</span>
+                                <span class="o">-</span> <span class="mi">201</span>
+</code></pre></div>
 
 <p>The above lambda trigger will be treated successful only if its invocation returns with either 200 or 201 status. </p>
                 
@@ -1468,7 +1494,7 @@ The <code>Status</code> holds a list of response statuses that are considered va
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

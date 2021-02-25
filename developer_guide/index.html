@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -929,6 +941,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1020,6 +1044,18 @@
   <li class="md-nav__item">
     <a href="../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1283,32 +1319,29 @@ This guide includes steps for <code>Minikube</code> for local development, but i
 another cluster you can ignore the Minikube specific step 3.</p>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Golang 1.13</li>
+<li>Golang 1.15</li>
 <li>Docker</li>
 </ul>
 <h3 id="installation-setup">Installation &amp; Setup<a class="headerlink" href="#installation-setup" title="Permanent link">&para;</a></h3>
 <h4 id="1-get-the-project">1. Get the project<a class="headerlink" href="#1-get-the-project" title="Permanent link">&para;</a></h4>
-<div class="codehilite"><pre><span></span>git clone git@github.com:argoproj/argo-events
-cd argo-events
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">git</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="n">git</span><span class="nv">@github</span><span class="p">.</span><span class="nl">com</span><span class="p">:</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+<span class="n">cd</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+</code></pre></div>
 
 <h4 id="2-start-minikube-and-point-docker-client-to-minikubes-docker-daemon">2. Start Minikube and point Docker Client to Minikube's Docker Daemon<a class="headerlink" href="#2-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="Permanent link">&para;</a></h4>
-<div class="codehilite"><pre><span></span>minikube start
+<div class="codehilite"><pre><span></span><code>minikube start
 eval $(minikube docker-env)
-</pre></div>
-
+</code></pre></div>
 
 <h4 id="3-build-the-project">3. Build the project<a class="headerlink" href="#3-build-the-project" title="Permanent link">&para;</a></h4>
-<div class="codehilite"><pre><span></span>make all
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>make all
+</code></pre></div>
 
 <h3 id="changing-types">Changing Types<a class="headerlink" href="#changing-types" title="Permanent link">&para;</a></h3>
 <p>If you're making a change to the <code>pkg/apis</code> package, please ensure you re-run
 following command for code regeneration.</p>
-<div class="codehilite"><pre><span></span>$ make codegen
-</pre></div>
+<div class="codehilite"><pre><span></span><code>$ make codegen
+</code></pre></div>
                 
                   
                 
@@ -1329,7 +1362,7 @@ following command for code regeneration.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../service-accounts/" title="Service Accounts" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../validating-admission-webhook/" title="Validating Admission Webhook" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1338,7 +1371,7 @@ following command for code regeneration.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Service Accounts
+                Validating Admission Webhook
               </span>
             </div>
           </a>
@@ -1378,7 +1411,7 @@ following command for code regeneration.</p>
       
     </div>
     
-      <script src="../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
       

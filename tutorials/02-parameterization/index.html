@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -929,6 +929,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -1031,6 +1043,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1122,6 +1146,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1311,7 +1347,7 @@ with the event payload.</p>
 <h3 id="webhook-event-payload">Webhook Event Payload<a class="headerlink" href="#webhook-event-payload" title="Permanent link">&para;</a></h3>
 <p>Webhook event-source consumes events through HTTP requests and transforms them into CloudEvents.
 The structure of the event the Webhook sensor receives from the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
         &quot;context&quot;: {
           &quot;type&quot;: &quot;type_of_event_source&quot;,
           &quot;specversion&quot;: &quot;cloud_events_version&quot;,
@@ -1326,12 +1362,11 @@ The structure of the event the Webhook sensor receives from the event-source ove
           &quot;body&quot;: {},
         }
     }
-</pre></div>
-
+</code></pre></div>
 
 <ol>
 <li>
-<p><code>Context</code>: This is the CloudEvent context and it is populated by the event-source regardless of 
+<p><code>Context</code>: This is the CloudEvent context and it is populated by the event-source regardless of
 type of HTTP request.</p>
 </li>
 <li>
@@ -1340,7 +1375,7 @@ type of HTTP request.</p>
 <li>
 <p><code>Header</code>: The <code>header</code> within event <code>data</code> contains the headers in the HTTP request that was dispatched
    to the event-source. The event-source extracts the headers from the request and put it in
-   the the <code>header</code> within event <code>data</code>. </p>
+   the <code>header</code> within event <code>data</code>.</p>
 </li>
 <li>
 <p><code>Body</code>: This is the request payload from the HTTP request.</p>
@@ -1352,28 +1387,25 @@ the event-source over the eventbus, lets see how we can use the event context to
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>contextKey</code> for the parameter at index 0.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-01.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-01.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Send a HTTP request to the event-source pod.</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Inspect the output of the Argo workflow that was created.</p>
-<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>argo logs name_of_the_workflow
+</code></pre></div>
 
 </li>
 </ol>
 <p>You will see the following output,</p>
-<div class="codehilite"><pre><span></span>    _________
+<div class="codehilite"><pre><span></span><code>    _________
     &lt; webhook &gt;
     ---------
        \
@@ -1387,55 +1419,50 @@ the event-source over the eventbus, lets see how we can use the event context to
           \______ o          __/
            \    \        __/
              \____\______/
-</pre></div>
-
+</code></pre></div>
 
 <p>We have successfully extracted the <code>type</code> key within the event context and parameterized
 the workflow to print the value of the <code>type</code>.</p>
 <h3 id="event-data">Event Data<a class="headerlink" href="#event-data" title="Permanent link">&para;</a></h3>
 <p>Now, it is time to use the event data and parameterize the Argo workflow trigger.
-We will extract the <code>message</code> from request payload and get the Argo workflow to 
+We will extract the <code>message</code> from request payload and get the Argo workflow to
 print the message.</p>
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>dataKey</code> in the parameter at index 0.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-02.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-02.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Send a HTTP request to the event-source pod.</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Inspect the output of the Argo workflow that was created.</p>
-<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>argo logs name_of_the_workflow
+</code></pre></div>
 
 </li>
 </ol>
 <p>You will see the following output,</p>
-<div class="codehilite"><pre><span></span>     __________________________ 
+<div class="codehilite"><pre><span></span><code>     __________________________
     &lt; this is my first webhook &gt;
-     -------------------------- 
+     --------------------------
         \
          \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
+          \
+                        ##        .
+                  ## ## ##       ==
+               ## ## ## ##      ===
+           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+           \______ o          __/
+            \    \        __/
               \____\______/
-</pre></div>
-
+</code></pre></div>
 
 <p>Yay!! The Argo workflow printed the message. You can add however many number of parameters
 to update the trigger resource on the fly.</p>
@@ -1448,43 +1475,39 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>value</code> for the parameter at index 0.
    We will also update the <code>dataKey</code> to an unknown event key.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-03.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-03.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Send a HTTP request to the event-source pod.</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Inspect the output of the Argo workflow that was created.</p>
-<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>argo logs name_of_the_workflow
+</code></pre></div>
 
 </li>
 </ol>
 <p>You will see the following output,</p>
-<div class="codehilite"><pre><span></span>    _______________________ 
+<div class="codehilite"><pre><span></span><code>    _______________________
     &lt; wow! a default value. &gt;
-    ----------------------- 
+    -----------------------
        \
         \
-         \     
-                       ##        .            
-                 ## ## ##       ==            
-              ## ## ## ##      ===            
-          /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-     ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-          \______ o          __/            
-           \    \        __/             
+         \
+                       ##        .
+                 ## ## ##       ==
+              ## ## ## ##      ===
+          /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+     ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+          \______ o          __/
+           \    \        __/
              \____\______/
-</pre></div>
-
+</code></pre></div>
 
 <p><br/></p>
 <h3 id="sprig-templates">Sprig Templates<a class="headerlink" href="#sprig-templates" title="Permanent link">&para;</a></h3>
@@ -1492,28 +1515,27 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 context and event data before it gets applied to the trigger via <code>parameters</code>.</p>
 <p>Take a look at the example defined <a href="https://github.com/argoproj/argo-events/blob/stable/examples/sensors/trigger-with-template.yaml">here</a>, it contains the parameters
 as follows,</p>
-<div class="codehilite"><pre><span></span><span class="x">    parameters:</span>
-<span class="x">    # Retrieve the &#39;message&#39; key from the payload</span>
-<span class="x">    - src:</span>
-<span class="x">        dependencyName: test-dep</span>
-<span class="x">        dataTemplate: &quot;</span><span class="cp">{{</span> <span class="nv">.Input.body.message</span> <span class="o">|</span> <span class="nf">title</span> <span class="cp">}}</span><span class="x">&quot;</span>
-<span class="x">      dest: spec.arguments.parameters.0.value</span>
-<span class="x">    # Title case the context subject</span>
-<span class="x">    - src:</span>
-<span class="x">        dependencyName: test-dep</span>
-<span class="x">        contextTemplate: &quot;</span><span class="cp">{{</span> <span class="nv">.Input.subject</span> <span class="o">|</span> <span class="nf">title</span> <span class="cp">}}</span><span class="x">&quot;</span>
-<span class="x">      dest: spec.arguments.parameters.1.value</span>
-<span class="x">    # Retrieve the &#39;name&#39; key from the payload, remove all whitespace and lowercase it.</span>
-<span class="x">    - src:</span>
-<span class="x">        dependencyName: test-dep</span>
-<span class="x">        dataTemplate: &quot;</span><span class="cp">{{</span> <span class="nv">.Input.body.name</span> <span class="o">|</span> <span class="nf">nospace</span> <span class="o">|</span> <span class="nf">lower</span> <span class="cp">}}</span><span class="x">-&quot;</span>
-<span class="x">      dest: metadata.generateName</span>
-<span class="x">      operation: append</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    <span class="n">parameters</span><span class="p">:</span>
+    <span class="c1"># Retrieve the &#39;message&#39; key from the payload</span>
+    <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+        <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+        <span class="n">dataTemplate</span><span class="p">:</span> <span class="s2">&quot;{{ .Input.body.message | title }}&quot;</span>
+      <span class="n">dest</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">0.</span><span class="n">value</span>
+    <span class="c1"># Title case the context subject</span>
+    <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+        <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+        <span class="n">contextTemplate</span><span class="p">:</span> <span class="s2">&quot;{{ .Input.subject | title }}&quot;</span>
+      <span class="n">dest</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">1.</span><span class="n">value</span>
+    <span class="c1"># Retrieve the &#39;name&#39; key from the payload, remove all whitespace and lowercase it.</span>
+    <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+        <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+        <span class="n">dataTemplate</span><span class="p">:</span> <span class="s2">&quot;{{ .Input.body.name | nospace | lower }}-&quot;</span>
+      <span class="n">dest</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">generateName</span>
+      <span class="n">operation</span><span class="p">:</span> <span class="n">append</span>
+</code></pre></div>
 
 <p>Consider the event the sensor received has format like,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
         &quot;context&quot;: {
           &quot;type&quot;: &quot;type_of_event_source&quot;,
           &quot;specversion&quot;: &quot;cloud_events_version&quot;,
@@ -1530,8 +1552,7 @@ as follows,</p>
           },
         }
     }
-</pre></div>
-
+</code></pre></div>
 
 <p>The parameters are transformed as,</p>
 <ol>
@@ -1549,82 +1570,76 @@ as follows,</p>
 </li>
 </ol>
 <p>Send a curl request to event-source as follows,</p>
-<div class="codehilite"><pre><span></span>    curl -d &#39;{&quot;name&quot;:&quot;foo bar&quot;, &quot;message&quot;: &quot;hello there!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    curl -d &#39;{&quot;name&quot;:&quot;foo bar&quot;, &quot;message&quot;: &quot;hello there!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 <p>and you will see an Argo workflow being sprung with name like <code>webhook-foobar-xxxxx</code>.</p>
 <p>Check the output of the workflow, it should print something like,</p>
-<div class="codehilite"><pre><span></span>     ____________________________ 
+<div class="codehilite"><pre><span></span><code>     ____________________________
     &lt; Hello There!! from Example &gt;
-     ---------------------------- 
+     ----------------------------
         \
          \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
+          \
+                        ##        .
+                  ## ## ##       ==
+               ## ## ## ##      ===
+           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+           \______ o          __/
+            \    \        __/
               \____\______/
-</pre></div>
-
+</code></pre></div>
 
 <p><br/></p>
 <h3 id="operations">Operations<a class="headerlink" href="#operations" title="Permanent link">&para;</a></h3>
-<p>Sometimes you need the ability to append or prepend a parameter value to 
+<p>Sometimes you need the ability to append or prepend a parameter value to
 an existing value in trigger resource. This is where the <code>operation</code> field within
 a parameter comes handy.</p>
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>operation</code> in the parameter at index 0.
    We will prepend the message to an existing value.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-04.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-04.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Send a HTTP request to the event-source.</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;hey!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;hey!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Inspect the output of the Argo workflow that was created.</p>
-<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>argo logs name_of_the_workflow
+</code></pre></div>
 
 </li>
 </ol>
 <p>You will see the following output,</p>
-<div class="codehilite"><pre><span></span>     __________________ 
+<div class="codehilite"><pre><span></span><code>     __________________
     &lt; hey!!hello world &gt;
-     ------------------ 
+     ------------------
         \
          \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
+          \
+                        ##        .
+                  ## ## ##       ==
+               ## ## ## ##      ===
+           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+           \______ o          __/
+            \    \        __/
               \____\______/
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="trigger-template-parameterization">Trigger Template Parameterization<a class="headerlink" href="#trigger-template-parameterization" title="Permanent link">&para;</a></h2>
 <p>The parameterization you saw above deals with the trigger resource, but sometimes
 you need to parameterize the trigger template itself. This comes handy when you have
 the trigger resource stored on some external source like S3, Git, etc. and you need
 to replace the url of the source on the fly in trigger template.</p>
-<p>Imagine a scenario where you want to parameterize the parameters of trigger to 
+<p>Imagine a scenario where you want to parameterize the parameters of trigger to
 parameterize the trigger resource. What?...</p>
 <p>The sensor you have been using in this tutorial has one parameter defined in the
 trigger resource under <code>k8s</code>. We will parameterize that <code>parameter</code> by
@@ -1632,46 +1647,42 @@ applying a parameter at the trigger template level.</p>
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add parameters at trigger level.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-05.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-05.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Send a HTTP request to the event-source.</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;dependencyName&quot;:&quot;test-dep&quot;, &quot;dataKey&quot;: &quot;body.message&quot;, &quot;dest&quot;: &quot;spec.arguments.parameters.0.value&quot;, &quot;message&quot;: &quot;amazing!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;dependencyName&quot;:&quot;test-dep&quot;, &quot;dataKey&quot;: &quot;body.message&quot;, &quot;dest&quot;: &quot;spec.arguments.parameters.0.value&quot;, &quot;message&quot;: &quot;amazing!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Inspect the output of the Argo workflow that was created.</p>
-<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>argo logs name_of_the_workflow
+</code></pre></div>
 
 </li>
 </ol>
 <p>You will see the following output,</p>
-<div class="codehilite"><pre><span></span>    ___________ 
+<div class="codehilite"><pre><span></span><code>    ___________
     &lt; amazing!! &gt;
-    ----------- 
+    -----------
     \
      \
-      \     
-                    ##        .            
-              ## ## ##       ==            
-           ## ## ## ##      ===            
-       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-       \______ o          __/            
-        \    \        __/             
+      \
+                    ##        .
+              ## ## ##       ==
+           ## ## ## ##      ===
+       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+       \______ o          __/
+        \    \        __/
           \____\______/
-</pre></div>
-
+</code></pre></div>
 
 <p>Great!! You have now learned how to apply parameters at trigger resource and template level.
-Keep in mind that you can apply default values and operations like prepend and append for 
+Keep in mind that you can apply default values and operations like prepend and append for
 trigger template parameters as well.</p>
                 
                   
@@ -1742,7 +1753,7 @@ trigger template parameters as well.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

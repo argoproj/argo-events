@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -895,6 +895,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -997,6 +1009,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1088,6 +1112,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1248,43 +1284,38 @@ will explore other trigger sources.</p>
 </li>
 <li>
 <p>Create a K8s secret that holds the SSH keys</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/&lt;YOUR_SSH_KEY_FILE_NAME&gt;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/&lt;YOUR_SSH_KEY_FILE_NAME&gt;
+</code></pre></div>
 
 </li>
 <li>
 <p>Create a K8s secret that holds known hosts.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
+</code></pre></div>
 
 </li>
 <li>
 <p>Create a sensor with the git trigger source and refer it to the <code>hello world</code> workflow stored
    on the Argo Git project</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-git.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-git.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Now, you should see an Argo workflow being created.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events get wf
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get wf
+</code></pre></div>
 
 </li>
 </ol>
 <h2 id="s3">S3<a class="headerlink" href="#s3" title="Permanent link">&para;</a></h2>
-<p>You can refer to the K8s resource stored on S3 complaint store as the trigger source.</p>
+<p>You can refer to the K8s resource stored on S3 compliant store as the trigger source.</p>
 <p>For this tutorial, lets set up a minio server which is S3 compliant store.</p>
 <ol>
 <li>
@@ -1303,23 +1334,20 @@ will explore other trigger sources.</p>
 </li>
 <li>
 <p>Create the sensor with trigger source as S3.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-minio.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-minio.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Now, you should see an Argo workflow being created.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events get wf
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get wf
+</code></pre></div>
 
 </li>
 </ol>
@@ -1328,30 +1356,26 @@ will explore other trigger sources.</p>
 <ol>
 <li>
 <p>Lets create a configmap called <code>trigger-store</code>.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/trigger-store.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/trigger-store.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Create a sensor with trigger source as configmap and refer it to the <code>trigger-store</code>.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-cm.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-cm.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Now, you should see an Argo workflow being created.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events get wf
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get wf
+</code></pre></div>
 
 </li>
 </ol>
@@ -1426,7 +1450,7 @@ will explore other trigger sources.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

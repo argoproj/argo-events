@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -976,6 +988,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1067,6 +1091,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1200,34 +1236,33 @@
 </li>
 <li>
 <p>Lets create the sensor,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">dependencies</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">minio</span>
-      <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
-        <span class="n">name</span><span class="o">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">nats</span><span class="o">:</span>
-          <span class="err">#</span> <span class="n">NATS</span> <span class="n">Server</span> <span class="n">URL</span>
-          <span class="n">url</span><span class="o">:</span> <span class="n">nats</span><span class="o">.</span><span class="na">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="na">svc</span><span class="o">:</span><span class="mi">4222</span>
-          <span class="err">#</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">subject</span>
-          <span class="n">subject</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">events</span>
-          <span class="n">payload</span><span class="o">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="o">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">s3</span><span class="o">.</span><span class="na">object</span><span class="o">.</span><span class="na">key</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">fileName</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="o">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">s3</span><span class="o">.</span><span class="na">bucket</span><span class="o">.</span><span class="na">name</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">bucket</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">sensor</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">dependencies</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">minio</span>
+      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
+  <span class="n">triggers</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">trigger</span>
+        <span class="n">nats</span><span class="p">:</span>
+          <span class="c1"># NATS Server URL</span>
+          <span class="n">url</span><span class="p">:</span> <span class="n">nats</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">4222</span>
+          <span class="c1"># Name of the subject</span>
+          <span class="n">subject</span><span class="p">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">events</span>
+          <span class="n">payload</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">key</span>
+              <span class="n">dest</span><span class="p">:</span> <span class="n">fileName</span>
+            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span>
+              <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
+</code></pre></div>
 
 </li>
 <li>
@@ -1237,34 +1272,30 @@
 </ol>
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a message body like below,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
         &quot;fileName&quot;: &quot;hello.txt&quot; // name/key of the object
         &quot;bucket&quot;: &quot;input&quot; // name of the bucket
     }
-</pre></div>
-
+</code></pre></div>
 
 <ol>
 <li>
 <p>If you are running NATS on local K8s cluster, make sure to <code>port-forward</code> to pod,</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;nats-pod-name&gt; 4222:4222
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;nats-pod-name&gt; 4222:4222
+</code></pre></div>
 
 </li>
 <li>
 <p>Subscribe to the subject called <code>minio-events</code>. Refer the nats example to publish a message to the subject https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe.</p>
-<div class="codehilite"><pre><span></span>   go run main.go -s localhost minio-events&#39;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="err">&#39;</span><span class="w"></span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on NATS subscriber
    as follows,</p>
-<div class="codehilite"><pre><span></span>[#1] Received on [minio-events]: &#39;{&quot;bucket&quot;:&quot;input&quot;,&quot;fileName&quot;:&quot;hello.txt&quot;}&#39;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>[#1] Received on [minio-events]: &#39;{&quot;bucket&quot;:&quot;input&quot;,&quot;fileName&quot;:&quot;hello.txt&quot;}&#39;
+</code></pre></div>
 
 </li>
 </ol>
@@ -1337,7 +1368,7 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

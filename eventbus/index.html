@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -919,6 +931,18 @@
   <li class="md-nav__item">
     <a href="../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../triggers/log/" title="Log" class="md-nav__link">
+      Log
     </a>
   </li>
 
@@ -1108,6 +1132,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
     <a href="../developer_guide/" title="Developer Guide" class="md-nav__link">
       Developer Guide
     </a>
@@ -1249,11 +1285,11 @@
                 
                 
                 <h1 id="eventbus">EventBus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h1>
-<p><img alt="alpha" src="../assets/alpha.svg" /></p>
+<p><img alt="GA" src="../assets/ga.svg" /></p>
 <blockquote>
 <p>v0.17.0 and after</p>
 </blockquote>
-<p>EventBus is a kubernetes
+<p>EventBus is a Kubernetes
 <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/">Custom Resource</a>
 which is used for events transmission from EventSources to Sensors. Currently
 EventBus is backed by
@@ -1265,22 +1301,22 @@ EventSource and Sensor work.</p>
 you want to use a different name, or you want to have multiple EventBus in one
 namespace, you need to specifiy <code>eventBusName</code> in the spec of EventSource and
 Sensor correspondingly, so that they can find the right one. See EventSource
-<a href="https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#eventsourcespec">spec</a> and Sensor
+<a href="https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#eventsourcespec">spec</a>
+and Sensor
 <a href="https://github.com/argoproj/argo-events/tree/stable/api/sensor.md#sensorspec">spec</a>.</p>
 <h2 id="nats-streaming">NATS Streaming<a class="headerlink" href="#nats-streaming" title="Permanent link">&para;</a></h2>
 <p>You can create a <code>native</code> NATS EventBus, or connect to an existing NATS
 Streaming service with <code>exotic</code> NATS EventBus.</p>
 <h3 id="native">Native<a class="headerlink" href="#native" title="Permanent link">&para;</a></h3>
-<p>A simplest <code>native</code> NATS EeventBus example:</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
-<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">nats</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">native</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{}</span>
-</pre></div>
-
+<p>A simplest <code>native</code> NATS EventBus example:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">nats</span><span class="p">:</span>
+    <span class="nt">native</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
+</code></pre></div>
 
 <p>The example above brings up a NATS Streaming
 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
@@ -1288,21 +1324,21 @@ with 3 replicas in the namespace.</p>
 <p>The following example shows an EventBus with <code>token</code> auth strategy and
 persistent volumes, the StatefulSet PODs will be created with anti-affinity
 rule.</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
-<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">nats</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">native</span><span class="p p-Indicator">:</span>
-      <span class="l l-Scalar l-Scalar-Plain">replicas</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span> <span class="c1"># optional, defaults to 3, and requires minimal 3</span>
-      <span class="l l-Scalar l-Scalar-Plain">auth</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span> <span class="c1"># optional, default to none</span>
-      <span class="l l-Scalar l-Scalar-Plain">antiAffinity</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span> <span class="c1"># optional, default to false</span>
-      <span class="l l-Scalar l-Scalar-Plain">persistence</span><span class="p p-Indicator">:</span> <span class="c1"># optional</span>
-        <span class="l l-Scalar l-Scalar-Plain">storageClassName</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">standard</span>
-        <span class="l l-Scalar l-Scalar-Plain">accessMode</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
-        <span class="l l-Scalar l-Scalar-Plain">volumeSize</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">10Gi</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">nats</span><span class="p">:</span>
+    <span class="nt">native</span><span class="p">:</span>
+      <span class="nt">replicas</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span> <span class="c1"># optional, defaults to 3, and requires minimal 3</span>
+      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span> <span class="c1"># optional, default to none</span>
+      <span class="nt">antiAffinity</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span> <span class="c1"># optional, default to false</span>
+      <span class="nt">persistence</span><span class="p">:</span> <span class="c1"># optional</span>
+        <span class="nt">storageClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">standard</span>
+        <span class="nt">accessMode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
+        <span class="nt">volumeSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10Gi</span>
+</code></pre></div>
 
 <ul>
 <li>
@@ -1329,8 +1365,9 @@ rule.</p>
   for the data.</p>
 </li>
 <li>
-<p>Check <a href="https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy">here</a> for the
-  full spec.</p>
+<p>Check
+  <a href="https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy">here</a>
+  for the full spec.</p>
 </li>
 </ul>
 <h4 id="more-about-native-nats-eventbus">More About Native NATS EventBus<a class="headerlink" href="#more-about-native-nats-eventbus" title="Permanent link">&para;</a></h4>
@@ -1340,7 +1377,8 @@ rule.</p>
 </li>
 <li>
 <p>Max age of messages is 72 hours, which means messages over 72 hours will be
-  deleted automatically.</p>
+  deleted automatically. It can be cutomized by setting
+  <code>spec.nats.native.maxAge</code>, i.e. <code>240h</code>.</p>
 </li>
 <li>
 <p>Max subscription number is 1000.</p>
@@ -1348,32 +1386,30 @@ rule.</p>
 </ul>
 <h3 id="exotic">Exotic<a class="headerlink" href="#exotic" title="Permanent link">&para;</a></h3>
 <p>To use an existing NATS Streaming service, follow the example below.</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
-<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">nats</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">exotic</span><span class="p p-Indicator">:</span>
-      <span class="l l-Scalar l-Scalar-Plain">url</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">nats://xxxxx:xxx</span>
-      <span class="l l-Scalar l-Scalar-Plain">clusterID</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cluster-id</span>
-      <span class="l l-Scalar l-Scalar-Plain">auth</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span>
-      <span class="l l-Scalar l-Scalar-Plain">accessSecret</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-secret-name</span>
-        <span class="l l-Scalar l-Scalar-Plain">key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secret-key</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">nats</span><span class="p">:</span>
+    <span class="nt">exotic</span><span class="p">:</span>
+      <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nats://xxxxx:xxx</span>
+      <span class="nt">clusterID</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cluster-id</span>
+      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span>
+      <span class="nt">accessSecret</span><span class="p">:</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my-secret-name</span>
+        <span class="nt">key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">secret-key</span>
+</code></pre></div>
 
 <h2 id="more-information">More Information<a class="headerlink" href="#more-information" title="Permanent link">&para;</a></h2>
 <ul>
 <li>To view a finalized EventBus config:</li>
 </ul>
-<div class="codehilite"><pre><span></span>kubectl get eventbus default  -o json <span class="p">|</span> jq <span class="s1">&#39;.status.config&#39;</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl get eventbus default  -o json <span class="p">|</span> jq <span class="s1">&#39;.status.config&#39;</span>
+</code></pre></div>
 
 <p>A sample result:</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
   <span class="nt">&quot;nats&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="nt">&quot;accessSecret&quot;</span><span class="p">:</span> <span class="p">{</span>
       <span class="nt">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;client-auth&quot;</span><span class="p">,</span>
@@ -1384,8 +1420,7 @@ rule.</p>
     <span class="nt">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;nats://eventbus-default-stan-svc:4222&quot;</span>
   <span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 <ul>
 <li>All the events in a namespace are published to same channel/subject/topic
@@ -1460,7 +1495,7 @@ rule.</p>
       
     </div>
     
-      <script src="../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
       

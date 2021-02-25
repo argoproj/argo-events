@@ -31,18 +31,18 @@
       
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
-      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
-        <title>Service Accounts - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Generic EventSource - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.3020aac5.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
-        <link rel="stylesheet" href="../assets/stylesheets/application-palette.224b79ff.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
       
         
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../assets/javascripts/modernizr.01ccdecf.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -60,7 +60,7 @@
         <style>body,input{font-family:"Work Sans","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"","Courier New",Courier,monospace}</style>
       
     
-    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
+    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
     
@@ -127,7 +127,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#service-accounts" tabindex="1" class="md-skip">
+      <a href="#generic-eventsource" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -136,9 +136,9 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href=".." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-header-nav__button md-logo">
+        <a href="../.." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-header-nav__button md-logo">
           
-            <img src="../assets/logo.png" width="24" height="24">
+            <img src="../../assets/logo.png" width="24" height="24">
           
         </a>
       </div>
@@ -152,7 +152,7 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              Service Accounts
+              Generic EventSource
             </span>
           
         </div>
@@ -226,9 +226,9 @@
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
   <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href=".." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-nav__button md-logo">
+    <a href="../.." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-nav__button md-logo">
       
-        <img src="../assets/logo.png" width="48" height="48">
+        <img src="../../assets/logo.png" width="48" height="48">
       
     </a>
     Argo Events - The Event-Based Dependency Manager for Kubernetes
@@ -262,7 +262,7 @@
 
 
   <li class="md-nav__item">
-    <a href=".." title="Overview" class="md-nav__link">
+    <a href="../.." title="Overview" class="md-nav__link">
       Overview
     </a>
   </li>
@@ -274,7 +274,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../installation/" title="Installation" class="md-nav__link">
+    <a href="../../installation/" title="Installation" class="md-nav__link">
       Installation
     </a>
   </li>
@@ -286,7 +286,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../managed-namespace/" title="Managed Namespace" class="md-nav__link">
+    <a href="../../managed-namespace/" title="Managed Namespace" class="md-nav__link">
       Managed Namespace
     </a>
   </li>
@@ -298,7 +298,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../quick_start/" title="Getting Started" class="md-nav__link">
+    <a href="../../quick_start/" title="Getting Started" class="md-nav__link">
       Getting Started
     </a>
   </li>
@@ -329,7 +329,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/architecture/" title="Architecture" class="md-nav__link">
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
       Architecture
     </a>
   </li>
@@ -341,7 +341,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/event_source/" title="Event Source" class="md-nav__link">
+    <a href="../../concepts/event_source/" title="Event Source" class="md-nav__link">
       Event Source
     </a>
   </li>
@@ -353,7 +353,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/sensor/" title="Sensor" class="md-nav__link">
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
       Sensor
     </a>
   </li>
@@ -365,7 +365,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/eventbus/" title="Eventbus" class="md-nav__link">
+    <a href="../../concepts/eventbus/" title="Eventbus" class="md-nav__link">
       Eventbus
     </a>
   </li>
@@ -377,7 +377,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../concepts/trigger/" title="Trigger" class="md-nav__link">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
       Trigger
     </a>
   </li>
@@ -413,7 +413,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/amqp/" title="AMQP" class="md-nav__link">
+    <a href="../../setup/amqp/" title="AMQP" class="md-nav__link">
       AMQP
     </a>
   </li>
@@ -425,7 +425,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/aws-sns/" title="AWS SNS" class="md-nav__link">
+    <a href="../../setup/aws-sns/" title="AWS SNS" class="md-nav__link">
       AWS SNS
     </a>
   </li>
@@ -437,7 +437,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/aws-sqs/" title="AWS SQS" class="md-nav__link">
+    <a href="../../setup/aws-sqs/" title="AWS SQS" class="md-nav__link">
       AWS SQS
     </a>
   </li>
@@ -449,7 +449,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/calendar/" title="Calendar" class="md-nav__link">
+    <a href="../../setup/calendar/" title="Calendar" class="md-nav__link">
       Calendar
     </a>
   </li>
@@ -461,7 +461,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/emitter/" title="Emitter" class="md-nav__link">
+    <a href="../../setup/emitter/" title="Emitter" class="md-nav__link">
       Emitter
     </a>
   </li>
@@ -473,7 +473,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/file/" title="File" class="md-nav__link">
+    <a href="../../setup/file/" title="File" class="md-nav__link">
       File
     </a>
   </li>
@@ -485,7 +485,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/gcp-pub-sub/" title="GCP Pub/Sub" class="md-nav__link">
+    <a href="../../setup/gcp-pub-sub/" title="GCP Pub/Sub" class="md-nav__link">
       GCP Pub/Sub
     </a>
   </li>
@@ -497,7 +497,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/github/" title="GitHub" class="md-nav__link">
+    <a href="../../setup/github/" title="GitHub" class="md-nav__link">
       GitHub
     </a>
   </li>
@@ -509,7 +509,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/gitlab/" title="GitLab" class="md-nav__link">
+    <a href="../../setup/gitlab/" title="GitLab" class="md-nav__link">
       GitLab
     </a>
   </li>
@@ -521,7 +521,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/kafka/" title="Kafka" class="md-nav__link">
+    <a href="../../setup/kafka/" title="Kafka" class="md-nav__link">
       Kafka
     </a>
   </li>
@@ -533,7 +533,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/minio/" title="Minio" class="md-nav__link">
+    <a href="../../setup/minio/" title="Minio" class="md-nav__link">
       Minio
     </a>
   </li>
@@ -545,7 +545,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/mqtt/" title="MQTT" class="md-nav__link">
+    <a href="../../setup/mqtt/" title="MQTT" class="md-nav__link">
       MQTT
     </a>
   </li>
@@ -557,7 +557,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/nats/" title="NATS" class="md-nav__link">
+    <a href="../../setup/nats/" title="NATS" class="md-nav__link">
       NATS
     </a>
   </li>
@@ -569,7 +569,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/nsq/" title="NSQ" class="md-nav__link">
+    <a href="../../setup/nsq/" title="NSQ" class="md-nav__link">
       NSQ
     </a>
   </li>
@@ -581,7 +581,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/redis/" title="Redis" class="md-nav__link">
+    <a href="../../setup/redis/" title="Redis" class="md-nav__link">
       Redis
     </a>
   </li>
@@ -593,7 +593,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/resource/" title="Resource" class="md-nav__link">
+    <a href="../../setup/resource/" title="Resource" class="md-nav__link">
       Resource
     </a>
   </li>
@@ -605,7 +605,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/webhook/" title="Webhook" class="md-nav__link">
+    <a href="../../setup/webhook/" title="Webhook" class="md-nav__link">
       Webhook
     </a>
   </li>
@@ -617,7 +617,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../setup/pulsar/" title="Pulsar" class="md-nav__link">
+    <a href="../../setup/pulsar/" title="Pulsar" class="md-nav__link">
       Pulsar
     </a>
   </li>
@@ -653,7 +653,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/01-introduction/" title="Introduction" class="md-nav__link">
+    <a href="../../tutorials/01-introduction/" title="Introduction" class="md-nav__link">
       Introduction
     </a>
   </li>
@@ -665,7 +665,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/02-parameterization/" title="Parameterization" class="md-nav__link">
+    <a href="../../tutorials/02-parameterization/" title="Parameterization" class="md-nav__link">
       Parameterization
     </a>
   </li>
@@ -677,7 +677,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
+    <a href="../../tutorials/03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
       Trigger Sources
     </a>
   </li>
@@ -689,7 +689,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-nav__link">
+    <a href="../../tutorials/04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-nav__link">
       Trigger Standard K8s Resources
     </a>
   </li>
@@ -701,7 +701,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
+    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
       Trigger Custom Resources
     </a>
   </li>
@@ -713,7 +713,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/06-trigger-conditions/" title="Trigger Conditions" class="md-nav__link">
+    <a href="../../tutorials/06-trigger-conditions/" title="Trigger Conditions" class="md-nav__link">
       Trigger Conditions
     </a>
   </li>
@@ -725,7 +725,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/07-filters/" title="Filters" class="md-nav__link">
+    <a href="../../tutorials/07-filters/" title="Filters" class="md-nav__link">
       Filters
     </a>
   </li>
@@ -737,7 +737,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/08-policy/" title="Policy" class="md-nav__link">
+    <a href="../../tutorials/08-policy/" title="Policy" class="md-nav__link">
       Policy
     </a>
   </li>
@@ -752,10 +752,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8" checked>
     
     <label class="md-nav__link" for="nav-8">
       EventSources
@@ -773,7 +775,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../eventsources/deployment-strategies/" title="EventSource Deployment Strategies" class="md-nav__link">
+    <a href="../deployment-strategies/" title="EventSource Deployment Strategies" class="md-nav__link">
       EventSource Deployment Strategies
     </a>
   </li>
@@ -785,7 +787,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../eventsources/multiple-events/" title="EventSource With Multiple Events" class="md-nav__link">
+    <a href="../multiple-events/" title="EventSource With Multiple Events" class="md-nav__link">
       EventSource With Multiple Events
     </a>
   </li>
@@ -797,7 +799,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../eventsources/naming/" title="EventSource Names" class="md-nav__link">
+    <a href="../naming/" title="EventSource Names" class="md-nav__link">
       EventSource Names
     </a>
   </li>
@@ -809,7 +811,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../eventsources/services/" title="EventSource Services" class="md-nav__link">
+    <a href="../services/" title="EventSource Services" class="md-nav__link">
       EventSource Services
     </a>
   </li>
@@ -821,7 +823,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../eventsources/gcp-pubsub/" title="GCP PubSub" class="md-nav__link">
+    <a href="../gcp-pubsub/" title="GCP PubSub" class="md-nav__link">
       GCP PubSub
     </a>
   </li>
@@ -831,11 +833,77 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Generic EventSource
+      </label>
+    
+    <a href="./" title="Generic EventSource" class="md-nav__link md-nav__link--active">
       Generic EventSource
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#contract" title="Contract" class="md-nav__link">
+    Contract
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" title="Architecture" class="md-nav__link">
+    Architecture
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flow" title="Flow" class="md-nav__link">
+    Flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-strategy" title="Connection Strategy" class="md-nav__link">
+    Connection Strategy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-strategy" title="Deployment Strategy" class="md-nav__link">
+    Deployment Strategy
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -869,7 +937,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
+    <a href="../../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
       Argo Workflow Trigger
     </a>
   </li>
@@ -881,7 +949,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/aws-lambda/" title="AWS Lambda" class="md-nav__link">
+    <a href="../../triggers/aws-lambda/" title="AWS Lambda" class="md-nav__link">
       AWS Lambda
     </a>
   </li>
@@ -893,7 +961,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/http-trigger/" title="HTTP Trigger" class="md-nav__link">
+    <a href="../../triggers/http-trigger/" title="HTTP Trigger" class="md-nav__link">
       HTTP Trigger
     </a>
   </li>
@@ -905,7 +973,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/nats-trigger/" title="NATS Trigger" class="md-nav__link">
+    <a href="../../triggers/nats-trigger/" title="NATS Trigger" class="md-nav__link">
       NATS Trigger
     </a>
   </li>
@@ -917,7 +985,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/kafka-trigger/" title="Kafka Trigger" class="md-nav__link">
+    <a href="../../triggers/kafka-trigger/" title="Kafka Trigger" class="md-nav__link">
       Kafka Trigger
     </a>
   </li>
@@ -929,7 +997,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
+    <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
     </a>
   </li>
@@ -941,7 +1009,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/log/" title="Log" class="md-nav__link">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
       Log
     </a>
   </li>
@@ -953,7 +1021,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+    <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
   </li>
@@ -965,7 +1033,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+    <a href="../../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
       Slack Trigger
     </a>
   </li>
@@ -977,7 +1045,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
+    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
       Build Your Own Trigger
     </a>
   </li>
@@ -994,7 +1062,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../eventbus/" title="EventBus" class="md-nav__link">
+    <a href="../../eventbus/" title="EventBus" class="md-nav__link">
       EventBus
     </a>
   </li>
@@ -1006,7 +1074,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../webhook-authentication/" title="Webhook Authentication" class="md-nav__link">
+    <a href="../../webhook-authentication/" title="Webhook Authentication" class="md-nav__link">
       Webhook Authentication
     </a>
   </li>
@@ -1018,7 +1086,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../webhook-health-check/" title="Webhook Health Check" class="md-nav__link">
+    <a href="../../webhook-health-check/" title="Webhook Health Check" class="md-nav__link">
       Webhook Health Check
     </a>
   </li>
@@ -1030,7 +1098,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../trigger-conditions/" title="Trigger Conditions" class="md-nav__link">
+    <a href="../../trigger-conditions/" title="Trigger Conditions" class="md-nav__link">
       Trigger Conditions
     </a>
   </li>
@@ -1040,90 +1108,11 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Service Accounts
-      </label>
-    
-    <a href="./" title="Service Accounts" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#service-account-for-eventsources" title="Service Account for EventSources" class="md-nav__link">
-    Service Account for EventSources
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#service-account-for-sensors" title="Service Account for Sensors" class="md-nav__link">
-    Service Account for Sensors
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#argo-workflow-trigger" title="Argo Workflow Trigger" class="md-nav__link">
-    Argo Workflow Trigger
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#k8s-resource-trigger" title="K8s Resource Trigger" class="md-nav__link">
-    K8s Resource Trigger
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aws-lambda-http-slack-nats-kafka-and-openwhisk-triggers" title="AWS Lambda, HTTP, Slack, NATS, Kafka, and OpenWhisk Triggers" class="md-nav__link">
-    AWS Lambda, HTTP, Slack, NATS, Kafka, and OpenWhisk Triggers
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#service-account-for-trigged-workflows-or-other-k8s-resources" title="Service Account for Trigged Workflows (or other K8s resources)" class="md-nav__link">
-    Service Account for Trigged Workflows (or other K8s resources)
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
     
@@ -1133,7 +1122,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
       Validating Admission Webhook
     </a>
   </li>
@@ -1145,7 +1134,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../developer_guide/" title="Developer Guide" class="md-nav__link">
+    <a href="../../developer_guide/" title="Developer Guide" class="md-nav__link">
       Developer Guide
     </a>
   </li>
@@ -1157,7 +1146,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../FAQ/" title="FAQs" class="md-nav__link">
+    <a href="../../FAQ/" title="FAQs" class="md-nav__link">
       FAQs
     </a>
   </li>
@@ -1220,49 +1209,36 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#service-account-for-eventsources" title="Service Account for EventSources" class="md-nav__link">
-    Service Account for EventSources
+  <a href="#contract" title="Contract" class="md-nav__link">
+    Contract
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#service-account-for-sensors" title="Service Account for Sensors" class="md-nav__link">
-    Service Account for Sensors
+  <a href="#architecture" title="Architecture" class="md-nav__link">
+    Architecture
   </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#argo-workflow-trigger" title="Argo Workflow Trigger" class="md-nav__link">
-    Argo Workflow Trigger
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#k8s-resource-trigger" title="K8s Resource Trigger" class="md-nav__link">
-    K8s Resource Trigger
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aws-lambda-http-slack-nats-kafka-and-openwhisk-triggers" title="AWS Lambda, HTTP, Slack, NATS, Kafka, and OpenWhisk Triggers" class="md-nav__link">
-    AWS Lambda, HTTP, Slack, NATS, Kafka, and OpenWhisk Triggers
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#service-account-for-trigged-workflows-or-other-k8s-resources" title="Service Account for Trigged Workflows (or other K8s resources)" class="md-nav__link">
-    Service Account for Trigged Workflows (or other K8s resources)
+  <a href="#flow" title="Flow" class="md-nav__link">
+    Flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-strategy" title="Connection Strategy" class="md-nav__link">
+    Connection Strategy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-strategy" title="Deployment Strategy" class="md-nav__link">
+    Deployment Strategy
   </a>
   
 </li>
@@ -1283,72 +1259,84 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/service-accounts.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/eventsources/generic.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="service-accounts">Service Accounts<a class="headerlink" href="#service-accounts" title="Permanent link">&para;</a></h1>
-<h2 id="service-account-for-eventsources">Service Account for EventSources<a class="headerlink" href="#service-account-for-eventsources" title="Permanent link">&para;</a></h2>
-<p>A <code>Service Account</code> can be specified in the EventSource object with
-<code>spec.template.serviceAccountName</code>, however it is not needed for all the
-EventSource types except <code>resource</code>. For a <code>resource</code> EventSource, you need to
-specify a Service Accout and give it <code>list</code> and <code>watch</code> permissions for the
-resource being watched.</p>
-<p>For example, if you want to watch actions on <code>Deployment</code> objects, you need to:</p>
+                <h1 id="generic-eventsource">Generic EventSource<a class="headerlink" href="#generic-eventsource" title="Permanent link">&para;</a></h1>
+<p>Generic eventsource extends Argo-Events eventsources via a simple gRPC contract. This is specifically useful when you want to onboard a custom eventsource implementation.</p>
+<h2 id="contract">Contract<a class="headerlink" href="#contract" title="Permanent link">&para;</a></h2>
+<p>In order to qualify as generic eventsource, the eventsource server needs to implement following gRPC contract,</p>
+<div class="codehilite"><pre><span></span><code>    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;proto3&quot;</span><span class="p">;</span>
+
+    <span class="n">package</span> <span class="n">generic</span><span class="p">;</span>
+
+    <span class="n">service</span> <span class="n">Eventing</span> <span class="p">{</span>
+        <span class="n">rpc</span> <span class="n">StartEventSource</span><span class="p">(</span><span class="n">EventSource</span><span class="p">)</span> <span class="n">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">Event</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">message</span> <span class="n">EventSource</span> <span class="p">{</span>
+        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">source</span> <span class="n">name</span><span class="o">.</span>
+        <span class="n">string</span> <span class="n">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">source</span> <span class="n">configuration</span> <span class="n">value</span><span class="o">.</span>
+        <span class="n">bytes</span> <span class="n">config</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="o">/**</span>
+    <span class="o">*</span> <span class="n">Represents</span> <span class="n">an</span> <span class="n">event</span>
+    <span class="o">*/</span>
+    <span class="n">message</span> <span class="n">Event</span> <span class="p">{</span>
+        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">source</span> <span class="n">name</span><span class="o">.</span>
+        <span class="n">string</span> <span class="n">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">payload</span><span class="o">.</span>
+        <span class="n">bytes</span> <span class="n">payload</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></div>
+
+<p>The proto file is available <a href="https://github.com/argoproj/argo-events/blob/master/eventsources/sources/generic/generic.proto">here</a>.</p>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<p><br/>
+<br/></p>
+<p><img alt="arch" src="../../assets/generic-eventsource.png" /></p>
+<p><br/></p>
+<p>Consider a generic eventsource,</p>
+<div class="codehilite"><pre><span></span><code>    apiVersion: argoproj.io/v1alpha1
+    kind: EventSource
+    metadata:
+      name: generic
+    spec:
+      generic:
+        example:
+          insecure: true
+          url: &quot;generic-event-source-server.argo-events.svc:8080&quot;
+          config: |-
+            key1: value1
+            key2: value2
+</code></pre></div>
+
+<p>The values placed under <code>config</code> field follows a free-form style and Argo-Events eventsource client is not 
+opinionated about them. Although, it is expected that the eventsource server implemented by the user is able to parse the configuration. </p>
+<h2 id="flow">Flow<a class="headerlink" href="#flow" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Create a Service Account</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n your-namespace create sa my-sa
-</code></pre></div>
-
+<p>The eventsource client connects to the server via the <code>url</code> defined under eventsource <code>spec</code> and sends over the configuration defined
+under <code>config</code> over an RPC call.</p>
 </li>
 <li>
-<p>Grant RBAC privileges to it</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n your-namespace create role deployments-watcher --verb=list,watch --resource=deployments.apps
-
-kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa
-</code></pre></div>
-
-<p>or (if you want to watch cluster scope)</p>
-<div class="codehilite"><pre><span></span><code>kubectl create clusterrole deployments-watcher --verb=list,watch --resource=deployments.apps
-
-kubectl create clusterrolebinding deployments-watcher-clusterrole-binding --clusterrole=deployments-watcher --serviceaccount=your-namespace:my-sa
-</code></pre></div>
-
+<p>The eventsource server then parses the configuration and connects to any external source if required to consume the events.
+The eventsource server can produce events without connecting to any external source, e.g. a special implementation of calendar events.</p>
+</li>
+<li>
+<p>The events from eventsource server are streamed back to the client.</p>
+</li>
+<li>
+<p>Client then writes the events to the eventbus which are read by the sensor to trigger the workflows.</p>
 </li>
 </ol>
-<h2 id="service-account-for-sensors">Service Account for Sensors<a class="headerlink" href="#service-account-for-sensors" title="Permanent link">&para;</a></h2>
-<p>A <code>Service Account</code> also can be specified in a Sensor object via
-<code>spec.template.serviceAccountName</code>, this is only needed when <code>k8s</code> trigger or
-<code>argoWorkflow</code> trigger is defined in the Sensor object.</p>
-<p>The sensor examples provided by us use <code>argo-events-sa</code> service account to
-execute the triggers, but it has more permissions than needed, and you may want
-to limit those privileges based on your use-case. It's always a good practice to
-create a service account with minimum privileges to execute it.</p>
-<h3 id="argo-workflow-trigger">Argo Workflow Trigger<a class="headerlink" href="#argo-workflow-trigger" title="Permanent link">&para;</a></h3>
-<ul>
-<li>
-<p>To <code>submit</code> a workflow through <code>argoWorkflow</code> trigger, make sure to grant the
-  Service Account <code>create</code> and <code>list</code> access to <code>workflows.argoproj.io</code>.</p>
-</li>
-<li>
-<p>To <code>resubmit</code>, <code>retry</code>, <code>resume</code> or <code>suspend</code> a workflow through
-  <code>argoWorkflow</code> trigger, the service account needs <code>update</code> and <code>get</code> access to
-  <code>workflows.argoproj.io</code>.</p>
-</li>
-</ul>
-<h3 id="k8s-resource-trigger">K8s Resource Trigger<a class="headerlink" href="#k8s-resource-trigger" title="Permanent link">&para;</a></h3>
-<p>To trigger a K8s resource including <code>workflows.argoproj.io</code> through <code>k8s</code>
-trigger, make sure to grant <code>create</code> permission to that resource.</p>
-<h3 id="aws-lambda-http-slack-nats-kafka-and-openwhisk-triggers">AWS Lambda, HTTP, Slack, NATS, Kafka, and OpenWhisk Triggers<a class="headerlink" href="#aws-lambda-http-slack-nats-kafka-and-openwhisk-triggers" title="Permanent link">&para;</a></h3>
-<p>For these triggers, you <strong>don't</strong> need to specify a Service Account to the
-Sensor.</p>
-<h2 id="service-account-for-trigged-workflows-or-other-k8s-resources">Service Account for Trigged Workflows (or other K8s resources)<a class="headerlink" href="#service-account-for-trigged-workflows-or-other-k8s-resources" title="Permanent link">&para;</a></h2>
-<p>When the Sensor is used to trigger a Workflow, you might need to configure the
-Service Account used in the Workflow spec (<strong>NOT</strong>
-<code>spec.template.serviceAccountName</code>) following Argo Workflow
-<a href="https://github.com/argoproj/argo/blob/master/docs/service-accounts.md">instructions</a>.</p>
-<p>If it is used to trigger other K8s resources (i.e. a Deployment), make sure to
-follow least privilege principle.</p>
+<h2 id="connection-strategy">Connection Strategy<a class="headerlink" href="#connection-strategy" title="Permanent link">&para;</a></h2>
+<p>The eventsource client performs indefinite retries to connect to the eventsource server and receives events over a stream upon successful
+connection. This also applies when the eventsource server goes down.</p>
+<h2 id="deployment-strategy">Deployment Strategy<a class="headerlink" href="#deployment-strategy" title="Permanent link">&para;</a></h2>
+<p>The deployment strategy for the generic eventsource is <code>Recreate</code>. More info is available <a href="../deployment-strategies/">here</a>.</p>
                 
                   
                 
@@ -1369,7 +1357,7 @@ follow least privilege principle.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../trigger-conditions/" title="Trigger Conditions" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../gcp-pubsub/" title="GCP PubSub" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1378,19 +1366,19 @@ follow least privilege principle.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Trigger Conditions
+                GCP PubSub
               </span>
             </div>
           </a>
         
         
-          <a href="../validating-admission-webhook/" title="Validating Admission Webhook" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Validating Admission Webhook
+                Argo Workflow Trigger
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
@@ -1418,9 +1406,9 @@ follow least privilege principle.</p>
       
     </div>
     
-      <script src="../assets/javascripts/application.dc02f8ce.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
-      <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
+      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
     
   </body>

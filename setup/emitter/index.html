@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -838,6 +838,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -930,6 +942,18 @@
   <li class="md-nav__item">
     <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
     </a>
   </li>
 
@@ -1041,6 +1065,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
     <a href="../../developer_guide/" title="Developer Guide" class="md-nav__link">
       Developer Guide
     </a>
@@ -1129,23 +1165,22 @@
 <p>Emitter event-source subscribes to a channel and helps sensor trigger the workloads.</p>
 <h1 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h1>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
-        &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;time&quot;: &quot;event_time&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
-        },
-        &quot;data&quot;: {
-          &quot;topic&quot;: &quot;name_of_the_topic&quot;,
-          &quot;body&quot;: &quot;message_payload&quot;
-        }
-    }
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    <span class="p">{</span>
+        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;specversion&quot;</span><span class="p">:</span> <span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;topic&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_topic&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="s2">&quot;message_payload&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>Emitter event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#emittereventsource">here</a>.</p>
@@ -1153,65 +1188,63 @@
 <ol>
 <li>
 <p>Deploy the emitter in your local K8s cluster,</p>
-<div class="codehilite"><pre><span></span>---
-apiVersion: v1
-kind: Service
-metadata:
-  name: broker
-  labels:
-    app: broker
-spec:
-  clusterIP: None
-  ports:
-    - port: 4000
-      targetPort: 4000
-  selector:
-    app: broker
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: broker
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: broker
-  template:
-    metadata:
-      labels:
-        app: broker
-    spec:
-      containers:
-        - env:
-            - name: EMITTER_LICENSE
-              value: &quot;zT83oDV0DWY5_JysbSTPTDr8KB0AAAAAAAAAAAAAAAI&quot; # This is a test license, DO NOT USE IN PRODUCTION!
-            - name: EMITTER_CLUSTER_SEED
-              value: &quot;broker&quot;
-            - name: EMITTER_CLUSTER_ADVERTISE
-              value: &quot;private:4000&quot;
-          name: broker
-          image: emitter/server:latest
-          ports:
-            - containerPort: 8080
-            - containerPort: 443
-            - containerPort: 4000
-          volumeMounts:
-            - name: broker-volume
-              mountPath: /data
-      volumes:
-        - name: broker-volume
-          hostPath:
-            path: /emitter #directory on host
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="o">---</span>
+<span class="nv">apiVersion</span>: <span class="nv">v1</span>
+<span class="nv">kind</span>: <span class="nv">Service</span>
+<span class="nv">metadata</span>:
+  <span class="nv">name</span>: <span class="nv">broker</span>
+  <span class="nv">labels</span>:
+    <span class="nv">app</span>: <span class="nv">broker</span>
+<span class="nv">spec</span>:
+  <span class="nv">clusterIP</span>: <span class="nv">None</span>
+  <span class="nv">ports</span>:
+    <span class="o">-</span> <span class="nv">port</span>: <span class="mi">4000</span>
+      <span class="nv">targetPort</span>: <span class="mi">4000</span>
+  <span class="nv">selector</span>:
+    <span class="nv">app</span>: <span class="nv">broker</span>
+<span class="o">---</span>
+<span class="nv">apiVersion</span>: <span class="nv">apps</span><span class="o">/</span><span class="nv">v1</span>
+<span class="nv">kind</span>: <span class="nv">Deployment</span>
+<span class="nv">metadata</span>:
+  <span class="nv">name</span>: <span class="nv">broker</span>
+<span class="nv">spec</span>:
+  <span class="nv">replicas</span>: <span class="mi">1</span>
+  <span class="nv">selector</span>:
+    <span class="nv">matchLabels</span>:
+      <span class="nv">app</span>: <span class="nv">broker</span>
+  <span class="nv">template</span>:
+    <span class="nv">metadata</span>:
+      <span class="nv">labels</span>:
+        <span class="nv">app</span>: <span class="nv">broker</span>
+    <span class="nv">spec</span>:
+      <span class="nv">containers</span>:
+        <span class="o">-</span> <span class="nv">env</span>:
+            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">EMITTER_LICENSE</span>
+              <span class="nv">value</span>: <span class="s2">&quot;</span><span class="s">zT83oDV0DWY5_JysbSTPTDr8KB0AAAAAAAAAAAAAAAI</span><span class="s2">&quot;</span> # <span class="nv">This</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">test</span> <span class="nv">license</span>, <span class="k">DO</span> <span class="nv">NOT</span> <span class="nv">USE</span> <span class="nv">IN</span> <span class="nv">PRODUCTION</span><span class="o">!</span>
+            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">EMITTER_CLUSTER_SEED</span>
+              <span class="nv">value</span>: <span class="s2">&quot;</span><span class="s">broker</span><span class="s2">&quot;</span>
+            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">EMITTER_CLUSTER_ADVERTISE</span>
+              <span class="nv">value</span>: <span class="s2">&quot;</span><span class="s">private:4000</span><span class="s2">&quot;</span>
+          <span class="nv">name</span>: <span class="nv">broker</span>
+          <span class="nv">image</span>: <span class="nv">emitter</span><span class="o">/</span><span class="nv">server</span>:<span class="nv">latest</span>
+          <span class="nv">ports</span>:
+            <span class="o">-</span> <span class="nv">containerPort</span>: <span class="mi">8080</span>
+            <span class="o">-</span> <span class="nv">containerPort</span>: <span class="mi">443</span>
+            <span class="o">-</span> <span class="nv">containerPort</span>: <span class="mi">4000</span>
+          <span class="nv">volumeMounts</span>:
+            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">broker</span><span class="o">-</span><span class="nv">volume</span>
+              <span class="nv">mountPath</span>: <span class="o">/</span><span class="nv">data</span>
+      <span class="nv">volumes</span>:
+        <span class="o">-</span> <span class="nv">name</span>: <span class="nv">broker</span><span class="o">-</span><span class="nv">volume</span>
+          <span class="nv">hostPath</span>:
+            <span class="nv">path</span>: <span class="o">/</span><span class="nv">emitter</span> #<span class="nv">directory</span> <span class="nv">on</span> <span class="nv">host</span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Create the event-source by running the following command.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/emitter.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/emitter.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1219,9 +1252,8 @@ spec:
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/emitter.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/emitter.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1302,7 +1334,7 @@ spec:
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -888,6 +888,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -990,6 +1002,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1081,6 +1105,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1216,7 +1252,7 @@
 <p>File event-source listens to file system events and helps sensor trigger workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
         &quot;context&quot;: {
           &quot;type&quot;: &quot;type_of_event_source&quot;,
           &quot;specversion&quot;: &quot;cloud_events_version&quot;,
@@ -1231,8 +1267,7 @@
             &quot;op&quot;: &quot;File operation that triggered the event&quot; // Create, Write, Remove, Rename, Chmod
         }
     }
-</pre></div>
-
+</code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>File event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#fileeventsource">here</a>.</p>
@@ -1240,9 +1275,8 @@
 <ol>
 <li>
 <p>Create the event source by running the following command.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/file.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/file.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1250,26 +1284,23 @@
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/file.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/file.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Log into the event-source pod by running following command,</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events exec -it &lt;event-source-pod-name&gt; -c file-events -- /bin/bash
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nv">kubectl</span> <span class="o">-</span><span class="nv">n</span> <span class="nv">argo</span><span class="o">-</span><span class="nv">events</span> <span class="k">exec</span> <span class="o">-</span><span class="nv">it</span> <span class="o">&lt;</span><span class="nv">event</span><span class="o">-</span><span class="nv">source</span><span class="o">-</span><span class="nv">pod</span><span class="o">-</span><span class="nv">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="nv">c</span> <span class="nv">file</span><span class="o">-</span><span class="nv">events</span> <span class="o">--</span> <span class="o">/</span><span class="nv">bin</span><span class="o">/</span><span class="nv">bash</span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Let's create a file called <code>x.txt</code> under <code>test-data</code> directory in the event-source pod.</p>
-<div class="codehilite"><pre><span></span>cd test-data
+<div class="codehilite"><pre><span></span><code>cd test-data
 cat &lt;&lt;EOF &gt; x.txt
 hello
 EOF
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
@@ -1350,7 +1381,7 @@ EOF
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

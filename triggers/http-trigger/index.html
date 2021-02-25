@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -1017,6 +1029,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1108,6 +1132,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1281,12 +1317,12 @@
 <h2 id="rest-api-calls">REST API Calls<a class="headerlink" href="#rest-api-calls" title="Permanent link">&para;</a></h2>
 <p>Consider a scenario where your REST API server needs to consume events from event-sources S3, GitHub, SQS etc. Usually, you'd end up writing
 the integration yourself in the server code, although server logic has nothing to do any of the event-sources. This is where Argo Events HTTP trigger
-can hel. The HTTP trigger takes the task of consuming events from event-sources away from API server and seamlessly integrates these events via REST API calls.</p>
+can help. The HTTP trigger takes the task of consuming events from event-sources away from API server and seamlessly integrates these events via REST API calls.</p>
 <p>We will set up a basic go http server and connect it with the minio events.</p>
 <ol>
 <li>
 <p>The HTTP server simply prints the request body as follows,</p>
-<div class="codehilite"><pre><span></span><span class="n">package</span> <span class="n">main</span>
+<div class="codehilite"><pre><span></span><code><span class="n">package</span> <span class="n">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s2">&quot;fmt&quot;</span>
@@ -1295,7 +1331,7 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
 <span class="p">)</span>
 
 <span class="n">func</span> <span class="n">hello</span><span class="p">(</span><span class="n">w</span> <span class="n">http</span><span class="o">.</span><span class="n">ResponseWriter</span><span class="p">,</span> <span class="n">req</span> <span class="o">*</span><span class="n">http</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">body</span><span class="p">,</span> <span class="n">err</span> <span class="p">:</span><span class="o">=</span> <span class="n">ioutil</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span>
+    <span class="n">body</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">ioutil</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
         <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&quot;%+v</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
         <span class="k">return</span>
@@ -1309,29 +1345,25 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
     <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;server is listening on 8090&quot;</span><span class="p">)</span>
     <span class="n">http</span><span class="o">.</span><span class="n">ListenAndServe</span><span class="p">(</span><span class="s2">&quot;:8090&quot;</span><span class="p">,</span> <span class="n">nil</span><span class="p">)</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy the HTTP server,</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Create a service to expose the http server</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server-svc.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server-svc.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Either use Ingress, OpenShift Route or port-forwarding to expose the http server..</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;http-server-pod-name&gt; 8090:8090
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;http-server-pod-name&gt; 8090:8090
+</code></pre></div>
 
 </li>
 <li>
@@ -1341,9 +1373,8 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
 </li>
 <li>
 <p>Create a sensor as follows,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/http-trigger.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/http-trigger.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1351,10 +1382,9 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
 </li>
 <li>
 <p>The sensor has triggered a http request to the http server. Take a look at the logs</p>
-<div class="codehilite"><pre><span></span>server is listening on 8090
+<div class="codehilite"><pre><span></span><code>server is listening on 8090
 {&quot;type&quot;:&quot;minio&quot;,&quot;bucket&quot;:&quot;input&quot;}
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
@@ -1365,29 +1395,27 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
 <p>In order to construct a request payload based on the event data, sensor offers 
 <code>payload</code> field as a part of the HTP trigger.</p>
 <p>Let's examine a HTTP trigger,</p>
-<div class="codehilite"><pre><span></span>    http:
-      url: http://http-server.argo-events.svc:8090/hello
-      payload:
-        - src:
-            dependencyName: test-dep
-            dataKey: notification.0.s3.bucket.name
-          dest: bucket
-        - src:
-            dependencyName: test-dep
-            contextKey: type
-          dest: type
-      method: POST  // GET, DELETE, POST, PUT, HEAD, etc.
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    <span class="n">http</span><span class="p">:</span>
+      <span class="n">url</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">http</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">8090</span><span class="o">/</span><span class="n">hello</span>
+      <span class="n">payload</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+            <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span>
+          <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
+        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+            <span class="n">contextKey</span><span class="p">:</span> <span class="n">type</span>
+          <span class="n">dest</span><span class="p">:</span> <span class="n">type</span>
+      <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>  <span class="o">//</span> <span class="n">GET</span><span class="p">,</span> <span class="n">DELETE</span><span class="p">,</span> <span class="n">POST</span><span class="p">,</span> <span class="n">PUT</span><span class="p">,</span> <span class="n">HEAD</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span>
+</code></pre></div>
 
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a request payload like below,</p>
-<div class="codehilite"><pre><span></span>    {
+<div class="codehilite"><pre><span></span><code>    {
       &quot;type&quot;: &quot;type of event from event&#39;s context&quot;
       &quot;bucket&quot;: &quot;bucket name from event data&quot;
     }
-</pre></div>
-
+</code></pre></div>
 
 <p>The above payload will be passed in the HTTP request. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>. </p>
 <p><strong>Note</strong>: Take a look at <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">Parameterization</a> in order to understand how to extract particular key-value from
@@ -1400,25 +1428,24 @@ you want to define a generic trigger template in the sensor and populate values 
 <p>Trigger policy helps you determine the status of the HTTP request and decide whether to stop or continue sensor. </p>
 <p>To determine whether the HTTP request was successful or not, the HTTP trigger provides a <code>Status</code> policy.
 The <code>Status</code> holds a list of response statuses that are considered valid.</p>
-<div class="codehilite"><pre><span></span>    http:
-      url: http://http-server.argo-events.svc:8090/hello
-      payload:
-        - src:
-            dependencyName: test-dep
-            dataKey: notification.0s3.bucket.name
-          dest: bucket
-        - src:
-            dependencyName: test-dep
-            contextKey: type
-          dest: type
-      method: POST  // GET, DELETE, POST, PUT, HEAD, etc.
-      policy:
-        status:
-          allow:
-            - 200
-            - 201
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>    <span class="n">http</span><span class="p">:</span>
+      <span class="n">url</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">http</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">8090</span><span class="o">/</span><span class="n">hello</span>
+      <span class="n">payload</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+            <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span>
+          <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
+        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+            <span class="n">contextKey</span><span class="p">:</span> <span class="n">type</span>
+          <span class="n">dest</span><span class="p">:</span> <span class="n">type</span>
+      <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>  <span class="o">//</span> <span class="n">GET</span><span class="p">,</span> <span class="n">DELETE</span><span class="p">,</span> <span class="n">POST</span><span class="p">,</span> <span class="n">PUT</span><span class="p">,</span> <span class="n">HEAD</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span>
+      <span class="n">policy</span><span class="p">:</span>
+        <span class="n">status</span><span class="p">:</span>
+          <span class="n">allow</span><span class="p">:</span>
+            <span class="o">-</span> <span class="mi">200</span>
+            <span class="o">-</span> <span class="mi">201</span>
+</code></pre></div>
 
 <p>The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status. </p>
 <h2 id="openfaas">OpenFaas<a class="headerlink" href="#openfaas" title="Permanent link">&para;</a></h2>
@@ -1431,7 +1458,7 @@ to invoke OpenFaas function.</p>
 <li>
 <p>Let's create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>
    to set up the function.</p>
-<div class="codehilite"><pre><span></span><span class="n">package</span> <span class="n">function</span>
+<div class="codehilite"><pre><span></span><code><span class="n">package</span> <span class="n">function</span>
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s2">&quot;fmt&quot;</span>
@@ -1441,8 +1468,7 @@ to invoke OpenFaas function.</p>
 <span class="n">func</span> <span class="n">Handle</span><span class="p">(</span><span class="n">req</span> <span class="p">[]</span><span class="n">byte</span><span class="p">)</span> <span class="n">string</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s2">&quot;Hello, Go. You said: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(</span><span class="n">req</span><span class="p">))</span>
 <span class="p">}</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
@@ -1457,36 +1483,34 @@ to invoke OpenFaas function.</p>
 </li>
 <li>
 <p>Let's create the sensor with OpenFaas trigger</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">redis</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">template</span><span class="o">:</span>
-    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
-  <span class="n">dependencies</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">redis</span>
-      <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
-        <span class="n">name</span><span class="o">:</span> <span class="n">openfaas</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">http</span><span class="o">:</span>
-          <span class="n">url</span><span class="o">:</span> <span class="n">http</span><span class="o">://</span><span class="n">gateway</span><span class="o">.</span><span class="na">openfaas</span><span class="o">.</span><span class="na">svc</span><span class="o">.</span><span class="na">cluster</span><span class="o">.</span><span class="na">local</span><span class="o">:</span><span class="mi">8080</span><span class="sr">/function/g</span><span class="n">ohash</span>
-          <span class="n">payload</span><span class="o">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">bucket</span>
-          <span class="n">method</span><span class="o">:</span> <span class="n">POST</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">redis</span><span class="o">-</span><span class="n">sensor</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">serviceAccountName</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+  <span class="n">dependencies</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">redis</span>
+      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
+  <span class="n">triggers</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">openfaas</span><span class="o">-</span><span class="n">trigger</span>
+        <span class="n">http</span><span class="p">:</span>
+          <span class="n">url</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">gateway</span><span class="o">.</span><span class="n">openfaas</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span><span class="n">function</span><span class="o">/</span><span class="n">gohash</span>
+          <span class="n">payload</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+              <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
+          <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Publish a message on <code>FOO</code> channel using <code>redis-cli</code>.</p>
-<div class="codehilite"><pre><span></span>PUBLISH FOO hello
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>PUBLISH FOO hello
+</code></pre></div>
 
 </li>
 <li>
@@ -1501,11 +1525,10 @@ to invoke OpenFaas function.</p>
 </li>
 <li>
 <p>Lets create a basic function,</p>
-<div class="codehilite"><pre><span></span>def hello(event, context):
-  print event
-  return event[&#39;data&#39;]
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nv">def</span> <span class="nv">hello</span><span class="ss">(</span><span class="nv">event</span>, <span class="nv">context</span><span class="ss">)</span>:
+  <span class="nv">print</span> <span class="nv">event</span>
+  <span class="k">return</span> <span class="nv">event</span>[<span class="s1">&#39;</span><span class="s">data</span><span class="s1">&#39;</span>]
+</code></pre></div>
 
 </li>
 <li>
@@ -1520,48 +1543,45 @@ to invoke OpenFaas function.</p>
 </li>
 <li>
 <p>Let's create NATS sensor with HTTP trigger,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">template</span><span class="o">:</span>
-    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
-  <span class="n">dependencies</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">nats</span>
-      <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
-        <span class="n">name</span><span class="o">:</span> <span class="n">kubeless</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">http</span><span class="o">:</span>
-          <span class="n">serverURL</span><span class="o">:</span> <span class="n">http</span><span class="o">://</span><span class="n">hello</span><span class="o">.</span><span class="na">kubeless</span><span class="o">.</span><span class="na">svc</span><span class="o">.</span><span class="na">cluster</span><span class="o">.</span><span class="na">local</span><span class="o">:</span><span class="mi">8080</span>
-          <span class="n">payload</span><span class="o">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="o">:</span> <span class="n">body</span><span class="o">.</span><span class="na">first_name</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">first_name</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="o">:</span> <span class="n">body</span><span class="o">.</span><span class="na">last_name</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">last_name</span>
-          <span class="n">method</span><span class="o">:</span> <span class="n">POST</span>
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">sensor</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">serviceAccountName</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+  <span class="n">dependencies</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">nats</span>
+      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
+  <span class="n">triggers</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">kubeless</span><span class="o">-</span><span class="n">trigger</span>
+        <span class="n">http</span><span class="p">:</span>
+          <span class="n">serverURL</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hello</span><span class="o">.</span><span class="n">kubeless</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="mi">8080</span>
+          <span class="n">payload</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">first_name</span>
+              <span class="n">dest</span><span class="p">:</span> <span class="n">first_name</span>
+            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
+                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">last_name</span>
+              <span class="n">dest</span><span class="p">:</span> <span class="n">last_name</span>
+          <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Once event-source and sensor pod are up and running, dispatch a message on <code>foo</code> subject using nats client,</p>
-<div class="codehilite"><pre><span></span>go run main.go -s localhost foo &#39;{&quot;first_name&quot;: &quot;foo&quot;, &quot;last_name&quot;: &quot;bar&quot;}&#39;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="s1">&#39;{&quot;first_name&quot;: &quot;foo&quot;, &quot;last_name&quot;: &quot;bar&quot;}&#39;</span><span class="w"></span>
+</code></pre></div>
 
 </li>
 <li>
 <p>It will invoke Kubeless function <code>hello</code>,</p>
-<div class="codehilite"><pre><span></span>{&#39;event-time&#39;: None, &#39;extensions&#39;: {&#39;request&#39;: &lt;LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/&gt; }, &#39;event-type&#39;: None, &#39;event-namespace&#39;: None, &#39;data&#39;: &#39;{&quot;first_name&quot;:&quot;foo&quot;,&quot;last_name&quot;:&quot;bar&quot;}&#39;, &#39;event-id&#39;: None}
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>{&#39;event-time&#39;: None, &#39;extensions&#39;: {&#39;request&#39;: &lt;LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/&gt; }, &#39;event-type&#39;: None, &#39;event-namespace&#39;: None, &#39;data&#39;: &#39;{&quot;first_name&quot;:&quot;foo&quot;,&quot;last_name&quot;:&quot;bar&quot;}&#39;, &#39;event-id&#39;: None}
+</code></pre></div>
 
 </li>
 </ol>
@@ -1636,7 +1656,7 @@ to invoke OpenFaas function.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

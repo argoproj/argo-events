@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -827,6 +827,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -990,6 +1002,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1081,6 +1105,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1231,14 +1267,13 @@ set up event-driven pipelines for existing workloads.</p>
 </li>
 <li>
 <p>Lets set up a webhook event source to process incoming requests.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>To trigger a pod, we need to create a sensor as defined below,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span>
@@ -1275,8 +1310,7 @@ set up event-driven pipelines for existing workloads.</p>
             <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
                 <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
               <span class="n">dest</span><span class="o">:</span> <span class="n">spec</span><span class="o">.</span><span class="na">containers</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="mi">0</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
@@ -1285,28 +1319,25 @@ set up event-driven pipelines for existing workloads.</p>
 </li>
 <li>
 <p>Create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Lets expose the webhook event-source pod using <code>port-forward</code> so that we can make a request to it.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
+</code></pre></div>
 
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Inspect the logs of the pod, you will something similar as below,</p>
-<div class="codehilite"><pre><span></span>_________________________________________ 
+<div class="codehilite"><pre><span></span><code>_________________________________________ 
 / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
 | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
 | ventID&quot;:&quot;30306463666539362d346666642d34 |
@@ -1331,8 +1362,7 @@ set up event-driven pipelines for existing workloads.</p>
      \______ o          __/            
       \    \        __/             
         \____\______/
-</pre></div>
-
+</code></pre></div>
 
 </li>
 </ol>
@@ -1353,28 +1383,27 @@ you want to define a generic trigger template in the sensor and populate the K8s
 <p>Trigger policy helps you determine the status of the triggered K8s object and decide whether to stop or continue sensor. </p>
 <p>To determine whether the K8s object was successful or not, the K8s trigger provides a <code>Resource Labels</code> policy.
 The <code>Resource Labels</code> holds a list of labels which are checked against the triggered K8s object to determine the status of the object.</p>
-<div class="codehilite"><pre><span></span>            # Policy to configure backoff and execution criteria for the trigger
-            # Because the sensor is able to trigger any K8s resource, it determines the resource state by looking at the resource&#39;s labels.
-            policy:
-              k8s:
-                # Backoff before checking the resource labels
-                backoff:
-                  # Duration is the duration in nanoseconds
-                  duration: 1000000000 # 1 second
-                  # Duration is multiplied by factor each iteration
-                  factor: 2
-                  # The amount of jitter applied each iteration
-                  jitter: 0.1
-                  # Exit with error after these many steps
-                  steps: 5
-                # labels set on the resource decide if the resource has transitioned into the success state.
-                labels:
-                  workflows.argoproj.io/phase: Succeeded
-                # Determines whether trigger should be marked as failed if the backoff times out and sensor is still unable to decide the state of the trigger.
-                # defaults to false
-                errorOnBackoffTimeout: true
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>            # <span class="nv">Policy</span> <span class="nv">to</span> <span class="nv">configure</span> <span class="nv">backoff</span> <span class="nv">and</span> <span class="nv">execution</span> <span class="nv">criteria</span> <span class="k">for</span> <span class="nv">the</span> <span class="nv">trigger</span>
+            # <span class="nv">Because</span> <span class="nv">the</span> <span class="nv">sensor</span> <span class="nv">is</span> <span class="nv">able</span> <span class="nv">to</span> <span class="nv">trigger</span> <span class="nv">any</span> <span class="nv">K8s</span> <span class="nv">resource</span>, <span class="nv">it</span> <span class="nv">determines</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">state</span> <span class="nv">by</span> <span class="nv">looking</span> <span class="nv">at</span> <span class="nv">the</span> <span class="nv">resource</span><span class="s1">&#39;</span><span class="s">s labels.</span>
+            <span class="nv">policy</span>:
+              <span class="nv">k8s</span>:
+                # <span class="nv">Backoff</span> <span class="nv">before</span> <span class="nv">checking</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">labels</span>
+                <span class="nv">backoff</span>:
+                  # <span class="nv">Duration</span> <span class="nv">is</span> <span class="nv">the</span> <span class="nv">duration</span> <span class="nv">in</span> <span class="nv">nanoseconds</span>
+                  <span class="nv">duration</span>: <span class="mi">1000000000</span> # <span class="mi">1</span> <span class="nv">second</span>
+                  # <span class="nv">Duration</span> <span class="nv">is</span> <span class="nv">multiplied</span> <span class="nv">by</span> <span class="nv">factor</span> <span class="nv">each</span> <span class="nv">iteration</span>
+                  <span class="nv">factor</span>: <span class="mi">2</span>
+                  # <span class="nv">The</span> <span class="nv">amount</span> <span class="nv">of</span> <span class="nv">jitter</span> <span class="nv">applied</span> <span class="nv">each</span> <span class="nv">iteration</span>
+                  <span class="nv">jitter</span>: <span class="mi">0</span>.<span class="mi">1</span>
+                  # <span class="k">Exit</span> <span class="nv">with</span> <span class="nv">error</span> <span class="nv">after</span> <span class="nv">these</span> <span class="nv">many</span> <span class="nv">steps</span>
+                  <span class="nv">steps</span>: <span class="mi">5</span>
+                # <span class="nv">labels</span> <span class="nv">set</span> <span class="nv">on</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">decide</span> <span class="k">if</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">has</span> <span class="nv">transitioned</span> <span class="nv">into</span> <span class="nv">the</span> <span class="nv">success</span> <span class="nv">state</span>.
+                <span class="nv">labels</span>:
+                  <span class="nv">workflows</span>.<span class="nv">argoproj</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">phase</span>: <span class="nv">Succeeded</span>
+                # <span class="nv">Determines</span> <span class="nv">whether</span> <span class="nv">trigger</span> <span class="nv">should</span> <span class="nv">be</span> <span class="nv">marked</span> <span class="nv">as</span> <span class="nv">failed</span> <span class="k">if</span> <span class="nv">the</span> <span class="nv">backoff</span> <span class="nv">times</span> <span class="nv">out</span> <span class="nv">and</span> <span class="nv">sensor</span> <span class="nv">is</span> <span class="nv">still</span> <span class="nv">unable</span> <span class="nv">to</span> <span class="nv">decide</span> <span class="nv">the</span> <span class="nv">state</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">trigger</span>.
+                # <span class="nv">defaults</span> <span class="nv">to</span> <span class="nv">false</span>
+                <span class="nv">errorOnBackoffTimeout</span>: <span class="nv">true</span>
+</code></pre></div>
 
 <p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-with-policy.yaml">here</a>. </p>
                 
@@ -1412,13 +1441,13 @@ The <code>Resource Labels</code> holds a list of labels which are checked agains
           </a>
         
         
-          <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../log/" title="Log" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                OpenWhisk Trigger
+                Log
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
@@ -1446,7 +1475,7 @@ The <code>Resource Labels</code> holds a list of labels which are checked agains
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

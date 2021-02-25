@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -881,6 +881,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -983,6 +995,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1074,6 +1098,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1202,28 +1238,27 @@
 <p>SQS event-source listens to messages on AWS SQS queue and helps sensor trigger workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span>        {
-            &quot;context&quot;: {
-              &quot;type&quot;: &quot;type_of_event_source&quot;,
-              &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-              &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-              &quot;id&quot;: &quot;unique_event_id&quot;,
-              &quot;time&quot;: &quot;event_time&quot;,
-              &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-              &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
+<div class="codehilite"><pre><span></span><code>        {
+            <span class="s2">&quot;</span><span class="s">context</span><span class="s2">&quot;</span>: {
+              <span class="s2">&quot;</span><span class="s">type</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">type_of_event_source</span><span class="s2">&quot;</span>,
+              <span class="s2">&quot;</span><span class="s">specversion</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">cloud_events_version</span><span class="s2">&quot;</span>,
+              <span class="s2">&quot;</span><span class="s">source</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">name_of_the_event_source</span><span class="s2">&quot;</span>,
+              <span class="s2">&quot;</span><span class="s">id</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">unique_event_id</span><span class="s2">&quot;</span>,
+              <span class="s2">&quot;</span><span class="s">time</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">event_time</span><span class="s2">&quot;</span>,
+              <span class="s2">&quot;</span><span class="s">datacontenttype</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">type_of_data</span><span class="s2">&quot;</span>,
+              <span class="s2">&quot;</span><span class="s">subject</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">name_of_the_configuration_within_event_source</span><span class="s2">&quot;</span>
             },
-            &quot;data&quot;: {
-                &quot;messageId&quot;: &quot;message id&quot;,
-                // Each message attribute consists of a Name, Type, and Value. For more information,
-                // see Amazon SQS Message Attributes
-                // (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html)
-                // in the Amazon Simple Queue Service Developer Guide.
-                &quot;messageAttributes&quot;: &quot;message attributes&quot;, 
-                &quot;body&quot;: &quot;Body is the message data&quot;,
+            <span class="s2">&quot;</span><span class="s">data</span><span class="s2">&quot;</span>: {
+                <span class="s2">&quot;</span><span class="s">messageId</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">message id</span><span class="s2">&quot;</span>,
+                <span class="o">//</span> <span class="nv">Each</span> <span class="nv">message</span> <span class="nv">attribute</span> <span class="nv">consists</span> <span class="nv">of</span> <span class="nv">a</span> <span class="nv">Name</span>, <span class="nv">Type</span>, <span class="nv">and</span> <span class="nv">Value</span>. <span class="k">For</span> <span class="nv">more</span> <span class="nv">information</span>,
+                <span class="o">//</span> <span class="nv">see</span> <span class="nv">Amazon</span> <span class="nv">SQS</span> <span class="nv">Message</span> <span class="nv">Attributes</span>
+                <span class="o">//</span> <span class="ss">(</span><span class="nv">https</span>:<span class="o">//</span><span class="nv">docs</span>.<span class="nv">aws</span>.<span class="nv">amazon</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">AWSSimpleQueueService</span><span class="o">/</span><span class="nv">latest</span><span class="o">/</span><span class="nv">SQSDeveloperGuide</span><span class="o">/</span><span class="nv">sqs</span><span class="o">-</span><span class="nv">message</span><span class="o">-</span><span class="nv">attributes</span>.<span class="nv">html</span><span class="ss">)</span>
+                <span class="o">//</span> <span class="nv">in</span> <span class="nv">the</span> <span class="nv">Amazon</span> <span class="nv">Simple</span> <span class="nv">Queue</span> <span class="nv">Service</span> <span class="nv">Developer</span> <span class="nv">Guide</span>.
+                <span class="s2">&quot;</span><span class="s">messageAttributes</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">message attributes</span><span class="s2">&quot;</span>, 
+                <span class="s2">&quot;</span><span class="s">body</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">Body is the message data</span><span class="s2">&quot;</span>,
             }
         }
-</pre></div>
-
+</code></pre></div>
 
 <p><br/></p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
@@ -1236,7 +1271,7 @@
 </li>
 <li>
 <p>Create a secret called <code>aws-secret</code> as follows,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
@@ -1244,22 +1279,19 @@
 <span class="n">data</span><span class="o">:</span>
   <span class="n">accesskey</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
   <span class="n">secretkey</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy the secret</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f aws-secret.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f aws-secret.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Create the event source by running the following command.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/aws-sqs.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/aws-sqs.yaml
+</code></pre></div>
 
 </li>
 <li>
@@ -1267,16 +1299,14 @@
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-sqs.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-sqs.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Dispatch a message on sqs queue,</p>
-<div class="codehilite"><pre><span></span>aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/XXXXX/test --message-body &#39;{&quot;message&quot;: &quot;hello&quot;}&#39;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code><span class="nv">aws</span> <span class="nv">sqs</span> <span class="k">send</span><span class="o">-</span><span class="nv">message</span> <span class="o">--</span><span class="nv">queue</span><span class="o">-</span><span class="nv">url</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">sqs</span>.<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>.<span class="nv">amazonaws</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">XXXXX</span><span class="o">/</span><span class="nv">test</span> <span class="o">--</span><span class="nv">message</span><span class="o">-</span><span class="nv">body</span> <span class="s1">&#39;</span><span class="s">{&quot;message&quot;: &quot;hello&quot;}</span><span class="s1">&#39;</span>
+</code></pre></div>
 
 </li>
 <li>
@@ -1354,7 +1384,7 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

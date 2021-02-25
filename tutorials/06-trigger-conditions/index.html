@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -874,6 +874,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -976,6 +988,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1067,6 +1091,18 @@
   <li class="md-nav__item">
     <a href="../../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1205,17 +1241,15 @@ want to trigger an Argo workflow if the sensor receives an event from the
 <li>
 <p>Create the webhook event-source and event-source. The event-source listens
     to HTTP requests on port <code>12000</code></p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/webhook-event-source.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/webhook-event-source.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Create the minio event-source. The event-source listens to events of type
     <code>PUT</code> and <code>DELETE</code> for objects in bucket <code>test</code>.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/minio-event-source.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/minio-event-source.yaml
+</code></pre></div>
 
 </li>
 </ol>
@@ -1226,22 +1260,20 @@ want to trigger an Argo workflow if the sensor receives an event from the
     you will notice that it contains a field named <code>conditions</code>, which is a
     boolean expression contains dependency names. So, as soon as the expression
     is resolved as true, the corresponding trigger will be executed.</p>
-<div class="codehilite"><pre><span></span> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-01.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-01.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Send a HTTP request to Webhook event-source,</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>You will notice an Argo worklfow with name <code>group-1-xxxx</code> is created with
     following output,</p>
-<div class="codehilite"><pre><span></span> __________________________
+<div class="codehilite"><pre><span></span><code> __________________________
 &lt; this is my first webhook &gt;
  --------------------------
     \
@@ -1255,15 +1287,14 @@ want to trigger an Argo workflow if the sensor receives an event from the
        \______ o          __/
         \    \        __/
           \____\______/
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
 <p>Now, lets generate a Minio event so that we can run <code>group-2-xxxx</code> workflow.
     Drop a file onto <code>test</code> bucket. The workflow that will get created will
     print the name of the bucket as follows,</p>
-<div class="codehilite"><pre><span></span> ______
+<div class="codehilite"><pre><span></span><code> ______
 &lt; test &gt;
  ------
     \
@@ -1277,21 +1308,19 @@ want to trigger an Argo workflow if the sensor receives an event from the
        \______ o          __/
         \    \        __/
           \____\______/
-</pre></div>
-
+</code></pre></div>
 
 </li>
 <li>
 <p>Great!! You have now learned how to use <code>conditions</code>. Lets update the sensor
     with a trigger that waits for both dependencies to resolve. This is the
     normal sensor behavior if <code>conditions</code> is not defined.</p>
-<div class="codehilite"><pre><span></span> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-02.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-02.yaml
+</code></pre></div>
 
 <p>Send a HTTP request and perform a file drop on Minio bucket as done above.
 You should following output,</p>
-<div class="codehilite"><pre><span></span> _______________________________
+<div class="codehilite"><pre><span></span><code> _______________________________
 &lt; this is my first webhook test &gt;
  -------------------------------
     \
@@ -1305,8 +1334,7 @@ You should following output,</p>
        \______ o          __/
         \    \        __/
           \____\______/
-</pre></div>
-
+</code></pre></div>
 
 </li>
 </ol>
@@ -1379,7 +1407,7 @@ You should following output,</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       

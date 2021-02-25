@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -913,6 +913,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -1015,6 +1027,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../triggers/log/" title="Log" class="md-nav__link">
+      Log
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
@@ -1106,6 +1130,18 @@
   <li class="md-nav__item">
     <a href="../service-accounts/" title="Service Accounts" class="md-nav__link">
       Service Accounts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
     </a>
   </li>
 
@@ -1275,34 +1311,32 @@
 <ol>
 <li>
 <p>Create the namespace</p>
-<div class="codehilite"><pre><span></span>kubectl create namespace argo-events
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl create namespace argo-events
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
+# Install with a validating admission controller
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
+</code></pre></div>
 
 <p>NOTE: </p>
-<div class="codehilite"><pre><span></span> * On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
+<div class="codehilite"><pre><span></span><code> <span class="o">*</span> <span class="k">On</span> <span class="n">GKE</span><span class="p">,</span> <span class="n">you</span> <span class="n">may</span> <span class="n">need</span> <span class="k">to</span> <span class="k">grant</span> <span class="n">your</span> <span class="k">account</span> <span class="n">the</span> <span class="n">ability</span> <span class="k">to</span> <span class="k">create</span> <span class="k">new</span> <span class="n">custom</span> <span class="k">resource</span> <span class="n">definitions</span> <span class="k">and</span> <span class="n">clusterroles</span>
 
-        kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+        <span class="n">kubectl</span> <span class="k">create</span> <span class="n">clusterrolebinding</span> <span class="n">YOURNAME</span><span class="o">-</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span><span class="o">-</span><span class="n">binding</span> <span class="o">--</span><span class="n">clusterrole</span><span class="o">=</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span> <span class="o">--</span><span class="k">user</span><span class="o">=</span><span class="n">YOUREMAIL</span><span class="nv">@gmail.com</span>
 
- * On Openshift, make sure to grant `anyuid` scc to the service account.
+ <span class="o">*</span> <span class="k">On</span> <span class="n">Openshift</span><span class="p">,</span> <span class="n">make</span> <span class="n">sure</span> <span class="k">to</span> <span class="k">grant</span> <span class="n n-Quoted">`anyuid`</span> <span class="n">scc</span> <span class="k">to</span> <span class="n">the</span> <span class="n">service</span> <span class="k">account</span><span class="p">.</span>
 
-        oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
-</pre></div>
-
+        <span class="n">oc</span> <span class="n">adm</span> <span class="n">policy</span> <span class="k">add</span><span class="o">-</span><span class="n">scc</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="k">user</span> <span class="n">anyuid</span> <span class="k">system</span><span class="o">:</span><span class="n">serviceaccount</span><span class="o">:</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">:</span><span class="k">default</span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy the eventbus,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+</code></pre></div>
 
 </li>
 </ol>
@@ -1310,46 +1344,41 @@
 <ol>
 <li>
 <p>Create the namespace</p>
-<div class="codehilite"><pre><span></span>kubectl create namespace argo-events
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl create namespace argo-events
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
+</code></pre></div>
 
 <p>NOTE: </p>
-<div class="codehilite"><pre><span></span> * On GKE, you may need to grant your account the ability to create new custom resource definitions
+<div class="codehilite"><pre><span></span><code> <span class="o">*</span> <span class="k">On</span> <span class="n">GKE</span><span class="p">,</span> <span class="n">you</span> <span class="n">may</span> <span class="n">need</span> <span class="k">to</span> <span class="k">grant</span> <span class="n">your</span> <span class="k">account</span> <span class="n">the</span> <span class="n">ability</span> <span class="k">to</span> <span class="k">create</span> <span class="k">new</span> <span class="n">custom</span> <span class="k">resource</span> <span class="n">definitions</span>
 
-        kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+        <span class="n">kubectl</span> <span class="k">create</span> <span class="n">clusterrolebinding</span> <span class="n">YOURNAME</span><span class="o">-</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span><span class="o">-</span><span class="n">binding</span> <span class="o">--</span><span class="n">clusterrole</span><span class="o">=</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span> <span class="o">--</span><span class="k">user</span><span class="o">=</span><span class="n">YOUREMAIL</span><span class="nv">@gmail.com</span>
 
- * On Openshift, make sure to grant `anyuid` scc to the service account.
+ <span class="o">*</span> <span class="k">On</span> <span class="n">Openshift</span><span class="p">,</span> <span class="n">make</span> <span class="n">sure</span> <span class="k">to</span> <span class="k">grant</span> <span class="n n-Quoted">`anyuid`</span> <span class="n">scc</span> <span class="k">to</span> <span class="n">the</span> <span class="n">service</span> <span class="k">account</span><span class="p">.</span>
 
-        oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
-</pre></div>
-
+        <span class="n">oc</span> <span class="n">adm</span> <span class="n">policy</span> <span class="k">add</span><span class="o">-</span><span class="n">scc</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="k">user</span> <span class="n">anyuid</span> <span class="k">system</span><span class="o">:</span><span class="n">serviceaccount</span><span class="o">:</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">:</span><span class="k">default</span>
+</code></pre></div>
 
 </li>
 <li>
 <p>Deploy the eventbus,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+</code></pre></div>
 
 </li>
 </ol>
 <h3 id="using-kustomize">Using Kustomize<a class="headerlink" href="#using-kustomize" title="Permanent link">&para;</a></h3>
-<p>Use either <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/cluster-install"><code>cluster-install</code></a> or <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install"><code>namespace-install</code></a> folder as your base for Kustomize.</p>
+<p>Use either <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/cluster-install"><code>cluster-install</code></a>, or <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/cluster-install-with-extension"><code>cluster-install-with-extension</code></a>, or <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install"><code>namespace-install</code></a> folder as your base for Kustomize.</p>
 <p><code>kustomization.yaml</code>:</p>
-<div class="codehilite"><pre><span></span>bases:
+<div class="codehilite"><pre><span></span><code>bases:
   - github.com/argoproj/argo-events/manifests/cluster-install
   # OR
   - github.com/argoproj/argo-events/manifests/namespace-install
-</pre></div>
-
+</code></pre></div>
 
 <h3 id="using-helm-chart">Using Helm Chart<a class="headerlink" href="#using-helm-chart" title="Permanent link">&para;</a></h3>
 <p>Note: This method does not work with Helm 3, only Helm 2.</p>
@@ -1360,9 +1389,8 @@
 </li>
 <li>
 <p>Add <code>argoproj</code> repository</p>
-<div class="codehilite"><pre><span></span>helm repo add argo https://argoproj.github.io/argo-helm
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>helm repo add argo https://argoproj.github.io/argo-helm
+</code></pre></div>
 
 </li>
 <li>
@@ -1371,9 +1399,8 @@
 </li>
 <li>
 <p>Install <code>argo-events</code> chart</p>
-<div class="codehilite"><pre><span></span>helm install argo-events argo/argo-events
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>helm install argo-events argo/argo-events
+</code></pre></div>
 
 </li>
 </ol>
@@ -1448,7 +1475,7 @@
       
     </div>
     
-      <script src="../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
       

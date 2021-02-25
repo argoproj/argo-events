@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.1.1">
     
     
       
@@ -40,7 +40,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.3020aac5.css">
       
         <link rel="stylesheet" href="../assets/stylesheets/application-palette.224b79ff.css">
       
@@ -51,7 +51,7 @@
       
     
     
-      <script src="../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../assets/javascripts/modernizr.01ccdecf.js"></script>
     
     
       
@@ -836,6 +836,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../eventsources/generic/" title="Generic EventSource" class="md-nav__link">
+      Generic EventSource
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -928,6 +940,18 @@
   <li class="md-nav__item">
     <a href="../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../triggers/log/" title="Log" class="md-nav__link">
+      Log
     </a>
   </li>
 
@@ -1039,6 +1063,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../validating-admission-webhook/" title="Validating Admission Webhook" class="md-nav__link">
+      Validating Admission Webhook
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
     <a href="../developer_guide/" title="Developer Guide" class="md-nav__link">
       Developer Guide
     </a>
@@ -1129,25 +1165,22 @@
 <ol>
 <li>
 <p>Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+</code></pre></div>
 
 </li>
 <li>
 <p>Setup event-source for webhook as follows,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
 
 </li>
 </ol>
 <p>The above event-source contains a single event configuration that runs an HTTP server on port <code>12000</code> with endpoint <code>example</code>.</p>
 <p>After running the above command, the event-source controller will create a pod and service.</p>
 <ol>
-<li>Create webhook sensor,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
-</pre></div>
-
+<li>Create webhook sensor,<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+</code></pre></div>
 
 </li>
 </ol>
@@ -1155,23 +1188,20 @@
 <ol>
 <li>
 <p>Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;event-source-pod-name&gt; 12000:12000
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &amp;
+</code></pre></div>
 
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the http://localhost:12000/example</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
 
 </li>
 <li>
 <p>Verify that an Argo workflow was triggered.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events get workflows | grep &quot;webhook&quot;
-</pre></div>
-
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get workflows | grep &quot;webhook&quot;
+</code></pre></div>
 
 </li>
 </ol>
@@ -1244,7 +1274,7 @@
       
     </div>
     
-      <script src="../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../assets/javascripts/application.dc02f8ce.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
       
