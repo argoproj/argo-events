@@ -376,7 +376,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
         },
         "antiAffinity": {
-          "description": "Deprecated, use Affinity instead, will be removed in v1.5",
+          "description": "Deprecated: use Affinity instead, will be removed in v1.5",
           "type": "boolean"
         },
         "auth": {
