@@ -64,7 +64,11 @@ spec:
         volumeSize: 10Gi
 ```
 
-Fields of `native`:
+#### Properties
+
+Check
+[here](https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy)
+for the full spec of `native`.
 
 - `replicas` - StatefulSet replicas, defaults to 3, and requires minimal 3.
   According to
@@ -147,10 +151,6 @@ affinity:
             eventbus-name: default
         topologyKey: kubernetes.io/hostname
 ```
-
-- Check
-  [here](https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy)
-  for the full spec.
 
 #### More About Native NATS EventBus
 
