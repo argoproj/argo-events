@@ -209,7 +209,7 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 .PHONY: start
 start: all-images
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kustomize build --load_restrictor=none test/manifests | sed 's/argoproj\//$(IMAGE_NAMESPACE)\//' | sed 's/:latest/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
+	kustomize build test/manifests | sed 's/argoproj\//$(IMAGE_NAMESPACE)\//' | sed 's/:latest/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
