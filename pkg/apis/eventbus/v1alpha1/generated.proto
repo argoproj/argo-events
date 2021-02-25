@@ -51,6 +51,7 @@ message EventBus {
 
   optional EventBusSpec spec = 2;
 
+  // +optional
   optional EventBusStatus status = 3;
 }
 

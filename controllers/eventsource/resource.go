@@ -288,6 +288,9 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	eventSourceContainer := corev1.Container{
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
+		Ports: []corev1.ContainerPort{
+			{Name: "metrics", ContainerPort: common.EventSourceMetricsPort},
+		},
 	}
 	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Container != nil {
 		if err := mergo.Merge(&eventSourceContainer, args.EventSource.Spec.Template.Container, mergo.WithOverride); err != nil {

@@ -79,6 +79,7 @@ nav:
   - 'trigger-conditions.md'
   - 'service-accounts.md'
   - 'validating-admission-webhook.md'
+  - 'metrics.md'
   - 'developer_guide.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases

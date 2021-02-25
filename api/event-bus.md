@@ -160,6 +160,7 @@ NATS eventbus
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 </td>
 </tr>
 </tbody>

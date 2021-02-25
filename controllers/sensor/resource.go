@@ -241,6 +241,9 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	sensorContainer := corev1.Container{
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
+		Ports: []corev1.ContainerPort{
+			{Name: "metrics", ContainerPort: common.SensorMetricsPort},
+		},
 	}
 	if args.Sensor.Spec.Template != nil && args.Sensor.Spec.Template.Container != nil {
 		if err := mergo.Merge(&sensorContainer, args.Sensor.Spec.Template.Container, mergo.WithOverride); err != nil {
