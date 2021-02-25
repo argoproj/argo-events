@@ -83,7 +83,8 @@ for the full spec of `native`.
   automatically load the client secret and use it to connect to the EventBus.
 
 - `antiAffinity` - Whether to create the StatefulSet PODs with anti-affinity
-  rule. Deprecated in v1.3, will be removed in v1.5, use `affinity` instead.
+  rule. **Deprecated** in `v1.3`, will be removed in `v1.5`, use `affinity`
+  instead.
 
 - `nodeSelector` -
   [Node selector](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
