@@ -43,6 +43,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/eventsources/sources/webhook"
+	eventsourcemetrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -246,15 +247,18 @@ type EventSourceAdaptor struct {
 	hostname        string
 
 	eventBusConn eventbusdriver.Connection
+
+	metrics *eventsourcemetrics.Metrics
 }
 
 // NewEventSourceAdaptor returns a new EventSourceAdaptor
-func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string) *EventSourceAdaptor {
+func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *eventsourcemetrics.Metrics) *EventSourceAdaptor {
 	return &EventSourceAdaptor{
 		eventSource:     eventSource,
 		eventBusConfig:  eventBusConfig,
 		eventBusSubject: eventBusSubject,
 		hostname:        hostname,
+		metrics:         metrics,
 	}
 }
 
@@ -326,6 +330,8 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 			}
 			wg.Add(1)
 			go func(s EventingServer) {
+				e.metrics.IncRunningServices(s.GetEventSourceName())
+				defer e.metrics.DecRunningServices(s.GetEventSourceName())
 				defer wg.Done()
 				if err = common.Connect(&wait.Backoff{
 					Steps:    10,
@@ -354,10 +360,12 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 						if err = driver.Publish(e.eventBusConn, eventBody); err != nil {
 							logger.Error("failed to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							return err
 						}
 						logger.Info("succeeded to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 						return nil
 					})
 				}); err != nil {

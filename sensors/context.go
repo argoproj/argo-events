@@ -28,6 +28,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
+	sensormetrics "github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -58,10 +59,12 @@ type SensorContext struct {
 	awsLambdaClients map[string]*lambda.Lambda
 	// openwhiskClients holds the references to active OpenWhisk clients.
 	openwhiskClients map[string]*whisk.Client
+
+	metrics *sensormetrics.Metrics
 }
 
 // NewSensorContext returns a new sensor execution context.
-func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject string) *SensorContext {
+func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject string, metrics *sensormetrics.Metrics) *SensorContext {
 	return &SensorContext{
 		KubeClient:           kubeClient,
 		DynamicClient:        dynamicClient,
@@ -77,5 +80,6 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		natsConnections:  make(map[string]*natslib.Conn),
 		awsLambdaClients: make(map[string]*lambda.Lambda),
 		openwhiskClients: make(map[string]*whisk.Client),
+		metrics:          metrics,
 	}
 }
