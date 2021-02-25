@@ -238,6 +238,23 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, len(ss.Spec.Template.Spec.ImagePullSecrets) > 0)
 	})
+
+	t.Run("installation with priority class", func(t *testing.T) {
+		cl := fake.NewClientBuilder().Build()
+		eb := testEventBus.DeepCopy()
+		eb.Spec.NATS.Native.PriorityClassName = "test-class"
+		installer := &natsInstaller{
+			client:         cl,
+			eventBus:       eb,
+			streamingImage: testStreamingImage,
+			metricsImage:   testMetricsImage,
+			labels:         testLabels,
+			logger:         logging.NewArgoEventsLogger(),
+		}
+		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
+		assert.NoError(t, err)
+		assert.Equal(t, ss.Spec.Template.Spec.PriorityClassName, "test-class")
+	})
 }
 
 func TestBuildServiceAccountStatefulSetSpec(t *testing.T) {
