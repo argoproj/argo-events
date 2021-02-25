@@ -431,6 +431,7 @@ message Sensor {
 
   optional SensorSpec spec = 2;
 
+  // +optional
   optional SensorStatus status = 3;
 }
 
