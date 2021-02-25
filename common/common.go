@@ -26,7 +26,7 @@ import (
 // Environment variables
 const (
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
-	EnvVarKubeConfig = "KUBE_CONFIG"
+	EnvVarKubeConfig = "KUBECONFIG"
 	// EnvVarDebugLog is the env var to turn on the debug mode for logging
 	EnvVarDebugLog = "DEBUG_LOG"
 )
