@@ -69,6 +69,7 @@ var (
 						},
 					},
 				},
+				PriorityClassName: "test-class",
 			},
 			Triggers: []v1alpha1.Trigger{
 				{
@@ -130,29 +131,27 @@ var (
 )
 
 func Test_BuildDeployment(t *testing.T) {
-	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObj}
 	t.Run("test build with eventbus", func(t *testing.T) {
-		for _, sObj := range sensorObjs {
-			args := &AdaptorArgs{
-				Image:  testImage,
-				Sensor: sObj,
-				Labels: testLabels,
-			}
-			deployment, err := buildDeployment(args, fakeEventBus)
-			assert.Nil(t, err)
-			assert.NotNil(t, deployment)
-			volumes := deployment.Spec.Template.Spec.Volumes
-			assert.True(t, len(volumes) > 0)
-			hasAuthVolume := false
-			for _, vol := range volumes {
-				if vol.Name == "auth-volume" {
-					hasAuthVolume = true
-					break
-				}
-			}
-			assert.True(t, hasAuthVolume)
-			assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
 		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		volumes := deployment.Spec.Template.Spec.Volumes
+		assert.True(t, len(volumes) > 0)
+		hasAuthVolume := false
+		for _, vol := range volumes {
+			if vol.Name == "auth-volume" {
+				hasAuthVolume = true
+				break
+			}
+		}
+		assert.True(t, hasAuthVolume)
+		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
+		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
 	})
 }
 

@@ -32,6 +32,7 @@ func Test_BuildDeployment(t *testing.T) {
 				Name: "test",
 			},
 		},
+		PriorityClassName: "test-class",
 	}
 	t.Run("test build HDFS", func(t *testing.T) {
 		args := &AdaptorArgs{
@@ -61,6 +62,7 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		assert.True(t, cmRefs > 0)
 		assert.True(t, secretRefs > 0)
+		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
 	})
 }
 
