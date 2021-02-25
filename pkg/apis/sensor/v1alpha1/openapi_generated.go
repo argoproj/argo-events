@@ -1184,7 +1184,7 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 						},
 					},
 				},
-				Required: []string{"metadata", "spec", "status"},
+				Required: []string{"metadata", "spec"},
 			},
 		},
 		Dependencies: []string{

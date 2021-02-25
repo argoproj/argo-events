@@ -1779,6 +1779,7 @@ Switch in triggers instead.
 <a href="#argoproj.io/v1alpha1.SensorStatus"> SensorStatus </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 </td>
 </tr>
 </tbody>

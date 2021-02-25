@@ -76,8 +76,9 @@ const (
 type Sensor struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Spec              SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
-	Status            SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
+	Spec              SensorSpec `json:"spec" protobuf:"bytes,2,opt,name=spec"`
+	// +optional
+	Status SensorStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
 }
 
 // SensorList is the list of Sensor resources
