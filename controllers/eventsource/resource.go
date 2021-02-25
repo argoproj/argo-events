@@ -333,6 +333,8 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		spec.Template.Spec.Tolerations = args.EventSource.Spec.Template.Tolerations
 		spec.Template.Spec.Affinity = args.EventSource.Spec.Template.Affinity
 		spec.Template.Spec.ImagePullSecrets = args.EventSource.Spec.Template.ImagePullSecrets
+		spec.Template.Spec.PriorityClassName = args.EventSource.Spec.Template.PriorityClassName
+		spec.Template.Spec.Priority = args.EventSource.Spec.Template.Priority
 	}
 	allEventTypes := eventsources.GetEventingServers(args.EventSource)
 	recreateTypes := make(map[apicommon.EventSourceType]bool)
