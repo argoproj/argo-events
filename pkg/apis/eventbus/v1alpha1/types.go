@@ -63,9 +63,10 @@ var (
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
-	Replicas     int32         `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
-	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth,casttype=AuthStrategy"`
-	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"varint,3,opt,name=antiAffinity"`
+	Replicas int32         `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
+	Auth     *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth,casttype=AuthStrategy"`
+	// Deprecated, use Affinity instead, will be removed in v1.5
+	DeprecatedAntiAffinity bool `json:"antiAffinity,omitempty" protobuf:"varint,3,opt,name=antiAffinity"`
 	// +optional
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
 	// ContainerTemplate contains customized spec for NATS container
@@ -102,6 +103,10 @@ type NativeStrategy struct {
 	// ServiceAccountName to apply to NATS StatefulSet
 	// +optional
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,13,opt,name=serviceAccountName"`
+	// If specified, the pod's scheduling constraints
+	// More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,14,opt,name=affinity"`
 }
 
 // ContainerTemplate defines customized spec for a container

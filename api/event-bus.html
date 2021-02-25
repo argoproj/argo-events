@@ -392,6 +392,7 @@ bool
 </em>
 </td>
 <td>
+<p>Deprecated, use Affinity instead, will be removed in v1.5</p>
 </td>
 </tr>
 <tr>
@@ -528,6 +529,21 @@ string
 <td>
 <em>(Optional)</em>
 <p>ServiceAccountName to apply to NATS StatefulSet</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>affinity</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+Kubernetes core/v1.Affinity
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>If specified, the pod&rsquo;s scheduling constraints
+More info: <a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/">https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/</a></p>
 </td>
 </tr>
 </tbody>

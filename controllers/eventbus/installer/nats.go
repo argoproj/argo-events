@@ -663,6 +663,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				SecurityContext:    i.eventBus.Spec.NATS.Native.SecurityContext,
 				ImagePullSecrets:   i.eventBus.Spec.NATS.Native.ImagePullSecrets,
 				ServiceAccountName: i.eventBus.Spec.NATS.Native.ServiceAccountName,
+				Affinity:           i.eventBus.Spec.NATS.Native.Affinity,
 				Volumes: []corev1.Volume{
 					{
 						Name: "config-volume",
@@ -792,7 +793,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/data/stan"})
 		spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 	}
-	if i.eventBus.Spec.NATS.Native.AntiAffinity {
+	if spec.Template.Spec.Affinity == nil && i.eventBus.Spec.NATS.Native.DeprecatedAntiAffinity {
 		spec.Template.Spec.Affinity = &corev1.Affinity{
 			PodAntiAffinity: &corev1.PodAntiAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{

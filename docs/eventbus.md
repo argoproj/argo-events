@@ -46,8 +46,7 @@ The example above brings up a NATS Streaming
 with 3 replicas in the namespace.
 
 The following example shows an EventBus with `token` auth strategy and
-persistent volumes, the StatefulSet PODs will be created with anti-affinity
-rule.
+persistent volumes.
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -59,12 +58,13 @@ spec:
     native:
       replicas: 3 # optional, defaults to 3, and requires minimal 3
       auth: token # optional, default to none
-      antiAffinity: true # optional, default to false
       persistence: # optional
         storageClassName: standard
         accessMode: ReadWriteOnce
         volumeSize: 10Gi
 ```
+
+Fields of `native`:
 
 - `replicas` - StatefulSet replicas, defaults to 3, and requires minimal 3.
   According to
@@ -78,11 +78,75 @@ spec:
   K8s secrets (one for client, one for server), EventSource and Sensor PODs will
   automatically load the client secret and use it to connect to the EventBus.
 
-- `antiAffinity` - Whether to create the PODs with anti-affinity rule.
+- `antiAffinity` - Whether to create the StatefulSet PODs with anti-affinity
+  rule. Deprecated in v1.3, will be removed in v1.5, use `affinity` instead.
+
+- `nodeSelector` -
+  [Node selector](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
+  for StatefulSet PODs.
+
+- `tolerations` -
+  [Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+  for the PODs.
 
 - `persistence` - Whether to use a
   [persistence volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
   for the data.
+
+- `securityContext` - POD level
+  [security attributes](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+  and common container settings.
+
+- `maxAge` - Max Age of existing messages, i.e. `72h`, `4h35m`, defaults to
+  `72h`.
+
+- `imagePullSecrets` - Secrets used to pull images.
+
+- `serviceAccountName` - In case your firm requires to use a service account
+  other than `default`.
+
+- `priority` -
+  [Priority](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/)
+  of the StatefulSet PODs.
+
+- `priorityClassName` -
+  [PriorityClassName](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/)
+  of the StatefulSet PODs.
+
+- `affinity` -
+  [Affinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
+  settings for the StatefulSet PODs.
+
+  A best effort and a hard requirement node anti-affinity config look like
+  below, if you want to do AZ (Availablity Zone) anti-affinity, change the value
+  of `topologyKey` from `kubernetes.io/hostname` to
+  `topology.kubernetes.io/zone`.
+
+```yaml
+# Best effort
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              controller: eventbus-controller
+              eventbus-name: default
+          topologyKey: kubernetes.io/hostname
+        weight: 100
+```
+
+```yaml
+# Hard requirement
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            controller: eventbus-controller
+            eventbus-name: default
+        topologyKey: kubernetes.io/hostname
+```
 
 - Check
   [here](https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy)

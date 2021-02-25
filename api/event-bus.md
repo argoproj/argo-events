@@ -417,6 +417,9 @@ Size is the NATS StatefulSet size
 <code>antiAffinity</code></br> <em> bool </em>
 </td>
 <td>
+<p>
+Deprecated, use Affinity instead, will be removed in v1.5
+</p>
 </td>
 </tr>
 <tr>
@@ -545,6 +548,20 @@ only DockerConfig type secrets are honored. More info:
 <em>(Optional)</em>
 <p>
 ServiceAccountName to apply to NATS StatefulSet
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>affinity</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+Kubernetes core/v1.Affinity </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+If specified, the pod’s scheduling constraints More info:
+<a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/">https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/</a>
 </p>
 </td>
 </tr>
