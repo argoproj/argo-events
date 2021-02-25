@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"go.uber.org/zap"
@@ -11,6 +12,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources"
+	"github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -52,9 +54,11 @@ func main() {
 		logger.Fatal("required environment variable 'POD_NAME' not defined")
 	}
 
-	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname)
 	logger = logger.With(logging.LabelEventSourceName, eventSource.Name)
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+	m := metrics.NewMetrics(eventSource.Namespace)
+	go m.Run(ctx, fmt.Sprintf(":%d", common.EventSourceMetricsPort))
+	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m)
 	if err := adaptor.Start(ctx); err != nil {
 		logger.Desugar().Fatal("failed to start eventsource server", zap.Error(err))
 	}

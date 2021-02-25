@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"reflect"
 
@@ -34,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	argoevents "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -69,7 +71,7 @@ func main() {
 		logger.Fatalf("required environment variable '%s' not defined", sensorImageEnvVar)
 	}
 	opts := ctrl.Options{
-		MetricsBindAddress:     ":8080",
+		MetricsBindAddress:     fmt.Sprintf(":%d", common.ControllerMetricsPort),
 		HealthProbeBindAddress: ":8081",
 	}
 	if namespaced {

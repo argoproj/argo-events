@@ -29,7 +29,6 @@ const (
 	clientPort  = int32(4222)
 	clusterPort = int32(6222)
 	monitorPort = int32(8222)
-	metricsPort = int32(7777)
 
 	// annotation key on serverAuthSecret and clientAuthsecret
 	authStrategyAnnoKey = "strategy"
@@ -477,7 +476,7 @@ func (i *natsInstaller) buildMetricsService() (*corev1.Service, error) {
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
 			Ports: []corev1.ServicePort{
-				{Name: "metrics", Port: metricsPort},
+				{Name: "metrics", Port: common.EventBusMetricsPort},
 			},
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: i.labels,
@@ -734,7 +733,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						Name:  "metrics",
 						Image: i.metricsImage,
 						Ports: []corev1.ContainerPort{
-							{Name: "metrics", ContainerPort: metricsPort},
+							{Name: "metrics", ContainerPort: common.EventBusMetricsPort},
 						},
 						Args:      []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(monitorPort)))},
 						Resources: metricsContainerResources,
