@@ -158,7 +158,7 @@ message NativeStrategy {
   // +optional
   optional string serviceAccountName = 13;
 
-  // If specified, the pod's scheduling constraints
+  // The pod's scheduling constraints
   // More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   // +optional
   optional k8s.io.api.core.v1.Affinity affinity = 14;

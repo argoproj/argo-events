@@ -560,7 +560,7 @@ Kubernetes core/v1.Affinity </a> </em>
 <td>
 <em>(Optional)</em>
 <p>
-If specified, the pod’s scheduling constraints More info:
+The pod’s scheduling constraints More info:
 <a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/">https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/</a>
 </p>
 </td>

@@ -103,7 +103,7 @@ type NativeStrategy struct {
 	// ServiceAccountName to apply to NATS StatefulSet
 	// +optional
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,13,opt,name=serviceAccountName"`
-	// If specified, the pod's scheduling constraints
+	// The pod's scheduling constraints
 	// More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,14,opt,name=affinity"`
