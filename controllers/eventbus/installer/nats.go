@@ -73,9 +73,6 @@ func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error
 	if err != nil {
 		return nil, err
 	}
-	if _, err := i.createMetricsService(ctx); err != nil {
-		return nil, err
-	}
 	cm, err := i.createConfigMap(ctx)
 	if err != nil {
 		return nil, err
@@ -179,46 +176,6 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 		return nil, err
 	}
 	log.Infow("service is created", "serviceName", expectedSvc.Name)
-	return expectedSvc, nil
-}
-
-// Create a service for nats streaming metrics
-func (i *natsInstaller) createMetricsService(ctx context.Context) (*corev1.Service, error) {
-	log := i.logger
-	svc, err := i.getMetricsService(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkDeployFailed("GetMetricsServiceFailed", "Get existing metrics service failed")
-		log.Errorw("error getting existing metrics service", zap.Error(err))
-		return nil, err
-	}
-	expectedSvc, err := i.buildMetricsService()
-	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("BuildMetricsServiceFailed", "Failed to build a metrics service spec")
-		log.Errorw("error building metrics service spec", zap.Error(err))
-		return nil, err
-	}
-	if svc != nil {
-		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
-			svc.Spec = expectedSvc.Spec
-			svc.SetLabels(expectedSvc.Labels)
-			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
-			err = i.client.Update(ctx, svc)
-			if err != nil {
-				i.eventBus.Status.MarkDeployFailed("UpdateMetricsServiceFailed", "Failed to update existing metrics service")
-				log.Errorw("error updating existing metrics service", zap.Error(err))
-				return nil, err
-			}
-			log.Infow("metrics service is updated", "serviceName", svc.Name)
-		}
-		return svc, nil
-	}
-	err = i.client.Create(ctx, expectedSvc)
-	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("CreateMetricsServiceFailed", "Failed to create a metrics service")
-		log.Errorw("error creating a metrics service", zap.Error(err))
-		return nil, err
-	}
-	log.Infow("metrics service is created", "serviceName", expectedSvc.Name)
 	return expectedSvc, nil
 }
 
@@ -454,29 +411,6 @@ func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 				{Name: "client", Port: clientPort},
 				{Name: "cluster", Port: clusterPort},
 				{Name: "monitor", Port: monitorPort},
-			},
-			Type:     corev1.ServiceTypeClusterIP,
-			Selector: i.labels,
-		},
-	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
-		return nil, err
-	}
-	return svc, nil
-}
-
-// buildMetricsService builds a metrics Service for NATS streaming
-func (i *natsInstaller) buildMetricsService() (*corev1.Service, error) {
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      generateMetricsServiceName(i.eventBus),
-			Namespace: i.eventBus.Namespace,
-			Labels:    i.mergeEventBusLabels(metricsServiceLabels(i.labels)),
-		},
-		Spec: corev1.ServiceSpec{
-			ClusterIP: corev1.ClusterIPNone,
-			Ports: []corev1.ServicePort{
-				{Name: "metrics", Port: common.EventBusMetricsPort},
 			},
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: i.labels,
@@ -814,10 +748,6 @@ func (i *natsInstaller) getStanService(ctx context.Context) (*corev1.Service, er
 	return i.getService(ctx, stanServiceLabels(i.labels))
 }
 
-func (i *natsInstaller) getMetricsService(ctx context.Context) (*corev1.Service, error) {
-	return i.getService(ctx, metricsServiceLabels(i.labels))
-}
-
 func (i *natsInstaller) getService(ctx context.Context, labels map[string]string) (*corev1.Service, error) {
 	// Why not using getByName()?
 	// Naming convention might be changed.
@@ -956,14 +886,6 @@ func clientAuthSecretLabels(given map[string]string) map[string]string {
 
 func stanServiceLabels(given map[string]string) map[string]string {
 	result := map[string]string{"stan": "yes"}
-	for k, v := range given {
-		result[k] = v
-	}
-	return result
-}
-
-func metricsServiceLabels(given map[string]string) map[string]string {
-	result := map[string]string{"metrics": "yes"}
 	for k, v := range given {
 		result[k] = v
 	}
