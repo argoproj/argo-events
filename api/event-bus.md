@@ -418,6 +418,9 @@ Size is the NATS StatefulSet size
 <code>antiAffinity</code></br> <em> bool </em>
 </td>
 <td>
+<p>
+Deprecated, use Affinity instead, will be removed in v1.5
+</p>
 </td>
 </tr>
 <tr>
@@ -579,6 +582,20 @@ enabled, it prevents users from setting this field. The admission
 controller populates this field from PriorityClassName. The higher the
 value, the higher the priority. More info:
 <a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>affinity</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+Kubernetes core/v1.Affinity </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+The pod’s scheduling constraints More info:
+<a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/">https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/</a>
 </p>
 </td>
 </tr>
