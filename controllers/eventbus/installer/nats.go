@@ -900,10 +900,6 @@ func generateServiceName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-stan-svc", eventBus.Name)
 }
 
-func generateMetricsServiceName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-metrics-svc", eventBus.Name)
-}
-
 func generateConfigMapName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-stan-configmap", eventBus.Name)
 }
