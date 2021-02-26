@@ -33,16 +33,20 @@ message Amount {
 
 // Backoff for an operation
 message Backoff {
-  // Duration is the duration in nanoseconds
+  // The initial duration such as "1s", "3m"
+  // +optional
   optional int64 duration = 1;
 
   // Duration is multiplied by factor each iteration
+  // +optional
   optional Amount factor = 2;
 
   // The amount of jitter applied each iteration
+  // +optional
   optional Amount jitter = 3;
 
   // Exit with error after this many steps
+  // +optional
   optional int32 steps = 4;
 }
 

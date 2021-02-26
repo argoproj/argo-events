@@ -55,6 +55,8 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	client := fake.NewSimpleDynamicClient(runtimeScheme, uObj)
 	artifact := common.NewResource(uObj)
 	jitter := common.NewAmount("0.5")
+	factor := common.NewAmount("2")
+	duration := time.Second * 1
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
@@ -77,8 +79,8 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 				},
 				Backoff: common.Backoff{
 					Steps:    2,
-					Duration: time.Second * 1,
-					Factor:   common.NewAmount("2"),
+					Duration: &duration,
+					Factor:   &factor,
 					Jitter:   &jitter,
 				},
 			},

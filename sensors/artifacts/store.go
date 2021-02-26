@@ -20,11 +20,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ArtifactReader enables reading artifacts from an external store
@@ -34,11 +35,14 @@ type ArtifactReader interface {
 
 // FetchArtifact from the location, decode it using explicit types, and unstructure it
 func FetchArtifact(reader ArtifactReader) (*unstructured.Unstructured, error) {
-	var err error
 	var obj []byte
-	obj, err = reader.Read()
-	if err != nil {
-		return nil, err
+
+	if err := common.Connect(&common.DefaultRetry, func() error {
+		var e error
+		obj, e = reader.Read()
+		return e
+	}); err != nil {
+		return nil, errors.Wrap(err, "failed to fetch artifact")
 	}
 	return decodeAndUnstructure(obj)
 }

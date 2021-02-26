@@ -64,7 +64,7 @@ func schema_argo_events_pkg_apis_common_Backoff(ref common.ReferenceCallback) co
 				Properties: map[string]spec.Schema{
 					"duration": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Duration is the duration in nanoseconds",
+							Description: "The initial duration such as \"1s\", \"3m\"",
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
@@ -89,7 +89,6 @@ func schema_argo_events_pkg_apis_common_Backoff(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"duration", "factor"},
 			},
 		},
 		Dependencies: []string{
@@ -441,7 +440,6 @@ func schema_argo_events_pkg_apis_common_TLSConfig(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
 			},
 		},
 		Dependencies: []string{

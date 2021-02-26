@@ -103,24 +103,28 @@ type TLSConfig struct {
 
 	// DeprecatedCACertPath refers the file path that contains the CA cert.
 	// Deprecated: use CACertSecret instead
-	DeprecatedCACertPath string `json:"caCertPath" protobuf:"bytes,4,opt,name=caCertPath"`
+	DeprecatedCACertPath string `json:"caCertPath,omitempty" protobuf:"bytes,4,opt,name=caCertPath"`
 	// DeprecatedClientCertPath refers the file path that contains client cert.
 	// Deprecated: use ClientCertSecret instead
-	DeprecatedClientCertPath string `json:"clientCertPath" protobuf:"bytes,5,opt,name=clientCertPath"`
+	DeprecatedClientCertPath string `json:"clientCertPath,omitempty" protobuf:"bytes,5,opt,name=clientCertPath"`
 	// DeprecatedClientKeyPath refers the file path that contains client key.
 	// Deprecated: use ClientKeySecret instead
-	DeprecatedClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,6,opt,name=clientKeyPath"`
+	DeprecatedClientKeyPath string `json:"clientKeyPath,omitempty" protobuf:"bytes,6,opt,name=clientKeyPath"`
 }
 
 // Backoff for an operation
 type Backoff struct {
-	// Duration is the duration in nanoseconds
-	Duration time.Duration `json:"duration" protobuf:"varint,1,opt,name=duration,casttype=time.Duration"`
+	// The initial duration such as "1s", "3m"
+	// +optional
+	Duration *time.Duration `json:"duration,omitempty" protobuf:"varint,1,opt,name=duration,casttype=time.Duration"`
 	// Duration is multiplied by factor each iteration
-	Factor Amount `json:"factor" protobuf:"bytes,2,opt,name=factor"`
+	// +optional
+	Factor *Amount `json:"factor,omitempty" protobuf:"bytes,2,opt,name=factor"`
 	// The amount of jitter applied each iteration
+	// +optional
 	Jitter *Amount `json:"jitter,omitempty" protobuf:"bytes,3,opt,name=jitter"`
 	// Exit with error after this many steps
+	// +optional
 	Steps int32 `json:"steps,omitempty" protobuf:"varint,4,opt,name=steps"`
 }
 

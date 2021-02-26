@@ -909,6 +909,11 @@ func (in *Trigger) DeepCopyInto(out *Trigger) {
 		*out = new(TriggerPolicy)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.RetryStrategy != nil {
+		in, out := &in.RetryStrategy, &out.RetryStrategy
+		*out = new(common.Backoff)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

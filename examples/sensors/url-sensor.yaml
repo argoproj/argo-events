@@ -21,3 +21,5 @@ spec:
             url:
               path: "https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml"
               verifycert: false
+      retryStrategy:
+        steps: 3

@@ -44,10 +44,12 @@ func (rl *ResourceLabels) ApplyPolicy(ctx context.Context) error {
 	completed := false
 
 	backoff := wait.Backoff{
-		Duration: from.Duration,
+		Duration: *from.Duration,
 		Steps:    int(from.Steps),
 	}
-	backoff.Factor, _ = from.Factor.Float64()
+	if from.Factor != nil {
+		backoff.Factor, _ = from.Factor.Float64()
+	}
 	if from.Jitter != nil {
 		jitter, _ := from.Jitter.Float64()
 		backoff.Jitter = jitter

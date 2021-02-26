@@ -36,6 +36,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
@@ -244,6 +245,9 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, log); err != nil {
 			// Log the error, and let it continue
 			log.Errorw("failed to trigger action", zap.Error(err))
+			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
+		} else {
+			sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
 		}
 	}
 	return nil
@@ -259,7 +263,6 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 
 	if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
 		log.Errorf("failed to apply template parameters, %v", err)
-		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		return err
 	}
 
@@ -273,7 +276,6 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	log.Debugw("fetching trigger resource if any", "triggerName", trigger.Template.Name)
 	obj, err := triggerImpl.FetchResource(ctx)
 	if err != nil {
-		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		return err
 	}
 	if obj == nil {
@@ -284,25 +286,29 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	log.Debugw("applying resource parameters if any", "triggerName", trigger.Template.Name)
 	updatedObj, err := triggerImpl.ApplyResourceParameters(eventsMapping, obj)
 	if err != nil {
-		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		return err
 	}
 
 	log.Debugw("executing the trigger resource", "triggerName", trigger.Template.Name)
-	newObj, err := triggerImpl.Execute(ctx, eventsMapping, updatedObj)
-	if err != nil {
-		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
-		return err
+	retryStrategy := trigger.RetryStrategy
+	if retryStrategy == nil {
+		retryStrategy = &apicommon.Backoff{Steps: 1}
+	}
+	var newObj interface{}
+	if err := common.Connect(common.GetConnectionBackoff(retryStrategy), func() error {
+		var e error
+		newObj, e = triggerImpl.Execute(ctx, eventsMapping, updatedObj)
+		return e
+	}); err != nil {
+		return errors.Wrap(err, "failed to execute trigger")
 	}
 	log.Debugw("trigger resource successfully executed", "triggerName", trigger.Template.Name)
 
 	log.Debugw("applying trigger policy", "triggerName", trigger.Template.Name)
 	if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
-		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		return err
 	}
 	log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name), zap.Any("triggeredBy", depNames))
-	sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
 	return nil
 }
 
