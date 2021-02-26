@@ -326,7 +326,7 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 					},
 					"antiAffinity": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Deprecated: use Affinity instead, will be removed in v1.5",
+							Description: "Deprecated, use Affinity instead, will be removed in v1.5",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},

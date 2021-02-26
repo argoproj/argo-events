@@ -66,7 +66,7 @@ type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
 	Replicas int32         `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
 	Auth     *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth,casttype=AuthStrategy"`
-	// Deprecated: use Affinity instead, will be removed in v1.5
+	// Deprecated, use Affinity instead, will be removed in v1.5
 	DeprecatedAntiAffinity bool `json:"antiAffinity,omitempty" protobuf:"varint,3,opt,name=antiAffinity"`
 	// +optional
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
