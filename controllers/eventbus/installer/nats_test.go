@@ -139,7 +139,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(svcList.Items))
+		assert.Equal(t, 1, len(svcList.Items))
 		for _, s := range svcList.Items {
 			assert.True(t, strings.Contains(s.Name, "stan") || strings.Contains(s.Name, "metrics"))
 		}
@@ -188,7 +188,7 @@ func TestInstallationAuthNone(t *testing.T) {
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(svcList.Items))
+		assert.Equal(t, 1, len(svcList.Items))
 
 		cmList := &corev1.ConfigMapList{}
 		err = cl.List(ctx, cmList, &client.ListOptions{
