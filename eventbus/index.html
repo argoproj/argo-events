@@ -1037,6 +1037,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#properties" title="Properties" class="md-nav__link">
+    Properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#more-about-native-nats-eventbus" title="More About Native NATS EventBus" class="md-nav__link">
     More About Native NATS EventBus
   </a>
@@ -1247,6 +1254,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#properties" title="Properties" class="md-nav__link">
+    Properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#more-about-native-nats-eventbus" title="More About Native NATS EventBus" class="md-nav__link">
     More About Native NATS EventBus
   </a>
@@ -1334,8 +1348,7 @@ Streaming service with <code>exotic</code> NATS EventBus.</p>
 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
 with 3 replicas in the namespace.</p>
 <p>The following example shows an EventBus with <code>token</code> auth strategy and
-persistent volumes, the StatefulSet PODs will be created with anti-affinity
-rule.</p>
+persistent volumes.</p>
 <div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -1345,13 +1358,16 @@ rule.</p>
     <span class="nt">native</span><span class="p">:</span>
       <span class="nt">replicas</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span> <span class="c1"># optional, defaults to 3, and requires minimal 3</span>
       <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span> <span class="c1"># optional, default to none</span>
-      <span class="nt">antiAffinity</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span> <span class="c1"># optional, default to false</span>
       <span class="nt">persistence</span><span class="p">:</span> <span class="c1"># optional</span>
         <span class="nt">storageClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">standard</span>
         <span class="nt">accessMode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
         <span class="nt">volumeSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10Gi</span>
 </code></pre></div>
 
+<h4 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h4>
+<p>Check
+<a href="https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy">here</a>
+for the full spec of <code>native</code>.</p>
 <ul>
 <li>
 <p><code>replicas</code> - StatefulSet replicas, defaults to 3, and requires minimal 3.
@@ -1369,7 +1385,19 @@ rule.</p>
   automatically load the client secret and use it to connect to the EventBus.</p>
 <ul>
 <li>
-<p><code>antiAffinity</code> - Whether to create the PODs with anti-affinity rule.</p>
+<p><code>antiAffinity</code> - Whether to create the StatefulSet PODs with anti-affinity
+  rule. <strong>Deprecated</strong> in <code>v1.3</code>, will be removed in <code>v1.5</code>, use <code>affinity</code>
+  instead.</p>
+</li>
+<li>
+<p><code>nodeSelector</code> -
+  <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">Node selector</a>
+  for StatefulSet PODs.</p>
+</li>
+<li>
+<p><code>tolerations</code> -
+  <a href="https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/">Tolerations</a>
+  for the PODs.</p>
 </li>
 <li>
 <p><code>persistence</code> - Whether to use a
@@ -1377,11 +1405,65 @@ rule.</p>
   for the data.</p>
 </li>
 <li>
-<p>Check
-  <a href="https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy">here</a>
-  for the full spec.</p>
+<p><code>securityContext</code> - POD level
+  <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">security attributes</a>
+  and common container settings.</p>
+</li>
+<li>
+<p><code>maxAge</code> - Max Age of existing messages, i.e. <code>72h</code>, <code>4h35m</code>, defaults to
+  <code>72h</code>.</p>
+</li>
+<li>
+<p><code>imagePullSecrets</code> - Secrets used to pull images.</p>
+</li>
+<li>
+<p><code>serviceAccountName</code> - In case your firm requires to use a service account
+  other than <code>default</code>.</p>
+</li>
+<li>
+<p><code>priority</code> -
+  <a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">Priority</a>
+  of the StatefulSet PODs.</p>
+</li>
+<li>
+<p><code>priorityClassName</code> -
+  <a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">PriorityClassName</a>
+  of the StatefulSet PODs.</p>
+</li>
+<li>
+<p><code>affinity</code> -
+  <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">Affinity</a>
+  settings for the StatefulSet PODs.</p>
 </li>
 </ul>
+<p>A best effort and a hard requirement node anti-affinity config look like
+  below, if you want to do AZ (Availablity Zone) anti-affinity, change the value
+  of <code>topologyKey</code> from <code>kubernetes.io/hostname</code> to
+  <code>topology.kubernetes.io/zone</code>.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Best effort</span>
+<span class="nt">affinity</span><span class="p">:</span>
+  <span class="nt">podAntiAffinity</span><span class="p">:</span>
+    <span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">podAffinityTerm</span><span class="p">:</span>
+          <span class="nt">labelSelector</span><span class="p">:</span>
+            <span class="nt">matchLabels</span><span class="p">:</span>
+              <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
+              <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+          <span class="nt">topologyKey</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
+        <span class="nt">weight</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># Hard requirement</span>
+<span class="nt">affinity</span><span class="p">:</span>
+  <span class="nt">podAntiAffinity</span><span class="p">:</span>
+    <span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">labelSelector</span><span class="p">:</span>
+          <span class="nt">matchLabels</span><span class="p">:</span>
+            <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
+            <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+        <span class="nt">topologyKey</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
+</code></pre></div>
+
 <h4 id="more-about-native-nats-eventbus">More About Native NATS EventBus<a class="headerlink" href="#more-about-native-nats-eventbus" title="Permanent link">&para;</a></h4>
 <ul>
 <li>
