@@ -326,8 +326,9 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 					},
 					"antiAffinity": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"boolean"},
-							Format: "",
+							Description: "Deprecated, use Affinity instead, will be removed in v1.5",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 					"persistence": {
@@ -434,11 +435,17 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Format:      "int32",
 						},
 					},
+					"affinity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The pod's scheduling constraints More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
+							Ref:         ref("k8s.io/api/core/v1.Affinity"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Metadata", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy", "k8s.io/api/core/v1.LocalObjectReference", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Toleration"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Metadata", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy", "k8s.io/api/core/v1.Affinity", "k8s.io/api/core/v1.LocalObjectReference", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Toleration"},
 	}
 }
 
