@@ -37,7 +37,7 @@ type ArtifactReader interface {
 func FetchArtifact(reader ArtifactReader) (*unstructured.Unstructured, error) {
 	var obj []byte
 
-	if err := common.Connect(&common.DefaultRetry, func() error {
+	if err := common.Connect(&common.DefaultBackoff, func() error {
 		var e error
 		obj, e = reader.Read()
 		return e

@@ -127,7 +127,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 				triggerNames = append(triggerNames, t.Template.Name)
 			}
 			var conn eventbusdriver.Connection
-			err = common.Connect(&common.DefaultRetry, func() error {
+			err = common.Connect(&common.DefaultBackoff, func() error {
 				var err error
 				conn, err = ebDriver.Connect()
 				return err
@@ -237,12 +237,14 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 	log := logging.FromContext(ctx)
 	eventsMapping := make(map[string]*v1alpha1.Event)
 	depNames := make([]string, 0, len(events))
+	eventIDs := make([]string, 0, len(events))
 	for k, v := range events {
 		eventsMapping[k] = convertEvent(v)
 		depNames = append(depNames, k)
+		eventIDs = append(eventIDs, v.ID())
 	}
 	for _, trigger := range triggers {
-		if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, log); err != nil {
+		if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, eventIDs, log); err != nil {
 			// Log the error, and let it continue
 			log.Errorw("failed to trigger action", zap.Error(err))
 			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
@@ -253,7 +255,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 	return nil
 }
 
-func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames []string, log *zap.SugaredLogger) error {
+func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string, log *zap.SugaredLogger) error {
 	startTime := time.Now()
 	defer func(start time.Time) {
 		t := time.Now()
@@ -295,7 +297,7 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		retryStrategy = &apicommon.Backoff{Steps: 1}
 	}
 	var newObj interface{}
-	if err := common.Connect(common.GetConnectionBackoff(retryStrategy), func() error {
+	if err := common.Connect(retryStrategy, func() error {
 		var e error
 		newObj, e = triggerImpl.Execute(ctx, eventsMapping, updatedObj)
 		return e
@@ -308,7 +310,8 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
 		return err
 	}
-	log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name), zap.Any("triggeredBy", depNames))
+	log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name),
+		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 	return nil
 }
 
@@ -390,14 +393,14 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 		}
 		depExpression = strings.Join(deps, "&&")
 	}
-	logger.Sugar().Infof("Dependency expression for trigger %s before simlification: %s", trigger.Template.Name, depExpression)
+	logger.Sugar().Infof("Dependency expression for trigger %s before simplification: %s", trigger.Template.Name, depExpression)
 	boolSimplifier, err := common.NewBoolExpression(depExpression)
 	if err != nil {
 		logger.Error("Invalid dependency expression", zap.Error(err))
 		return "", err
 	}
 	result := boolSimplifier.GetExpression()
-	logger.Sugar().Infof("Dependency expression for trigger %s after simlification: %s", trigger.Template.Name, result)
+	logger.Sugar().Infof("Dependency expression for trigger %s after simplification: %s", trigger.Template.Name, result)
 	return result, nil
 }
 

@@ -102,9 +102,12 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		return nil, err
 	}
 
-	connBackoff := common.GetConnectionBackoff(nil)
+	backoff, err := common.Convert2WaitBackoff(&common.DefaultBackoff)
+	if err != nil {
+		return nil, err
+	}
 
-	if err = wait.ExponentialBackoff(*connBackoff, func() (done bool, err error) {
+	if err = wait.ExponentialBackoff(*backoff, func() (done bool, err error) {
 		if conn.GetState() == connectivity.Ready {
 			return true, nil
 		}

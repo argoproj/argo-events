@@ -33,9 +33,9 @@ message Amount {
 
 // Backoff for an operation
 message Backoff {
-  // The initial duration such as "1s", "3m"
+  // The initial duration in nanoseconds or string like "1s", "3m"
   // +optional
-  optional int64 duration = 1;
+  optional Int64OrString duration = 1;
 
   // Duration is multiplied by factor each iteration
   // +optional
@@ -81,6 +81,14 @@ message Condition {
   // Human-readable message indicating details about last transition.
   // +optional
   optional string message = 5;
+}
+
+message Int64OrString {
+  optional int64 type = 1;
+
+  optional int64 int64Val = 2;
+
+  optional string strVal = 3;
 }
 
 // Metadata holds the annotations and labels of an event source pod

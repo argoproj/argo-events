@@ -628,7 +628,7 @@ type K8SResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,1,rep,name=labels"`
 	// Backoff before checking resource state
-	Backoff apicommon.Backoff `json:"backoff" protobuf:"bytes,2,opt,name=backoff"`
+	Backoff *apicommon.Backoff `json:"backoff" protobuf:"bytes,2,opt,name=backoff"`
 	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
 	// the state of the resource
 	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"varint,3,opt,name=errorOnBackoffTimeout"`

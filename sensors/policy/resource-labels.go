@@ -24,6 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -35,7 +36,6 @@ type ResourceLabels struct {
 }
 
 func (rl *ResourceLabels) ApplyPolicy(ctx context.Context) error {
-	from := rl.Trigger.Policy.K8s.Backoff
 	if rl.Trigger.Policy.K8s == nil || rl.Trigger.Policy.K8s.Labels == nil {
 		return nil
 	}
@@ -43,18 +43,16 @@ func (rl *ResourceLabels) ApplyPolicy(ctx context.Context) error {
 	// check if success labels match with labels on object
 	completed := false
 
-	backoff := wait.Backoff{
-		Duration: *from.Duration,
-		Steps:    int(from.Steps),
+	b := rl.Trigger.Policy.K8s.Backoff
+	if b == nil {
+		b = &common.DefaultBackoff
 	}
-	if from.Factor != nil {
-		backoff.Factor, _ = from.Factor.Float64()
+	backoff, err := common.Convert2WaitBackoff(b)
+	if err != nil {
+		return err
 	}
-	if from.Jitter != nil {
-		jitter, _ := from.Jitter.Float64()
-		backoff.Jitter = jitter
-	}
-	err := wait.ExponentialBackoff(backoff, func() (bool, error) {
+
+	err = wait.ExponentialBackoff(*backoff, func() (bool, error) {
 		obj, err := rl.Client.Namespace(rl.Obj.GetNamespace()).Get(ctx, rl.Obj.GetName(), metav1.GetOptions{})
 		if err != nil {
 			return false, err

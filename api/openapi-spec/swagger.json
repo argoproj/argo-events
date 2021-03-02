@@ -15,9 +15,8 @@
       "type": "object",
       "properties": {
         "duration": {
-          "description": "The initial duration such as \"1s\", \"3m\"",
-          "type": "integer",
-          "format": "int64"
+          "description": "The initial duration in nanoseconds or string like \"1s\", \"3m\"",
+          "$ref": "#/definitions/io.argoproj.common.Int64OrString"
         },
         "factor": {
           "description": "Duration is multiplied by factor each iteration",
@@ -77,6 +76,10 @@
           "type": "string"
         }
       }
+    },
+    "io.argoproj.common.Int64OrString": {
+      "type": "string",
+      "format": "int64-or-string"
     },
     "io.argoproj.common.Metadata": {
       "description": "Metadata holds the annotations and labels of an event source pod",

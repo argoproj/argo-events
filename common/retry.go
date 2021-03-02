@@ -19,19 +19,25 @@ package common
 import (
 	"time"
 
+	"github.com/pkg/errors"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
-// DefaultRetry is a default retry backoff settings when retrying API calls
-var DefaultRetry = wait.Backoff{
-	Steps:    5,
-	Duration: 1 * time.Second,
-	Factor:   1.0,
-	Jitter:   1,
-}
+var (
+	defaultFactor   = apicommon.NewAmount("1.0")
+	defaultJitter   = apicommon.NewAmount("1")
+	defaultDuration = apicommon.FromString("5s")
+
+	DefaultBackoff = apicommon.Backoff{
+		Steps:    5,
+		Duration: &defaultDuration,
+		Factor:   &defaultFactor,
+		Jitter:   &defaultJitter,
+	}
+)
 
 // IsRetryableKubeAPIError returns if the error is a retryable kubernetes error
 func IsRetryableKubeAPIError(err error) bool {
@@ -42,42 +48,56 @@ func IsRetryableKubeAPIError(err error) bool {
 	return true
 }
 
-// GetConnectionBackoff returns a connection backoff option
-func GetConnectionBackoff(backoff *apicommon.Backoff) *wait.Backoff {
-	result := wait.Backoff{
-		Duration: DefaultRetry.Duration,
-		Factor:   DefaultRetry.Factor,
-		Jitter:   DefaultRetry.Jitter,
-		Steps:    DefaultRetry.Steps,
-	}
-	if backoff == nil {
-		return &result
-	}
+// Convert2WaitBackoff converts to a wait backoff option
+func Convert2WaitBackoff(backoff *apicommon.Backoff) (*wait.Backoff, error) {
+	result := wait.Backoff{}
+
 	if backoff.Duration != nil {
-		result.Duration = *backoff.Duration
+		result.Duration = time.Duration(backoff.Duration.Int64Value())
+	} else {
+		result.Duration = time.Duration(defaultDuration.Int64Value())
 	}
-	if backoff.Factor != nil {
-		result.Factor, _ = backoff.Factor.Float64()
+
+	factor := backoff.Factor
+	if factor == nil {
+		factor = &defaultFactor
 	}
-	if backoff.Jitter != nil {
-		result.Jitter, _ = backoff.Jitter.Float64()
+	f, err := factor.Float64()
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid factor")
 	}
-	if backoff.Steps != 0 {
+	result.Factor = f
+
+	jitter := backoff.Jitter
+	if jitter == nil {
+		jitter = &defaultJitter
+	}
+	j, err := jitter.Float64()
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid jitter")
+	}
+	result.Jitter = j
+
+	if backoff.Steps > 0 {
 		result.Steps = backoff.GetSteps()
+	} else {
+		result.Steps = int(DefaultBackoff.Steps)
 	}
-	return &result
+	return &result, nil
 }
 
-// Connect is a general connection helper
-func Connect(backoff *wait.Backoff, conn func() error) error {
+func Connect(backoff *apicommon.Backoff, conn func() error) error {
 	if backoff == nil {
-		backoff = &DefaultRetry
+		backoff = &DefaultBackoff
 	}
-	err := wait.ExponentialBackoff(*backoff, func() (bool, error) {
+	b, err := Convert2WaitBackoff(backoff)
+	if err != nil {
+		return errors.Wrap(err, "invalid backoff configuration")
+	}
+	return wait.ExponentialBackoff(*b, func() (bool, error) {
 		if err := conn(); err != nil {
 			return false, nil
 		}
 		return true, nil
 	})
-	return err
 }

@@ -17,8 +17,6 @@ limitations under the License.
 package common
 
 import (
-	"time"
-
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -114,9 +112,9 @@ type TLSConfig struct {
 
 // Backoff for an operation
 type Backoff struct {
-	// The initial duration such as "1s", "3m"
+	// The initial duration in nanoseconds or string like "1s", "3m"
 	// +optional
-	Duration *time.Duration `json:"duration,omitempty" protobuf:"varint,1,opt,name=duration,casttype=time.Duration"`
+	Duration *Int64OrString `json:"duration,omitempty" protobuf:"varint,1,opt,name=duration"`
 	// Duration is multiplied by factor each iteration
 	// +optional
 	Factor *Amount `json:"factor,omitempty" protobuf:"bytes,2,opt,name=factor"`

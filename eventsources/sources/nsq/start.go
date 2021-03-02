@@ -84,7 +84,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		config.TlsV1 = true
 	}
 
-	if err := common.Connect(common.GetConnectionBackoff(nsqEventSource.ConnectionBackoff), func() error {
+	if err := common.Connect(nsqEventSource.ConnectionBackoff, func() error {
 		var err error
 		if consumer, err = nsq.NewConsumer(nsqEventSource.Topic, nsqEventSource.Channel, config); err != nil {
 			return err
@@ -100,8 +100,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	consumer.AddHandler(&messageHandler{dispatch: dispatch, logger: log, isJSON: nsqEventSource.JSONBody, metadata: nsqEventSource.Metadata})
 
-	err := consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress)
-	if err != nil {
+	if err := consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress); err != nil {
 		return errors.Wrapf(err, "lookup failed for host %s for event source %s", nsqEventSource.HostAddress, el.GetEventName())
 	}
 
