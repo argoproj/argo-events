@@ -19,8 +19,8 @@ spec:
       # optional backoff time for connection retries.
       # if not provided, default connection backoff time will be used.
       connectionBackoff:
-        # duration in nanoseconds. following value is 10 seconds
-        duration: 10000000000
+        # duration in nanoseconds, or strings like "1s", "1m". following value is 10 seconds
+        duration: 10s
         # how many backoffs
         steps: 5
         # factor to increase on each step.
@@ -71,8 +71,8 @@ spec:
 #      # optional backoff time for connection retries.
 #      # if not provided, default connection backoff time will be used.
 #      connectionBackoff:
-#        # duration in nanoseconds. following value is 10 seconds
-#        duration: 10000000000
+#        # duration in nanoseconds, or strings like "1s". following value is 10 seconds
+#        duration: 10s
 #        # how many backoffs
 #        steps: 5
 #        # factor to increase on each step.

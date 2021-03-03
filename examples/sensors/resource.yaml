@@ -45,3 +45,5 @@ spec:
             - src:
                 dependencyName: test-dep
               dest: spec.arguments.parameters.0.value
+      retryStrategy:
+        steps: 3
