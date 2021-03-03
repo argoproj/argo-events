@@ -246,7 +246,8 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 	for _, trigger := range triggers {
 		if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, eventIDs, log); err != nil {
 			// Log the error, and let it continue
-			log.Errorw("failed to trigger action", zap.Error(err))
+			log.Errorw("failed to trigger action", zap.Error(err), zap.String("triggerName", trigger.Template.Name),
+				zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		} else {
 			sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
