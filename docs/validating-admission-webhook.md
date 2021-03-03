@@ -19,11 +19,11 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 
 Using the validating webhook has following benefits:
 
-1. It notifies the error at the time applying the faulty spec, so that you don't
-   need to check the CRD object `status` field to see if there's any condition
-   errors later on.
+- It notifies the error at the time applying the faulty spec, so that you don't
+  need to check the CRD object `status` field to see if there's any condition
+  errors later on.
 
-e.g. Creating an `exotic` NATS EventBus without `ClusterID` specified:
+  e.g. Creating an `exotic` NATS EventBus without `ClusterID` specified:
 
 ```sh
 cat <<EOF | kubectl create -f -
@@ -38,15 +38,15 @@ cat <<EOF | kubectl create -f -
 Error from server (BadRequest): error when creating "STDIN": admission webhook "webhook.argo-events.argoproj.io" denied the request: "spec.nats.exotic.clusterID" is missing
 ```
 
-2. Spec updating behavior can be validated.
+- Spec updating behavior can be validated.
 
-Updating existing specs requires more validation, besides checking if the new
-spec is valid, we also need to check if there's any immutable fields being
-updated. This can not be done in the controller reconciliation, but we can do it
-by using the validating webhook.
+  Updating existing specs requires more validation, besides checking if the new
+  spec is valid, we also need to check if there's any immutable fields being
+  updated. This can not be done in the controller reconciliation, but we can do
+  it by using the validating webhook.
 
-For example, updating Auth Strategy for a native NATS EventBus is prohibited, a
-denied response as following will be returned.
+  For example, updating Auth Strategy for a native NATS EventBus is prohibited,
+  a denied response as following will be returned.
 
 ```sh
 Error from server (BadRequest): error when applying patch:
