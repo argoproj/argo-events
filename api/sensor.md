@@ -2422,8 +2422,21 @@ definition
 <a href="#argoproj.io/v1alpha1.TriggerPolicy"> TriggerPolicy </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Policy to configure backoff and execution criteria for the trigger
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>retryStrategy</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Retry strategy, defaults to no retry
 </p>
 </td>
 </tr>

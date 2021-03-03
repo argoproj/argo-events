@@ -259,7 +259,11 @@ type Trigger struct {
 	// Parameters is the list of parameters applied to the trigger template definition
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
 	// Policy to configure backoff and execution criteria for the trigger
+	// +optional
 	Policy *TriggerPolicy `json:"policy,omitempty" protobuf:"bytes,3,opt,name=policy"`
+	// Retry strategy, defaults to no retry
+	// +optional
+	RetryStrategy *apicommon.Backoff `json:"retryStrategy,omitempty" protobuf:"bytes,4,opt,name=retryStrategy"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.
@@ -624,7 +628,7 @@ type K8SResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,1,rep,name=labels"`
 	// Backoff before checking resource state
-	Backoff apicommon.Backoff `json:"backoff" protobuf:"bytes,2,opt,name=backoff"`
+	Backoff *apicommon.Backoff `json:"backoff" protobuf:"bytes,2,opt,name=backoff"`
 	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
 	// the state of the resource
 	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"varint,3,opt,name=errorOnBackoffTimeout"`

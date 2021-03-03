@@ -29,17 +29,18 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/common.Amount":     schema_argo_events_pkg_apis_common_Amount(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":    schema_argo_events_pkg_apis_common_Backoff(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth":  schema_argo_events_pkg_apis_common_BasicAuth(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Condition":  schema_argo_events_pkg_apis_common_Condition(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":   schema_argo_events_pkg_apis_common_Metadata(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Resource":   schema_argo_events_pkg_apis_common_Resource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact": schema_argo_events_pkg_apis_common_S3Artifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":   schema_argo_events_pkg_apis_common_S3Bucket(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":   schema_argo_events_pkg_apis_common_S3Filter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Status":     schema_argo_events_pkg_apis_common_Status(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":  schema_argo_events_pkg_apis_common_TLSConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Amount":        schema_argo_events_pkg_apis_common_Amount(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":       schema_argo_events_pkg_apis_common_Backoff(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth":     schema_argo_events_pkg_apis_common_BasicAuth(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Condition":     schema_argo_events_pkg_apis_common_Condition(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Int64OrString": schema_argo_events_pkg_apis_common_Int64OrString(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":      schema_argo_events_pkg_apis_common_Metadata(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Resource":      schema_argo_events_pkg_apis_common_Resource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact":    schema_argo_events_pkg_apis_common_S3Artifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":      schema_argo_events_pkg_apis_common_S3Bucket(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":      schema_argo_events_pkg_apis_common_S3Filter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Status":        schema_argo_events_pkg_apis_common_Status(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":     schema_argo_events_pkg_apis_common_TLSConfig(ref),
 	}
 }
 
@@ -64,9 +65,8 @@ func schema_argo_events_pkg_apis_common_Backoff(ref common.ReferenceCallback) co
 				Properties: map[string]spec.Schema{
 					"duration": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Duration is the duration in nanoseconds",
-							Type:        []string{"integer"},
-							Format:      "int64",
+							Description: "The initial duration in nanoseconds or strings like \"1s\", \"3m\"",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Int64OrString"),
 						},
 					},
 					"factor": {
@@ -89,11 +89,10 @@ func schema_argo_events_pkg_apis_common_Backoff(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"duration", "factor"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Amount"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Amount", "github.com/argoproj/argo-events/pkg/apis/common.Int64OrString"},
 	}
 }
 
@@ -171,6 +170,17 @@ func schema_argo_events_pkg_apis_common_Condition(ref common.ReferenceCallback) 
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_Int64OrString(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type:   Int64OrString{}.OpenAPISchemaType(),
+				Format: Int64OrString{}.OpenAPISchemaFormat(),
+			},
+		},
 	}
 }
 
@@ -441,7 +451,6 @@ func schema_argo_events_pkg_apis_common_TLSConfig(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
 			},
 		},
 		Dependencies: []string{
