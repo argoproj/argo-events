@@ -623,7 +623,12 @@ message Trigger {
   repeated TriggerParameter parameters = 2;
 
   // Policy to configure backoff and execution criteria for the trigger
+  // +optional
   optional TriggerPolicy policy = 3;
+
+  // Retry strategy, defaults to no retry
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff retryStrategy = 4;
 }
 
 // TriggerParameter indicates a passed parameter to a service template

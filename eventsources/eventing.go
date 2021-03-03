@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -273,7 +272,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 		logger.Error("failed to get eventbus driver", zap.Error(err))
 		return err
 	}
-	if err = common.Connect(&common.DefaultRetry, func() error {
+	if err = common.Connect(&common.DefaultBackoff, func() error {
 		e.eventBusConn, err = driver.Connect()
 		return err
 	}); err != nil {
@@ -333,12 +332,16 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 				e.metrics.IncRunningServices(s.GetEventSourceName())
 				defer e.metrics.DecRunningServices(s.GetEventSourceName())
 				defer wg.Done()
-				if err = common.Connect(&wait.Backoff{
+				duration := apicommon.FromString("1s")
+				factor := apicommon.NewAmount("1")
+				jitter := apicommon.NewAmount("30")
+				backoff := apicommon.Backoff{
 					Steps:    10,
-					Duration: 1 * time.Second,
-					Factor:   1,
-					Jitter:   30,
-				}, func() error {
+					Duration: &duration,
+					Factor:   &factor,
+					Jitter:   &jitter,
+				}
+				if err = common.Connect(&backoff, func() error {
 					return s.StartListening(cctx, func(data []byte) error {
 						event := cloudevents.NewEvent()
 						event.SetID(fmt.Sprintf("%x", uuid.New()))
@@ -358,13 +361,13 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 						if err = driver.Publish(e.eventBusConn, eventBody); err != nil {
-							logger.Error("failed to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
+							logger.Error("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							return err
 						}
-						logger.Info("succeeded to publish an event", zap.Error(err), zap.Any(logging.LabelEventName,
-							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+						logger.Info("succeeded to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
+							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 						return nil
 					})

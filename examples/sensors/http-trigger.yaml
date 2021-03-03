@@ -22,3 +22,6 @@ spec:
                 contextKey: type
               dest: type
           method: POST
+      retryStrategy:
+        steps: 3
+        duration: 3s

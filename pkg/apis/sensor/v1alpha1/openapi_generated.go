@@ -1682,11 +1682,17 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy"),
 						},
 					},
+					"retryStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Retry strategy, defaults to no retry",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
 	}
 }
 

@@ -13,15 +13,10 @@
     "io.argoproj.common.Backoff": {
       "description": "Backoff for an operation",
       "type": "object",
-      "required": [
-        "duration",
-        "factor"
-      ],
       "properties": {
         "duration": {
-          "description": "Duration is the duration in nanoseconds",
-          "type": "integer",
-          "format": "int64"
+          "description": "The initial duration in nanoseconds or strings like \"1s\", \"3m\"",
+          "$ref": "#/definitions/io.argoproj.common.Int64OrString"
         },
         "factor": {
           "description": "Duration is multiplied by factor each iteration",
@@ -81,6 +76,10 @@
           "type": "string"
         }
       }
+    },
+    "io.argoproj.common.Int64OrString": {
+      "type": "string",
+      "format": "int64-or-string"
     },
     "io.argoproj.common.Metadata": {
       "description": "Metadata holds the annotations and labels of an event source pod",
@@ -198,11 +197,6 @@
     "io.argoproj.common.TLSConfig": {
       "description": "TLSConfig refers to TLS configuration for a client.",
       "type": "object",
-      "required": [
-        "caCertPath",
-        "clientCertPath",
-        "clientKeyPath"
-      ],
       "properties": {
         "caCertPath": {
           "description": "DeprecatedCACertPath refers the file path that contains the CA cert. Deprecated: use CACertSecret instead",
@@ -3084,6 +3078,10 @@
         "policy": {
           "description": "Policy to configure backoff and execution criteria for the trigger",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerPolicy"
+        },
+        "retryStrategy": {
+          "description": "Retry strategy, defaults to no retry",
+          "$ref": "#/definitions/io.argoproj.common.Backoff"
         },
         "template": {
           "description": "Template describes the trigger specification.",

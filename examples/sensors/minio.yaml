@@ -39,3 +39,5 @@ spec:
                 dependencyName: test-dep
                 dataKey: notification.0.s3.object.key
               dest: spec.templates.0.container.args.0
+      retryStrategy:
+        steps: 3

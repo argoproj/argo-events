@@ -33,16 +33,20 @@ message Amount {
 
 // Backoff for an operation
 message Backoff {
-  // Duration is the duration in nanoseconds
-  optional int64 duration = 1;
+  // The initial duration in nanoseconds or strings like "1s", "3m"
+  // +optional
+  optional Int64OrString duration = 1;
 
   // Duration is multiplied by factor each iteration
+  // +optional
   optional Amount factor = 2;
 
   // The amount of jitter applied each iteration
+  // +optional
   optional Amount jitter = 3;
 
   // Exit with error after this many steps
+  // +optional
   optional int32 steps = 4;
 }
 
@@ -77,6 +81,14 @@ message Condition {
   // Human-readable message indicating details about last transition.
   // +optional
   optional string message = 5;
+}
+
+message Int64OrString {
+  optional int64 type = 1;
+
+  optional int64 int64Val = 2;
+
+  optional string strVal = 3;
 }
 
 // Metadata holds the annotations and labels of an event source pod

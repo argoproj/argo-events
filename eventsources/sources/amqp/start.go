@@ -63,9 +63,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	amqpEventSource := &el.AMQPEventSource
-	backoff := common.GetConnectionBackoff(amqpEventSource.ConnectionBackoff)
 	var conn *amqplib.Connection
-	if err := common.Connect(backoff, func() error {
+	if err := common.Connect(amqpEventSource.ConnectionBackoff, func() error {
 		if amqpEventSource.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS)
 			if err != nil {
