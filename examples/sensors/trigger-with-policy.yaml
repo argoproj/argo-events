@@ -25,7 +25,7 @@ spec:
           k8s:
             # Backoff before checking the resource labels
             backoff:
-              # Duration is the duration in nanoseconds, or string like "3s", "2m"
+              # Duration is the duration in nanoseconds, or strings like "3s", "2m"
               duration: 1s # 1 second
               # Duration is multiplied by factor each iteration
               factor: 2

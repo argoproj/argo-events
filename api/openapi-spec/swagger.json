@@ -15,7 +15,7 @@
       "type": "object",
       "properties": {
         "duration": {
-          "description": "The initial duration in nanoseconds or string like \"1s\", \"3m\"",
+          "description": "The initial duration in nanoseconds or strings like \"1s\", \"3m\"",
           "$ref": "#/definitions/io.argoproj.common.Int64OrString"
         },
         "factor": {

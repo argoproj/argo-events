@@ -112,7 +112,7 @@ type TLSConfig struct {
 
 // Backoff for an operation
 type Backoff struct {
-	// The initial duration in nanoseconds or string like "1s", "3m"
+	// The initial duration in nanoseconds or strings like "1s", "3m"
 	// +optional
 	Duration *Int64OrString `json:"duration,omitempty" protobuf:"varint,1,opt,name=duration"`
 	// Duration is multiplied by factor each iteration

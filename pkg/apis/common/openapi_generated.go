@@ -65,7 +65,7 @@ func schema_argo_events_pkg_apis_common_Backoff(ref common.ReferenceCallback) co
 				Properties: map[string]spec.Schema{
 					"duration": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The initial duration in nanoseconds or string like \"1s\", \"3m\"",
+							Description: "The initial duration in nanoseconds or strings like \"1s\", \"3m\"",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Int64OrString"),
 						},
 					},

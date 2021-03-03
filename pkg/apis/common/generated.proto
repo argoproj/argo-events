@@ -33,7 +33,7 @@ message Amount {
 
 // Backoff for an operation
 message Backoff {
-  // The initial duration in nanoseconds or string like "1s", "3m"
+  // The initial duration in nanoseconds or strings like "1s", "3m"
   // +optional
   optional Int64OrString duration = 1;
 
