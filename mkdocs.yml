@@ -2,7 +2,8 @@ site_name: Argo Events - The Event-Based Dependency Manager for Kubernetes
 repo_url: https://github.com/argoproj/argo-events
 strict: true
 theme:
-  name: material
+  #name: material
+  name: mkdocs
   palette:
     primary: teal
   font:
@@ -40,24 +41,24 @@ nav:
       - 'tutorials/08-policy.md'
   - EventSources:
       - Setup:
-          - 'setup/amqp.md'
-          - 'setup/aws-sns.md'
-          - 'setup/aws-sqs.md'
-          - 'setup/calendar.md'
-          - 'setup/emitter.md'
-          - 'setup/file.md'
-          - 'setup/gcp-pub-sub.md'
-          - 'setup/github.md'
-          - 'setup/gitlab.md'
-          - 'setup/kafka.md'
-          - 'setup/minio.md'
-          - 'setup/mqtt.md'
-          - 'setup/nats.md'
-          - 'setup/nsq.md'
-          - 'setup/redis.md'
-          - 'setup/resource.md'
-          - 'setup/webhook.md'
-          - 'setup/pulsar.md'
+          - 'eventsources/setup/amqp.md'
+          - 'eventsources/setup/aws-sns.md'
+          - 'eventsources/setup/aws-sqs.md'
+          - 'eventsources/setup/calendar.md'
+          - 'eventsources/setup/emitter.md'
+          - 'eventsources/setup/file.md'
+          - 'eventsources/setup/gcp-pub-sub.md'
+          - 'eventsources/setup/github.md'
+          - 'eventsources/setup/gitlab.md'
+          - 'eventsources/setup/kafka.md'
+          - 'eventsources/setup/minio.md'
+          - 'eventsources/setup/mqtt.md'
+          - 'eventsources/setup/nats.md'
+          - 'eventsources/setup/nsq.md'
+          - 'eventsources/setup/redis.md'
+          - 'eventsources/setup/resource.md'
+          - 'eventsources/setup/webhook.md'
+          - 'eventsources/setup/pulsar.md'
       - 'eventsources/deployment-strategies.md'
       - 'eventsources/multiple-events.md'
       - 'eventsources/naming.md'
@@ -81,9 +82,11 @@ nav:
           - 'triggers/build-your-own-trigger.md'
       - 'trigger-conditions.md'
       - More Information: 'more-about-sensors-and-triggers.md'
+  - Operator Guide:
+      - 'metrics.md'
+      - HA/DR Recommendations: 'dr_ha_recommendations.md'
   - 'eventbus.md'
   - 'service-accounts.md'
-  - 'metrics.md'
   - 'developer_guide.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
