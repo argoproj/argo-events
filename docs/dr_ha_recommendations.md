@@ -114,13 +114,15 @@ make them HA, see more detail [here](eventsources/deployment-strategies.md).
 - Stripe
 - Webhook
 
-### POD Node Selection
+### EventSource POD Node Selection
 
 EventSource POD `affinity`, `nodeSelector` and `tolerations` could be set
 through `spec.template.affinity`, `spec.template.nodeSelector` and
 `spec.template.tolerations`.
 
 ## Sensors
+
+### Sensor POD Node Selection
 
 Sensor POD `affinity`, `nodeSelector` and `tolerations` could also be set
 through `spec.template.affinity`, `spec.template.nodeSelector` and
