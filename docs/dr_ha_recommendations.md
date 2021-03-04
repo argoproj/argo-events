@@ -120,6 +120,11 @@ EventSource POD `affinity`, `nodeSelector` and `tolerations` could be set
 through `spec.template.affinity`, `spec.template.nodeSelector` and
 `spec.template.tolerations`.
 
+### EventSource POD Priority
+
+Priority could be set through `spec.template.priorityClassName` or
+`spec.template.priority`.
+
 ## Sensors
 
 ### Sensor POD Node Selection
@@ -127,3 +132,8 @@ through `spec.template.affinity`, `spec.template.nodeSelector` and
 Sensor POD `affinity`, `nodeSelector` and `tolerations` could also be set
 through `spec.template.affinity`, `spec.template.nodeSelector` and
 `spec.template.tolerations`.
+
+### Sensor POD Priority
+
+Priority could be set through `spec.template.priorityClassName` or
+`spec.template.priority`.
