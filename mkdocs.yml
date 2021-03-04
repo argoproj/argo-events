@@ -81,11 +81,11 @@ nav:
           - 'triggers/build-your-own-trigger.md'
       - 'trigger-conditions.md'
       - More Information: 'more-about-sensors-and-triggers.md'
+  - 'eventbus.md'
+  - 'service-accounts.md'
   - Operator Guide:
       - 'metrics.md'
       - HA/DR Recommendations: 'dr_ha_recommendations.md'
-  - 'eventbus.md'
-  - 'service-accounts.md'
   - 'developer_guide.md'
   - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases

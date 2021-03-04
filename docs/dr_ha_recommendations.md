@@ -92,7 +92,7 @@ also could be set through `spec.nats.native.nodeSelector` and
 ### POD Priority
 
 Setting
-[POD Prioryty](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/)
+[POD Priority](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/)
 could reduce the chance of PODs being evicted.
 
 Priority could be set through `spec.nats.native.priorityClassName` or
