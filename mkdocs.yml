@@ -2,8 +2,7 @@ site_name: Argo Events - The Event-Based Dependency Manager for Kubernetes
 repo_url: https://github.com/argoproj/argo-events
 strict: true
 theme:
-  #name: material
-  name: mkdocs
+  name: material
   palette:
     primary: teal
   font:
