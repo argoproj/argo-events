@@ -24,7 +24,9 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common/logging"
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
@@ -39,11 +41,11 @@ type AWSLambdaTrigger struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
 	lambdaClient, ok := lambdaClients[trigger.Template.Name]
@@ -60,8 +62,13 @@ func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alph
 		LambdaClient: lambdaClient,
 		Sensor:       sensor,
 		Trigger:      trigger,
-		Logger:       logger,
+		Logger:       logger.With(logging.LabelTriggerType, apicommon.LambdaTrigger),
 	}, nil
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *AWSLambdaTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.LambdaTrigger
 }
 
 // FetchResource fetches the trigger resource

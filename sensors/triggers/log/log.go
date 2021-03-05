@@ -7,18 +7,25 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 type LogTrigger struct {
 	Sensor      *v1alpha1.Sensor
 	Trigger     *v1alpha1.Trigger
-	Logger      *zap.Logger
+	Logger      *zap.SugaredLogger
 	LastLogTime time.Time
 }
 
-func NewLogTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*LogTrigger, error) {
-	return &LogTrigger{Sensor: sensor, Trigger: trigger, Logger: logger}, nil
+func NewLogTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*LogTrigger, error) {
+	return &LogTrigger{Sensor: sensor, Trigger: trigger, Logger: logger.With(logging.LabelTriggerType, apicommon.LogTrigger)}, nil
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *LogTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.LogTrigger
 }
 
 func (t *LogTrigger) FetchResource(ctx context.Context) (interface{}, error) {
@@ -36,9 +43,8 @@ func (t *LogTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Ev
 	}
 	if t.shouldLog(log) {
 		for dependencyName, event := range events {
-			t.Logger.Info(
+			t.Logger.Infow(
 				event.DataString(),
-				zap.String("triggerName", t.Trigger.Template.Name),
 				zap.String("dependencyName", dependencyName),
 				zap.Any("eventContext", event.Context),
 			)

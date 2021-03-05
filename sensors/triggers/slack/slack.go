@@ -26,6 +26,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -36,19 +38,24 @@ type SlackTrigger struct {
 	// Trigger refers to the trigger resource
 	Trigger *v1alpha1.Trigger
 	// Logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 	// http client to invoke function.
 	httpClient *http.Client
 }
 
 // NewSlackTrigger returns a new Slack trigger context
-func NewSlackTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger, httpClient *http.Client) (*SlackTrigger, error) {
+func NewSlackTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, httpClient *http.Client) (*SlackTrigger, error) {
 	return &SlackTrigger{
 		Sensor:     sensor,
 		Trigger:    trigger,
-		Logger:     logger,
+		Logger:     logger.With(logging.LabelTriggerType, apicommon.SlackTrigger),
 		httpClient: httpClient,
 	}, nil
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *SlackTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.SlackTrigger
 }
 
 func (t *SlackTrigger) FetchResource(ctx context.Context) (interface{}, error) {
@@ -116,7 +123,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	for {
 		channels, nextCursor, err := api.GetConversations(params)
 		if err != nil {
-			t.Logger.Error("unable to list channels", zap.Error(err))
+			t.Logger.Errorw("unable to list channels", zap.Error(err))
 			return nil, errors.Wrapf(err, "failed to list channels")
 		}
 		for _, c := range channels {
@@ -138,21 +145,21 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	// Not applicable for private channels since bot cannot join private channels
 	if !isPrivateChannel {
 		c, _, _, err := api.JoinConversation(channelID)
-		t.Logger.Debug("successfully joined channel", zap.Any("channel", c))
+		t.Logger.Debugw("successfully joined channel", zap.Any("channel", c))
 		if err != nil {
-			t.Logger.Error("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
+			t.Logger.Errorw("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
 			return nil, errors.Wrapf(err, "failed to join channel %s", channel)
 		}
 	}
 
-	t.Logger.Info("posting to channel...", zap.Any("channelName", channel))
+	t.Logger.Infow("posting to channel...", zap.Any("channelName", channel))
 	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
 	if err != nil {
-		t.Logger.Error("unable to post to channel...", zap.Any("channelName", channel), zap.Error(err))
+		t.Logger.Errorw("unable to post to channel...", zap.Any("channelName", channel), zap.Error(err))
 		return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
 	}
 
-	t.Logger.Info("message successfully sent to channelID with timestamp", zap.Any("message", message), zap.Any("channelID", channelID), zap.Any("timestamp", timestamp))
+	t.Logger.Infow("message successfully sent to channelID with timestamp", zap.Any("message", message), zap.Any("channelID", channelID), zap.Any("timestamp", timestamp))
 	t.Logger.Info("finished executing SlackTrigger")
 	return nil, nil
 }
