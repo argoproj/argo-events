@@ -45,7 +45,6 @@ func (t *LogTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Ev
 		for dependencyName, event := range events {
 			t.Logger.Infow(
 				event.DataString(),
-				zap.String("triggerName", t.Trigger.Template.Name),
 				zap.String("dependencyName", dependencyName),
 				zap.Any("eventContext", event.Context),
 			)
