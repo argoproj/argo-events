@@ -210,7 +210,7 @@ filter:
 					return false, err
 				}
 
-				match := exp.Match([]byte(res.Str))
+				match := exp.Match([]byte(res.String()))
 				switch f.Comparator {
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if match {
