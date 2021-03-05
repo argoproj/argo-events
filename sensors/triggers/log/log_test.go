@@ -12,7 +12,7 @@ import (
 )
 
 func TestLogTrigger(t *testing.T) {
-	logger := zaptest.NewLogger(t)
+	logger := zaptest.NewLogger(t).Sugar()
 	l := &LogTrigger{
 		Logger:  logger,
 		Trigger: &sv1.Trigger{Template: &sv1.TriggerTemplate{}},

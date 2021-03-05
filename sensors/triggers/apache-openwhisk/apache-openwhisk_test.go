@@ -53,7 +53,7 @@ func getFakeTriggerImpl() *TriggerImpl {
 		OpenWhiskClient: nil,
 		Sensor:          sensorObj.DeepCopy(),
 		Trigger:         sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:          logging.NewArgoEventsLogger().Desugar(),
+		Logger:          logging.NewArgoEventsLogger(),
 	}
 }
 

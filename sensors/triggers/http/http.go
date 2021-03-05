@@ -26,6 +26,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
@@ -40,11 +42,11 @@ type HTTPTrigger struct {
 	// Trigger reference
 	Trigger *v1alpha1.Trigger
 	// Logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 }
 
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) (*HTTPTrigger, error) {
+func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
 	httptrigger := trigger.Template.HTTP
 
 	client, ok := httpClients[trigger.Template.Name]
@@ -74,8 +76,13 @@ func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor
 		Client:  client,
 		Sensor:  sensor,
 		Trigger: trigger,
-		Logger:  logger,
+		Logger:  logger.With(logging.LabelTriggerType, apicommon.HTTPTrigger),
 	}, nil
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *HTTPTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.HTTPTrigger
 }
 
 // FetchResource fetches the trigger. As the HTTP trigger simply executes a http request, there
@@ -124,7 +131,7 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 	}
 
 	if (trigger.Method == http.MethodPost || trigger.Method == http.MethodPatch || trigger.Method == http.MethodPut) && trigger.Payload == nil {
-		t.Logger.Warn("payload parameters are not specified. request payload will be an empty string", zap.Any("url", trigger.URL))
+		t.Logger.Warnw("payload parameters are not specified. request payload will be an empty string", zap.Any("url", trigger.URL))
 	}
 
 	if trigger.Payload != nil {
@@ -168,7 +175,7 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		request.SetBasicAuth(username, password)
 	}
 
-	t.Logger.Info("making a http request...", zap.Any("url", trigger.URL))
+	t.Logger.Infow("making a http request...", zap.Any("url", trigger.URL))
 
 	return t.Client.Do(request)
 }

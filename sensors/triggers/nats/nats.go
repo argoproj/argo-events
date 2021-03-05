@@ -24,6 +24,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -37,11 +39,11 @@ type NATSTrigger struct {
 	// Conn refers to the NATS client connection.
 	Conn *natslib.Conn
 	// Logger to log stuff.
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 }
 
 // NewNATSTrigger returns new nats trigger.
-func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections map[string]*natslib.Conn, logger *zap.Logger) (*NATSTrigger, error) {
+func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections map[string]*natslib.Conn, logger *zap.SugaredLogger) (*NATSTrigger, error) {
 	natstrigger := trigger.Template.NATS
 
 	conn, ok := natsConnections[trigger.Template.Name]
@@ -72,8 +74,13 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 		Sensor:  sensor,
 		Trigger: trigger,
 		Conn:    conn,
-		Logger:  logger,
+		Logger:  logger.With(logging.LabelTriggerType, apicommon.NATSTrigger),
 	}, nil
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *NATSTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.NATSTrigger
 }
 
 // FetchResource fetches the trigger. As the NATS trigger is simply a NATS client, there

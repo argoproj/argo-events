@@ -28,6 +28,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -39,17 +41,17 @@ type CustomTrigger struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 	// triggerClient is the gRPC client for the custom trigger server
 	triggerClient triggers.TriggerClient
 }
 
 // NewCustomTrigger returns a new custom trigger
-func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger, customTriggerClients map[string]*grpc.ClientConn) (*CustomTrigger, error) {
+func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients map[string]*grpc.ClientConn) (*CustomTrigger, error) {
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,
-		Logger:  logger.Sugar().With("trigger-name", trigger.Template.Name).Desugar(),
+		Logger:  logger.With(logging.LabelTriggerType, apicommon.CustomTrigger),
 	}
 
 	ct := trigger.Template.CustomTrigger
@@ -65,7 +67,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		delete(customTriggerClients, trigger.Template.Name)
 	}
 
-	logger.Info("instantiating trigger client...", zap.Any("server-url", ct.ServerURL))
+	logger.Infow("instantiating trigger client...", zap.Any("server-url", ct.ServerURL))
 
 	opt := []grpc.DialOption{
 		grpc.WithBlock(),
@@ -123,6 +125,11 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 	return customTrigger, nil
 }
 
+// GetTriggerType returns the type of the trigger
+func (ct *CustomTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.CustomTrigger
+}
+
 // FetchResource fetches the trigger resource from external source
 func (ct *CustomTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	specBody, err := yaml.Marshal(ct.Trigger.Template.CustomTrigger.Spec)
@@ -130,7 +137,7 @@ func (ct *CustomTrigger) FetchResource(ctx context.Context) (interface{}, error)
 		return nil, errors.Wrap(err, "failed to parse the custom trigger spec body")
 	}
 
-	ct.Logger.Debug("trigger spec body", zap.Any("spec", string(specBody)))
+	ct.Logger.Debugw("trigger spec body", zap.Any("spec", string(specBody)))
 
 	resource, err := ct.triggerClient.FetchResource(context.Background(), &triggers.FetchResourceRequest{
 		Resource: specBody,
@@ -139,7 +146,7 @@ func (ct *CustomTrigger) FetchResource(ctx context.Context) (interface{}, error)
 		return nil, errors.Wrapf(err, "failed to fetch the custom trigger resource for %s", ct.Trigger.Template.Name)
 	}
 
-	ct.Logger.Debug("fetched resource", zap.Any("resource", string(resource.Resource)))
+	ct.Logger.Debugw("fetched resource", zap.Any("resource", string(resource.Resource)))
 	return resource.Resource, nil
 }
 
@@ -163,7 +170,7 @@ func (ct *CustomTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Eve
 			return nil, errors.Wrapf(err, "failed to apply the parameters to the custom trigger resource for %s", ct.Trigger.Template.Name)
 		}
 
-		ct.Logger.Debug("resource after parameterization", zap.Any("resource", string(result)))
+		ct.Logger.Debugw("resource after parameterization", zap.Any("resource", string(result)))
 		return result, nil
 	}
 
@@ -177,7 +184,7 @@ func (ct *CustomTrigger) Execute(ctx context.Context, events map[string]*v1alpha
 		return nil, errors.New("failed to interpret the trigger resource for the execution")
 	}
 
-	ct.Logger.Debug("resource to execute", zap.Any("resource", string(obj)))
+	ct.Logger.Debugw("resource to execute", zap.Any("resource", string(obj)))
 
 	trigger := ct.Trigger.Template.CustomTrigger
 
@@ -190,7 +197,7 @@ func (ct *CustomTrigger) Execute(ctx context.Context, events map[string]*v1alpha
 			return nil, err
 		}
 
-		ct.Logger.Debug("payload for the trigger execution", zap.Any("payload", string(payload)))
+		ct.Logger.Debugw("payload for the trigger execution", zap.Any("payload", string(payload)))
 	}
 
 	result, err := ct.triggerClient.Execute(context.Background(), &triggers.ExecuteRequest{
@@ -201,7 +208,7 @@ func (ct *CustomTrigger) Execute(ctx context.Context, events map[string]*v1alpha
 		return nil, errors.Wrapf(err, "failed to execute the custom trigger resource for %s", ct.Trigger.Template.Name)
 	}
 
-	ct.Logger.Debug("trigger execution response", zap.Any("response", string(result.Response)))
+	ct.Logger.Debugw("trigger execution response", zap.Any("response", string(result.Response)))
 	return result.Response, nil
 }
 
@@ -212,7 +219,7 @@ func (ct *CustomTrigger) ApplyPolicy(ctx context.Context, resource interface{}) 
 		return errors.New("failed to interpret the trigger resource for the policy application")
 	}
 
-	ct.Logger.Debug("resource to apply policy on", zap.Any("resource", string(obj)))
+	ct.Logger.Debugw("resource to apply policy on", zap.Any("resource", string(obj)))
 
 	result, err := ct.triggerClient.ApplyPolicy(ctx, &triggers.ApplyPolicyRequest{
 		Request: obj,
@@ -220,6 +227,6 @@ func (ct *CustomTrigger) ApplyPolicy(ctx context.Context, resource interface{}) 
 	if err != nil {
 		return errors.Wrapf(err, "failed to apply the policy for the custom trigger resource for %s", ct.Trigger.Template.Name)
 	}
-	ct.Logger.Info("policy application result", zap.Any("success", result.Success), zap.Any("message", result.Message))
+	ct.Logger.Infow("policy application result", zap.Any("success", result.Success), zap.Any("message", result.Message))
 	return err
 }

@@ -25,6 +25,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
@@ -39,17 +41,17 @@ type TriggerImpl struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 }
 
 // NewTriggerImpl returns a new TriggerImpl
-func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients map[string]*whisk.Client, logger *zap.Logger) (*TriggerImpl, error) {
+func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients map[string]*whisk.Client, logger *zap.SugaredLogger) (*TriggerImpl, error) {
 	openwhisktrigger := trigger.Template.OpenWhisk
 
 	client, ok := openWhiskClients[trigger.Template.Name]
 	if !ok {
-		logger.Debug("OpenWhisk trigger value", zap.Any("name", trigger.Template.Name), zap.Any("trigger", *trigger.Template.OpenWhisk))
-		logger.Info("instantiating OpenWhisk client", zap.Any("trigger-name", trigger.Template.Name))
+		logger.Debugw("OpenWhisk trigger value", zap.Any("name", trigger.Template.Name), zap.Any("trigger", *trigger.Template.OpenWhisk))
+		logger.Infow("instantiating OpenWhisk client", zap.Any("trigger-name", trigger.Template.Name))
 
 		config, err := whisk.GetDefaultConfig()
 		if err != nil {
@@ -73,7 +75,7 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 			config.Version = openwhisktrigger.Version
 		}
 
-		logger.Debug("configuration for OpenWhisk client", zap.Any("config", *config))
+		logger.Debugw("configuration for OpenWhisk client", zap.Any("config", *config))
 
 		client, err = whisk.NewClient(http.DefaultClient, config)
 		if err != nil {
@@ -87,8 +89,13 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 		OpenWhiskClient: client,
 		Sensor:          sensor,
 		Trigger:         trigger,
-		Logger:          logger,
+		Logger:          logger.With(logging.LabelTriggerType, apicommon.OpenWhiskTrigger),
 	}, nil
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *TriggerImpl) GetTriggerType() apicommon.TriggerType {
+	return apicommon.OpenWhiskTrigger
 }
 
 // FetchResource fetches the trigger. As the OpenWhisk trigger simply executes a http request, there
@@ -119,7 +126,7 @@ func (t *TriggerImpl) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 			return nil, errors.Wrap(err, "failed to unmarshal the updated OpenWhisk trigger resource after applying resource parameters")
 		}
 
-		t.Logger.Debug("applied parameters to the OpenWhisk trigger", zap.Any("name", t.Trigger.Template.Name), zap.Any("trigger", *openwhisktrigger))
+		t.Logger.Debugw("applied parameters to the OpenWhisk trigger", zap.Any("name", t.Trigger.Template.Name), zap.Any("trigger", *openwhisktrigger))
 
 		return openwhisktrigger, nil
 	}
@@ -143,7 +150,7 @@ func (t *TriggerImpl) Execute(ctx context.Context, events map[string]*v1alpha1.E
 			return nil, err
 		}
 
-		t.Logger.Debug("payload for the OpenWhisk action invocation", zap.Any("name", t.Trigger.Template.Name), zap.Any("payload", string(payload)))
+		t.Logger.Debugw("payload for the OpenWhisk action invocation", zap.Any("name", t.Trigger.Template.Name), zap.Any("payload", string(payload)))
 	}
 
 	response, status, err := t.OpenWhiskClient.Actions.Invoke(openwhisktrigger.ActionName, payload, true, true)
@@ -151,7 +158,7 @@ func (t *TriggerImpl) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		return nil, errors.Wrapf(err, "failed to invoke action %s", openwhisktrigger.ActionName)
 	}
 
-	t.Logger.Debug("response for the OpenWhisk action invocation", zap.Any("name", t.Trigger.Template.Name), zap.Any("response", response))
+	t.Logger.Debugw("response for the OpenWhisk action invocation", zap.Any("name", t.Trigger.Template.Name), zap.Any("response", response))
 
 	return status, nil
 }
