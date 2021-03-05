@@ -20,7 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// EventSourceType is the type of event source supported by the gateway
+// EventSourceType is the type of event source
 type EventSourceType string
 
 // possible event source types
@@ -72,6 +72,23 @@ var (
 		FileEvent,
 		GenericEvent,
 	}
+)
+
+// TriggerType is the type of trigger
+type TriggerType string
+
+// possible trigger types
+var (
+	OpenWhiskTrigger    TriggerType = "OpenWhisk"
+	ArgoWorkflowTrigger TriggerType = "ArgoWorkflow"
+	LambdaTrigger       TriggerType = "Lambda"
+	CustomTrigger       TriggerType = "Custom"
+	HTTPTrigger         TriggerType = "HTTP"
+	KafkaTrigger        TriggerType = "Kafka"
+	LogTrigger          TriggerType = "Log"
+	NATSTrigger         TriggerType = "NATS"
+	SlackTrigger        TriggerType = "Slack"
+	K8sTrigger          TriggerType = "Kubernetes"
 )
 
 // EventBusType is the type of event bus

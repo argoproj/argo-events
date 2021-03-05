@@ -66,7 +66,7 @@ func getAWSTrigger() *AWSLambdaTrigger {
 		LambdaClient: nil,
 		Sensor:       sensorObj.DeepCopy(),
 		Trigger:      &sensorObj.Spec.Triggers[0],
-		Logger:       logging.NewArgoEventsLogger().Desugar(),
+		Logger:       logging.NewArgoEventsLogger(),
 	}
 }
 

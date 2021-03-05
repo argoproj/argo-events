@@ -24,9 +24,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/policy"
-	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,6 +33,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
+	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
 // ArgoWorkflowTrigger implements Trigger interface for Argo workflow
@@ -49,20 +52,25 @@ type ArgoWorkflowTrigger struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
 }
 
 // NewArgoWorkflowTrigger returns a new Argo workflow trigger
-func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) *ArgoWorkflowTrigger {
+func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) *ArgoWorkflowTrigger {
 	return &ArgoWorkflowTrigger{
 		K8sClient:     k8sClient,
 		DynamicClient: dynamicClient,
 		Sensor:        sensor,
 		Trigger:       trigger,
-		Logger:        logger,
+		Logger:        logger.With(logging.LabelTriggerType, apicommon.ArgoWorkflowTrigger),
 	}
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *ArgoWorkflowTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.ArgoWorkflowTrigger
 }
 
 // FetchResource fetches the trigger resource from external source

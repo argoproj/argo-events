@@ -26,6 +26,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -39,11 +41,11 @@ type KafkaTrigger struct {
 	// Kafka async producer
 	Producer sarama.AsyncProducer
 	// Logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
-func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.Logger) (*KafkaTrigger, error) {
+func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
 
 	producer, ok := kafkaProducers[trigger.Template.Name]
@@ -100,8 +102,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		Sensor:   sensor,
 		Trigger:  trigger,
 		Producer: producer,
-		Logger:   logger,
+		Logger:   logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger),
 	}, nil
+}
+
+// GetTriggerType returns the type of the trigger
+func (t *KafkaTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.KafkaTrigger
 }
 
 // FetchResource fetches the trigger. As the Kafka trigger is simply a Kafka producer, there
@@ -165,7 +172,7 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		Timestamp: time.Now().UTC(),
 	}
 
-	t.Logger.Info("successfully produced a message", zap.Any("topic", trigger.Topic), zap.Any("partition", trigger.Partition))
+	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic), zap.Any("partition", trigger.Partition))
 
 	return nil, nil
 }
