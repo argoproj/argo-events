@@ -64,14 +64,14 @@ func (sensorCtx *SensorContext) getGroupAndClientID(depExpression string) (strin
 
 // ListenEvents watches and handles events received from the gateway.
 func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
-	logger := logging.FromContext(ctx).Desugar()
+	logger := logging.FromContext(ctx)
 	sensor := sensorCtx.Sensor
 	// Get a mapping of dependencyExpression: []triggers
 	triggerMapping := make(map[string][]v1alpha1.Trigger)
 	for _, trigger := range sensor.Spec.Triggers {
 		depExpr, err := sensorCtx.getDependencyExpression(ctx, trigger)
 		if err != nil {
-			logger.Error("failed to get dependency expression", zap.Error(err))
+			logger.Errorw("failed to get dependency expression", zap.Error(err))
 			return err
 		}
 		triggers, ok := triggerMapping[depExpr]
@@ -97,7 +97,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			de := strings.ReplaceAll(depExpression, "-", "\\-")
 			expr, err := govaluate.NewEvaluableExpression(de)
 			if err != nil {
-				logger.Error("failed to get new evaluable expression", zap.Error(err))
+				logger.Errorw("failed to get new evaluable expression", zap.Error(err))
 				return
 			}
 			depNames := unique(expr.Vars())
@@ -105,7 +105,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			for _, depName := range depNames {
 				dep, ok := depMapping[depName]
 				if !ok {
-					logger.Sugar().Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
+					logger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
 					return
 				}
 				d := eventbusdriver.Dependency{
@@ -119,7 +119,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			group, clientID := sensorCtx.getGroupAndClientID(depExpression)
 			ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
 			if err != nil {
-				logger.Error("failed to get eventbus driver", zap.Error(err))
+				logger.Errorw("failed to get eventbus driver", zap.Error(err))
 				return
 			}
 			triggerNames := []string{}
@@ -133,7 +133,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 				return err
 			})
 			if err != nil {
-				logger.Fatal("failed to connect to event bus", zap.Error(err))
+				logger.Fatalw("failed to connect to event bus", zap.Error(err))
 				return
 			}
 			defer conn.Close()
@@ -149,7 +149,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 				e := convertEvent(event)
 				result, err := sensordependencies.Filter(e, dep.Filters)
 				if err != nil {
-					logger.Error("failed to apply filters", zap.Error(err))
+					logger.Errorw("failed to apply filters", zap.Error(err))
 					return false
 				}
 				return result
@@ -157,7 +157,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 
 			actionFunc := func(events map[string]cloudevents.Event) {
 				if err := sensorCtx.triggerActions(cctx, sensor, events, triggers); err != nil {
-					logger.Error("failed to trigger actions", zap.Error(err))
+					logger.Errorw("failed to trigger actions", zap.Error(err))
 				}
 			}
 
@@ -172,11 +172,11 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 					// release the lock when goroutine exits
 					defer atomic.StoreUint32(&subLock, 0)
 
-					logger.Sugar().Infof("started subscribing to events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
+					logger.Infof("started subscribing to events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 
 					err = ebDriver.SubscribeEventSources(cctx, conn, group, closeSubCh, depExpression, deps, filterFunc, actionFunc)
 					if err != nil {
-						logger.Error("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
 						return
 					}
 				}()
@@ -184,12 +184,12 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 
 			subscribeOnce(&subLock, subscribeFunc)
 
-			logger.Sugar().Infof("starting eventbus connection daemon for client %s...", clientID)
+			logger.Infof("starting eventbus connection daemon for client %s...", clientID)
 			ticker := time.NewTicker(5 * time.Second)
 			for {
 				select {
 				case <-cctx.Done():
-					logger.Sugar().Infof("exiting eventbus connection daemon for client %s...", clientID)
+					logger.Infof("exiting eventbus connection daemon for client %s...", clientID)
 					ticker.Stop()
 					wg1.Wait()
 					return
@@ -200,15 +200,15 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 						_, clientID := sensorCtx.getGroupAndClientID(depExpression)
 						ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
 						if err != nil {
-							logger.Error("failed to get eventbus driver during reconnection", zap.Error(err))
+							logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 							continue
 						}
 						conn, err = ebDriver.Connect()
 						if err != nil {
-							logger.Error("failed to reconnect to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+							logger.Errorw("failed to reconnect to eventbus", zap.Any("clientID", clientID), zap.Error(err))
 							continue
 						}
-						logger.Info("reconnected to NATS streaming server.", zap.Any("clientID", clientID))
+						logger.Infow("reconnected to NATS streaming server.", zap.Any("clientID", clientID))
 
 						if atomic.LoadUint32(&subLock) == 1 {
 							closeSubCh <- struct{}{}
@@ -269,30 +269,33 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		return err
 	}
 
-	log.Debugw("resolving the trigger implementation", "triggerName", trigger.Template.Name)
+	logger := log.With(logging.LabelTriggerName, trigger.Template.Name)
+
+	logger.Debugw("resolving the trigger implementation")
 	triggerImpl := sensorCtx.GetTrigger(ctx, &trigger)
 	if triggerImpl == nil {
-		log.Errorw("failed to get the specific trigger implementation. continuing to next trigger if any", "triggerName", trigger.Template.Name)
+		logger.Errorw("failed to get the specific trigger implementation. continuing to next trigger if any")
 		return nil
 	}
 
-	log.Debugw("fetching trigger resource if any", "triggerName", trigger.Template.Name)
+	logger = logger.With(logging.LabelTriggerType, triggerImpl.GetTriggerType())
+	log.Debug("fetching trigger resource if any")
 	obj, err := triggerImpl.FetchResource(ctx)
 	if err != nil {
 		return err
 	}
 	if obj == nil {
-		log.Debugw("trigger resource is empty, ignore it", "triggerName", trigger.Template.Name)
+		logger.Debug("trigger resource is empty, ignore it")
 		return nil
 	}
 
-	log.Debugw("applying resource parameters if any", "triggerName", trigger.Template.Name)
+	logger.Debug("applying resource parameters if any")
 	updatedObj, err := triggerImpl.ApplyResourceParameters(eventsMapping, obj)
 	if err != nil {
 		return err
 	}
 
-	log.Debugw("executing the trigger resource", "triggerName", trigger.Template.Name)
+	logger.Debug("executing the trigger resource")
 	retryStrategy := trigger.RetryStrategy
 	if retryStrategy == nil {
 		retryStrategy = &apicommon.Backoff{Steps: 1}
@@ -305,13 +308,13 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	}); err != nil {
 		return errors.Wrap(err, "failed to execute trigger")
 	}
-	log.Debugw("trigger resource successfully executed", "triggerName", trigger.Template.Name)
+	logger.Debugw("trigger resource successfully executed", "triggerName", trigger.Template.Name)
 
-	log.Debugw("applying trigger policy", "triggerName", trigger.Template.Name)
+	logger.Debugw("applying trigger policy", "triggerName", trigger.Template.Name)
 	if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
 		return err
 	}
-	log.Infow("successfully processed the trigger", zap.String("triggerName", trigger.Template.Name),
+	logger.Infow("successfully processed the trigger",
 		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 	return nil
 }

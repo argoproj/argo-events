@@ -273,7 +273,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		} else if m.Timestamp < existingMsg.timestamp {
 			// Re-delivered old message, ack and return
 			msgHolder.ackAndCache(m, event.ID())
-			log.Infow("Dropping this message becasue later ones also satisfy", "message", m)
+			log.Debugw("Dropping this message because later ones also satisfy", "eventID", event.ID())
 			return
 		}
 	}

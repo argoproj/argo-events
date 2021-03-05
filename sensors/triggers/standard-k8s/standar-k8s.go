@@ -35,6 +35,8 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
+	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/artifacts"
 	"github.com/argoproj/argo-events/sensors/policy"
@@ -52,20 +54,25 @@ type StandardK8sTrigger struct {
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
 }
 
 // NewStandardK8sTrigger returns a new StandardK8STrigger
-func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.Logger) *StandardK8sTrigger {
+func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) *StandardK8sTrigger {
 	return &StandardK8sTrigger{
 		K8sClient:     k8sClient,
 		DynamicClient: dynamicClient,
 		Sensor:        sensor,
 		Trigger:       trigger,
-		Logger:        logger,
+		Logger:        logger.With(logging.LabelTriggerType, apicommon.K8sTrigger),
 	}
+}
+
+// GetTriggerType returns the type of the trigger
+func (k8sTrigger *StandardK8sTrigger) GetTriggerType() apicommon.TriggerType {
+	return apicommon.K8sTrigger
 }
 
 // FetchResource fetches the trigger resource from external source
