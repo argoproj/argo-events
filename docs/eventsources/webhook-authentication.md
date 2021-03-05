@@ -1,6 +1,6 @@
 # Webhook Authentication
 
-![GA](assets/ga.svg)
+![GA](../assets/ga.svg)
 
 > v1.0 and after
 
