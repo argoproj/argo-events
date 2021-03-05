@@ -246,7 +246,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 	for _, trigger := range triggers {
 		if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, eventIDs, log); err != nil {
 			// Log the error, and let it continue
-			log.Errorw("failed to trigger action", zap.Error(err), zap.String("triggerName", trigger.Template.Name),
+			log.Errorw("failed to trigger action", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
 				zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		} else {
@@ -274,8 +274,7 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	logger.Debugw("resolving the trigger implementation")
 	triggerImpl := sensorCtx.GetTrigger(ctx, &trigger)
 	if triggerImpl == nil {
-		logger.Errorw("failed to get the specific trigger implementation. continuing to next trigger if any")
-		return nil
+		return errors.Errorf("invalid trigger %s, could not find an implementation", trigger.Template.Name)
 	}
 
 	logger = logger.With(logging.LabelTriggerType, triggerImpl.GetTriggerType())
@@ -285,8 +284,7 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		return err
 	}
 	if obj == nil {
-		logger.Debug("trigger resource is empty, ignore it")
-		return nil
+		return errors.Errorf("invalid trigger %s, could not fetch the trigger resource", trigger.Template.Name)
 	}
 
 	logger.Debug("applying resource parameters if any")
@@ -308,9 +306,9 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	}); err != nil {
 		return errors.Wrap(err, "failed to execute trigger")
 	}
-	logger.Debugw("trigger resource successfully executed", "triggerName", trigger.Template.Name)
+	logger.Debug("trigger resource successfully executed")
 
-	logger.Debugw("applying trigger policy", "triggerName", trigger.Template.Name)
+	logger.Debug("applying trigger policy")
 	if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
 		return err
 	}
