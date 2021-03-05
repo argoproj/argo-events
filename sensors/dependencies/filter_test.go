@@ -338,6 +338,47 @@ func TestFilterData(t *testing.T) {
 			want:    false,
 			wantErr: false,
 		},
+		{
+			name: "string filter Regex, JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:       "[k,k1.a.#(k2==\"v2\").k2]",
+						Type:       v1alpha1.JSONTypeString,
+						Value:      []string{"\\bv\\b.*\\bv2\\b"},
+						Comparator: "=",
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"v\", \"k1\": {\"a\": [{\"k2\": \"v2\"}]}}"),
+				},
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter Regex2, JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "[k,k1.a.#(k2==\"v2\").k2,,k1.a.#(k2==\"v3\").k2]",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"(\\bz\\b.*\\bv2\\b)|(\\bv\\b.*(\\bv2\\b.*\\bv3\\b))"},
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"v\", \"k1\": {\"a\": [{\"k2\": \"v2\"}, {\"k2\": \"v3\"}]}}"),
+				},
+			},
+			want:    true,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
