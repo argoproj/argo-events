@@ -92,7 +92,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 
 	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Now().Sub(start)
+		elapsed := time.Since(start)
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(elapsed/time.Millisecond))
 	}(startTime)
 

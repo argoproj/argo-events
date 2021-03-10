@@ -123,7 +123,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Message, dispatch func([]byte) error, ack func(), log *zap.SugaredLogger) {
 	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Now().Sub(start)
+		elapsed := time.Since(start)
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 	}(startTime)
 
@@ -145,8 +145,7 @@ func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Mes
 		ack()
 		return
 	}
-	err = dispatch(eventBytes)
-	if err != nil {
+	if err = dispatch(eventBytes); err != nil {
 		log.Errorw("failed to dispatch SQS event", zap.Error(err))
 		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 	} else {

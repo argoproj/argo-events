@@ -105,7 +105,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
 		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Now().Sub(start)
+			elapsed := time.Since(start)
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 		}(startTime)
 

@@ -89,7 +89,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	handler := func(c context.Context, event *eventhub.Event) error {
 		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Now().Sub(start)
+			elapsed := time.Since(start)
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 		}(startTime)
 
@@ -111,8 +111,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		log.Info("dispatching the event to eventbus...")
-		err = dispatch(eventBytes)
-		if err != nil {
+		if err = dispatch(eventBytes); err != nil {
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			log.Errorw("failed to dispatch Azure EventHub event", zap.Error(err))
 			return err

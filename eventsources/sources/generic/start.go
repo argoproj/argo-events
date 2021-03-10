@@ -95,7 +95,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 func (el *EventListener) handleOne(event *Event, dispatch func([]byte) error, logger *zap.SugaredLogger) error {
 	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Now().Sub(start)
+		elapsed := time.Since(start)
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 	}(startTime)
 

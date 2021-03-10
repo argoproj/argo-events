@@ -210,7 +210,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	processOne := func(msg *sarama.ConsumerMessage) error {
 		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Now().Sub(start)
+			elapsed := time.Since(start)
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 		}(startTime)
 
@@ -338,7 +338,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, message *sarama.ConsumerMessage) error {
 	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Now().Sub(start)
+		elapsed := time.Since(start)
 		consumer.metrics.EventProcessingDuration(consumer.eventSourceName, consumer.eventName, float64(elapsed/time.Millisecond))
 	}(startTime)
 

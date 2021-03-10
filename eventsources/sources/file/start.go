@@ -111,7 +111,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte)
 	processOne := func(event fsnotify.Event) error {
 		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Now().Sub(start)
+			elapsed := time.Since(start)
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 		}(startTime)
 
@@ -190,7 +190,7 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 	processOne := func(event watcherpkg.Event) error {
 		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Now().Sub(start)
+			elapsed := time.Since(start)
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 		}(startTime)
 

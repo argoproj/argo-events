@@ -186,7 +186,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	if filterName(notification, router.storageGridEventSource) {
 		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Now().Sub(start)
+			elapsed := time.Since(start)
 			route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(elapsed/time.Millisecond))
 		}(startTime)
 

@@ -74,7 +74,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
 		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Now().Sub(start)
+			elapsed := time.Since(start)
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 		}(startTime)
 

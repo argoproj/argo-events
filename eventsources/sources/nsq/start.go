@@ -121,7 +121,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 func (h *messageHandler) HandleMessage(m *nsq.Message) error {
 	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Now().Sub(start)
+		elapsed := time.Since(start)
 		h.metrics.EventProcessingDuration(h.eventSourceName, h.eventName, float64(elapsed/time.Millisecond))
 	}(startTime)
 

@@ -159,7 +159,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 func (el *EventListener) handleOne(event fsevent.Event, dispatch func([]byte) error, log *zap.SugaredLogger) error {
 	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Now().Sub(start)
+		elapsed := time.Since(start)
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
 	}(startTime)
 
@@ -172,7 +172,6 @@ func (el *EventListener) handleOne(event fsevent.Event, dispatch func([]byte) er
 	payload, err := json.Marshal(event)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal the event data, rejecting event...")
-
 	}
 
 	logger.Info("dispatching event on data channel...")

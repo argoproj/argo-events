@@ -259,8 +259,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string, log *zap.SugaredLogger) error {
 	startTime := time.Now()
 	defer func(start time.Time) {
-		t := time.Now()
-		elapsed := t.Sub(start)
+		elapsed := time.Since(start)
 		sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(elapsed/time.Millisecond))
 	}(startTime)
 
