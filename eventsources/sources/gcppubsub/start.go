@@ -20,20 +20,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/pubsub"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/eventsources/sources"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/events"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // EventListener implements Eventing for gcp pub-sub event source
@@ -41,6 +45,7 @@ type EventListener struct {
 	EventSourceName   string
 	EventName         string
 	PubSubEventSource v1alpha1.PubSubEventSource
+	Metrics           *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -98,6 +103,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("listening for messages from PubSub...")
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
+		startTime := time.Now()
+		defer func(start time.Time) {
+			elapsed := time.Now().Sub(start)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
+		}(startTime)
+
 		log.Info("received GCP PubSub Message from topic")
 		eventData := &events.PubSubEventData{
 			ID:          m.ID,
@@ -112,14 +123,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			log.Error("failed to marshal the event data", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			m.Nack()
 			return
 		}
 
 		log.Info("dispatching event...")
-		err = dispatch(eventBytes)
-		if err != nil {
+		if err = dispatch(eventBytes); err != nil {
 			log.Error("failed to dispatch GCP PubSub event", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			m.Nack()
 			return
 		}

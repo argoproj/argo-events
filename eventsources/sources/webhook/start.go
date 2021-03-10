@@ -21,14 +21,17 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"go.uber.org/zap"
 )
 
 var (
@@ -44,6 +47,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	WebhookContext  v1alpha1.WebhookContext
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -86,7 +90,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		logging.LabelEndpoint, route.Context.Endpoint,
 		logging.LabelPort, route.Context.Port,
 		logging.LabelHTTPMethod, route.Context.Method,
-	).Desugar()
+	)
 
 	logger.Info("a request received, processing it...")
 
@@ -96,10 +100,17 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	startTime := time.Now()
+	defer func(start time.Time) {
+		elapsed := time.Now().Sub(start)
+		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(elapsed/time.Millisecond))
+	}(startTime)
+
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error("failed to parse request body", zap.Error(err))
+		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -111,8 +122,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	data, err := json.Marshal(payload)
 	if err != nil {
-		logger.Error("failed to construct the event payload", zap.Error(err))
+		logger.Errorw("failed to construct the event payload", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -138,7 +150,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the webhook event source...")
 
-	route := webhook.NewRoute(&el.WebhookContext, log, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(&el.WebhookContext, log, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
 	return webhook.ManageRoute(ctx, &Router{
 		route: route,
 	}, controller, dispatch)

@@ -27,6 +27,7 @@ type Metrics struct {
 	runningEventServices    *prometheus.GaugeVec
 	eventsSent              *prometheus.CounterVec
 	eventsSentFailed        *prometheus.CounterVec
+	eventsProcessingFailed  *prometheus.CounterVec
 	eventProcessingDuration *prometheus.SummaryVec
 	actionTriggered         *prometheus.CounterVec
 	actionFailed            *prometheus.CounterVec
@@ -56,7 +57,15 @@ func NewMetrics(namespace string) *Metrics {
 		eventsSentFailed: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: prefix,
 			Name:      "events_sent_failed_total",
-			Help:      "How many events failed to send. https://argoproj.github.io/argo-events/metrics/#argo_events_events_sent_failed_total",
+			Help:      "How many events failed to send to EventBus. https://argoproj.github.io/argo-events/metrics/#argo_events_events_sent_failed_total",
+			ConstLabels: prometheus.Labels{
+				labelNamespace: namespace,
+			},
+		}, []string{labelEventSourceName, labelEventName}),
+		eventsProcessingFailed: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: prefix,
+			Name:      "events_processing_failed_total",
+			Help:      "Number of events failed to process, it includes argo_events_events_sent_failed_total. https://argoproj.github.io/argo-events/metrics/#argo_events_events_processing_failed_total",
 			ConstLabels: prometheus.Labels{
 				labelNamespace: namespace,
 			},
@@ -100,6 +109,8 @@ func (m *Metrics) Collect(ch chan<- prometheus.Metric) {
 	m.runningEventServices.Collect(ch)
 	m.eventsSent.Collect(ch)
 	m.eventsSentFailed.Collect(ch)
+	m.eventsProcessingFailed.Collect(ch)
+	m.eventProcessingDuration.Collect(ch)
 	m.actionTriggered.Collect(ch)
 	m.actionFailed.Collect(ch)
 	m.actionDuration.Collect(ch)
@@ -109,6 +120,8 @@ func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
 	m.runningEventServices.Describe(ch)
 	m.eventsSent.Describe(ch)
 	m.eventsSentFailed.Describe(ch)
+	m.eventsProcessingFailed.Describe(ch)
+	m.eventProcessingDuration.Describe(ch)
 	m.actionTriggered.Describe(ch)
 	m.actionFailed.Describe(ch)
 	m.actionDuration.Describe(ch)
@@ -128,6 +141,10 @@ func (m *Metrics) EventSent(eventSourceName, eventName string) {
 
 func (m *Metrics) EventSentFailed(eventSourceName, eventName string) {
 	m.eventsSentFailed.WithLabelValues(eventSourceName, eventName).Inc()
+}
+
+func (m *Metrics) EventProcessingFailed(eventSourceName, eventName string) {
+	m.eventsProcessingFailed.WithLabelValues(eventSourceName, eventName).Inc()
 }
 
 func (m *Metrics) EventProcessingDuration(eventSourceName, eventName string, num float64) {

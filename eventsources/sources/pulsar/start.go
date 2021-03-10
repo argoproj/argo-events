@@ -18,16 +18,19 @@ package pulsar
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for the Pulsar event source
@@ -35,6 +38,7 @@ type EventListener struct {
 	EventSourceName   string
 	EventName         string
 	PulsarEventSource v1alpha1.PulsarEventSource
+	Metrics           *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -139,31 +143,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 consumeMessages:
 	for {
 		select {
-		case msg := <-msgChannel:
-			log.Infof("received a message on the topic %s", msg.Topic())
-			payload := msg.Payload()
-			eventData := &events.PulsarEventData{
-				Key:         msg.Key(),
-				PublishTime: msg.PublishTime().UTC().String(),
-				Body:        payload,
-				Metadata:    pulsarEventSource.Metadata,
-			}
-			if pulsarEventSource.JSONBody {
-				eventData.Body = (*json.RawMessage)(&payload)
+		case msg, ok := <-msgChannel:
+			if !ok {
+				log.Error("failed to read a message, channel might have been closed")
+				return errors.New("channel might have been closed")
 			}
 
-			eventBody, err := json.Marshal(eventData)
-			if err != nil {
-				log.Desugar().Error("failed to marshal the event data. rejecting the event...", zap.Error(err))
-				return err
+			if err := el.handleOne(msg, dispatch, log); err != nil {
+				log.Errorw("failed to process a Pulsar event", zap.Error(err))
+				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			}
-
-			log.Infof("dispatching the message received on the topic %s to eventbus", msg.Topic())
-			err = dispatch(eventBody)
-			if err != nil {
-				log.Desugar().Error("failed to dispatch Pulsar event", zap.Error(err))
-			}
-
 		case <-ctx.Done():
 			consumer.Close()
 			client.Close()
@@ -172,5 +161,36 @@ consumeMessages:
 	}
 
 	log.Info("event source is stopped")
+	return nil
+}
+
+func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte) error, log *zap.SugaredLogger) error {
+	startTime := time.Now()
+	defer func(start time.Time) {
+		elapsed := time.Now().Sub(start)
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
+	}(startTime)
+
+	log.Infof("received a message on the topic %s", msg.Topic())
+	payload := msg.Payload()
+	eventData := &events.PulsarEventData{
+		Key:         msg.Key(),
+		PublishTime: msg.PublishTime().UTC().String(),
+		Body:        payload,
+		Metadata:    el.PulsarEventSource.Metadata,
+	}
+	if el.PulsarEventSource.JSONBody {
+		eventData.Body = (*json.RawMessage)(&payload)
+	}
+
+	eventBody, err := json.Marshal(eventData)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal the event data. rejecting the event...")
+	}
+
+	log.Infof("dispatching the message received on the topic %s to eventbus", msg.Topic())
+	if err = dispatch(eventBody); err != nil {
+		return errors.Wrap(err, "failed to dispatch a Pulsar event")
+	}
 	return nil
 }

@@ -20,6 +20,7 @@ import (
 	"github.com/google/go-github/v31/github"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -29,6 +30,7 @@ type EventListener struct {
 	EventSourceName   string
 	EventName         string
 	GithubEventSource v1alpha1.GithubEventSource
+	Metrics           *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source

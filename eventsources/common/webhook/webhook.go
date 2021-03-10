@@ -27,6 +27,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -41,7 +42,7 @@ func NewController() *Controller {
 }
 
 // NewRoute returns a vanilla route
-func NewRoute(hookContext *v1alpha1.WebhookContext, logger *zap.SugaredLogger, eventSourceName, eventName string) *Route {
+func NewRoute(hookContext *v1alpha1.WebhookContext, logger *zap.SugaredLogger, eventSourceName, eventName string, metrics *metrics.Metrics) *Route {
 	return &Route{
 		Context:         hookContext,
 		Logger:          logger.With(logging.LabelEventSourceName, eventSourceName, logging.LabelEventName, eventName),
@@ -51,6 +52,7 @@ func NewRoute(hookContext *v1alpha1.WebhookContext, logger *zap.SugaredLogger, e
 		DataCh:          make(chan []byte),
 		StartCh:         make(chan struct{}),
 		StopChan:        make(chan struct{}),
+		Metrics:         metrics,
 	}
 }
 
@@ -185,9 +187,9 @@ func manageRouteChannels(router Router, dispatch func([]byte) error) {
 		select {
 		case data := <-route.DataCh:
 			logger.Info("new event received, dispatching it...")
-			err := dispatch(data)
-			if err != nil {
+			if err := dispatch(data); err != nil {
 				logger.Error("failed to send event", zap.Error(err))
+				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				continue
 			}
 

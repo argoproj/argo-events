@@ -25,14 +25,16 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing kafka event source
@@ -40,6 +42,7 @@ type EventListener struct {
 	EventSourceName  string
 	EventName        string
 	KafkaEventSource v1alpha1.KafkaEventSource
+	Metrics          *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -82,7 +85,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
+func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
 	config, err := getSaramaConfig(kafkaEventSource, log)
 	if err != nil {
 		return err
@@ -105,6 +108,9 @@ func (listener *EventListener) consumerGroupConsumer(ctx context.Context, log *z
 		dispatch:         dispatch,
 		logger:           log,
 		kafkaEventSource: kafkaEventSource,
+		eventSourceName:  el.EventSourceName,
+		eventName:        el.EventName,
+		metrics:          el.Metrics,
 	}
 
 	urls := strings.Split(kafkaEventSource.URL, ",")
@@ -201,31 +207,43 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		return errors.Wrapf(err, "failed to create consumer partition for event source %s", el.GetEventName())
 	}
 
+	processOne := func(msg *sarama.ConsumerMessage) error {
+		startTime := time.Now()
+		defer func(start time.Time) {
+			elapsed := time.Now().Sub(start)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
+		}(startTime)
+
+		log.Info("dispatching event on the data channel...")
+		eventData := &events.KafkaEventData{
+			Topic:     msg.Topic,
+			Partition: int(msg.Partition),
+			Timestamp: msg.Timestamp.String(),
+			Metadata:  kafkaEventSource.Metadata,
+		}
+		if kafkaEventSource.JSONBody {
+			eventData.Body = (*json.RawMessage)(&msg.Value)
+		} else {
+			eventData.Body = msg.Value
+		}
+		eventBody, err := json.Marshal(eventData)
+		if err != nil {
+			return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+		}
+		if err = dispatch(eventBody); err != nil {
+			return errors.Wrap(err, "failed to dispatch a Kafka event...")
+		}
+		return nil
+	}
+
 	log.Info("listening to messages on the partition...")
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			log.Info("dispatching event on the data channel...")
-			eventData := &events.KafkaEventData{
-				Topic:     msg.Topic,
-				Partition: int(msg.Partition),
-				Timestamp: msg.Timestamp.String(),
-				Metadata:  kafkaEventSource.Metadata,
+			if err := processOne(msg); err != nil {
+				log.Errorw("failed to process a Kafka message", zap.Error(err))
+				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			}
-			if kafkaEventSource.JSONBody {
-				eventData.Body = (*json.RawMessage)(&msg.Value)
-			} else {
-				eventData.Body = msg.Value
-			}
-			eventBody, err := json.Marshal(eventData)
-			if err != nil {
-				log.Desugar().Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
-				continue
-			}
-			if err = dispatch(eventBody); err != nil {
-				log.Desugar().Error("failed to dispatch kafka event...", zap.Error(err))
-			}
-
 		case err := <-partitionConsumer.Errors():
 			return errors.Wrapf(err, "failed to consume messages for event source %s", el.GetEventName())
 
@@ -233,7 +251,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 			log.Info("event source is stopped, closing partition consumer")
 			err = partitionConsumer.Close()
 			if err != nil {
-				log.Desugar().Error("failed to close consumer", zap.Error(err))
+				log.Errorw("failed to close consumer", zap.Error(err))
 			}
 			return nil
 		}
@@ -277,6 +295,9 @@ type Consumer struct {
 	dispatch         func([]byte) error
 	logger           *zap.SugaredLogger
 	kafkaEventSource *v1alpha1.KafkaEventSource
+	eventSourceName  string
+	eventName        string
+	metrics          *metrics.Metrics
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
@@ -298,29 +319,10 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 	// The `ConsumeClaim` itself is called within a goroutine, see:
 	// https://github.com/Shopify/sarama/blob/master/consumer_group.go#L27-L29
 	for message := range claim.Messages() {
-		//consumer.logger.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(message.Value), message.Timestamp, message.Topic)
-		consumer.logger.Info("dispatching event on the data channel...")
-		eventData := &events.KafkaEventData{
-			Topic:     message.Topic,
-			Partition: int(message.Partition),
-			Timestamp: message.Timestamp.String(),
-			Metadata:  consumer.kafkaEventSource.Metadata,
-		}
-		if consumer.kafkaEventSource.JSONBody {
-			eventData.Body = (*json.RawMessage)(&message.Value)
-		} else {
-			eventData.Body = message.Value
-		}
-		eventBody, err := json.Marshal(eventData)
-		if err != nil {
-			consumer.logger.Desugar().Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
+		if err := consumer.processOne(session, message); err != nil {
+			consumer.logger.Errorw("failed to process a Kafka message", zap.Error(err))
+			consumer.metrics.EventProcessingFailed(consumer.eventSourceName, consumer.eventName)
 			continue
-		}
-
-		if err = consumer.dispatch(eventBody); err != nil {
-			consumer.logger.Desugar().Error("failed to dispatch kafka event...", zap.Error(err))
-		} else {
-			session.MarkMessage(message, "")
 		}
 		if consumer.kafkaEventSource.LimitEventsPerSecond > 0 {
 			//1000000000 is 1 second in nanoseconds
@@ -330,5 +332,36 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 		}
 	}
 
+	return nil
+}
+
+func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, message *sarama.ConsumerMessage) error {
+	startTime := time.Now()
+	defer func(start time.Time) {
+		elapsed := time.Now().Sub(start)
+		consumer.metrics.EventProcessingDuration(consumer.eventSourceName, consumer.eventName, float64(elapsed/time.Millisecond))
+	}(startTime)
+
+	consumer.logger.Info("dispatching event on the data channel...")
+	eventData := &events.KafkaEventData{
+		Topic:     message.Topic,
+		Partition: int(message.Partition),
+		Timestamp: message.Timestamp.String(),
+		Metadata:  consumer.kafkaEventSource.Metadata,
+	}
+	if consumer.kafkaEventSource.JSONBody {
+		eventData.Body = (*json.RawMessage)(&message.Value)
+	} else {
+		eventData.Body = message.Value
+	}
+	eventBody, err := json.Marshal(eventData)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+	}
+
+	if err = consumer.dispatch(eventBody); err != nil {
+		return errors.Wrap(err, "failed to dispatch a kafka event...")
+	}
+	session.MarkMessage(message, "")
 	return nil
 }

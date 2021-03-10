@@ -65,173 +65,173 @@ type EventingServer interface {
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
-func GetEventingServers(eventSource *v1alpha1.EventSource) map[apicommon.EventSourceType][]EventingServer {
+func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcemetrics.Metrics) map[apicommon.EventSourceType][]EventingServer {
 	result := make(map[apicommon.EventSourceType][]EventingServer)
 	if len(eventSource.Spec.AMQP) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AMQP {
-			servers = append(servers, &amqp.EventListener{EventSourceName: eventSource.Name, EventName: k, AMQPEventSource: v})
+			servers = append(servers, &amqp.EventListener{EventSourceName: eventSource.Name, EventName: k, AMQPEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AMQPEvent] = servers
 	}
 	if len(eventSource.Spec.AzureEventsHub) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AzureEventsHub {
-			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v})
+			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AzureEventsHub] = servers
 	}
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Calendar {
-			servers = append(servers, &calendar.EventListener{EventSourceName: eventSource.Name, EventName: k, CalendarEventSource: v, Namespace: eventSource.Namespace})
+			servers = append(servers, &calendar.EventListener{EventSourceName: eventSource.Name, EventName: k, CalendarEventSource: v, Namespace: eventSource.Namespace, Metrics: metrics})
 		}
 		result[apicommon.CalendarEvent] = servers
 	}
 	if len(eventSource.Spec.Emitter) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Emitter {
-			servers = append(servers, &emitter.EventListener{EventSourceName: eventSource.Name, EventName: k, EmitterEventSource: v})
+			servers = append(servers, &emitter.EventListener{EventSourceName: eventSource.Name, EventName: k, EmitterEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.EmitterEvent] = servers
 	}
 	if len(eventSource.Spec.File) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.File {
-			servers = append(servers, &file.EventListener{EventSourceName: eventSource.Name, EventName: k, FileEventSource: v})
+			servers = append(servers, &file.EventListener{EventSourceName: eventSource.Name, EventName: k, FileEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.FileEvent] = servers
 	}
 	if len(eventSource.Spec.Github) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Github {
-			servers = append(servers, &github.EventListener{EventSourceName: eventSource.Name, EventName: k, GithubEventSource: v})
+			servers = append(servers, &github.EventListener{EventSourceName: eventSource.Name, EventName: k, GithubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.GithubEvent] = servers
 	}
 	if len(eventSource.Spec.Gitlab) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Gitlab {
-			servers = append(servers, &gitlab.EventListener{EventSourceName: eventSource.Name, EventName: k, GitlabEventSource: v})
+			servers = append(servers, &gitlab.EventListener{EventSourceName: eventSource.Name, EventName: k, GitlabEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.GitlabEvent] = servers
 	}
 	if len(eventSource.Spec.HDFS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.HDFS {
-			servers = append(servers, &hdfs.EventListener{EventSourceName: eventSource.Name, EventName: k, HDFSEventSource: v})
+			servers = append(servers, &hdfs.EventListener{EventSourceName: eventSource.Name, EventName: k, HDFSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.HDFSEvent] = servers
 	}
 	if len(eventSource.Spec.Kafka) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Kafka {
-			servers = append(servers, &kafka.EventListener{EventSourceName: eventSource.Name, EventName: k, KafkaEventSource: v})
+			servers = append(servers, &kafka.EventListener{EventSourceName: eventSource.Name, EventName: k, KafkaEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.KafkaEvent] = servers
 	}
 	if len(eventSource.Spec.MQTT) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.MQTT {
-			servers = append(servers, &mqtt.EventListener{EventSourceName: eventSource.Name, EventName: k, MQTTEventSource: v})
+			servers = append(servers, &mqtt.EventListener{EventSourceName: eventSource.Name, EventName: k, MQTTEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.MQTTEvent] = servers
 	}
 	if len(eventSource.Spec.Minio) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Minio {
-			servers = append(servers, &minio.EventListener{EventSourceName: eventSource.Name, EventName: k, MinioEventSource: v})
+			servers = append(servers, &minio.EventListener{EventSourceName: eventSource.Name, EventName: k, MinioEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.MinioEvent] = servers
 	}
 	if len(eventSource.Spec.NATS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.NATS {
-			servers = append(servers, &nats.EventListener{EventSourceName: eventSource.Name, EventName: k, NATSEventSource: v})
+			servers = append(servers, &nats.EventListener{EventSourceName: eventSource.Name, EventName: k, NATSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.NATSEvent] = servers
 	}
 	if len(eventSource.Spec.NSQ) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.NSQ {
-			servers = append(servers, &nsq.EventListener{EventSourceName: eventSource.Name, EventName: k, NSQEventSource: v})
+			servers = append(servers, &nsq.EventListener{EventSourceName: eventSource.Name, EventName: k, NSQEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.NSQEvent] = servers
 	}
 	if len(eventSource.Spec.PubSub) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.PubSub {
-			servers = append(servers, &gcppubsub.EventListener{EventSourceName: eventSource.Name, EventName: k, PubSubEventSource: v})
+			servers = append(servers, &gcppubsub.EventListener{EventSourceName: eventSource.Name, EventName: k, PubSubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.PubSubEvent] = servers
 	}
 	if len(eventSource.Spec.Redis) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Redis {
-			servers = append(servers, &redis.EventListener{EventSourceName: eventSource.Name, EventName: k, RedisEventSource: v})
+			servers = append(servers, &redis.EventListener{EventSourceName: eventSource.Name, EventName: k, RedisEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.RedisEvent] = servers
 	}
 	if len(eventSource.Spec.SNS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SNS {
-			servers = append(servers, &awssns.EventListener{EventSourceName: eventSource.Name, EventName: k, SNSEventSource: v})
+			servers = append(servers, &awssns.EventListener{EventSourceName: eventSource.Name, EventName: k, SNSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SNSEvent] = servers
 	}
 	if len(eventSource.Spec.SQS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SQS {
-			servers = append(servers, &awssqs.EventListener{EventSourceName: eventSource.Name, EventName: k, SQSEventSource: v})
+			servers = append(servers, &awssqs.EventListener{EventSourceName: eventSource.Name, EventName: k, SQSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SQSEvent] = servers
 	}
 	if len(eventSource.Spec.Slack) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Slack {
-			servers = append(servers, &slack.EventListener{EventSourceName: eventSource.Name, EventName: k, SlackEventSource: v})
+			servers = append(servers, &slack.EventListener{EventSourceName: eventSource.Name, EventName: k, SlackEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SlackEvent] = servers
 	}
 	if len(eventSource.Spec.StorageGrid) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.StorageGrid {
-			servers = append(servers, &storagegrid.EventListener{EventSourceName: eventSource.Name, EventName: k, StorageGridEventSource: v})
+			servers = append(servers, &storagegrid.EventListener{EventSourceName: eventSource.Name, EventName: k, StorageGridEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.StorageGridEvent] = servers
 	}
 	if len(eventSource.Spec.Stripe) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Stripe {
-			servers = append(servers, &stripe.EventListener{EventSourceName: eventSource.Name, EventName: k, StripeEventSource: v})
+			servers = append(servers, &stripe.EventListener{EventSourceName: eventSource.Name, EventName: k, StripeEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.StripeEvent] = servers
 	}
 	if len(eventSource.Spec.Webhook) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Webhook {
-			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, WebhookContext: v})
+			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, WebhookContext: v, Metrics: metrics})
 		}
 		result[apicommon.WebhookEvent] = servers
 	}
 	if len(eventSource.Spec.Resource) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Resource {
-			servers = append(servers, &resource.EventListener{EventSourceName: eventSource.Name, EventName: k, ResourceEventSource: v})
+			servers = append(servers, &resource.EventListener{EventSourceName: eventSource.Name, EventName: k, ResourceEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.ResourceEvent] = servers
 	}
 	if len(eventSource.Spec.Pulsar) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Pulsar {
-			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v})
+			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.PulsarEvent] = servers
 	}
 	if len(eventSource.Spec.Generic) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Generic {
-			servers = append(servers, &generic.EventListener{EventSourceName: eventSource.Name, EventName: k, GenericEventSource: v})
+			servers = append(servers, &generic.EventListener{EventSourceName: eventSource.Name, EventName: k, GenericEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.GenericEvent] = servers
 	}
@@ -265,7 +265,7 @@ func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *ev
 func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	logger := logging.FromContext(ctx).Desugar()
 	logger.Info("Starting event source server...")
-	servers := GetEventingServers(e.eventSource)
+	servers := GetEventingServers(e.eventSource, e.metrics)
 	clientID := generateClientID(e.hostname)
 	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 	if err != nil {

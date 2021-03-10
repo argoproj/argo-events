@@ -19,6 +19,7 @@ package amqp
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/pkg/errors"
 	amqplib "github.com/streadway/amqp"
@@ -27,6 +28,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -37,6 +39,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	AMQPEventSource v1alpha1.AMQPEventSource
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -57,7 +60,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 
 	log.Info("started processing the AMQP event source...")
 	defer sources.Recover(el.GetEventName())
@@ -113,48 +116,60 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				log.Error("failed to read a message, channel might have been closed")
 				return errors.New("channel might have been closed")
 			}
-			log.Info("received the message", zap.Any("message-id", msg.MessageId))
-			body := &events.AMQPEventData{
-				ContentType:     msg.ContentType,
-				ContentEncoding: msg.ContentEncoding,
-				DeliveryMode:    int(msg.DeliveryMode),
-				Priority:        int(msg.Priority),
-				CorrelationId:   msg.CorrelationId,
-				ReplyTo:         msg.ReplyTo,
-				Expiration:      msg.Expiration,
-				MessageId:       msg.MessageId,
-				Timestamp:       msg.Timestamp.String(),
-				Type:            msg.Type,
-				AppId:           msg.AppId,
-				Exchange:        msg.Exchange,
-				RoutingKey:      msg.RoutingKey,
-				Metadata:        amqpEventSource.Metadata,
-			}
-			if amqpEventSource.JSONBody {
-				body.Body = (*json.RawMessage)(&msg.Body)
-			} else {
-				body.Body = msg.Body
-			}
-
-			bodyBytes, err := json.Marshal(body)
-			if err != nil {
-				log.Error("failed to marshal the message", zap.Any("message-id", msg.MessageId), zap.Error(err))
-				continue
-			}
-
-			log.Info("dispatching event ...")
-			err = dispatch(bodyBytes)
-			if err != nil {
-				log.Error("failed to dispatch AMQP event", zap.Error(err))
+			if err := el.handleOne(amqpEventSource, msg, dispatch, log); err != nil {
+				log.Errorw("failed to process an AMQP message", zap.Error(err))
+				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			}
 		case <-ctx.Done():
 			err = conn.Close()
 			if err != nil {
-				log.Error("failed to close connection", zap.Error(err))
+				log.Errorw("failed to close connection", zap.Error(err))
 			}
 			return nil
 		}
 	}
+}
+
+func (el *EventListener) handleOne(amqpEventSource *v1alpha1.AMQPEventSource, msg amqplib.Delivery, dispatch func([]byte) error, log *zap.SugaredLogger) error {
+	startTime := time.Now()
+	defer func(start time.Time) {
+		elapsed := time.Now().Sub(start)
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
+	}(startTime)
+
+	log.Infow("received the message", zap.Any("message-id", msg.MessageId))
+	body := &events.AMQPEventData{
+		ContentType:     msg.ContentType,
+		ContentEncoding: msg.ContentEncoding,
+		DeliveryMode:    int(msg.DeliveryMode),
+		Priority:        int(msg.Priority),
+		CorrelationId:   msg.CorrelationId,
+		ReplyTo:         msg.ReplyTo,
+		Expiration:      msg.Expiration,
+		MessageId:       msg.MessageId,
+		Timestamp:       msg.Timestamp.String(),
+		Type:            msg.Type,
+		AppId:           msg.AppId,
+		Exchange:        msg.Exchange,
+		RoutingKey:      msg.RoutingKey,
+		Metadata:        amqpEventSource.Metadata,
+	}
+	if amqpEventSource.JSONBody {
+		body.Body = (*json.RawMessage)(&msg.Body)
+	} else {
+		body.Body = msg.Body
+	}
+
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return errors.Wrapf(err, "failed to marshal the message, message-id: %s", msg.MessageId)
+	}
+
+	log.Info("dispatching event ...")
+	if err = dispatch(bodyBytes); err != nil {
+		return errors.Wrap(err, "failed to dispatch AMQP event")
+	}
+	return nil
 }
 
 // setDefaults sets the default values in case the user hasn't defined them

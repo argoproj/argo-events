@@ -19,6 +19,7 @@ package nats
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	natslib "github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
@@ -27,6 +28,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -37,6 +39,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	NATSEventSource v1alpha1.NATSEventsSource
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -57,7 +60,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
 
 	natsEventSource := &el.NATSEventSource
@@ -127,6 +130,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("subscribing to messages on the queue...")
 	_, err := conn.Subscribe(natsEventSource.Subject, func(msg *natslib.Msg) {
+		startTime := time.Now()
+		defer func(start time.Time) {
+			elapsed := time.Now().Sub(start)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
+		}(startTime)
+
 		eventData := &events.NATSEventData{
 			Subject:  msg.Subject,
 			Metadata: natsEventSource.Metadata,
@@ -139,13 +148,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			log.Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
+			log.Errorw("failed to marshal the event data, rejecting the event...", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			return
 		}
 		log.Info("dispatching the event on data channel...")
-		err = dispatch(eventBody)
-		if err != nil {
-			log.Error("failed to dispatch NATS event", zap.Error(err))
+		if err = dispatch(eventBody); err != nil {
+			log.Errorw("failed to dispatch a NATS event", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}
 	})
 	if err != nil {

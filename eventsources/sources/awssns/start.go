@@ -27,9 +27,11 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"time"
 
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -37,10 +39,10 @@ import (
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -97,7 +99,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		logging.LabelEndpoint, route.Context.Endpoint,
 		logging.LabelPort, route.Context.Port,
 		logging.LabelHTTPMethod, route.Context.Method,
-	).Desugar()
+	)
 
 	logger.Info("request received from event source")
 
@@ -107,18 +109,26 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	startTime := time.Now()
+	defer func(start time.Time) {
+		elapsed := time.Now().Sub(start)
+		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(elapsed/time.Millisecond))
+	}(startTime)
+
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error("failed to parse the request body", zap.Error(err))
+		logger.Errorw("failed to parse the request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
 	var notification *httpNotification
 	err = yaml.Unmarshal(body, &notification)
 	if err != nil {
-		logger.Error("failed to convert request payload into sns notification", zap.Error(err))
+		logger.Errorw("failed to convert request payload into sns notification", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -126,8 +136,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	if router.eventSource.ValidateSignature {
 		err = notification.verify()
 		if err != nil {
-			logger.Error("failed to verify sns message", zap.Error(err))
+			logger.Errorw("failed to verify sns message", zap.Error(err))
 			common.SendErrorResponse(writer, err.Error())
+			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
 	}
@@ -141,8 +152,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			Token:    &notification.Token,
 		})
 		if err != nil {
-			logger.Error("failed to send confirmation response to aws sns", zap.Error(err))
+			logger.Errorw("failed to send confirmation response to aws sns", zap.Error(err))
 			common.SendErrorResponse(writer, err.Error())
+			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
 
@@ -160,8 +172,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
-			logger.Error("failed to marshal the event data", zap.Error(err))
+			logger.Errorw("failed to marshal the event data", zap.Error(err))
 			common.SendErrorResponse(writer, err.Error())
+			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
 		route.DataCh <- eventBytes
@@ -232,6 +245,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	SNSEventSource  v1alpha1.SNSEventSource
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -258,7 +272,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	logger.Info("started processing the AWS SNS event source...")
 
-	route := webhook.NewRoute(el.SNSEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(el.SNSEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
 
 	logger.Info("operating on the route...")
 	return webhook.ManageRoute(ctx, &Router{

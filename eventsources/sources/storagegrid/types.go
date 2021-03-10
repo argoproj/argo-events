@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -28,6 +29,7 @@ type EventListener struct {
 	EventSourceName        string
 	EventName              string
 	StorageGridEventSource v1alpha1.StorageGridEventSource
+	Metrics                *metrics.Metrics
 }
 
 // Router manages route

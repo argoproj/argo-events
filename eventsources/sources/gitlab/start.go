@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -84,10 +85,17 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	startTime := time.Now()
+	defer func(start time.Time) {
+		elapsed := time.Now().Sub(start)
+		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(elapsed/time.Millisecond))
+	}(startTime)
+
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Desugar().Error("failed to parse request body", zap.Error(err))
+		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -101,6 +109,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	if err != nil {
 		logger.Info("failed to marshal event")
 		common.SendErrorResponse(writer, "invalid event")
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -267,7 +276,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	gitlabEventSource := &el.GitlabEventSource
 
-	route := webhook.NewRoute(gitlabEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(gitlabEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
 
 	return webhook.ManageRoute(ctx, &Router{
 		route:             route,
