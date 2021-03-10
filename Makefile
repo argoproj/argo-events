@@ -6,6 +6,7 @@ DOCKERFILE:=Dockerfile
 
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(shell git rev-parse HEAD)
+GIT_BRANCH=$(shell git rev-parse --symbolic-full-name --verify --quiet --abbrev-ref HEAD)
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
 GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ; else echo "dirty"; fi)
 
@@ -239,3 +240,34 @@ quay-release: eventbus-controller-image sensor-controller-image sensor-image eve
 
 	docker tag $(IMAGE_NAMESPACE)/events-webhook:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(VERSION)
 	docker push quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(VERSION)
+
+# release - targets only available on release branch
+ifneq ($(findstring release,$(GIT_BRANCH)),)
+
+.PHONY: prepare-release
+prepare-release: check-version-warning clean update-manifests-version codegen
+	git status
+	@git diff --quiet || echo "\n\nPlease run 'git diff' to confirm the file changes are correct.\n"
+
+.PHONY: release
+release: check-version-warning
+	@echo "\n1. Make sure you have run 'VERSION=$(VERSION) make prepare-release', and confirmed all the changes are expected."
+	@echo "\n2. Run following commands to commit the changes to the release branch, add give a tag.\n"
+	@echo "git commit -am \"Update manifests to $(VERSION)\""
+	@echo "git push {your-remote}\n"
+	@echo "git tag -a $(VERSION) -m $(VERSION)"
+	@echo "git push {your-remote} $(VERSION)\n"
+
+endif
+
+.PHONY: check-version-warning
+check-version-warning:
+	@if [[ ! "$(VERSION)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$  ]]; then echo -n "It looks like you're not using a version format like 'v1.2.3', or 'v1.2.3-rc2', that version format is required for our releases. Do you wish to continue anyway? [y/N]" && read ans && [ $${ans:-N} = y ]; fi
+
+.PHONY: update-manifests-version
+update-manifests-version:
+	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: argoproj/eventsource:.*@value: argoproj/eventsource:$(VERSION)@' | sed 's@value: argoproj/sensor:.*@value: argoproj/sensor:$(VERSION)@' > /tmp/base_kustomization.yaml
+	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
+	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
+	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
+
