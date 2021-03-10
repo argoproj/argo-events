@@ -245,7 +245,7 @@ quay-release: eventbus-controller-image sensor-controller-image sensor-image eve
 ifneq ($(findstring release,$(GIT_BRANCH)),)
 
 .PHONY: prepare-release
-prepare-release: check-version-warning clean update-version codegen
+prepare-release: check-version-warning clean update-manifests-version codegen
 	git status
 	@git diff --quiet || echo "\n\nPlease run 'git diff' to confirm the file changes are correct.\n"
 
@@ -264,8 +264,8 @@ endif
 check-version-warning:
 	@if [[ ! "$(VERSION)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$  ]]; then echo -n "It looks like you're not using a version format like 'v1.2.3', or 'v1.2.3-rc2', that version format is required for our releases. Do you wish to continue anyway? [y/N]" && read ans && [ $${ans:-N} = y ]; fi
 
-.PHONY: update-version
-update-version:
+.PHONY: update-manifests-version
+update-manifests-version:
 	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: argoproj/eventsource:.*@value: argoproj/eventsource:$(VERSION)@' | sed 's@value: argoproj/sensor:.*@value: argoproj/sensor:$(VERSION)@' > /tmp/base_kustomization.yaml
 	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
 	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
