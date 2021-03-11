@@ -1223,6 +1223,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#argo_events_events_processing_failed_total" title="argo_events_events_processing_failed_total" class="md-nav__link">
+    argo_events_events_processing_failed_total
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#argo_events_event_processing_duration_milliseconds" title="argo_events_event_processing_duration_milliseconds" class="md-nav__link">
     argo_events_event_processing_duration_milliseconds
   </a>
@@ -1440,6 +1447,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#argo_events_events_processing_failed_total" title="argo_events_events_processing_failed_total" class="md-nav__link">
+    argo_events_events_processing_failed_total
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#argo_events_event_processing_duration_milliseconds" title="argo_events_event_processing_duration_milliseconds" class="md-nav__link">
     argo_events_event_processing_duration_milliseconds
   </a>
@@ -1582,10 +1596,13 @@ and grant it to your Service Account.</p>
 <h4 id="argo_events_events_sent_total">argo_events_events_sent_total<a class="headerlink" href="#argo_events_events_sent_total" title="Permanent link">&para;</a></h4>
 <p>How many events have been sent successfully.</p>
 <h4 id="argo_events_events_sent_failed_total">argo_events_events_sent_failed_total<a class="headerlink" href="#argo_events_events_sent_failed_total" title="Permanent link">&para;</a></h4>
-<p>How many events failed to send.</p>
+<p>How many events failed to send to EventBus.</p>
+<h4 id="argo_events_events_processing_failed_total">argo_events_events_processing_failed_total<a class="headerlink" href="#argo_events_events_processing_failed_total" title="Permanent link">&para;</a></h4>
+<p>How many events failed to process due to all the reasons, it includes
+<code>argo_events_events_sent_failed_total</code>.</p>
 <h4 id="argo_events_event_processing_duration_milliseconds">argo_events_event_processing_duration_milliseconds<a class="headerlink" href="#argo_events_event_processing_duration_milliseconds" title="Permanent link">&para;</a></h4>
 <p>Event processing duration (from getting the event to send it to EventBus) in
-milliseconds - TBD.</p>
+milliseconds.</p>
 <h3 id="sensor">Sensor<a class="headerlink" href="#sensor" title="Permanent link">&para;</a></h3>
 <h4 id="argo_events_action_triggered_total">argo_events_action_triggered_total<a class="headerlink" href="#argo_events_action_triggered_total" title="Permanent link">&para;</a></h4>
 <p>How many actions have been triggered successfully.</p>
@@ -1646,8 +1663,9 @@ of monitoring your applictions running with Argo Events.</p>
 <p>Errors</p>
 </li>
 <li>
-<p><code>argo_events_events_sent_failed_total</code></p>
+<p><code>argo_events_events_processing_failed_total</code></p>
 </li>
+<li><code>argo_events_events_sent_failed_total</code></li>
 <li>
 <p><code>argo_events_action_failed_total</code></p>
 </li>
