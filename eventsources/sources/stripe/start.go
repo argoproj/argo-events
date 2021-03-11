@@ -21,6 +21,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
+
+	"github.com/pkg/errors"
+	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/webhookendpoint"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -28,10 +34,6 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
-	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/webhookendpoint"
-	"go.uber.org/zap"
 )
 
 // controller controls the webhook operations
@@ -78,7 +80,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		logging.LabelEndpoint, route.Context.Endpoint,
 		logging.LabelPort, route.Context.Port,
 		logging.LabelHTTPMethod, route.Context.Method,
-	).Desugar()
+	)
 
 	logger.Info("request a received, processing it...")
 
@@ -88,26 +90,32 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
+	defer func(start time.Time) {
+		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
+
 	const MaxBodyBytes = int64(65536)
 	request.Body = http.MaxBytesReader(writer, request.Body, MaxBodyBytes)
 	payload, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error("error reading request body", zap.Error(err))
+		logger.Errorw("error reading request body", zap.Error(err))
 		writer.WriteHeader(http.StatusServiceUnavailable)
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
 	var event *stripe.Event
 	if err := json.Unmarshal(payload, &event); err != nil {
-		logger.Error("failed to parse request body", zap.Error(err))
+		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, "failed to parse the event")
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
-	ok := filterEvent(event, rc.stripeEventSource.EventFilter)
-	if !ok {
-		logger.Error("failed to pass the filters", zap.Any("event-type", event.Type), zap.Error(err))
-		common.SendSuccessResponse(writer, "invalid event")
+	if ok := filterEvent(event, rc.stripeEventSource.EventFilter); !ok {
+		logger.Errorw("failed to pass the filters", zap.Any("event-type", event.Type), zap.Error(err))
+		common.SendErrorResponse(writer, "invalid event")
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -118,8 +126,9 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 
 	data, err := json.Marshal(eventData)
 	if err != nil {
-		logger.Error("failed to marshal event data", zap.Any("event-id", event.ID), zap.Error(err))
-		common.SendSuccessResponse(writer, "invalid event")
+		logger.Errorw("failed to marshal event data", zap.Any("event-id", event.ID), zap.Error(err))
+		common.SendErrorResponse(writer, "invalid event")
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -188,7 +197,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	stripeEventSource := &el.StripeEventSource
-	route := webhook.NewRoute(stripeEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(stripeEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
 
 	return webhook.ManageRoute(ctx, &Router{
 		route:             route,

@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -27,6 +28,7 @@ type When struct {
 	eventBus          *eventbusv1alpha1.EventBus
 	eventSource       *eventsourcev1alpha1.EventSource
 	sensor            *sensorv1alpha1.Sensor
+	restConfig        *rest.Config
 	kubeClient        kubernetes.Interface
 }
 
@@ -371,6 +373,7 @@ func (w *When) Given() *Given {
 		eventBus:          w.eventBus,
 		eventSource:       w.eventSource,
 		sensor:            w.sensor,
+		restConfig:        w.restConfig,
 		kubeClient:        w.kubeClient,
 	}
 }
@@ -384,6 +387,7 @@ func (w *When) Then() *Then {
 		eventBus:          w.eventBus,
 		eventSource:       w.eventSource,
 		sensor:            w.sensor,
+		restConfig:        w.restConfig,
 		kubeClient:        w.kubeClient,
 	}
 }

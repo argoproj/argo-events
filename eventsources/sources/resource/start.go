@@ -39,6 +39,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -56,6 +57,7 @@ type EventListener struct {
 	EventSourceName     string
 	EventName           string
 	ResourceEventSource v1alpha1.ResourceEventSource
+	Metrics             *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -124,46 +126,57 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	stopCh := make(chan struct{})
 	startTime := time.Now()
 
+	processOne := func(event *InformerEvent) error {
+		if !passFilters(event, resourceEventSource.Filter, startTime, log) {
+			return nil
+		}
+
+		defer func(start time.Time) {
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
+		objBody, err := json.Marshal(event.Obj)
+		if err != nil {
+			return errors.Wrap(err, "failed to marshal the resource, rejecting the event...")
+		}
+
+		var oldObjBody []byte
+		if event.OldObj != nil {
+			oldObjBody, err = json.Marshal(event.OldObj)
+			if err != nil {
+				return errors.Wrap(err, "failed to marshal the resource, rejecting the event...")
+			}
+		}
+
+		eventData := &events.ResourceEventData{
+			EventType: string(event.Type),
+			Body:      (*json.RawMessage)(&objBody),
+			OldBody:   (*json.RawMessage)(&oldObjBody),
+			Group:     resourceEventSource.Group,
+			Version:   resourceEventSource.Version,
+			Resource:  resourceEventSource.Resource,
+			Metadata:  resourceEventSource.Metadata,
+		}
+
+		eventBody, err := json.Marshal(eventData)
+		if err != nil {
+			return errors.Wrap(err, "failed to marshal the event. rejecting the event...")
+		}
+
+		if err = dispatch(eventBody); err != nil {
+			return errors.Wrap(err, "failed to dispatch a resource event")
+		}
+		return nil
+	}
+
 	go func() {
 		log.Info("listening to resource events...")
 		for {
 			select {
 			case event := <-informerEventCh:
-				objBody, err := json.Marshal(event.Obj)
-				if err != nil {
-					log.Desugar().Error("failed to marshal the resource, rejecting the event...", zap.Error(err))
-					continue
-				}
-
-				var oldObjBody []byte
-				if event.OldObj != nil {
-					oldObjBody, err = json.Marshal(event.OldObj)
-					if err != nil {
-						log.Desugar().Error("failed to marshal the resource, rejecting the event...", zap.Error(err))
-						continue
-					}
-				}
-
-				eventData := &events.ResourceEventData{
-					EventType: string(event.Type),
-					Body:      (*json.RawMessage)(&objBody),
-					OldBody:   (*json.RawMessage)(&oldObjBody),
-					Group:     resourceEventSource.Group,
-					Version:   resourceEventSource.Version,
-					Resource:  resourceEventSource.Resource,
-					Metadata:  resourceEventSource.Metadata,
-				}
-
-				eventBody, err := json.Marshal(eventData)
-				if err != nil {
-					log.Desugar().Error("failed to marshal the event. rejecting the event...", zap.Error(err))
-					continue
-				}
-				if !passFilters(event, resourceEventSource.Filter, startTime, log) {
-					continue
-				}
-				if err = dispatch(eventBody); err != nil {
-					log.Desugar().Error("failed to dispatch resource event", zap.Error(err))
+				if err := processOne(event); err != nil {
+					log.Errorw("failed to process a Resource event", zap.Error(err))
+					el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 				}
 			case <-stopCh:
 				return

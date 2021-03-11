@@ -6,6 +6,7 @@ import (
 	fmt "fmt"
 	"time"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -14,6 +15,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -24,7 +26,9 @@ type EventListener struct {
 	EventSourceName    string
 	EventName          string
 	GenericEventSource v1alpha1.GenericEventSource
-	conn               *grpc.ClientConn
+	Metrics            *metrics.Metrics
+
+	conn *grpc.ClientConn
 }
 
 // GetEventSourceName returns name of event source
@@ -66,7 +70,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				logger.Info("dialing eventsource server...")
 				eventStream, err := el.connect()
 				if err != nil {
-					logger.Error("failed to connect eventsource server, reconnecting in 5 seconds...", zap.Error(err))
+					logger.Errorw("failed to connect eventsource server, reconnecting in 5 seconds...", zap.Error(err))
 					continue
 				}
 				logger.Info("connected to eventsource server successfully, started event stream...")
@@ -78,28 +82,39 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 						el.conn.Close()
 						break
 					}
-					logger.Info("received an event from server")
-					eventData := &events.GenericEventData{
-						Metadata: el.GenericEventSource.Metadata,
-					}
-					if el.GenericEventSource.JSONBody {
-						eventData.Body = (*json.RawMessage)(&event.Payload)
-					} else {
-						eventData.Body = event.Payload
-					}
-					eventBytes, err := json.Marshal(eventData)
-					if err != nil {
-						logger.Errorw("failed to marshal the event data", zap.Error(err))
-						continue
-					}
-					logger.Info("dispatching event...")
-					if err := dispatch(eventBytes); err != nil {
-						logger.Errorw("failed to dispatch the event", zap.Error(err))
+					if err := el.handleOne(event, dispatch, logger); err != nil {
+						logger.Errorw("failed to process a Generics event", zap.Error(err))
+						el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 					}
 				}
 			}
 		}
 	}
+}
+
+func (el *EventListener) handleOne(event *Event, dispatch func([]byte) error, logger *zap.SugaredLogger) error {
+	defer func(start time.Time) {
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
+
+	logger.Info("received an event from server")
+	eventData := &events.GenericEventData{
+		Metadata: el.GenericEventSource.Metadata,
+	}
+	if el.GenericEventSource.JSONBody {
+		eventData.Body = (*json.RawMessage)(&event.Payload)
+	} else {
+		eventData.Body = event.Payload
+	}
+	eventBytes, err := json.Marshal(eventData)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal the event data")
+	}
+	logger.Info("dispatching event...")
+	if err := dispatch(eventBytes); err != nil {
+		return errors.Wrap(err, "failed to dispatch a Generic event")
+	}
+	return nil
 }
 
 func (el *EventListener) connect() (Eventing_StartEventSourceClient, error) {

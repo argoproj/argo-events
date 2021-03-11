@@ -24,16 +24,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/eventsources/persist"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/events"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/eventsources/persist"
+	metrics "github.com/argoproj/argo-events/metrics"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // EventListener implements Eventing for calendar based events
@@ -42,8 +44,10 @@ type EventListener struct {
 	EventName           string
 	Namespace           string
 	CalendarEventSource v1alpha1.CalendarEventSource
-	log                 *zap.Logger
-	eventPersistence    persist.EventPersist
+	Metrics             *metrics.Metrics
+
+	log              *zap.SugaredLogger
+	eventPersistence persist.EventPersist
 }
 
 // GetEventSourceName returns name of event source
@@ -95,20 +99,20 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 	if el.eventPersistence.IsEnabled() && el.CalendarEventSource.Persistence.IsCatchUpEnabled() {
 		lastEvent, err := el.eventPersistence.Get(el.getPersistenceKey())
 		if err != nil {
-			el.log.Error("failed to get last persisted event.", zap.Error(err))
+			el.log.Errorw("failed to get last persisted event.", zap.Error(err))
 			return lastT, errors.Wrap(err, "failed to get last persisted event.")
 		}
 		if lastEvent != nil && lastEvent.EventPayload != "" {
 			var eventData events.CalendarEventData
 			err := json.Unmarshal([]byte(lastEvent.EventPayload), &eventData)
 			if err != nil {
-				el.log.Info("failed to marshal last persisted event.", zap.Error(err))
+				el.log.Errorw("failed to marshal last persisted event.", zap.Error(err))
 				return lastT, errors.Wrap(err, "failed to marshal last persisted event.")
 			}
 			eventTime := strings.Split(eventData.EventTime, " m=")
 			lastT, err = time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", eventTime[0])
 			if err != nil {
-				el.log.Error("failed to parse the persisted last event timestamp", zap.Error(err))
+				el.log.Errorw("failed to parse the persisted last event timestamp", zap.Error(err))
 				return lastT, errors.Wrap(err, "failed to parse the persisted last event timestamp.")
 			}
 		}
@@ -121,7 +125,7 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 
 			// Set maxCatchupDuration in execution time if last persisted event time is greater than maxCatchupDuration
 			if duration < time.Since(lastT) {
-				el.log.Info("set execution time", zap.Any("maxDuration", el.CalendarEventSource.Persistence.Catchup.MaxDuration))
+				el.log.Infow("set execution time", zap.Any("maxDuration", el.CalendarEventSource.Persistence.Catchup.MaxDuration))
 				lastT = time.Now().Add(-duration)
 			}
 		}
@@ -132,7 +136,7 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	el.log = logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	el.log.Info("started processing the calendar event source...")
 
 	calendarEventSource := &el.CalendarEventSource
@@ -150,12 +154,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	el.eventPersistence = &persist.NullPersistence{}
 	if calendarEventSource.Persistence != nil {
-		err = el.initializePersistence(ctx, calendarEventSource.Persistence)
-		if err != nil {
+		if err = el.initializePersistence(ctx, calendarEventSource.Persistence); err != nil {
 			return err
 		}
 	} else {
-		el.log.Info("Persistence disabled")
+		el.log.Info("Persistence not enabled")
 	}
 
 	var next Next
@@ -180,7 +183,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var location *time.Location
 	if calendarEventSource.Timezone != "" {
-		el.log.Info("loading location for the schedule...", zap.Any("location", calendarEventSource.Timezone))
+		el.log.Infow("loading location for the schedule...", zap.Any("location", calendarEventSource.Timezone))
 		location, err = time.LoadLocation(calendarEventSource.Timezone)
 		if err != nil {
 			return errors.Wrapf(err, "failed to load location for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
@@ -188,6 +191,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		lastT = lastT.In(location)
 	}
 	sendEventFunc := func(tx time.Time) error {
+		defer func(start time.Time) {
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
 		eventData := &events.CalendarEventData{
 			EventTime:   tx.String(),
 			UserPayload: calendarEventSource.UserPayload,
@@ -195,37 +202,37 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		payload, err := json.Marshal(eventData)
 		if err != nil {
-			el.log.Error("failed to marshal the event data", zap.Error(err))
+			el.log.Errorw("failed to marshal the event data", zap.Error(err))
 			// no need to continue as further event payloads will suffer same fate as this one.
 			return errors.Wrapf(err, "failed to marshal the event data for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
 		}
 		el.log.Info("dispatching calendar event...")
 		err = dispatch(payload)
 		if err != nil {
-			el.log.Error("failed to dispatch calendar event", zap.Error(err))
+			el.log.Errorw("failed to dispatch calendar event", zap.Error(err))
 			return errors.Wrapf(err, "failed to dispatch calendar event")
 		}
 		if el.eventPersistence != nil && el.eventPersistence.IsEnabled() {
 			event := persist.Event{EventKey: el.getPersistenceKey(), EventPayload: string(payload)}
 			err = el.eventPersistence.Save(&event)
 			if err != nil {
-				el.log.Error("failed to persist calendar event", zap.Error(err))
+				el.log.Errorw("failed to persist calendar event", zap.Error(err))
 			}
 		}
 		return nil
 	}
 
-	el.log.Info("Calendar event start time:", zap.Any("Time", lastT.Format(time.RFC822)))
+	el.log.Infow("Calendar event start time:", zap.Any("Time", lastT.Format(time.RFC822)))
 	for {
 		t := next(lastT)
 
 		// Catchup scenario
 		// Trigger the event immediately if the current schedule time is earlier then
 		if time.Now().After(t) {
-			el.log.Info("triggering catchup events", zap.Any(logging.LabelTime, t.UTC().String()))
-			err = sendEventFunc(t)
-			if err != nil {
-				el.log.Error("failed to dispatch calendar event", zap.Error(err))
+			el.log.Infow("triggering catchup events", zap.Any(logging.LabelTime, t.UTC().String()))
+			if err = sendEventFunc(t); err != nil {
+				el.log.Errorw("failed to dispatch calendar event", zap.Error(err))
+				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 				if el.eventPersistence.IsEnabled() {
 					time.Sleep(100 * time.Millisecond)
 					continue
@@ -239,12 +246,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		timer := time.After(time.Until(t))
-		el.log.Info("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
+		el.log.Infow("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
 		select {
 		case tx := <-timer:
-			err = sendEventFunc(tx)
-			if err != nil {
-				el.log.Error("failed to dispatch calendar event", zap.Error(err))
+			if err = sendEventFunc(tx); err != nil {
+				el.log.Errorw("failed to dispatch calendar event", zap.Error(err))
+				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 				if el.eventPersistence.IsEnabled() {
 					time.Sleep(100 * time.Millisecond)
 					continue
