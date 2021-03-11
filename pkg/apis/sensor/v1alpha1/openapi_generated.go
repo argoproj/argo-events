@@ -326,7 +326,7 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 					},
 					"certFilePath": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. DEPRECATED: use CertSecret instead",
+							Description: "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. DEPRECATED: will be removed in v1.5, use CertSecret instead",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -686,7 +686,7 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 					},
 					"sshKeyPath": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. DEPRECATED: use SSHKeySecret instead.",
+							Description: "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. DEPRECATED: will be removed in v1.5, use SSHKeySecret instead.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1307,7 +1307,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					},
 					"circuit": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Circuit is a boolean expression of dependency groups DEPRECATED: Use Switch in triggers instead.",
+							Description: "Circuit is a boolean expression of dependency groups DEPRECATED: will be removed in v1.5, use Switch in triggers instead.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1819,7 +1819,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback)
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. DEPRECATED",
+				Description: "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. DEPRECATED, will be removed in v1.5",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"any": {
@@ -1939,7 +1939,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 					},
 					"switch": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedSwitch is the condition to execute the trigger. DEPRECATED: USE conditions instead",
+							Description: "DeprecatedSwitch is the condition to execute the trigger. DEPRECATED: will be removed in v1.5, use conditions instead",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"),
 						},
 					},

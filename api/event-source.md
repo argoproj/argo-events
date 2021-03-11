@@ -638,7 +638,8 @@ Timezone in which to run the schedule
 <em>(Optional)</em>
 <p>
 UserPayload will be sent to sensor as extra data once the event is
-triggered Deprecated. Please use Metadata instead.
+triggered Deprecated, will be removed in v1.5. Please use Metadata
+instead.
 </p>
 </td>
 </tr>
@@ -3099,7 +3100,8 @@ will be JSON
 <td>
 <p>
 CredentialsFile is the file that contains credentials to authenticate
-for GCP Deprecated, use CredentialSecret instead
+for GCP Deprecated, will be removed in v1.5, use CredentialSecret
+instead
 </p>
 </td>
 </tr>

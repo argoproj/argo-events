@@ -204,7 +204,7 @@ message CalendarEventSource {
 
   // UserPayload will be sent to sensor as extra data once the event is triggered
   // +optional
-  // Deprecated. Please use Metadata instead.
+  // Deprecated, will be removed in v1.5. Please use Metadata instead.
   optional bytes userPayload = 5;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
@@ -767,7 +767,7 @@ message PubSubEventSource {
   optional bool jsonBody = 7;
 
   // CredentialsFile is the file that contains credentials to authenticate for GCP
-  // Deprecated, use CredentialSecret instead
+  // Deprecated, will be removed in v1.5, use CredentialSecret instead
   optional string credentialsFile = 8;
 
   // Metadata holds the user defined metadata which will passed along the event payload.

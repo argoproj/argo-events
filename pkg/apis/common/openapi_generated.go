@@ -431,21 +431,21 @@ func schema_argo_events_pkg_apis_common_TLSConfig(ref common.ReferenceCallback) 
 					},
 					"caCertPath": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedCACertPath refers the file path that contains the CA cert. Deprecated: use CACertSecret instead",
+							Description: "DeprecatedCACertPath refers the file path that contains the CA cert. Deprecated: will be removed in v1.5, use CACertSecret instead",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"clientCertPath": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedClientCertPath refers the file path that contains client cert. Deprecated: use ClientCertSecret instead",
+							Description: "DeprecatedClientCertPath refers the file path that contains client cert. Deprecated: will be removed in v1.5, use ClientCertSecret instead",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"clientKeyPath": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedClientKeyPath refers the file path that contains client key. Deprecated: use ClientKeySecret instead",
+							Description: "DeprecatedClientKeyPath refers the file path that contains client key. Deprecated: will be removed in v1.5, use ClientKeySecret instead",
 							Type:        []string{"string"},
 							Format:      "",
 						},
