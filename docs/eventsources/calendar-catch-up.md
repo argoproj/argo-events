@@ -28,8 +28,8 @@ spec:
           name: test-configmap
 ```
 
-Last calender event persisted in configured configmap. Multiple events can use
-the same configmap to persist the events.
+Last calender event persisted in configured configmap. Same configmap can be
+used by multiple events configuration.
 
 ```yaml
 data:
