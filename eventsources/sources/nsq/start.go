@@ -20,16 +20,19 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"time"
+
+	"github.com/nsqio/go-nsq"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/nsqio/go-nsq"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for the NSQ event source
@@ -37,6 +40,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	NSQEventSource  v1alpha1.NSQEventSource
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -55,10 +59,13 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 type messageHandler struct {
-	dispatch func([]byte) error
-	logger   *zap.SugaredLogger
-	isJSON   bool
-	metadata map[string]string
+	eventSourceName string
+	eventName       string
+	metrics         *metrics.Metrics
+	dispatch        func([]byte) error
+	logger          *zap.SugaredLogger
+	isJSON          bool
+	metadata        map[string]string
 }
 
 // StartListening listens NSQ events
@@ -98,7 +105,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		log.Info("assuming all events have a json body...")
 	}
 
-	consumer.AddHandler(&messageHandler{dispatch: dispatch, logger: log, isJSON: nsqEventSource.JSONBody, metadata: nsqEventSource.Metadata})
+	consumer.AddHandler(&messageHandler{eventSourceName: el.EventSourceName, eventName: el.EventName, dispatch: dispatch, logger: log, isJSON: nsqEventSource.JSONBody, metadata: nsqEventSource.Metadata, metrics: el.Metrics})
 
 	if err := consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress); err != nil {
 		return errors.Wrapf(err, "lookup failed for host %s for event source %s", nsqEventSource.HostAddress, el.GetEventName())
@@ -112,6 +119,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 // HandleMessage implements the Handler interface.
 func (h *messageHandler) HandleMessage(m *nsq.Message) error {
+	defer func(start time.Time) {
+		h.metrics.EventProcessingDuration(h.eventSourceName, h.eventName, float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
+
 	h.logger.Info("received a message")
 
 	eventData := &events.NSQEventData{
@@ -126,13 +137,14 @@ func (h *messageHandler) HandleMessage(m *nsq.Message) error {
 
 	eventBody, err := json.Marshal(eventData)
 	if err != nil {
-		h.logger.Desugar().Error("failed to marshal the event data. rejecting the event...", zap.Error(err))
+		h.logger.Errorw("failed to marshal the event data. rejecting the event...", zap.Error(err))
+		h.metrics.EventProcessingFailed(h.eventSourceName, h.eventName)
 		return err
 	}
 
 	h.logger.Info("dispatching the event on the data channel...")
-	err = h.dispatch(eventBody)
-	if err != nil {
+	if err = h.dispatch(eventBody); err != nil {
+		h.metrics.EventProcessingFailed(h.eventSourceName, h.eventName)
 		return err
 	}
 	return nil

@@ -25,12 +25,13 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
-	"github.com/radovskyb/watcher"
+	watcherpkg "github.com/radovskyb/watcher"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/common/fsevent"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -40,6 +41,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	FileEventSource v1alpha1.FileEventSource
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -60,7 +62,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
 
 	fileEventSource := &el.FileEventSource
@@ -79,7 +81,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 // listenEvents listen to file related events.
-func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte) error, log *zap.Logger) error {
+func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte) error, log *zap.SugaredLogger) error {
 	fileEventSource := &el.FileEventSource
 
 	// create new fs watcher
@@ -99,11 +101,31 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte)
 
 	var pathRegexp *regexp.Regexp
 	if fileEventSource.WatchPathConfig.PathRegexp != "" {
-		log.Info("matching file path with configured regex...", zap.Any("regex", fileEventSource.WatchPathConfig.PathRegexp))
+		log.Infow("matching file path with configured regex...", zap.Any("regex", fileEventSource.WatchPathConfig.PathRegexp))
 		pathRegexp, err = regexp.Compile(fileEventSource.WatchPathConfig.PathRegexp)
 		if err != nil {
 			return errors.Wrapf(err, "failed to match file path with configured regex %s for %s", fileEventSource.WatchPathConfig.PathRegexp, el.GetEventName())
 		}
+	}
+
+	processOne := func(event fsnotify.Event) error {
+		defer func(start time.Time) {
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
+		log.Infow("file event", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
+
+		// Assume fsnotify event has the same Op spec of our file event
+		fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String()), Metadata: el.FileEventSource.Metadata}
+		payload, err := json.Marshal(fileEvent)
+		if err != nil {
+			return errors.Wrap(err, "failed to marshal the event to the fs event")
+		}
+		log.Infow("dispatching file event on data channel...", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
+		if err = dispatch(payload); err != nil {
+			return errors.Wrap(err, "failed to dispatch a file event")
+		}
+		return nil
 	}
 
 	log.Info("listening to file notifications...")
@@ -124,19 +146,9 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte)
 				matched = true
 			}
 			if matched && fileEventSource.EventType == event.Op.String() {
-				log.Info("file event", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
-
-				// Assume fsnotify event has the same Op spec of our file event
-				fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String()), Metadata: fileEventSource.Metadata}
-				payload, err := json.Marshal(fileEvent)
-				if err != nil {
-					log.Error("failed to marshal the event to the fs event", zap.Error(err))
-					continue
-				}
-				log.Info("dispatching file event on data channel...", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
-				err = dispatch(payload)
-				if err != nil {
-					log.Error("failed to dispatch file event", zap.Error(err))
+				if err = processOne(event); err != nil {
+					log.Errorw("failed to process a file event", zap.Error(err))
+					el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 				}
 			}
 		case err := <-watcher.Errors:
@@ -149,12 +161,12 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte)
 }
 
 // listenEvents listen to file related events using polling.
-func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func([]byte) error, log *zap.Logger) error {
+func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func([]byte) error, log *zap.SugaredLogger) error {
 	fileEventSource := &el.FileEventSource
 
 	// create new fs watcher
 	log.Info("setting up a new file polling watcher...")
-	watcher := watcher.New()
+	watcher := watcherpkg.New()
 	defer watcher.Close()
 
 	// file descriptor to watch must be available in file system. You can't watch an fs descriptor that is not present.
@@ -166,11 +178,31 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 
 	var pathRegexp *regexp.Regexp
 	if fileEventSource.WatchPathConfig.PathRegexp != "" {
-		log.Info("matching file path with configured regex...", zap.Any("regex", fileEventSource.WatchPathConfig.PathRegexp))
+		log.Infow("matching file path with configured regex...", zap.Any("regex", fileEventSource.WatchPathConfig.PathRegexp))
 		pathRegexp, err = regexp.Compile(fileEventSource.WatchPathConfig.PathRegexp)
 		if err != nil {
 			return errors.Wrapf(err, "failed to match file path with configured regex %s for %s", fileEventSource.WatchPathConfig.PathRegexp, el.GetEventName())
 		}
+	}
+
+	processOne := func(event watcherpkg.Event) error {
+		defer func(start time.Time) {
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
+		log.Infow("file event", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
+
+		// Assume fsnotify event has the same Op spec of our file event
+		fileEvent := fsevent.Event{Name: event.Name(), Op: fsevent.NewOp(event.Op.String()), Metadata: el.FileEventSource.Metadata}
+		payload, err := json.Marshal(fileEvent)
+		if err != nil {
+			return errors.Wrap(err, "failed to marshal the event to the fs event")
+		}
+		log.Infow("dispatching file event on data channel...", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
+		if err = dispatch(payload); err != nil {
+			return errors.Wrap(err, "failed to dispatch file event")
+		}
+		return nil
 	}
 
 	go func() {
@@ -181,7 +213,7 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 				if !ok {
 					log.Info("fs watcher has stopped")
 					// watcher stopped watching file events
-					log.Error("fs watcher stopped", zap.Any("eventName", el.GetEventName()))
+					log.Errorw("fs watcher stopped", zap.Any("eventName", el.GetEventName()))
 					return
 				}
 				// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
@@ -193,23 +225,13 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 					matched = true
 				}
 				if matched && fileEventSource.EventType == event.Op.String() {
-					log.Info("file event", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
-
-					// Assume fsnotify event has the same Op spec of our file event
-					fileEvent := fsevent.Event{Name: event.Name(), Op: fsevent.NewOp(event.Op.String())}
-					payload, err := json.Marshal(fileEvent)
-					if err != nil {
-						log.Error("failed to marshal the event to the fs event", zap.Error(err))
-						continue
-					}
-					log.Info("dispatching file event on data channel...", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
-					err = dispatch(payload)
-					if err != nil {
-						log.Error("failed to dispatch file event", zap.Error(err))
+					if err := processOne(event); err != nil {
+						log.Errorw("failed to process a file event", zap.Error(err))
+						el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 					}
 				}
 			case err := <-watcher.Error:
-				log.Error("failed to process event source", zap.Any("eventName", el.GetEventName()), zap.Error(err))
+				log.Errorw("failed to process event source", zap.Any("eventName", el.GetEventName()), zap.Error(err))
 				return
 			case <-ctx.Done():
 				log.Info("event source has been stopped")

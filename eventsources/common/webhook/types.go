@@ -23,6 +23,7 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
+	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -62,6 +63,8 @@ type Route struct {
 	DataCh chan []byte
 	// Stop channel to signal the end of the event source.
 	StopChan chan struct{}
+
+	Metrics *metrics.Metrics
 }
 
 // Controller controls the active servers and endpoints

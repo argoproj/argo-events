@@ -17,6 +17,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/common/fsevent"
 	"github.com/argoproj/argo-events/eventsources/common/naivewatcher"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -26,6 +27,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	HDFSEventSource v1alpha1.HDFSEventSource
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -141,22 +143,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 
 			if matched && (op&event.Op != 0) {
-				logger := log.With(
-					"event-type", event.Op.String(),
-					"descriptor-name", event.Name,
-				).Desugar()
-				log.Info("received an event")
-
-				log.Info("parsing the event...")
-				payload, err := json.Marshal(event)
-				if err != nil {
-					logger.Error("failed to marshal the event data, rejecting event...", zap.Error(err))
-					continue
-				}
-
-				log.Info("dispatching event on data channel...")
-				if err = dispatch(payload); err != nil {
-					logger.Error("failed to dispatch HDFS event...", zap.Error(err))
+				if err := el.handleOne(event, dispatch, log); err != nil {
+					log.Errorw("failed to process an HDFS event", zap.Error(err))
+					el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 				}
 			}
 		case err := <-watcher.Errors:
@@ -165,4 +154,27 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		}
 	}
+}
+
+func (el *EventListener) handleOne(event fsevent.Event, dispatch func([]byte) error, log *zap.SugaredLogger) error {
+	defer func(start time.Time) {
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
+
+	logger := log.With(
+		"event-type", event.Op.String(),
+		"descriptor-name", event.Name,
+	)
+	logger.Info("received an event")
+
+	payload, err := json.Marshal(event)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal the event data, rejecting event...")
+	}
+
+	logger.Info("dispatching event on data channel...")
+	if err = dispatch(payload); err != nil {
+		return errors.Wrap(err, "failed to dispatch an HDFS event")
+	}
+	return nil
 }

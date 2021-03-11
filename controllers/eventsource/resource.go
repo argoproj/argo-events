@@ -339,7 +339,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		spec.Template.Spec.PriorityClassName = args.EventSource.Spec.Template.PriorityClassName
 		spec.Template.Spec.Priority = args.EventSource.Spec.Template.Priority
 	}
-	allEventTypes := eventsources.GetEventingServers(args.EventSource)
+	allEventTypes := eventsources.GetEventingServers(args.EventSource, nil)
 	recreateTypes := make(map[apicommon.EventSourceType]bool)
 	for _, esType := range apicommon.RecreateStrategyEventSources {
 		recreateTypes[esType] = true

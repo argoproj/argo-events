@@ -19,16 +19,19 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"time"
+
+	"github.com/go-redis/redis"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/go-redis/redis"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for the Redis event source
@@ -36,6 +39,7 @@ type EventListener struct {
 	EventSourceName  string
 	EventName        string
 	RedisEventSource v1alpha1.RedisEventSource
+	Metrics          *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -101,30 +105,45 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	ch := pubsub.Channel()
 	for {
 		select {
-		case message := <-ch:
-			log.With("channel", message.Channel).Info("received a message")
-			eventData := &events.RedisEventData{
-				Channel:  message.Channel,
-				Pattern:  message.Pattern,
-				Body:     message.Payload,
-				Metadata: redisEventSource.Metadata,
+		case message, ok := <-ch:
+			if !ok {
+				log.Error("failed to read a message, channel might have been closed")
+				return errors.New("channel might have been closed")
 			}
-			eventBody, err := json.Marshal(&eventData)
-			if err != nil {
-				log.With("channel", message.Channel).Desugar().Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
-				continue
-			}
-			log.With("channel", message.Channel).Info("dispatching th event on the data channel...")
-			err = dispatch(eventBody)
-			if err != nil {
-				log.With("channel", message.Channel).Desugar().Error("failed to dispatch redis event", zap.Error(err))
+
+			if err := el.handleOne(message, dispatch, log); err != nil {
+				log.With("channel", message.Channel).Errorw("failed to process a Redis message", zap.Error(err))
+				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			}
 		case <-ctx.Done():
 			log.Info("event source is stopped. unsubscribing the subscription")
 			if err := pubsub.Unsubscribe(redisEventSource.Channels...); err != nil {
-				log.Desugar().Error("failed to unsubscribe", zap.Error(err))
+				log.Errorw("failed to unsubscribe", zap.Error(err))
 			}
 			return nil
 		}
 	}
+}
+
+func (el *EventListener) handleOne(message *redis.Message, dispatch func([]byte) error, log *zap.SugaredLogger) error {
+	defer func(start time.Time) {
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
+
+	log.With("channel", message.Channel).Info("received a message")
+	eventData := &events.RedisEventData{
+		Channel:  message.Channel,
+		Pattern:  message.Pattern,
+		Body:     message.Payload,
+		Metadata: el.RedisEventSource.Metadata,
+	}
+	eventBody, err := json.Marshal(&eventData)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+	}
+	log.With("channel", message.Channel).Info("dispatching th event on the data channel...")
+	if err = dispatch(eventBody); err != nil {
+		return errors.Wrap(err, "failed dispatch a Redis event")
+	}
+	return nil
 }

@@ -19,6 +19,7 @@ package mqtt
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/pkg/errors"
@@ -27,6 +28,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -37,6 +39,7 @@ type EventListener struct {
 	EventSourceName string
 	EventName       string
 	MQTTEventSource v1alpha1.MQTTEventSource
+	Metrics         *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -57,7 +60,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
 
 	log.Info("starting MQTT event source...")
@@ -69,6 +72,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("setting up the message handler...")
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
+		defer func(start time.Time) {
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
 		eventData := &events.MQTTEventData{
 			Topic:     msg.Topic(),
 			MessageID: int(msg.MessageID()),
@@ -84,12 +91,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			log.Error("failed to marshal the event data, rejecting the event...", zap.Error(err))
+			log.Errorw("failed to marshal the event data, rejecting the event...", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			return
 		}
 		log.Info("dispatching event on the data channel...")
 		if err = dispatch(eventBody); err != nil {
-			log.Error("failed to dispatch MQTT event...", zap.Error(err))
+			log.Errorw("failed to dispatch MQTT event...", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}
 	}
 
@@ -126,7 +135,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	token := client.Unsubscribe(mqttEventSource.Topic)
 	if token.Error() != nil {
-		log.Error("failed to unsubscribe client", zap.Error(token.Error()))
+		log.Errorw("failed to unsubscribe client", zap.Error(token.Error()))
 	}
 
 	return nil

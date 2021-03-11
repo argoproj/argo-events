@@ -18,6 +18,7 @@ import (
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
 	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 type Then struct {
@@ -28,7 +29,10 @@ type Then struct {
 	eventBus          *eventbusv1alpha1.EventBus
 	eventSource       *eventsourcev1alpha1.EventSource
 	sensor            *sensorv1alpha1.Sensor
+	restConfig        *rest.Config
 	kubeClient        kubernetes.Interface
+
+	portForwarderStopChanels map[string]chan struct{}
 }
 
 func (t *Then) ExpectEventBusDeleted() *Then {
@@ -43,7 +47,7 @@ func (t *Then) ExpectEventBusDeleted() *Then {
 func (t *Then) ExpectEventSourcePodLogContains(regex string) *Then {
 	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", t.eventSource.Name)
 	ctx := context.Background()
-	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector})
+	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
 	if err != nil {
 		t.t.Fatalf("error getting event source pod name: %v", err)
 	}
@@ -65,7 +69,7 @@ func (t *Then) ExpectEventSourcePodLogContains(regex string) *Then {
 func (t *Then) ExpectSensorPodLogContains(regex string) *Then {
 	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", t.sensor.Name)
 	ctx := context.Background()
-	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector})
+	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
 	if err != nil {
 		t.t.Fatalf("error getting event source pod name: %v", err)
 	}
@@ -114,6 +118,58 @@ func (t *Then) podLogContains(ctx context.Context, client kubernetes.Interface, 
 	}
 }
 
+func (t *Then) EventSourcePodPortForward(localPort, remotePort int) *Then {
+	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", t.eventSource.Name)
+	ctx := context.Background()
+	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+	if err != nil {
+		t.t.Fatalf("error getting event source pod name: %v", err)
+	}
+	podName := podList.Items[0].GetName()
+	t.t.Logf("EventSource POD name: %s", podName)
+
+	stopCh := make(chan struct{}, 1)
+	if err = PortForward(t.restConfig, Namespace, podName, localPort, remotePort, stopCh); err != nil {
+		t.t.Fatalf("expected eventsource pod port-forward: %v", err)
+	}
+	if t.portForwarderStopChanels == nil {
+		t.portForwarderStopChanels = make(map[string]chan struct{})
+	}
+	t.portForwarderStopChanels[podName] = stopCh
+	return t
+}
+
+func (t *Then) SensorPodPortForward(localPort, remotePort int) *Then {
+	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", t.sensor.Name)
+	ctx := context.Background()
+	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+	if err != nil {
+		t.t.Fatalf("error getting sensor pod name: %v", err)
+	}
+	podName := podList.Items[0].GetName()
+	t.t.Logf("Sensor POD name: %s", podName)
+
+	stopCh := make(chan struct{}, 1)
+	if err = PortForward(t.restConfig, Namespace, podName, localPort, remotePort, stopCh); err != nil {
+		t.t.Fatalf("expected sensor pod port-forward: %v", err)
+	}
+	if t.portForwarderStopChanels == nil {
+		t.portForwarderStopChanels = make(map[string]chan struct{})
+	}
+	t.portForwarderStopChanels[podName] = stopCh
+	return t
+}
+
+func (t *Then) TerminateAllPodPortForwards() *Then {
+	if len(t.portForwarderStopChanels) > 0 {
+		for k, v := range t.portForwarderStopChanels {
+			t.t.Logf("Terminating port-forward for POD %s", k)
+			close(v)
+		}
+	}
+	return t
+}
+
 func (t *Then) When() *When {
 	return &When{
 		t:                 t.t,
@@ -123,6 +179,7 @@ func (t *Then) When() *When {
 		eventBus:          t.eventBus,
 		eventSource:       t.eventSource,
 		sensor:            t.sensor,
+		restConfig:        t.restConfig,
 		kubeClient:        t.kubeClient,
 	}
 }

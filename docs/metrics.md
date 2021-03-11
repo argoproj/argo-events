@@ -62,12 +62,17 @@ How many events have been sent successfully.
 
 #### argo_events_events_sent_failed_total
 
-How many events failed to send.
+How many events failed to send to EventBus.
+
+#### argo_events_events_processing_failed_total
+
+How many events failed to process due to all the reasons, it includes
+`argo_events_events_sent_failed_total`.
 
 #### argo_events_event_processing_duration_milliseconds
 
 Event processing duration (from getting the event to send it to EventBus) in
-milliseconds - TBD.
+milliseconds.
 
 ### Sensor
 
@@ -132,6 +137,7 @@ of monitoring your applictions running with Argo Events.
 
 - Errors
 
+  - `argo_events_events_processing_failed_total`
   - `argo_events_events_sent_failed_total`
   - `argo_events_action_failed_total`
 

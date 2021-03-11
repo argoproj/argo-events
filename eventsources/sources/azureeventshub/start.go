@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
 	"github.com/pkg/errors"
@@ -28,6 +29,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -38,6 +40,7 @@ type EventListener struct {
 	EventSourceName           string
 	EventName                 string
 	AzureEventsHubEventSource v1alpha1.AzureEventsHubEventSource
+	Metrics                   *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -58,7 +61,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Azure Events Hub event source...")
 	defer sources.Recover(el.GetEventName())
 
@@ -84,6 +87,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
+		defer func(start time.Time) {
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
 		log.Info("received an event from eventshub...")
 
 		eventData := &events.AzureEventsHubEventData{
@@ -97,13 +104,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			return errors.Wrapf(err, "failed to marshal the event data for event source %s and message id %s", el.GetEventName(), event.ID)
 		}
 
 		log.Info("dispatching the event to eventbus...")
-		err = dispatch(eventBytes)
-		if err != nil {
-			log.Error("failed to dispatch Azure EventHub event", zap.Error(err))
+		if err = dispatch(eventBytes); err != nil {
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+			log.Errorw("failed to dispatch Azure EventHub event", zap.Error(err))
 			return err
 		}
 		return nil
