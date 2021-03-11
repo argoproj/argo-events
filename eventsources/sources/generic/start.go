@@ -93,11 +93,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func (el *EventListener) handleOne(event *Event, dispatch func([]byte) error, logger *zap.SugaredLogger) error {
-	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Since(start)
-		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-	}(startTime)
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
 
 	logger.Info("received an event from server")
 	eventData := &events.GenericEventData{

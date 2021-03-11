@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventbus"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	eventbusversiond "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
@@ -64,6 +65,14 @@ func (s *E2ESuite) SetupSuite() {
 	s.eventSourceClient = eventsourceversiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().EventSources(Namespace)
 	s.sensorClient = sensorversiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().Sensors(Namespace)
 
+	// Clean up resources if any
+	s.DeleteResources()
+	// Clean up test event bus if any
+	resources := []schema.GroupVersionResource{
+		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventbus.Plural},
+	}
+	s.deleteResources(resources)
+
 	s.Given().EventBus(e2eEventBus).
 		When().
 		CreateEventBus().
@@ -87,13 +96,8 @@ func (s *E2ESuite) BeforeTest(string, string) {
 	s.DeleteResources()
 }
 
-func (s *E2ESuite) DeleteResources() {
+func (s *E2ESuite) deleteResources(resources []schema.GroupVersionResource) {
 	hasTestLabel := metav1.ListOptions{LabelSelector: Label}
-	resources := []schema.GroupVersionResource{
-		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
-		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
-	}
-
 	ctx := context.Background()
 	for _, r := range resources {
 		err := s.dynamicFor(r).DeleteCollection(ctx, metav1.DeleteOptions{PropagationPolicy: &background}, hasTestLabel)
@@ -110,6 +114,14 @@ func (s *E2ESuite) DeleteResources() {
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
+}
+
+func (s *E2ESuite) DeleteResources() {
+	resources := []schema.GroupVersionResource{
+		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
+		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
+	}
+	s.deleteResources(resources)
 }
 
 func (s *E2ESuite) dynamicFor(r schema.GroupVersionResource) dynamic.ResourceInterface {
@@ -130,6 +142,7 @@ func (s *E2ESuite) Given() *Given {
 		eventBusClient:    s.eventBusClient,
 		eventSourceClient: s.eventSourceClient,
 		sensorClient:      s.sensorClient,
+		restConfig:        s.restConfig,
 		kubeClient:        s.kubeClient,
 	}
 }

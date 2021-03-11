@@ -109,11 +109,9 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte)
 	}
 
 	processOne := func(event fsnotify.Event) error {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(startTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		log.Infow("file event", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
 
@@ -188,11 +186,9 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 	}
 
 	processOne := func(event watcherpkg.Event) error {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(startTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		log.Infow("file event", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
 

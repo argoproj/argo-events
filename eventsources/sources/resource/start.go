@@ -131,11 +131,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		}
 
-		sTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(sTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		objBody, err := json.Marshal(event.Obj)
 		if err != nil {

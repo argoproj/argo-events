@@ -165,11 +165,9 @@ consumeMessages:
 }
 
 func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte) error, log *zap.SugaredLogger) error {
-	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Since(start)
-		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-	}(startTime)
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
 
 	log.Infof("received a message on the topic %s", msg.Topic())
 	payload := msg.Payload()

@@ -184,11 +184,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	if filterName(notification, router.storageGridEventSource) {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(elapsed/time.Millisecond))
-		}(startTime)
+			route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		logger.Info("new event received, dispatching event on route's data channel")
 		eventData := &events.StorageGridEventData{

@@ -208,11 +208,9 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	}
 
 	processOne := func(msg *sarama.ConsumerMessage) error {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(startTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		log.Info("dispatching event on the data channel...")
 		eventData := &events.KafkaEventData{
@@ -336,11 +334,9 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 }
 
 func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, message *sarama.ConsumerMessage) error {
-	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Since(start)
-		consumer.metrics.EventProcessingDuration(consumer.eventSourceName, consumer.eventName, float64(elapsed/time.Millisecond))
-	}(startTime)
+		consumer.metrics.EventProcessingDuration(consumer.eventSourceName, consumer.eventName, float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
 
 	consumer.logger.Info("dispatching event on the data channel...")
 	eventData := &events.KafkaEventData{

@@ -121,11 +121,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Message, dispatch func([]byte) error, ack func(), log *zap.SugaredLogger) {
-	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Since(start)
-		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-	}(startTime)
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
 
 	data := &events.SQSEventData{
 		MessageId:         *message.MessageId,

@@ -87,11 +87,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(startTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		log.Info("received an event from eventshub...")
 

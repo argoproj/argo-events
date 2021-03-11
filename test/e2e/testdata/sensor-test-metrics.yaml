@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: e2e-test-metrics
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: e2e-test-metrics-webhook
+      eventName: example
+  triggers:
+    - template:
+        name: log-trigger
+        log: {}
+    - template:
+        name: http-trigger
+        http:
+          # Expect to fail
+          url: https://not-existing.com/
+          method: GET

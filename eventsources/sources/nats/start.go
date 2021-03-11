@@ -130,11 +130,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("subscribing to messages on the queue...")
 	_, err := conn.Subscribe(natsEventSource.Subject, func(msg *natslib.Msg) {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(startTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		eventData := &events.NATSEventData{
 			Subject:  msg.Subject,

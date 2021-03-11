@@ -108,11 +108,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func (el *EventListener) handleOne(notification minio.NotificationInfo, dispatch func([]byte) error, log *zap.SugaredLogger) error {
-	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Since(start)
-		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-	}(startTime)
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
 
 	eventData := &events.MinioEventData{Notification: notification.Records, Metadata: el.MinioEventSource.Metadata}
 	eventBytes, err := json.Marshal(eventData)

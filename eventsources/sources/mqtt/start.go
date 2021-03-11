@@ -72,11 +72,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("setting up the message handler...")
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(startTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		eventData := &events.MQTTEventData{
 			Topic:     msg.Topic(),

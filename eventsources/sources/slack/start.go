@@ -112,11 +112,9 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Since(start)
-		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(elapsed/time.Millisecond))
-	}(startTime)
+		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
 
 	logger.Info("verifying the request...")
 	err := rc.verifyRequest(request)

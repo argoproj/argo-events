@@ -119,11 +119,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 // HandleMessage implements the Handler interface.
 func (h *messageHandler) HandleMessage(m *nsq.Message) error {
-	startTime := time.Now()
 	defer func(start time.Time) {
-		elapsed := time.Since(start)
-		h.metrics.EventProcessingDuration(h.eventSourceName, h.eventName, float64(elapsed/time.Millisecond))
-	}(startTime)
+		h.metrics.EventProcessingDuration(h.eventSourceName, h.eventName, float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
 
 	h.logger.Info("received a message")
 

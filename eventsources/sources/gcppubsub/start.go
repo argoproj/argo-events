@@ -103,11 +103,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("listening for messages from PubSub...")
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
-		startTime := time.Now()
 		defer func(start time.Time) {
-			elapsed := time.Since(start)
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(elapsed/time.Millisecond))
-		}(startTime)
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
 
 		log.Info("received GCP PubSub Message from topic")
 		eventData := &events.PubSubEventData{
