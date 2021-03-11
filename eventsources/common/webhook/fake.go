@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/argoproj/argo-events/common/logging"
+	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -68,5 +69,5 @@ func (f *FakeRouter) PostInactivate() error {
 
 func GetFakeRoute() *Route {
 	logger := logging.NewArgoEventsLogger()
-	return NewRoute(Hook, logger, "fake-event-source", "fake-event")
+	return NewRoute(Hook, logger, "fake-event-source", "fake-event", metrics.NewMetrics("fake-ns"))
 }

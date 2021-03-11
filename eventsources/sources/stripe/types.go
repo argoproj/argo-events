@@ -18,6 +18,7 @@ package stripe
 
 import (
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -26,6 +27,7 @@ type EventListener struct {
 	EventSourceName   string
 	EventName         string
 	StripeEventSource v1alpha1.StripeEventSource
+	Metrics           *metrics.Metrics
 }
 
 // Router contains information about a REST endpoint

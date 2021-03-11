@@ -18,7 +18,7 @@ func ValidateEventSource(eventSource *v1alpha1.EventSource) error {
 		recreateTypes[esType] = true
 	}
 
-	servers := eventsources.GetEventingServers(eventSource)
+	servers := eventsources.GetEventingServers(eventSource, nil)
 
 	eventNames := make(map[string]bool)
 	rollingUpdates, recreates := 0, 0

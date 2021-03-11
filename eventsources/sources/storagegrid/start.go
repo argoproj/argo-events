@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/go-resty/resty/v2"
@@ -128,7 +129,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		logging.LabelEndpoint, route.Context.Endpoint,
 		logging.LabelPort, route.Context.Port,
 		logging.LabelHTTPMethod, route.Context.Method,
-	).Desugar()
+	)
 
 	logger.Info("processing incoming request...")
 
@@ -141,8 +142,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	logger.Info("parsing the request body...")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error("failed to parse request body", zap.Error(err))
+		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, "")
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -153,19 +155,22 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Add("Content-Type", "text/plain")
 	if _, err := writer.Write([]byte(respBody)); err != nil {
-		logger.Error("failed to write the response", zap.Error(err))
+		logger.Errorw("failed to write the response", zap.Error(err))
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))
 	if err != nil {
-		logger.Error("failed to unescape request body url", zap.Error(err))
+		logger.Errorw("failed to unescape request body url", zap.Error(err))
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 	b, err := qson.ToJSON(parsedURL)
 	if err != nil {
-		logger.Error("failed to convert request body in JSON format", zap.Error(err))
+		logger.Errorw("failed to convert request body in JSON format", zap.Error(err))
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
@@ -173,19 +178,25 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	var notification *events.StorageGridNotification
 	err = json.Unmarshal(b, &notification)
 	if err != nil {
-		logger.Error("failed to convert the request body into storage grid notification", zap.Error(err))
+		logger.Errorw("failed to convert the request body into storage grid notification", zap.Error(err))
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
 	if filterName(notification, router.storageGridEventSource) {
-		logger.Error("new event received, dispatching event on route's data channel", zap.Error(err))
+		defer func(start time.Time) {
+			route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
+		logger.Info("new event received, dispatching event on route's data channel")
 		eventData := &events.StorageGridEventData{
 			Notification: notification,
 			Metadata:     router.storageGridEventSource.Metadata,
 		}
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			logger.Error("failed to marshal the event data", zap.Error(err))
+			logger.Errorw("failed to marshal the event data", zap.Error(err))
+			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
 		route.DataCh <- eventBody
@@ -332,7 +343,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	storagegridEventSource := &el.StorageGridEventSource
-	route := webhook.NewRoute(storagegridEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName())
+	route := webhook.NewRoute(storagegridEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
 
 	return webhook.ManageRoute(ctx, &Router{
 		route:                  route,

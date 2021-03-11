@@ -24,6 +24,7 @@ require (
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/gavv/httpexpect/v2 v2.2.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-openapi/spec v0.20.2

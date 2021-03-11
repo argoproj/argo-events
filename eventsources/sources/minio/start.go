@@ -19,15 +19,18 @@ package minio
 import (
 	"context"
 	"encoding/json"
+	"time"
+
+	"github.com/minio/minio-go"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
-	"github.com/minio/minio-go"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for minio event sources
@@ -35,6 +38,7 @@ type EventListener struct {
 	EventSourceName  string
 	EventName        string
 	MinioEventSource apicommon.S3Artifact
+	Metrics          *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -90,16 +94,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			continue
 		}
 
-		eventData := &events.MinioEventData{Notification: notification.Records, Metadata: minioEventSource.Metadata}
-		eventBytes, err := json.Marshal(eventData)
-		if err != nil {
-			log.Errorw("failed to marshal the event data, rejecting the event...", zap.Error(err))
-			continue
-		}
-
-		log.Info("dispatching the event on data channel...")
-		if err = dispatch(eventBytes); err != nil {
-			log.Errorw("failed to dispatch minio event", zap.Error(err))
+		if err := el.handleOne(notification, dispatch, log); err != nil {
+			log.Errorw("failed to process a Minio event", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}
 	}
 
@@ -107,6 +104,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	doneCh <- struct{}{}
 
 	log.Info("event source is stopped")
+	return nil
+}
+
+func (el *EventListener) handleOne(notification minio.NotificationInfo, dispatch func([]byte) error, log *zap.SugaredLogger) error {
+	defer func(start time.Time) {
+		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
+
+	eventData := &events.MinioEventData{Notification: notification.Records, Metadata: el.MinioEventSource.Metadata}
+	eventBytes, err := json.Marshal(eventData)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+	}
+
+	log.Info("dispatching the event on data channel...")
+	if err = dispatch(eventBytes); err != nil {
+		return errors.Wrap(err, "failed to dispatch minio event")
+	}
 	return nil
 }
 

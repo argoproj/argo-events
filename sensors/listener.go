@@ -257,12 +257,11 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 }
 
 func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string, log *zap.SugaredLogger) error {
-	startTime := time.Now()
 	defer func(start time.Time) {
-		t := time.Now()
-		elapsed := t.Sub(start)
-		sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(elapsed/time.Millisecond))
-	}(startTime)
+		sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(time.Since(start)/time.Millisecond))
+	}(time.Now())
+
+	defer sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(time.Since(time.Now())/time.Millisecond))
 
 	if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
 		log.Errorf("failed to apply template parameters, %v", err)

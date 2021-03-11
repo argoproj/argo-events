@@ -19,16 +19,19 @@ package emitter
 import (
 	"context"
 	"encoding/json"
+	"time"
+
+	emitter "github.com/emitter-io/go/v2"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	emitter "github.com/emitter-io/go/v2"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // EventListener implements Eventing for Emitter event source
@@ -36,6 +39,7 @@ type EventListener struct {
 	EventSourceName    string
 	EventName          string
 	EmitterEventSource v1alpha1.EmitterEventSource
+	Metrics            *metrics.Metrics
 }
 
 // GetEventSourceName returns name of event source
@@ -56,7 +60,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName()).Desugar()
+		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Emitter event source...")
 	defer sources.Recover(el.GetEventName())
 
@@ -92,7 +96,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		log.Info("assuming all events have a json body...")
 	}
 
-	log.Info("creating a client", zap.Any("channelName", emitterEventSource.ChannelName))
+	log.Infow("creating a client", zap.Any("channelName", emitterEventSource.ChannelName))
 	client := emitter.NewClient(options...)
 
 	if err := common.Connect(emitterEventSource.ConnectionBackoff, func() error {
@@ -105,6 +109,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if err := client.Subscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
+		defer func(start time.Time) {
+			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
+		}(time.Now())
+
 		body := message.Payload()
 		event := &events.EmitterEventData{
 			Topic:    message.Topic(),
@@ -117,13 +125,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		eventBytes, err := json.Marshal(event)
 
 		if err != nil {
-			log.Error("failed to marshal the event data", zap.Error(err))
+			log.Errorw("failed to marshal the event data", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			return
 		}
 		log.Info("dispatching event on data channel...")
-		err = dispatch(eventBytes)
-		if err != nil {
-			log.Error("failed to dispatch event", zap.Error(err))
+		if err = dispatch(eventBytes); err != nil {
+			log.Errorw("failed to dispatch event", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}
 	}); err != nil {
 		return errors.Wrapf(err, "failed to subscribe to channel %s", emitterEventSource.ChannelName)
@@ -131,10 +140,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	<-ctx.Done()
 
-	log.Info("event source stopped, unsubscribe the channel", zap.Any("channelName", emitterEventSource.ChannelName))
+	log.Infow("event source stopped, unsubscribe the channel", zap.Any("channelName", emitterEventSource.ChannelName))
 
 	if err := client.Unsubscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName); err != nil {
-		log.Error("failed to unsubscribe", zap.Any("channelName", emitterEventSource.ChannelName), zap.Error(err))
+		log.Errorw("failed to unsubscribe", zap.Any("channelName", emitterEventSource.ChannelName), zap.Error(err))
 	}
 
 	return nil
