@@ -910,9 +910,22 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enable-catch-up-foreventsource-definition" title="Enable Catch-up forEventSource Definition" class="md-nav__link">
-    Enable Catch-up forEventSource Definition
+  <a href="#enable-catch-up-for-calendar-eventsource" title="Enable Catch-up for Calendar EventSource" class="md-nav__link">
+    Enable Catch-up for Calendar EventSource
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#service-account" title="Service Account" class="md-nav__link">
+    Service Account
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1308,9 +1321,22 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enable-catch-up-foreventsource-definition" title="Enable Catch-up forEventSource Definition" class="md-nav__link">
-    Enable Catch-up forEventSource Definition
+  <a href="#enable-catch-up-for-calendar-eventsource" title="Enable Catch-up for Calendar EventSource" class="md-nav__link">
+    Enable Catch-up for Calendar EventSource
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#service-account" title="Service Account" class="md-nav__link">
+    Service Account
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1343,27 +1369,57 @@
                 <h1 id="calender-eventsource-catch-up">Calender EventSource Catch Up<a class="headerlink" href="#calender-eventsource-catch-up" title="Permanent link">&para;</a></h1>
 <p>Catch-up feature allow Calender eventsources to execute the missed schedules
 from last run.</p>
-<h2 id="enable-catch-up-foreventsource-definition">Enable Catch-up forEventSource Definition<a class="headerlink" href="#enable-catch-up-foreventsource-definition" title="Permanent link">&para;</a></h2>
-<p>User can configure catchup on each events in eventsource.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">example-with-catch-up</span><span class="p">:</span>
-  <span class="c1"># Catchup the missed events from last Event timestamp. last event will be persisted in configmap.</span>
-  <span class="nt">schedule</span><span class="p">:</span> <span class="s">&quot;*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
-  <span class="nt">persistence</span><span class="p">:</span>
-    <span class="nt">catchup</span><span class="p">:</span>
-      <span class="nt">enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span> <span class="c1"># Check missed schedules from last persisted event time on every start</span>
-      <span class="nt">maxDuration</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5m</span> <span class="c1"># maximum amount of duration go back for the catch-up</span>
-    <span class="nt">configMap</span><span class="p">:</span> <span class="c1"># Configmap for persist the last successful event timestamp</span>
-      <span class="nt">createIfNotExist</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-      <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test-configmap</span>
+<h2 id="enable-catch-up-for-calendar-eventsource">Enable Catch-up for Calendar EventSource<a class="headerlink" href="#enable-catch-up-for-calendar-eventsource" title="Permanent link">&para;</a></h2>
+<p>User can configure catch up on each events in eventsource.</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventSource</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">calendar</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">template</span><span class="p">:</span>
+    <span class="nt">serviceAccountName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">configmap-sa</span> <span class="c1"># assign a service account with read, write permissions on configmaps</span>
+  <span class="nt">calendar</span><span class="p">:</span>
+    <span class="nt">example-with-catch-up</span><span class="p">:</span>
+      <span class="c1"># Catchup the missed events from last Event timestamp. last event will be persisted in configmap.</span>
+      <span class="nt">schedule</span><span class="p">:</span> <span class="s">&quot;*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+      <span class="nt">persistence</span><span class="p">:</span>
+        <span class="nt">catchup</span><span class="p">:</span>
+          <span class="nt">enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span> <span class="c1"># Check missed schedules from last persisted event time on every start</span>
+          <span class="nt">maxDuration</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5m</span> <span class="c1"># maximum amount of duration go back for the catch-up</span>
+        <span class="nt">configMap</span><span class="p">:</span> <span class="c1"># Configmap for persist the last successful event timestamp</span>
+          <span class="nt">createIfNotExist</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test-configmap</span>
 </code></pre></div>
 
-<p>Last calender event persisted in configured configmap. Multiple event can use
-the same configmap to persist the events.</p>
+<p>Last calender event persisted in configured configmap. Same configmap can be
+used by multiple events configuration.</p>
 <div class="codehilite"><pre><span></span><code><span class="nt">data</span><span class="p">:</span>
   <span class="nt">calendar.example-with-catch-up</span><span class="p">:</span>
     <span class="s">&#39;{&quot;eventTime&quot;:&quot;2020-10-19</span><span class="nv"> </span><span class="s">22:50:00.0003192</span><span class="nv"> </span><span class="s">+0000</span><span class="nv"> </span><span class="s">UTC</span><span class="nv"> </span><span class="s">m=+683.567066901&quot;}&#39;</span>
 </code></pre></div>
 
+<h3 id="service-account">Service Account<a class="headerlink" href="#service-account" title="Permanent link">&para;</a></h3>
+<p>To make Calendar EventSource catch-up work, a Service Account with proper RBAC
+settings needs to be provided.</p>
+<p>If the configMap is not existing, and <code>createIfNotExist: true</code> is set, a Service
+Account bound with following <code>Role</code> is required.</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Role</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example-configmap-access-role</span>
+<span class="nt">rules</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">apiGroups</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;&quot;</span>
+    <span class="nt">resources</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">configmaps</span>
+    <span class="nt">verbs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">get</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">create</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">update</span>
+</code></pre></div>
+
+<p>If the configmap is already existing, <code>create</code> can be removed from the <code>verbs</code>
+list.</p>
 <h2 id="disable-the-catchup">Disable the catchup<a class="headerlink" href="#disable-the-catchup" title="Permanent link">&para;</a></h2>
 <p>Set <code>false</code> to catchup--&gt;enabled element</p>
 <div class="codehilite"><pre><span></span><code><span class="nt">catchup</span><span class="p">:</span>
