@@ -117,13 +117,13 @@ type TLSConfig struct {
 	ClientKeySecret *corev1.SecretKeySelector `json:"clientKeySecret,omitempty" protobuf:"bytes,3,opt,name=clientKeySecret"`
 
 	// DeprecatedCACertPath refers the file path that contains the CA cert.
-	// Deprecated: use CACertSecret instead
+	// Deprecated: will be removed in v1.5, use CACertSecret instead
 	DeprecatedCACertPath string `json:"caCertPath,omitempty" protobuf:"bytes,4,opt,name=caCertPath"`
 	// DeprecatedClientCertPath refers the file path that contains client cert.
-	// Deprecated: use ClientCertSecret instead
+	// Deprecated: will be removed in v1.5, use ClientCertSecret instead
 	DeprecatedClientCertPath string `json:"clientCertPath,omitempty" protobuf:"bytes,5,opt,name=clientCertPath"`
 	// DeprecatedClientKeyPath refers the file path that contains client key.
-	// Deprecated: use ClientKeySecret instead
+	// Deprecated: will be removed in v1.5, use ClientKeySecret instead
 	DeprecatedClientKeyPath string `json:"clientKeyPath,omitempty" protobuf:"bytes,6,opt,name=clientKeyPath"`
 }
 
