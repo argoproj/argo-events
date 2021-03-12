@@ -111,7 +111,7 @@ message CustomTrigger {
   repeated TriggerParameter payload = 7;
 
   // DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-  // DEPRECATED: will be removed in v1.5, use CertSecret instead
+  // Deprecated: will be removed in v1.5, use CertSecret instead
   optional string certFilePath = 8;
 }
 
@@ -254,7 +254,7 @@ message GitArtifact {
 
   // DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
   // ssh key path must be mounted in sensor pod.
-  // DEPRECATED: will be removed in v1.5, use SSHKeySecret instead.
+  // Deprecated: will be removed in v1.5, use SSHKeySecret instead.
   // +optional
   optional string sshKeyPath = 10;
 }
@@ -466,7 +466,7 @@ message SensorSpec {
   optional string eventBusName = 6;
 
   // Circuit is a boolean expression of dependency groups
-  // DEPRECATED: will be removed in v1.5, use Switch in triggers instead.
+  // Deprecated: will be removed in v1.5, use Switch in triggers instead.
   optional string circuit = 7;
 }
 
@@ -694,7 +694,7 @@ message TriggerPolicy {
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
-// DEPRECATED, will be removed in v1.5
+// Deprecated: will be removed in v1.5
 message TriggerSwitch {
   // Any acts as a OR operator between dependencies
   repeated string any = 1;
@@ -754,7 +754,7 @@ message TriggerTemplate {
   optional LogTrigger log = 13;
 
   // DeprecatedSwitch is the condition to execute the trigger.
-  // DEPRECATED: will be removed in v1.5, use conditions instead
+  // Deprecated: will be removed in v1.5, use conditions instead
   // +optional
   optional TriggerSwitch switch = 12;
 }

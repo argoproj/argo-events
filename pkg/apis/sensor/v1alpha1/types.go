@@ -109,7 +109,7 @@ type SensorSpec struct {
 	// EventBusName references to a EventBus name. By default the value is "default"
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,6,opt,name=eventBusName"`
 	// Circuit is a boolean expression of dependency groups
-	// DEPRECATED: will be removed in v1.5, use Switch in triggers instead.
+	// Deprecated: will be removed in v1.5, use Switch in triggers instead.
 	DeprecatedCircuit string `json:"circuit,omitempty" protobuf:"bytes,7,opt,name=circuit"`
 }
 
@@ -305,14 +305,14 @@ type TriggerTemplate struct {
 	// +optional
 	Log *LogTrigger `json:"log,omitempty" protobuf:"bytes,13,opt,name=log"`
 	// DeprecatedSwitch is the condition to execute the trigger.
-	// DEPRECATED: will be removed in v1.5, use conditions instead
+	// Deprecated: will be removed in v1.5, use conditions instead
 	// +optional
 	DeprecatedSwitch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,12,opt,name=switch"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
-// DEPRECATED, will be removed in v1.5
+// Deprecated: will be removed in v1.5
 type TriggerSwitch struct {
 
 	// Any acts as a OR operator between dependencies
@@ -497,7 +497,7 @@ type CustomTrigger struct {
 
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
 	// DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-	// DEPRECATED: will be removed in v1.5, use CertSecret instead
+	// Deprecated: will be removed in v1.5, use CertSecret instead
 	DeprecatedCertFilePath string `json:"certFilePath,omitempty" protobuf:"bytes,8,opt,name=certFilePath"`
 }
 
@@ -763,7 +763,7 @@ type GitArtifact struct {
 	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,9,opt,name=remote"`
 	// DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
 	// ssh key path must be mounted in sensor pod.
-	// DEPRECATED: will be removed in v1.5, use SSHKeySecret instead.
+	// Deprecated: will be removed in v1.5, use SSHKeySecret instead.
 	// +optional
 	DeprecatedSSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,10,opt,name=sshKeyPath"`
 }

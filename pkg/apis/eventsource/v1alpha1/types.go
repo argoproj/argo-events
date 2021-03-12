@@ -204,7 +204,7 @@ type CalendarEventSource struct {
 	Timezone string `json:"timezone,omitempty" protobuf:"bytes,4,opt,name=timezone"`
 	// UserPayload will be sent to sensor as extra data once the event is triggered
 	// +optional
-	// Deprecated, will be removed in v1.5. Please use Metadata instead.
+	// Deprecated: will be removed in v1.5. Please use Metadata instead.
 	UserPayload json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload,casttype=encoding/json.RawMessage"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
@@ -625,7 +625,7 @@ type PubSubEventSource struct {
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
 	// CredentialsFile is the file that contains credentials to authenticate for GCP
-	// Deprecated, will be removed in v1.5, use CredentialSecret instead
+	// Deprecated: will be removed in v1.5, use CredentialSecret instead
 	DeprecatedCredentialsFile string `json:"credentialsFile" protobuf:"bytes,8,opt,name=credentialsFile"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional

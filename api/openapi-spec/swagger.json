@@ -678,7 +678,7 @@
           "type": "string"
         },
         "userPayload": {
-          "description": "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated, will be removed in v1.5. Please use Metadata instead.",
+          "description": "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated: will be removed in v1.5. Please use Metadata instead.",
           "type": "string",
           "format": "byte"
         }
@@ -1528,7 +1528,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "credentialsFile": {
-          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated, will be removed in v1.5, use CredentialSecret instead",
+          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated: will be removed in v1.5, use CredentialSecret instead",
           "type": "string"
         },
         "deleteSubscriptionOnFinish": {
@@ -2268,7 +2268,7 @@
       ],
       "properties": {
         "certFilePath": {
-          "description": "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. DEPRECATED: will be removed in v1.5, use CertSecret instead",
+          "description": "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. Deprecated: will be removed in v1.5, use CertSecret instead",
           "type": "string"
         },
         "certSecret": {
@@ -2509,7 +2509,7 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitRemoteConfig"
         },
         "sshKeyPath": {
-          "description": "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. DEPRECATED: will be removed in v1.5, use SSHKeySecret instead.",
+          "description": "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret instead.",
           "type": "string"
         },
         "sshKeySecret": {
@@ -2848,7 +2848,7 @@
       ],
       "properties": {
         "circuit": {
-          "description": "Circuit is a boolean expression of dependency groups DEPRECATED: will be removed in v1.5, use Switch in triggers instead.",
+          "description": "Circuit is a boolean expression of dependency groups Deprecated: will be removed in v1.5, use Switch in triggers instead.",
           "type": "string"
         },
         "dependencies": {
@@ -3158,7 +3158,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.TriggerSwitch": {
-      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. DEPRECATED, will be removed in v1.5",
+      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. Deprecated: will be removed in v1.5",
       "type": "object",
       "properties": {
         "all": {
@@ -3233,7 +3233,7 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackTrigger"
         },
         "switch": {
-          "description": "DeprecatedSwitch is the condition to execute the trigger. DEPRECATED: will be removed in v1.5, use conditions instead",
+          "description": "DeprecatedSwitch is the condition to execute the trigger. Deprecated: will be removed in v1.5, use conditions instead",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerSwitch"
         }
       }

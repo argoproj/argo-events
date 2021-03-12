@@ -424,7 +424,7 @@ gRPC server knows how to interpret.
 <td>
 <p>
 DeprecatedCertFilePath is path to the cert file within sensor for secure
-connection between sensor and custom trigger gRPC server. DEPRECATED:
+connection between sensor and custom trigger gRPC server. Deprecated:
 will be removed in v1.5, use CertSecret instead
 </p>
 </td>
@@ -995,7 +995,7 @@ Refer
 <p>
 DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don’t
 want to provide username and password. ssh key path must be mounted in
-sensor pod. DEPRECATED: will be removed in v1.5, use SSHKeySecret
+sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret
 instead.
 </p>
 </td>
@@ -1766,7 +1766,7 @@ EventBusName references to a EventBus name. By default the value is
 </td>
 <td>
 <p>
-Circuit is a boolean expression of dependency groups DEPRECATED: will be
+Circuit is a boolean expression of dependency groups Deprecated: will be
 removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
@@ -1886,7 +1886,7 @@ EventBusName references to a EventBus name. By default the value is
 </td>
 <td>
 <p>
-Circuit is a boolean expression of dependency groups DEPRECATED: will be
+Circuit is a boolean expression of dependency groups Deprecated: will be
 removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
@@ -2710,7 +2710,7 @@ TriggerSwitch
 <p>
 TriggerSwitch describes condition which must be satisfied in order to
 execute a trigger. Depending upon condition type, status of dependency
-groups is used to evaluate the result. DEPRECATED, will be removed in
+groups is used to evaluate the result. Deprecated: will be removed in
 v1.5
 </p>
 </p>
@@ -2929,7 +2929,7 @@ Log refers to the trigger designed to invoke log the event.
 <td>
 <em>(Optional)</em>
 <p>
-DeprecatedSwitch is the condition to execute the trigger. DEPRECATED:
+DeprecatedSwitch is the condition to execute the trigger. Deprecated:
 will be removed in v1.5, use conditions instead
 </p>
 </td>
