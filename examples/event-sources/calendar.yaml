@@ -10,6 +10,7 @@ spec:
 
 #    example-with-catchup:
 #    # Catchup the missed events from last Event timestamp. last event will be persisted in configmap.
+#    # A service account with configmap get/create/update privileges needs to be configured
 #      schedule: "* * * * *"
 #      persistence:
 #        catchup:
