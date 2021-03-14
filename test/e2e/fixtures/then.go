@@ -1,15 +1,14 @@
 package fixtures
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"regexp"
 	"testing"
 
-	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -17,8 +16,7 @@ import (
 	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
 	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	testutil "github.com/argoproj/argo-events/test/util"
 )
 
 type Then struct {
@@ -45,18 +43,8 @@ func (t *Then) ExpectEventBusDeleted() *Then {
 }
 
 func (t *Then) ExpectEventSourcePodLogContains(regex string) *Then {
-	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", t.eventSource.Name)
 	ctx := context.Background()
-	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
-	if err != nil {
-		t.t.Fatalf("error getting event source pod name: %v", err)
-	}
-	podName := podList.Items[0].GetName()
-	t.t.Logf("EventSource POD name: %s", podName)
-	timeout := defaultTimeout
-	cctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	contains, err := t.podLogContains(cctx, t.kubeClient, Namespace, podName, regex)
+	contains, err := testutil.EventSourcePodLogContains(ctx, t.kubeClient, Namespace, t.eventSource.Name, regex, defaultTimeout)
 	if err != nil {
 		t.t.Fatalf("expected event source pod logs: %v", err)
 	}
@@ -67,18 +55,8 @@ func (t *Then) ExpectEventSourcePodLogContains(regex string) *Then {
 }
 
 func (t *Then) ExpectSensorPodLogContains(regex string) *Then {
-	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", t.sensor.Name)
 	ctx := context.Background()
-	podList, err := t.kubeClient.CoreV1().Pods(Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
-	if err != nil {
-		t.t.Fatalf("error getting event source pod name: %v", err)
-	}
-	podName := podList.Items[0].GetName()
-	t.t.Logf("Sensor POD name: %s", podName)
-	timeout := defaultTimeout
-	cctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	contains, err := t.podLogContains(cctx, t.kubeClient, Namespace, podName, regex)
+	contains, err := testutil.SensorPodLogContains(ctx, t.kubeClient, Namespace, t.sensor.Name, regex, defaultTimeout)
 	if err != nil {
 		t.t.Fatalf("expected sensor pod logs: %v", err)
 	}
@@ -86,36 +64,6 @@ func (t *Then) ExpectSensorPodLogContains(regex string) *Then {
 		t.t.Fatalf("expected sensor pod log contains %s", regex)
 	}
 	return t
-}
-
-func (t *Then) podLogContains(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string) (bool, error) {
-	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
-	if err != nil {
-		return false, err
-	}
-	defer func() { _ = stream.Close() }()
-
-	exp, err := regexp.Compile(regex)
-	if err != nil {
-		return false, err
-	}
-
-	s := bufio.NewScanner(stream)
-	for {
-		select {
-		case <-ctx.Done():
-			return false, nil
-		default:
-			if !s.Scan() {
-				return false, s.Err()
-			}
-			data := s.Bytes()
-			t.t.Log(string(data))
-			if exp.Match(data) {
-				return true, nil
-			}
-		}
-	}
 }
 
 func (t *Then) EventSourcePodPortForward(localPort, remotePort int) *Then {
@@ -129,7 +77,7 @@ func (t *Then) EventSourcePodPortForward(localPort, remotePort int) *Then {
 	t.t.Logf("EventSource POD name: %s", podName)
 
 	stopCh := make(chan struct{}, 1)
-	if err = PortForward(t.restConfig, Namespace, podName, localPort, remotePort, stopCh); err != nil {
+	if err = testutil.PodPortForward(t.restConfig, Namespace, podName, localPort, remotePort, stopCh); err != nil {
 		t.t.Fatalf("expected eventsource pod port-forward: %v", err)
 	}
 	if t.portForwarderStopChanels == nil {
@@ -150,7 +98,7 @@ func (t *Then) SensorPodPortForward(localPort, remotePort int) *Then {
 	t.t.Logf("Sensor POD name: %s", podName)
 
 	stopCh := make(chan struct{}, 1)
-	if err = PortForward(t.restConfig, Namespace, podName, localPort, remotePort, stopCh); err != nil {
+	if err = testutil.PodPortForward(t.restConfig, Namespace, podName, localPort, remotePort, stopCh); err != nil {
 		t.t.Fatalf("expected sensor pod port-forward: %v", err)
 	}
 	if t.portForwarderStopChanels == nil {
