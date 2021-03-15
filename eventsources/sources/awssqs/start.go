@@ -70,6 +70,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var awsSession *session.Session
 	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
 	if err != nil {
+		log.Errorw("Error creating AWS credentials", zap.Error(err))
 		return errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
 	}
 
@@ -85,6 +86,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	queueURL, err := sqsClient.GetQueueUrl(getQueueURLInput)
 	if err != nil {
+		log.Errorw("Error getting SQS Queue URL", zap.Error(err))
 		return errors.Wrapf(err, "failed to get the queue url for %s", el.GetEventName())
 	}
 
