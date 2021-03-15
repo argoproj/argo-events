@@ -46,7 +46,7 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 
 ## Contribute
 
-Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md).
+Participation in the Argo Events project is governed by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md)
 
 [Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested take a look at our [Contributing Guidelines](./CONTRIBUTING.md).
 
