@@ -2,23 +2,33 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
-	"net/http"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/yaml"
 
+	"github.com/argoproj/argo-events/pkg/apis/eventbus"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	eventbusversiond "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
 	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
@@ -30,87 +40,142 @@ import (
 )
 
 const (
-	eventBusName   = "stress-test"
+	eventBusName   = "stress-testing"
 	defaultTimeout = 60 * time.Second
+
+	Success = "success"
+	Failure = "failure"
+
+	StressTestingLabel      = "argo-events-stress"
+	StressTestingLabelValue = "true"
 
 	logEventSourceStarted      = "Eventing server started."
 	logSensorStarted           = "Sensor started."
 	logTriggerActionSuccessful = "successfully processed the trigger"
 	logTriggerActionFailed     = "failed to trigger action"
+	logEventSuccessful         = "succeeded to publish an event"
+	logEventFailed             = "failed to publish an event"
+)
+
+type TestingEventSource string
+
+// possible values of TestingEventSource
+const (
+	UnsupportedEventsource TestingEventSource = "unsupported"
+	WebhookEventSource     TestingEventSource = "webhook"
+	SQSEventSource         TestingEventSource = "sqs"
+)
+
+type TestingTrigger string
+
+// possible values of TestingTrigger
+const (
+	UnsupportedTrigger TestingTrigger = "unsupported"
+	WorkflowTrigger    TestingTrigger = "workflow"
+	LogTrigger         TestingTrigger = "log"
 )
 
 var (
-	eventBus = `apiVersion: argoproj.io/v1alpha1
-kind: EventBus
-metadata:
-  name: default
-spec:
-  nats:
-    native:
-      auth: token`
-
-	webhookEventSource = `apiVersion: argoproj.io/v1alpha1
-kind: EventSource
-metadata:
-  name: stress-test-webhook
-spec:
-  webhook:
-    test:
-      port: "12000"
-      endpoint: /test
-      method: POST`
-
-	webhookSensor = `apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  name: stress-test-log
-spec:
-  dependencies:
-  - name: test-dep
-    eventSourceName: stress-test-webhook
-    eventName: test
-  triggers:
-  - template:
-      name: log-trigger
-      log: {}`
+	background = metav1.DeletePropagationBackground
 )
 
-func createEventBus(ctx context.Context, kubeClient kubernetes.Interface, eventBusClient eventbuspkg.EventBusInterface, namespace string) (*eventbusv1alpha1.EventBus, error) {
-	eb := &eventbusv1alpha1.EventBus{}
-	if err := yaml.Unmarshal([]byte(eventBus), eb); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal event bus yaml: %w", err)
+type options struct {
+	namespace          string
+	testingEventSource TestingEventSource
+	testingTrigger     TestingTrigger
+	// Inactive time before exiting
+	idleTimeout time.Duration
+	hardTimeout *time.Duration
+	noCleanUp   bool
+
+	kubeClient        kubernetes.Interface
+	eventBusClient    eventbuspkg.EventBusInterface
+	eventSourceClient eventsourcepkg.EventSourceInterface
+	sensorClient      sensorpkg.SensorInterface
+	restConfig        *rest.Config
+}
+
+func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTrigger, idleTimeout time.Duration, noCleanUp bool) (*options, error) {
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	configOverrides := &clientcmd.ConfigOverrides{}
+	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
+	config, err := kubeConfig.ClientConfig()
+	if err != nil {
+		return nil, err
 	}
+	namespace, _, _ := kubeConfig.Namespace()
+	kubeClient, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	eventBusClient := eventbusversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventBus(namespace)
+	eventSourceClient := eventsourceversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventSources(namespace)
+	sensorClient := sensorversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().Sensors(namespace)
+	return &options{
+		namespace:          namespace,
+		testingEventSource: testingEventSource,
+		testingTrigger:     testingTrigger,
+		kubeClient:         kubeClient,
+		eventBusClient:     eventBusClient,
+		eventSourceClient:  eventSourceClient,
+		restConfig:         config,
+		sensorClient:       sensorClient,
+		idleTimeout:        idleTimeout,
+		noCleanUp:          noCleanUp,
+	}, nil
+}
+
+func (o *options) createEventBus(ctx context.Context) (*eventbusv1alpha1.EventBus, error) {
+	fmt.Println("------- Creating EventBus -------")
+	eb := &eventbusv1alpha1.EventBus{}
+	if err := readResource("@testdata/eventbus/default.yaml", eb); err != nil {
+		return nil, fmt.Errorf("failed to read event bus yaml file: %w", err)
+	}
+	l := eb.GetLabels()
+	if l == nil {
+		l = map[string]string{}
+	}
+	l[StressTestingLabel] = StressTestingLabelValue
+	eb.SetLabels(l)
 	eb.Name = eventBusName
-	result, err := eventBusClient.Create(ctx, eb, metav1.CreateOptions{})
+	result, err := o.eventBusClient.Create(ctx, eb, metav1.CreateOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event bus: %w", err)
 	}
-	if err := testutil.WaitForEventBusReady(ctx, eventBusClient, eb.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForEventBusReady(ctx, o.eventBusClient, eb.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see event bus ready: %w", err)
 	}
-	if err := testutil.WaitForEventBusStatefulSetReady(ctx, kubeClient, namespace, eb.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForEventBusStatefulSetReady(ctx, o.kubeClient, o.namespace, eb.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see event bus statefulset ready: %w", err)
 	}
 	return result, nil
 }
 
-func createEventSource(ctx context.Context, kubeClient kubernetes.Interface, eventSourceClient eventsourcepkg.EventSourceInterface, namespace string) (*eventsourcev1alpha1.EventSource, error) {
+func (o *options) createEventSource(ctx context.Context) (*eventsourcev1alpha1.EventSource, error) {
+	fmt.Printf("\n------- Creating %v EventSource -------\n", o.testingEventSource)
 	es := &eventsourcev1alpha1.EventSource{}
-	if err := yaml.Unmarshal([]byte(webhookEventSource), es); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal event source yaml: %w", err)
+	file := fmt.Sprintf("@testdata/eventsources/%v.yaml", o.testingEventSource)
+	if err := readResource(file, es); err != nil {
+		return nil, fmt.Errorf("failed to read %v event source yaml file: %w", o.testingEventSource, err)
 	}
+	l := es.GetLabels()
+	if l == nil {
+		l = map[string]string{}
+	}
+	l[StressTestingLabel] = StressTestingLabelValue
+	es.SetLabels(l)
 	es.Spec.EventBusName = eventBusName
-	result, err := eventSourceClient.Create(ctx, es, metav1.CreateOptions{})
+	result, err := o.eventSourceClient.Create(ctx, es, metav1.CreateOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event source: %w", err)
 	}
-	if err := testutil.WaitForEventSourceReady(ctx, eventSourceClient, es.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForEventSourceReady(ctx, o.eventSourceClient, es.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see event source ready: %w", err)
 	}
-	if err := testutil.WaitForEventSourceDeploymentReady(ctx, kubeClient, namespace, es.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForEventSourceDeploymentReady(ctx, o.kubeClient, o.namespace, es.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see event source deployment and pod ready: %w", err)
 	}
-	contains, err := testutil.EventSourcePodLogContains(ctx, kubeClient, namespace, es.Name, logEventSourceStarted, defaultTimeout)
+	contains, err := testutil.EventSourcePodLogContains(ctx, o.kubeClient, o.namespace, es.Name, logEventSourceStarted, defaultTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("expected to see event source pod contains something: %w", err)
 	}
@@ -120,23 +185,31 @@ func createEventSource(ctx context.Context, kubeClient kubernetes.Interface, eve
 	return result, nil
 }
 
-func createSensor(ctx context.Context, kubeClient kubernetes.Interface, sensorClient sensorpkg.SensorInterface, namespace string) (*sensorv1alpha1.Sensor, error) {
+func (o *options) createSensor(ctx context.Context) (*sensorv1alpha1.Sensor, error) {
+	fmt.Printf("\n------- Creating %v Sensor -------\n", o.testingTrigger)
 	sensor := &sensorv1alpha1.Sensor{}
-	if err := yaml.Unmarshal([]byte(webhookSensor), sensor); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal sensor yaml: %w", err)
+	file := fmt.Sprintf("@testdata/sensors/%v.yaml", o.testingTrigger)
+	if err := readResource(file, sensor); err != nil {
+		return nil, fmt.Errorf("failed to read %v sensor yaml file: %w", o.testingTrigger, err)
 	}
+	l := sensor.GetLabels()
+	if l == nil {
+		l = map[string]string{}
+	}
+	l[StressTestingLabel] = StressTestingLabelValue
+	sensor.SetLabels(l)
 	sensor.Spec.EventBusName = eventBusName
-	result, err := sensorClient.Create(ctx, sensor, metav1.CreateOptions{})
+	result, err := o.sensorClient.Create(ctx, sensor, metav1.CreateOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create sensor: %w", err)
 	}
-	if err := testutil.WaitForSensorReady(ctx, sensorClient, sensor.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForSensorReady(ctx, o.sensorClient, sensor.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see sensor ready: %w", err)
 	}
-	if err := testutil.WaitForSensorDeploymentReady(ctx, kubeClient, namespace, sensor.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForSensorDeploymentReady(ctx, o.kubeClient, o.namespace, sensor.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see sensor deployment and pod ready: %w", err)
 	}
-	contains, err := testutil.SensorPodLogContains(ctx, kubeClient, namespace, sensor.Name, logSensorStarted, defaultTimeout)
+	contains, err := testutil.SensorPodLogContains(ctx, o.kubeClient, o.namespace, sensor.Name, logSensorStarted, defaultTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("expected to see sensor pod contains something: %w", err)
 	}
@@ -146,193 +219,417 @@ func createSensor(ctx context.Context, kubeClient kubernetes.Interface, sensorCl
 	return result, nil
 }
 
-func runTesting(ctx context.Context, kubeClient kubernetes.Interface, namespace, sensorPodName string, num int, timeout time.Duration) {
-	succeededSent := 0
-	failedSent := 0
-	finishedSent := false
+func (o *options) getEventSourcePodNames(ctx context.Context, eventSourceName string) ([]string, error) {
+	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", eventSourceName)
+	esPodList, err := o.kubeClient.CoreV1().Pods(o.namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+	if err != nil {
+		return nil, err
+	}
+	results := []string{}
+	for _, i := range esPodList.Items {
+		results = append(results, i.Name)
+	}
+	return results, nil
+}
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		stream, err := kubeClient.CoreV1().Pods(namespace).GetLogs(sensorPodName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
-		if err != nil {
-			fmt.Printf("failed to acquire sensor pod log stream: %v", err)
-			return
-		}
-		defer func() { _ = stream.Close() }()
+func (o *options) getSensorPodNames(ctx context.Context, sensorName string) ([]string, error) {
+	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", sensorName)
+	sPodList, err := o.kubeClient.CoreV1().Pods(o.namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+	if err != nil {
+		return nil, err
+	}
+	results := []string{}
+	for _, i := range sPodList.Items {
+		results = append(results, i.Name)
+	}
+	return results, nil
+}
 
-		successReg, err := regexp.Compile(logTriggerActionSuccessful)
-		if err != nil {
-			fmt.Printf("failed to compile regex for success pattern: %v", err)
-			return
-		}
-		failureReg, err := regexp.Compile(logTriggerActionFailed)
-		if err != nil {
-			fmt.Printf("failed to compile regex for failure pattern: %v", err)
-			return
-		}
+func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName string) error {
+	esPodNames, err := o.getEventSourcePodNames(ctx, eventSourceName)
+	if err != nil {
+		return fmt.Errorf("failed to get event source pod names: %v", err)
+	}
+	if len(esPodNames) == 0 {
+		return fmt.Errorf("no pod found for event source %s", eventSourceName)
+	}
+	sensorPodNames, err := o.getSensorPodNames(ctx, sensorName)
+	if err != nil {
+		return fmt.Errorf("failed to get sensor pod names: %v", err)
+	}
+	if len(sensorPodNames) == 0 {
+		return fmt.Errorf("no pod found for sensor %s", sensorName)
+	}
 
-		succeeded := 0
-		failed := 0
+	successActionReg, err := regexp.Compile(logTriggerActionSuccessful)
+	if err != nil {
+		return fmt.Errorf("failed to compile regex for sensor success pattern: %v", err)
+	}
+	failureActionReg, err := regexp.Compile(logTriggerActionFailed)
+	if err != nil {
+		return fmt.Errorf("failed to compile regex for sensor failure pattern: %v", err)
+	}
 
-		var firstActionTime time.Time
-		var lastActionTime time.Time
+	successEventReg, err := regexp.Compile(logEventSuccessful)
+	if err != nil {
+		return fmt.Errorf("failed to compile regex for event source success pattern: %v", err)
+	}
+	failureEventReg, err := regexp.Compile(logEventFailed)
+	if err != nil {
+		return fmt.Errorf("failed to compile regex for event source failure pattern: %v", err)
+	}
 
-		defer func() {
-			fmt.Printf("\n++++++++++++++++++ Action Triggered Summary ++++++++++++++++++\n")
-			fmt.Printf("Expected actions              : %d\n", num)
-			fmt.Printf("Action triggered successfully : %d\n", succeeded)
-			fmt.Printf("Action triggered failed       : %d\n", failed)
-			fmt.Printf("First action triggered at     : %v\n", firstActionTime)
-			fmt.Printf("Last action triggered at      : %v\n", lastActionTime)
-			fmt.Printf("Total time taken              : %v\n", time.Since(firstActionTime))
-		}()
+	esMap := map[string]int64{Success: 0, Failure: 0}
+	var firstEventTime time.Time
+	lastEventTime := time.Now()
 
-		cctx, cancel := context.WithTimeout(ctx, timeout)
-		defer cancel()
-		s := bufio.NewScanner(stream)
-		for {
-			select {
-			case <-cctx.Done():
-				return
-			default:
-				if !s.Scan() {
-					fmt.Printf("error found: %v", s.Err())
-					return
-				}
-				data := s.Bytes()
-				if successReg.Match(data) {
-					succeeded++
-				} else if failureReg.Match(data) {
-					failed++
-				}
-				if succeeded+failed == 1 {
-					firstActionTime = time.Now()
-				}
-				lastActionTime = time.Now()
-				if finishedSent && succeededSent > 0 && succeeded+failed >= succeededSent {
-					return
-				}
-			}
-		}
-	}()
+	sensorMap := map[string]int64{Success: 0, Failure: 0}
+	var firstActionTime time.Time
+	lastActionTime := time.Now()
+
+	var esLock = &sync.Mutex{}
+	var sensorLock = &sync.Mutex{}
 
 	startTime := time.Now()
 
-	for i := 0; i < num; i++ {
-		resp, err := http.Post("http://localhost:12000/test", "application/json", bytes.NewBuffer([]byte("{}")))
-		if err != nil {
-			fmt.Printf("failed to post events: %v", err)
-			return
-		}
-		if resp.StatusCode == 200 {
-			succeededSent++
-		} else {
-			failedSent++
-		}
+	wg := &sync.WaitGroup{}
+	for _, sensorPodName := range sensorPodNames {
+		wg.Add(1)
+		go func(podName string) {
+			defer wg.Done()
+			fmt.Printf("Started watching Sensor Pod %s ...\n", podName)
+			stream, err := o.kubeClient.CoreV1().Pods(o.namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
+			if err != nil {
+				fmt.Printf("failed to acquire sensor pod %s log stream: %v", podName, err)
+				return
+			}
+			defer func() { _ = stream.Close() }()
+
+			sCh := make(chan bool)
+			go func(successCh chan bool) {
+				s := bufio.NewScanner(stream)
+				for {
+					if !s.Scan() {
+						fmt.Printf("Can not read: %v\n", s.Err())
+						close(successCh)
+						return
+					}
+					data := s.Bytes()
+					if successActionReg.Match(data) {
+						successCh <- true
+					} else if failureActionReg.Match(data) {
+						successCh <- false
+					}
+				}
+			}(sCh)
+
+			for {
+				if o.hardTimeout != nil && time.Since(startTime).Seconds() > o.hardTimeout.Seconds() {
+					fmt.Printf("Exited Sensor Pod %s due to the hard timeout %v\n", podName, *o.hardTimeout)
+					return
+				}
+				timeout := o.idleTimeout
+				if sensorMap[Success]+sensorMap[Failure] == 0 {
+					timeout = 5 * 60 * time.Second
+				}
+				if time.Since(lastActionTime).Seconds() > timeout.Seconds() {
+					fmt.Printf("Exited Sensor Pod %s due to no actions in the last %v\n", podName, o.idleTimeout)
+					return
+				}
+				select {
+				case successful, ok := <-sCh:
+					if !ok {
+						return
+					}
+					sensorLock.Lock()
+					if successful {
+						sensorMap[Success]++
+					} else {
+						sensorMap[Failure]++
+					}
+					if sensorMap[Success]+sensorMap[Failure] == 1 {
+						firstActionTime = time.Now()
+					}
+					lastActionTime = time.Now()
+					sensorLock.Unlock()
+				default:
+				}
+			}
+		}(sensorPodName)
 	}
-	finishedSent = true
-	fmt.Printf("\n++++++++++++++++++++  Events Sent Summary ++++++++++++++++++++ \n")
-	fmt.Printf("Total requests                : %d\n", num)
-	fmt.Printf("Succeeded                     : %d\n", succeededSent)
-	fmt.Printf("Failed                        : %d\n", failedSent)
-	fmt.Printf("First event sent at           : %v\n", startTime)
-	fmt.Printf("Last event sent at            : %v\n", time.Now())
-	fmt.Printf("Total time taken              : %v\n", time.Since(startTime))
+
+	for _, esPodName := range esPodNames {
+		wg.Add(1)
+		go func(podName string) {
+			defer wg.Done()
+			fmt.Printf("Started watching EventSource Pod %s ...\n", podName)
+			stream, err := o.kubeClient.CoreV1().Pods(o.namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
+			if err != nil {
+				fmt.Printf("failed to acquire event source pod %s log stream: %v", podName, err)
+				return
+			}
+			defer func() { _ = stream.Close() }()
+
+			sCh := make(chan bool)
+			go func(successCh chan bool) {
+				s := bufio.NewScanner(stream)
+				for {
+					if !s.Scan() {
+						fmt.Printf("Can not read: %v\n", s.Err())
+						close(successCh)
+						return
+					}
+					data := s.Bytes()
+					if successEventReg.Match(data) {
+						successCh <- true
+					} else if failureEventReg.Match(data) {
+						successCh <- false
+					}
+				}
+			}(sCh)
+
+			for {
+				if o.hardTimeout != nil && time.Since(startTime).Seconds() > o.hardTimeout.Seconds() {
+					fmt.Printf("Exited EventSource Pod %s due to the hard timeout %v\n", podName, *o.hardTimeout)
+					return
+				}
+				timeout := o.idleTimeout
+				if esMap[Success]+esMap[Failure] == 0 {
+					timeout = 5 * 60 * time.Second
+				}
+				if time.Since(lastEventTime).Seconds() > timeout.Seconds() {
+					fmt.Printf("Exited EventSource Pod %s due to no active events in the last %v\n", podName, o.idleTimeout)
+					return
+				}
+				select {
+				case successful, ok := <-sCh:
+					if !ok {
+						return
+					}
+					esLock.Lock()
+					if successful {
+						esMap[Success]++
+					} else {
+						esMap[Failure]++
+					}
+					if esMap[Success]+esMap[Failure] == 1 {
+						firstEventTime = time.Now()
+					}
+					lastEventTime = time.Now()
+					esLock.Unlock()
+				default:
+				}
+			}
+		}(esPodName)
+	}
+
 	wg.Wait()
+
+	time.Sleep(3 * time.Second)
+
+	fmt.Printf("\n++++++++++++++++++++++++ Events Summary +++++++++++++++++++++++\n")
+	fmt.Printf("Total processed events        : %d\n", esMap[Success]+esMap[Failure])
+	fmt.Printf("Events sent successful        : %d\n", esMap[Success])
+	fmt.Printf("Events sent failed            : %d\n", esMap[Failure])
+	fmt.Printf("First event sent at           : %v\n", firstEventTime)
+	fmt.Printf("Last event sent at            : %v\n", lastEventTime)
+	fmt.Printf("Total time taken              : %v\n", lastEventTime.Sub(firstEventTime))
+
+	fmt.Printf("\n+++++++++++++++++++++++ Actions Summary +++++++++++++++++++++++\n")
+	fmt.Printf("Total triggered actions       : %d\n", sensorMap[Success]+sensorMap[Failure])
+	fmt.Printf("Action triggered successfully : %d\n", sensorMap[Success])
+	fmt.Printf("Action triggered failed       : %d\n", sensorMap[Failure])
+	fmt.Printf("First action triggered at     : %v\n", firstActionTime)
+	fmt.Printf("Last action triggered at      : %v\n", lastActionTime)
+	fmt.Printf("Total time taken              : %v\n", lastActionTime.Sub(firstActionTime))
+	return nil
 }
 
-func mainFunc(num int, timeout time.Duration) error {
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	configOverrides := &clientcmd.ConfigOverrides{}
-	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
-	config, err := kubeConfig.ClientConfig()
-	if err != nil {
-		return err
-	}
-	namespace, _, _ := kubeConfig.Namespace()
-	kubeClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return err
-	}
-	eventBusClient := eventbusversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventBus(namespace)
-	eventSourceClient := eventsourceversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventSources(namespace)
-	sensorClient := sensorversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().Sensors(namespace)
+func (o *options) dynamicFor(r schema.GroupVersionResource) dynamic.ResourceInterface {
+	resourceInterface := dynamic.NewForConfigOrDie(o.restConfig).Resource(r)
+	return resourceInterface.Namespace(o.namespace)
+}
 
+func (o *options) cleanUpResources(ctx context.Context) error {
+	hasTestLabel := metav1.ListOptions{LabelSelector: StressTestingLabel}
+	resources := []schema.GroupVersionResource{
+		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
+		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
+		{Group: eventbus.Group, Version: "v1alpha1", Resource: eventbus.Plural},
+	}
+	for _, r := range resources {
+		if err := o.dynamicFor(r).DeleteCollection(ctx, metav1.DeleteOptions{PropagationPolicy: &background}, hasTestLabel); err != nil {
+			return err
+		}
+	}
+
+	for _, r := range resources {
+		for {
+			list, err := o.dynamicFor(r).List(ctx, hasTestLabel)
+			if err != nil {
+				return err
+			}
+			if len(list.Items) == 0 {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+	return nil
+}
+
+func (o *options) Start() error {
 	fmt.Println("################## Preparing ##################")
 	ctx := context.Background()
+	// Clean up resources if any
+	if err := o.cleanUpResources(ctx); err != nil {
+		return err
+	}
+	time.Sleep(10 * time.Second)
 
 	// Create EventBus
-	eb, err := createEventBus(ctx, kubeClient, eventBusClient, namespace)
+	eb, err := o.createEventBus(ctx)
 	if err != nil {
 		return err
 	}
+
 	defer func() {
-		_ = eventBusClient.Delete(ctx, eb.Name, metav1.DeleteOptions{})
+		if !o.noCleanUp {
+			_ = o.eventBusClient.Delete(ctx, eb.Name, metav1.DeleteOptions{})
+		}
 	}()
 
 	time.Sleep(5 * time.Second)
 
-	// Create Event Source
-	es, err := createEventSource(ctx, kubeClient, eventSourceClient, namespace)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = eventSourceClient.Delete(ctx, es.Name, metav1.DeleteOptions{})
-	}()
-
 	// Create Sensor
-	sensor, err := createSensor(ctx, kubeClient, sensorClient, namespace)
+	sensor, err := o.createSensor(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		_ = sensorClient.Delete(ctx, sensor.Name, metav1.DeleteOptions{})
+		if !o.noCleanUp {
+			_ = o.sensorClient.Delete(ctx, sensor.Name, metav1.DeleteOptions{})
+		}
 	}()
 
-	// Port-forward
-	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", es.Name)
-	esPodList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+	// Create Event Source
+	es, err := o.createEventSource(ctx)
 	if err != nil {
 		return err
 	}
-	esPodName := esPodList.Items[0].GetName()
-	fmt.Printf("EventSource POD name: %s\n", esPodName)
-
-	stopCh := make(chan struct{}, 1)
-	if err = testutil.PodPortForward(config, namespace, esPodName, 12000, 12000, stopCh); err != nil {
-		return err
-	}
-	defer close(stopCh)
+	defer func() {
+		if !o.noCleanUp {
+			_ = o.eventSourceClient.Delete(ctx, es.Name, metav1.DeleteOptions{})
+		}
+	}()
 
 	// Run testing
 	fmt.Println("")
-	fmt.Println("################## Start Testing ##################")
+	fmt.Println("################# Started Testing #################")
 	fmt.Println("")
 
-	ls := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", sensor.Name)
-	sensorPodList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: ls, FieldSelector: "status.phase=Running"})
-	if err != nil {
-		return err
+	return o.runTesting(ctx, es.Name, sensor.Name)
+}
+
+func readResource(text string, v metav1.Object) error {
+	var data []byte
+	var err error
+	if strings.HasPrefix(text, "@") {
+		file := strings.TrimPrefix(text, "@")
+		_, fileName, _, _ := runtime.Caller(0)
+		data, err = ioutil.ReadFile(filepath.Dir(fileName) + "/" + file)
+		if err != nil {
+			return fmt.Errorf("failed to read a file: %w", err)
+		}
+	} else {
+		data = []byte(text)
 	}
-	sensorPodName := sensorPodList.Items[0].GetName()
-
-	time.Sleep(3 * time.Second)
-
-	runTesting(ctx, kubeClient, namespace, sensorPodName, num, timeout)
-
-	time.Sleep(20 * time.Second)
-
+	if err = yaml.Unmarshal(data, v); err != nil {
+		return fmt.Errorf("failed to unmarshal the yaml: %w", err)
+	}
 	return nil
 }
 
-func main() {
-	num := 100
-	timeout := 60 * time.Second
-
-	if err := mainFunc(num, timeout); err != nil {
-		panic(err)
+func getTestingEventSource(str string) TestingEventSource {
+	switch str {
+	case "webhook":
+		return WebhookEventSource
+	case "sqs":
+		return SQSEventSource
+	default:
+		return UnsupportedEventsource
 	}
+}
+
+func getTestingTrigger(str string) TestingTrigger {
+	switch str {
+	case "log":
+		return LogTrigger
+	case "workflow":
+		return WorkflowTrigger
+	default:
+		return UnsupportedTrigger
+	}
+}
+
+func main() {
+	var (
+		esStr          string
+		triggerStr     string
+		idleTimeoutStr string
+		hardTimeoutStr string
+		noCleanUp      bool
+	)
+	var rootCmd = &cobra.Command{
+		Use:   "go run ./test/stress/main.go",
+		Short: "Argo Events stress testing.",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			if esStr == "" {
+				cmd.HelpFunc()(cmd, args)
+				os.Exit(1)
+			}
+			es := getTestingEventSource(esStr)
+			if es == UnsupportedEventsource {
+				fmt.Printf("Invalid event source %s\n\n", esStr)
+				cmd.HelpFunc()(cmd, args)
+				os.Exit(1)
+			}
+			trigger := getTestingTrigger(triggerStr)
+			if trigger == UnsupportedTrigger {
+				fmt.Printf("Invalid trigger %s\n\n", triggerStr)
+				cmd.HelpFunc()(cmd, args)
+				os.Exit(1)
+			}
+			idleTimeout, err := time.ParseDuration(idleTimeoutStr)
+			if err != nil {
+				fmt.Printf("Invalid idle timeout %s: %v\n\n", idleTimeoutStr, err)
+				cmd.HelpFunc()(cmd, args)
+				os.Exit(1)
+			}
+			opts, err := NewOptions(es, trigger, idleTimeout, noCleanUp)
+			if err != nil {
+				fmt.Printf("Failed: %v\n", err)
+				os.Exit(1)
+			}
+			if hardTimeoutStr != "" {
+				hardTimeout, err := time.ParseDuration(hardTimeoutStr)
+				if err != nil {
+					fmt.Printf("Invalid hard timeout %s: %v\n\n", hardTimeoutStr, err)
+					cmd.HelpFunc()(cmd, args)
+					os.Exit(1)
+				}
+				opts.hardTimeout = &hardTimeout
+			}
+			if err = opts.Start(); err != nil {
+				panic(err)
+			}
+		},
+	}
+	rootCmd.Flags().StringVarP(&esStr, "event-source", "e", "", "Type of event source to be tested, e.g. webhook, sqs, etc.")
+	rootCmd.Flags().StringVarP(&triggerStr, "trigger", "t", string(LogTrigger), "Type of trigger to be tested, e.g. log, workflow.")
+	rootCmd.Flags().StringVar(&idleTimeoutStr, "idle-timeout", "60s", "Exit in how long without any active events or actions. e.g. 30s, 2m.")
+	rootCmd.Flags().StringVar(&hardTimeoutStr, "hard-timeout", "", "Exit in how long after the stress testing starts. e.g. 120s, 5m. If it's specified, the application will exit at the time either hard-timeout or idle-timeout meets.")
+	rootCmd.Flags().BoolVar(&noCleanUp, "no-clean-up", false, "Whether to clean up the created resources.")
+	_ = rootCmd.Execute()
 }

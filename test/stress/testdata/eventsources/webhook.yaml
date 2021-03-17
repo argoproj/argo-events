@@ -1,0 +1,10 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: stress-testing
+spec:
+  webhook:
+    test:
+      port: "12000"
+      endpoint: /test
+      method: POST`

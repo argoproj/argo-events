@@ -366,7 +366,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							return err
 						}
-						logger.Info("succeeded to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
+						logger.Info("succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 						return nil
