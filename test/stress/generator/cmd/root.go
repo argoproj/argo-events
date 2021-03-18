@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -56,7 +57,7 @@ func validateGlobalParameters(cmd *cobra.Command, args []string) {
 	}
 }
 
-func stressRun(f func() error) {
+func stressRun(ctx context.Context, f func() error) {
 	var mutex = &sync.Mutex{}
 	results := map[string]int64{Success: 0, Failure: 0}
 	counter := int64(0)
@@ -77,6 +78,11 @@ loop:
 			break loop
 		}
 		for i := 0; i < requestPerSecond; i++ {
+			select {
+			case <-ctx.Done():
+				break loop
+			default:
+			}
 			wg.Add(1)
 			go func() {
 				defer wg.Done()

@@ -22,6 +22,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/yaml"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventbus"
@@ -337,6 +338,8 @@ func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName st
 					return
 				}
 				select {
+				case <-ctx.Done():
+					return
 				case successful, ok := <-sCh:
 					if !ok {
 						return
@@ -402,6 +405,8 @@ func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName st
 					return
 				}
 				select {
+				case <-ctx.Done():
+					return
 				case successful, ok := <-sCh:
 					if !ok {
 						return
@@ -478,9 +483,8 @@ func (o *options) cleanUpResources(ctx context.Context) error {
 	return nil
 }
 
-func (o *options) Start() error {
+func (o *options) Start(ctx context.Context) error {
 	fmt.Println("################## Preparing ##################")
-	ctx := context.Background()
 	// Clean up resources if any
 	if err := o.cleanUpResources(ctx); err != nil {
 		return err
@@ -621,7 +625,8 @@ func main() {
 				}
 				opts.hardTimeout = &hardTimeout
 			}
-			if err = opts.Start(); err != nil {
+			ctx := signals.SetupSignalHandler()
+			if err = opts.Start(ctx); err != nil {
 				panic(err)
 			}
 		},

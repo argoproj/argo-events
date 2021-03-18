@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 )
 
 var (
@@ -30,11 +31,11 @@ var webhookCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		validateGlobalParameters(cmd, args)
 		if webhookURL == "" {
-			fmt.Printf("\nUrl is missing\n\n")
+			fmt.Printf("\nUrl is required\n\n")
 			cmd.HelpFunc()(cmd, args)
 			os.Exit(1)
 		}
-		stressRun(runWebhook)
+		stressRun(signals.SetupSignalHandler(), runWebhook)
 	},
 }
 
