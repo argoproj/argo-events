@@ -42,6 +42,8 @@ func init() {
 	rootCmd.PersistentFlags().DurationVarP(&duration, "duration", "d", defaultDuration, "How long it will run, e.g. 5m, 60s")
 	rootCmd.PersistentFlags().IntVar(&requestPerSecond, "rps", 0, "Requests per second")
 	rootCmd.PersistentFlags().Int64Var(&totalRequests, "total", 0, "Total requests")
+	rootCmd.AddCommand(NewWebhookCommand())
+	rootCmd.AddCommand(NewSqsCommand())
 }
 
 func validateGlobalParameters(cmd *cobra.Command, args []string) {

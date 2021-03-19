@@ -72,6 +72,10 @@ const (
 	UnsupportedEventsource TestingEventSource = "unsupported"
 	WebhookEventSource     TestingEventSource = "webhook"
 	SQSEventSource         TestingEventSource = "sqs"
+	SNSEventSource         TestingEventSource = "sns"
+	KafkaEventSource       TestingEventSource = "kafka"
+	NATSEventSource        TestingEventSource = "nats"
+	RedisEventSource       TestingEventSource = "redis"
 )
 
 type TestingTrigger string
@@ -767,8 +771,8 @@ func main() {
 	rootCmd.Flags().StringVarP(&triggerTypeStr, "trigger-type", "t", string(LogTrigger), "Type of trigger to be tested, e.g. log, workflow.")
 	rootCmd.Flags().StringVar(&esName, "es-name", "", "Name of an existing event source to be tested")
 	rootCmd.Flags().StringVar(&sensorName, "sensor-name", "", "Name of an existing sensor to be tested.")
-	rootCmd.Flags().StringVar(&idleTimeoutStr, "idle-timeout", "60s", "Exit in how long without any active events or actions. e.g. 30s, 2m.")
-	rootCmd.Flags().StringVar(&hardTimeoutStr, "hard-timeout", "", "Exit in how long after the stress testing starts. e.g. 120s, 5m. If it's specified, the application will exit at the time either hard-timeout or idle-timeout meets.")
+	rootCmd.Flags().StringVar(&idleTimeoutStr, "idle-timeout", "60s", "Exit in a period of time without any active events or actions. e.g. 30s, 2m.")
+	rootCmd.Flags().StringVar(&hardTimeoutStr, "hard-timeout", "", "Exit in a period of time after the testing starts. e.g. 120s, 5m. If it's specified, the application will exit at the time either hard-timeout or idle-timeout meets.")
 	rootCmd.Flags().BoolVar(&noCleanUp, "no-clean-up", false, "Whether to clean up the created resources.")
 
 	_ = rootCmd.Execute()
