@@ -29,5 +29,5 @@ Use "go [command] --help" for more information about a command.
 
 ### Supported EventSources
 
-Currently only the generators for most common event sources are supported, you
-are welcome to contribute the implementation.
+Currently only the most common event sources are supported, you are welcome to
+contribute the implementation.

@@ -30,7 +30,7 @@ Argo Events provides a set of simple tools to do stress testing:
 ## Steps
 
 - Use the [Generator](generator/README.md) or any other generators your have to
-  genrate messages for your EventSource.
+  generate messages for your EventSource.
 
 - Explore the metrics in Grafana, watch the changes of
   [golden metrics](https://argoproj.github.io/argo-events/metrics/#golden-signals)
