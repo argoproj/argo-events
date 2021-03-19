@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -84,6 +85,8 @@ type options struct {
 	namespace          string
 	testingEventSource TestingEventSource
 	testingTrigger     TestingTrigger
+	esName             string
+	sensorName         string
 	// Inactive time before exiting
 	idleTimeout time.Duration
 	hardTimeout *time.Duration
@@ -96,7 +99,7 @@ type options struct {
 	restConfig        *rest.Config
 }
 
-func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTrigger, idleTimeout time.Duration, noCleanUp bool) (*options, error) {
+func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTrigger, esName, sensorName string, idleTimeout time.Duration, noCleanUp bool) (*options, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	configOverrides := &clientcmd.ConfigOverrides{}
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
@@ -116,6 +119,8 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 		namespace:          namespace,
 		testingEventSource: testingEventSource,
 		testingTrigger:     testingTrigger,
+		esName:             esName,
+		sensorName:         sensorName,
 		kubeClient:         kubeClient,
 		eventBusClient:     eventBusClient,
 		eventSourceClient:  eventSourceClient,
@@ -280,6 +285,20 @@ func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName st
 		return fmt.Errorf("failed to compile regex for event source failure pattern: %v", err)
 	}
 
+	fmt.Printf(`
+*********************************************************
+The application will automatically exit:
+  - If there's no active events and actions in %v.
+`, o.idleTimeout)
+	if o.hardTimeout != nil {
+		fmt.Printf("  - In %v after it starts.\n", *o.hardTimeout)
+	}
+	fmt.Printf(`
+Or you can terminate it any time by Ctrl + C.
+*********************************************************
+
+`)
+
 	esMap := map[string]int64{Success: 0, Failure: 0}
 	var firstEventTime time.Time
 	lastEventTime := time.Now()
@@ -316,9 +335,9 @@ func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName st
 						return
 					}
 					data := s.Bytes()
-					if successActionReg.Match(data) {
+					if successActionReg.Match(data) && isValid(data, startTime) {
 						successCh <- true
-					} else if failureActionReg.Match(data) {
+					} else if failureActionReg.Match(data) && isValid(data, startTime) {
 						successCh <- false
 					}
 				}
@@ -383,9 +402,9 @@ func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName st
 						return
 					}
 					data := s.Bytes()
-					if successEventReg.Match(data) {
+					if successEventReg.Match(data) && isValid(data, startTime) {
 						successCh <- true
-					} else if failureEventReg.Match(data) {
+					} else if failureEventReg.Match(data) && isValid(data, startTime) {
 						successCh <- false
 					}
 				}
@@ -450,6 +469,25 @@ func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName st
 	return nil
 }
 
+// Check if it a valid log in JSON format, which contains something
+// like `"ts":1616093369.2583323`, and return if it's later than start.
+func isValid(log []byte, start time.Time) bool {
+	t := make(map[string]interface{})
+	if err := json.Unmarshal(log, &t); err != nil {
+		fmt.Println(err)
+		return false
+	}
+	ts, ok := t["ts"]
+	if !ok {
+		return false
+	}
+	s, ok := ts.(float64)
+	if !ok {
+		return false
+	}
+	return float64(start.Unix()) < s
+}
+
 func (o *options) dynamicFor(r schema.GroupVersionResource) dynamic.ResourceInterface {
 	resourceInterface := dynamic.NewForConfigOrDie(o.restConfig).Resource(r)
 	return resourceInterface.Namespace(o.namespace)
@@ -484,55 +522,69 @@ func (o *options) cleanUpResources(ctx context.Context) error {
 }
 
 func (o *options) Start(ctx context.Context) error {
-	fmt.Println("################## Preparing ##################")
-	// Clean up resources if any
-	if err := o.cleanUpResources(ctx); err != nil {
-		return err
-	}
-	time.Sleep(10 * time.Second)
+	fmt.Println("#################### Preparing ####################")
 
-	// Create EventBus
-	eb, err := o.createEventBus(ctx)
-	if err != nil {
-		return err
-	}
+	esName := o.esName
+	sensorName := o.sensorName
 
-	defer func() {
-		if !o.noCleanUp {
-			_ = o.eventBusClient.Delete(ctx, eb.Name, metav1.DeleteOptions{})
+	// Need to create
+	if esName == "" && sensorName == "" {
+		// Clean up resources if any
+		if err := o.cleanUpResources(ctx); err != nil {
+			return err
 		}
-	}()
+		time.Sleep(10 * time.Second)
 
-	time.Sleep(5 * time.Second)
-
-	// Create Sensor
-	sensor, err := o.createSensor(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if !o.noCleanUp {
-			_ = o.sensorClient.Delete(ctx, sensor.Name, metav1.DeleteOptions{})
+		// Create EventBus
+		eb, err := o.createEventBus(ctx)
+		if err != nil {
+			return err
 		}
-	}()
 
-	// Create Event Source
-	es, err := o.createEventSource(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if !o.noCleanUp {
-			_ = o.eventSourceClient.Delete(ctx, es.Name, metav1.DeleteOptions{})
+		defer func() {
+			if !o.noCleanUp {
+				_ = o.eventBusClient.Delete(ctx, eb.Name, metav1.DeleteOptions{})
+			}
+		}()
+
+		time.Sleep(5 * time.Second)
+
+		// Create Sensor
+		sensor, err := o.createSensor(ctx)
+		if err != nil {
+			return err
 		}
-	}()
+		defer func() {
+			if !o.noCleanUp {
+				_ = o.sensorClient.Delete(ctx, sensor.Name, metav1.DeleteOptions{})
+			}
+		}()
+
+		// Create Event Source
+		es, err := o.createEventSource(ctx)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			if !o.noCleanUp {
+				_ = o.eventSourceClient.Delete(ctx, es.Name, metav1.DeleteOptions{})
+			}
+		}()
+
+		esName = es.Name
+		sensorName = sensor.Name
+	} else {
+		fmt.Printf("------- Use existing EventSource and Sensor -------\n")
+		fmt.Printf("EventSource name : %s\n", esName)
+		fmt.Printf("Sensor name      : %s\n", sensorName)
+	}
 
 	// Run testing
 	fmt.Println("")
 	fmt.Println("################# Started Testing #################")
 	fmt.Println("")
 
-	return o.runTesting(ctx, es.Name, sensor.Name)
+	return o.runTesting(ctx, esName, sensorName)
 }
 
 func readResource(text string, v metav1.Object) error {
@@ -578,8 +630,10 @@ func getTestingTrigger(str string) TestingTrigger {
 
 func main() {
 	var (
-		esStr          string
-		triggerStr     string
+		esTypeStr      string
+		triggerTypeStr string
+		esName         string
+		sensorName     string
 		idleTimeoutStr string
 		hardTimeoutStr string
 		noCleanUp      bool
@@ -589,29 +643,33 @@ func main() {
 		Short: "Argo Events stress testing.",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			if esStr == "" {
+			esType := getTestingEventSource(esTypeStr)
+			triggerType := getTestingTrigger(triggerTypeStr)
+			if esName == "" && sensorName == "" {
+				if esType == UnsupportedEventsource {
+					fmt.Printf("Invalid event source %s\n\n", esTypeStr)
+					cmd.HelpFunc()(cmd, args)
+					os.Exit(1)
+				}
+
+				if triggerType == UnsupportedTrigger {
+					fmt.Printf("Invalid trigger %s\n\n", triggerTypeStr)
+					cmd.HelpFunc()(cmd, args)
+					os.Exit(1)
+				}
+			} else if (esName == "" && sensorName != "") || (esName != "" && sensorName == "") {
+				fmt.Printf("Both event source name and sensor name need to be specified\n\n")
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
-			es := getTestingEventSource(esStr)
-			if es == UnsupportedEventsource {
-				fmt.Printf("Invalid event source %s\n\n", esStr)
-				cmd.HelpFunc()(cmd, args)
-				os.Exit(1)
-			}
-			trigger := getTestingTrigger(triggerStr)
-			if trigger == UnsupportedTrigger {
-				fmt.Printf("Invalid trigger %s\n\n", triggerStr)
-				cmd.HelpFunc()(cmd, args)
-				os.Exit(1)
-			}
+
 			idleTimeout, err := time.ParseDuration(idleTimeoutStr)
 			if err != nil {
 				fmt.Printf("Invalid idle timeout %s: %v\n\n", idleTimeoutStr, err)
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
-			opts, err := NewOptions(es, trigger, idleTimeout, noCleanUp)
+			opts, err := NewOptions(esType, triggerType, esName, sensorName, idleTimeout, noCleanUp)
 			if err != nil {
 				fmt.Printf("Failed: %v\n", err)
 				os.Exit(1)
@@ -631,10 +689,13 @@ func main() {
 			}
 		},
 	}
-	rootCmd.Flags().StringVarP(&esStr, "event-source", "e", "", "Type of event source to be tested, e.g. webhook, sqs, etc.")
-	rootCmd.Flags().StringVarP(&triggerStr, "trigger", "t", string(LogTrigger), "Type of trigger to be tested, e.g. log, workflow.")
+	rootCmd.Flags().StringVarP(&esTypeStr, "es-type", "e", "", "Type of event source to be tested, e.g. webhook, sqs, etc.")
+	rootCmd.Flags().StringVarP(&triggerTypeStr, "trigger-type", "t", string(LogTrigger), "Type of trigger to be tested, e.g. log, workflow.")
+	rootCmd.Flags().StringVar(&esName, "es-name", "", "Name of an existing event source to be tested")
+	rootCmd.Flags().StringVar(&sensorName, "sensor-name", "", "Name of an existing sensor to be tested.")
 	rootCmd.Flags().StringVar(&idleTimeoutStr, "idle-timeout", "60s", "Exit in how long without any active events or actions. e.g. 30s, 2m.")
 	rootCmd.Flags().StringVar(&hardTimeoutStr, "hard-timeout", "", "Exit in how long after the stress testing starts. e.g. 120s, 5m. If it's specified, the application will exit at the time either hard-timeout or idle-timeout meets.")
 	rootCmd.Flags().BoolVar(&noCleanUp, "no-clean-up", false, "Whether to clean up the created resources.")
+
 	_ = rootCmd.Execute()
 }
