@@ -12,6 +12,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [InsideBoard](https://www.insideboard.com)
 1. [Intuit](https://www.intuit.com/)
 1. [OneCause](https://www.onecause.com/)
+1. [Produvar](https://www.produvar.com/)
 1. [Rakuten](https://www.rakuten.com)
 1. [RTL Nederland](https://www.rtl.nl)
 1. [Viaduct](https://www.viaduct.ai/)
