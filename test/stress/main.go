@@ -48,6 +48,12 @@ const (
 	Success = "success"
 	Failure = "failure"
 
+	First = "first"
+	Last  = "last"
+
+	EventNameKey   = "eventName"
+	TriggerNameKey = "triggerName"
+
 	StressTestingLabel      = "argo-events-stress"
 	StressTestingLabelValue = "true"
 
@@ -299,13 +305,11 @@ Or you can terminate it any time by Ctrl + C.
 
 `)
 
-	esMap := map[string]int64{Success: 0, Failure: 0}
-	var firstEventTime time.Time
-	lastEventTime := time.Now()
+	esMap := map[string]int64{}
+	esTimeMap := map[string]time.Time{}
 
-	sensorMap := map[string]int64{Success: 0, Failure: 0}
-	var firstActionTime time.Time
-	lastActionTime := time.Now()
+	sensorMap := map[string]int64{}
+	sensorTimeMap := map[string]time.Time{}
 
 	var esLock = &sync.Mutex{}
 	var sensorLock = &sync.Mutex{}
@@ -325,20 +329,24 @@ Or you can terminate it any time by Ctrl + C.
 			}
 			defer func() { _ = stream.Close() }()
 
-			sCh := make(chan bool)
-			go func(successCh chan bool) {
+			sCh := make(chan string)
+			go func(dataCh chan string) {
 				s := bufio.NewScanner(stream)
 				for {
 					if !s.Scan() {
 						fmt.Printf("Can not read: %v\n", s.Err())
-						close(successCh)
+						close(dataCh)
 						return
 					}
 					data := s.Bytes()
-					if successActionReg.Match(data) && isValid(data, startTime) {
-						successCh <- true
-					} else if failureActionReg.Match(data) && isValid(data, startTime) {
-						successCh <- false
+					triggerName := getLogValue(data, startTime, TriggerNameKey)
+					if triggerName == "" {
+						continue
+					}
+					if successActionReg.Match(data) {
+						dataCh <- triggerName + "/" + Success
+					} else if failureActionReg.Match(data) {
+						dataCh <- triggerName + "/" + Failure
 					}
 				}
 			}(sCh)
@@ -348,10 +356,17 @@ Or you can terminate it any time by Ctrl + C.
 					fmt.Printf("Exited Sensor Pod %s due to the hard timeout %v\n", podName, *o.hardTimeout)
 					return
 				}
-				timeout := o.idleTimeout
-				if sensorMap[Success]+sensorMap[Failure] == 0 {
-					timeout = 5 * 60 * time.Second
+				timeout := 5 * 60 * time.Second
+				lastActionTime := startTime
+				if len(sensorMap) > 0 && len(sensorTimeMap) > 0 {
+					timeout = o.idleTimeout
+					for _, v := range sensorTimeMap {
+						if v.After(lastActionTime) {
+							lastActionTime = v
+						}
+					}
 				}
+
 				if time.Since(lastActionTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited Sensor Pod %s due to no actions in the last %v\n", podName, o.idleTimeout)
 					return
@@ -359,20 +374,26 @@ Or you can terminate it any time by Ctrl + C.
 				select {
 				case <-ctx.Done():
 					return
-				case successful, ok := <-sCh:
+				case data, ok := <-sCh:
 					if !ok {
 						return
 					}
+					// e.g. triggerName/success
+					t := strings.Split(data, "/")
 					sensorLock.Lock()
-					if successful {
-						sensorMap[Success]++
+					if _, ok := sensorMap[data]; !ok {
+						sensorMap[t[0]+"/"+Success] = 0
+						sensorMap[t[0]+"/"+Failure] = 0
+					}
+					if t[1] == Success {
+						sensorMap[t[0]+"/"+Success]++
 					} else {
-						sensorMap[Failure]++
+						sensorMap[t[0]+"/"+Failure]++
 					}
-					if sensorMap[Success]+sensorMap[Failure] == 1 {
-						firstActionTime = time.Now()
+					if sensorMap[t[0]+"/"+Success]+sensorMap[t[0]+"/"+Failure] == 1 {
+						sensorTimeMap[t[0]+"/"+First] = time.Now()
 					}
-					lastActionTime = time.Now()
+					sensorTimeMap[t[0]+"/"+Last] = time.Now()
 					sensorLock.Unlock()
 				default:
 				}
@@ -392,20 +413,24 @@ Or you can terminate it any time by Ctrl + C.
 			}
 			defer func() { _ = stream.Close() }()
 
-			sCh := make(chan bool)
-			go func(successCh chan bool) {
+			sCh := make(chan string)
+			go func(dataCh chan string) {
 				s := bufio.NewScanner(stream)
 				for {
 					if !s.Scan() {
 						fmt.Printf("Can not read: %v\n", s.Err())
-						close(successCh)
+						close(dataCh)
 						return
 					}
 					data := s.Bytes()
-					if successEventReg.Match(data) && isValid(data, startTime) {
-						successCh <- true
-					} else if failureEventReg.Match(data) && isValid(data, startTime) {
-						successCh <- false
+					eventName := getLogValue(data, startTime, EventNameKey)
+					if eventName == "" {
+						continue
+					}
+					if successEventReg.Match(data) {
+						dataCh <- eventName + "/" + Success
+					} else if failureEventReg.Match(data) {
+						dataCh <- eventName + "/" + Failure
 					}
 				}
 			}(sCh)
@@ -415,9 +440,15 @@ Or you can terminate it any time by Ctrl + C.
 					fmt.Printf("Exited EventSource Pod %s due to the hard timeout %v\n", podName, *o.hardTimeout)
 					return
 				}
-				timeout := o.idleTimeout
-				if esMap[Success]+esMap[Failure] == 0 {
-					timeout = 5 * 60 * time.Second
+				timeout := 5 * 60 * time.Second
+				lastEventTime := startTime
+				if len(esMap) > 0 && len(esTimeMap) > 0 {
+					timeout = o.idleTimeout
+					for _, v := range esTimeMap {
+						if v.After(lastEventTime) {
+							lastEventTime = v
+						}
+					}
 				}
 				if time.Since(lastEventTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited EventSource Pod %s due to no active events in the last %v\n", podName, o.idleTimeout)
@@ -426,20 +457,26 @@ Or you can terminate it any time by Ctrl + C.
 				select {
 				case <-ctx.Done():
 					return
-				case successful, ok := <-sCh:
+				case data, ok := <-sCh:
 					if !ok {
 						return
 					}
+					// e.g. eventName/success
+					t := strings.Split(data, "/")
 					esLock.Lock()
-					if successful {
-						esMap[Success]++
+					if _, ok := esMap[data]; !ok {
+						esMap[t[0]+"/"+Success] = 0
+						esMap[t[0]+"/"+Failure] = 0
+					}
+					if t[1] == Success {
+						esMap[t[0]+"/"+Success]++
 					} else {
-						esMap[Failure]++
+						esMap[t[0]+"/"+Failure]++
 					}
-					if esMap[Success]+esMap[Failure] == 1 {
-						firstEventTime = time.Now()
+					if esMap[t[0]+"/"+Success]+esMap[t[0]+"/"+Failure] == 1 {
+						esTimeMap[t[0]+"/"+First] = time.Now()
 					}
-					lastEventTime = time.Now()
+					esTimeMap[t[0]+"/"+Last] = time.Now()
 					esLock.Unlock()
 				default:
 				}
@@ -450,42 +487,80 @@ Or you can terminate it any time by Ctrl + C.
 	wg.Wait()
 
 	time.Sleep(3 * time.Second)
-
+	eventNames := []string{}
+	for k := range esMap {
+		t := strings.Split(k, "/")
+		if t[1] == Success {
+			eventNames = append(eventNames, t[0])
+		}
+	}
+	triggerNames := []string{}
+	for k := range sensorMap {
+		t := strings.Split(k, "/")
+		if t[1] == Success {
+			triggerNames = append(triggerNames, t[0])
+		}
+	}
 	fmt.Printf("\n++++++++++++++++++++++++ Events Summary +++++++++++++++++++++++\n")
-	fmt.Printf("Total processed events        : %d\n", esMap[Success]+esMap[Failure])
-	fmt.Printf("Events sent successful        : %d\n", esMap[Success])
-	fmt.Printf("Events sent failed            : %d\n", esMap[Failure])
-	fmt.Printf("First event sent at           : %v\n", firstEventTime)
-	fmt.Printf("Last event sent at            : %v\n", lastEventTime)
-	fmt.Printf("Total time taken              : %v\n", lastEventTime.Sub(firstEventTime))
+	if len(eventNames) == 0 {
+		fmt.Println("No events.")
+	} else {
+		for _, eventName := range eventNames {
+			fmt.Printf("Event Name                    : %s\n", eventName)
+			fmt.Printf("Total processed events        : %d\n", esMap[eventName+"/"+Success]+esMap[eventName+"/"+Failure])
+			fmt.Printf("Events sent successful        : %d\n", esMap[eventName+"/"+Success])
+			fmt.Printf("Events sent failed            : %d\n", esMap[eventName+"/"+Failure])
+			fmt.Printf("First event sent at           : %v\n", esTimeMap[eventName+"/"+First])
+			fmt.Printf("Last event sent at            : %v\n", esTimeMap[eventName+"/"+Last])
+			fmt.Printf("Total time taken              : %v\n", esTimeMap[eventName+"/"+Last].Sub(esTimeMap[eventName+"/"+First]))
+			fmt.Println("--")
+		}
+	}
 
 	fmt.Printf("\n+++++++++++++++++++++++ Actions Summary +++++++++++++++++++++++\n")
-	fmt.Printf("Total triggered actions       : %d\n", sensorMap[Success]+sensorMap[Failure])
-	fmt.Printf("Action triggered successfully : %d\n", sensorMap[Success])
-	fmt.Printf("Action triggered failed       : %d\n", sensorMap[Failure])
-	fmt.Printf("First action triggered at     : %v\n", firstActionTime)
-	fmt.Printf("Last action triggered at      : %v\n", lastActionTime)
-	fmt.Printf("Total time taken              : %v\n", lastActionTime.Sub(firstActionTime))
+	if len(triggerNames) == 0 {
+		fmt.Println("No actions.")
+	} else {
+		for _, triggerName := range triggerNames {
+			fmt.Printf("Trigger Name                  : %s\n", triggerName)
+			fmt.Printf("Total triggered actions       : %d\n", sensorMap[triggerName+"/"+Success]+sensorMap[triggerName+"/"+Failure])
+			fmt.Printf("Action triggered successfully : %d\n", sensorMap[triggerName+"/"+Success])
+			fmt.Printf("Action triggered failed       : %d\n", sensorMap[triggerName+"/"+Failure])
+			fmt.Printf("First action triggered at     : %v\n", sensorTimeMap[triggerName+"/"+First])
+			fmt.Printf("Last action triggered at      : %v\n", sensorTimeMap[triggerName+"/"+Last])
+			fmt.Printf("Total time taken              : %v\n", sensorTimeMap[triggerName+"/"+Last].Sub(sensorTimeMap[triggerName+"/"+First]))
+			fmt.Println("--")
+		}
+	}
 	return nil
 }
 
 // Check if it a valid log in JSON format, which contains something
-// like `"ts":1616093369.2583323`, and return if it's later than start.
-func isValid(log []byte, start time.Time) bool {
+// like `"ts":1616093369.2583323`, and if it's later than start,
+// return the value of a log key
+func getLogValue(log []byte, start time.Time, key string) string {
 	t := make(map[string]interface{})
 	if err := json.Unmarshal(log, &t); err != nil {
-		fmt.Println(err)
-		return false
+		// invalid json format log
+		return ""
 	}
 	ts, ok := t["ts"]
 	if !ok {
-		return false
+		return ""
 	}
 	s, ok := ts.(float64)
 	if !ok {
-		return false
+		return ""
 	}
-	return float64(start.Unix()) < s
+	if float64(start.Unix()) > s {
+		// old log
+		return ""
+	}
+	v, ok := t[key]
+	if !ok {
+		return ""
+	}
+	return fmt.Sprintf("%v", v)
 }
 
 func (o *options) dynamicFor(r schema.GroupVersionResource) dynamic.ResourceInterface {
@@ -582,7 +657,6 @@ func (o *options) Start(ctx context.Context) error {
 	// Run testing
 	fmt.Println("")
 	fmt.Println("################# Started Testing #################")
-	fmt.Println("")
 
 	return o.runTesting(ctx, esName, sensorName)
 }
