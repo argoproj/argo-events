@@ -696,6 +696,8 @@ func getTestingEventSource(str string) TestingEventSource {
 		return KafkaEventSource
 	case "redis":
 		return RedisEventSource
+	case "nats":
+		return NATSEventSource
 	default:
 		return UnsupportedEventsource
 	}
