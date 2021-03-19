@@ -690,6 +690,12 @@ func getTestingEventSource(str string) TestingEventSource {
 		return WebhookEventSource
 	case "sqs":
 		return SQSEventSource
+	case "sns":
+		return SNSEventSource
+	case "kafka":
+		return KafkaEventSource
+	case "redis":
+		return RedisEventSource
 	default:
 		return UnsupportedEventsource
 	}
