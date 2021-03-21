@@ -382,6 +382,13 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"dataTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DataTemplate is a go-template for extracting a string from the event's data. If a DataTemplate is provided with a path and type, the template will be evaluated. The templating follows the standard go-template syntax as well as sprig's extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"path", "type", "value"},
 			},

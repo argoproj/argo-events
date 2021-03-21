@@ -379,6 +379,75 @@ func TestFilterData(t *testing.T) {
 			want:    true,
 			wantErr: false,
 		},
+		{
+			name: "string filter base32 dataTemplate",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Value:        []string{"hello world"},
+					DataTemplate: "{{ b32dec .Input.k }}",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"NBSWY3DPEB3W64TMMQ======\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter base64 dataTemplate",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Value:        []string{"hello world"},
+					DataTemplate: "{{ b64dec .Input.k }}",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ=\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter base64 dataTemplate, comparator not equal",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Value:        []string{"hello world"},
+					DataTemplate: "{{ b64dec .Input.k }}",
+					Comparator:   "!=",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter base64 dataTemplate, regex",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Value:        []string{"world$"},
+					DataTemplate: "{{ b64dec .Input.k }}",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ=\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

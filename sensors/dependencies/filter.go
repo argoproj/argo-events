@@ -17,12 +17,15 @@ limitations under the License.
 package dependencies
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
+	"text/template"
 	"time"
 
+	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/tidwall/gjson"
 
 	"github.com/argoproj/argo-events/common"
@@ -149,6 +152,43 @@ func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error)
 	}
 filter:
 	for _, f := range data {
+		if f.DataTemplate != "" {
+			res := gjson.ParseBytes(jsData)
+			tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.DataTemplate)
+			if err != nil {
+				return false, err
+			}
+			var buf bytes.Buffer
+			if err := tpl.Execute(&buf, map[string]interface{}{
+				"Input": res.Value(),
+			}); err != nil {
+				return false, err
+			}
+			out := buf.String()
+			if out == "" || out == "<no value>" {
+				return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.DataTemplate)
+			}
+			for _, value := range f.Value {
+				exp, err := regexp.Compile(value)
+				if err != nil {
+					return false, err
+				}
+
+				match := exp.Match([]byte(out))
+				switch f.Comparator {
+				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
+					if match {
+						continue filter
+					}
+				case v1alpha1.NotEqualTo:
+					if !match {
+						continue filter
+					}
+				}
+			}
+			return false, nil
+		}
+
 		res := gjson.GetBytes(jsData, f.Path)
 		if !res.Exists() {
 			return false, nil
