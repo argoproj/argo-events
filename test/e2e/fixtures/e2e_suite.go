@@ -76,8 +76,7 @@ func (s *E2ESuite) SetupSuite() {
 	s.Given().EventBus(e2eEventBus).
 		When().
 		CreateEventBus().
-		WaitForEventBusReady().
-		WaitForEventBusStatefulSetReady()
+		WaitForEventBusReady()
 	s.T().Log("EventBus is ready")
 }
 
