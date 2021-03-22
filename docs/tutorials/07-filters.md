@@ -94,13 +94,14 @@ e.g.
               filters:
                 data:
                   - path: body.value
+                    type: string
                     value:
                       - "hello world"
                     template: "{{ b64dec .Input }}"
 
 message `'{"message":"aGVsbG8gd29ybGQ="}'` will match with the above filter definition.
 
-**Note**: Data type is assumed to be string, you can pass either an exact value or a regex. Only supports “=”, “!=” `comparator`.
+**Note**: Data type is assumed to be string before applying the `template`, then cast to the user defined `type` for value matching.
 
 ## Context Filter
 Similar to the data filter, you can apply a filter on the context of the event.

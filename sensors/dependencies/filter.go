@@ -172,25 +172,7 @@ filter:
 			if out == "" || out == "<no value>" {
 				return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.Template)
 			}
-			for _, value := range f.Value {
-				exp, err := regexp.Compile(value)
-				if err != nil {
-					return false, err
-				}
-
-				match := exp.Match([]byte(out))
-				switch f.Comparator {
-				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
-					if match {
-						continue filter
-					}
-				case v1alpha1.NotEqualTo:
-					if !match {
-						continue filter
-					}
-				}
-			}
-			return false, nil
+			res = gjson.Parse(strconv.Quote(out))
 		}
 
 		switch f.Type {
