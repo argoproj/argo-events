@@ -511,14 +511,14 @@ blank treated as equality “=”.
 </tr>
 <tr>
 <td>
-<code>dataTemplate</code></br> <em> string </em>
+<code>template</code></br> <em> string </em>
 </td>
 <td>
 <p>
-DataTemplate is a go-template for extracting a string from the event’s
-data. If a DataTemplate is provided with a path and type, the template
-will be evaluated. The templating follows the standard go-template
-syntax as well as sprig’s extra functions. See
+Template is a go-template for extracting a string from the event’s data.
+A Template is evaluated with provided path and value. The templating
+follows the standard go-template syntax as well as sprig’s extra
+functions. See
 <a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
 and
 <a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>

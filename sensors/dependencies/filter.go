@@ -152,21 +152,25 @@ func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error)
 	}
 filter:
 	for _, f := range data {
-		if f.DataTemplate != "" {
-			res := gjson.ParseBytes(jsData)
-			tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.DataTemplate)
+		res := gjson.GetBytes(jsData, f.Path)
+		if !res.Exists() {
+			return false, nil
+		}
+
+		if f.Template != "" {
+			tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.Template)
 			if err != nil {
 				return false, err
 			}
 			var buf bytes.Buffer
 			if err := tpl.Execute(&buf, map[string]interface{}{
-				"Input": res.Value(),
+				"Input": res.String(),
 			}); err != nil {
 				return false, err
 			}
 			out := buf.String()
 			if out == "" || out == "<no value>" {
-				return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.DataTemplate)
+				return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.Template)
 			}
 			for _, value := range f.Value {
 				exp, err := regexp.Compile(value)
@@ -189,10 +193,6 @@ filter:
 			return false, nil
 		}
 
-		res := gjson.GetBytes(jsData, f.Path)
-		if !res.Exists() {
-			return false, nil
-		}
 		switch f.Type {
 		case v1alpha1.JSONTypeBool:
 			for _, value := range f.Value {

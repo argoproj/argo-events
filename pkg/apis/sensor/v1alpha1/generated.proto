@@ -140,11 +140,11 @@ message DataFilter {
   // Is optional, and if left blank treated as equality "=".
   optional string comparator = 4;
 
-  // DataTemplate is a go-template for extracting a string from the event's data.
-  // If a DataTemplate is provided with a path and type, the template will be evaluated.
+  // Template is a go-template for extracting a string from the event's data.
+  // A Template is evaluated with provided path and value.
   // The templating follows the standard go-template syntax as well as sprig's extra functions.
   // See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
-  optional string dataTemplate = 5;
+  optional string template = 5;
 }
 
 // DependencyGroup is the group of dependencies

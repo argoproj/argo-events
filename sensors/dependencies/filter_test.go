@@ -380,28 +380,12 @@ func TestFilterData(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "string filter base32 dataTemplate",
+			name: "string filter base64, uppercase template",
 			args: args{data: []v1alpha1.DataFilter{
 				{
-					Value:        []string{"hello world"},
-					DataTemplate: "{{ b32dec .Input.k }}",
-				},
-			},
-				event: &v1alpha1.Event{
-					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
-					},
-					Data: []byte("{\"k\": \"NBSWY3DPEB3W64TMMQ======\"}"),
-				}},
-			want:    true,
-			wantErr: false,
-		},
-		{
-			name: "string filter base64 dataTemplate",
-			args: args{data: []v1alpha1.DataFilter{
-				{
-					Value:        []string{"hello world"},
-					DataTemplate: "{{ b64dec .Input.k }}",
+					Path:     "k",
+					Value:    []string{"HELLO WORLD"},
+					template: "{{ b64dec .Input | upper }}",
 				},
 			},
 				event: &v1alpha1.Event{
@@ -414,12 +398,31 @@ func TestFilterData(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "string filter base64 dataTemplate, comparator not equal",
+			name: "string filter base64 template",
 			args: args{data: []v1alpha1.DataFilter{
 				{
-					Value:        []string{"hello world"},
-					DataTemplate: "{{ b64dec .Input.k }}",
-					Comparator:   "!=",
+					Path:     "k",
+					Value:    []string{"3.14"},
+					template: "{{ b64dec .Input }}",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"My4xNA==\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter base64 template, comparator not equal",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Value:      []string{"hello world"},
+					template:   "{{ b64dec .Input }}",
+					Comparator: "!=",
 				},
 			},
 				event: &v1alpha1.Event{
@@ -432,11 +435,12 @@ func TestFilterData(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "string filter base64 dataTemplate, regex",
+			name: "string filter base64 template, regex",
 			args: args{data: []v1alpha1.DataFilter{
 				{
-					Value:        []string{"world$"},
-					DataTemplate: "{{ b64dec .Input.k }}",
+					Path:     "k",
+					Value:    []string{"world$"},
+					template: "{{ b64dec .Input }}",
 				},
 			},
 				event: &v1alpha1.Event{
