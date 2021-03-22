@@ -84,6 +84,24 @@ If data types is bool or float, then you need to pass the exact value.
 
 5. Watch for a workflow with name `data-workflow-xxxx`.
 
+### Template
+
+The data filter offers `template`.
+`template` process the incoming data defined in `path` through [sprig template](https://github.com/Masterminds/sprig) before matching with the `value`.
+
+e.g.
+
+              filters:
+                data:
+                  - path: body.value
+                    value:
+                      - "hello world"
+                    template: "{{ b64dec .Input }}"
+
+message `'{"message":"aGVsbG8gd29ybGQ="}'` will match with the above filter definition.
+
+**Note**: Data type is assumed to be string, you can pass either an exact value or a regex. Only supports “=”, “!=” `comparator`.
+
 ## Context Filter
 Similar to the data filter, you can apply a filter on the context of the event.
 
