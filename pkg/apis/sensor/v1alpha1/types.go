@@ -249,6 +249,11 @@ type DataFilter struct {
 	// Can be ">=", ">", "=", "!=", "<", or "<=".
 	// Is optional, and if left blank treated as equality "=".
 	Comparator Comparator `json:"comparator,omitempty" protobuf:"bytes,4,opt,name=comparator,casttype=Comparator"`
+	// Template is a go-template for extracting a string from the event's data.
+	// A Template is evaluated with provided path, type and value.
+	// The templating follows the standard go-template syntax as well as sprig's extra functions.
+	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+	Template string `json:"template,omitempty" protobuf:"bytes,5,opt,name=template"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent

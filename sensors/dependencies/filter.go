@@ -17,12 +17,15 @@ limitations under the License.
 package dependencies
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
+	"text/template"
 	"time"
 
+	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/tidwall/gjson"
 
 	"github.com/argoproj/argo-events/common"
@@ -153,6 +156,25 @@ filter:
 		if !res.Exists() {
 			return false, nil
 		}
+
+		if f.Template != "" {
+			tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.Template)
+			if err != nil {
+				return false, err
+			}
+			var buf bytes.Buffer
+			if err := tpl.Execute(&buf, map[string]interface{}{
+				"Input": res.String(),
+			}); err != nil {
+				return false, err
+			}
+			out := buf.String()
+			if out == "" || out == "<no value>" {
+				return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.Template)
+			}
+			res = gjson.Parse(strconv.Quote(out))
+		}
+
 		switch f.Type {
 		case v1alpha1.JSONTypeBool:
 			for _, value := range f.Value {

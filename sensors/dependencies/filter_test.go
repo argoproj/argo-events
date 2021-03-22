@@ -379,6 +379,84 @@ func TestFilterData(t *testing.T) {
 			want:    true,
 			wantErr: false,
 		},
+		{
+			name: "string filter base64, uppercase template",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:     "k",
+					Type:     v1alpha1.JSONTypeString,
+					Value:    []string{"HELLO WORLD"},
+					Template: "{{ b64dec .Input | upper }}",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ=\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter base64 template",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"3.13"},
+					Comparator: ">",
+					Template:   "{{ b64dec .Input }}",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"My4xNA==\"}"), // 3.14
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter base64 template, comparator not equal",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeString,
+					Value:      []string{"hello world"},
+					Template:   "{{ b64dec .Input }}",
+					Comparator: "!=",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter base64 template, regex",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:     "k",
+					Type:     v1alpha1.JSONTypeString,
+					Value:    []string{"world$"},
+					Template: "{{ b64dec .Input }}",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
+					},
+					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ=\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
