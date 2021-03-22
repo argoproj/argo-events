@@ -47,7 +47,6 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		WaitForEventSourceDeploymentReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
@@ -55,7 +54,6 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		When().
 		CreateSensor().
 		WaitForSensorReady().
-		WaitForSensorDeploymentReady().
 		Then().
 		ExpectSensorPodLogContains(LogTriggerActionSuccessful)
 }
@@ -65,7 +63,6 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		WaitForEventSourceDeploymentReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(7777, 7777)
@@ -87,7 +84,6 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		When().
 		CreateSensor().
 		WaitForSensorReady().
-		WaitForSensorDeploymentReady().
 		Then().
 		ExpectSensorPodLogContains(LogSensorStarted).
 		SensorPodPortForward(7778, 7777)
@@ -111,7 +107,6 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		WaitForEventSourceDeploymentReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12000, 12000).
@@ -123,7 +118,6 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		When().
 		CreateSensor().
 		WaitForSensorReady().
-		WaitForSensorDeploymentReady().
 		Then().
 		ExpectSensorPodLogContains(LogSensorStarted).
 		SensorPodPortForward(7778, 7777)

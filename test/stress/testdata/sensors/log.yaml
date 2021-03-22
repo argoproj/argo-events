@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: stress-testing-log
+spec:
+  dependencies:
+  - name: dep
+    eventSourceName: stress-testing
+    eventName: test
+  triggers:
+  - template:
+      name: log-trigger
+      log: {}
