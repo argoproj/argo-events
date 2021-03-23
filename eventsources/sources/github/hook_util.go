@@ -33,7 +33,7 @@ func sliceEqual(first []string, second []string) bool {
 	}
 
 	for _, v := range tmp {
-		// -1: only exists in secod
+		// -1: only exists in second
 		// 1: only exists in first
 		// 2: eists in both
 		if v < 2 {
