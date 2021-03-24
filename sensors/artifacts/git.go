@@ -125,6 +125,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 		fetchOptions := &git.FetchOptions{
 			RemoteName: g.artifact.Remote.Name,
 			RefSpecs:   fetchRefSpec,
+			Force:      true,
 		}
 		if auth != nil {
 			fetchOptions.Auth = auth
@@ -143,6 +144,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 	fetchOptions := &git.FetchOptions{
 		RemoteName: g.getRemote(),
 		RefSpecs:   fetchRefSpec,
+		Force:      true,
 	}
 	if auth != nil {
 		fetchOptions.Auth = auth
