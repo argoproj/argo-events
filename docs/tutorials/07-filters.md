@@ -54,13 +54,13 @@ The data filter offers `comparator` “>=”, “>”, “=”, “!=”, “<�
 
 e.g.,
 
-              filters:
-                data:
-                  - path: body.value
-                    type: number
-                    comparator: ">"
-                    value:
-                      - "50.0"
+        filters:
+        data:
+                - path: body.value
+                type: number
+                comparator: ">"
+                value:
+                - "50.0"
 
 <br/>
 
@@ -105,21 +105,21 @@ For a given payload such as:
 We want our sensor to fire if the action is "opened" and it has a label of "Webhook" or if the action is "closed"
 and it has a label of "Webhook" and "Approved". We could therefore define the path as:
 
-              filters:
-                data:
-                  - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
-                    type: string
-                ...
+        filters:
+        data:
+                - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
+                type: string
+        ...
 
 This would return a string like: `["opened","Webhook","Approved"]`. As the resulting data type will be a
 `string`, we can pass a regex over it:
 
-              filters:
-                data:
-                  - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
-                    type: string
-                    value:
-                      - "(\bopened\b.*\bWebhook\b)|(\blabeled\b.*(\bWebhook\b.*\bApproved\b))"
+        filters:
+        data:
+                - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
+                type: string
+                value:
+                - "(\bopened\b.*\bWebhook\b)|(\blabeled\b.*(\bWebhook\b.*\bApproved\b))"
 
 ### Template
 
