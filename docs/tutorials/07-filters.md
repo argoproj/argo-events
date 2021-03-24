@@ -55,11 +55,11 @@ The data filter offers `comparator` “>=”, “>”, “=”, “!=”, “<�
 e.g.,
 
         filters:
-        data:
-                - path: body.value
-                type: number
-                comparator: ">"
-                value:
+          data:
+            - path: body.value
+              type: number
+              comparator: ">"
+              value:
                 - "50.0"
 
 <br/>
