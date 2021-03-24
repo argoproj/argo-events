@@ -13,6 +13,8 @@ import (
 const (
 	Success = "success"
 	Failure = "failure"
+
+	RootCommand = "go run ./test/stress/generator/main.go"
 )
 
 var (
@@ -22,7 +24,7 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "go run ./test/stress/generator/main.go",
+	Use:   RootCommand,
 	Short: "Events generator for stress testing.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -100,7 +102,7 @@ loop:
 				}
 			}()
 			counter++
-			if counter >= totalRequests {
+			if totalRequests > 0 && counter >= totalRequests {
 				break loop
 			}
 		}
