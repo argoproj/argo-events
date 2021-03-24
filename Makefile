@@ -270,4 +270,6 @@ update-manifests-version:
 	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
 	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
+	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' > /tmp/ae_makefile
+	mv /tmp/ae_makefile Makefile
 
