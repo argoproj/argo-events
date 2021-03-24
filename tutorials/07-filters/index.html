@@ -572,6 +572,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#multiple-paths" title="Multiple Paths" class="md-nav__link">
+    Multiple Paths
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#template" title="Template" class="md-nav__link">
     Template
   </a>
@@ -1364,6 +1371,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#multiple-paths" title="Multiple Paths" class="md-nav__link">
+    Multiple Paths
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#template" title="Template" class="md-nav__link">
     Template
   </a>
@@ -1421,7 +1435,7 @@ apply constraints on the events in order to determine a validity.</p>
 <h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
 <p>Webhook event-source must be set up.</p>
 <h2 id="data-filter">Data Filter<a class="headerlink" href="#data-filter" title="Permanent link">&para;</a></h2>
-<p>Data filter as the name suggests are applied on the event data. A CloudEvent from Webhook event-source has
+<p>Data filters as the name suggests are applied on the event data. A CloudEvent from Webhook event-source has
 payload structure as,</p>
 <div class="codehilite"><pre><span></span><code>    {
         &quot;context&quot;: {
@@ -1440,7 +1454,7 @@ payload structure as,</p>
     }
 </code></pre></div>
 
-<p>Data Filter are applied on <code>data</code> within the payload. We will make a simple HTTP request
+<p>Data Filters are applied on <code>data</code> within the payload. We will make a simple HTTP request
 to webhook event-source with request data as <code>{"message":"this is my first webhook"}</code> and apply
 data filter on <code>message</code>.</p>
 <p>A data filter has following fields,</p>
@@ -1454,13 +1468,13 @@ data filter on <code>message</code>.</p>
 <h3 id="comparator">Comparator<a class="headerlink" href="#comparator" title="Permanent link">&para;</a></h3>
 <p>The data filter offers <code>comparator</code> “&gt;=”, “&gt;”, “=”, “!=”, “&lt;”, or “&lt;=”.</p>
 <p>e.g.,</p>
-<div class="codehilite"><pre><span></span><code>          filters:
-            data:
-              - path: body.value
-                type: number
-                comparator: &quot;&gt;&quot;
-                value:
-                  - &quot;50.0&quot;
+<div class="codehilite"><pre><span></span><code>    filters:
+      data:
+        - path: body.value
+          type: number
+          comparator: &quot;&gt;&quot;
+          value:
+            - &quot;50.0&quot;
 </code></pre></div>
 
 <p><br/></p>
@@ -1493,6 +1507,41 @@ If data types is bool or float, then you need to pass the exact value.</p>
 <p>Watch for a workflow with name <code>data-workflow-xxxx</code>.</p>
 </li>
 </ol>
+<h3 id="multiple-paths">Multiple Paths<a class="headerlink" href="#multiple-paths" title="Permanent link">&para;</a></h3>
+<p>If the HTTP request was less simple and contained multiple paths that we would like to filter against,
+we can make use of <a href="https://github.com/tidwall/gjson/blob/master/SYNTAX.md#multipaths">multipaths</a> to combine
+multiple data paths in the payload into one string.</p>
+<p>For a given payload such as:</p>
+<div class="codehilite"><pre><span></span><code>    {
+      &quot;body&quot;: {
+        &quot;action&quot;:&quot;opened&quot;,
+       &quot;labels&quot;: [
+          {&quot;id&quot;:&quot;1234&quot;, &quot;name&quot;:&quot;Webhook&quot;}, 
+          {&quot;id&quot;:&quot;5678&quot;, &quot;name&quot;:&quot;Approved&quot;}
+        ]
+      }
+    }
+</code></pre></div>
+
+<p>We want our sensor to fire if the action is "opened" and it has a label of "Webhook" or if the action is "closed"
+and it has a label of "Webhook" and "Approved". We could therefore define the path as:</p>
+<div class="codehilite"><pre><span></span><code>    filters:
+      data:
+        - path: &quot;[body.action,body.labels.#(name==&quot;Webhook&quot;).name,body.labels.#(name==&quot;Approved&quot;).name]&quot;
+          type: string
+    ...
+</code></pre></div>
+
+<p>This would return a string like: <code>["opened","Webhook","Approved"]</code>. As the resulting data type will be a
+<code>string</code>, we can pass a regex over it:</p>
+<div class="codehilite"><pre><span></span><code>    filters:
+      data:
+        - path: &quot;[body.action,body.labels.#(name==&quot;Webhook&quot;).name,body.labels.#(name==&quot;Approved&quot;).name]&quot;
+          type: string
+          value:
+            - &quot;(\bopened\b.*\bWebhook\b)|(\blabeled\b.*(\bWebhook\b.*\bApproved\b))&quot;
+</code></pre></div>
+
 <h3 id="template">Template<a class="headerlink" href="#template" title="Permanent link">&para;</a></h3>
 <p>The data filter offers <code>template</code>.
 <code>template</code> process the incoming data defined in <code>path</code> through <a href="https://github.com/Masterminds/sprig">sprig template</a> before matching with the <code>value</code>.</p>
