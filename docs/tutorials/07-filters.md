@@ -106,21 +106,20 @@ We want our sensor to fire if the action is "opened" and it has a label of "Webh
 and it has a label of "Webhook" and "Approved". We could therefore define the path as:
 
         filters:
-        data:
-                - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
-                type: string
+          data:
+            - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
+              type: string
         ...
 
 This would return a string like: `["opened","Webhook","Approved"]`. As the resulting data type will be a
 `string`, we can pass a regex over it:
 
         filters:
-        data:
-                - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
-                type: string
-                value:
+          data:
+            - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
+              type: string
+              value:
                 - "(\bopened\b.*\bWebhook\b)|(\blabeled\b.*(\bWebhook\b.*\bApproved\b))"
-
 ### Template
 
 The data filter offers `template`.
