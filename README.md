@@ -20,6 +20,10 @@
 * Manage everything from simple, linear, real-time to complex, multi-source events.
 * [CloudEvents](https://cloudevents.io/) compliant.
 
+## Try Argo Events
+
+[Access the demo enviromnment](https://workflows.apps.argoproj.io/event-flow/argo?showWorkflows=true) (login using Github)
+
 ## Getting Started
 
 Follow these [instruction](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
