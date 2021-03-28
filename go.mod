@@ -5,8 +5,10 @@ go 1.15
 require (
 	cloud.google.com/go v0.52.0
 	cloud.google.com/go/pubsub v1.2.0
-	github.com/Azure/azure-event-hubs-go/v3 v3.3.0
-	github.com/Azure/azure-sdk-for-go v43.0.0+incompatible // indirect
+	github.com/Azure/azure-amqp-common-go/v3 v3.1.0 // indirect
+	github.com/Azure/azure-event-hubs-go/v3 v3.3.7
+	github.com/Azure/azure-sdk-for-go v52.6.0+incompatible // indirect
+	github.com/Azure/go-amqp v0.13.6 // indirect
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/sprig/v3 v3.2.0
 	github.com/Shopify/sarama v1.26.1
@@ -45,6 +47,7 @@ require (
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/minio/minio-go v1.0.1-0.20190523192347-c6c2912aa552
+	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/go-nats v1.7.2
@@ -73,8 +76,9 @@ require (
 	github.com/tidwall/sjson v1.1.1
 	github.com/xanzy/go-gitlab v0.33.0
 	go.uber.org/zap v1.15.0
-	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	golang.org/x/net v0.0.0-20210324205630-d1beb07c2056 // indirect
 	google.golang.org/api v0.15.1
 	google.golang.org/grpc v1.28.1
 	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
@@ -140,7 +144,7 @@ replace k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.19.6
 
 replace k8s.io/sample-controller => k8s.io/sample-controller v0.19.6
 
-replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.3+incompatible
+replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+incompatible
 
 replace k8s.io/code-generator => k8s.io/code-generator v0.19.7-rc.0
 
