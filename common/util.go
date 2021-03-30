@@ -154,7 +154,9 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get secret value of name: %s, key: %s", selector.Name, selector.Key)
 	}
-	return string(data), nil
+	// Secrets edied by tools like "vim" always have an extra invisible "\n" in the end,
+	// and it's often negleted, but it makes differences for some of the applications.
+	return strings.TrimSuffix(string(data), "\n"), nil
 }
 
 // GetSecretVolumePath returns the path of the mounted secret
@@ -176,7 +178,9 @@ func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get configMap value of name: %s, key: %s", selector.Name, selector.Key)
 	}
-	return string(data), nil
+	// Contents edied by tools like "vim" always have an extra invisible "\n" in the end,
+	// and it's often negleted, but it makes differences for some of the applications.
+	return strings.TrimSuffix(string(data), "\n"), nil
 }
 
 // GetConfigMapVolumePath returns the path of the mounted configmap
