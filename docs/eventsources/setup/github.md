@@ -17,8 +17,8 @@ The structure of an event dispatched by the event-source over the eventbus looks
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
-                  	"body": "Body is the github event data",
-                  	"headers": "Headers from the Gitlab event",
+                  	"body": "Body is the Github event data",
+                  	"headers": "Headers from the Github event",
                 }
             }
 
