@@ -26,6 +26,7 @@ import (
 	openwhisk "github.com/argoproj/argo-events/sensors/triggers/apache-openwhisk"
 	argoworkflow "github.com/argoproj/argo-events/sensors/triggers/argo-workflow"
 	awslambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
+	eventhubs "github.com/argoproj/argo-events/sensors/triggers/azure-event-hubs"
 	customtrigger "github.com/argoproj/argo-events/sensors/triggers/custom-trigger"
 	"github.com/argoproj/argo-events/sensors/triggers/http"
 	"github.com/argoproj/argo-events/sensors/triggers/kafka"
@@ -72,6 +73,15 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 		result, err := awslambda.NewAWSLambdaTrigger(sensorCtx.awsLambdaClients, sensorCtx.Sensor, trigger, log)
 		if err != nil {
 			log.Errorw("failed to new a Lambda trigger", zap.Error(err))
+			return nil
+		}
+		return result
+	}
+
+	if trigger.Template.AzureEventHubs != nil {
+		result, err := eventhubs.NewAzureEventHubsTrigger(sensorCtx.Sensor, trigger, sensorCtx.azureEventHubsClients, log)
+		if err != nil {
+			log.Errorw("failed to new an Azure Event Hubs trigger", zap.Error(err))
 			return nil
 		}
 		return result
