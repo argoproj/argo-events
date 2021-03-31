@@ -303,3 +303,10 @@ func TestBuildConfigMap(t *testing.T) {
 		}
 	})
 }
+
+func TestGenerateToken(t *testing.T) {
+	n := 30
+	token, err := generateToken(n)
+	assert.NoError(t, err)
+	assert.Equal(t, len(token), n)
+}
