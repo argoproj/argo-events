@@ -11,5 +11,5 @@ namespace: argo-events
 
 images:
   - name: argoproj/events-webhook
-    newTag: v1.3.0-rc1
+    newTag: v1.3.0-rc2
 
