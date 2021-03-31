@@ -3,8 +3,6 @@ kind: Sensor
 metadata:
   name: azure-events-hub
 spec:
-  template:
-    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       eventSourceName: webhook
