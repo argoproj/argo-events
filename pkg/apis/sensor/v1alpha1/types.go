@@ -313,6 +313,9 @@ type TriggerTemplate struct {
 	// Deprecated: will be removed in v1.5, use conditions instead
 	// +optional
 	DeprecatedSwitch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,12,opt,name=switch"`
+	// AzureEventHubs refers to the trigger send an event to an Azure Event Hub.
+	// +optional
+	AzureEventHubs *AzureEventHubsTrigger `json:"azureEventHubs,omitempty" protobuf:"bytes,14,opt,name=azureEventHubs"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -421,6 +424,24 @@ type AWSLambdaTrigger struct {
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
 
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
+}
+
+// AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger
+type AzureEventHubsTrigger struct {
+	// FQDN refers to the namespace dns of Azure Event Hubs to be used i.e. <namespace>.servicebus.windows.net
+	FQDN string `json:"fqdn" protobuf:"bytes,1,opt,name=fqdn"`
+	// HubName refers to the Azure Event Hub to send events to
+	HubName string `json:"hubName" protobuf:"bytes,2,opt,name=hubName"`
+	// SharedAccessKeyName refers to the name of the Shared Access Key
+	SharedAccessKeyName *corev1.SecretKeySelector `json:"sharedAccessKeyName" protobuf:"bytes,3,opt,name=sharedAccessKeyName"`
+	// SharedAccessKey refers to a K8s secret containing the primary key for the
+	SharedAccessKey *corev1.SecretKeySelector `json:"sharedAccessKey,omitempty" protobuf:"bytes,4,opt,name=sharedAccessKey"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,5,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 }

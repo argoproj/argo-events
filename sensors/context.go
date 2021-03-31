@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"time"
 
+	eventhubs "github.com/Azure/azure-event-hubs-go/v3"
 	"github.com/Shopify/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -59,8 +60,9 @@ type SensorContext struct {
 	awsLambdaClients map[string]*lambda.Lambda
 	// openwhiskClients holds the references to active OpenWhisk clients.
 	openwhiskClients map[string]*whisk.Client
-
-	metrics *sensormetrics.Metrics
+	// azureEventHubsClients holds the references to active Azure Event Hub clients.
+	azureEventHubsClients map[string]*eventhubs.Hub
+	metrics               *sensormetrics.Metrics
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -76,10 +78,11 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		slackHTTPClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers:   make(map[string]sarama.AsyncProducer),
-		natsConnections:  make(map[string]*natslib.Conn),
-		awsLambdaClients: make(map[string]*lambda.Lambda),
-		openwhiskClients: make(map[string]*whisk.Client),
-		metrics:          metrics,
+		kafkaProducers:        make(map[string]sarama.AsyncProducer),
+		natsConnections:       make(map[string]*natslib.Conn),
+		awsLambdaClients:      make(map[string]*lambda.Lambda),
+		openwhiskClients:      make(map[string]*whisk.Client),
+		azureEventHubsClients: make(map[string]*eventhubs.Hub),
+		metrics:               metrics,
 	}
 }

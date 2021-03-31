@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: azure-events-hub
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: azure-eventhubs-trigger
+        azureEventHubs:
+          # FQDN of the EventsHub namespace you created
+          # More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string
+          fqdn: eventhubs_fqdn
+          sharedAccessKeyName:
+            name: azure-event-hubs-secret
+            key: sharedAccessKeyName
+          sharedAccessKey:
+            name: azure-event-hubs-secret
+            key: sharedAccessKey
+          # Event Hub path/name
+          hubName: hub_name
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.message
+              dest: message
