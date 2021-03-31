@@ -2,9 +2,10 @@ package installer
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strconv"
 	"strings"
 	"time"
@@ -289,7 +290,12 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		log.Infow("created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
 		return expectedSSecret, nil, nil
 	case v1alpha1.AuthStrategyToken:
-		token := generateToken(64)
+		token, err := generateToken(64)
+		if err != nil {
+			i.eventBus.Status.MarkDeployFailed("BuildServerAuthSecretFailed", "Failed to generate auth token")
+			log.Errorw("error generating auth token", zap.Error(err))
+			return nil, nil, err
+		}
 		serverAuthText := fmt.Sprintf(`authorization {
   token: "%s"
 }`, token)
@@ -859,14 +865,17 @@ func (i *natsInstaller) mergeEventBusLabels(given map[string]string) map[string]
 }
 
 // generate a random string as token with given length
-func generateToken(length int) string {
+func generateToken(length int) (string, error) {
 	seeds := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = seeds[seededRand.Intn(len(seeds))]
+	result := make([]byte, length)
+	for i := 0; i < length; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(seeds))))
+		if err != nil {
+			return "", err
+		}
+		result[i] = seeds[num.Int64()]
 	}
-	return string(b)
+	return string(result), nil
 }
 
 func serverAuthSecretLabels(given map[string]string) map[string]string {
