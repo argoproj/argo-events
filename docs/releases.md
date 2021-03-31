@@ -25,11 +25,8 @@ same.
 
 For **unstable**, we build and tag `latest` images for every commit to master.
 
-New major versions are released roughly every 6 months. Release candidates for
-each major release are typically available for 6 weeks before the release
-becomes generally available.
+New minor versions are released roughly every 2 months. Release candidates for
+each release are typically available for 2 weeks before the release becomes
+generally available.
 
-Otherwise, we typically release once a month:
-
-- Patch fixes for the current stable version. These are tagged `stable`.
-- The next release candidate, if we are currently in a release-cycle.
+Otherwise, we typically patch the release as needed.
