@@ -2257,6 +2257,48 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.AzureEventHubsTrigger": {
+      "description": "AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger",
+      "type": "object",
+      "required": [
+        "fqdn",
+        "hubName",
+        "sharedAccessKeyName",
+        "payload"
+      ],
+      "properties": {
+        "fqdn": {
+          "description": "FQDN refers to the namespace dns of Azure Event Hubs to be used i.e. \u003cnamespace\u003e.servicebus.windows.net",
+          "type": "string"
+        },
+        "hubName": {
+          "description": "HubName refers to the Azure Event Hub to send events to",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "sharedAccessKey": {
+          "description": "SharedAccessKey refers to a K8s secret containing the primary key for the",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "sharedAccessKeyName": {
+          "description": "SharedAccessKeyName refers to the name of the Shared Access Key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.CustomTrigger": {
       "description": "CustomTrigger refers to the specification of the custom trigger.",
       "type": "object",
@@ -3195,6 +3237,10 @@
         "awsLambda": {
           "description": "AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AWSLambdaTrigger"
+        },
+        "azureEventHubs": {
+          "description": "AzureEventHubs refers to the trigger send an event to an Azure Event Hub.",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AzureEventHubsTrigger"
         },
         "conditions": {
           "description": "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) \u0026\u0026 dep04\"",
