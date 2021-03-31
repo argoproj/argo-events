@@ -88,6 +88,6 @@ nav:
       - HA/DR Recommendations: 'dr_ha_recommendations.md'
   - 'developer_guide.md'
   - 'FAQ.md'
-  - Releases ⧉: https://github.com/argoproj/argo-events/releases
+  - Releases ⧉: 'releases.md'
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
   - Blog ⧉: https://blog.argoproj.io/
