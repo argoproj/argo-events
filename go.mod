@@ -28,6 +28,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gavv/httpexpect/v2 v2.2.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/go-git/go-git/v5 v5.3.0
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-openapi/spec v0.20.2
 	github.com/go-redis/redis v6.15.8+incompatible
@@ -43,7 +44,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/grpc-ecosystem/grpc-gateway v1.9.5
 	github.com/hokaccha/go-prettyjson v0.0.0-20190818114111-108c894c2c0e // indirect
-	github.com/imdario/mergo v0.3.11
+	github.com/imdario/mergo v0.3.12
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/minio/minio-go v1.0.1-0.20190523192347-c6c2912aa552
@@ -63,7 +64,6 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/robfig/cron v1.2.0
-	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/slack-go/slack v0.7.4
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v1.6.4
@@ -78,13 +78,11 @@ require (
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20210324205630-d1beb07c2056 // indirect
 	google.golang.org/api v0.15.1
 	google.golang.org/grpc v1.28.1
 	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	gopkg.in/jcmturner/rpc.v0 v0.0.2 // indirect
-	gopkg.in/src-d/go-git.v4 v4.13.1
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.19.6
 	k8s.io/apimachinery v0.19.6
