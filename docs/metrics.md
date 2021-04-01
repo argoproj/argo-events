@@ -39,7 +39,7 @@ POD discovery. A sample `ClusterRole` like below needs to be added or merged,
 and grant it to your Service Account.
 
 ```yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: pod-discovery
