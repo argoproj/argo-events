@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: e2e-resource-log
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: test-resource
+      eventName: example
+  triggers:
+    - template:
+        name: log-trigger
+        log: {}
