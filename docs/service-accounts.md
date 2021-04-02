@@ -4,9 +4,10 @@
 
 A `Service Account` can be specified in the EventSource object with
 `spec.template.serviceAccountName`, however it is not needed for all the
-EventSource types except `resource`. For a `resource` EventSource, you need to
-specify a Service Accout and give it `list` and `watch` permissions for the
-resource being watched.
+EventSource types except `resource`, unless you want to achieve
+[HA](eventsources/ha.md) for some of them. For a `resource` EventSource, you
+need to specify a Service Accout and give it `list` and `watch` permissions for
+the resource being watched.
 
 For example, if you want to watch actions on `Deployment` objects, you need to:
 
@@ -30,7 +31,8 @@ For example, if you want to watch actions on `Deployment` objects, you need to:
 
 A `Service Account` also can be specified in a Sensor object via
 `spec.template.serviceAccountName`, this is only needed when `k8s` trigger or
-`argoWorkflow` trigger is defined in the Sensor object.
+`argoWorkflow` trigger is defined in the Sensor object, or you want to run the
+Sensor with [HA](sensors/ha.md).
 
 The sensor examples provided by us use `argo-events-sa` service account to
 execute the triggers, but it has more permissions than needed, and you may want

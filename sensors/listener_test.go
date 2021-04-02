@@ -64,7 +64,7 @@ func TestGetDependencyExpression(t *testing.T) {
 			},
 		}
 		sensorCtx := &SensorContext{
-			Sensor: obj,
+			sensor: obj,
 		}
 		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
 		assert.NoError(t, err)
@@ -86,7 +86,7 @@ func TestGetDependencyExpression(t *testing.T) {
 			},
 		}
 		sensorCtx := &SensorContext{
-			Sensor: obj,
+			sensor: obj,
 		}
 		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
 		assert.NoError(t, err)
@@ -113,7 +113,7 @@ func TestGetDependencyExpression(t *testing.T) {
 			},
 		}
 		sensorCtx := &SensorContext{
-			Sensor: obj,
+			sensor: obj,
 		}
 		obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
 			{Name: "group-1", Dependencies: []string{"dep1", "dep1a"}},
@@ -154,7 +154,7 @@ func TestGetDependencyExpression(t *testing.T) {
 			},
 		}
 		sensorCtx := &SensorContext{
-			Sensor: obj,
+			sensor: obj,
 		}
 		obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
 			{Name: "group-1", Dependencies: []string{"dep-1", "dep_1a"}},

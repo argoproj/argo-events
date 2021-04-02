@@ -66,8 +66,9 @@ spec:
 
 However, there are some rules need to follow to do it:
 
-- `Rolling Update` types and `Recreate` types can not be configured together,
-  see [EventSource Deployment Strategies](deployment-strategies.md).
+- EventSource types with HA strategy `Active-Active` can not be mixed with types
+  with `Active-Passive` strategy, see [EventSource High Availability](ha.md) for
+  the detail of HA strategies.
 
 - Event Name (i.e. `webhook-example` and `sns-example` above, refer to
   [EventSource Names](naming.md)) needs to be unique in the EventSource, same

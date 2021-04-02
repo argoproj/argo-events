@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
+	argoevents "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources"
@@ -58,8 +59,10 @@ func main() {
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
 	m := metrics.NewMetrics(eventSource.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.EventSourceMetricsPort))
+
+	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
 	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m)
 	if err := adaptor.Start(ctx); err != nil {
-		logger.Desugar().Fatal("failed to start eventsource server", zap.Error(err))
+		logger.Fatalw("failed to start eventsource server", zap.Error(err))
 	}
 }

@@ -51,7 +51,7 @@ rules:
       - patch
       - delete
   - apiGroups:
-      - "batch"
+      - batch
     resources:
       - jobs
     verbs:
@@ -63,7 +63,7 @@ rules:
       - patch
       - delete
   - apiGroups:
-      - "apps"
+      - apps
     resources:
       - deployments
       - statefulsets
@@ -75,3 +75,9 @@ rules:
       - update
       - patch
       - delete
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - "*"

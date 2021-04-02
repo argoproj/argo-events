@@ -153,6 +153,10 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Name:  common.EnvVarEventBusSubject,
 			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
 		},
+		{
+			Name:      "POD_NAME",
+			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}},
+		},
 	}
 
 	busConfigBytes, err := json.Marshal(eventBus.Status.Config)
@@ -237,7 +241,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 }
 
 func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
-	replicas := int32(1)
+	replicas := args.Sensor.Spec.GetReplicas()
 	sensorContainer := corev1.Container{
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,

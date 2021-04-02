@@ -8,7 +8,9 @@ import (
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
+	coordinationv1 "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
@@ -252,6 +254,23 @@ func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interf
 		return false, fmt.Errorf("error getting event source pod name: %w", err)
 	}
 	podName := podList.Items[0].GetName()
+	if len(podList.Items) > 1 {
+		// HA
+		var l *coordinationv1.Lease
+		for {
+			l, err = kubeClient.CoordinationV1().Leases(namespace).Get(ctx, "eventsource-"+eventSourceName, metav1.GetOptions{})
+			if err != nil {
+				if !apierrors.IsNotFound(err) {
+					return false, fmt.Errorf("error getting event source Lease information: %w", err)
+				} else if err != nil && apierrors.IsNotFound(err) {
+					time.Sleep(2 * time.Second)
+					continue
+				}
+			}
+			break
+		}
+		podName = *l.Spec.HolderIdentity
+	}
 	fmt.Printf("EventSource POD name: %s\n", podName)
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -265,7 +284,24 @@ func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, 
 		return false, fmt.Errorf("error getting sensor pod name: %w", err)
 	}
 	podName := podList.Items[0].GetName()
-	fmt.Printf("Sensor POD name: %s", podName)
+	if len(podList.Items) > 1 {
+		// HA
+		var l *coordinationv1.Lease
+		for {
+			l, err = kubeClient.CoordinationV1().Leases(namespace).Get(ctx, "sensor-"+sensorName, metav1.GetOptions{})
+			if err != nil {
+				if !apierrors.IsNotFound(err) {
+					return false, fmt.Errorf("error getting sensor Lease information: %w", err)
+				} else if err != nil && apierrors.IsNotFound(err) {
+					time.Sleep(2 * time.Second)
+					continue
+				}
+			}
+			break
+		}
+		podName = *l.Spec.HolderIdentity
+	}
+	fmt.Printf("Sensor POD name: %s\n", podName)
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	return podLogContains(cctx, kubeClient, namespace, podName, regex)

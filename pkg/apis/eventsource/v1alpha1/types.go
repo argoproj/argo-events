@@ -58,8 +58,9 @@ type EventSourceSpec struct {
 	// Service is the specifications of the service to expose the event source
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,3,opt,name=service"`
-	// Replica is the event source deployment replicas
-	Replica *int32 `json:"replica,omitempty" protobuf:"varint,4,opt,name=replica"`
+	// DeprecatedReplica is the event source deployment replicas
+	// Deprecated: use replicas instead, will be removed in v1.5
+	DeprecatedReplica *int32 `json:"replica,omitempty" protobuf:"varint,4,opt,name=replica"`
 
 	// Minio event sources
 	Minio map[string]apicommon.S3Artifact `json:"minio,omitempty" protobuf:"bytes,5,rep,name=minio"`
@@ -109,6 +110,24 @@ type EventSourceSpec struct {
 	Pulsar map[string]PulsarEventSource `json:"pulsar,omitempty" protobuf:"bytes,27,opt,name=pulsar"`
 	// Generic event source
 	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,28,rep,name=generic"`
+	// Replicas is the event source deployment replicas
+	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,29,opt,name=replicas"`
+}
+
+func (e EventSourceSpec) GetReplicas() int32 {
+	if e.Replicas == nil && e.DeprecatedReplica == nil {
+		return 1
+	}
+	replicas := int32(1)
+	if e.Replicas != nil {
+		replicas = *e.Replicas
+	} else {
+		replicas = *e.DeprecatedReplica
+	}
+	if replicas < 1 {
+		replicas = 1
+	}
+	return replicas
 }
 
 // Template holds the information of an EventSource deployment template

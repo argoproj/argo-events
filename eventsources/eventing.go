@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -13,6 +14,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/leaderelection"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -263,20 +268,90 @@ func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *ev
 
 // Start function
 func (e *EventSourceAdaptor) Start(ctx context.Context) error {
-	logger := logging.FromContext(ctx).Desugar()
-	logger.Info("Starting event source server...")
+	log := logging.FromContext(ctx)
+
+	recreateTypes := make(map[apicommon.EventSourceType]bool)
+	for _, esType := range apicommon.RecreateStrategyEventSources {
+		recreateTypes[esType] = true
+	}
+	isRecreatType := false
 	servers := GetEventingServers(e.eventSource, e.metrics)
+	for k := range servers {
+		if _, ok := recreateTypes[k]; ok {
+			isRecreatType = true
+		}
+		// This is based on the presumption that all the events in one
+		// EventSource object use the same type of deployment strategy
+		break
+	}
+	if !isRecreatType || e.eventSource.Spec.GetReplicas() == 1 {
+		return e.run(ctx, servers)
+	}
+
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	restConfig, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get a K8s rest config for the event source %s", e.eventSource.Name)
+	}
+	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
+
+	leaseName := "eventsource-" + e.eventSource.Name
+	lock := &resourcelock.LeaseLock{
+		LeaseMeta: metav1.ObjectMeta{
+			Name:      leaseName,
+			Namespace: e.eventSource.Namespace,
+		},
+		Client: kubeClient.CoordinationV1(),
+		LockConfig: resourcelock.ResourceLockConfig{
+			Identity: e.hostname,
+		},
+	}
+
+	ctx, cancel := context.WithCancel(ctx)
+	leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
+		Lock:            lock,
+		ReleaseOnCancel: true,
+		LeaseDuration:   60 * time.Second,
+		RenewDeadline:   15 * time.Second,
+		RetryPeriod:     5 * time.Second,
+		Callbacks: leaderelection.LeaderCallbacks{
+			OnStartedLeading: func(ctx context.Context) {
+				if err := e.run(ctx, servers); err != nil {
+					log.Errorw("failed to start", zap.Error(err))
+					cancel()
+				}
+			},
+			OnStoppedLeading: func() {
+				log.Infof("leader lost: %s", e.hostname)
+				cancel()
+			},
+			OnNewLeader: func(identity string) {
+				if identity == e.hostname {
+					log.Infof("I am the new leader: %s", identity)
+					return
+				}
+				log.Infof("stand by, new leader elected: %s", identity)
+			},
+		},
+	})
+
+	return nil
+}
+
+func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer) error {
+	logger := logging.FromContext(ctx)
+	logger.Info("Starting event source server...")
 	clientID := generateClientID(e.hostname)
 	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 	if err != nil {
-		logger.Error("failed to get eventbus driver", zap.Error(err))
+		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
 	}
 	if err = common.Connect(&common.DefaultBackoff, func() error {
 		e.eventBusConn, err = driver.Connect()
 		return err
 	}); err != nil {
-		logger.Error("failed to connect to eventbus", zap.Error(err))
+		logger.Errorw("failed to connect to eventbus", zap.Error(err))
 		return err
 	}
 	defer e.eventBusConn.Close()
@@ -302,12 +377,12 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 					clientID := generateClientID(e.hostname)
 					driver, err := eventbus.GetDriver(cctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 					if err != nil {
-						logger.Error("failed to get eventbus driver during reconnection", zap.Error(err))
+						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
 					}
 					e.eventBusConn, err = driver.Connect()
 					if err != nil {
-						logger.Error("failed to reconnect to eventbus", zap.Error(err))
+						logger.Errorw("failed to reconnect to eventbus", zap.Error(err))
 						continue
 					}
 					logger.Info("reconnected to eventbus successfully")
@@ -322,7 +397,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 			// Validation has been done in eventsource-controller, it's harmless to do it again here.
 			err := server.ValidateEventSource(cctx)
 			if err != nil {
-				logger.Error("Validation failed", zap.Error(err), zap.Any(logging.LabelEventName,
+				logger.Errorw("Validation failed", zap.Error(err), zap.Any(logging.LabelEventName,
 					server.GetEventName()), zap.Any(logging.LabelEventSourceType, server.GetEventSourceType()))
 				// Continue starting other event services instead of failing all of them
 				continue
@@ -361,18 +436,18 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 						if err = driver.Publish(e.eventBusConn, eventBody); err != nil {
-							logger.Error("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
+							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							return err
 						}
-						logger.Info("succeeded to publish an event", zap.String(logging.LabelEventName,
+						logger.Infow("succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 						return nil
 					})
 				}); err != nil {
-					logger.Error("failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
+					logger.Errorw("failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
 						s.GetEventSourceType()), zap.Any(logging.LabelEventName, s.GetEventName()), zap.Error(err))
 				}
 			}(server)

@@ -277,14 +277,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 }
 
 func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
-	singleReplica := int32(1)
-	replicas := singleReplica
-	if args.EventSource.Spec.Replica != nil {
-		replicas = *args.EventSource.Spec.Replica
-	}
-	if replicas < singleReplica {
-		replicas = singleReplica
-	}
 	eventSourceContainer := corev1.Container{
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
@@ -309,6 +301,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		podTemplateLabels[k] = v
 	}
 
+	replicas := args.EventSource.Spec.GetReplicas()
 	spec := &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: args.Labels,
@@ -351,8 +344,10 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 			break
 		}
 	}
-	if recreates > 0 {
-		spec.Replicas = &singleReplica
+	if recreates > 0 && replicas == 1 {
+		// For those event types, if there's only 1 replica, use recreate strategy.
+		// If replicas > 1, which means HA is available for them, rolling update strategy
+		// is better.
 		spec.Strategy = appv1.DeploymentStrategy{
 			Type: appv1.RecreateDeploymentStrategyType,
 		}
