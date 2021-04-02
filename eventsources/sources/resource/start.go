@@ -274,13 +274,13 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTim
 		log.Infof("resource name does not match prefix. resource-name: %s, prefix: %s\n", uObj.GetName(), filter.Prefix)
 		return false
 	}
-	created := uObj.GetCreationTimestamp()
-	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		log.Infof("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s\n", created.UTC().String(), filter.CreatedBy.UTC().String())
+	eventTime := getEventTime(uObj, event.Type)
+	if !filter.CreatedBy.IsZero() && eventTime.UTC().After(filter.CreatedBy.UTC()) {
+		log.Infof("Event happened after filter time. event-timestamp: %s, filter-creation-timestamp: %s\n", eventTime.UTC().String(), filter.CreatedBy.UTC().String())
 		return false
 	}
-	if filter.AfterStart && created.UTC().Before(startTime.UTC()) {
-		log.Infof("resource is created before service start time. creation-timestamp: %s, start-timestamp: %s\n", created.UTC().String(), startTime.UTC().String())
+	if filter.AfterStart && eventTime.UTC().Before(startTime.UTC()) {
+		log.Infof("Event happened before service start time. event-timestamp: %s, start-timestamp: %s\n", eventTime.UTC().String(), startTime.UTC().String())
 		return false
 	}
 	if len(filter.Fields) > 0 {
@@ -323,4 +323,27 @@ func filterFields(jsonData []byte, selectors []v1alpha1.Selector, log *zap.Sugar
 		}
 	}
 	return true
+}
+
+func getEventTime(obj *unstructured.Unstructured, eventType v1alpha1.ResourceEventType) metav1.Time {
+	switch eventType {
+	case v1alpha1.ADD:
+		return obj.GetCreationTimestamp()
+	case v1alpha1.DELETE:
+		if obj.GetDeletionTimestamp() != nil {
+			return *obj.GetDeletionTimestamp()
+		} else {
+			return metav1.Now()
+		}
+	case v1alpha1.UPDATE:
+		t := obj.GetCreationTimestamp()
+		for _, f := range obj.GetManagedFields() {
+			if f.Operation == metav1.ManagedFieldsOperationUpdate && f.Time.UTC().After(t.UTC()) {
+				t = *f.Time
+			}
+		}
+		return t
+	default:
+		return obj.GetCreationTimestamp()
+	}
 }
