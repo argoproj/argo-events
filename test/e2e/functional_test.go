@@ -159,6 +159,30 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Contains("argo_events_action_failed_total")
 }
 
+func (s *FunctionalSuite) TestResourceEventSource() {
+	w1 := s.Given().EventSource("@testdata/es-resource.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Exec("kubectl", []string{"-n", fixtures.Namespace, "run", "test-pod", "--image", "hello-world", "-l", fixtures.Label + "=" + fixtures.LabelValue}, fixtures.OutputRegexp(`pod/.* created`))
+
+	t1 := w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	t2 := s.Given().Sensor("@testdata/sensor-resource.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted)
+
+	w1.Exec("kubectl", []string{"-n", fixtures.Namespace, "delete", "pod", "test-pod"}, fixtures.OutputRegexp(`pod "test-pod" deleted`))
+
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful)
+}
+
 func TestFunctionalSuite(t *testing.T) {
 	suite.Run(t, new(FunctionalSuite))
 }
