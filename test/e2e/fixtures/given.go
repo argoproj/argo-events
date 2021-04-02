@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -126,5 +127,14 @@ func (g *Given) When() *When {
 		sensor:            g.sensor,
 		restConfig:        g.restConfig,
 		kubeClient:        g.kubeClient,
+	}
+}
+
+var OutputRegexp = func(rx string) func(t *testing.T, output string, err error) {
+	return func(t *testing.T, output string, err error) {
+		t.Helper()
+		if assert.NoError(t, err, output) {
+			assert.Regexp(t, rx, output)
+		}
 	}
 }
