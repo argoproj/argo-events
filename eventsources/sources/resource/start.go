@@ -275,12 +275,13 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTim
 		return false
 	}
 	eventTime := getEventTime(uObj, event.Type)
-	if !filter.CreatedBy.IsZero() && eventTime.UTC().After(filter.CreatedBy.UTC()) {
-		log.Infof("Event happened after filter time. event-timestamp: %s, filter-creation-timestamp: %s\n", eventTime.UTC().String(), filter.CreatedBy.UTC().String())
-		return false
-	}
 	if filter.AfterStart && eventTime.UTC().Before(startTime.UTC()) {
 		log.Infof("Event happened before service start time. event-timestamp: %s, start-timestamp: %s\n", eventTime.UTC().String(), startTime.UTC().String())
+		return false
+	}
+	created := uObj.GetCreationTimestamp()
+	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
+		log.Infof("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s\n", created.UTC().String(), filter.CreatedBy.UTC().String())
 		return false
 	}
 	if len(filter.Fields) > 0 {
