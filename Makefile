@@ -14,7 +14,7 @@ GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ;
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
 VERSION?=latest
-BASE_VERSION?=latest
+BASE_VERSION:=latest
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -271,6 +271,6 @@ update-manifests-version:
 	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
 	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
-	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' | sed 's/^BASE_VERSION?=.*/BASE_VERSION?=$(VERSION)/' > /tmp/ae_makefile
+	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' | sed 's/^BASE_VERSION:=.*/BASE_VERSION:=$(VERSION)/' > /tmp/ae_makefile
 	mv /tmp/ae_makefile Makefile
 
