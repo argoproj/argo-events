@@ -41,7 +41,7 @@ func main() {
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
-		logger.Desugar().Fatal("failed to get kubeconfig", zap.Error(err))
+		logger.Fatalw("failed to get kubeconfig", zap.Error(err))
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	encodedSensorSpec, defined := os.LookupEnv(common.EnvVarSensorObject)
@@ -50,11 +50,11 @@ func main() {
 	}
 	sensorSpec, err := base64.StdEncoding.DecodeString(encodedSensorSpec)
 	if err != nil {
-		logger.Desugar().Fatal("failed to decode sensor string", zap.Error(err))
+		logger.Fatalw("failed to decode sensor string", zap.Error(err))
 	}
 	sensor := &v1alpha1.Sensor{}
 	if err = json.Unmarshal(sensorSpec, sensor); err != nil {
-		logger.Desugar().Fatal("failed to unmarshal sensor object", zap.Error(err))
+		logger.Fatalw("failed to unmarshal sensor object", zap.Error(err))
 	}
 
 	busConfig := &eventbusv1alpha1.BusConfig{}
@@ -62,10 +62,10 @@ func main() {
 	if len(encodedBusConfigSpec) > 0 {
 		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)
 		if err != nil {
-			logger.Desugar().Fatal("failed to decode bus config string", zap.Error(err))
+			logger.Fatalw("failed to decode bus config string", zap.Error(err))
 		}
 		if err = json.Unmarshal(busConfigSpec, busConfig); err != nil {
-			logger.Desugar().Fatal("failed to unmarshal bus config object", zap.Error(err))
+			logger.Fatalw("failed to unmarshal bus config object", zap.Error(err))
 		}
 	}
 
