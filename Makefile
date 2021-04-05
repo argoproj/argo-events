@@ -14,6 +14,7 @@ GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ;
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
 VERSION?=v1.3.0-rc3
+BASE_VERSION:=v1.3.0-rc3
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -210,7 +211,7 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 .PHONY: start
 start: all-images
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kustomize build test/manifests | sed 's@argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:latest/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
+	kustomize build test/manifests | sed 's@argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
@@ -270,6 +271,6 @@ update-manifests-version:
 	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
 	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
-	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' > /tmp/ae_makefile
+	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' | sed 's/^BASE_VERSION:=.*/BASE_VERSION:=$(VERSION)/' > /tmp/ae_makefile
 	mv /tmp/ae_makefile Makefile
 
