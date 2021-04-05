@@ -1388,6 +1388,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replicas is the sensor deployment replicas",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},

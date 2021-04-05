@@ -391,8 +391,8 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 		*out = new(Service)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Replica != nil {
-		in, out := &in.Replica, &out.Replica
+	if in.DeprecatedReplica != nil {
+		in, out := &in.DeprecatedReplica, &out.DeprecatedReplica
 		*out = new(int32)
 		**out = **in
 	}
@@ -563,6 +563,11 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 		for key, val := range *in {
 			(*out)[key] = *val.DeepCopy()
 		}
+	}
+	if in.Replicas != nil {
+		in, out := &in.Replicas, &out.Replicas
+		*out = new(int32)
+		**out = **in
 	}
 	return
 }

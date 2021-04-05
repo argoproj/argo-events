@@ -955,7 +955,12 @@
           }
         },
         "replica": {
-          "description": "Replica is the event source deployment replicas",
+          "description": "DeprecatedReplica is the event source deployment replicas Deprecated: use replicas instead, will be removed in v1.5",
+          "type": "integer",
+          "format": "int32"
+        },
+        "replicas": {
+          "description": "Replicas is the event source deployment replicas",
           "type": "integer",
           "format": "int32"
         },
@@ -2918,6 +2923,11 @@
         "eventBusName": {
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
+        },
+        "replicas": {
+          "description": "Replicas is the sensor deployment replicas",
+          "type": "integer",
+          "format": "int32"
         },
         "template": {
           "description": "Template is the pod specification for the sensor",

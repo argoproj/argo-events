@@ -31,6 +31,8 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/leaderelection"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -53,7 +55,7 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 
 func (sensorCtx *SensorContext) getGroupAndClientID(depExpression string) (string, string) {
 	// Generate clientID with hash code
-	hashKey := fmt.Sprintf("%s-%s", sensorCtx.Sensor.Name, depExpression)
+	hashKey := fmt.Sprintf("%s-%s", sensorCtx.sensor.Name, depExpression)
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	hashVal := common.Hasher(hashKey)
@@ -62,10 +64,59 @@ func (sensorCtx *SensorContext) getGroupAndClientID(depExpression string) (strin
 	return group, clientID
 }
 
-// ListenEvents watches and handles events received from the gateway.
-func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
+func (sensorCtx *SensorContext) Start(ctx context.Context) error {
+	if sensorCtx.sensor.Spec.GetReplicas() == 1 {
+		return sensorCtx.listenEvents(ctx)
+	}
+
+	leaseName := "sensor-" + sensorCtx.sensor.Name
+	lock := &resourcelock.LeaseLock{
+		LeaseMeta: metav1.ObjectMeta{
+			Name:      leaseName,
+			Namespace: sensorCtx.sensor.Namespace,
+		},
+		Client: sensorCtx.kubeClient.CoordinationV1(),
+		LockConfig: resourcelock.ResourceLockConfig{
+			Identity: sensorCtx.hostname,
+		},
+	}
+
+	log := logging.FromContext(ctx)
+	ctx, cancel := context.WithCancel(ctx)
+	leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
+		Lock:            lock,
+		ReleaseOnCancel: true,
+		LeaseDuration:   60 * time.Second,
+		RenewDeadline:   15 * time.Second,
+		RetryPeriod:     5 * time.Second,
+		Callbacks: leaderelection.LeaderCallbacks{
+			OnStartedLeading: func(ctx context.Context) {
+				if err := sensorCtx.listenEvents(ctx); err != nil {
+					log.Errorw("failed to start", zap.Error(err))
+					cancel()
+				}
+			},
+			OnStoppedLeading: func() {
+				log.Infof("leader lost: %s", sensorCtx.hostname)
+				cancel()
+			},
+			OnNewLeader: func(identity string) {
+				if identity == sensorCtx.hostname {
+					log.Infof("I am the new leader: %s", identity)
+					return
+				}
+				log.Infof("stand by, new leader elected: %s", identity)
+			},
+		},
+	})
+
+	return nil
+}
+
+// listenEvents watches and handles events received from the gateway.
+func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
-	sensor := sensorCtx.Sensor
+	sensor := sensorCtx.sensor
 	// Get a mapping of dependencyExpression: []triggers
 	triggerMapping := make(map[string][]v1alpha1.Trigger)
 	for _, trigger := range sensor.Spec.Triggers {
@@ -117,7 +168,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 			}
 
 			group, clientID := sensorCtx.getGroupAndClientID(depExpression)
-			ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
+			ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
 			if err != nil {
 				logger.Errorw("failed to get eventbus driver", zap.Error(err))
 				return
@@ -198,7 +249,7 @@ func (sensorCtx *SensorContext) ListenEvents(ctx context.Context) error {
 						logger.Info("NATS connection lost, reconnecting...")
 						// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 						_, clientID := sensorCtx.getGroupAndClientID(depExpression)
-						ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.EventBusConfig, sensorCtx.EventBusSubject, clientID)
+						ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
 						if err != nil {
 							logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 							continue
@@ -246,7 +297,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 	for _, trigger := range triggers {
 		if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, eventIDs, log); err != nil {
 			// Log the error, and let it continue
-			log.Errorw("failed to trigger action", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
+			log.Errorw("failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
 				zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		} else {
@@ -344,7 +395,7 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 		return newExpr, nil
 	}
 
-	sensor := sensorCtx.Sensor
+	sensor := sensorCtx.sensor
 	var depExpression string
 	var err error
 	switch {

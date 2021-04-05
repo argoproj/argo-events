@@ -1887,6 +1887,16 @@ removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>replicas</code></br> <em> int32 </em>
+</td>
+<td>
+<p>
+Replicas is the sensor deployment replicas
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2004,6 +2014,16 @@ EventBusName references to a EventBus name. By default the value is
 <p>
 Circuit is a boolean expression of dependency groups Deprecated: will be
 removed in v1.5, use Switch in triggers instead.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code></br> <em> int32 </em>
+</td>
+<td>
+<p>
+Replicas is the sensor deployment replicas
 </p>
 </td>
 </tr>
