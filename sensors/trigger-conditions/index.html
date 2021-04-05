@@ -36,7 +36,7 @@
     
     
       
-        <title>Azure Event Hubs - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Trigger Conditions - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -127,7 +127,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#azure-event-hubs" tabindex="1" class="md-skip">
+      <a href="#trigger-conditions" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -152,7 +152,7 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              Azure Event Hubs
+              Trigger Conditions
             </span>
           
         </div>
@@ -809,18 +809,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../../eventsources/deployment-strategies/" title="EventSource Deployment Strategies" class="md-nav__link">
-      EventSource Deployment Strategies
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../../eventsources/multiple-events/" title="EventSource With Multiple Events" class="md-nav__link">
       EventSource With Multiple Events
     </a>
@@ -847,6 +835,18 @@
   <li class="md-nav__item">
     <a href="../../eventsources/services/" title="EventSource Services" class="md-nav__link">
       EventSource Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../eventsources/ha/" title="EventSource High Availability" class="md-nav__link">
+      EventSource High Availability
     </a>
   </li>
 
@@ -920,10 +920,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
     
     <label class="md-nav__link" for="nav-7">
       Sensors
@@ -960,7 +962,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
+    <a href="../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
       Argo Workflow Trigger
     </a>
   </li>
@@ -972,7 +974,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../aws-lambda/" title="AWS Lambda" class="md-nav__link">
+    <a href="../triggers/aws-lambda/" title="AWS Lambda" class="md-nav__link">
       AWS Lambda
     </a>
   </li>
@@ -984,7 +986,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../http-trigger/" title="HTTP Trigger" class="md-nav__link">
+    <a href="../triggers/http-trigger/" title="HTTP Trigger" class="md-nav__link">
       HTTP Trigger
     </a>
   </li>
@@ -996,7 +998,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../nats-trigger/" title="NATS Trigger" class="md-nav__link">
+    <a href="../triggers/nats-trigger/" title="NATS Trigger" class="md-nav__link">
       NATS Trigger
     </a>
   </li>
@@ -1008,7 +1010,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../kafka-trigger/" title="Kafka Trigger" class="md-nav__link">
+    <a href="../triggers/kafka-trigger/" title="Kafka Trigger" class="md-nav__link">
       Kafka Trigger
     </a>
   </li>
@@ -1020,7 +1022,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
+    <a href="../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
     </a>
   </li>
@@ -1032,7 +1034,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../log/" title="Log" class="md-nav__link">
+    <a href="../triggers/log/" title="Log" class="md-nav__link">
       Log
     </a>
   </li>
@@ -1044,7 +1046,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+    <a href="../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
       OpenWhisk Trigger
     </a>
   </li>
@@ -1056,7 +1058,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../slack-trigger/" title="Slack Trigger" class="md-nav__link">
+    <a href="../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
       Slack Trigger
     </a>
   </li>
@@ -1068,7 +1070,19 @@
 
 
   <li class="md-nav__item">
-    <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
+    <a href="../triggers/azure-event-hubs/" title="Azure Event Hubs" class="md-nav__link">
+      Azure Event Hubs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
       Build Your Own Trigger
     </a>
   </li>
@@ -1083,10 +1097,60 @@
           
           
 
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Trigger Conditions
+      </label>
+    
+    <a href="./" title="Trigger Conditions" class="md-nav__link md-nav__link--active">
+      Trigger Conditions
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#triggers-without-conditions" title="Triggers Without Conditions" class="md-nav__link">
+    Triggers Without Conditions
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
 
   <li class="md-nav__item">
-    <a href="../../trigger-conditions/" title="Trigger Conditions" class="md-nav__link">
-      Trigger Conditions
+    <a href="../ha/" title="Sensor High Availability" class="md-nav__link">
+      Sensor High Availability
     </a>
   </li>
 
@@ -1097,7 +1161,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../more-about-sensors-and-triggers/" title="More Information" class="md-nav__link">
+    <a href="../more-about-sensors-and-triggers/" title="More Information" class="md-nav__link">
       More Information
     </a>
   </li>
@@ -1261,15 +1325,8 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#specification" title="Specification" class="md-nav__link">
-    Specification
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#send-an-event-to-azure-event-hubs" title="Send an Event to Azure Event Hubs" class="md-nav__link">
-    Send an Event to Azure Event Hubs
+  <a href="#triggers-without-conditions" title="Triggers Without Conditions" class="md-nav__link">
+    Triggers Without Conditions
   </a>
   
 </li>
@@ -1290,110 +1347,62 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/triggers/azure-event-hubs.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/sensors/trigger-conditions.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="azure-event-hubs">Azure Event Hubs<a class="headerlink" href="#azure-event-hubs" title="Permanent link">&para;</a></h1>
-<p>Azure Event Hubs Trigger allows a sensor to publish events to <a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about">Azure Event Hubs</a>. Argo Events integrates with Azure Event Hubs to stream data from an <code>EventSource</code></p>
-<p><strong>NOTE:</strong> Parametrization for <code>fqdn</code> and <code>hubName</code> values are not yet supported.</p>
-<h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>The Azure Event Hubs trigger specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#azureeventhubstrigger">here</a>.</p>
-<h2 id="send-an-event-to-azure-event-hubs">Send an Event to Azure Event Hubs<a class="headerlink" href="#send-an-event-to-azure-event-hubs" title="Permanent link">&para;</a></h2>
-<ol>
-<li>
-<p>Make sure to have the eventbus deployed in the namespace.</p>
-</li>
-<li>
-<p><a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create">Create an event hub</a></p>
-</li>
-<li>
-<p>Make sure that the Shared Access Key used to connect to Azure Event Hubs has the <code>Send</code> policy.</p>
-</li>
-<li>
-<p>Get the <code>Primary Key</code> of the Shared Access Policy, the <code>Name</code> of the Shared Access Policy, the <code>Hub Name</code>, and the <code>FQDN</code> of the Azure Event Hubs Namespace</p>
-</li>
-<li>
-<p>Create a secret called <code>azure-event-hubs-secret</code> as follows:</p>
-<p><strong>NOTE: <code>sharedAccessKey</code> refers to the <code>Primary Key</code> and <code>sharedAccessKeyName</code> refers to the Name of the Shared Access Policy.</strong></p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span>
-<span class="n">type</span><span class="o">:</span> <span class="n">Opaque</span>
-<span class="n">data</span><span class="o">:</span>
-  <span class="n">sharedAccessKey</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">shared</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
-  <span class="n">sharedAccessKeyName</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">shared</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+                <h1 id="trigger-conditions">Trigger Conditions<a class="headerlink" href="#trigger-conditions" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>v1.0 and after</p>
+</blockquote>
+<p><code>Conditions</code> is a new feature to replace <code>Circuit</code> and <code>Switch</code>. With
+<code>conditions</code>, triggers can be executed based on different dependency conditions.</p>
+<p>An example with <code>conditions</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Sensor</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">dependencies</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep01</span>
+      <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-a</span>
+      <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example01</span>
+    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep02</span>
+      <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-a</span>
+      <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example02</span>
+  <span class=" -Error"> </span><span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep03</span>
+      <span class="l l-Scalar l-Scalar-Plain">eventSourceName</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-b</span>
+      <span class="l l-Scalar l-Scalar-Plain">eventName</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">example03</span>
+  <span class="nt">triggers</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
+        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;dep02&quot;</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger01</span>
+        <span class="nt">http</span><span class="p">:</span>
+          <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello1</span>
+          <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GET</span>
+    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
+        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;dep02</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger02</span>
+        <span class="nt">http</span><span class="p">:</span>
+          <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello2</span>
+          <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GET</span>
+    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
+        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;(dep01</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">dep02)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger03</span>
+        <span class="nt">http</span><span class="p">:</span>
+          <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello3</span>
+          <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GET</span>
 </code></pre></div>
 
-</li>
-<li>
-<p>Let's set up a webhook event-source to process incoming requests.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-</code></pre></div>
-
-</li>
-<li>
-<p>Create the sensor with the following template. Replace the necessary values for <code>fqdn</code> and <code>hubName</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="p">:</span>
-  <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">hub</span>
-<span class="n">spec</span><span class="p">:</span>
-  <span class="n">dependencies</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">webhook</span>
-      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
-      <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">eventhubs</span><span class="o">-</span><span class="n">trigger</span>
-      <span class="n">azureEventHubs</span><span class="p">:</span>
-      <span class="c1"># FQDN of the EventsHub namespace you created</span>
-      <span class="c1"># More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string</span>
-        <span class="n">fqdn</span><span class="p">:</span> <span class="n">eventhubs_fqdn</span>
-        <span class="n">sharedAccessKeyName</span><span class="p">:</span>
-          <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span>
-          <span class="n">key</span><span class="p">:</span> <span class="n">sharedAccessKeyName</span>
-        <span class="n">sharedAccessKey</span><span class="p">:</span>
-          <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span>
-          <span class="n">key</span><span class="p">:</span> <span class="n">sharedAccessKey</span>
-        <span class="c1"># Event Hub path/name</span>
-        <span class="n">hubName</span><span class="p">:</span> <span class="n">hub_name</span>
-        <span class="n">payload</span><span class="p">:</span>
-          <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-              <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-              <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">message</span>
-            <span class="n">dest</span><span class="p">:</span> <span class="n">message</span>
-</code></pre></div>
-
-</li>
-<li>
-<p>The Event needs a body. In order to construct a messaged based on your event data, the Azure Event Hubs sensor has the <code>payload</code> field as part of the trigger.</p>
-<p>The <code>payload</code> contains the list of <code>src</code> which refers to the source events and <code>dest</code> which refers to destination key within the resulting request payload.</p>
-</li>
-</ol>
-<p>The <code>payload</code> declared above will generate a message body like below,</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;message&quot;: &quot;some message here&quot; // name/key of the object
-    }
-</code></pre></div>
-
-<ol>
-<li>
-<p>Let's expose the webhook event-source pod using <code>port-forward</code> so that we can make a request to it.</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000
-</code></pre></div>
-
-</li>
-<li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</code></pre></div>
-
-</li>
-<li>
-<p>Verify Events have been in ingested in Azure Events Hub by creating a <a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-go-get-started-send#receive-events">listener app</a> or following other <a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-samples">code samples</a>. You can optionally create an <a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/azure-event-hubs-sensor.yaml">Azure Event Hubs Event Source</a>.</p>
-</li>
-</ol>
+<p><code>Conditions</code> is a boolean expression contains dependency names, the trigger
+won't be executed until the expression resolves to true. The operators in
+<code>conditions</code> include:</p>
+<ul>
+<li><code>&amp;&amp;</code></li>
+<li><code>||</code></li>
+</ul>
+<h2 id="triggers-without-conditions">Triggers Without Conditions<a class="headerlink" href="#triggers-without-conditions" title="Permanent link">&para;</a></h2>
+<p>If <code>conditions</code> is missing, the default conditions to execute the trigger is
+<code>&amp;&amp;</code> logic of all the defined dependencies.</p>
                 
                   
                 
@@ -1410,6 +1419,41 @@
       
         
 <footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Build Your Own Trigger
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../ha/" title="Sensor High Availability" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Sensor High Availability
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
