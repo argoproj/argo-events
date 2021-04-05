@@ -368,7 +368,7 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 }
 
 func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, trigger v1alpha1.Trigger) (string, error) {
-	logger := logging.FromContext(ctx).Desugar()
+	logger := logging.FromContext(ctx)
 
 	// Translate original expression which might contain group names
 	// to an expression only contains dependency names
@@ -381,12 +381,12 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 
 		program, err := expr.Compile(originalExpr, expr.Env(parameters))
 		if err != nil {
-			logger.Error("Failed to compile original dependency expression", zap.Error(err))
+			logger.Errorw("Failed to compile original dependency expression", zap.Error(err))
 			return "", err
 		}
 		result, err := expr.Run(program, parameters)
 		if err != nil {
-			logger.Error("Failed to parse original dependency expression", zap.Error(err))
+			logger.Errorw("Failed to parse original dependency expression", zap.Error(err))
 			return "", err
 		}
 		newExpr := fmt.Sprintf("%v", result)
@@ -445,14 +445,14 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 		}
 		depExpression = strings.Join(deps, "&&")
 	}
-	logger.Sugar().Infof("Dependency expression for trigger %s before simplification: %s", trigger.Template.Name, depExpression)
+	logger.Infof("Dependency expression for trigger %s before simplification: %s", trigger.Template.Name, depExpression)
 	boolSimplifier, err := common.NewBoolExpression(depExpression)
 	if err != nil {
-		logger.Error("Invalid dependency expression", zap.Error(err))
+		logger.Errorw("Invalid dependency expression", zap.Error(err))
 		return "", err
 	}
 	result := boolSimplifier.GetExpression()
-	logger.Sugar().Infof("Dependency expression for trigger %s after simplification: %s", trigger.Template.Name, result)
+	logger.Infof("Dependency expression for trigger %s after simplification: %s", trigger.Template.Name, result)
 	return result, nil
 }
 
