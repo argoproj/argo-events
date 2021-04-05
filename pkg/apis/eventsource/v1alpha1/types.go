@@ -118,7 +118,7 @@ func (e EventSourceSpec) GetReplicas() int32 {
 	if e.Replicas == nil && e.DeprecatedReplica == nil {
 		return 1
 	}
-	replicas := int32(1)
+	var replicas int32
 	if e.Replicas != nil {
 		replicas = *e.Replicas
 	} else {

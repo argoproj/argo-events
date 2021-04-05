@@ -66,9 +66,9 @@ spec:
 
 However, there are some rules need to follow to do it:
 
-- EventSource types with HA strategy `Active-Active` can not be mixed with types
-  with `Active-Passive` strategy, see [EventSource High Availability](ha.md) for
-  the detail of HA strategies.
+- EventSource types with `Active-Active` HA strategy can not be mixed with types
+  with `Active-Passive` strategy, for EventSource types, see
+  [EventSource High Availability](ha.md) for the detail.
 
 - Event Name (i.e. `webhook-example` and `sns-example` above, refer to
   [EventSource Names](naming.md)) needs to be unique in the EventSource, same
