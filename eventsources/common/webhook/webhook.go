@@ -102,19 +102,19 @@ func startServer(router Router, controller *Controller) {
 				}
 				err = server.ListenAndServeTLS(certPath, keyPath)
 				if err != nil {
-					route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve with TLS configured", zap.Error(err))
+					route.Logger.With("port", route.Context.Port).Errorw("failed to listen and serve with TLS configured", zap.Error(err))
 				}
 			case route.Context.DeprecatedServerCertPath != "" && route.Context.DeprecatedServerKeyPath != "":
 				// DEPRECATED.
 				route.Logger.Warn("ServerCertPath and ServerKeyPath are deprecated, please use ServerCertSecret and ServerKeySecret")
 				err := server.ListenAndServeTLS(route.Context.DeprecatedServerCertPath, route.Context.DeprecatedServerKeyPath)
 				if err != nil {
-					route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve with TLS configured", zap.Error(err))
+					route.Logger.With("port", route.Context.Port).Errorw("failed to listen and serve with TLS configured", zap.Error(err))
 				}
 			default:
 				err := server.ListenAndServe()
 				if err != nil {
-					route.Logger.With("port", route.Context.Port).Desugar().Error("failed to listen and serve", zap.Error(err))
+					route.Logger.With("port", route.Context.Port).Errorw("failed to listen and serve", zap.Error(err))
 				}
 			}
 		}()
@@ -182,13 +182,13 @@ func activateRoute(router Router, controller *Controller) {
 // manageRouteChannels consumes data from route's data channel and stops the processing when the event source is stopped/removed
 func manageRouteChannels(router Router, dispatch func([]byte) error) {
 	route := router.GetRoute()
-	logger := route.Logger.Desugar()
+	logger := route.Logger
 	for {
 		select {
 		case data := <-route.DataCh:
 			logger.Info("new event received, dispatching it...")
 			if err := dispatch(data); err != nil {
-				logger.Error("failed to send event", zap.Error(err))
+				logger.Errorw("failed to send event", zap.Error(err))
 				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				continue
 			}
@@ -204,7 +204,7 @@ func manageRouteChannels(router Router, dispatch func([]byte) error) {
 func ManageRoute(ctx context.Context, router Router, controller *Controller, dispatch func([]byte) error) error {
 	route := router.GetRoute()
 
-	logger := route.Logger.Desugar()
+	logger := route.Logger
 
 	// in order to process a route, it needs to go through
 	// 1. validation - basic configuration checks
@@ -231,7 +231,7 @@ func ManageRoute(ctx context.Context, router Router, controller *Controller, dis
 
 	logger.Info("running operations post route activation...")
 	if err := router.PostActivate(); err != nil {
-		logger.Error("error occurred while performing post route activation operations", zap.Error(err))
+		logger.Errorw("error occurred while performing post route activation operations", zap.Error(err))
 		return err
 	}
 
@@ -243,7 +243,7 @@ func ManageRoute(ctx context.Context, router Router, controller *Controller, dis
 
 	logger.Info("running operations post route inactivation...")
 	if err := router.PostInactivate(); err != nil {
-		logger.Error("error occurred while running operations post route inactivation", zap.Error(err))
+		logger.Errorw("error occurred while running operations post route inactivation", zap.Error(err))
 	}
 
 	return nil
