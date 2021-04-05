@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/argoproj/argo-events/test/e2e/fixtures"
 	"github.com/gavv/httpexpect/v2"
@@ -21,7 +22,7 @@ const (
 	LogSensorStarted           = "Sensor started."
 	LogPublishEventSuccessful  = "succeeded to publish an event"
 	LogTriggerActionSuccessful = "successfully processed the trigger"
-	LogTriggerActionFailed     = "failed to trigger action"
+	LogTriggerActionFailed     = "failed to execute a trigger"
 )
 
 func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
@@ -58,8 +59,26 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		ExpectSensorPodLogContains(LogTriggerActionSuccessful)
 }
 
+func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
+	s.Given().EventSource("@testdata/es-calendar-ha.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Wait(3 * time.Second).
+		Then().
+		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+
+	s.Given().Sensor("@testdata/sensor-log-ha.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Wait(3 * time.Second).
+		Then().
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful)
+}
+
 func (s *FunctionalSuite) TestMetricsWithCalendar() {
-	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
+	t1 := s.Given().EventSource("@testdata/es-calendar-metrics.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -80,7 +99,7 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		Contains("argo_events_events_sent_total").
 		Contains("argo_events_event_processing_duration_milliseconds")
 
-	t2 := s.Given().Sensor("@testdata/sensor-log.yaml").
+	t2 := s.Given().Sensor("@testdata/sensor-log-metrics.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -99,7 +118,6 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		Body().
 		Contains("argo_events_action_triggered_total").
 		Contains("argo_events_action_duration_milliseconds")
-
 }
 
 func (s *FunctionalSuite) TestMetricsWithWebhook() {

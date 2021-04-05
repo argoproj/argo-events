@@ -1,6 +1,7 @@
 # Trigger
 
-A Trigger is the resource/workload executed by the sensor once the event dependencies are resolved. 
+A Trigger is the resource/workload executed by the sensor once the event
+dependencies are resolved.
 
 ## Trigger Types
 
@@ -8,11 +9,11 @@ A Trigger is the resource/workload executed by the sensor once the event depende
 1. Apache OpenWhisk
 1. Argo Rollouts
 1. Argo Workflows
-1. Custom - Build Your Own 
+1. Custom - Build Your Own
 1. HTTP Requests - Serverless Workloads (OpenFaas, Kubeless, KNative etc.)
 1. Kafka Messages
-1. Log Message - for debugging
 1. NATS Messages
 1. Slack Notifications
+1. Azure Event Hubs Messages
 1. Create any Kubernetes Objects
 1. Log (for debugging event bus messages)

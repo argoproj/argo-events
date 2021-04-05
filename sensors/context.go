@@ -36,16 +36,18 @@ import (
 
 // SensorContext contains execution context for Sensor
 type SensorContext struct {
-	// KubeClient is the kubernetes client
-	KubeClient kubernetes.Interface
-	// ClientPool manages a pool of dynamic clients.
-	DynamicClient dynamic.Interface
+	// kubeClient is the kubernetes client
+	kubeClient kubernetes.Interface
+	// dynamic clients.
+	dynamicClient dynamic.Interface
 	// Sensor object
-	Sensor *v1alpha1.Sensor
+	sensor *v1alpha1.Sensor
 	// EventBus config
-	EventBusConfig *eventbusv1alpha1.BusConfig
+	eventBusConfig *eventbusv1alpha1.BusConfig
 	// EventBus subject
-	EventBusSubject string
+	eventBusSubject string
+	hostname        string
+
 	// httpClients holds the reference to HTTP clients for HTTP triggers.
 	httpClients map[string]*http.Client
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
@@ -66,13 +68,14 @@ type SensorContext struct {
 }
 
 // NewSensorContext returns a new sensor execution context.
-func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject string, metrics *sensormetrics.Metrics) *SensorContext {
+func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics) *SensorContext {
 	return &SensorContext{
-		KubeClient:           kubeClient,
-		DynamicClient:        dynamicClient,
-		Sensor:               sensor,
-		EventBusConfig:       eventBusConfig,
-		EventBusSubject:      eventBusSubject,
+		kubeClient:           kubeClient,
+		dynamicClient:        dynamicClient,
+		sensor:               sensor,
+		eventBusConfig:       eventBusConfig,
+		eventBusSubject:      eventBusSubject,
+		hostname:             hostname,
 		httpClients:          make(map[string]*http.Client),
 		customTriggerClients: make(map[string]*grpc.ClientConn),
 		slackHTTPClient: &http.Client{

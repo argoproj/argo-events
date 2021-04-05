@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
+	argoevents "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/metrics"
@@ -73,14 +74,21 @@ func main() {
 		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarEventBusSubject)
 	}
 
+	hostname, defined := os.LookupEnv("POD_NAME")
+	if !defined {
+		logger.Fatal("required environment variable 'POD_NAME' not defined")
+	}
+
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
 	logger = logger.With("sensorName", sensor.Name)
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
 	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
-	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, m)
-	if err := sensorExecutionCtx.ListenEvents(ctx); err != nil {
-		logger.Desugar().Fatal("failed to listen to events", zap.Error(err))
+
+	logger.Infow("starting sensor server", "version", argoevents.GetVersion())
+	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, hostname, m)
+	if err := sensorExecutionCtx.Start(ctx); err != nil {
+		logger.Fatalw("failed to listen to events", zap.Error(err))
 	}
 }

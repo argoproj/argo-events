@@ -1016,7 +1016,8 @@ Service is the specifications of the service to expose the event source
 </td>
 <td>
 <p>
-Replica is the event source deployment replicas
+DeprecatedReplica is the event source deployment replicas Deprecated:
+use replicas instead, will be removed in v1.5
 </p>
 </td>
 </tr>
@@ -1328,6 +1329,16 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Gener
 <td>
 <p>
 Generic event source
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code></br> <em> int32 </em>
+</td>
+<td>
+<p>
+Replicas is the event source deployment replicas
 </p>
 </td>
 </tr>
@@ -1411,7 +1422,8 @@ Service is the specifications of the service to expose the event source
 </td>
 <td>
 <p>
-Replica is the event source deployment replicas
+DeprecatedReplica is the event source deployment replicas Deprecated:
+use replicas instead, will be removed in v1.5
 </p>
 </td>
 </tr>
@@ -1723,6 +1735,16 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Gener
 <td>
 <p>
 Generic event source
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code></br> <em> int32 </em>
+</td>
+<td>
+<p>
+Replicas is the event source deployment replicas
 </p>
 </td>
 </tr>
