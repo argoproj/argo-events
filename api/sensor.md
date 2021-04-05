@@ -303,6 +303,106 @@ Resource is generic template for K8s resource
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.AzureEventHubsTrigger">
+AzureEventHubsTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+<p>
+AzureEventHubsTrigger refers to specification of the Azure Event Hubs
+Trigger
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>fqdn</code></br> <em> string </em>
+</td>
+<td>
+<p>
+FQDN refers to the namespace dns of Azure Event Hubs to be used
+i.e. <namespace>.servicebus.windows.net
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hubName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+HubName refers to the Azure Event Hub to send events to
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sharedAccessKeyName</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+SharedAccessKeyName refers to the name of the Shared Access Key
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sharedAccessKey</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+SharedAccessKey refers to a K8s secret containing the primary key for
+the
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.Comparator">
 Comparator (<code>string</code> alias)
 </p>
@@ -506,6 +606,22 @@ strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 Comparator compares the event data with a user given value. Can be
 “&gt;=”, “&gt;”, “=”, “!=”, “&lt;”, or “&lt;=”. Is optional, and if left
 blank treated as equality “=”.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>template</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Template is a go-template for extracting a string from the event’s data.
+A Template is evaluated with provided path, type and value. The
+templating follows the standard go-template syntax as well as sprig’s
+extra functions. See
+<a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
+and
+<a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>
 </p>
 </td>
 </tr>
@@ -1771,6 +1887,16 @@ removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>replicas</code></br> <em> int32 </em>
+</td>
+<td>
+<p>
+Replicas is the sensor deployment replicas
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1888,6 +2014,16 @@ EventBusName references to a EventBus name. By default the value is
 <p>
 Circuit is a boolean expression of dependency groups Deprecated: will be
 removed in v1.5, use Switch in triggers instead.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code></br> <em> int32 </em>
+</td>
+<td>
+<p>
+Replicas is the sensor deployment replicas
 </p>
 </td>
 </tr>
@@ -2450,6 +2586,7 @@ TriggerParameter
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.AWSLambdaTrigger">AWSLambdaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
+<a href="#argoproj.io/v1alpha1.AzureEventHubsTrigger">AzureEventHubsTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
@@ -2931,6 +3068,20 @@ Log refers to the trigger designed to invoke log the event.
 <p>
 DeprecatedSwitch is the condition to execute the trigger. Deprecated:
 will be removed in v1.5, use conditions instead
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureEventHubs</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureEventHubsTrigger">
+AzureEventHubsTrigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AzureEventHubs refers to the trigger send an event to an Azure Event
+Hub.
 </p>
 </td>
 </tr>

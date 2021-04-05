@@ -955,7 +955,12 @@
           }
         },
         "replica": {
-          "description": "Replica is the event source deployment replicas",
+          "description": "DeprecatedReplica is the event source deployment replicas Deprecated: use replicas instead, will be removed in v1.5",
+          "type": "integer",
+          "format": "int32"
+        },
+        "replicas": {
+          "description": "Replicas is the event source deployment replicas",
           "type": "integer",
           "format": "int32"
         },
@@ -2257,6 +2262,48 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.AzureEventHubsTrigger": {
+      "description": "AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger",
+      "type": "object",
+      "required": [
+        "fqdn",
+        "hubName",
+        "sharedAccessKeyName",
+        "payload"
+      ],
+      "properties": {
+        "fqdn": {
+          "description": "FQDN refers to the namespace dns of Azure Event Hubs to be used i.e. \u003cnamespace\u003e.servicebus.windows.net",
+          "type": "string"
+        },
+        "hubName": {
+          "description": "HubName refers to the Azure Event Hub to send events to",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "sharedAccessKey": {
+          "description": "SharedAccessKey refers to a K8s secret containing the primary key for the",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "sharedAccessKeyName": {
+          "description": "SharedAccessKeyName refers to the name of the Shared Access Key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.CustomTrigger": {
       "description": "CustomTrigger refers to the specification of the custom trigger.",
       "type": "object",
@@ -2323,6 +2370,10 @@
         },
         "path": {
           "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+          "type": "string"
+        },
+        "template": {
+          "description": "Template is a go-template for extracting a string from the event's data. A Template is evaluated with provided path, type and value. The templating follows the standard go-template syntax as well as sprig's extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/",
           "type": "string"
         },
         "type": {
@@ -2873,6 +2924,11 @@
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
         },
+        "replicas": {
+          "description": "Replicas is the sensor deployment replicas",
+          "type": "integer",
+          "format": "int32"
+        },
         "template": {
           "description": "Template is the pod specification for the sensor",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Template"
@@ -3191,6 +3247,10 @@
         "awsLambda": {
           "description": "AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AWSLambdaTrigger"
+        },
+        "azureEventHubs": {
+          "description": "AzureEventHubs refers to the trigger send an event to an Azure Event Hub.",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AzureEventHubsTrigger"
         },
         "conditions": {
           "description": "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) \u0026\u0026 dep04\"",

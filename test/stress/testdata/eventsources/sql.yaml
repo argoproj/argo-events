@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: stress-testing
+spec:
+  sqs:
+    test:
+      jsonBody: true
+      accessKey:
+        key: accesskey
+        name: aws-secret
+      secretKey:
+        key: secretkey
+        name: aws-secret
+      region: us-east-1
+      queue: test
+      queueAccountId: "12345678"

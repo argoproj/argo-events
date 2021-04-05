@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: stress-testing
+spec:
+  replica: 1
+  # template:
+  #   container:
+  #     resources:
+  #       requests:
+  #         memory: "64Mi"
+  #         cpu: "250m"
+  #       limits:
+  #         memory: "128Mi"
+  #         cpu: "500m"
+  webhook:
+    test:
+      port: "12000"
+      endpoint: /test
+      method: POST

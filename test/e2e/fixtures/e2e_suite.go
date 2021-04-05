@@ -76,8 +76,7 @@ func (s *E2ESuite) SetupSuite() {
 	s.Given().EventBus(e2eEventBus).
 		When().
 		CreateEventBus().
-		WaitForEventBusReady().
-		WaitForEventBusStatefulSetReady()
+		WaitForEventBusReady()
 	s.T().Log("EventBus is ready")
 }
 
@@ -120,6 +119,7 @@ func (s *E2ESuite) DeleteResources() {
 	resources := []schema.GroupVersionResource{
 		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
 		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
+		{Group: "", Version: "v1", Resource: "pods"},
 	}
 	s.deleteResources(resources)
 }

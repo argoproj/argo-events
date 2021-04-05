@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"go.uber.org/zap"
+	coordinationv1 "k8s.io/api/coordination/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -86,6 +87,9 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		log.Info("deleting sensor")
 		if controllerutil.ContainsFinalizer(sensor, finalizerName) {
 			// Finalizer logic should be added here.
+			if err := r.finalize(ctx, sensor); err != nil {
+				return err
+			}
 			controllerutil.RemoveFinalizer(sensor, finalizerName)
 		}
 		return nil
@@ -107,6 +111,16 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		},
 	}
 	return Reconcile(r.client, args, log)
+}
+
+func (r *reconciler) finalize(ctx context.Context, sensor *v1alpha1.Sensor) error {
+	// Clean up Lease objects if there's any
+	if err := r.client.DeleteAllOf(ctx, &coordinationv1.Lease{},
+		client.InNamespace(sensor.Namespace),
+		client.MatchingFields{"metadata.name": "sensor-" + sensor.Name}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *reconciler) needsUpdate(old, new *v1alpha1.Sensor) bool {

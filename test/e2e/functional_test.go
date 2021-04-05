@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/argoproj/argo-events/test/e2e/fixtures"
 	"github.com/gavv/httpexpect/v2"
@@ -21,7 +22,7 @@ const (
 	LogSensorStarted           = "Sensor started."
 	LogPublishEventSuccessful  = "succeeded to publish an event"
 	LogTriggerActionSuccessful = "successfully processed the trigger"
-	LogTriggerActionFailed     = "failed to trigger action"
+	LogTriggerActionFailed     = "failed to execute a trigger"
 )
 
 func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
@@ -47,7 +48,6 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		WaitForEventSourceDeploymentReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
@@ -55,17 +55,33 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		When().
 		CreateSensor().
 		WaitForSensorReady().
-		WaitForSensorDeploymentReady().
+		Then().
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful)
+}
+
+func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
+	s.Given().EventSource("@testdata/es-calendar-ha.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Wait(3 * time.Second).
+		Then().
+		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+
+	s.Given().Sensor("@testdata/sensor-log-ha.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Wait(3 * time.Second).
 		Then().
 		ExpectSensorPodLogContains(LogTriggerActionSuccessful)
 }
 
 func (s *FunctionalSuite) TestMetricsWithCalendar() {
-	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
+	t1 := s.Given().EventSource("@testdata/es-calendar-metrics.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		WaitForEventSourceDeploymentReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(7777, 7777)
@@ -83,11 +99,10 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		Contains("argo_events_events_sent_total").
 		Contains("argo_events_event_processing_duration_milliseconds")
 
-	t2 := s.Given().Sensor("@testdata/sensor-log.yaml").
+	t2 := s.Given().Sensor("@testdata/sensor-log-metrics.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
-		WaitForSensorDeploymentReady().
 		Then().
 		ExpectSensorPodLogContains(LogSensorStarted).
 		SensorPodPortForward(7778, 7777)
@@ -103,7 +118,6 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		Body().
 		Contains("argo_events_action_triggered_total").
 		Contains("argo_events_action_duration_milliseconds")
-
 }
 
 func (s *FunctionalSuite) TestMetricsWithWebhook() {
@@ -111,7 +125,6 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		WaitForEventSourceDeploymentReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12000, 12000).
@@ -123,7 +136,6 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		When().
 		CreateSensor().
 		WaitForSensorReady().
-		WaitForSensorDeploymentReady().
 		Then().
 		ExpectSensorPodLogContains(LogSensorStarted).
 		SensorPodPortForward(7778, 7777)
@@ -163,6 +175,30 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Contains("argo_events_action_triggered_total").
 		Contains("argo_events_action_duration_milliseconds").
 		Contains("argo_events_action_failed_total")
+}
+
+func (s *FunctionalSuite) TestResourceEventSource() {
+	w1 := s.Given().EventSource("@testdata/es-resource.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Exec("kubectl", []string{"-n", fixtures.Namespace, "run", "test-pod", "--image", "hello-world", "-l", fixtures.Label + "=" + fixtures.LabelValue}, fixtures.OutputRegexp(`pod/.* created`))
+
+	t1 := w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	t2 := s.Given().Sensor("@testdata/sensor-resource.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted)
+
+	w1.Exec("kubectl", []string{"-n", fixtures.Namespace, "delete", "pod", "test-pod"}, fixtures.OutputRegexp(`pod "test-pod" deleted`))
+
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful)
 }
 
 func TestFunctionalSuite(t *testing.T) {

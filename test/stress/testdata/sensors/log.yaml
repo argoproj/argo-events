@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: stress-testing-log
+spec:
+  # template:
+  #   container:
+  #     resources:
+  #       requests:
+  #         memory: "64Mi"
+  #         cpu: "250m"
+  #       limits:
+  #         memory: "128Mi"
+  #         cpu: "500m"
+  dependencies:
+  - name: dep
+    eventSourceName: stress-testing
+    eventName: test
+  triggers:
+  - template:
+      name: log-trigger
+      log: {}

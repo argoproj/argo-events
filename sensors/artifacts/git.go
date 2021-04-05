@@ -21,14 +21,14 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	go_git_ssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/config"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
-	go_git_ssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -125,6 +125,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 		fetchOptions := &git.FetchOptions{
 			RemoteName: g.artifact.Remote.Name,
 			RefSpecs:   fetchRefSpec,
+			Force:      true,
 		}
 		if auth != nil {
 			fetchOptions.Auth = auth
@@ -143,6 +144,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 	fetchOptions := &git.FetchOptions{
 		RemoteName: g.getRemote(),
 		RefSpecs:   fetchRefSpec,
+		Force:      true,
 	}
 	if auth != nil {
 		fetchOptions.Auth = auth

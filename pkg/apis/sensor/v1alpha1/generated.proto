@@ -89,6 +89,29 @@ message ArtifactLocation {
   optional github.com.argoproj.argo_events.pkg.apis.common.Resource resource = 7;
 }
 
+// AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger
+message AzureEventHubsTrigger {
+  // FQDN refers to the namespace dns of Azure Event Hubs to be used i.e. <namespace>.servicebus.windows.net
+  optional string fqdn = 1;
+
+  // HubName refers to the Azure Event Hub to send events to
+  optional string hubName = 2;
+
+  // SharedAccessKeyName refers to the name of the Shared Access Key
+  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 3;
+
+  // SharedAccessKey refers to a K8s secret containing the primary key for the
+  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 4;
+
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
+  repeated TriggerParameter payload = 5;
+
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the trigger resource.
+  // +optional
+  repeated TriggerParameter parameters = 6;
+}
+
 // CustomTrigger refers to the specification of the custom trigger.
 message CustomTrigger {
   // ServerURL is the url of the gRPC server that executes custom trigger
@@ -139,6 +162,12 @@ message DataFilter {
   // Can be ">=", ">", "=", "!=", "<", or "<=".
   // Is optional, and if left blank treated as equality "=".
   optional string comparator = 4;
+
+  // Template is a go-template for extracting a string from the event's data.
+  // A Template is evaluated with provided path, type and value.
+  // The templating follows the standard go-template syntax as well as sprig's extra functions.
+  // See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+  optional string template = 5;
 }
 
 // DependencyGroup is the group of dependencies
@@ -468,6 +497,9 @@ message SensorSpec {
   // Circuit is a boolean expression of dependency groups
   // Deprecated: will be removed in v1.5, use Switch in triggers instead.
   optional string circuit = 7;
+
+  // Replicas is the sensor deployment replicas
+  optional int32 replicas = 8;
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -757,6 +789,10 @@ message TriggerTemplate {
   // Deprecated: will be removed in v1.5, use conditions instead
   // +optional
   optional TriggerSwitch switch = 12;
+
+  // AzureEventHubs refers to the trigger send an event to an Azure Event Hub.
+  // +optional
+  optional AzureEventHubsTrigger azureEventHubs = 14;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

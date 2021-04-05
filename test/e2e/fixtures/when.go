@@ -2,12 +2,9 @@ package fixtures
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -18,6 +15,7 @@ import (
 	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
 	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
+	testutil "github.com/argoproj/argo-events/test/util"
 )
 
 type When struct {
@@ -124,244 +122,39 @@ func (w *When) Exec(name string, args []string, block func(t *testing.T, output 
 func (w *When) WaitForEventBusReady() *When {
 	w.t.Helper()
 	ctx := context.Background()
-	timeout := defaultTimeout
-	fieldSelector := "metadata.name=" + w.eventBus.Name
-	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	watch, err := w.eventBusClient.Watch(ctx, opts)
-	if err != nil {
+	if err := testutil.WaitForEventBusReady(ctx, w.eventBusClient, w.eventBus.Name, defaultTimeout); err != nil {
 		w.t.Fatal(err)
 	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
-	for {
-		select {
-		case event := <-watch.ResultChan():
-			eb, ok := event.Object.(*eventbusv1alpha1.EventBus)
-			if ok {
-				if eb.Status.IsReady() {
-					w.eventBus = eb
-					return w
-				}
-			} else {
-				w.t.Fatal("not eventbus")
-			}
-		case <-timeoutCh:
-			w.t.Fatalf("timeout after %v waiting for EventBus ready", timeout)
-		}
-	}
-}
-
-func (w *When) WaitForEventBusStatefulSetReady() *When {
-	w.t.Helper()
-	timeout := defaultTimeout
-	labelSelector := fmt.Sprintf("controller=eventbus-controller,eventbus-name=%s", w.eventBus.Name)
-	opts := metav1.ListOptions{LabelSelector: labelSelector}
-	ctx := context.Background()
-	watch, err := w.kubeClient.AppsV1().StatefulSets(Namespace).Watch(ctx, opts)
-	if err != nil {
+	if err := testutil.WaitForEventBusStatefulSetReady(ctx, w.kubeClient, Namespace, w.eventBus.Name, defaultTimeout); err != nil {
 		w.t.Fatal(err)
 	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
-
-statefulSetWatch:
-	for {
-		select {
-		case event := <-watch.ResultChan():
-			ss, ok := event.Object.(*appsv1.StatefulSet)
-			if ok {
-				if ss.Status.Replicas == ss.Status.ReadyReplicas {
-					break statefulSetWatch
-				}
-			} else {
-				w.t.Fatal("not statefulset")
-			}
-		case <-timeoutCh:
-			w.t.Fatalf("timeout after %v waiting for EventBus StatefulSet ready", timeout)
-		}
-	}
-
-	// POD
-	podWatch, err := w.kubeClient.CoreV1().Pods(Namespace).Watch(ctx, opts)
-	if err != nil {
-		w.t.Fatal(err)
-	}
-	defer podWatch.Stop()
-	podTimeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		podTimeoutCh <- true
-	}()
-
-	podNames := make(map[string]bool)
-	for {
-		if len(podNames) == 3 {
-			// defaults to 3 Pods
-			return w
-		}
-		select {
-		case event := <-podWatch.ResultChan():
-			p, ok := event.Object.(*corev1.Pod)
-			if ok {
-				if p.Status.Phase == corev1.PodRunning {
-					if _, existing := podNames[p.GetName()]; !existing {
-						podNames[p.GetName()] = true
-					}
-				}
-			} else {
-				w.t.Fatal("not Pod")
-			}
-		case <-podTimeoutCh:
-			w.t.Fatalf("timeout after %v waiting for event bus Pod ready", timeout)
-		}
-	}
+	return w
 }
 
 func (w *When) WaitForEventSourceReady() *When {
 	w.t.Helper()
 	ctx := context.Background()
-	timeout := defaultTimeout
-	fieldSelector := "metadata.name=" + w.eventSource.Name
-	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	watch, err := w.eventSourceClient.Watch(ctx, opts)
-	if err != nil {
+	if err := testutil.WaitForEventSourceReady(ctx, w.eventSourceClient, w.eventSource.Name, defaultTimeout); err != nil {
 		w.t.Fatal(err)
 	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
-	for {
-		select {
-		case event := <-watch.ResultChan():
-			es, ok := event.Object.(*eventsourcev1alpha1.EventSource)
-			if ok {
-				if es.Status.IsReady() {
-					w.eventSource = es
-					return w
-				}
-			} else {
-				w.t.Fatal("not eventsource")
-			}
-		case <-timeoutCh:
-			w.t.Fatalf("timeout after %v waiting for EventSource ready", timeout)
-		}
+	if err := testutil.WaitForEventSourceDeploymentReady(ctx, w.kubeClient, Namespace, w.eventSource.Name, defaultTimeout); err != nil {
+		w.t.Fatal(err)
 	}
-}
-
-func (w *When) WaitForEventSourceDeploymentReady() *When {
-	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", w.eventSource.Name)
-	return w.waitForDeploymentAndPodReady("EventSource", labelSelector, defaultTimeout)
+	w.t.Logf("Pod of EventSource %s is running", w.eventSource.Name)
+	return w
 }
 
 func (w *When) WaitForSensorReady() *When {
 	w.t.Helper()
 	ctx := context.Background()
-	timeout := defaultTimeout
-	fieldSelector := "metadata.name=" + w.sensor.Name
-	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	watch, err := w.sensorClient.Watch(ctx, opts)
-	if err != nil {
+	if err := testutil.WaitForSensorReady(ctx, w.sensorClient, w.sensor.Name, defaultTimeout); err != nil {
 		w.t.Fatal(err)
 	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
-	for {
-		select {
-		case event := <-watch.ResultChan():
-			s, ok := event.Object.(*sensorv1alpha1.Sensor)
-			if ok {
-				if s.Status.IsReady() {
-					w.sensor = s
-					return w
-				}
-			} else {
-				w.t.Fatal("not sensor")
-			}
-		case <-timeoutCh:
-			w.t.Fatalf("timeout after %v waiting for Sensor ready", timeout)
-		}
-	}
-}
-
-func (w *When) WaitForSensorDeploymentReady() *When {
-	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", w.sensor.Name)
-	return w.waitForDeploymentAndPodReady("Sensor", labelSelector, 60*time.Second)
-}
-
-func (w *When) waitForDeploymentAndPodReady(objectType, labelSelector string, timeout time.Duration) *When {
-	w.t.Helper()
-	opts := metav1.ListOptions{LabelSelector: labelSelector}
-	ctx := context.Background()
-	deployWatch, err := w.kubeClient.AppsV1().Deployments(Namespace).Watch(ctx, opts)
-	if err != nil {
+	if err := testutil.WaitForSensorDeploymentReady(ctx, w.kubeClient, Namespace, w.sensor.Name, defaultTimeout); err != nil {
 		w.t.Fatal(err)
 	}
-	defer deployWatch.Stop()
-	deployTimeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		deployTimeoutCh <- true
-	}()
-
-deployWatch:
-	for {
-		select {
-		case event := <-deployWatch.ResultChan():
-			ss, ok := event.Object.(*appsv1.Deployment)
-			if ok {
-				if ss.Status.Replicas == ss.Status.AvailableReplicas {
-					break deployWatch
-				}
-			} else {
-				w.t.Fatal("not deployment")
-			}
-		case <-deployTimeoutCh:
-			w.t.Fatalf("timeout after %v waiting for %s Deployment ready", timeout, objectType)
-		}
-	}
-
-	// POD
-	podWatch, err := w.kubeClient.CoreV1().Pods(Namespace).Watch(ctx, opts)
-	if err != nil {
-		w.t.Fatal(err)
-	}
-	defer podWatch.Stop()
-	podTimeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		podTimeoutCh <- true
-	}()
-	for {
-		select {
-		case event := <-podWatch.ResultChan():
-			p, ok := event.Object.(*corev1.Pod)
-			if ok {
-				if p.Status.Phase == corev1.PodRunning {
-					w.t.Logf("%s pod is running", objectType)
-					return w
-				}
-			} else {
-				w.t.Fatal("not Pod")
-			}
-		case <-podTimeoutCh:
-			w.t.Fatalf("timeout after %v waiting for %s Pod ready", timeout, objectType)
-		}
-	}
+	w.t.Logf("Pod of Sensor %s is running", w.sensor.Name)
+	return w
 }
 
 func (w *When) Given() *Given {

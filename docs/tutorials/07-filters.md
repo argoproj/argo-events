@@ -15,7 +15,7 @@ Argo Events offers 3 types of filters:
 Webhook event-source must be set up.
 
 ## Data Filter
-Data filter as the name suggests are applied on the event data. A CloudEvent from Webhook event-source has
+Data filters as the name suggests are applied on the event data. A CloudEvent from Webhook event-source has
 payload structure as,
 
 
@@ -35,7 +35,7 @@ payload structure as,
             }
         }
 
-Data Filter are applied on `data` within the payload. We will make a simple HTTP request
+Data Filters are applied on `data` within the payload. We will make a simple HTTP request
 to webhook event-source with request data as `{"message":"this is my first webhook"}` and apply
 data filter on `message`.
 
@@ -54,13 +54,13 @@ The data filter offers `comparator` “>=”, “>”, “=”, “!=”, “<�
 
 e.g.,
 
-              filters:
-                data:
-                  - path: body.value
-                    type: number
-                    comparator: ">"
-                    value:
-                      - "50.0"
+        filters:
+          data:
+            - path: body.value
+              type: number
+              comparator: ">"
+              value:
+                - "50.0"
 
 <br/>
 
@@ -83,6 +83,61 @@ If data types is bool or float, then you need to pass the exact value.
         curl -d '{"message":"hello"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 5. Watch for a workflow with name `data-workflow-xxxx`.
+
+### Multiple Paths
+
+If the HTTP request was less simple and contained multiple paths that we would like to filter against,
+we can make use of [multipaths](https://github.com/tidwall/gjson/blob/master/SYNTAX.md#multipaths) to combine
+multiple data paths in the payload into one string.
+
+For a given payload such as:
+
+        {
+          "body": {
+            "action":"opened",
+           "labels": [
+              {"id":"1234", "name":"Webhook"}, 
+              {"id":"5678", "name":"Approved"}
+            ]
+          }
+        }
+
+We want our sensor to fire if the action is "opened" and it has a label of "Webhook" or if the action is "closed"
+and it has a label of "Webhook" and "Approved". We could therefore define the path as:
+
+        filters:
+          data:
+            - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
+              type: string
+        ...
+
+This would return a string like: `["opened","Webhook","Approved"]`. As the resulting data type will be a
+`string`, we can pass a regex over it:
+
+        filters:
+          data:
+            - path: "[body.action,body.labels.#(name=="Webhook").name,body.labels.#(name=="Approved").name]"
+              type: string
+              value:
+                - "(\bopened\b.*\bWebhook\b)|(\blabeled\b.*(\bWebhook\b.*\bApproved\b))"
+### Template
+
+The data filter offers `template`.
+`template` process the incoming data defined in `path` through [sprig template](https://github.com/Masterminds/sprig) before matching with the `value`.
+
+e.g.
+
+              filters:
+                data:
+                  - path: body.value
+                    type: string
+                    value:
+                      - "hello world"
+                    template: "{{ b64dec .Input }}"
+
+message `'{"message":"aGVsbG8gd29ybGQ="}'` will match with the above filter definition.
+
+**Note**: Data type is assumed to be string before applying the `template`, then cast to the user defined `type` for value matching.
 
 ## Context Filter
 Similar to the data filter, you can apply a filter on the context of the event.

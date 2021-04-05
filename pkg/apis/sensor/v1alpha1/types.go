@@ -111,6 +111,19 @@ type SensorSpec struct {
 	// Circuit is a boolean expression of dependency groups
 	// Deprecated: will be removed in v1.5, use Switch in triggers instead.
 	DeprecatedCircuit string `json:"circuit,omitempty" protobuf:"bytes,7,opt,name=circuit"`
+	// Replicas is the sensor deployment replicas
+	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,8,opt,name=replicas"`
+}
+
+func (s SensorSpec) GetReplicas() int32 {
+	if s.Replicas == nil {
+		return 1
+	}
+	replicas := *s.Replicas
+	if replicas < 1 {
+		replicas = 1
+	}
+	return replicas
 }
 
 // Template holds the information of a sensor deployment template
@@ -249,6 +262,11 @@ type DataFilter struct {
 	// Can be ">=", ">", "=", "!=", "<", or "<=".
 	// Is optional, and if left blank treated as equality "=".
 	Comparator Comparator `json:"comparator,omitempty" protobuf:"bytes,4,opt,name=comparator,casttype=Comparator"`
+	// Template is a go-template for extracting a string from the event's data.
+	// A Template is evaluated with provided path, type and value.
+	// The templating follows the standard go-template syntax as well as sprig's extra functions.
+	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+	Template string `json:"template,omitempty" protobuf:"bytes,5,opt,name=template"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
@@ -308,6 +326,9 @@ type TriggerTemplate struct {
 	// Deprecated: will be removed in v1.5, use conditions instead
 	// +optional
 	DeprecatedSwitch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,12,opt,name=switch"`
+	// AzureEventHubs refers to the trigger send an event to an Azure Event Hub.
+	// +optional
+	AzureEventHubs *AzureEventHubsTrigger `json:"azureEventHubs,omitempty" protobuf:"bytes,14,opt,name=azureEventHubs"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -416,6 +437,24 @@ type AWSLambdaTrigger struct {
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
 
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
+}
+
+// AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger
+type AzureEventHubsTrigger struct {
+	// FQDN refers to the namespace dns of Azure Event Hubs to be used i.e. <namespace>.servicebus.windows.net
+	FQDN string `json:"fqdn" protobuf:"bytes,1,opt,name=fqdn"`
+	// HubName refers to the Azure Event Hub to send events to
+	HubName string `json:"hubName" protobuf:"bytes,2,opt,name=hubName"`
+	// SharedAccessKeyName refers to the name of the Shared Access Key
+	SharedAccessKeyName *corev1.SecretKeySelector `json:"sharedAccessKeyName" protobuf:"bytes,3,opt,name=sharedAccessKeyName"`
+	// SharedAccessKey refers to a K8s secret containing the primary key for the
+	SharedAccessKey *corev1.SecretKeySelector `json:"sharedAccessKey,omitempty" protobuf:"bytes,4,opt,name=sharedAccessKey"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,5,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 }

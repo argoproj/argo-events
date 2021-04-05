@@ -79,16 +79,17 @@ type TriggerType string
 
 // possible trigger types
 var (
-	OpenWhiskTrigger    TriggerType = "OpenWhisk"
-	ArgoWorkflowTrigger TriggerType = "ArgoWorkflow"
-	LambdaTrigger       TriggerType = "Lambda"
-	CustomTrigger       TriggerType = "Custom"
-	HTTPTrigger         TriggerType = "HTTP"
-	KafkaTrigger        TriggerType = "Kafka"
-	LogTrigger          TriggerType = "Log"
-	NATSTrigger         TriggerType = "NATS"
-	SlackTrigger        TriggerType = "Slack"
-	K8sTrigger          TriggerType = "Kubernetes"
+	OpenWhiskTrigger      TriggerType = "OpenWhisk"
+	ArgoWorkflowTrigger   TriggerType = "ArgoWorkflow"
+	LambdaTrigger         TriggerType = "Lambda"
+	CustomTrigger         TriggerType = "Custom"
+	HTTPTrigger           TriggerType = "HTTP"
+	KafkaTrigger          TriggerType = "Kafka"
+	LogTrigger            TriggerType = "Log"
+	NATSTrigger           TriggerType = "NATS"
+	SlackTrigger          TriggerType = "Slack"
+	K8sTrigger            TriggerType = "Kubernetes"
+	AzureEventHubsTrigger TriggerType = "AzureEventHubs"
 )
 
 // EventBusType is the type of event bus
