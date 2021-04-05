@@ -749,7 +749,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 					},
 					"replica": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Replica is the event source deployment replicas",
+							Description: "DeprecatedReplica is the event source deployment replicas Deprecated: use replicas instead, will be removed in v1.5",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -1088,6 +1088,13 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 									},
 								},
 							},
+						},
+					},
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replicas is the event source deployment replicas",
+							Type:        []string{"integer"},
+							Format:      "int32",
 						},
 					},
 				},

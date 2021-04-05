@@ -497,6 +497,9 @@ message SensorSpec {
   // Circuit is a boolean expression of dependency groups
   // Deprecated: will be removed in v1.5, use Switch in triggers instead.
   optional string circuit = 7;
+
+  // Replicas is the sensor deployment replicas
+  optional int32 replicas = 8;
 }
 
 // SensorStatus contains information about the status of a sensor.

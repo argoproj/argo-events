@@ -1,7 +1,5 @@
 # Trigger Conditions
 
-![GA](assets/ga.svg)
-
 > v1.0 and after
 
 `Conditions` is a new feature to replace `Circuit` and `Switch`. With

@@ -102,17 +102,8 @@ Priority could be set through `spec.nats.native.priorityClassName` or
 
 ### Replicas
 
-For below types of EventSources, `spec.replica` could be set to a number `>1` to
-make them HA, see more detail [here](eventsources/deployment-strategies.md).
-
-- AWS SNS
-- AWS SQS
-- Github
-- Gitlab
-- NetApp Storage GRID
-- Slack
-- Stripe
-- Webhook
+EventSources can run with HA by setting `spec.replicas` to a number `>1`, see
+more detail [here](eventsources/ha.md).
 
 ### EventSource POD Node Selection
 
@@ -126,6 +117,11 @@ Priority could be set through `spec.template.priorityClassName` or
 `spec.template.priority`.
 
 ## Sensors
+
+### Replicas
+
+Sensors can run with HA by setting `spec.replicas` to a number `>1`, see more
+detail [here](sensors/ha.md).
 
 ### Sensor POD Node Selection
 

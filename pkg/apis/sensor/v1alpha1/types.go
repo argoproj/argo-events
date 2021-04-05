@@ -111,6 +111,19 @@ type SensorSpec struct {
 	// Circuit is a boolean expression of dependency groups
 	// Deprecated: will be removed in v1.5, use Switch in triggers instead.
 	DeprecatedCircuit string `json:"circuit,omitempty" protobuf:"bytes,7,opt,name=circuit"`
+	// Replicas is the sensor deployment replicas
+	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,8,opt,name=replicas"`
+}
+
+func (s SensorSpec) GetReplicas() int32 {
+	if s.Replicas == nil {
+		return 1
+	}
+	replicas := *s.Replicas
+	if replicas < 1 {
+		replicas = 1
+	}
+	return replicas
 }
 
 // Template holds the information of a sensor deployment template

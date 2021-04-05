@@ -313,7 +313,8 @@ message EventSourceSpec {
   // +optional
   optional Service service = 3;
 
-  // Replica is the event source deployment replicas
+  // DeprecatedReplica is the event source deployment replicas
+  // Deprecated: use replicas instead, will be removed in v1.5
   optional int32 replica = 4;
 
   // Minio event sources
@@ -387,6 +388,9 @@ message EventSourceSpec {
 
   // Generic event source
   map<string, GenericEventSource> generic = 28;
+
+  // Replicas is the event source deployment replicas
+  optional int32 replicas = 29;
 }
 
 // EventSourceStatus holds the status of the event-source resource
