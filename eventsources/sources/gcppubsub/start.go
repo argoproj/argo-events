@@ -89,7 +89,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		"topicProjectID", pubsubEventSource.TopicProjectID,
 		"projectID", pubsubEventSource.ProjectID,
 		"subscriptionID", pubsubEventSource.SubscriptionID,
-	).Desugar()
+	)
 
 	if pubsubEventSource.JSONBody {
 		log.Info("assuming all events have a json body...")
@@ -120,7 +120,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
-			log.Error("failed to marshal the event data", zap.Error(err))
+			log.Errorw("failed to marshal the event data", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			m.Nack()
 			return
@@ -128,7 +128,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		log.Info("dispatching event...")
 		if err = dispatch(eventBytes); err != nil {
-			log.Error("failed to dispatch GCP PubSub event", zap.Error(err))
+			log.Errorw("failed to dispatch GCP PubSub event", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			m.Nack()
 			return
@@ -146,13 +146,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if pubsubEventSource.DeleteSubscriptionOnFinish {
 		log.Info("deleting PubSub subscription...")
 		if err = subscription.Delete(context.Background()); err != nil {
-			log.Error("failed to delete the PubSub subscription", zap.Error(err))
+			log.Errorw("failed to delete the PubSub subscription", zap.Error(err))
 		}
 	}
 
 	log.Info("closing PubSub client...")
 	if err = client.Close(); err != nil {
-		log.Error("failed to close the PubSub client", zap.Error(err))
+		log.Errorw("failed to close the PubSub client", zap.Error(err))
 	}
 
 	return nil
@@ -198,7 +198,7 @@ func (el *EventListener) hash() (string, error) {
 	return common.Hasher(el.GetEventName() + string(body)), nil
 }
 
-func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Logger) (*pubsub.Client, *pubsub.Subscription, error) {
+func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.SugaredLogger) (*pubsub.Client, *pubsub.Subscription, error) {
 	pubsubEventSource := &el.PubSubEventSource
 
 	opts := make([]option.ClientOption, 0, 1)

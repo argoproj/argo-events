@@ -25,12 +25,12 @@ type Installer interface {
 func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) error {
 	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
-		logger.Desugar().Error("failed to an installer", zap.Error(err))
+		logger.Errorw("failed to an installer", zap.Error(err))
 		return err
 	}
 	busConfig, err := installer.Install(ctx)
 	if err != nil {
-		logger.Desugar().Error("installation error", zap.Error(err))
+		logger.Errorw("installation error", zap.Error(err))
 		return err
 	}
 	eventBus.Status.Config = *busConfig
@@ -86,7 +86,7 @@ func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.C
 
 	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
 	if err != nil {
-		logger.Desugar().Error("failed to get an installer", zap.Error(err))
+		logger.Errorw("failed to get an installer", zap.Error(err))
 		return err
 	}
 	return installer.Uninstall(ctx)
