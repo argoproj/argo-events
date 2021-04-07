@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -94,10 +95,18 @@ func Connect(backoff *apicommon.Backoff, conn func() error) error {
 	if err != nil {
 		return errors.Wrap(err, "invalid backoff configuration")
 	}
-	return wait.ExponentialBackoff(*b, func() (bool, error) {
-		if err := conn(); err != nil {
+	if waitErr := wait.ExponentialBackoff(*b, func() (bool, error) {
+		if err = conn(); err != nil {
+			// return "false, err" will cover waitErr
 			return false, nil
 		}
 		return true, nil
-	})
+	}); waitErr != nil {
+		if err != nil {
+			return fmt.Errorf("%v: %v", waitErr, err)
+		} else {
+			return waitErr
+		}
+	}
+	return nil
 }
