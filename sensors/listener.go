@@ -31,10 +31,9 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/leaderelection"
-	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
@@ -65,51 +64,23 @@ func (sensorCtx *SensorContext) getGroupAndClientID(depExpression string) (strin
 }
 
 func (sensorCtx *SensorContext) Start(ctx context.Context) error {
-	if sensorCtx.sensor.Spec.GetReplicas() == 1 {
-		return sensorCtx.listenEvents(ctx)
-	}
-
-	leaseName := "sensor-" + sensorCtx.sensor.Name
-	lock := &resourcelock.LeaseLock{
-		LeaseMeta: metav1.ObjectMeta{
-			Name:      leaseName,
-			Namespace: sensorCtx.sensor.Namespace,
-		},
-		Client: sensorCtx.kubeClient.CoordinationV1(),
-		LockConfig: resourcelock.ResourceLockConfig{
-			Identity: sensorCtx.hostname,
-		},
-	}
-
 	log := logging.FromContext(ctx)
-	ctx, cancel := context.WithCancel(ctx)
-	leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
-		Lock:            lock,
-		ReleaseOnCancel: true,
-		LeaseDuration:   60 * time.Second,
-		RenewDeadline:   15 * time.Second,
-		RetryPeriod:     5 * time.Second,
-		Callbacks: leaderelection.LeaderCallbacks{
-			OnStartedLeading: func(ctx context.Context) {
-				if err := sensorCtx.listenEvents(ctx); err != nil {
-					log.Errorw("failed to start", zap.Error(err))
-					cancel()
-				}
-			},
-			OnStoppedLeading: func() {
-				log.Infof("leader lost: %s", sensorCtx.hostname)
-				cancel()
-			},
-			OnNewLeader: func(identity string) {
-				if identity == sensorCtx.hostname {
-					log.Infof("I am the new leader: %s", identity)
-					return
-				}
-				log.Infof("stand by, new leader elected: %s", identity)
-			},
+	custerName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
+	elector, err := leaderelection.NewEventBusElector(ctx, *sensorCtx.eventBusConfig, custerName, int(sensorCtx.sensor.Spec.GetReplicas()))
+	if err != nil {
+		log.Errorw("failed to get an elector", zap.Error(err))
+		return err
+	}
+	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
+		OnStartedLeading: func(ctx context.Context) {
+			if err := sensorCtx.listenEvents(ctx); err != nil {
+				log.Errorw("failed to start", zap.Error(err))
+			}
+		},
+		OnStoppedLeading: func() {
+			log.Infof("leader lost: %s", sensorCtx.hostname)
 		},
 	})
-
 	return nil
 }
 

@@ -20,8 +20,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/eventsources"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -221,9 +219,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 					},
 				},
 			})
+			emptyDirVolName := "tmp-volume"
+			volumes = append(volumes, corev1.Volume{
+				Name: emptyDirVolName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+			})
 			deploymentSpec.Template.Spec.Volumes = volumes
 			volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
 			deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 		}
 	} else {
@@ -331,26 +334,6 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		spec.Template.Spec.ImagePullSecrets = args.EventSource.Spec.Template.ImagePullSecrets
 		spec.Template.Spec.PriorityClassName = args.EventSource.Spec.Template.PriorityClassName
 		spec.Template.Spec.Priority = args.EventSource.Spec.Template.Priority
-	}
-	allEventTypes := eventsources.GetEventingServers(args.EventSource, nil)
-	recreateTypes := make(map[apicommon.EventSourceType]bool)
-	for _, esType := range apicommon.RecreateStrategyEventSources {
-		recreateTypes[esType] = true
-	}
-	recreates := 0
-	for eventType := range allEventTypes {
-		if _, ok := recreateTypes[eventType]; ok {
-			recreates++
-			break
-		}
-	}
-	if recreates > 0 && replicas == 1 {
-		// For those event types, if there's only 1 replica, use recreate strategy.
-		// If replicas > 1, which means HA is available for them, rolling update strategy
-		// is better.
-		spec.Strategy = appv1.DeploymentStrategy{
-			Type: appv1.RecreateDeploymentStrategyType,
-		}
 	}
 	return spec, nil
 }

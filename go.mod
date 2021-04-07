@@ -52,9 +52,9 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/go-nats v1.7.2
+	github.com/nats-io/graft v0.0.0-20200605173148-348798afea05
 	github.com/nats-io/nats-streaming-server v0.17.0 // indirect
-	github.com/nats-io/nats.go v1.9.1
-	github.com/nats-io/nkeys v0.1.4 // indirect
+	github.com/nats-io/nats.go v1.10.0
 	github.com/nats-io/stan.go v0.6.0
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
 	github.com/nsqio/go-nsq v1.0.8
