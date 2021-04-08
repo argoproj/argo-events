@@ -150,6 +150,7 @@ rules:
   - eventbus
   - eventbus/finalizers
   - eventbus/status
+  - rollouts
   verbs:
   - create
   - delete

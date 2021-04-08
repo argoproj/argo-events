@@ -32,6 +32,7 @@ rules:
       - eventbus
       - eventbus/finalizers
       - eventbus/status
+      - rollouts
   - apiGroups:
       - ""
     resources:
