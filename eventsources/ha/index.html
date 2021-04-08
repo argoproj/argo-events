@@ -885,19 +885,6 @@
     Active-Passive
   </a>
   
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rbac" title="RBAC" class="md-nav__link">
-    RBAC
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1363,19 +1350,6 @@
     Active-Passive
   </a>
   
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rbac" title="RBAC" class="md-nav__link">
-    RBAC
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1450,27 +1424,6 @@ old one is gone.</p>
 <li>Calendar</li>
 <li>Generic</li>
 </ul>
-<h3 id="rbac">RBAC<a class="headerlink" href="#rbac" title="Permanent link">&para;</a></h3>
-<p>To achieve <code>Active-Passive</code> strategy for these EventSources, a Service Account
-with extra RBAC settings is needed. The Service Account needs to be bound to a
-Role like following, and specified in the spec through
-<code>spec.template.serviceAccountName</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Role</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">lease-role</span>
-<span class="nt">rules</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">apiGroups</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">coordination.k8s.io</span>
-    <span class="nt">resources</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">leases</span>
-    <span class="nt">resourceNames</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">eventsource-{event-source-name}</span>
-    <span class="nt">verbs</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="s">&quot;*&quot;</span>
-</code></pre></div>
-
-<p><strong>NOTE: This is not requried if <code>spec.replicas = 1</code>.</strong></p>
 <h2 id="more">More<a class="headerlink" href="#more" title="Permanent link">&para;</a></h2>
 <p>Check <a href="../../dr_ha_recommendations/">this</a> out to learn more information about
 DR/HA.</p>

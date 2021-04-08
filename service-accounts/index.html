@@ -1434,10 +1434,9 @@
 <h2 id="service-account-for-eventsources">Service Account for EventSources<a class="headerlink" href="#service-account-for-eventsources" title="Permanent link">&para;</a></h2>
 <p>A <code>Service Account</code> can be specified in the EventSource object with
 <code>spec.template.serviceAccountName</code>, however it is not needed for all the
-EventSource types except <code>resource</code>, unless you want to achieve
-<a href="../eventsources/ha/">HA</a> for some of them. For a <code>resource</code> EventSource, you
-need to specify a Service Accout and give it <code>list</code> and <code>watch</code> permissions for
-the resource being watched.</p>
+EventSource types except <code>resource</code>. For a <code>resource</code> EventSource, you need to
+specify a Service Accout and give it <code>list</code> and <code>watch</code> permissions for the
+resource being watched.</p>
 <p>For example, if you want to watch actions on <code>Deployment</code> objects, you need to:</p>
 <ol>
 <li>
@@ -1464,8 +1463,7 @@ kubectl create clusterrolebinding deployments-watcher-clusterrole-binding --clus
 <h2 id="service-account-for-sensors">Service Account for Sensors<a class="headerlink" href="#service-account-for-sensors" title="Permanent link">&para;</a></h2>
 <p>A <code>Service Account</code> also can be specified in a Sensor object via
 <code>spec.template.serviceAccountName</code>, this is only needed when <code>k8s</code> trigger or
-<code>argoWorkflow</code> trigger is defined in the Sensor object, or you want to run the
-Sensor with <a href="../sensors/ha/">HA</a>.</p>
+<code>argoWorkflow</code> trigger is defined in the Sensor object.</p>
 <p>The sensor examples provided by us use <code>argo-events-sa</code> service account to
 execute the triggers, but it has more permissions than needed, and you may want
 to limit those privileges based on your use-case. It's always a good practice to
