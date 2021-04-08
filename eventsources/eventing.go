@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -14,12 +13,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/leaderelection"
-	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
@@ -284,54 +280,24 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 		// EventSource object use the same type of deployment strategy
 		break
 	}
-	if !isRecreatType || e.eventSource.Spec.GetReplicas() == 1 {
+	if !isRecreatType {
 		return e.run(ctx, servers)
 	}
 
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
+	custerName := fmt.Sprintf("%s-eventsource-%s", e.eventSource.Namespace, e.eventSource.Name)
+	elector, err := leaderelection.NewEventBusElector(ctx, *e.eventBusConfig, custerName, int(e.eventSource.Spec.GetReplicas()))
 	if err != nil {
-		return errors.Wrapf(err, "failed to get a K8s rest config for the event source %s", e.eventSource.Name)
+		log.Errorw("failed to get an elector", zap.Error(err))
+		return err
 	}
-	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
-
-	leaseName := "eventsource-" + e.eventSource.Name
-	lock := &resourcelock.LeaseLock{
-		LeaseMeta: metav1.ObjectMeta{
-			Name:      leaseName,
-			Namespace: e.eventSource.Namespace,
+	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
+		OnStartedLeading: func(ctx context.Context) {
+			if err := e.run(ctx, servers); err != nil {
+				log.Errorw("failed to start", zap.Error(err))
+			}
 		},
-		Client: kubeClient.CoordinationV1(),
-		LockConfig: resourcelock.ResourceLockConfig{
-			Identity: e.hostname,
-		},
-	}
-
-	ctx, cancel := context.WithCancel(ctx)
-	leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
-		Lock:            lock,
-		ReleaseOnCancel: true,
-		LeaseDuration:   60 * time.Second,
-		RenewDeadline:   15 * time.Second,
-		RetryPeriod:     5 * time.Second,
-		Callbacks: leaderelection.LeaderCallbacks{
-			OnStartedLeading: func(ctx context.Context) {
-				if err := e.run(ctx, servers); err != nil {
-					log.Errorw("failed to start", zap.Error(err))
-					cancel()
-				}
-			},
-			OnStoppedLeading: func() {
-				log.Infof("leader lost: %s", e.hostname)
-				cancel()
-			},
-			OnNewLeader: func(identity string) {
-				if identity == e.hostname {
-					log.Infof("I am the new leader: %s", identity)
-					return
-				}
-				log.Infof("stand by, new leader elected: %s", identity)
-			},
+		OnStoppedLeading: func() {
+			log.Infof("leader lost: %s", e.hostname)
 		},
 	})
 

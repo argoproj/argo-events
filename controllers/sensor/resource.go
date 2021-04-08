@@ -185,9 +185,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 					},
 				},
 			})
+			emptyDirVolName := "tmp"
+			volumes = append(volumes, corev1.Volume{
+				Name: emptyDirVolName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+			})
 			deploymentSpec.Template.Spec.Volumes = volumes
 			volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
 			deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 		}
 	} else {
@@ -270,10 +275,6 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 			MatchLabels: args.Labels,
 		},
 		Replicas: &replicas,
-		Strategy: appv1.DeploymentStrategy{
-			// Event bus does not allow multiple clients with same clientID to connect to the server at the same time.
-			Type: appv1.RecreateDeploymentStrategyType,
-		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: podTemplateLabels,
