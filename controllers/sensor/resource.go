@@ -185,7 +185,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 					},
 				},
 			})
-			emptyDirVolName := "tmp-volume"
+			emptyDirVolName := "tmp"
 			volumes = append(volumes, corev1.Volume{
 				Name: emptyDirVolName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 			})
