@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"go.uber.org/zap"
-	coordinationv1 "k8s.io/api/coordination/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -71,9 +70,6 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 		log.Info("deleting eventsource")
 		if controllerutil.ContainsFinalizer(eventSource, finalizerName) {
 			// Finalizer logic should be added here.
-			if err := r.finalize(ctx, eventSource); err != nil {
-				return err
-			}
 			controllerutil.RemoveFinalizer(eventSource, finalizerName)
 		}
 		return nil
@@ -95,16 +91,6 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 		},
 	}
 	return Reconcile(r.client, args, log)
-}
-
-func (r *reconciler) finalize(ctx context.Context, eventSource *v1alpha1.EventSource) error {
-	// Clean up Lease objects if there's any
-	if err := r.client.DeleteAllOf(ctx, &coordinationv1.Lease{},
-		client.InNamespace(eventSource.Namespace),
-		client.MatchingFields{"metadata.name": "eventsource-" + eventSource.Name}); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *reconciler) needsUpdate(old, new *v1alpha1.EventSource) bool {

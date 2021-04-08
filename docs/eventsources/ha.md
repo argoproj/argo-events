@@ -51,31 +51,6 @@ old one is gone.
 - Calendar
 - Generic
 
-### RBAC
-
-To achieve `Active-Passive` strategy for these EventSources, a Service Account
-with extra RBAC settings is needed. The Service Account needs to be bound to a
-Role like following, and specified in the spec through
-`spec.template.serviceAccountName`.
-
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: lease-role
-rules:
-  - apiGroups:
-      - coordination.k8s.io
-    resources:
-      - leases
-    resourceNames:
-      - eventsource-{event-source-name}
-    verbs:
-      - "*"
-```
-
-**NOTE: This is not requried if `spec.replicas = 1`.**
-
 ## More
 
 Check [this](../dr_ha_recommendations.md) out to learn more information about
