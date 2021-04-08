@@ -16,6 +16,8 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -35,4 +37,17 @@ func TestRetryableKubeAPIError(t *testing.T) {
 	assert.False(t, IsRetryableKubeAPIError(errForbidden))
 	assert.False(t, IsRetryableKubeAPIError(errInvalid))
 	assert.False(t, IsRetryableKubeAPIError(errMethodNotSupported))
+}
+
+func TestConnect(t *testing.T) {
+	err := Connect(nil, func() error {
+		return fmt.Errorf("new error")
+	})
+	assert.NotNil(t, err)
+	assert.True(t, strings.Contains(err.Error(), "new error"))
+
+	err = Connect(nil, func() error {
+		return nil
+	})
+	assert.Nil(t, err)
 }
