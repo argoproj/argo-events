@@ -113,6 +113,8 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	defer node.Close()
 
 	cctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	if node.State() == graft.LEADER {
 		log.Info("I'm the LEADER, starting ...")
 		go callbacks.OnStartedLeading(cctx)
@@ -147,7 +149,6 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 		select {
 		case <-ctx.Done():
 			log.Info("exiting...")
-			cancel()
 			return
 		case sc := <-stateChangeChan:
 			handleStateChange(sc)
