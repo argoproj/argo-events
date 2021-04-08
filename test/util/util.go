@@ -8,9 +8,7 @@ import (
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
-	coordinationv1 "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
@@ -253,28 +251,8 @@ func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interf
 	if err != nil {
 		return false, fmt.Errorf("error getting event source pod name: %w", err)
 	}
-	podName := podList.Items[0].GetName()
-	if len(podList.Items) > 1 {
-		// HA
-		var l *coordinationv1.Lease
-		for {
-			l, err = kubeClient.CoordinationV1().Leases(namespace).Get(ctx, "eventsource-"+eventSourceName, metav1.GetOptions{})
-			if err != nil {
-				if !apierrors.IsNotFound(err) {
-					return false, fmt.Errorf("error getting event source Lease information: %w", err)
-				} else if err != nil && apierrors.IsNotFound(err) {
-					time.Sleep(2 * time.Second)
-					continue
-				}
-			}
-			break
-		}
-		podName = *l.Spec.HolderIdentity
-	}
-	fmt.Printf("EventSource POD name: %s\n", podName)
-	cctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	return podLogContains(cctx, kubeClient, namespace, podName, regex)
+
+	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout), nil
 }
 
 func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, sensorName, regex string, timeout time.Duration) (bool, error) {
@@ -283,28 +261,41 @@ func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, 
 	if err != nil {
 		return false, fmt.Errorf("error getting sensor pod name: %w", err)
 	}
-	podName := podList.Items[0].GetName()
-	if len(podList.Items) > 1 {
-		// HA
-		var l *coordinationv1.Lease
-		for {
-			l, err = kubeClient.CoordinationV1().Leases(namespace).Get(ctx, "sensor-"+sensorName, metav1.GetOptions{})
-			if err != nil {
-				if !apierrors.IsNotFound(err) {
-					return false, fmt.Errorf("error getting sensor Lease information: %w", err)
-				} else if err != nil && apierrors.IsNotFound(err) {
-					time.Sleep(2 * time.Second)
-					continue
-				}
-			}
-			break
-		}
-		podName = *l.Spec.HolderIdentity
-	}
-	fmt.Printf("Sensor POD name: %s\n", podName)
+
+	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout), nil
+}
+
+func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, regex string, podList *corev1.PodList, timeout time.Duration) bool {
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	return podLogContains(cctx, kubeClient, namespace, podName, regex)
+	errChan := make(chan error)
+	resultChan := make(chan bool)
+	for _, p := range podList.Items {
+		go func(podName string) {
+			fmt.Printf("Watching POD: %s\n", podName)
+			contains, err := podLogContains(cctx, kubeClient, namespace, podName, regex)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			if contains {
+				resultChan <- true
+			}
+		}(p.Name)
+	}
+
+	for {
+		select {
+		case <-cctx.Done():
+			return false
+		case result := <-resultChan:
+			if result {
+				return true
+			}
+		case err := <-errChan:
+			fmt.Printf("error: %v", err)
+		}
+	}
 }
 
 func podLogContains(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string) (bool, error) {
