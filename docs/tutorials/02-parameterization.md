@@ -17,7 +17,7 @@ with the event payload.
 
 ### Prerequisites
 
-Make sure to have the basic webhook event-source and sensor set up. Follow the [introduction](https://argoproj.github.io/argo-events/tutorials/01_introduction) tutorial if haven't done already.
+Make sure to have the basic webhook event-source and sensor set up. Follow the [introduction](https://argoproj.github.io/argo-events/tutorials/01-introduction) tutorial if haven't done already.
 
 ### Webhook Event Payload
 
