@@ -13,8 +13,8 @@ GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ;
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=argoproj
-VERSION?=v1.3.0-rc3
-BASE_VERSION:=v1.3.0-rc3
+VERSION?=v1.3.0-rc4
+BASE_VERSION:=v1.3.0-rc4
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
