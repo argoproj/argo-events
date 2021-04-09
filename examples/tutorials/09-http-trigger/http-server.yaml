@@ -5,7 +5,6 @@ metadata:
   labels:
     app: http-server
 spec:
-  serviceAccountName: argo-events-sa
   containers:
     - name: http-server
       image: metalgearsolid/http-server

@@ -32,7 +32,7 @@ A `Service Account` also can be specified in a Sensor object via
 `spec.template.serviceAccountName`, this is only needed when `k8s` trigger or
 `argoWorkflow` trigger is defined in the Sensor object.
 
-The sensor examples provided by us use `argo-events-sa` service account to
+The sensor examples provided by us use `operate-workflow-sa` service account to
 execute the triggers, but it has more permissions than needed, and you may want
 to limit those privileges based on your use-case. It's always a good practice to
 create a service account with minimum privileges to execute it.

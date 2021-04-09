@@ -9,7 +9,5 @@ elected to be active if the old one is gone.
 **Please DO NOT manually scale up the replicas, that might cause unexpected
 behaviors!**
 
-## More
-
-Check [this](../dr_ha_recommendations.md) out to learn more information about
-DR/HA.
+Click [here](../dr_ha_recommendations.md) to learn more information about Argo
+Events DR/HA recommendations.
