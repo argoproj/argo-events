@@ -3043,6 +3043,10 @@
       "description": "Template holds the information of a sensor deployment template",
       "type": "object",
       "properties": {
+        "affinity": {
+          "description": "If specified, the pod's scheduling constraints",
+          "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
+        },
         "container": {
           "description": "Container is the main container image to run in the sensor pod",
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"

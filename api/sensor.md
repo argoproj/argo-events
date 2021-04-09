@@ -2449,6 +2449,19 @@ value, the higher the priority. More info:
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>affinity</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+Kubernetes core/v1.Affinity </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+If specified, the pod’s scheduling constraints
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TimeFilter">
