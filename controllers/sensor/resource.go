@@ -295,6 +295,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		spec.Template.Spec.SecurityContext = args.Sensor.Spec.Template.SecurityContext
 		spec.Template.Spec.NodeSelector = args.Sensor.Spec.Template.NodeSelector
 		spec.Template.Spec.Tolerations = args.Sensor.Spec.Template.Tolerations
+		spec.Template.Spec.Affinity = args.Sensor.Spec.Template.Affinity
 		spec.Template.Spec.ImagePullSecrets = args.Sensor.Spec.Template.ImagePullSecrets
 		spec.Template.Spec.PriorityClassName = args.Sensor.Spec.Template.PriorityClassName
 		spec.Template.Spec.Priority = args.Sensor.Spec.Template.Priority
