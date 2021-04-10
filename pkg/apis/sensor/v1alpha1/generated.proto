@@ -626,6 +626,10 @@ message Template {
   // More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
   // +optional
   optional int32 priority = 10;
+
+  // If specified, the pod's scheduling constraints
+  // +optional
+  optional k8s.io.api.core.v1.Affinity affinity = 11;
 }
 
 // TimeFilter describes a window in time.

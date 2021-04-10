@@ -179,6 +179,9 @@ type Template struct {
 	// More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
 	// +optional
 	Priority *int32 `json:"priority,omitempty" protobuf:"bytes,10,opt,name=priority"`
+	// If specified, the pod's scheduling constraints
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,11,opt,name=affinity"`
 }
 
 // EventDependency describes a dependency
