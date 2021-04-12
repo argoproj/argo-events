@@ -4,7 +4,7 @@ metadata:
   name: context-filter
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   dependencies:
     - name: test-dep
       eventSourceName: webhook
@@ -27,7 +27,6 @@ spec:
               metadata:
                 generateName: data-workflow-
               spec:
-                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 arguments:
                   parameters:

@@ -4,7 +4,7 @@ metadata:
   name: gitlab
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   dependencies:
     - name: test-dep
       eventSourceName: gitlab
@@ -32,7 +32,6 @@ spec:
                     value: hello world
                 templates:
                 - name: whalesay
-                  serviceAccountName: argo-events-sa
                   inputs:
                     parameters:
                     - name: message

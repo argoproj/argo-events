@@ -4,7 +4,7 @@ metadata:
   name: redis
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   dependencies:
     - name: test-dep
       eventSourceName: redis
@@ -26,8 +26,7 @@ spec:
               spec:
                 entrypoint: whalesay
                 templates:
-                  -
-                    container:
+                  - container:
                       args:
                         - "hello" # it will get replaced by the event payload
                       command:
