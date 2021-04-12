@@ -4,7 +4,7 @@ metadata:
   name: multi-dependencies
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   # waits for both test-dependency-webhook and test-dependency-calendar to resolve
   dependencies:
     - name: test-dependency-webhook

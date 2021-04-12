@@ -12,7 +12,7 @@ spec:
       - name: workflow-file
         configMap:
           name: configmap-that-contains-the-workflow-definition
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   dependencies:
     - name: test-dep
       eventSourceName: webhook

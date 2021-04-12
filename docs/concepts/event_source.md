@@ -10,22 +10,24 @@ Available event-sources:
 1. AWS SQS
 1. Azure Events Hub
 1. Cron Schedules
+1. Emitter
+1. File Based Events
 1. GCP PubSub
+1. Generic EventSource
 1. GitHub
 1. GitLab
 1. HDFS
-1. File Based Events
+1. K8s Resources
 1. Kafka
 1. Minio
-1. NATS
 1. MQTT
-1. K8s Resources
+1. NATS
+1. Pulsar
 1. Slack
 1. NetApp StorageGrid
 1. Webhooks
 1. Stripe
 1. NSQ
-1. Emitter
 1. Redis
 
 

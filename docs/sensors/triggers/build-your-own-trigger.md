@@ -47,13 +47,6 @@ Let's look at the following sensor,
         metadata:
           name: webhook-sensor
         spec:
-          template:
-            spec:
-              containers:
-                - name: sensor
-                  image: metalgearsolid/sensor:v0.15.0
-                  imagePullPolicy: Always
-              serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               eventSourceName: webhook

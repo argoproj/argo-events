@@ -4,7 +4,7 @@ metadata:
   name: storage-grid
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   dependencies:
     - name: test-dep
       eventSourceName: storage-grid
@@ -24,7 +24,6 @@ spec:
               metadata:
                 generateName: storage-grid-wf-
               spec:
-                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 arguments:
                   parameters:

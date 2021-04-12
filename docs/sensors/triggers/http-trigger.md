@@ -184,8 +184,6 @@ to invoke OpenFaas function.
         metadata:
           name: redis-sensor
         spec:
-          template:
-            serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               eventSourceName: redis
@@ -233,8 +231,6 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
         metadata:
           name: nats-sensor
         spec:
-          template:
-            serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               eventSourceName: nats

@@ -4,7 +4,7 @@ metadata:
   name: circuit
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   dependencies:
     - name: test-dep-webhook
       eventSourceName: webhook
@@ -31,7 +31,6 @@ spec:
               metadata:
                 generateName: group-1-
               spec:
-                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 templates:
                   - name: whalesay
@@ -61,7 +60,6 @@ spec:
               metadata:
                 generateName: group-2-
               spec:
-                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 templates:
                   - name: whalesay
