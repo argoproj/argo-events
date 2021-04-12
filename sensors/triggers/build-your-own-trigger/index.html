@@ -1450,13 +1450,6 @@ run a gRPC server that implements the interface that the sensor expects.</p>
     <span class="n">metadata</span><span class="o">:</span>
       <span class="k">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
     <span class="n">spec</span><span class="o">:</span>
-      <span class="n">template</span><span class="o">:</span>
-        <span class="n">spec</span><span class="o">:</span>
-          <span class="n">containers</span><span class="o">:</span>
-            <span class="o">-</span> <span class="k">name</span><span class="o">:</span> <span class="n">sensor</span>
-              <span class="n">image</span><span class="o">:</span> <span class="n">metalgearsolid</span><span class="o">/</span><span class="n">sensor</span><span class="o">:</span><span class="n">v0</span><span class="mf">.15.0</span>
-              <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="k">Always</span>
-          <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">-</span><span class="n">sa</span>
       <span class="n">dependencies</span><span class="o">:</span>
         <span class="o">-</span> <span class="k">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
           <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">webhook</span>

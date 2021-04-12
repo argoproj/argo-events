@@ -1425,7 +1425,7 @@ set up event-driven pipelines for existing workloads.</p>
   <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span>
 <span class="n">spec</span><span class="o">:</span>
   <span class="n">template</span><span class="o">:</span>
-    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">create</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">sa</span> <span class="err">#</span> <span class="n">A</span> <span class="n">service</span> <span class="n">account</span> <span class="n">has</span> <span class="n">privileges</span> <span class="n">to</span> <span class="n">create</span> <span class="n">a</span> <span class="n">Pod</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
       <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">webhook</span>

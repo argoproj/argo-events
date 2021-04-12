@@ -1634,8 +1634,6 @@ to invoke OpenFaas function.</p>
 <span class="n">metadata</span><span class="p">:</span>
   <span class="n">name</span><span class="p">:</span> <span class="n">redis</span><span class="o">-</span><span class="n">sensor</span>
 <span class="n">spec</span><span class="p">:</span>
-  <span class="n">template</span><span class="p">:</span>
-    <span class="n">serviceAccountName</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="p">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
       <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">redis</span>
@@ -1694,8 +1692,6 @@ to invoke OpenFaas function.</p>
 <span class="n">metadata</span><span class="p">:</span>
   <span class="n">name</span><span class="p">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">sensor</span>
 <span class="n">spec</span><span class="p">:</span>
-  <span class="n">template</span><span class="p">:</span>
-    <span class="n">serviceAccountName</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="p">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
       <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">nats</span>

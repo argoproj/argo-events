@@ -1379,20 +1379,28 @@
                 
                 
                 <h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h1>
-<p>In the tutorials, we will cover every aspect of Argo Events and demonstrate how you 
-can leverage these features to build an event driven workflow pipeline. All the concepts you will learn
-in this tutorial and subsequent ones can be applied to any type of event-source.</p>
+<p>In the tutorials, we will cover every aspect of Argo Events and demonstrate how
+you can leverage these features to build an event driven workflow pipeline. All
+the concepts you will learn in this tutorial and subsequent ones can be applied
+to any type of event-source.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Follow the installation guide to set up the Argo Events. </li>
+<li>Follow the installation guide to set up the Argo Events.</li>
 <li>Make sure to configure Argo Workflow controller to listen to workflow objects
-created in <code>argo-events</code> namespace.</li>
-<li>Make sure to read the concepts behind <a href="https://argoproj.github.io/argo-events/concepts/eventbus/">eventbus</a>,
-<a href="https://argoproj.github.io/argo-events/concepts/sensor/">sensor</a>,
-<a href="https://argoproj.github.io/argo-events/concepts/event_source/">event source</a>.</li>
+  created in <code>argo-events</code> namespace.</li>
+<li>Make sure to read the concepts behind
+  <a href="https://argoproj.github.io/argo-events/concepts/eventbus/">eventbus</a>,
+  <a href="https://argoproj.github.io/argo-events/concepts/sensor/">sensor</a>,
+  <a href="https://argoproj.github.io/argo-events/concepts/event_source/">event source</a>.</li>
+<li>Follow the
+  <a href="https://github.com/argoproj/argo-events/tree/master/examples">instruction</a> to
+  create a Service Account <code>operate-workflow-sa</code> with proper privileges, and
+  make sure the Service Account used by Workflows (here we use <code>default</code> in the
+  turorials for demostration purpose) has proper RBAC settings.</li>
 </ul>
 <h2 id="get-started">Get Started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
-<p>We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.</p>
+<p>We are going to set up a sensor and event-source for webhook. The goal is to
+trigger an Argo workflow upon a HTTP Post request.</p>
 <ul>
 <li>
 <p>Let' set up the eventbus,</p>
@@ -1413,17 +1421,20 @@ created in <code>argo-events</code> namespace.</li>
 
 </li>
 </ul>
-<p>If the commands are executed successfully, the eventbus, event-source and sensor pods will get created. You will
-also notice that a service is created for the event-source. </p>
+<p>If the commands are executed successfully, the eventbus, event-source and sensor
+pods will get created. You will also notice that a service is created for the
+event-source.</p>
 <ul>
 <li>
-<p>Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
+<p>Expose the event-source pod via Ingress, OpenShift Route or port forward to
+  consume requests over HTTP.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;event-source-pod-name&gt; 12000:12000
 </code></pre></div>
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the
+  <code>http://localhost:12000/example</code></p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1436,7 +1447,7 @@ also notice that a service is created for the event-source. </p>
 </li>
 <li>
 <p>Make sure the workflow pod ran successfully.</p>
-<div class="codehilite"><pre><span></span><code>_________________________________________ 
+<div class="codehilite"><pre><span></span><code>_________________________________________
 / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
 | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
 | ventID&quot;:&quot;38376665363064642d343336352d34 |
@@ -1450,44 +1461,42 @@ also notice that a service is created for the event-source. </p>
 | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
 | jp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0 |
 \ IHdlYmhvb2sifX0=&quot;}                      /
- ----------------------------------------- 
+ -----------------------------------------
     \
      \
-      \     
-                    ##        .            
-              ## ## ##       ==            
-           ## ## ## ##      ===            
-       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-       \______ o          __/            
-        \    \        __/             
+      \
+                    ##        .
+              ## ## ##       ==
+           ## ## ## ##      ===
+       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+       \______ o          __/
+        \    \        __/
           \____\______/
 </code></pre></div>
 
 </li>
 </ul>
-<p><b>Note:</b> You will see the message printed in the workflow logs contains both the event context
-and data, with data being base64 encoded. In later sections, we will see how to extract particular key-value
-from event context or data and pass it to the workflow as arguments.</p>
+<p><b>Note:</b> You will see the message printed in the workflow logs contains both
+the event context and data, with data being base64 encoded. In later sections,
+we will see how to extract particular key-value from event context or data and
+pass it to the workflow as arguments.</p>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>
 <p>If you don't see the event-source and sensor pod in <code>argo-events</code> namespace,</p>
 <ol>
-<li>
-<p>Inspect the event-source</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get eventsource event-source-object-name -o yaml
-</code></pre></div>
-
+<li>Inspect the event-source</li>
+</ol>
+<p>kubectl -n argo-events get eventsource event-source-object-name -o yaml</p>
 <p>Inspect the sensor,</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get sensor sensor-object-name -o yaml
-</code></pre></div>
-
-<p>and look for any errors within the <code>Status</code>.
-  2. Make sure the correct Role and RoleBindings are applied to the service account
- and there are no errors in both event-source and sensor controller.
-  3. Check the logs of event-source and sensor controller. Make sure the controllers
- have processed the event-source and sensor objects and there are no errors.
-  4. Raise an issue on GitHub or post a question on <code>argo-events</code> slack channel.</p>
-</li>
+<p>kubectl -n argo-events get sensor sensor-object-name -o yaml</p>
+<p>and look for any errors within the <code>Status</code>.</p>
+<ol>
+<li>Make sure the correct Role and RoleBindings are applied to the service
+   account and there are no errors in both event-source and sensor controller.</li>
+<li>Check the logs of event-source and sensor controller. Make sure the
+   controllers have processed the event-source and sensor objects and there are
+   no errors.</li>
+<li>Raise an issue on GitHub or post a question on <code>argo-events</code> slack channel.</li>
 </ol>
                 
                   

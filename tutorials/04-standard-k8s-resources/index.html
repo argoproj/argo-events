@@ -1379,30 +1379,57 @@
                 
                 
                 <h1 id="trigger-standard-k8s-resources">Trigger Standard K8s Resources<a class="headerlink" href="#trigger-standard-k8s-resources" title="Permanent link">&para;</a></h1>
-<p>In the previous sections, you saw how to trigger the Argo workflows. In this tutorial, you 
-will see how to trigger Pod and Deployment. </p>
+<p>In the previous sections, you saw how to trigger the Argo workflows. In this
+tutorial, you will see how to trigger Pod and Deployment.</p>
 <p><strong>Note:</strong> You can trigger any standard Kubernetes object.</p>
-<p>Having the ability to trigger standard Kubernetes resources is quite powerful as provides an avenue to
-set up pipelines for existing workloads.</p>
+<p>Having the ability to trigger standard Kubernetes resources is quite powerful as
+provides an avenue to set up pipelines for existing workloads.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Make sure that <code>argo-events-sa</code> service account has necessary permissions to 
-create the Kubernetes resource of your choice.</li>
-<li>The <code>Webhook</code> event-source is already set up.</li>
+<li>
+<p>Make sure that the service account used by the Sensor has necessary
+    permissions to create the Kubernetes resource of your choice. We use
+    <code>k8s-resource-sa</code> for below examples, it should be bound to a Role like
+    following.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">rbac</span><span class="o">.</span><span class="na">authorization</span><span class="o">.</span><span class="na">k8s</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span> <span class="n">Role</span>
+<span class="n">metadata</span><span class="o">:</span>
+  <span class="n">name</span><span class="o">:</span> <span class="n">create</span><span class="o">-</span><span class="n">deploy</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">role</span>
+<span class="n">rules</span><span class="o">:</span>
+  <span class="o">-</span> <span class="n">apiGroups</span><span class="o">:</span>
+      <span class="o">-</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">resources</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">pods</span>
+    <span class="n">verbs</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">create</span>
+  <span class="o">-</span> <span class="n">apiGroups</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">apps</span>
+    <span class="n">resources</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">deployments</span>
+    <span class="n">verbs</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">create</span>
+</code></pre></div>
+
+</li>
+<li>
+<p>The <code>Webhook</code> event-source is already set up.</p>
+</li>
 </ol>
 <h2 id="pod">Pod<a class="headerlink" href="#pod" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Create a sensor with K8s trigger. Pay close attention to the <code>group</code>, <code>version</code> and <code>kind</code>
-   keys within the trigger resource. These keys determine the type of kubernetes object.</li>
-</ol>
-<p>You will notice that the <code>group</code> key is empty, that means we want to use <code>core</code> group.
-   For any other groups, you need to specify the <code>group</code> key.</p>
-<div class="codehilite"><pre><span></span><code>    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
+<li>
+<p>Create a sensor with K8s trigger. Pay close attention to the <code>group</code>,
+    <code>version</code> and <code>kind</code> keys within the trigger resource. These keys determine
+    the type of kubernetes object.</p>
+<p>You will notice that the <code>group</code> key is empty, that means we want to use
+<code>core</code> group. For any other groups, you need to specify the <code>group</code> key.</p>
+<div class="codehilite"><pre><span></span><code> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
 </code></pre></div>
 
-<ol>
+</li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the
+    <code>http://localhost:12000/example</code></p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1415,7 +1442,7 @@ create the Kubernetes resource of your choice.</li>
 </li>
 </ol>
 <p>Output</p>
-<div class="codehilite"><pre><span></span><code>    _________________________________________ 
+<div class="codehilite"><pre><span></span><code>    _________________________________________
     / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
     | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
     | ventID&quot;:&quot;30306463666539362d346666642d34 |
@@ -1428,17 +1455,17 @@ create the Kubernetes resource of your choice.</li>
     | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
     | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
     \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;}       /
-    ----------------------------------------- 
+    -----------------------------------------
       \
        \
-        \     
-                      ##        .            
-                ## ## ##       ==            
-             ## ## ## ##      ===            
-         /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-         \______ o          __/            
-          \    \        __/             
+        \
+                      ##        .
+                ## ## ##       ==
+             ## ## ## ##      ===
+         /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+         \______ o          __/
+          \    \        __/
             \____\______/
 </code></pre></div>
 
@@ -1451,7 +1478,8 @@ create the Kubernetes resource of your choice.</li>
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the
+    <code>http://localhost:12000/example</code></p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1464,7 +1492,7 @@ create the Kubernetes resource of your choice.</li>
 </li>
 </ol>
 <p>Output</p>
-<div class="codehilite"><pre><span></span><code>    _________________________________________ 
+<div class="codehilite"><pre><span></span><code>    _________________________________________
     / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
     | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
     | ventID&quot;:&quot;30306463666539362d346666642d34 |
@@ -1477,17 +1505,17 @@ create the Kubernetes resource of your choice.</li>
     | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
     | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
     \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;}       /
-    ----------------------------------------- 
+    -----------------------------------------
       \
        \
-        \     
-                      ##        .            
-                ## ## ##       ==            
-             ## ## ## ##      ===            
-         /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-         \______ o          __/            
-          \    \        __/             
+        \
+                      ##        .
+                ## ## ##       ==
+             ## ## ## ##      ===
+         /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+         \______ o          __/
+          \    \        __/
             \____\______/
 </code></pre></div>
                 

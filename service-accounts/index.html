@@ -1464,7 +1464,7 @@ kubectl create clusterrolebinding deployments-watcher-clusterrole-binding --clus
 <p>A <code>Service Account</code> also can be specified in a Sensor object via
 <code>spec.template.serviceAccountName</code>, this is only needed when <code>k8s</code> trigger or
 <code>argoWorkflow</code> trigger is defined in the Sensor object.</p>
-<p>The sensor examples provided by us use <code>argo-events-sa</code> service account to
+<p>The sensor examples provided by us use <code>operate-workflow-sa</code> service account to
 execute the triggers, but it has more permissions than needed, and you may want
 to limit those privileges based on your use-case. It's always a good practice to
 create a service account with minimum privileges to execute it.</p>

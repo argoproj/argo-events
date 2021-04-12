@@ -1448,9 +1448,10 @@
                 
                 <h1 id="argo-events-the-event-driven-workflow-automation-framework">Argo Events - The Event-driven Workflow Automation Framework<a class="headerlink" href="#argo-events-the-event-driven-workflow-automation-framework" title="Permanent link">&para;</a></h1>
 <h2 id="what-is-argo-events">What is Argo Events?<a class="headerlink" href="#what-is-argo-events" title="Permanent link">&para;</a></h2>
-<p><strong>Argo Events</strong> is an event-driven workflow automation framework for Kubernetes 
-which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. 
-on events from variety of sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.</p>
+<p><strong>Argo Events</strong> is an event-driven workflow automation framework for Kubernetes
+which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc.
+on events from variety of sources like webhook, s3, schedules, messaging queues,
+gcp pubsub, sns, sqs, etc.</p>
 <p><br/>
 <br/></p>
 <p align="center">
@@ -1462,17 +1463,20 @@ on events from variety of sources like webhook, s3, schedules, messaging queues,
 <ul>
 <li>Supports events from 20+ event sources.</li>
 <li>Ability to customize business-level constraint logic for workflow automation.</li>
-<li>Manage everything from simple, linear, real-time to complex, multi-source events.</li>
-<li>Supports Kubernetes Objects, Argo Workflow, AWS Lambda, Serverless, etc. as triggers.</li>
+<li>Manage everything from simple, linear, real-time to complex, multi-source
+  events.</li>
+<li>Supports Kubernetes Objects, Argo Workflow, AWS Lambda, Serverless, etc. as
+  triggers.</li>
 <li><a href="https://cloudevents.io/">CloudEvents</a> compliant.</li>
 </ul>
 <h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
-<p>Follow these <a href="https://argoproj.github.io/argo-events/installation/">instruction</a> to set up Argo Events.</p>
+<p>Follow these <a href="https://argoproj.github.io/argo-events/installation/">instruction</a>
+to set up Argo Events.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://argoproj.github.io/argo-events/concepts/architecture/">Concepts</a>.</li>
 <li><a href="https://argoproj.github.io/argo-events/quick_start/">Argo Events in action</a>.</li>
-<li><a href="https://argoproj.github.io/argo-events/tutorials/01-introduction/">Deep dive into Argo Events</a>.  </li>
+<li><a href="https://argoproj.github.io/argo-events/tutorials/01-introduction/">Deep dive into Argo Events</a>.</li>
 </ul>
 <h2 id="triggers">Triggers<a class="headerlink" href="#triggers" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1483,30 +1487,28 @@ on events from variety of sources like webhook, s3, schedules, messaging queues,
 <li>NATS Messages</li>
 <li>Kafka Messages</li>
 <li>Slack Notifications</li>
+<li>Azure Event Hubs Messages</li>
 <li>Argo Rollouts</li>
 <li>Custom Trigger / Build Your Own Trigger</li>
 <li>Apache OpenWhisk</li>
+<li>Log Trigger</li>
 </ol>
 <h2 id="event-sources">Event Sources<a class="headerlink" href="#event-sources" title="Permanent link">&para;</a></h2>
-<p>Argo-Events supports 20+ event sources. The complete list of event sources is available <a href="https://argoproj.github.io/argo-events/concepts/event_source/">here</a>.</p>
+<p>Argo Events supports 20+ event sources. The complete list of event sources is
+available <a href="https://argoproj.github.io/argo-events/concepts/event_source/">here</a>.</p>
 <h2 id="who-uses-argo-events">Who uses Argo Events?<a class="headerlink" href="#who-uses-argo-events" title="Permanent link">&para;</a></h2>
-<p>Organizations below are <strong>officially</strong> using Argo Events. Please send a PR with your organization name if you are using Argo Events.</p>
-<ol>
-<li><a href="https://biobox.io">BioBox Analytics</a></li>
-<li><a href="https://www.blackrock.com/">BlackRock</a></li>
-<li><a href="https://www.canva.com/">Canva</a></li>
-<li><a href="https://fairwinds.com/">Fairwinds</a></li>
-<li><a href="https://www.insideboard.com">InsideBoard</a></li>
-<li><a href="https://www.intuit.com/">Intuit</a></li>
-<li><a href="https://www.viaduct.ai/">Viaduct</a></li>
-</ol>
+<p>Check the <a href="https://github.com/argoproj/argo-events/blob/master/USERS.md">list</a>
+to see who are <strong>officially</strong> using Argo Events. Please send a PR with your
+organization name if you are using Argo Events.</p>
 <h2 id="community-blogs-and-presentations">Community Blogs and Presentations<a class="headerlink" href="#community-blogs-and-presentations" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://youtu.be/XNXJtxkUKeY">Automation of Everything - How To Combine Argo Events, Workflows &amp; Pipelines, CD, and Rollouts</a></li>
 <li><a href="https://youtu.be/sUPkGChvD54">Argo Events - Event-Based Dependency Manager for Kubernetes</a></li>
+<li><a href="https://youtu.be/U4tCYcCK20w">Argo Events Deep-dive</a></li>
 <li><a href="https://www.youtube.com/watch?v=ZK510prml8o">Automating Research Workflows at BlackRock</a></li>
 <li><a href="https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500">Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD</a></li>
-<li>TGI Kubernetes with Joe Beda: <a href="https://www.youtube.com/watch?v=LQbBgQnUs_k&amp;list=PL7bmigfV0EqQzxcNpmcdTJ9eFRPBe-iZa&amp;index=2&amp;t=0s">CloudEvents and Argo Events</a></li>
+<li>TGI Kubernetes with Joe Beda:
+  <a href="https://www.youtube.com/watch?v=LQbBgQnUs_k&amp;list=PL7bmigfV0EqQzxcNpmcdTJ9eFRPBe-iZa&amp;index=2&amp;t=0s">CloudEvents and Argo Events</a></li>
 </ul>
                 
                   
