@@ -4,7 +4,7 @@ metadata:
   name: webhook
 spec:
   template:
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   # defines list of all events sensor will accept
   dependencies:
     - name: test-dep

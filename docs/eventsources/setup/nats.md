@@ -65,7 +65,6 @@ NATS event-source specification is available [here](https://github.com/argoproj/
               labels:
                 component: nats
             spec:
-              serviceAccountName: argo-events-sa
               containers:
               - name: nats
                 image: nats:latest

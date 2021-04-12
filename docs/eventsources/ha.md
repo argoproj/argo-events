@@ -53,5 +53,5 @@ old one is gone.
 
 ## More
 
-Check [this](../dr_ha_recommendations.md) out to learn more information about
-DR/HA.
+Click [here](../dr_ha_recommendations.md) to learn more information about Argo
+Events DR/HA recommendations.

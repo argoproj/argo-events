@@ -30,7 +30,7 @@ set up event-driven pipelines for existing workloads.
           name: webhook
         spec:
           template:
-            serviceAccountName: argo-events-sa
+            serviceAccountName: create-pod-sa # A service account has privileges to create a Pod
           dependencies:
             - name: test-dep
               eventSourceName: webhook

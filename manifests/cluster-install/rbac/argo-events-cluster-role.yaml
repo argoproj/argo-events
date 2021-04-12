@@ -4,20 +4,6 @@ metadata:
   name: argo-events-role
 rules:
   - apiGroups:
-      - apiextensions.k8s.io
-      - apiextensions.k8s.io/v1beta1
-    verbs:
-      - create
-      - delete
-      - deletecollection
-      - get
-      - list
-      - patch
-      - update
-      - watch
-    resources:
-      - customresourcedefinitions
-  - apiGroups:
       - argoproj.io
     verbs:
       - create
@@ -29,14 +15,6 @@ rules:
       - update
       - watch
     resources:
-      - workflows
-      - workflows/finalizers
-      - workflowtemplates
-      - workflowtemplates/finalizers
-      - cronworkflows
-      - cronworkflows/finalizers
-      - clusterworkflowtemplates
-      - clusterworkflowtemplates/finalizers
       - sensors
       - sensors/finalizers
       - sensors/status
@@ -54,20 +32,7 @@ rules:
       - configmaps
       - secrets
       - services
-      - events
       - persistentvolumeclaims
-    verbs:
-      - create
-      - get
-      - list
-      - watch
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - batch
-    resources:
-      - jobs
     verbs:
       - create
       - get

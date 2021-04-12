@@ -24,7 +24,7 @@ spec:
       - name: known-hosts
         secret:
           secretName: git-known-hosts
-    serviceAccountName: argo-events-sa
+    serviceAccountName: operate-workflow-sa
   dependencies:
     - name: test-dep
       eventSourceName: webhook
