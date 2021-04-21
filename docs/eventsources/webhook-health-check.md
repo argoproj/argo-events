@@ -1,9 +1,5 @@
 # Webhook Health Check
 
-![GA](../assets/ga.svg)
-
-> v1.0 and after
-
 For `webhook` or `webhook` extended event sources such as `github`, `gitlab`,
 `sns`, `slack`, `Storage GRID` and `stripe`, besides the endpoint configured in
 the spec, an extra endpoint `:${port}/health` will also be created, this is
