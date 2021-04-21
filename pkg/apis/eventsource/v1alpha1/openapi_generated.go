@@ -55,6 +55,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSAuth":                  schema_pkg_apis_eventsource_v1alpha1_NATSAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource":          schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource":            schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories":         schema_pkg_apis_eventsource_v1alpha1_OwnedRepositories(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource":         schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource":         schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource":          schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref),
@@ -1262,11 +1263,17 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 				Description: "GithubEventSource refers to event-source for github related events",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"id": {
+					"repositories": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Id is the webhook's id",
-							Type:        []string{"integer"},
-							Format:      "int64",
+							Description: "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories"),
+									},
+								},
+							},
 						},
 					},
 					"webhook": {
@@ -1277,14 +1284,14 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 					},
 					"owner": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Owner refers to GitHub owner name i.e. argoproj",
+							Description: "DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated: use Repositories instead. Will be unsupported in v 1.6",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"repository": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repository refers to GitHub repo name i.e. argo-events",
+							Description: "DeprecatedRepository refers to GitHub repo name i.e. argo-events Deprecated: use Repositories instead. Will be unsupported in v 1.6",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1372,11 +1379,11 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"id", "owner", "repository", "events"},
+				Required: []string{"owner", "repository", "events"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1963,6 +1970,39 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_OwnedRepositories(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"owner": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Orgnization or user name",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"names": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Repository names",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 

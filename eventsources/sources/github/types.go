@@ -56,8 +56,9 @@ type Router struct {
 	githubEventSource *v1alpha1.GithubEventSource
 	// githubClient is the client to connect to GitHub
 	githubClient *github.Client
-	// hook represents a GitHub (web and service) hook for a repository.
-	hook *github.Hook
+	// hookIDs represents GitHub (web and service) hook ID for repositories.
+	// The map key is the combo of owner and repo name
+	hookIDs map[string]int64
 	// hookSecret is a GitHub webhook secret
 	hookSecret string
 }

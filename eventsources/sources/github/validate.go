@@ -31,15 +31,13 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	if githubEventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if githubEventSource.Repository == "" {
-		return fmt.Errorf("repository cannot be empty")
+	if githubEventSource.GetOwnedRepositories() == nil {
+		return fmt.Errorf("no valid repository owner and name found")
 	}
-	if githubEventSource.Owner == "" {
-		return fmt.Errorf("owner cannot be empty")
+	if githubEventSource.APIToken != nil && githubEventSource.Webhook.URL != "" && len(githubEventSource.Events) == 0 {
+		return fmt.Errorf("events must be defined to create a github webhook")
 	}
-	if githubEventSource.Events == nil || len(githubEventSource.Events) < 1 {
-		return fmt.Errorf("events must be defined")
-	}
+
 	if githubEventSource.ContentType != "" {
 		if !(githubEventSource.ContentType == "json" || githubEventSource.ContentType == "form") {
 			return fmt.Errorf("content type must be \"json\" or \"form\"")

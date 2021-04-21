@@ -651,16 +651,26 @@ type PubSubEventSource struct {
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 }
 
+type OwnedRepositories struct {
+	// Orgnization or user name
+	Owner string `json:"owner,omitempty" protobuf:"bytes,1,opt,name=owner"`
+	// Repository names
+	Names []string `json:"names,omitempty" protobuf:"bytes,2,rep,name=names"`
+}
+
 // GithubEventSource refers to event-source for github related events
 type GithubEventSource struct {
-	// Id is the webhook's id
-	ID int64 `json:"id" protobuf:"varint,1,opt,name=id"`
+	// Repositories holds the information of repositories, which uses repo owner as the key,
+	// and list of repo names as the value
+	Repositories []OwnedRepositories `json:"repositories,omitempty" protobuf:"bytes,1,rep,name=repositories"`
 	// Webhook refers to the configuration required to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,2,opt,name=webhook"`
-	// Owner refers to GitHub owner name i.e. argoproj
-	Owner string `json:"owner" protobuf:"bytes,3,opt,name=owner"`
-	// Repository refers to GitHub repo name i.e. argo-events
-	Repository string `json:"repository" protobuf:"bytes,4,opt,name=repository"`
+	// DeprecatedOwner refers to GitHub owner name i.e. argoproj
+	// Deprecated: use Repositories instead. Will be unsupported in v 1.6
+	DeprecatedOwner string `json:"owner" protobuf:"bytes,3,opt,name=owner"`
+	// DeprecatedRepository refers to GitHub repo name i.e. argo-events
+	// Deprecated: use Repositories instead. Will be unsupported in v 1.6
+	DeprecatedRepository string `json:"repository" protobuf:"bytes,4,opt,name=repository"`
 	// Events refer to Github events to subscribe to which the event source will subscribe
 
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
@@ -691,6 +701,22 @@ type GithubEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,14,rep,name=metadata"`
+}
+
+func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {
+	if len(g.Repositories) > 0 {
+		return g.Repositories
+	} else if g.DeprecatedOwner != "" && g.DeprecatedRepository != "" {
+		return []OwnedRepositories{
+			{
+				Owner: g.DeprecatedOwner,
+				Names: []string{
+					g.DeprecatedRepository,
+				},
+			},
+		}
+	}
+	return nil
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events

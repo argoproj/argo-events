@@ -1980,11 +1980,14 @@ Description
 <tbody>
 <tr>
 <td>
-<code>id</code></br> <em> int64 </em>
+<code>repositories</code></br> <em>
+<a href="#argoproj.io/v1alpha1.OwnedRepositories"> \[\]OwnedRepositories
+</a> </em>
 </td>
 <td>
 <p>
-Id is the webhook’s id
+Repositories holds the information of repositories, which uses repo
+owner as the key, and list of repo names as the value
 </p>
 </td>
 </tr>
@@ -2006,7 +2009,8 @@ Webhook refers to the configuration required to run a http server
 </td>
 <td>
 <p>
-Owner refers to GitHub owner name i.e. argoproj
+DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated:
+use Repositories instead. Will be unsupported in v 1.6
 </p>
 </td>
 </tr>
@@ -2016,7 +2020,8 @@ Owner refers to GitHub owner name i.e. argoproj
 </td>
 <td>
 <p>
-Repository refers to GitHub repo name i.e. argo-events
+DeprecatedRepository refers to GitHub repo name i.e. argo-events
+Deprecated: use Repositories instead. Will be unsupported in v 1.6
 </p>
 </td>
 </tr>
@@ -2993,6 +2998,49 @@ TLS configuration for the nsq client.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.OwnedRepositories">
+OwnedRepositories
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>owner</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Orgnization or user name
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>names</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Repository names
 </p>
 </td>
 </tr>
