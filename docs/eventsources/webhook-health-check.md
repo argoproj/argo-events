@@ -11,7 +11,7 @@ useful for LB or Ingress configuration for the event source, where usually a
 health check endpoint is required.
 
 For example, the following EventSource object will have 4 endpoints created,
-`:12000/example1`, `:12000/health`, `:13000/example2` and `:13000/health`. A
+`:12000/example1`, `:12000/health`, `:13000/example2` and `:13000/health`. An
 HTTP GET request to the health endpoint returns a text `OK` with HTTP response
 code `200`.
 
