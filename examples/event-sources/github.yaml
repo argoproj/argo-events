@@ -10,10 +10,11 @@ spec:
         targetPort: 12000
   github:
     example:
-      # owner of the repo
-      owner: argoproj
-      # repository name
-      repository: argo-events
+      repositories:
+        - owner: argoproj
+          names:
+            - argo-events
+            - argo-workflows
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
