@@ -487,20 +487,24 @@ type KafkaTrigger struct {
 	// Defaults to 500 milliseconds.
 	// +optional
 	FlushFrequency int32 `json:"flushFrequency,omitempty" protobuf:"varint,7,opt,name=flushFrequency"`
+	// SASL configuration for the kafka client
+	// +optional
+	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,8,opt,name=sasl"`
+
 	// TLS configuration for the Kafka producer.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,9,opt,name=tls"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 
-	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,10,rep,name=payload"`
 	// The partitioning key for the messages put on the Kafka topic.
 	// Defaults to broker url.
 	// +optional.
-	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
+	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,11,opt,name=partitioningKey"`
 
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
-	Version string `json:"version,omitempty" protobuf:"bytes,11,opt,name=version"`
+	Version string `json:"version,omitempty" protobuf:"bytes,12,opt,name=version"`
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.
