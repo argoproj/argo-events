@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -40,13 +41,16 @@ var sensorObj = &v1alpha1.Sensor{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
 					Kafka: &v1alpha1.KafkaTrigger{
-						URL:             "fake-kafka-url",
-						Topic:           "fake-topic",
-						Partition:       0,
-						Parameters:      nil,
-						RequiredAcks:    1,
-						Compress:        false,
-						FlushFrequency:  0,
+						URL:            "fake-kafka-url",
+						Topic:          "fake-topic",
+						Partition:      0,
+						Parameters:     nil,
+						RequiredAcks:   1,
+						Compress:       false,
+						FlushFrequency: 0,
+						SASL: &apicommon.SASLConfig{
+							Mechanism: "PLAIN",
+						},
 						TLS:             nil,
 						Payload:         nil,
 						PartitioningKey: "",
@@ -59,6 +63,18 @@ var sensorObj = &v1alpha1.Sensor{
 
 func getFakeKafkaTrigger(producers map[string]sarama.AsyncProducer) (*KafkaTrigger, error) {
 	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
+}
+
+func TestNewKafkaTrigger(t *testing.T) {
+	producer := mocks.NewAsyncProducer(t, nil)
+	producers := map[string]sarama.AsyncProducer{
+		"fake-trigger": producer,
+	}
+	trigger, err := NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
+
+	assert.Nil(t, err)
+	assert.Equal(t, trigger.Trigger.Template.Kafka.URL, "fake-kafka-url")
+	assert.Equal(t, trigger.Trigger.Template.Kafka.SASL.Mechanism, "PLAIN")
 }
 
 func TestKafkaTrigger_FetchResource(t *testing.T) {
