@@ -1914,16 +1914,14 @@ Kubernetes core/v1.SecretKeySelector
 <tbody>
 <tr>
 <td>
-<code>repositories</code></br>
+<code>id</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.OwnedRepositories">
-[]OwnedRepositories
-</a>
+int64
 </em>
 </td>
 <td>
-<p>Repositories holds the information of repositories, which uses repo owner as the key,
-and list of repo names as the value</p>
+<p>Id is the webhook&rsquo;s id
+Deprecated: This is not used at all, will be removed in v1.6</p>
 </td>
 </tr>
 <tr>
@@ -2083,6 +2081,20 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.OwnedRepositories">
+[]OwnedRepositories
+</a>
+</em>
+</td>
+<td>
+<p>Repositories holds the information of repositories, which uses repo owner as the key,
+and list of repo names as the value</p>
 </td>
 </tr>
 </tbody>

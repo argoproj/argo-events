@@ -1980,14 +1980,12 @@ Description
 <tbody>
 <tr>
 <td>
-<code>repositories</code></br> <em>
-<a href="#argoproj.io/v1alpha1.OwnedRepositories"> \[\]OwnedRepositories
-</a> </em>
+<code>id</code></br> <em> int64 </em>
 </td>
 <td>
 <p>
-Repositories holds the information of repositories, which uses repo
-owner as the key, and list of repo names as the value
+Id is the webhook’s id Deprecated: This is not used at all, will be
+removed in v1.6
 </p>
 </td>
 </tr>
@@ -2134,6 +2132,19 @@ repository once the event source is stopped.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code></br> <em>
+<a href="#argoproj.io/v1alpha1.OwnedRepositories"> \[\]OwnedRepositories
+</a> </em>
+</td>
+<td>
+<p>
+Repositories holds the information of repositories, which uses repo
+owner as the key, and list of repo names as the value
 </p>
 </td>
 </tr>

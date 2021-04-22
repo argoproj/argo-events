@@ -660,9 +660,9 @@ type OwnedRepositories struct {
 
 // GithubEventSource refers to event-source for github related events
 type GithubEventSource struct {
-	// Repositories holds the information of repositories, which uses repo owner as the key,
-	// and list of repo names as the value
-	Repositories []OwnedRepositories `json:"repositories,omitempty" protobuf:"bytes,1,rep,name=repositories"`
+	// Id is the webhook's id
+	// Deprecated: This is not used at all, will be removed in v1.6
+	ID int64 `json:"id" protobuf:"varint,1,opt,name=id"`
 	// Webhook refers to the configuration required to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,2,opt,name=webhook"`
 	// DeprecatedOwner refers to GitHub owner name i.e. argoproj
@@ -701,6 +701,9 @@ type GithubEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,14,rep,name=metadata"`
+	// Repositories holds the information of repositories, which uses repo owner as the key,
+	// and list of repo names as the value
+	Repositories []OwnedRepositories `json:"repositories,omitempty" protobuf:"bytes,15,rep,name=repositories"`
 }
 
 func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {

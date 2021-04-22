@@ -1263,17 +1263,11 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 				Description: "GithubEventSource refers to event-source for github related events",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"repositories": {
+					"id": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories"),
-									},
-								},
-							},
+							Description: "Id is the webhook's id Deprecated: This is not used at all, will be removed in v1.6",
+							Type:        []string{"integer"},
+							Format:      "int64",
 						},
 					},
 					"webhook": {
@@ -1378,8 +1372,21 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							},
 						},
 					},
+					"repositories": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories"),
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"owner", "repository", "events"},
+				Required: []string{"id", "owner", "repository", "events"},
 			},
 		},
 		Dependencies: []string{

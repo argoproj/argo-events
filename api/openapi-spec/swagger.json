@@ -1108,6 +1108,7 @@
       "description": "GithubEventSource refers to event-source for github related events",
       "type": "object",
       "required": [
+        "id",
         "owner",
         "repository",
         "events"
@@ -1142,6 +1143,11 @@
         "githubUploadURL": {
           "description": "GitHub upload URL (for GitHub Enterprise)",
           "type": "string"
+        },
+        "id": {
+          "description": "Id is the webhook's id Deprecated: This is not used at all, will be removed in v1.6",
+          "type": "integer",
+          "format": "int64"
         },
         "insecure": {
           "description": "Insecure tls verification",

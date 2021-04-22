@@ -442,9 +442,9 @@ message GenericEventSource {
 
 // GithubEventSource refers to event-source for github related events
 message GithubEventSource {
-  // Repositories holds the information of repositories, which uses repo owner as the key,
-  // and list of repo names as the value
-  repeated OwnedRepositories repositories = 1;
+  // Id is the webhook's id
+  // Deprecated: This is not used at all, will be removed in v1.6
+  optional int64 id = 1;
 
   // Webhook refers to the configuration required to run a http server
   optional WebhookContext webhook = 2;
@@ -494,6 +494,10 @@ message GithubEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 14;
+
+  // Repositories holds the information of repositories, which uses repo owner as the key,
+  // and list of repo names as the value
+  repeated OwnedRepositories repositories = 15;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
