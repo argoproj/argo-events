@@ -546,6 +546,11 @@ func (in *KafkaTrigger) DeepCopyInto(out *KafkaTrigger) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.SASL != nil {
+		in, out := &in.SASL, &out.SASL
+		*out = new(common.SASLConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
 		*out = new(common.TLSConfig)
