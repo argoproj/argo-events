@@ -30,3 +30,39 @@ func ValidateTLSConfig(tlsConfig *TLSConfig) error {
 	}
 	return nil
 }
+
+func ValidateSASLConfig(saslConfig *SASLConfig) error {
+	if saslConfig == nil {
+		return nil
+	}
+
+	var mechanismSet, userSet, passwordSet bool
+
+	if saslConfig.Mechanism != "" {
+		// this might need additional checks with the proper set of values
+		switch saslConfig.Mechanism {
+		case "PLAIN", "OAUTHBEARER", "SCRAM-SHA-256", "SCRAM-SHA-512", "GSSAPI":
+			mechanismSet = true
+		default:
+			mechanismSet = false
+		}
+	}
+
+	if saslConfig.User != nil {
+		userSet = true
+	}
+
+	if saslConfig.Password != nil {
+		passwordSet = true
+	}
+
+	if !userSet && !passwordSet {
+		return errors.New("invalid sasl config, please configure either User, and/or Password")
+	}
+
+	if !mechanismSet {
+		return errors.New("invalid sasl config, please configure Mechanism. Possible values are `OAUTHBEARER`, `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512` and `GSSAPI`")
+	}
+
+	return nil
+}
