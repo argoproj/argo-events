@@ -130,6 +130,11 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	if notification == nil {
+		common.SendErrorResponse(writer, "bad request, not a valid SNS notification")
+		return
+	}
+
 	// SNS Signature Verification
 	if router.eventSource.ValidateSignature {
 		err = notification.verify()
