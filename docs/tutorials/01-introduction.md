@@ -18,7 +18,7 @@ to any type of event-source.
   [instruction](https://github.com/argoproj/argo-events/tree/master/examples) to
   create a Service Account `operate-workflow-sa` with proper privileges, and
   make sure the Service Account used by Workflows (here we use `default` in the
-  turorials for demostration purpose) has proper RBAC settings.
+  turorials for demonstration purpose) has proper RBAC settings.
 
 ## Get Started
 

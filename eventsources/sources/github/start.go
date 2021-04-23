@@ -19,6 +19,8 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"time"
@@ -124,165 +126,32 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 // PostActivate performs operations once the route is activated and ready to consume requests
 func (router *Router) PostActivate() error {
-	// In order to successfully setup a GitHub hook for the given repository,
-	// 1. Get the API Token and Webhook secret from K8s secrets
-	// 2. Configure the hook with url, content type, ssl etc.
-	// 3. Set up a GitHub client
-	// 4. Set the base and upload url for the client
-	// 5. Create the hook if one doesn't exist already. If exists already, then use that one.
-
-	route := router.route
-	githubEventSource := router.githubEventSource
-
-	logger := route.Logger.With(
-		logging.LabelEndpoint, route.Context.Endpoint,
-		logging.LabelPort, route.Context.Port,
-		logging.LabelHTTPMethod, route.Context.Method,
-		"repository", githubEventSource.Repository,
-	)
-
-	logger.Info("retrieving webhook secret credentials...")
-	if githubEventSource.WebhookSecret != nil {
-		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret)
-		if err != nil {
-			return errors.Errorf("failed to retrieve webhook secret. err: %+v", err)
-		}
-		router.hookSecret = webhookSecretCreds.secret
-	}
-
-	if githubEventSource.APIToken == nil || githubEventSource.Webhook.URL == "" {
-		logger.Info("no api credential or webhook url specified, skipping webhook creation...")
-		return nil
-	}
-
-	logger.Info("retrieving api token credentials...")
-	apiTokenCreds, err := router.getCredentials(githubEventSource.APIToken)
-	if err != nil {
-		return errors.Errorf("failed to retrieve api token credentials. err: %+v", err)
-	}
-
-	logger.Info("setting up auth with api token...")
-	PATTransport := TokenAuthTransport{
-		Token: apiTokenCreds.secret,
-	}
-
-	logger.Info("configuring GitHub hook...")
-	formattedURL := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
-	hookConfig := map[string]interface{}{
-		"url": &formattedURL,
-	}
-
-	if githubEventSource.ContentType != "" {
-		hookConfig["content_type"] = githubEventSource.ContentType
-	}
-
-	if githubEventSource.Insecure {
-		hookConfig["insecure_ssl"] = "1"
-	} else {
-		hookConfig["insecure_ssl"] = "0"
-	}
-
-	if router.hookSecret != "" {
-		hookConfig["secret"] = router.hookSecret
-	}
-
-	router.hook = &gh.Hook{
-		Events: githubEventSource.Events,
-		Active: gh.Bool(githubEventSource.Active),
-		Config: hookConfig,
-	}
-
-	logger.Info("setting up client for GitHub...")
-	router.githubClient = gh.NewClient(PATTransport.Client())
-
-	logger.Info("setting up base url for GitHub client...")
-	if githubEventSource.GithubBaseURL != "" {
-		baseURL, err := url.Parse(githubEventSource.GithubBaseURL)
-		if err != nil {
-			return errors.Errorf("failed to parse github base url. err: %s", err)
-		}
-		router.githubClient.BaseURL = baseURL
-	}
-
-	logger.Info("setting up the upload url for GitHub client...")
-	if githubEventSource.GithubUploadURL != "" {
-		uploadURL, err := url.Parse(githubEventSource.GithubUploadURL)
-		if err != nil {
-			return errors.Errorf("failed to parse github upload url. err: %s", err)
-		}
-		router.githubClient.UploadURL = uploadURL
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	logger.Info("creating a GitHub hook for the repository...")
-	hook, _, err := router.githubClient.Repositories.CreateHook(ctx, githubEventSource.Owner, githubEventSource.Repository, router.hook)
-	if err != nil {
-		// Continue if error is because hook already exists
-		er, ok := err.(*gh.ErrorResponse)
-		if !ok || er.Response.StatusCode != http.StatusUnprocessableEntity {
-			return errors.Errorf("failed to create webhook. err: %+v", err)
-		}
-	}
-
-	// if hook alreay exists then CreateHook returns hook value as nil
-	if hook == nil {
-		logger.Info("GitHub hook for the repository already exists, trying to use the existing hook...")
-		ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
-		defer cancel()
-
-		hooks, _, err := router.githubClient.Repositories.ListHooks(ctx, githubEventSource.Owner, githubEventSource.Repository, nil)
-		if err != nil {
-			return errors.Errorf("failed to list existing webhooks. err: %+v", err)
-		}
-
-		hook = getHook(hooks, formattedURL, githubEventSource.Events)
-		if hook == nil {
-			return errors.New("failed to find existing webhook")
-		}
-	}
-
-	if githubEventSource.WebhookSecret != nil {
-		// As secret in hook config is masked with asterisk (*), replace it with unmasked secret.
-		hook.Config["secret"] = hookConfig["secret"]
-	}
-
-	router.hook = hook
-	logger.Info("GitHub hook has been successfully set for the repository")
-
 	return nil
 }
 
 // PostInactivate performs operations after the route is inactivated
 func (router *Router) PostInactivate() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
 	githubEventSource := router.githubEventSource
 
-	if githubEventSource.APIToken == nil || githubEventSource.Webhook.URL == "" {
-		logger := router.route.Logger.With(
-			"repository", githubEventSource.Repository,
-		)
-
-		logger.Info("no api credential or webhook url specified, skipping webhook deletion...")
-		return nil
-	}
-
-	if githubEventSource.DeleteHookOnFinish {
-		logger := router.route.Logger.With(
-			"repository", githubEventSource.Repository,
-			"hook-id", *router.hook.ID,
-		)
-
+	if githubEventSource.NeedToCreateHooks() && githubEventSource.DeleteHookOnFinish {
+		logger := router.route.Logger
 		logger.Info("deleting GitHub hook...")
-		if _, err := router.githubClient.Repositories.DeleteHook(ctx, githubEventSource.Owner, githubEventSource.Repository, *router.hook.ID); err != nil {
-			return errors.Errorf("failed to delete hook. err: %+v", err)
-		}
-		logger.Info("GitHub hook deleted")
-	}
 
+		for _, r := range githubEventSource.GetOwnedRepositories() {
+			for _, n := range r.Names {
+				id, ok := router.hookIDs[r.Owner+","+n]
+				if !ok {
+					return errors.Errorf("can not find hook ID for repo %s/%s", r.Owner, n)
+				}
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+				if _, err := router.githubClient.Repositories.DeleteHook(ctx, r.Owner, n, id); err != nil {
+					return errors.Errorf("failed to delete hook for repo %s/%s. err: %+v", r.Owner, n, err)
+				}
+				logger.Infof("GitHub hook deleted for repo %s/%s", r.Owner, n)
+			}
+		}
+	}
 	return nil
 }
 
@@ -293,13 +162,145 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	logger.Info("started processing the Github event source...")
 
 	githubEventSource := &el.GithubEventSource
-
 	route := webhook.NewRoute(githubEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
-
-	return webhook.ManageRoute(ctx, &Router{
+	router := &Router{
 		route:             route,
 		githubEventSource: githubEventSource,
-	}, controller, dispatch)
+	}
+	logger.Info("retrieving webhook secret credentials if any ...")
+	if githubEventSource.WebhookSecret != nil {
+		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret)
+		if err != nil {
+			return errors.Errorf("failed to retrieve webhook secret. err: %+v", err)
+		}
+		router.hookSecret = webhookSecretCreds.secret
+	}
+
+	if githubEventSource.NeedToCreateHooks() {
+		// create webhooks
+
+		// In order to successfully setup a GitHub hook for the given repository,
+		// 1. Get the API Token and Webhook secret from K8s secrets
+		// 2. Configure the hook with url, content type, ssl etc.
+		// 3. Set up a GitHub client
+		// 4. Set the base and upload url for the client
+		// 5. Create the hook if one doesn't exist already. If exists already, then use that one.
+
+		logger.Info("retrieving api token credentials...")
+		apiTokenCreds, err := router.getCredentials(githubEventSource.APIToken)
+		if err != nil {
+			return errors.Errorf("failed to retrieve api token credentials. err: %+v", err)
+		}
+
+		logger.Info("setting up auth with api token...")
+		PATTransport := TokenAuthTransport{
+			Token: apiTokenCreds.secret,
+		}
+
+		logger.Info("configuring GitHub hook...")
+		formattedURL := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
+		hookConfig := map[string]interface{}{
+			"url": &formattedURL,
+		}
+		if githubEventSource.ContentType != "" {
+			hookConfig["content_type"] = githubEventSource.ContentType
+		}
+		if githubEventSource.Insecure {
+			hookConfig["insecure_ssl"] = "1"
+		} else {
+			hookConfig["insecure_ssl"] = "0"
+		}
+		if router.hookSecret != "" {
+			hookConfig["secret"] = router.hookSecret
+		}
+
+		logger.Info("setting up client for GitHub...")
+		client := gh.NewClient(PATTransport.Client())
+
+		logger.Info("setting up base url for GitHub client...")
+		if githubEventSource.GithubBaseURL != "" {
+			baseURL, err := url.Parse(githubEventSource.GithubBaseURL)
+			if err != nil {
+				return fmt.Errorf("failed to parse github base url. err: %v", err)
+			}
+			client.BaseURL = baseURL
+		}
+
+		logger.Info("setting up the upload url for GitHub client...")
+		if githubEventSource.GithubUploadURL != "" {
+			uploadURL, err := url.Parse(githubEventSource.GithubUploadURL)
+			if err != nil {
+				return fmt.Errorf("failed to parse github upload url. err: %v", err)
+			}
+			client.UploadURL = uploadURL
+		}
+		router.githubClient = client
+		router.hookIDs = make(map[string]int64)
+
+		hook := &gh.Hook{
+			Events: githubEventSource.Events,
+			Active: gh.Bool(githubEventSource.Active),
+			Config: hookConfig,
+		}
+
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		f := func() {
+			for _, r := range githubEventSource.GetOwnedRepositories() {
+				for _, name := range r.Names {
+					hooks, _, err := router.githubClient.Repositories.ListHooks(ctx, r.Owner, name, nil)
+					if err != nil {
+						logger.Errorf("failed to list existing webhooks of %s/%s. err: %+v", r.Owner, name, err)
+						continue
+					}
+					h := getHook(hooks, formattedURL, githubEventSource.Events)
+					if h != nil {
+						router.hookIDs[r.Owner+","+name] = *h.ID
+						continue
+					}
+					logger.Infof("hook not found for %s/%s, creating ...", r.Owner, name)
+					h, _, err = router.githubClient.Repositories.CreateHook(ctx, r.Owner, name, hook)
+					if err != nil {
+						logger.Errorf("failed to create github webhook for %s/%s. err: %+v", r.Owner, name, err)
+						continue
+					}
+					router.hookIDs[r.Owner+","+name] = *h.ID
+					time.Sleep(500 * time.Millisecond)
+				}
+			}
+		}
+
+		// Github can not handle race condtions well - it might create multiple hooks with same config
+		// when replicas > 1
+		// Randomly sleep some time to mitigate the issue.
+		s1 := rand.NewSource(time.Now().UnixNano())
+		r1 := rand.New(s1)
+		time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+		f()
+
+		go func() {
+			// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
+			// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from github.
+			// This is a workround to mitigate the race conditions.
+			logger.Info("starting github hooks manager daemon")
+			ticker := time.NewTicker(60 * time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					logger.Info("exiting github hooks manager daemon")
+					return
+				case <-ticker.C:
+					f()
+				}
+			}
+		}()
+	} else {
+		logger.Info("no need to create webhooks")
+	}
+
+	return webhook.ManageRoute(ctx, router, controller, dispatch)
 }
 
 // parseValidateRequest parses a http request and checks if it is valid GitHub notification

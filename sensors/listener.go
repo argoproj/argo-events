@@ -208,11 +208,11 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 			logger.Infof("starting eventbus connection daemon for client %s...", clientID)
 			ticker := time.NewTicker(5 * time.Second)
+			defer ticker.Stop()
 			for {
 				select {
 				case <-cctx.Done():
 					logger.Infof("exiting eventbus connection daemon for client %s...", clientID)
-					ticker.Stop()
 					wg1.Wait()
 					return
 				case <-ticker.C:

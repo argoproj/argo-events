@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	"github.com/google/go-github/v31/github"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 
@@ -52,8 +51,14 @@ func TestRouteActiveHandler(t *testing.T) {
 					URL:      "http://webhook-gateway-svc",
 					Port:     "12000",
 				},
-				Owner:      "fake",
-				Repository: "fake",
+				Repositories: []v1alpha1.OwnedRepositories{
+					{
+						Owner: "fake",
+						Names: []string{
+							"fake0", "fake1",
+						},
+					},
+				},
 				Events: []string{
 					"PushEvent",
 				},
@@ -75,18 +80,59 @@ func TestRouteActiveHandler(t *testing.T) {
 
 			convey.Convey("Active route should return success", func() {
 				route.Active = true
-				router.hook = &github.Hook{
-					Config: make(map[string]interface{}),
-				}
 
 				router.HandleRoute(writer, &http.Request{
 					Body: ioutil.NopCloser(bytes.NewReader(body)),
 				})
 
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
-				router.githubEventSource = githubEventSource
-				err = router.PostActivate()
-				convey.So(err, convey.ShouldNotBeNil)
+			})
+		})
+	})
+}
+
+func TestRouteActiveHandlerDeprecated(t *testing.T) {
+	convey.Convey("Given a route configuration", t, func() {
+		route := router.route
+		route.DataCh = make(chan []byte)
+
+		convey.Convey("Inactive route should return error", func() {
+			writer := &webhook.FakeHttpWriter{}
+			githubEventSource := &v1alpha1.GithubEventSource{
+				Webhook: &v1alpha1.WebhookContext{
+					Endpoint: "/push",
+					URL:      "http://webhook-gateway-svc",
+					Port:     "12000",
+				},
+				DeprecatedOwner:      "fake",
+				DeprecatedRepository: "fake",
+				Events: []string{
+					"PushEvent",
+				},
+				APIToken: &corev1.SecretKeySelector{
+					Key: "accessKey",
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "github-access",
+					},
+				},
+			}
+
+			body, err := yaml.Marshal(githubEventSource)
+			convey.So(err, convey.ShouldBeNil)
+
+			router.HandleRoute(writer, &http.Request{
+				Body: ioutil.NopCloser(bytes.NewReader(body)),
+			})
+			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
+
+			convey.Convey("Active route should return success", func() {
+				route.Active = true
+
+				router.HandleRoute(writer, &http.Request{
+					Body: ioutil.NopCloser(bytes.NewReader(body)),
+				})
+
+				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 			})
 		})
 	})
