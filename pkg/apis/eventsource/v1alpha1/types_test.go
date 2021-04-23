@@ -27,3 +27,24 @@ func convertInt(t *testing.T, num int) *int32 {
 	r := int32(num)
 	return &r
 }
+
+func TestGithubEventSourceGetRepositories(t *testing.T) {
+	es := GithubEventSource{
+		DeprecatedOwner:      "test",
+		DeprecatedRepository: "test",
+	}
+	assert.Equal(t, len(es.GetOwnedRepositories()), 1)
+	es = GithubEventSource{
+		Repositories: []OwnedRepositories{
+			{
+				Owner: "test1",
+				Names: []string{"t1", "t2"},
+			},
+			{
+				Owner: "test2",
+				Names: []string{"t3", "t4"},
+			},
+		},
+	}
+	assert.Equal(t, len(es.GetOwnedRepositories()), 2)
+}

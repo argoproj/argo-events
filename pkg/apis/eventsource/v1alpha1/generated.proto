@@ -443,15 +443,18 @@ message GenericEventSource {
 // GithubEventSource refers to event-source for github related events
 message GithubEventSource {
   // Id is the webhook's id
+  // Deprecated: This is not used at all, will be removed in v1.6
   optional int64 id = 1;
 
   // Webhook refers to the configuration required to run a http server
   optional WebhookContext webhook = 2;
 
-  // Owner refers to GitHub owner name i.e. argoproj
+  // DeprecatedOwner refers to GitHub owner name i.e. argoproj
+  // Deprecated: use Repositories instead. Will be unsupported in v 1.6
   optional string owner = 3;
 
-  // Repository refers to GitHub repo name i.e. argo-events
+  // DeprecatedRepository refers to GitHub repo name i.e. argo-events
+  // Deprecated: use Repositories instead. Will be unsupported in v 1.6
   optional string repository = 4;
 
   repeated string events = 5;
@@ -491,6 +494,10 @@ message GithubEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 14;
+
+  // Repositories holds the information of repositories, which uses repo owner as the key,
+  // and list of repo names as the value
+  repeated OwnedRepositories repositories = 15;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
@@ -726,6 +733,14 @@ message NSQEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 7;
+}
+
+message OwnedRepositories {
+  // Orgnization or user name
+  optional string owner = 1;
+
+  // Repository names
+  repeated string names = 2;
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.

@@ -167,6 +167,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		defer wg.Done()
 		log.Info("starting ExactOnce cache clean up daemon ...")
 		ticker := time.NewTicker(60 * time.Second)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-cacheEvictorStopCh:
