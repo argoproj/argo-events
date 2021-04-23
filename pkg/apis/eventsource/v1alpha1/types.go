@@ -461,31 +461,31 @@ type KafkaEventSource struct {
 	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
 	// Backoff holds parameters applied to connection.
 	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
-	// SASL configuration for the kafka client
-	// +optional
-	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,5,opt,name=sasl"`
 	// TLS configuration for the kafka client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
-	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,6,opt,name=jsonBody"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 
 	// Consumer group for kafka client
 	// +optional
-	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,9,opt,name=consumerGroup"`
+	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,8,opt,name=consumerGroup"`
 
 	// Sets a limit on how many events get read from kafka per second.
 	// +optional
-	LimitEventsPerSecond int64 `json:"limitEventsPerSecond,omitempty" protobuf:"varint,10,opt,name=limitEventsPerSecond"`
+	LimitEventsPerSecond int64 `json:"limitEventsPerSecond,omitempty" protobuf:"varint,9,opt,name=limitEventsPerSecond"`
 
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
-	Version string `json:"version" protobuf:"bytes,11,opt,name=version"`
+	Version string `json:"version" protobuf:"bytes,10,opt,name=version"`
+	// SASL configuration for the kafka client
+	// +optional
+	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,11,opt,name=sasl"`
 }
 
 type KafkaConsumerGroup struct {
