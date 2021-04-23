@@ -93,6 +93,10 @@ Region is AWS region
 </a> </em>
 </td>
 <td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
 </td>
 </tr>
 <tr>
@@ -103,6 +107,43 @@ Region is AWS region
 </td>
 <td>
 <em>(Optional)</em>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>invocationType</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Choose from the following options.
+</p>
+<ul>
+<li>
+<p>
+RequestResponse (default) - Invoke the function synchronously. Keep the
+connection open until the function returns a response or times out. The
+API response includes the function response and additional data.
+</p>
+</li>
+<li>
+<p>
+Event - Invoke the function asynchronously. Send events that fail
+multiple times to the function’s dead-letter queue (if it’s configured).
+The API response only includes a status code.
+</p>
+</li>
+<li>
+<p>
+DryRun - Validate parameter values and verify that the user or role has
+permission to invoke the function.
+</p>
+</li>
+</ul>
 </td>
 </tr>
 </tbody>

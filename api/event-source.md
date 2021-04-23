@@ -2536,18 +2536,6 @@ Backoff holds parameters applied to connection.
 </tr>
 <tr>
 <td>
-<code>sasl</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.SASLConfig </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-SASL configuration for the kafka client
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>tls</code></br> <em>
 github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 </td>
@@ -2615,6 +2603,18 @@ Sets a limit on how many events get read from kafka per second.
 <p>
 Specify what kafka version is being connected to enables certain
 features in sarama, defaults to 1.0.0
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sasl</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.SASLConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SASL configuration for the kafka client
 </p>
 </td>
 </tr>

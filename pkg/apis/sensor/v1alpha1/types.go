@@ -435,13 +435,25 @@ type AWSLambdaTrigger struct {
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,4,opt,name=region"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,5,rep,name=payload"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
-
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
+	// Choose from the following options.
+	//
+	//    * RequestResponse (default) - Invoke the function synchronously. Keep
+	//    the connection open until the function returns a response or times out.
+	//    The API response includes the function response and additional data.
+	//
+	//    * Event - Invoke the function asynchronously. Send events that fail multiple
+	//    times to the function's dead-letter queue (if it's configured). The API
+	//    response only includes a status code.
+	//
+	//    * DryRun - Validate parameter values and verify that the user or role
+	//    has permission to invoke the function.
+	// +optional
+	InvocationType *string `json:"invocationType,omitempty" protobuf:"bytes,7,opt,name=invocationType"`
 }
 
 // AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger
