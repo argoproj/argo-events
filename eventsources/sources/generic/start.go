@@ -57,6 +57,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	logger.Info("connecting to eventsource server in 5 seconds...")
 	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
