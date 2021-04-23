@@ -53,6 +53,11 @@ func (in *AWSLambdaTrigger) DeepCopyInto(out *AWSLambdaTrigger) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.InvocationType != nil {
+		in, out := &in.InvocationType, &out.InvocationType
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 

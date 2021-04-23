@@ -2172,13 +2172,19 @@
           "description": "FunctionName refers to the name of the function to invoke.",
           "type": "string"
         },
+        "invocationType": {
+          "description": "Choose from the following options.\n\n   * RequestResponse (default) - Invoke the function synchronously. Keep\n   the connection open until the function returns a response or times out.\n   The API response includes the function response and additional data.\n\n   * Event - Invoke the function asynchronously. Send events that fail multiple\n   times to the function's dead-letter queue (if it's configured). The API\n   response only includes a status code.\n\n   * DryRun - Validate parameter values and verify that the user or role\n   has permission to invoke the function.",
+          "type": "string"
+        },
         "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           }
         },
         "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"

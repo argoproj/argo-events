@@ -114,8 +114,9 @@ func (t *AWSLambdaTrigger) Execute(ctx context.Context, events map[string]*v1alp
 	}
 
 	response, err := t.LambdaClient.Invoke(&lambda.InvokeInput{
-		FunctionName: &trigger.FunctionName,
-		Payload:      payload,
+		FunctionName:   &trigger.FunctionName,
+		Payload:        payload,
+		InvocationType: trigger.InvocationType,
 	})
 	if err != nil {
 		return nil, err
