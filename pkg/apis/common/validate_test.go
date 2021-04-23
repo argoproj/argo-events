@@ -104,21 +104,21 @@ func TestValidateSASLConfig(t *testing.T) {
 		s.Mechanism = "INVALIDSTRING"
 		err := ValidateSASLConfig(s)
 		assert.NotNil(t, err)
-		assert.True(t, strings.Contains(err.Error(), "invalid sasl config, please configure Mechanism. Possible values are `OAUTHBEARER`, `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512` and `GSSAPI`"))
+		assert.True(t, strings.Contains(err.Error(), "invalid sasl config. Possible values for SASL Mechanism are `OAUTHBEARER`, `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512` and `GSSAPI`"))
 	})
 
 	t.Run("test only User is set", func(t *testing.T) {
 		s := fakeSASLConfig(t)
 		s.Password = nil
 		err := ValidateSASLConfig(s)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 	})
 
 	t.Run("test only Password is set", func(t *testing.T) {
 		s := fakeSASLConfig(t)
 		s.User = nil
 		err := ValidateSASLConfig(s)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 	})
 
 	t.Run("test all of 3 are set", func(t *testing.T) {
