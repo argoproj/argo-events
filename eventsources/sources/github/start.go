@@ -19,6 +19,7 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -220,7 +221,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if githubEventSource.GithubBaseURL != "" {
 			baseURL, err := url.Parse(githubEventSource.GithubBaseURL)
 			if err != nil {
-				return errors.Errorf("failed to parse github base url. err: %s", err)
+				return fmt.Errorf("failed to parse github base url. err: %v", err)
 			}
 			client.BaseURL = baseURL
 		}
@@ -229,7 +230,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if githubEventSource.GithubUploadURL != "" {
 			uploadURL, err := url.Parse(githubEventSource.GithubUploadURL)
 			if err != nil {
-				return errors.Errorf("failed to parse github upload url. err: %s", err)
+				return fmt.Errorf("failed to parse github upload url. err: %v", err)
 			}
 			client.UploadURL = uploadURL
 		}
