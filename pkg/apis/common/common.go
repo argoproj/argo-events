@@ -132,15 +132,13 @@ type TLSConfig struct {
 type SASLConfig struct {
 	// SASLMechanism is the name of the enabled SASL mechanism.
 	// Possible values: OAUTHBEARER, PLAIN (defaults to PLAIN).
+	// +optional
 	Mechanism string `json:"mechanism,omitempty" protobuf:"bytes,1,opt,name=mechanism"`
-	// Version is the SASL Protocol Version to use
-	// Kafka > 1.x should use V1, except on Azure EventHub which use V0
 	// User is the authentication identity (authcid) to present for
 	// SASL/PLAIN or SASL/SCRAM authentication
 	User *corev1.SecretKeySelector `json:"user,omitempty" protobuf:"bytes,2,opt,name=user"`
 	// Password for SASL/PLAIN authentication
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,3,opt,name=password"`
-	// authz id used for SASL/SCRAM authentication
 }
 
 // Backoff for an operation
