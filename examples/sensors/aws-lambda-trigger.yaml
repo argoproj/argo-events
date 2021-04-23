@@ -24,3 +24,6 @@ spec:
                 dependencyName: test-dep
                 dataKey: body.name
               dest: name
+          # Optional, possible values: RequestResponse, Event and DryRun
+          # Defaults to RequestResponse, which means invoke the function synchronously.
+          invocationType: Event
