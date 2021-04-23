@@ -800,11 +800,6 @@ func (in *KafkaEventSource) DeepCopyInto(out *KafkaEventSource) {
 		*out = new(common.Backoff)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.SASL != nil {
-		in, out := &in.SASL, &out.SASL
-		*out = new(common.SASLConfig)
-		(*in).DeepCopyInto(*out)
-	}
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
 		*out = new(common.TLSConfig)
@@ -821,6 +816,11 @@ func (in *KafkaEventSource) DeepCopyInto(out *KafkaEventSource) {
 		in, out := &in.ConsumerGroup, &out.ConsumerGroup
 		*out = new(KafkaConsumerGroup)
 		**out = **in
+	}
+	if in.SASL != nil {
+		in, out := &in.SASL, &out.SASL
+		*out = new(common.SASLConfig)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }

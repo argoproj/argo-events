@@ -387,7 +387,7 @@ func schema_argo_events_pkg_apis_common_SASLConfig(ref common.ReferenceCallback)
 					},
 					"user": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Version is the SASL Protocol Version to use Kafka > 1.x should use V1, except on Azure EventHub which use V0 User is the authentication identity (authcid) to present for SASL/PLAIN or SASL/SCRAM authentication",
+							Description: "User is the authentication identity (authcid) to present for SASL/PLAIN or SASL/SCRAM authentication",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
