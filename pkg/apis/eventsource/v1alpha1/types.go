@@ -722,6 +722,10 @@ func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {
 	return nil
 }
 
+func (g GithubEventSource) NeedToCreateHooks() bool {
+	return g.APIToken != nil && g.Webhook != nil && g.Webhook.URL != ""
+}
+
 // GitlabEventSource refers to event-source related to Gitlab events
 type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server

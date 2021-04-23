@@ -331,6 +331,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 		defer connWG.Done()
 		logger.Info("starting eventbus connection daemon...")
 		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-cctx.Done():

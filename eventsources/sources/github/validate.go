@@ -34,7 +34,7 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	if githubEventSource.GetOwnedRepositories() == nil {
 		return fmt.Errorf("no valid repository owner and name found")
 	}
-	if githubEventSource.APIToken != nil && githubEventSource.Webhook.URL != "" && len(githubEventSource.Events) == 0 {
+	if githubEventSource.NeedToCreateHooks() && len(githubEventSource.Events) == 0 {
 		return fmt.Errorf("events must be defined to create a github webhook")
 	}
 

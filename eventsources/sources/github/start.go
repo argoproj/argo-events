@@ -131,12 +131,8 @@ func (router *Router) PostActivate() error {
 // PostInactivate performs operations after the route is inactivated
 func (router *Router) PostInactivate() error {
 	githubEventSource := router.githubEventSource
-	if githubEventSource.APIToken == nil || githubEventSource.Webhook.URL == "" {
-		router.route.Logger.Info("no api credential or webhook url specified, skipping webhook deletion...")
-		return nil
-	}
 
-	if githubEventSource.DeleteHookOnFinish {
+	if githubEventSource.NeedToCreateHooks() && githubEventSource.DeleteHookOnFinish {
 		logger := router.route.Logger
 		logger.Info("deleting GitHub hook...")
 
@@ -179,7 +175,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		router.hookSecret = webhookSecretCreds.secret
 	}
 
-	if githubEventSource.APIToken != nil && githubEventSource.Webhook.URL != "" {
+	if githubEventSource.NeedToCreateHooks() {
 		// create webhooks
 
 		// In order to successfully setup a GitHub hook for the given repository,
@@ -275,6 +271,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		// Github can not handle race condtions well - it might create multiple hooks with same config
+		// when replicas > 1
 		// Randomly sleep some time to mitigate the issue.
 		s1 := rand.NewSource(time.Now().UnixNano())
 		r1 := rand.New(s1)
@@ -287,6 +284,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			// This is a workround to mitigate the race conditions.
 			logger.Info("starting github hooks manager daemon")
 			ticker := time.NewTicker(60 * time.Second)
+			defer ticker.Stop()
 			for {
 				select {
 				case <-ctx.Done():
@@ -298,7 +296,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 		}()
 	} else {
-		logger.Info("no api credential or webhook url specified, skip webhook creation...")
+		logger.Info("no need to create webhooks")
 	}
 
 	return webhook.ManageRoute(ctx, router, controller, dispatch)
