@@ -15,7 +15,7 @@ spec:
     example:
       watchPathConfig:
         # directory to watch
-        directory: /test-data/
+        directory: /test-data
         # path to watch
         path: x.txt
       # type of the event
