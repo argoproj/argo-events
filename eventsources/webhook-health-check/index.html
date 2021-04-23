@@ -1306,17 +1306,13 @@
                 
                 
                 <h1 id="webhook-health-check">Webhook Health Check<a class="headerlink" href="#webhook-health-check" title="Permanent link">&para;</a></h1>
-<p><img alt="GA" src="../../assets/ga.svg" /></p>
-<blockquote>
-<p>v1.0 and after</p>
-</blockquote>
 <p>For <code>webhook</code> or <code>webhook</code> extended event sources such as <code>github</code>, <code>gitlab</code>,
 <code>sns</code>, <code>slack</code>, <code>Storage GRID</code> and <code>stripe</code>, besides the endpoint configured in
 the spec, an extra endpoint <code>:${port}/health</code> will also be created, this is
 useful for LB or Ingress configuration for the event source, where usually a
 health check endpoint is required.</p>
 <p>For example, the following EventSource object will have 4 endpoints created,
-<code>:12000/example1</code>, <code>:12000/health</code>, <code>:13000/example2</code> and <code>:13000/health</code>. A
+<code>:12000/example1</code>, <code>:12000/health</code>, <code>:13000/example2</code> and <code>:13000/health</code>. An
 HTTP GET request to the health endpoint returns a text <code>OK</code> with HTTP response
 code <code>200</code>.</p>
 <div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
