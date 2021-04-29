@@ -65,11 +65,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 		if kafkatrigger.SASL != nil {
 			config.Net.SASL.Enable = true
-			if kafkatrigger.SASL.Mechanism == "" {
-				config.Net.SASL.Mechanism = sarama.SASLMechanism(sarama.SASLTypePlaintext)
-			} else {
-				config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkatrigger.SASL.Mechanism)
-			}
+			config.Net.SASL.Mechanism = kafkatrigger.SASL.GetMechanism()
 
 			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.User)
 			if err != nil {

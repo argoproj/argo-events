@@ -273,11 +273,7 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 	if kafkaEventSource.SASL != nil {
 		config.Net.SASL.Enable = true
 
-		if kafkaEventSource.SASL.Mechanism == "" {
-			config.Net.SASL.Mechanism = sarama.SASLMechanism(sarama.SASLTypePlaintext)
-		} else {
-			config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaEventSource.SASL.Mechanism)
-		}
+		config.Net.SASL.Mechanism = kafkaEventSource.SASL.GetMechanism()
 
 		user, err := common.GetSecretFromVolume(kafkaEventSource.SASL.User)
 		if err != nil {
