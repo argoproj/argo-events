@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"github.com/Shopify/sarama"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -165,4 +166,14 @@ func (b Backoff) GetSteps() int {
 type Metadata struct {
 	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,rep,name=annotations"`
 	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
+}
+
+func (s SASLConfig) GetMechanism() sarama.SASLMechanism {
+	switch s.Mechanism {
+	case "PLAIN", "OAUTHBEARER", "SCRAM-SHA-256", "SCRAM-SHA-512", "GSSAPI":
+		return sarama.SASLMechanism(s.Mechanism)
+	default:
+		// default to PLAINTEXT mechanism
+		return sarama.SASLMechanism(sarama.SASLTypePlaintext)
+	}
 }
