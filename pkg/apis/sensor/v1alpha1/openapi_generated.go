@@ -1038,12 +1038,6 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Format:      "int32",
 						},
 					},
-					"sasl": {
-						SchemaProps: spec.SchemaProps{
-							Description: "SASL configuration for the kafka client",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
-						},
-					},
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the Kafka producer.",
@@ -1074,6 +1068,12 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Description: "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"sasl": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SASL configuration for the kafka client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
 						},
 					},
 				},

@@ -399,24 +399,24 @@ message KafkaTrigger {
   // +optional
   optional int32 flushFrequency = 7;
 
-  // SASL configuration for the kafka client
-  // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 8;
-
   // TLS configuration for the Kafka producer.
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 9;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 8;
 
-  repeated TriggerParameter payload = 10;
+  repeated TriggerParameter payload = 9;
 
   // The partitioning key for the messages put on the Kafka topic.
   // Defaults to broker url.
   // +optional.
-  optional string partitioningKey = 11;
+  optional string partitioningKey = 10;
 
   // Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
   // +optional
-  optional string version = 12;
+  optional string version = 11;
+
+  // SASL configuration for the kafka client
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 12;
 }
 
 message LogTrigger {

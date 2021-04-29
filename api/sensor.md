@@ -1538,18 +1538,6 @@ Defaults to 500 milliseconds.
 </tr>
 <tr>
 <td>
-<code>sasl</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.SASLConfig </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-SASL configuration for the kafka client
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>tls</code></br> <em>
 github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 </td>
@@ -1589,6 +1577,18 @@ to broker url.
 <p>
 Specify what kafka version is being connected to enables certain
 features in sarama, defaults to 1.0.0
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sasl</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.SASLConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SASL configuration for the kafka client
 </p>
 </td>
 </tr>
