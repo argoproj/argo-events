@@ -1,6 +1,6 @@
 # Examples
 
-The examples demostrate how Argo Events works.
+The examples demonstrate how Argo Events works.
 
 To make the Sensors be able to trigger Workflows, a Service Account with RBAC
 settings as following is required (assume you run the examples in the namespace

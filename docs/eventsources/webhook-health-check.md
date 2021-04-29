@@ -1,9 +1,5 @@
 # Webhook Health Check
 
-![GA](../assets/ga.svg)
-
-> v1.0 and after
-
 For `webhook` or `webhook` extended event sources such as `github`, `gitlab`,
 `sns`, `slack`, `Storage GRID` and `stripe`, besides the endpoint configured in
 the spec, an extra endpoint `:${port}/health` will also be created, this is
@@ -11,7 +7,7 @@ useful for LB or Ingress configuration for the event source, where usually a
 health check endpoint is required.
 
 For example, the following EventSource object will have 4 endpoints created,
-`:12000/example1`, `:12000/health`, `:13000/example2` and `:13000/health`. A
+`:12000/example1`, `:12000/health`, `:13000/example2` and `:13000/health`. An
 HTTP GET request to the health endpoint returns a text `OK` with HTTP response
 code `200`.
 

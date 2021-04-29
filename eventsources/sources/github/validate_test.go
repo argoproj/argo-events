@@ -33,7 +33,7 @@ func TestValidateEventSource(t *testing.T) {
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "repository cannot be empty", err.Error())
+	assert.Equal(t, "no valid repository owner and name found", err.Error())
 
 	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "github.yaml"))
 	assert.Nil(t, err)

@@ -1163,7 +1163,7 @@
           "type": "string"
         },
         "id": {
-          "description": "Id is the webhook's id",
+          "description": "Id is the webhook's id Deprecated: This is not used at all, will be removed in v1.6",
           "type": "integer",
           "format": "int64"
         },
@@ -1179,11 +1179,18 @@
           }
         },
         "owner": {
-          "description": "Owner refers to GitHub owner name i.e. argoproj",
+          "description": "DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated: use Repositories instead. Will be unsupported in v 1.6",
           "type": "string"
         },
+        "repositories": {
+          "description": "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.OwnedRepositories"
+          }
+        },
         "repository": {
-          "description": "Repository refers to GitHub repo name i.e. argo-events",
+          "description": "DeprecatedRepository refers to GitHub repo name i.e. argo-events Deprecated: use Repositories instead. Will be unsupported in v 1.6",
           "type": "string"
         },
         "webhook": {
@@ -1539,6 +1546,22 @@
         },
         "topic": {
           "description": "Topic to subscribe to.",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.OwnedRepositories": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "description": "Repository names",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "owner": {
+          "description": "Orgnization or user name",
           "type": "string"
         }
       }

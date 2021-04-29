@@ -32,7 +32,7 @@ Github)
 
 ## Getting Started
 
-Follow these [instruction](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
+Follow these [instructions](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
 
 ## User Interface/API
 
