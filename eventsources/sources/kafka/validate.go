@@ -46,5 +46,8 @@ func validate(eventSource *v1alpha1.KafkaEventSource) error {
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)
 	}
+	if eventSource.SASL != nil {
+		return apicommon.ValidateSASLConfig(eventSource.SASL)
+	}
 	return nil
 }

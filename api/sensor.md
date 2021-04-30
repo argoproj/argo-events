@@ -1580,6 +1580,18 @@ features in sarama, defaults to 1.0.0
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>sasl</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.SASLConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SASL configuration for the kafka client
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.KubernetesResourceOperation">
