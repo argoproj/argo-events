@@ -169,7 +169,7 @@ type Metadata struct {
 
 func (s SASLConfig) GetMechanism() string {
 	switch s.Mechanism {
-	case "PLAIN", "OAUTHBEARER", "SCRAM-SHA-256", "SCRAM-SHA-512", "GSSAPI":
+	case "OAUTHBEARER", "SCRAM-SHA-256", "SCRAM-SHA-512", "GSSAPI":
 		return s.Mechanism
 	default:
 		// default to PLAINTEXT mechanism
