@@ -1,9 +1,5 @@
 name: Snyk
-on:
-  push:
-    branches:
-      - "master"
-      - "release-*"
+on: push
 jobs:
   security:
     runs-on: ubuntu-latest
