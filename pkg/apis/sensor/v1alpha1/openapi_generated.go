@@ -1070,12 +1070,18 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"sasl": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SASL configuration for the kafka client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "topic", "partition", "payload"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 

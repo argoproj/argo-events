@@ -1720,12 +1720,18 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"sasl": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SASL configuration for the kafka client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "partition", "topic"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"},
 	}
 }
 

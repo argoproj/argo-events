@@ -483,6 +483,9 @@ type KafkaEventSource struct {
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
 	Version string `json:"version" protobuf:"bytes,10,opt,name=version"`
+	// SASL configuration for the kafka client
+	// +optional
+	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,11,opt,name=sasl"`
 }
 
 type KafkaConsumerGroup struct {

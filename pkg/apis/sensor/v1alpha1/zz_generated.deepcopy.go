@@ -563,6 +563,11 @@ func (in *KafkaTrigger) DeepCopyInto(out *KafkaTrigger) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.SASL != nil {
+		in, out := &in.SASL, &out.SASL
+		*out = new(common.SASLConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

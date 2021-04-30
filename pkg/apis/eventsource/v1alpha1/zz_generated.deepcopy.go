@@ -824,6 +824,11 @@ func (in *KafkaEventSource) DeepCopyInto(out *KafkaEventSource) {
 		*out = new(KafkaConsumerGroup)
 		**out = **in
 	}
+	if in.SASL != nil {
+		in, out := &in.SASL, &out.SASL
+		*out = new(common.SASLConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

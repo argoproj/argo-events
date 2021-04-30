@@ -270,6 +270,26 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 		config.Version = version
 	}
 
+	if kafkaEventSource.SASL != nil {
+		config.Net.SASL.Enable = true
+
+		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaEventSource.SASL.GetMechanism())
+
+		user, err := common.GetSecretFromVolume(kafkaEventSource.SASL.User)
+		if err != nil {
+			log.Errorf("Error getting user value from secret: %v", err)
+			return nil, err
+		}
+		config.Net.SASL.User = user
+
+		password, err := common.GetSecretFromVolume(kafkaEventSource.SASL.Password)
+		if err != nil {
+			log.Errorf("Error getting password value from secret: %v", err)
+			return nil, err
+		}
+		config.Net.SASL.Password = password
+	}
+
 	if kafkaEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS)
 		if err != nil {
