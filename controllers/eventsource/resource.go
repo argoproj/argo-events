@@ -211,7 +211,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		natsConf := eventBus.Status.Config.NATS
 		if natsConf.Auth != nil && natsConf.AccessSecret != nil {
 			// Mount the secret as volume instead of using evnFrom to gain the ability
-			// for the sensor deployment to auto reload when the secret changes
+			// for the event source deployment to auto reload when the secret changes
 			volumes = append(volumes, corev1.Volume{
 				Name: "auth-volume",
 				VolumeSource: corev1.VolumeSource{
