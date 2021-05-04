@@ -46,10 +46,14 @@ func Test_BuildDeployment(t *testing.T) {
 		volumes := deployment.Spec.Template.Spec.Volumes
 		assert.True(t, len(volumes) > 0)
 		hasAuthVolume := false
+		hasTmpVolume := false
 		cmRefs, secretRefs := 0, 0
 		for _, vol := range volumes {
 			if vol.Name == "auth-volume" {
 				hasAuthVolume = true
+			}
+			if vol.Name == "tmp" {
+				hasTmpVolume = true
 			}
 			if strings.Contains(vol.Name, testEventSource.Spec.HDFS["test"].KrbCCacheSecret.Name) {
 				secretRefs++
@@ -59,6 +63,7 @@ func Test_BuildDeployment(t *testing.T) {
 			}
 		}
 		assert.True(t, hasAuthVolume)
+		assert.True(t, hasTmpVolume)
 		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		assert.True(t, cmRefs > 0)
 		assert.True(t, secretRefs > 0)
