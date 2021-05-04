@@ -200,11 +200,18 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
 	if eventBus.Status.Config.NATS != nil {
+		volumes := deploymentSpec.Template.Spec.Volumes
+		volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
+		emptyDirVolName := "tmp"
+		volumes = append(volumes, corev1.Volume{
+			Name: emptyDirVolName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
+
 		natsConf := eventBus.Status.Config.NATS
 		if natsConf.Auth != nil && natsConf.AccessSecret != nil {
 			// Mount the secret as volume instead of using evnFrom to gain the ability
-			// for the sensor deployment to auto reload when the secret changes
-			volumes := deploymentSpec.Template.Spec.Volumes
+			// for the event source deployment to auto reload when the secret changes
 			volumes = append(volumes, corev1.Volume{
 				Name: "auth-volume",
 				VolumeSource: corev1.VolumeSource{
@@ -219,16 +226,10 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 					},
 				},
 			})
-			emptyDirVolName := "tmp"
-			volumes = append(volumes, corev1.Volume{
-				Name: emptyDirVolName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-			})
-			deploymentSpec.Template.Spec.Volumes = volumes
-			volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
-			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
-			deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 		}
+		deploymentSpec.Template.Spec.Volumes = volumes
+		deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 	} else {
 		return nil, errors.New("unsupported event bus")
 	}
