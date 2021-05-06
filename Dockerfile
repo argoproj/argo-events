@@ -45,26 +45,28 @@ COPY dist/eventsource /bin/eventsource
 ENTRYPOINT [ "/bin/eventsource" ]
 
 ####################################################################################################
-# sensor
+# sensor-base
 ####################################################################################################
-FROM alpine:3.12.3 as sensor
+FROM alpine:3.12.3 as sensor-base
 RUN apk update && apk upgrade && \
     apk add --no-cache git
 
-ENV ARGO_VERSION=v2.12.7
+ENV ARGO_VERSION=v3.0.2
 
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-
-# Argo Workflow CLI
 RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz
 RUN gunzip argo-linux-amd64.gz
 RUN chmod +x argo-linux-amd64
 RUN mv ./argo-linux-amd64 /usr/local/bin/argo
 RUN argo version
 
+####################################################################################################
+# sensor
+####################################################################################################
+FROM scratch as sensor
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=sensor-base /usr/local/bin/argo /usr/local/bin/argo
 COPY dist/sensor /bin/sensor
-
 ENTRYPOINT [ "/bin/sensor" ]
 
 ####################################################################################################
