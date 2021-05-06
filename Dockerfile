@@ -62,19 +62,11 @@ RUN argo version
 ####################################################################################################
 # sensor
 ####################################################################################################
-#FROM alpine:3.12.3 as sensor
-#RUN apk update && apk upgrade && \
-#    apk add --no-cache git
 FROM scratch as sensor
-
-
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=sensor-base /usr/local/bin/argo /usr/local/bin/argo
-#RUN /usr/local/bin/argo version
-
 COPY dist/sensor /bin/sensor
-
 ENTRYPOINT [ "/bin/sensor" ]
 
 ####################################################################################################
