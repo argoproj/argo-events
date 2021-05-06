@@ -30,7 +30,7 @@ import (
 var (
 	defaultFactor   = apicommon.NewAmount("1.0")
 	defaultJitter   = apicommon.NewAmount("1")
-	defaultDuration = apicommon.FromString("5s")
+	defaultDuration = apicommon.FromString("1s")
 
 	DefaultBackoff = apicommon.Backoff{
 		Steps:    5,
@@ -53,10 +53,18 @@ func IsRetryableKubeAPIError(err error) bool {
 func Convert2WaitBackoff(backoff *apicommon.Backoff) (*wait.Backoff, error) {
 	result := wait.Backoff{}
 
-	if backoff.Duration != nil {
-		result.Duration = time.Duration(backoff.Duration.Int64Value())
+	d := backoff.Duration
+	if d == nil {
+		d = &defaultDuration
+	}
+	if d.Type == apicommon.Int64 {
+		result.Duration = time.Duration(d.Int64Value())
 	} else {
-		result.Duration = time.Duration(defaultDuration.Int64Value())
+		parsedDuration, err := time.ParseDuration(d.StrVal)
+		if err != nil {
+			return nil, err
+		}
+		result.Duration = parsedDuration
 	}
 
 	factor := backoff.Factor
