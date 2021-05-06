@@ -12,7 +12,7 @@ type Int64OrString struct {
 	StrVal   string `json:"strVal,omitempty" protobuf:"bytes,3,opt,name=strVal"`
 }
 
-// Type represents the stored type of IntOrString.
+// Type represents the stored type of Int64OrString.
 type Type int64
 
 const (
