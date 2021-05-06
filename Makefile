@@ -4,6 +4,8 @@ DIST_DIR=${CURRENT_DIR}/dist
 
 DOCKERFILE:=Dockerfile
 
+BINARY_NAME:=argo-events
+
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_BRANCH=$(shell git rev-parse --symbolic-full-name --verify --quiet --abbrev-ref HEAD)
@@ -12,7 +14,7 @@ GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ;
 
 #  docker image publishing options
 DOCKER_PUSH?=false
-IMAGE_NAMESPACE?=argoproj
+IMAGE_NAMESPACE?=quay.io/argoproj
 VERSION?=latest
 BASE_VERSION:=latest
 
@@ -24,7 +26,7 @@ override LDFLAGS += \
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
-$(error IMAGE_NAMESPACE must be set to push images (e.g. IMAGE_NAMESPACE=argoproj))
+$(error IMAGE_NAMESPACE must be set to push images (e.g. IMAGE_NAMESPACE=quay.io/argoproj))
 endif
 endif
 
@@ -33,135 +35,28 @@ VERSION=$(GIT_TAG)
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
 
-# Build the project images
-.DELETE_ON_ERROR:
-all: sensor sensor-controller eventbus-controller eventsource-controller eventsource events-webhook
+.PHONY: build image clean test
 
-all-images: sensor-image sensor-controller-image eventbus-controller-image eventsource-controller-image eventsource-image events-webhook-image
+# build
+.PHONY: build
+build: dist/$(BINARY_NAME)-linux-amd64
 
-all-controller-images: sensor-controller-image eventbus-controller-image eventsource-controller-image
+dist/$(BINARY_NAME): GOARGS = GOOS= GOARCH=
+dist/$(BINARY_NAME)-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
+dist/$(BINARY_NAME)-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
+dist/$(BINARY_NAME)-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
+dist/$(BINARY_NAME)-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
-.PHONY: all clean test
+dist/$(BINARY_NAME):
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/$(BINARY_NAME) ./cmd
 
-# EventSource controller
-.PHONY: eventsource-controller
-eventsource-controller: dist/eventsource-controller-linux-amd64
+dist/$(BINARY_NAME)-%:
+	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/$(BINARY_NAME) ./cmd
 
-dist/eventsource-controller: GOARGS = GOOS= GOARCH=
-dist/eventsource-controller-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/eventsource-controller-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/eventsource-controller-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/eventsource-controller-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
-
-dist/eventsource-controller:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource-controller ./controllers/eventsource/cmd
-
-dist/eventsource-controller-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource-controller ./controllers/eventsource/cmd
-
-eventsource-controller-image: dist/eventsource-controller-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION)  --target eventsource-controller -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION); fi
-
-# EventSource
-.PHONY: eventsource
-eventsource: dist/eventsource-linux-amd64
-
-dist/eventsource: GOARGS = GOOS= GOARCH=
-dist/eventsource-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/eventsource-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/eventsource-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/eventsource-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
-
-dist/eventsource:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
-
-dist/eventsource-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventsource ./eventsources/cmd/main.go
-
-eventsource-image: dist/eventsource-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventsource:$(VERSION)  --target eventsource -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventsource:$(VERSION); fi
-
-# Sensor controller
-.PHONY: sensor-controller
-sensor-controller: dist/sensor-controller-linux-amd64
-
-dist/sensor-controller: GOARGS = GOOS= GOARCH=
-dist/sensor-controller-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/sensor-controller-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/sensor-controller-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/sensor-controller-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
-
-dist/sensor-controller:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-controller ./controllers/sensor/cmd
-
-dist/sensor-controller-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-controller ./controllers/sensor/cmd
-
-sensor-controller-image: dist/sensor-controller-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION)  --target sensor-controller -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION); fi
-
-# Sensor
-.PHONY: sensor
-sensor: dist/sensor-linux-amd64
-
-dist/sensor: GOARGS = GOOS= GOARCH=
-dist/sensor-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/sensor-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/sensor-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/sensor-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
-
-dist/sensor:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
-
-dist/sensor-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/main.go
-
-sensor-image: dist/sensor-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/sensor:$(VERSION)  --target sensor -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/sensor:$(VERSION); fi
-
-# EventBus controller
-.PHONY: eventbus-controller
-eventbus-controller: dist/eventbus-controller-linux-amd64
-
-dist/eventbus-controller: GOARGS = GOOS=linux GOARCH=amd64
-dist/eventbus-controller-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/eventbus-controller-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/eventbus-controller-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/eventbus-controller-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
-
-dist/eventbus-controller:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventbus-controller ./controllers/eventbus/cmd
-
-dist/eventbus-controller-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventbus-controller ./controllers/eventbus/cmd
-
-eventbus-controller-image: dist/eventbus-controller-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION)  --target eventbus-controller -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION); fi
-
-# Webhook
-.PHONY: events-webhook
-events-webhook: dist/events-webhook-linux-amd64
-
-dist/events-webhook: GOARGS = GOOS= GOARCH=
-dist/events-webhook-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-dist/events-webhook-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-dist/events-webhook-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-dist/events-webhook-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
-
-dist/events-webhook:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/events-webhook ./webhook/cmd/main.go
-
-dist/events-webhook-%:
-	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/events-webhook ./webhook/cmd/main.go
-
-events-webhook-image: dist/events-webhook-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/events-webhook:$(VERSION)  --target events-webhook -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/events-webhook:$(VERSION); fi
+.PHONY: build
+image: dist/$(BINARY_NAME)-linux-amd64
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)  --target argo-events -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
@@ -209,9 +104,9 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 	cd go-diagrams && dot -Tpng diagram.dot -o ../docs/assets/diagram.png
 
 .PHONY: start
-start: all-images
+start: image
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kustomize build test/manifests | sed 's@argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
+	kustomize build test/manifests | sed 's@quay.io/argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
@@ -221,26 +116,6 @@ $(GOPATH)/bin/golangci-lint:
 lint: $(GOPATH)/bin/golangci-lint
 	go mod tidy
 	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
-
-.PHONY: quay-release
-quay-release: eventbus-controller-image sensor-controller-image sensor-image eventsource-image eventsource-controller-image
-	docker tag $(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION)
-	docker push quay.io/$(IMAGE_NAMESPACE)/eventbus-controller:$(VERSION)
-
-	docker tag $(IMAGE_NAMESPACE)/sensor:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/sensor:$(VERSION)
-	docker push quay.io/$(IMAGE_NAMESPACE)/sensor:$(VERSION)
-
-	docker tag $(IMAGE_NAMESPACE)/sensor-controller:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/sensor-controller:$(VERSION)
-	docker push quay.io/$(IMAGE_NAMESPACE)/sensor-controller:$(VERSION)
-
-	docker tag $(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION)
-	docker push quay.io/$(IMAGE_NAMESPACE)/eventsource-controller:$(VERSION)
-
-	docker tag $(IMAGE_NAMESPACE)/eventsource:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/eventsource:$(VERSION)
-	docker push quay.io/$(IMAGE_NAMESPACE)/eventsource:$(VERSION)
-
-	docker tag $(IMAGE_NAMESPACE)/events-webhook:$(VERSION) quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(VERSION)
-	docker push quay.io/$(IMAGE_NAMESPACE)/events-webhook:$(VERSION)
 
 # release - targets only available on release branch
 ifneq ($(findstring release,$(GIT_BRANCH)),)
@@ -267,7 +142,7 @@ check-version-warning:
 
 .PHONY: update-manifests-version
 update-manifests-version:
-	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: argoproj/eventsource:.*@value: argoproj/eventsource:$(VERSION)@' | sed 's@value: argoproj/sensor:.*@value: argoproj/sensor:$(VERSION)@' > /tmp/base_kustomization.yaml
+	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: quay.io/argoproj/argo-events:.*@value: quay.io/argoproj/argo-events:$(VERSION)@' > /tmp/base_kustomization.yaml
 	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
 	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml

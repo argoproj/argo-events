@@ -1,6 +1,8 @@
-package main
+package commands
 
 import (
+	"github.com/spf13/cobra"
+
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -18,7 +20,18 @@ import (
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
-func main() {
+func NewEventSourceCommand() *cobra.Command {
+	command := &cobra.Command{
+		Use:   common.EventSourceSvcCommand,
+		Short: "Start event source service",
+		Run: func(cmd *cobra.Command, args []string) {
+			startEventSource()
+		},
+	}
+	return command
+}
+
+func startEventSource() {
 	logger := logging.NewArgoEventsLogger().Named("eventsource")
 	encodedEventSourceSpec, defined := os.LookupEnv(common.EnvVarEventSourceObject)
 	if !defined {

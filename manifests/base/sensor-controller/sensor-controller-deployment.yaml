@@ -18,14 +18,17 @@ spec:
         runAsUser: 9731
       containers:
         - name: sensor-controller
-          image: argoproj/sensor-controller:latest
+          image: quay.io/argoproj/argo-events:latest
+          args:
+            - controller
+            - --component=sensor
           env:
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: SENSOR_IMAGE
-              value: argoproj/sensor:latest
+              value: quay.io/argoproj/argo-events:latest
           livenessProbe:
             httpGet:
               path: /healthz

@@ -1,9 +1,10 @@
-package main
+package commands
 
 import (
 	"crypto/tls"
 	"os"
 
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -21,11 +22,18 @@ import (
 	"github.com/argoproj/argo-events/webhook"
 )
 
-const (
-	namespaceEnvVar = "NAMESPACE"
-)
+func NewWebhookCommand() *cobra.Command {
+	command := &cobra.Command{
+		Use:   common.WebhookCommand,
+		Short: "Start validating webhook server",
+		Run: func(cmd *cobra.Command, args []string) {
+			startWebhook()
+		},
+	}
+	return command
+}
 
-func main() {
+func startWebhook() {
 	logger := logging.NewArgoEventsLogger().Named("webhook")
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)

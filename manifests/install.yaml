@@ -292,7 +292,10 @@ spec:
         app: eventbus-controller
     spec:
       containers:
-      - env:
+      - args:
+        - controller
+        - --component=eventbus
+        env:
         - name: NAMESPACE
           valueFrom:
             fieldRef:
@@ -301,7 +304,7 @@ spec:
           value: nats-streaming:0.17.0
         - name: NATS_METRICS_EXPORTER_IMAGE
           value: synadia/prometheus-nats-exporter:0.6.2
-        image: argoproj/eventbus-controller:latest
+        image: quay.io/argoproj/argo-events:latest
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -337,14 +340,17 @@ spec:
         app: eventsource-controller
     spec:
       containers:
-      - env:
+      - args:
+        - controller
+        - --component=eventsource
+        env:
         - name: EVENTSOURCE_IMAGE
-          value: argoproj/eventsource:latest
+          value: quay.io/argoproj/argo-events:latest
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: argoproj/eventsource-controller:latest
+        image: quay.io/argoproj/argo-events:latest
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -380,14 +386,17 @@ spec:
         app: sensor-controller
     spec:
       containers:
-      - env:
+      - args:
+        - controller
+        - --component=sensor
+        env:
         - name: SENSOR_IMAGE
-          value: argoproj/sensor:latest
+          value: quay.io/argoproj/argo-events:latest
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: argoproj/sensor-controller:latest
+        image: quay.io/argoproj/argo-events:latest
         livenessProbe:
           httpGet:
             path: /healthz

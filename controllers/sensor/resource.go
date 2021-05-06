@@ -251,6 +251,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	sensorContainer := corev1.Container{
 		Image:           args.Image,
 		ImagePullPolicy: corev1.PullAlways,
+		Args:            []string{common.SensorSvcCommand},
 		Ports: []corev1.ContainerPort{
 			{Name: "metrics", ContainerPort: common.SensorMetricsPort},
 		},

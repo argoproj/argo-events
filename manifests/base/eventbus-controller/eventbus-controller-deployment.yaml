@@ -18,8 +18,11 @@ spec:
         runAsUser: 9731
       containers:
         - name: eventbus-controller
-          image: argoproj/eventbus-controller:latest
+          image: quay.io/argoproj/argo-events:latest
           imagePullPolicy: Always
+          args:
+            - controller
+            - --component=eventbus
           env:
             - name: NAMESPACE
               valueFrom:
