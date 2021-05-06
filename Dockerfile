@@ -56,7 +56,7 @@ ENV ARGO_VERSION=v3.0.2
 RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz
 RUN gunzip argo-linux-amd64.gz
 RUN chmod +x argo-linux-amd64
-RUN mv ./argo-linux-amd64 /bin/argo
+RUN mv ./argo-linux-amd64 /usr/local/bin/argo
 RUN argo version
 
 ####################################################################################################
@@ -70,7 +70,7 @@ FROM scratch as sensor
 
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=sensor-base /bin/argo /bin/argo
+COPY --from=sensor-base /usr/local/bin/argo /usr/local/bin/argo
 #RUN /usr/local/bin/argo version
 
 COPY dist/sensor /bin/sensor
