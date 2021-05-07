@@ -27,7 +27,6 @@ import (
 
 const (
 	eventSourceImageEnvVar = "EVENTSOURCE_IMAGE"
-	sensorImageEnvVar      = "SENSOR_IMAGE"
 )
 
 func Start(namespaced bool, managedNamespace string) {
