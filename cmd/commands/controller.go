@@ -12,12 +12,6 @@ import (
 	envpkg "github.com/argoproj/pkg/env"
 )
 
-const (
-	componentValEventBus    = "eventbus"
-	componentValEventSource = "eventsource"
-	componentValSensor      = "sensor"
-)
-
 func NewControllerCommand() *cobra.Command {
 	var (
 		component        string
@@ -30,11 +24,11 @@ func NewControllerCommand() *cobra.Command {
 		Short: "Start a controller",
 		Run: func(cmd *cobra.Command, args []string) {
 			switch component {
-			case componentValEventBus:
+			case "eventbus":
 				eventbuscmd.Start(namespaced, managedNamespace)
-			case componentValEventSource:
+			case "eventsource":
 				eventsourcecmd.Start(namespaced, managedNamespace)
-			case componentValSensor:
+			case "sensor":
 				sensorcmd.Start(namespaced, managedNamespace)
 			case "":
 				cmd.HelpFunc()(cmd, args)
@@ -45,7 +39,7 @@ func NewControllerCommand() *cobra.Command {
 		},
 	}
 	defaultNamespace := envpkg.LookupEnvStringOr("NAMESPACE", "argo-events")
-	command.Flags().StringVar(&component, "component", "", `The controller component, possible values: "`+componentValEventBus+`", "`+componentValEventSource+`" or "`+componentValSensor+`".`)
+	command.Flags().StringVar(&component, "component", "", `The controller component, possible values: "eventbus", "eventsource" or "sensor".`)
 	command.Flags().BoolVar(&namespaced, "namespaced", false, "Whether to run in namespaced scope, defaults to false.")
 	command.Flags().StringVar(&managedNamespace, "managed-namespaces", defaultNamespace, "The namespace that the controller watches when \"--namespaced\" is \"true\".")
 	return command

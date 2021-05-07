@@ -5,12 +5,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-
-	"github.com/argoproj/argo-events/common"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   common.RootCommand,
+	Use:   "argo-events",
 	Short: "Argo Events CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.HelpFunc()(cmd, args)

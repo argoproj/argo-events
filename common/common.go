@@ -98,7 +98,6 @@ var (
 
 // CLI related
 const (
-	RootCommand           = "argo-events"
 	ControllerCommand     = "controller"
 	EventSourceSvcCommand = "eventsource-service"
 	SensorSvcCommand      = "sensor-service"
