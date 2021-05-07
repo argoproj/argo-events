@@ -213,8 +213,7 @@ spec:
     spec:
       containers:
       - args:
-        - controller
-        - --component=eventbus
+        - eventbus-controller
         - --namespaced
         env:
         - name: NAMESPACE
@@ -262,8 +261,7 @@ spec:
     spec:
       containers:
       - args:
-        - controller
-        - --component=eventsource
+        - eventsource-controller
         - --namespaced
         env:
         - name: EVENTSOURCE_IMAGE
@@ -309,8 +307,7 @@ spec:
     spec:
       containers:
       - args:
-        - controller
-        - --component=sensor
+        - sensor-controller
         - --namespaced
         env:
         - name: SENSOR_IMAGE

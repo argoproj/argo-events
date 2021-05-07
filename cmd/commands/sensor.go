@@ -9,7 +9,7 @@ import (
 func NewSensorCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:   "sensor-service",
-		Short: "Start a sensor service",
+		Short: "Start a Sensor service",
 		Run: func(cmd *cobra.Command, args []string) {
 			sensorcmd.Start()
 		},

@@ -21,8 +21,7 @@ spec:
           image: quay.io/argoproj/argo-events:latest
           imagePullPolicy: Always
           args:
-            - controller
-            - --component=eventsource
+            - eventsource-controller
           env:
             - name: NAMESPACE
               valueFrom:

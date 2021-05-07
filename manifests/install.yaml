@@ -293,8 +293,7 @@ spec:
     spec:
       containers:
       - args:
-        - controller
-        - --component=eventbus
+        - eventbus-controller
         env:
         - name: NAMESPACE
           valueFrom:
@@ -341,8 +340,7 @@ spec:
     spec:
       containers:
       - args:
-        - controller
-        - --component=eventsource
+        - eventsource-controller
         env:
         - name: EVENTSOURCE_IMAGE
           value: quay.io/argoproj/argo-events:latest
@@ -387,8 +385,7 @@ spec:
     spec:
       containers:
       - args:
-        - controller
-        - --component=sensor
+        - sensor-controller
         env:
         - name: SENSOR_IMAGE
           value: quay.io/argoproj/argo-events:latest
