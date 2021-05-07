@@ -95,11 +95,3 @@ var (
 	SecretKeySelectorType    = reflect.TypeOf(&corev1.SecretKeySelector{})
 	ConfigMapKeySelectorType = reflect.TypeOf(&corev1.ConfigMapKeySelector{})
 )
-
-// CLI related
-const (
-	ControllerCommand     = "controller"
-	EventSourceSvcCommand = "eventsource-service"
-	SensorSvcCommand      = "sensor-service"
-	WebhookCommand        = "webhook-service"
-)

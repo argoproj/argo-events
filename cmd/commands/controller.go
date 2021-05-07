@@ -5,7 +5,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/argoproj/argo-events/common"
 	eventbuscmd "github.com/argoproj/argo-events/controllers/eventbus/cmd"
 	eventsourcecmd "github.com/argoproj/argo-events/controllers/eventsource/cmd"
 	sensorcmd "github.com/argoproj/argo-events/controllers/sensor/cmd"
@@ -20,7 +19,7 @@ func NewControllerCommand() *cobra.Command {
 	)
 
 	command := &cobra.Command{
-		Use:   common.ControllerCommand,
+		Use:   "controller",
 		Short: "Start a controller",
 		Run: func(cmd *cobra.Command, args []string) {
 			switch component {
