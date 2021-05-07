@@ -9,7 +9,7 @@ import (
 func NewEventSourceCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:   "eventsource-service",
-		Short: "Start event source service",
+		Short: "Start an event source service",
 		Run: func(cmd *cobra.Command, args []string) {
 			eventsourcecmd.Start()
 		},
