@@ -40,6 +40,6 @@ func NewControllerCommand() *cobra.Command {
 	defaultNamespace := envpkg.LookupEnvStringOr("NAMESPACE", "argo-events")
 	command.Flags().StringVar(&component, "component", "", `The controller component, possible values: "eventbus", "eventsource" or "sensor".`)
 	command.Flags().BoolVar(&namespaced, "namespaced", false, "Whether to run in namespaced scope, defaults to false.")
-	command.Flags().StringVar(&managedNamespace, "managed-namespaces", defaultNamespace, "The namespace that the controller watches when \"--namespaced\" is \"true\".")
+	command.Flags().StringVar(&managedNamespace, "managed-namespace", defaultNamespace, "The namespace that the controller watches when \"--namespaced\" is \"true\".")
 	return command
 }
