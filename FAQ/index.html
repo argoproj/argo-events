@@ -1331,9 +1331,14 @@ with the desired namespace and service account. Make sure to grant the service a
 <p><strong>Q. The event-source pod is receiving events but nothing happens.</strong></p>
 <p><strong>A</strong>. </p>
 <ol>
-<li>Check the sensor resource is deployed and a pod is running for the resource.
+<li>
+<p>Check the sensor resource is deployed and a pod is running for the resource.
 If the sensor pod is running, check for <code>Started to subscribe events for triggers</code> in the logs.
-If the sensor has subscribed to the event-bus but is unable to create the trigger resource, please raise an issue on GitHub. </li>
+If the sensor has subscribed to the event-bus but is unable to create the trigger resource, please raise an issue on GitHub.</p>
+</li>
+<li>
+<p>The sensor's dependencies have a specific eventSourceName and eventName that should match the values defined in the <code>EventSource</code> resource. See full details <a href="https://github.com/argoproj/argo-events/blob/master/docs/eventsources/naming.md">here</a>.</p>
+</li>
 </ol>
 <p><strong>Q. Helm chart installation does not work.</strong></p>
 <p><strong>A.</strong> The Helm chart for argo events is maintained by the community and can be out of sync with latest release version. 
