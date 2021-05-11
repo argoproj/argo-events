@@ -56,7 +56,6 @@ func TestConnect(t *testing.T) {
 }
 
 func TestConnectDurationString(t *testing.T) {
-
 	start := time.Now()
 	count := 2
 	err := Connect(nil, func() error {
@@ -75,7 +74,6 @@ func TestConnectDurationString(t *testing.T) {
 }
 
 func TestConnectRetry(t *testing.T) {
-
 	factor := apicommon.NewAmount("1.0")
 	jitter := apicommon.NewAmount("1")
 	duration := apicommon.FromInt64(1000000000)
