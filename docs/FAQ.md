@@ -25,7 +25,7 @@ with the desired namespace and service account. Make sure to grant the service a
      * Make sure you have configured the event source correctly.
      * Check the event-source pod's containers logs.
 
-Note: You can set the environment variable `DEBUG_LOG:true` in any of the containers to output debug logs.
+Note: You can set the environment variable `DEBUG_LOG:true` in any of the containers to output debug logs. See [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/log-debug.yaml) for a debug example.
 
 **Q. The event-source pod is receiving events but nothing happens.**
 
