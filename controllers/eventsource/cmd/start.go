@@ -1,12 +1,10 @@
-package main
+package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"reflect"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -24,32 +22,14 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/eventsource"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 const (
 	eventSourceImageEnvVar = "EVENTSOURCE_IMAGE"
 )
 
-var (
-	namespace        string
-	namespaced       bool
-	managedNamespace string
-)
-
-func init() {
-	ns, defined := os.LookupEnv("NAMESPACE")
-	if !defined {
-		panic(errors.New("required environment variable NAMESPACE not defined"))
-	}
-	namespace = ns
-
-	flag.BoolVar(&namespaced, "namespaced", false, "run the controller as namespaced mode")
-	flag.StringVar(&managedNamespace, "managed-namespace", namespace, "namespace that controller watches, default to the installation namespace")
-	flag.Parse()
-}
-
-func main() {
+func Start(namespaced bool, managedNamespace string) {
 	logger := logging.NewArgoEventsLogger().Named(eventsource.ControllerName)
 	eventSourceImage, defined := os.LookupEnv(eventSourceImageEnvVar)
 	if !defined {
@@ -77,7 +57,7 @@ func main() {
 		logger.Fatalw("unable add a health check", zap.Error(err))
 	}
 
-	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := eventsourcev1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("unable to add EventSource scheme", zap.Error(err))
 	}
 
@@ -94,7 +74,7 @@ func main() {
 	}
 
 	// Watch EventSource and enqueue EventSource object key
-	if err := c.Watch(&source.Kind{Type: &v1alpha1.EventSource{}}, &handler.EnqueueRequestForObject{},
+	if err := c.Watch(&source.Kind{Type: &eventsourcev1alpha1.EventSource{}}, &handler.EnqueueRequestForObject{},
 		predicate.Or(
 			predicate.GenerationChangedPredicate{},
 			// TODO: change to use LabelChangedPredicate with controller-runtime v0.8
@@ -113,12 +93,12 @@ func main() {
 	}
 
 	// Watch Deployments and enqueue owning EventSource key
-	if err := c.Watch(&source.Kind{Type: &appv1.Deployment{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventSource{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
+	if err := c.Watch(&source.Kind{Type: &appv1.Deployment{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventsourcev1alpha1.EventSource{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch Deployments", zap.Error(err))
 	}
 
 	// Watch Services and enqueue owning EventSource key
-	if err := c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventSource{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
+	if err := c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventsourcev1alpha1.EventSource{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch Services", zap.Error(err))
 	}
 

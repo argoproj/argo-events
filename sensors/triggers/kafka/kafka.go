@@ -75,7 +75,6 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.Password)
 			if err != nil {
-
 				return nil, errors.Wrap(err, "Error getting password value from secret")
 			}
 			config.Net.SASL.Password = password

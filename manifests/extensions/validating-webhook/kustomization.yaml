@@ -10,6 +10,6 @@ resources:
 namespace: argo-events
 
 images:
-  - name: argoproj/events-webhook
+  - name: quay.io/argoproj/argo-events
     newTag: latest
 
