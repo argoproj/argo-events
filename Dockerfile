@@ -1,17 +1,19 @@
+ARG ARCH=amd64
 ####################################################################################################
 # base
 ####################################################################################################
 FROM alpine:3.12.3 as base
+ARG ARCH
 RUN apk update && apk upgrade && \
     apk add ca-certificates && \
     apk --no-cache add tzdata
 
 ENV ARGO_VERSION=v3.0.2
 
-RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz
-RUN gunzip argo-linux-amd64.gz
-RUN chmod +x argo-linux-amd64
-RUN mv ./argo-linux-amd64 /usr/local/bin/argo
+RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-${ARCH}.gz
+RUN gunzip argo-linux-${ARCH}.gz
+RUN chmod +x argo-linux-${ARCH}
+RUN mv ./argo-linux-${ARCH} /usr/local/bin/argo
 RUN argo version
 
 ####################################################################################################
