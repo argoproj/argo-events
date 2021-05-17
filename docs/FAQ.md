@@ -25,7 +25,7 @@ with the desired namespace and service account. Make sure to grant the service a
      * Make sure you have configured the event source correctly.
      * Check the event-source pod's containers logs.
 
-Note: You can set the environment variable `DEBUG_LOG:true` in any of the containers to output debug logs.
+Note: You can set the environment variable `DEBUG_LOG:true` in any of the containers to output debug logs. See [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/log-debug.yaml) for a debug example.
 
 **Q. The event-source pod is receiving events but nothing happens.**
 
@@ -33,7 +33,9 @@ Note: You can set the environment variable `DEBUG_LOG:true` in any of the contai
 
 1. Check the sensor resource is deployed and a pod is running for the resource.
 If the sensor pod is running, check for `Started to subscribe events for triggers` in the logs.
-If the sensor has subscribed to the event-bus but is unable to create the trigger resource, please raise an issue on GitHub. 
+If the sensor has subscribed to the event-bus but is unable to create the trigger resource, please raise an issue on GitHub.
+
+2. The sensor's dependencies have a specific eventSourceName and eventName that should match the values defined in the `EventSource` resource. See full details [here](https://github.com/argoproj/argo-events/blob/master/docs/eventsources/naming.md).
 
 **Q. Helm chart installation does not work.**
 

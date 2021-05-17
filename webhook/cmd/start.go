@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"crypto/tls"
@@ -25,7 +25,7 @@ const (
 	namespaceEnvVar = "NAMESPACE"
 )
 
-func main() {
+func Start() {
 	logger := logging.NewArgoEventsLogger().Named("webhook")
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)

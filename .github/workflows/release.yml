@@ -21,7 +21,7 @@ jobs:
 
       - name: Build binaries
         run: |
-          make all
+          make build
           chmod -R +x dist
           zip -r release.zip dist
 
@@ -36,23 +36,16 @@ jobs:
       - name: Docker Login
         uses: Azure/docker-login@v1
         with:
-          username: ${{ secrets.DOCKERIO_USERNAME }}
-          password: ${{ secrets.DOCKERIO_PASSWORD }}
-
-      - name: Docker Login
-        uses: Azure/docker-login@v1
-        with:
           login-server: quay.io
           username: ${{ secrets.QUAYIO_USERNAME }}
           password: ${{ secrets.QUAYIO_PASSWORD }}
 
       - name: Build & Push Linux Docker Images
         env:
-          DOCKERIO_ORG: ${{ secrets.DOCKERIO_ORG }}
+          QUAYIO_ORG: ${{ secrets.QUAYIO_ORG }}
         run: |
           tag=$(basename $GITHUB_REF)
           if [ $tag = "master" ]; then
             tag="latest"
           fi
-          make eventsource-image sensor-image eventbus-controller-image eventsource-controller-image sensor-controller-image events-webhook-image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${DOCKERIO_ORG} DOCKER_PUSH=true
-          make quay-release
+          make image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${QUAYIO_ORG} DOCKER_PUSH=true

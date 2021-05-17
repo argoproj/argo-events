@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/base64"
@@ -18,7 +18,7 @@ import (
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
-func main() {
+func Start() {
 	logger := logging.NewArgoEventsLogger().Named("eventsource")
 	encodedEventSourceSpec, defined := os.LookupEnv(common.EnvVarEventSourceObject)
 	if !defined {
