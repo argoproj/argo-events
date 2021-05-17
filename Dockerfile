@@ -20,9 +20,9 @@ RUN argo version
 # argo-events
 ####################################################################################################
 FROM scratch as argo-events
+ARG ARCH
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=base /usr/local/bin/argo /usr/local/bin/argo
-COPY dist/argo-events /bin/argo-events
+COPY dist/argo-events-linux-${ARCH} /bin/argo-events
 ENTRYPOINT [ "/bin/argo-events" ]
-

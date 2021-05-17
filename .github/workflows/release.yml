@@ -7,9 +7,14 @@ on:
     branches:
       - master
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build-binaries:
+    runs-on: ubuntu-20.04
+    name: Build binaries
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -23,29 +28,167 @@ jobs:
         run: |
           make build
           chmod -R +x dist
-          zip -r release.zip dist
-
-      - name: Release binaries
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Make checksums
+        run: make checksums
+      - name: store artifacts
+        uses: actions/upload-artifact@v2
         with:
-          files: release.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: binaries
+          path: dist
+
+  build-push-linux-arm64:
+    name: Build & push linux/arm64
+    needs: [ build-binaries ]
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        platform: [ linux/arm64 ]
+        target: [ argo-events ]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries
+          path: dist/
 
       - name: Docker Login
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
+
+      - name: Docker Buildx
+        env:
+          QUAYIO_ORG: ${{ secrets.QUAYIO_ORG }}
+          PLATFORM: ${{ matrix.platform }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          tag=$(basename $GITHUB_REF)
+          if [ $tag = "master" ]; then
+            tag="latest"
+          fi
+
+          tag_suffix=$(echo $PLATFORM | sed -r "s/\//-/g")
+          image_name="${QUAYIO_ORG}/${TARGET}:${tag}-${tag_suffix}"
+
+          docker buildx build \
+            --output "type=image,push=true" \
+            --platform="${PLATFORM}" \
+            --build-arg "ARCH=arm64" \
+            --target $TARGET \
+            --tag quay.io/$image_name .
+
+  build-push-linux-amd64:
+    name: Build & push linux/amd64
+    needs: [ build-binaries ]
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        platform: [ linux/amd64 ]
+        target: [ argo-events ]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries
+          path: dist/
+
+      - name: Docker Login
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
+
+      - name: Docker Buildx
+        env:
+          QUAYIO_ORG: ${{ secrets.QUAYIO_ORG }}
+          PLATFORM: ${{ matrix.platform }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          tag=$(basename $GITHUB_REF)
+          if [ $tag = "master" ]; then
+            tag="latest"
+          fi
+
+          tag_suffix=$(echo $PLATFORM | sed -r "s/\//-/g")
+          image_name="${QUAYIO_ORG}/${TARGET}:${tag}-${tag_suffix}"
+
+          docker buildx build \
+            --output "type=image,push=true" \
+            --platform="${PLATFORM}" \
+            --build-arg "ARCH=amd64" \
+            --target $TARGET \
+            --tag quay.io/$image_name .
+
+  push-images-multi-manifest:
+    name: Push manifest with all images
+    runs-on: ubuntu-20.04
+    needs: [ build-push-linux-arm64, build-push-linux-amd64 ]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to Quay
         uses: Azure/docker-login@v1
         with:
           login-server: quay.io
           username: ${{ secrets.QUAYIO_USERNAME }}
           password: ${{ secrets.QUAYIO_PASSWORD }}
 
-      - name: Build & Push Linux Docker Images
+      - name: Push Multiarch Image
         env:
           QUAYIO_ORG: ${{ secrets.QUAYIO_ORG }}
         run: |
+          echo $(jq -c '. + { "experimental": "enabled" }' ${DOCKER_CONFIG}/config.json) > ${DOCKER_CONFIG}/config.json
+
+          quay_org=$QUAYIO_ORG
+
           tag=$(basename $GITHUB_REF)
           if [ $tag = "master" ]; then
             tag="latest"
           fi
-          make image IMAGE_TAG=${tag} IMAGE_NAMESPACE=${QUAYIO_ORG} DOCKER_PUSH=true
+
+          targets="argo-events"
+          for target in $targets; do
+            image_name="${quay_org}/${target}:${tag}"
+            
+            docker manifest create quay.io/$image_name quay.io/${image_name}-linux-arm64 quay.io/${image_name}-linux-amd64
+            
+            docker manifest push quay.io/$image_name
+          done
+  
+  release:
+    runs-on: ubuntu-latest
+    needs: [ push-images-multi-manifest ]
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries
+          path: dist/
+
+      - name: Release binaries
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            dist/*.gz
+            dist/*.gz.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
