@@ -385,13 +385,13 @@ func schema_argo_events_pkg_apis_common_SASLConfig(ref common.ReferenceCallback)
 							Format:      "",
 						},
 					},
-					"user": {
+					"userSecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "User is the authentication identity (authcid) to present for SASL/PLAIN or SASL/SCRAM authentication",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"password": {
+					"passwordSecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Password for SASL/PLAIN authentication",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
