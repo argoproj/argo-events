@@ -33,11 +33,7 @@ spec:
 #      limitEventsPerSecond: 1
 #      version: "2.5.0"
 
-#    example-tls:
-#      url: "kafka.argo-events:9092"
-#      topic: "topic-2"
-#      jsonBody: true
-#      partition: "1"
+##    Enable TLS authentication ( not to be used with SASL)
 #      tls:
 #        caCertSecret:
 #          name: my-secret
@@ -48,3 +44,13 @@ spec:
 #        clientKeySecret:
 #          name: my-secret
 #          key: client-key-key
+
+##    Enable SASL authentication (not to be used with TLS)
+#     sasl:
+#        mechanism: PLAIN
+#        passwordSecret:
+#          key: password
+#          name: my-user
+#        userSecret:
+#          key: user
+#          name: my-user

@@ -37,13 +37,13 @@ func fakeSASLConfig(t *testing.T) *SASLConfig {
 	return &SASLConfig{
 		Mechanism: "PLAIN",
 
-		User: &corev1.SecretKeySelector{
+		UserSecret: &corev1.SecretKeySelector{
 			Key: "fake-key1",
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "user",
 			},
 		},
-		Password: &corev1.SecretKeySelector{
+		PasswordSecret: &corev1.SecretKeySelector{
 			Key: "fake-key2",
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "password",
@@ -96,7 +96,7 @@ func TestValidateSASLConfig(t *testing.T) {
 		s := &SASLConfig{}
 		err := ValidateSASLConfig(s)
 		assert.NotNil(t, err)
-		assert.True(t, strings.Contains(err.Error(), "invalid sasl config, please configure either User, and/or Password"))
+		assert.True(t, strings.Contains(err.Error(), "invalid sasl config, both userSecret and passwordSecret must be defined"))
 	})
 
 	t.Run("test invalid Mechanism is set", func(t *testing.T) {
@@ -109,14 +109,14 @@ func TestValidateSASLConfig(t *testing.T) {
 
 	t.Run("test only User is set", func(t *testing.T) {
 		s := fakeSASLConfig(t)
-		s.Password = nil
+		s.PasswordSecret = nil
 		err := ValidateSASLConfig(s)
 		assert.NotNil(t, err)
 	})
 
 	t.Run("test only Password is set", func(t *testing.T) {
 		s := fakeSASLConfig(t)
-		s.User = nil
+		s.UserSecret = nil
 		err := ValidateSASLConfig(s)
 		assert.NotNil(t, err)
 	})
