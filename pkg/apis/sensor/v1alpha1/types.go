@@ -92,10 +92,8 @@ type SensorList struct {
 
 // SensorSpec represents desired sensor state
 type SensorSpec struct {
-
 	// Dependencies is a list of the events that this sensor is dependent on.
 	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
-
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 	// Template is the pod specification for the sensor
@@ -200,7 +198,6 @@ type EventDependency struct {
 type DependencyGroup struct {
 	// Name of the group
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-
 	// Dependencies of events
 	Dependencies []string `json:"dependencies" protobuf:"bytes,2,rep,name=dependencies"`
 }
@@ -211,9 +208,32 @@ type EventDependencyFilter struct {
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,1,opt,name=time"`
 	// Context filter constraints
 	Context *EventContext `json:"context,omitempty" protobuf:"bytes,2,opt,name=context"`
-
 	// Data filter constraints with escalation
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
+	// Exprs contains the list of expressions evaluated against the event payload.
+	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,3,rep,name=exprs"`
+}
+
+type ExprFilter struct {
+	// Name of the filter.
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	// Expr refers to the expression that determines the outcome of the filter.
+	Expr string `json:"expr" protobuf:"bytes,2,opt,name=expr"`
+	// Fields refers to set of keys that refer to the paths within event payload.
+	Fields []PayloadField `json:"fields" protobuf:"bytes,3,rep,name=fields"`
+}
+
+// PayloadField binds a value at path within the event payload against a name.
+type PayloadField struct {
+	// Path is the JSONPath of the event's (JSON decoded) data key
+	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
+	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
+	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
+	// Name acts as key that holds the value at the path.
+	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
+	// Type of the value at the path.
+	Type JSONType `json:"type" protobuf:"bytes,3,opt,name=type"`
 }
 
 // TimeFilter describes a window in time.
@@ -254,7 +274,6 @@ type DataFilter struct {
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
 	// Type contains the JSON type of the data
 	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type,casttype=JSONType"`
-
 	// Value is the allowed string values for this key
 	// Booleans are passed using strconv.ParseBool()
 	// Numbers are parsed using as float64 using strconv.ParseFloat()
@@ -276,7 +295,6 @@ type DataFilter struct {
 type Trigger struct {
 	// Template describes the trigger specification.
 	Template *TriggerTemplate `json:"template,omitempty" protobuf:"bytes,1,opt,name=template"`
-
 	// Parameters is the list of parameters applied to the trigger template definition
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
 	// Policy to configure backoff and execution criteria for the trigger
@@ -338,10 +356,8 @@ type TriggerTemplate struct {
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
 // Deprecated: will be removed in v1.5
 type TriggerSwitch struct {
-
 	// Any acts as a OR operator between dependencies
 	Any []string `json:"any,omitempty" protobuf:"bytes,1,rep,name=any"`
-
 	// All acts as a AND operator between dependencies
 	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
 }
@@ -357,7 +373,6 @@ type StandardK8STrigger struct {
 	// +optional
 	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,3,opt,name=operation,casttype=KubernetesResourceOperation"`
 	// Parameters is the list of parameters that is applied to resolved K8s trigger object.
-
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 	// PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
 	// possible values:
@@ -387,7 +402,6 @@ type ArgoWorkflowTrigger struct {
 	// +optional
 	Operation ArgoWorkflowOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation,casttype=ArgoWorkflowOperation"`
 	// Parameters is the list of parameters to pass to resolved Argo Workflow object
-
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
@@ -410,7 +424,6 @@ type HTTPTrigger struct {
 	Method string `json:"method,omitempty" protobuf:"bytes,4,opt,name=method"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the HTTP trigger resource.
-
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,5,rep,name=parameters"`
 	// Timeout refers to the HTTP request timeout in seconds.
 	// Default value is 60 seconds.
@@ -484,7 +497,6 @@ type KafkaTrigger struct {
 	// Partition to write data to.
 	Partition int32 `json:"partition" protobuf:"varint,3,opt,name=partition"`
 	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
-
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 	// RequiredAcks used in producer to tell the broker how many replica acknowledgements
 	// Defaults to 1 (Only wait for the leader to ack).
@@ -503,17 +515,14 @@ type KafkaTrigger struct {
 	// +optional
 	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
 	// The partitioning key for the messages put on the Kafka topic.
 	// Defaults to broker url.
 	// +optional.
 	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
-
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
 	Version string `json:"version,omitempty" protobuf:"bytes,11,opt,name=version"`
-
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,12,opt,name=sasl"`
@@ -549,10 +558,8 @@ type CustomTrigger struct {
 	// Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
 	Spec map[string]string `json:"spec" protobuf:"bytes,5,rep,name=spec"`
 	// Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
-
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
 	// DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
 	// Deprecated: will be removed in v1.5, use CertSecret instead
@@ -563,7 +570,6 @@ type CustomTrigger struct {
 type SlackTrigger struct {
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
-
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
@@ -594,11 +600,9 @@ type OpenWhiskTrigger struct {
 	// Name of the action/function.
 	ActionName string `json:"actionName" protobuf:"bytes,5,opt,name=actionName"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
-
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
