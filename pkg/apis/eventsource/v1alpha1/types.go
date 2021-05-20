@@ -112,6 +112,8 @@ type EventSourceSpec struct {
 	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,28,rep,name=generic"`
 	// Replicas is the event source deployment replicas
 	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,29,opt,name=replicas"`
+	// Bitbucket Server event sources
+	BitbucketServer map[string]BitbucketServerEventSource `json:"bitbucketserver,omitempty" protobuf:"bytes,30,rep,name=bitbucketserver"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -754,6 +756,34 @@ type GitlabEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+}
+
+// BitbucketServerEventSource refers to event-source related to Bitbucket Server events
+type BitbucketServerEventSource struct {
+	// Webhook holds configuration to run a http server
+	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
+	// ProjectKey is the key of project for which integration needs to setup
+	ProjectKey string `json:"projectKey" protobuf:"bytes,2,opt,name=projectKey"`
+	// RepositorySlug is the slug of the repository for which integration needs to setup
+	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,3,opt,name=repositorySlug"`
+	// Events are bitbucket event to listen to.
+	// Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
+	Events []string `json:"events" protobuf:"bytes,4,opt,name=events"`
+	// AccessToken is reference to k8 secret which holds the bitbucket api access information
+	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,5,opt,name=accessToken"`
+	// WebhookSecret is reference to k8 secret which holds the bitbucket webhook secret (for HMAC validation)
+	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,6,opt,name=webhookSecret"`
+	// EnableSSLVerification to enable ssl verification
+	// +optional
+	EnableSSLVerification bool `json:"enableSSLVerification,omitempty" protobuf:"varint,7,opt,name=enableSSLVerification"`
+	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
+	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,8,opt,name=bitbucketserverBaseURL"`
+	// DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
+	// +optional
+	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,9,opt,name=deleteHookOnFinish"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
 }
 
 // HDFSEventSource refers to event-source for HDFS related events

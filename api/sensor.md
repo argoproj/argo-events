@@ -621,7 +621,7 @@ Path is the JSONPath of the event’s (JSON decoded) data key Path is a
 series of keys separated by a dot. A key may contain wildcard characters
 ‘\*’ and ‘?’. To access an array value use the index as the key. The dot
 and wildcard characters can be escaped with ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>
@@ -656,9 +656,9 @@ strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 </td>
 <td>
 <p>
-Comparator compares the event data with a user given value. Can be
-“&gt;=”, “&gt;”, “=”, “!=”, “&lt;”, or “&lt;=”. Is optional, and if left
-blank treated as equality “=”.
+Comparator compares the event data with a user given value. Can be “>=”,
+“>”, “=”, “!=”, “\<”, or “\<=”. Is optional, and if left blank treated
+as equality “=”.
 </p>
 </td>
 </tr>
@@ -1564,7 +1564,7 @@ URL of the Kafka broker, multiple URLs separated by comma.
 <td>
 <p>
 Name of the topic. More info at
-<a href="https://kafka.apache.org/documentation/#intro_topics">https://kafka.apache.org/documentation/\#intro\_topics</a>
+<a href="https://kafka.apache.org/documentation/#intro_topics">https://kafka.apache.org/documentation/#intro_topics</a>
 </p>
 </td>
 </tr>
@@ -1955,7 +1955,7 @@ Path is the JSONPath of the event’s (JSON decoded) data key Path is a
 series of keys separated by a dot. A key may contain wildcard characters
 ‘\*’ and ‘?’. To access an array value use the index as the key. The dot
 and wildcard characters can be escaped with ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>
@@ -2627,7 +2627,7 @@ same namespace to use for pulling any of the images used by this
 PodSpec. If specified, these secrets will be passed to individual puller
 implementations for them to use. For example, in the case of docker,
 only DockerConfig type secrets are honored. More info:
-<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images\#specifying-imagepullsecrets-on-a-pod</a>
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a>
 </p>
 </td>
 </tr>
@@ -2863,7 +2863,7 @@ dependency
 Dest is the JSONPath of a resource key. A path is a series of keys
 separated by a dot. The colon character can be escaped with ‘.’ The -1
 key can be used to append a value to an existing array. See
-<a href="https://github.com/tidwall/sjson#path-syntax">https://github.com/tidwall/sjson\#path-syntax</a>
+<a href="https://github.com/tidwall/sjson#path-syntax">https://github.com/tidwall/sjson#path-syntax</a>
 for more information about how this is used.
 </p>
 </td>
@@ -2946,7 +2946,7 @@ ContextKey is a series of keys separated by a dot. A key may contain
 wildcard characters ‘\*’ and ‘?’. To access an array value use the index
 as the key. The dot and wildcard characters can be escaped with
 ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>
@@ -2978,7 +2978,7 @@ DataKey is the JSONPath of the event’s (JSON decoded) data key DataKey
 is a series of keys separated by a dot. A key may contain wildcard
 characters ‘\*’ and ‘?’. To access an array value use the index as the
 key. The dot and wildcard characters can be escaped with ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>

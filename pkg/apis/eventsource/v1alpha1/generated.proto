@@ -191,6 +191,43 @@ message AzureEventsHubEventSource {
   map<string, string> metadata = 5;
 }
 
+// BitbucketServerEventSource refers to event-source related to Bitbucket Server events
+message BitbucketServerEventSource {
+  // Webhook holds configuration to run a http server
+  optional WebhookContext webhook = 1;
+
+  // ProjectKey is the key of project for which integration needs to setup
+  optional string projectKey = 2;
+
+  // RepositorySlug is the slug of the repository for which integration needs to setup
+  optional string repositorySlug = 3;
+
+  // Events are bitbucket event to listen to.
+  // Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
+  repeated string events = 4;
+
+  // AccessToken is reference to k8 secret which holds the bitbucket api access information
+  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 5;
+
+  // WebhookSecret is reference to k8 secret which holds the bitbucket webhook secret (for HMAC validation)
+  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 6;
+
+  // EnableSSLVerification to enable ssl verification
+  // +optional
+  optional bool enableSSLVerification = 7;
+
+  // BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
+  optional string bitbucketserverBaseURL = 8;
+
+  // DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
+  // +optional
+  optional bool deleteHookOnFinish = 9;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 10;
+}
+
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 message CalendarEventSource {
@@ -395,6 +432,9 @@ message EventSourceSpec {
 
   // Replicas is the event source deployment replicas
   optional int32 replicas = 29;
+
+  // Bitbucket Server event sources
+  map<string, BitbucketServerEventSource> bitbucketserver = 30;
 }
 
 // EventSourceStatus holds the status of the event-source resource
