@@ -707,7 +707,7 @@
       ],
       "properties": {
         "accessToken": {
-          "description": "AccessToken is reference to k8 secret which holds the bitbucket api access information",
+          "description": "AccessToken is reference to K8s secret which holds the bitbucket api access information",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "bitbucketserverBaseURL": {
@@ -749,7 +749,7 @@
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         },
         "webhookSecret": {
-          "description": "WebhookSecret is reference to k8 secret which holds the bitbucket webhook secret (for HMAC validation)",
+          "description": "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -1316,7 +1316,7 @@
       ],
       "properties": {
         "accessToken": {
-          "description": "AccessToken is reference to k8 secret which holds the gitlab api access information",
+          "description": "AccessToken is reference to K8s secret which holds the gitlab api access information",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "deleteHookOnFinish": {
@@ -1862,7 +1862,7 @@
       }
     },
     "io.argoproj.eventsource.v1alpha1.ResourceFilter": {
-      "description": "ResourceFilter contains K8 ObjectMeta information to further filter resource event objects",
+      "description": "ResourceFilter contains K8s ObjectMeta information to further filter resource event objects",
       "type": "object",
       "properties": {
         "afterStart": {
@@ -1902,7 +1902,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "metadata": {
@@ -1921,7 +1921,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "topicArn": {
@@ -1948,7 +1948,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "jsonBody": {
@@ -1979,7 +1979,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "waitTimeSeconds": {
@@ -2313,7 +2313,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "functionName": {
@@ -2343,7 +2343,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -2375,7 +2375,7 @@
           "type": "string"
         },
         "source": {
-          "description": "Source of the K8 resource file(s)",
+          "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
         },
         "version": {
@@ -3235,7 +3235,7 @@
           "type": "string"
         },
         "source": {
-          "description": "Source of the K8 resource file(s)",
+          "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
         },
         "version": {

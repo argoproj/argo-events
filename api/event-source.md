@@ -653,7 +653,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessToken is reference to k8 secret which holds the bitbucket api
+AccessToken is reference to K8s secret which holds the bitbucket api
 access information
 </p>
 </td>
@@ -666,7 +666,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-WebhookSecret is reference to k8 secret which holds the bitbucket
+WebhookSecret is reference to K8s secret which holds the bitbucket
 webhook secret (for HMAC validation)
 </p>
 </td>
@@ -2396,7 +2396,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessToken is reference to k8 secret which holds the gitlab api access
+AccessToken is reference to K8s secret which holds the gitlab api access
 information
 </p>
 </td>
@@ -3755,7 +3755,7 @@ ResourceFilter
 </p>
 <p>
 <p>
-ResourceFilter contains K8 ObjectMeta information to further filter
+ResourceFilter contains K8s ObjectMeta information to further filter
 resource event objects
 </p>
 </p>
@@ -3894,7 +3894,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessKey refers K8 secret containing aws access key
+AccessKey refers K8s secret containing aws access key
 </p>
 </td>
 </tr>
@@ -3906,7 +3906,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SecretKey refers K8 secret containing aws secret key
+SecretKey refers K8s secret containing aws secret key
 </p>
 </td>
 </tr>
@@ -3989,7 +3989,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessKey refers K8 secret containing aws access key
+AccessKey refers K8s secret containing aws access key
 </p>
 </td>
 </tr>
@@ -4001,7 +4001,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SecretKey refers K8 secret containing aws secret key
+SecretKey refers K8s secret containing aws secret key
 </p>
 </td>
 </tr>

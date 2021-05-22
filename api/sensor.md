@@ -60,7 +60,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessKey refers K8 secret containing aws access key
+AccessKey refers K8s secret containing aws access key
 </p>
 </td>
 </tr>
@@ -72,7 +72,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SecretKey refers K8 secret containing aws secret key
+SecretKey refers K8s secret containing aws secret key
 </p>
 </td>
 </tr>
@@ -194,7 +194,7 @@ Description
 </td>
 <td>
 <p>
-Source of the K8 resource file(s)
+Source of the K8s resource file(s)
 </p>
 </td>
 </tr>
@@ -2397,7 +2397,7 @@ appropriate kubernetes api client for this resource
 </td>
 <td>
 <p>
-Source of the K8 resource file(s)
+Source of the K8s resource file(s)
 </p>
 </td>
 </tr>

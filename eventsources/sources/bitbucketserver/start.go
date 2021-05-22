@@ -196,7 +196,7 @@ func (router *Router) PostActivate() error {
 
 	localVarPostBody, err := json.Marshal(newHook)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marhal new webhook to JSON")
+		return errors.Wrapf(err, "failed to marshal new webhook to JSON")
 	}
 
 	if !isAlreadyExists {

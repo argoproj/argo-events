@@ -362,7 +362,7 @@ type TriggerSwitch struct {
 type StandardK8STrigger struct {
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,1,opt,name=groupVersionResource"`
-	// Source of the K8 resource file(s)
+	// Source of the K8s resource file(s)
 	Source *ArtifactLocation `json:"source,omitempty" protobuf:"bytes,2,opt,name=source"`
 	// Operation refers to the type of operation performed on the k8s resource.
 	// Default value is Create.
@@ -391,7 +391,7 @@ type StandardK8STrigger struct {
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
 type ArgoWorkflowTrigger struct {
-	// Source of the K8 resource file(s)
+	// Source of the K8s resource file(s)
 	Source *ArtifactLocation `json:"source,omitempty" protobuf:"bytes,1,opt,name=source"`
 	// Operation refers to the type of operation performed on the argo workflow resource.
 	// Default value is Submit.
@@ -440,9 +440,9 @@ type HTTPTrigger struct {
 type AWSLambdaTrigger struct {
 	// FunctionName refers to the name of the function to invoke.
 	FunctionName string `json:"functionName" protobuf:"bytes,1,opt,name=functionName"`
-	// AccessKey refers K8 secret containing aws access key
+	// AccessKey refers K8s secret containing aws access key
 	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,2,opt,name=accessKey"`
-	// SecretKey refers K8 secret containing aws secret key
+	// SecretKey refers K8s secret containing aws secret key
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,3,opt,name=secretKey"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,4,opt,name=region"`

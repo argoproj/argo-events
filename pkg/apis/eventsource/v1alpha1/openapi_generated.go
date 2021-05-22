@@ -452,13 +452,13 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 					},
 					"accessToken": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AccessToken is reference to k8 secret which holds the bitbucket api access information",
+							Description: "AccessToken is reference to K8s secret which holds the bitbucket api access information",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"webhookSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "WebhookSecret is reference to k8 secret which holds the bitbucket webhook secret (for HMAC validation)",
+							Description: "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -1615,7 +1615,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"accessToken": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AccessToken is reference to k8 secret which holds the gitlab api access information",
+							Description: "AccessToken is reference to K8s secret which holds the gitlab api access information",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -2588,7 +2588,7 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ResourceFilter contains K8 ObjectMeta information to further filter resource event objects",
+				Description: "ResourceFilter contains K8s ObjectMeta information to further filter resource event objects",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"prefix": {
@@ -2671,13 +2671,13 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 					},
 					"accessKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AccessKey refers K8 secret containing aws access key",
+							Description: "AccessKey refers K8s secret containing aws access key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"secretKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SecretKey refers K8 secret containing aws secret key",
+							Description: "SecretKey refers K8s secret containing aws secret key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -2737,13 +2737,13 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"accessKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AccessKey refers K8 secret containing aws access key",
+							Description: "AccessKey refers K8s secret containing aws access key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"secretKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SecretKey refers K8 secret containing aws secret key",
+							Description: "SecretKey refers K8s secret containing aws secret key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},

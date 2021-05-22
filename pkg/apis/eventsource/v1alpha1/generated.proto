@@ -206,10 +206,10 @@ message BitbucketServerEventSource {
   // Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
   repeated string events = 4;
 
-  // AccessToken is reference to k8 secret which holds the bitbucket api access information
+  // AccessToken is reference to K8s secret which holds the bitbucket api access information
   optional k8s.io.api.core.v1.SecretKeySelector accessToken = 5;
 
-  // WebhookSecret is reference to k8 secret which holds the bitbucket webhook secret (for HMAC validation)
+  // WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
   optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 6;
 
   // EnableSSLVerification to enable ssl verification
@@ -556,7 +556,7 @@ message GitlabEventSource {
   // Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
   repeated string events = 3;
 
-  // AccessToken is reference to k8 secret which holds the gitlab api access information
+  // AccessToken is reference to K8s secret which holds the gitlab api access information
   optional k8s.io.api.core.v1.SecretKeySelector accessToken = 4;
 
   // EnableSSLVerification to enable ssl verification
@@ -939,7 +939,7 @@ message ResourceEventSource {
   map<string, string> metadata = 5;
 }
 
-// ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
+// ResourceFilter contains K8s ObjectMeta information to further filter resource event objects
 message ResourceFilter {
   // Prefix filter is applied on the resource name.
   // +optional
@@ -975,10 +975,10 @@ message SNSEventSource {
   // TopicArn
   optional string topicArn = 2;
 
-  // AccessKey refers K8 secret containing aws access key
+  // AccessKey refers K8s secret containing aws access key
   optional k8s.io.api.core.v1.SecretKeySelector accessKey = 3;
 
-  // SecretKey refers K8 secret containing aws secret key
+  // SecretKey refers K8s secret containing aws secret key
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 4;
 
   // Region is AWS region
@@ -999,10 +999,10 @@ message SNSEventSource {
 
 // SQSEventSource refers to event-source for AWS SQS related events
 message SQSEventSource {
-  // AccessKey refers K8 secret containing aws access key
+  // AccessKey refers K8s secret containing aws access key
   optional k8s.io.api.core.v1.SecretKeySelector accessKey = 1;
 
-  // SecretKey refers K8 secret containing aws secret key
+  // SecretKey refers K8s secret containing aws secret key
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 2;
 
   // Region is AWS region
