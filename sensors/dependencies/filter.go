@@ -25,11 +25,11 @@ import (
 	"text/template"
 	"time"
 
-	sprig "github.com/Masterminds/sprig/v3"
-	"github.com/tidwall/gjson"
-
+	"github.com/Knetic/govaluate"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/tidwall/gjson"
 )
 
 // Filter filters the event with dependency's defined filters
@@ -55,8 +55,12 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) 
 		return false, err
 	}
 	ctxFilter := filterContext(filter.Context, event.Context)
+	exprFilter, err := filterExpr(filter.Exprs, event)
+	if err != nil {
+		return false, err
+	}
 
-	return timeFilter && ctxFilter && dataFilter, err
+	return timeFilter && ctxFilter && dataFilter && exprFilter, nil
 }
 
 // filterTime checks the eventTime falls into time range specified by the timeFilter.
@@ -251,4 +255,61 @@ filter:
 		}
 	}
 	return true, nil
+}
+
+// filterExpr applies expression based filters against event data
+func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
+	if filters == nil {
+		return true, nil
+	}
+	if event == nil {
+		return false, fmt.Errorf("nil event")
+	}
+	payload := event.Data
+	if payload == nil {
+		return true, nil
+	}
+	var js *json.RawMessage
+	if err := json.Unmarshal(payload, &js); err != nil {
+		return false, err
+	}
+	var jsData []byte
+	jsData, err := json.Marshal(js)
+	if err != nil {
+		return false, err
+	}
+
+	for _, filter := range filters {
+		parameters := map[string]interface{}{}
+		for _, field := range filter.Fields {
+			result := gjson.GetBytes(jsData, field.Path)
+			if !result.Exists() {
+				return false, fmt.Errorf("path %s does not exist", field.Path)
+			}
+			switch field.Type {
+			case v1alpha1.JSONTypeString:
+				parameters[field.Name] = result.Str
+			case v1alpha1.JSONTypeNumber:
+				parameters[field.Name] = result.Num
+			case v1alpha1.JSONTypeBool:
+				parameters[field.Name] = result.Bool()
+			}
+		}
+		if len(parameters) == 0 {
+			continue
+		}
+		expr, err := govaluate.NewEvaluableExpression(filter.Expr)
+		if err != nil {
+			return false, err
+		}
+		result, err := expr.Evaluate(parameters)
+		if err != nil {
+			return false, err
+		}
+		if result == true {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

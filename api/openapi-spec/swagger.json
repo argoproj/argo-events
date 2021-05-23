@@ -2262,6 +2262,7 @@
           "type": "string"
         },
         "parameters": {
+          "description": "Parameters is the list of parameters to pass to resolved Argo Workflow object",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
@@ -2374,12 +2375,14 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "parameters": {
+          "description": "Parameters is the list of parameters that is applied to resolved custom trigger trigger object.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           }
         },
         "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
@@ -2562,9 +2565,41 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
           }
         },
+        "exprs": {
+          "description": "Exprs contains the list of expressions evaluated against the event payload.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ExprFilter"
+          }
+        },
         "time": {
           "description": "Time filter on the event with escalation",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.ExprFilter": {
+      "type": "object",
+      "required": [
+        "name",
+        "expr",
+        "fields"
+      ],
+      "properties": {
+        "expr": {
+          "description": "Expr refers to the expression that determines the outcome of the filter.",
+          "type": "string"
+        },
+        "fields": {
+          "description": "Fields refers to set of keys that refer to the paths within event payload.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.PayloadField"
+          }
+        },
+        "name": {
+          "description": "Name of the filter.",
+          "type": "string"
         }
       }
     },
@@ -2685,6 +2720,7 @@
           "type": "string"
         },
         "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
@@ -2756,6 +2792,7 @@
           "format": "int32"
         },
         "parameters": {
+          "description": "Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
@@ -2771,6 +2808,7 @@
           "type": "string"
         },
         "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
@@ -2874,12 +2912,14 @@
           "type": "string"
         },
         "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           }
         },
         "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
@@ -2887,6 +2927,29 @@
         },
         "version": {
           "description": "Version for the API. Defaults to v1.",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.PayloadField": {
+      "description": "PayloadField binds a value at path within the event payload against a name.",
+      "type": "object",
+      "required": [
+        "path",
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name acts as key that holds the value at the path.",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of the value at the path.",
           "type": "string"
         }
       }
@@ -3025,6 +3088,7 @@
           "type": "string"
         },
         "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
@@ -3057,6 +3121,7 @@
           "type": "string"
         },
         "parameters": {
+          "description": "Parameters is the list of parameters that is applied to resolved K8s trigger object.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"

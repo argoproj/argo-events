@@ -77,6 +77,7 @@ message ArgoWorkflowTrigger {
   // +optional
   optional string operation = 2;
 
+  // Parameters is the list of parameters to pass to resolved Argo Workflow object
   repeated TriggerParameter parameters = 3;
 
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
@@ -147,8 +148,10 @@ message CustomTrigger {
   // Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
   map<string, string> spec = 5;
 
+  // Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
   repeated TriggerParameter parameters = 6;
 
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
   repeated TriggerParameter payload = 7;
 
   // DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
@@ -255,6 +258,20 @@ message EventDependencyFilter {
 
   // Data filter constraints with escalation
   repeated DataFilter data = 3;
+
+  // Exprs contains the list of expressions evaluated against the event payload.
+  repeated ExprFilter exprs = 4;
+}
+
+message ExprFilter {
+  // Name of the filter.
+  optional string name = 1;
+
+  // Expr refers to the expression that determines the outcome of the filter.
+  optional string expr = 2;
+
+  // Fields refers to set of keys that refer to the paths within event payload.
+  repeated PayloadField fields = 3;
 }
 
 // FileArtifact contains information about an artifact in a filesystem
@@ -340,6 +357,8 @@ message HTTPTrigger {
   // +optional
   optional string method = 4;
 
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the HTTP trigger resource.
   repeated TriggerParameter parameters = 5;
 
   // Timeout refers to the HTTP request timeout in seconds.
@@ -381,6 +400,7 @@ message KafkaTrigger {
   // Partition to write data to.
   optional int32 partition = 3;
 
+  // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
   repeated TriggerParameter parameters = 4;
 
   // RequiredAcks used in producer to tell the broker how many replica acknowledgements
@@ -403,6 +423,7 @@ message KafkaTrigger {
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 8;
 
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
   repeated TriggerParameter payload = 9;
 
   // The partitioning key for the messages put on the Kafka topic.
@@ -464,10 +485,28 @@ message OpenWhiskTrigger {
   // Name of the action/function.
   optional string actionName = 5;
 
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
   repeated TriggerParameter payload = 6;
 
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the trigger resource.
   // +optional
   repeated TriggerParameter parameters = 7;
+}
+
+// PayloadField binds a value at path within the event payload against a name.
+message PayloadField {
+  // Path is the JSONPath of the event's (JSON decoded) data key
+  // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+  // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
+  // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
+  optional string path = 1;
+
+  // Name acts as key that holds the value at the path.
+  optional string name = 2;
+
+  // Type of the value at the path.
+  optional string type = 3;
 }
 
 // Sensor is the definition of a sensor resource
@@ -531,6 +570,8 @@ message SensorStatus {
 
 // SlackTrigger refers to the specification of the slack notification trigger.
 message SlackTrigger {
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the trigger resource.
   // +optional
   repeated TriggerParameter parameters = 1;
 
@@ -559,6 +600,7 @@ message StandardK8STrigger {
   // +optional
   optional string operation = 3;
 
+  // Parameters is the list of parameters that is applied to resolved K8s trigger object.
   repeated TriggerParameter parameters = 4;
 
   // PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.

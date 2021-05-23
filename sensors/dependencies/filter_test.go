@@ -568,3 +568,110 @@ func TestFilterEvent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, valid, true)
 }
+
+func TestExprFilter(t *testing.T) {
+	tests := []struct {
+		event   *v1alpha1.Event
+		filters []v1alpha1.ExprFilter
+		result  bool
+		err     error
+	}{
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": "b"}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Name: "filter1",
+					Expr: `a == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a",
+							Name: "a",
+							Type: "string",
+						},
+					},
+				},
+			},
+			result: true,
+			err:    nil,
+		},
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "c"}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Name: "filter1",
+					Expr: `b == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+							Type: "string",
+						},
+					},
+				},
+			},
+			result: false,
+			err:    nil,
+		},
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "c"}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Name: "filter1",
+					Expr: `b == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+							Type: "string",
+						},
+					},
+				},
+				{
+					Name: "filter1",
+					Expr: `b == "c"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+							Type: "string",
+						},
+					},
+				},
+			},
+			result: true,
+			err:    nil,
+		},
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": 2}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Name: "filter1",
+					Expr: `b == 2`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+							Type: "number",
+						},
+					},
+				},
+			},
+			result: true,
+			err:    nil,
+		},
+	}
+
+	for _, test := range tests {
+		result, err := filterExpr(test.filters, test.event)
+		assert.Equal(t, test.err, err)
+		assert.Equal(t, test.result, result)
+	}
+}

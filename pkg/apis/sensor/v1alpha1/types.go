@@ -86,8 +86,7 @@ type Sensor struct {
 type SensorList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-
-	Items []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
+	Items           []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // SensorSpec represents desired sensor state
@@ -211,7 +210,7 @@ type EventDependencyFilter struct {
 	// Data filter constraints with escalation
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 	// Exprs contains the list of expressions evaluated against the event payload.
-	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,3,rep,name=exprs"`
+	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,4,rep,name=exprs"`
 }
 
 type ExprFilter struct {
