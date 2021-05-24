@@ -21,6 +21,7 @@ import (
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -154,6 +155,71 @@ func (router *Router) PostActivate() error {
 	bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
 
 	ctx := context.WithValue(context.Background(), bitbucketv1.ContextAccessToken, bitbucketCredentials.token)
+
+	// When running multiple replicas of the eventsource, they will all try to create the webhook.
+	// Randomly sleep some time to mitigate the issue.
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+	router.CreateBitbucketWebhook(ctx, bitbucketConfig)
+
+	go func() {
+		// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
+		// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from bitbucket.
+		// This is a workround to mitigate the race conditions.
+		logger.Info("starting bitbucket hooks manager daemon")
+		ticker := time.NewTicker(60 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				logger.Info("exiting bitbucket hooks manager daemon")
+				return
+			case <-ticker.C:
+				router.CreateBitbucketWebhook(ctx, bitbucketConfig)
+			}
+		}
+	}()
+
+	return nil
+}
+
+// PostInactivate performs operations after the route is inactivated
+func (router *Router) PostInactivate() error {
+	bitbucketserverEventSource := router.bitbucketserverEventSource
+	route := router.route
+
+	if bitbucketserverEventSource.DeleteHookOnFinish {
+		logger := route.Logger.With(
+			"project-key", bitbucketserverEventSource.ProjectKey,
+			"repository-slug", bitbucketserverEventSource.RepositorySlug,
+			"hook-id", router.hook.ID,
+		)
+
+		logger.Info("deleting webhook...")
+
+		if _, err := router.bitbucketClient.DefaultApi.DeleteWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(router.hook.ID)); err != nil {
+			return errors.Errorf("failed to delete webhook. err: %+v", err)
+		}
+
+		logger.Info("bitbucket server webhook deleted")
+	}
+	return nil
+}
+
+func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration) error {
+	bitbucketserverEventSource := router.bitbucketserverEventSource
+	route := router.route
+
+	logger := route.Logger.With(
+		logging.LabelEndpoint, route.Context.Endpoint,
+		logging.LabelPort, route.Context.Port,
+		logging.LabelHTTPMethod, route.Context.Method,
+		"project-key", bitbucketserverEventSource.ProjectKey,
+		"repository-slug", bitbucketserverEventSource.RepositorySlug,
+		"base-url", bitbucketserverEventSource.BitbucketServerBaseURL,
+	)
+
 	router.bitbucketClient = bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
 
 	formattedURL := common.FormattedURL(bitbucketserverEventSource.Webhook.URL, bitbucketserverEventSource.Webhook.Endpoint)
@@ -216,12 +282,8 @@ func (router *Router) PostActivate() error {
 		}
 	}
 
-	logger.Infof("created webhook apiResponse: %+v", apiResponse)
-
 	var createdHook *bitbucketv1.Webhook
 	err = mapstructure.Decode(apiResponse.Values, &createdHook)
-
-	logger.Infof("created webhook: %+v", createdHook)
 
 	if err != nil {
 		return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
@@ -229,29 +291,7 @@ func (router *Router) PostActivate() error {
 
 	router.hook = createdHook
 	logger.With("hook-id", createdHook.ID).Info("hook succesfully registered")
-	return nil
-}
 
-// PostInactivate performs operations after the route is inactivated
-func (router *Router) PostInactivate() error {
-	bitbucketserverEventSource := router.bitbucketserverEventSource
-	route := router.route
-
-	if bitbucketserverEventSource.DeleteHookOnFinish {
-		logger := route.Logger.With(
-			"project-key", bitbucketserverEventSource.ProjectKey,
-			"repository-slug", bitbucketserverEventSource.RepositorySlug,
-			"hook-id", router.hook.ID,
-		)
-
-		logger.Info("deleting webhook...")
-
-		if _, err := router.bitbucketClient.DefaultApi.DeleteWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(router.hook.ID)); err != nil {
-			return errors.Errorf("failed to delete webhook. err: %+v", err)
-		}
-
-		logger.Info("bitbucket server webhook deleted")
-	}
 	return nil
 }
 
