@@ -707,13 +707,6 @@ func schema_pkg_apis_sensor_v1alpha1_ExprFilter(ref common.ReferenceCallback) co
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name of the filter.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"expr": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Expr refers to the expression that determines the outcome of the filter.",
@@ -735,7 +728,7 @@ func schema_pkg_apis_sensor_v1alpha1_ExprFilter(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"name", "expr", "fields"},
+				Required: []string{"expr", "fields"},
 			},
 		},
 		Dependencies: []string{

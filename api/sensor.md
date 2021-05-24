@@ -1946,26 +1946,6 @@ Description
 
 <td>
 
-<code>name</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-Name of the filter.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>expr</code></br> <em> string </em>
 
 </td>

@@ -582,7 +582,6 @@ func TestExprFilter(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Name: "filter1",
 					Expr: `a == "b"`,
 					Fields: []v1alpha1.PayloadField{
 						{
@@ -602,7 +601,6 @@ func TestExprFilter(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Name: "filter1",
 					Expr: `b == "b"`,
 					Fields: []v1alpha1.PayloadField{
 						{
@@ -622,7 +620,6 @@ func TestExprFilter(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Name: "filter1",
 					Expr: `b == "b"`,
 					Fields: []v1alpha1.PayloadField{
 						{
@@ -633,7 +630,6 @@ func TestExprFilter(t *testing.T) {
 					},
 				},
 				{
-					Name: "filter1",
 					Expr: `b == "c"`,
 					Fields: []v1alpha1.PayloadField{
 						{
@@ -653,7 +649,6 @@ func TestExprFilter(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Name: "filter1",
 					Expr: `b == 2`,
 					Fields: []v1alpha1.PayloadField{
 						{

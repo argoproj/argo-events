@@ -214,12 +214,10 @@ type EventDependencyFilter struct {
 }
 
 type ExprFilter struct {
-	// Name of the filter.
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 	// Expr refers to the expression that determines the outcome of the filter.
-	Expr string `json:"expr" protobuf:"bytes,2,opt,name=expr"`
+	Expr string `json:"expr" protobuf:"bytes,1,opt,name=expr"`
 	// Fields refers to set of keys that refer to the paths within event payload.
-	Fields []PayloadField `json:"fields" protobuf:"bytes,3,rep,name=fields"`
+	Fields []PayloadField `json:"fields" protobuf:"bytes,2,rep,name=fields"`
 }
 
 // PayloadField binds a value at path within the event payload against a name.

@@ -264,14 +264,11 @@ message EventDependencyFilter {
 }
 
 message ExprFilter {
-  // Name of the filter.
-  optional string name = 1;
-
   // Expr refers to the expression that determines the outcome of the filter.
-  optional string expr = 2;
+  optional string expr = 1;
 
   // Fields refers to set of keys that refer to the paths within event payload.
-  repeated PayloadField fields = 3;
+  repeated PayloadField fields = 2;
 }
 
 // FileArtifact contains information about an artifact in a filesystem

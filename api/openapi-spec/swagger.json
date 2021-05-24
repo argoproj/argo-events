@@ -2581,7 +2581,6 @@
     "io.argoproj.sensor.v1alpha1.ExprFilter": {
       "type": "object",
       "required": [
-        "name",
         "expr",
         "fields"
       ],
@@ -2596,10 +2595,6 @@
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.PayloadField"
           }
-        },
-        "name": {
-          "description": "Name of the filter.",
-          "type": "string"
         }
       }
     },
