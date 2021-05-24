@@ -161,7 +161,11 @@ func (router *Router) PostActivate() error {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
-	router.CreateBitbucketWebhook(ctx, bitbucketConfig)
+	err = router.CreateBitbucketWebhook(ctx, bitbucketConfig)
+
+	if err != nil {
+		logger.Errorw("failed to create Bitbucket webhook", zap.Error(err))
+	}
 
 	go func() {
 		// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
@@ -176,7 +180,11 @@ func (router *Router) PostActivate() error {
 				logger.Info("exiting bitbucket hooks manager daemon")
 				return
 			case <-ticker.C:
-				router.CreateBitbucketWebhook(ctx, bitbucketConfig)
+				err := router.CreateBitbucketWebhook(ctx, bitbucketConfig)
+
+				if err != nil {
+					logger.Errorw("failed to create Bitbucket webhook", zap.Error(err))
+				}
 			}
 		}
 	}()
