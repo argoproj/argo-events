@@ -25,15 +25,12 @@ spec:
             fields:
               - name: a
                 path: a
-                type: string
               - name: c
                 path: c
-                type: number
           - expr: e == false
             fields:
               - name: e
                 path: d.e
-                type: bool
   triggers:
     - template:
         name: workflow

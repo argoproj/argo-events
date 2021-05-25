@@ -1317,15 +1317,8 @@ func schema_pkg_apis_sensor_v1alpha1_PayloadField(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"type": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Type of the value at the path.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
-				Required: []string{"path", "name", "type"},
+				Required: []string{"path", "name"},
 			},
 		},
 	}

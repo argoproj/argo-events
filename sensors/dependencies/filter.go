@@ -286,14 +286,7 @@ func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, err
 			if !result.Exists() {
 				return false, fmt.Errorf("path %s does not exist", field.Path)
 			}
-			switch field.Type {
-			case v1alpha1.JSONTypeString:
-				parameters[field.Name] = result.Str
-			case v1alpha1.JSONTypeNumber:
-				parameters[field.Name] = result.Num
-			case v1alpha1.JSONTypeBool:
-				parameters[field.Name] = result.Bool()
-			}
+			parameters[field.Name] = result.Value()
 		}
 		if len(parameters) == 0 {
 			continue

@@ -2741,8 +2741,7 @@ JSONType (<code>string</code> alias)
 <p>
 
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.DataFilter">DataFilter</a>,
-<a href="#argoproj.io/v1alpha1.PayloadField">PayloadField</a>)
+<a href="#argoproj.io/v1alpha1.DataFilter">DataFilter</a>)
 
 </p>
 
@@ -3717,27 +3716,6 @@ for more information on how to use this.
 <p>
 
 Name acts as key that holds the value at the path.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>type</code></br> <em> <a href="#argoproj.io/v1alpha1.JSONType">
-JSONType </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-Type of the value at the path.
 
 </p>
 

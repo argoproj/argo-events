@@ -587,7 +587,6 @@ func TestExprFilter(t *testing.T) {
 						{
 							Path: "a",
 							Name: "a",
-							Type: "string",
 						},
 					},
 				},
@@ -606,7 +605,6 @@ func TestExprFilter(t *testing.T) {
 						{
 							Path: "a.b",
 							Name: "b",
-							Type: "string",
 						},
 					},
 				},
@@ -625,7 +623,6 @@ func TestExprFilter(t *testing.T) {
 						{
 							Path: "a.b",
 							Name: "b",
-							Type: "string",
 						},
 					},
 				},
@@ -635,7 +632,6 @@ func TestExprFilter(t *testing.T) {
 						{
 							Path: "a.b",
 							Name: "b",
-							Type: "string",
 						},
 					},
 				},
@@ -654,7 +650,6 @@ func TestExprFilter(t *testing.T) {
 						{
 							Path: "a.b",
 							Name: "b",
-							Type: "number",
 						},
 					},
 				},

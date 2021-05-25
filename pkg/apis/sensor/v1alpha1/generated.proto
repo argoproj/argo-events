@@ -501,9 +501,6 @@ message PayloadField {
 
   // Name acts as key that holds the value at the path.
   optional string name = 2;
-
-  // Type of the value at the path.
-  optional string type = 3;
 }
 
 // Sensor is the definition of a sensor resource

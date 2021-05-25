@@ -229,8 +229,6 @@ type PayloadField struct {
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
 	// Name acts as key that holds the value at the path.
 	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
-	// Type of the value at the path.
-	Type JSONType `json:"type" protobuf:"bytes,3,opt,name=type"`
 }
 
 // TimeFilter describes a window in time.
