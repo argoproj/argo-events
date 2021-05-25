@@ -108,6 +108,11 @@ type BasicAuth struct {
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
 }
 
+type SecureHeaders struct {
+	HeaderName string                    `json:"headerName,omitempty" protobuf:"bytes,1,opt,name=headerName"`
+	Value      *corev1.SecretKeySelector `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
+}
+
 // TLSConfig refers to TLS configuration for a client.
 type TLSConfig struct {
 	// CACertSecret refers to the secret that contains the CA cert

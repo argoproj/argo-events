@@ -153,6 +153,12 @@ message SASLConfig {
   optional k8s.io.api.core.v1.SecretKeySelector password = 3;
 }
 
+message SecureHeaders {
+  optional string headerName = 1;
+
+  optional k8s.io.api.core.v1.SecretKeySelector value = 2;
+}
+
 // Status is a common structure which can be used for Status field.
 message Status {
   // Conditions are the latest available observations of a resource's current state.

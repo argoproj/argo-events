@@ -40,6 +40,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":      schema_argo_events_pkg_apis_common_S3Bucket(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":      schema_argo_events_pkg_apis_common_S3Filter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig":    schema_argo_events_pkg_apis_common_SASLConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.SecureHeaders": schema_argo_events_pkg_apis_common_SecureHeaders(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Status":        schema_argo_events_pkg_apis_common_Status(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":     schema_argo_events_pkg_apis_common_TLSConfig(ref),
 	}
@@ -395,6 +396,31 @@ func schema_argo_events_pkg_apis_common_SASLConfig(ref common.ReferenceCallback)
 						SchemaProps: spec.SchemaProps{
 							Description: "Password for SASL/PLAIN authentication",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_SecureHeaders(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"headerName": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"value": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 				},

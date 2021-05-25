@@ -500,6 +500,17 @@ func (in *HTTPTrigger) DeepCopyInto(out *HTTPTrigger) {
 			(*out)[key] = val
 		}
 	}
+	if in.SecureHeaders != nil {
+		in, out := &in.SecureHeaders, &out.SecureHeaders
+		*out = make([]*common.SecureHeaders, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(common.SecureHeaders)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
 	return
 }
 

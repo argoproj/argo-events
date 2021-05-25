@@ -197,6 +197,17 @@
         }
       }
     },
+    "io.argoproj.common.SecureHeaders": {
+      "type": "object",
+      "properties": {
+        "headerName": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.common.Status": {
       "description": "Status is a common structure which can be used for Status field.",
       "type": "object",
@@ -2694,6 +2705,13 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "secureHeaders": {
+          "description": "Secure Headers stored in Kubernetes Secrets for the HTTP requests.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.common.SecureHeaders"
           }
         },
         "timeout": {
