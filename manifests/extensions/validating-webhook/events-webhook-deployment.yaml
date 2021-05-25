@@ -14,8 +14,10 @@ spec:
     spec:
       containers:
       - name: webhook
-        image: argoproj/events-webhook:latest
+        image: quay.io/argoproj/argo-events:latest
         imagePullPolicy: Always
+        args:
+        - webhook-service
         env:
         - name: NAMESPACE
           valueFrom:

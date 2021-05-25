@@ -1,7 +1,6 @@
-package main
+package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"reflect"
@@ -22,7 +21,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/eventbus"
-	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -32,18 +31,7 @@ const (
 	natsMetricsExporterEnvVar = "NATS_METRICS_EXPORTER_IMAGE"
 )
 
-var (
-	namespaced       bool
-	managedNamespace string
-)
-
-func init() {
-	flag.BoolVar(&namespaced, "namespaced", false, "run the controller as namespaced mode")
-	flag.StringVar(&managedNamespace, "managed-namespace", os.Getenv("NAMESPACE"), "namespace that controller watches, default to the installation namespace")
-	flag.Parse()
-}
-
-func main() {
+func Start(namespaced bool, managedNamespace string) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
 	natsStreamingImage, defined := os.LookupEnv(natsStreamingEnvVar)
 	if !defined {
@@ -75,7 +63,7 @@ func main() {
 		logger.Fatalw("unable add a health check", zap.Error(err))
 	}
 
-	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := eventbusv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("unable to add scheme", zap.Error(err))
 	}
 
@@ -96,7 +84,7 @@ func main() {
 	}
 
 	// Watch EventBus and enqueue EventBus object key
-	if err := c.Watch(&source.Kind{Type: &v1alpha1.EventBus{}}, &handler.EnqueueRequestForObject{},
+	if err := c.Watch(&source.Kind{Type: &eventbusv1alpha1.EventBus{}}, &handler.EnqueueRequestForObject{},
 		predicate.Or(
 			predicate.GenerationChangedPredicate{},
 			// TODO: change to use LabelChangedPredicate with controller-runtime v0.8
@@ -115,22 +103,22 @@ func main() {
 	}
 
 	// Watch ConfigMaps and enqueue owning EventBus key
-	if err := c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
+	if err := c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventbusv1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch ConfigMaps", zap.Error(err))
 	}
 
 	// Watch Secrets and enqueue owning EventBus key
-	if err := c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
+	if err := c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventbusv1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch Secrets", zap.Error(err))
 	}
 
 	// Watch StatefulSets and enqueue owning EventBus key
-	if err := c.Watch(&source.Kind{Type: &appv1.StatefulSet{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
+	if err := c.Watch(&source.Kind{Type: &appv1.StatefulSet{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventbusv1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch StatefulSets", zap.Error(err))
 	}
 
 	// Watch Services and enqueue owning EventBus key
-	if err := c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
+	if err := c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventbusv1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch Services", zap.Error(err))
 	}
 

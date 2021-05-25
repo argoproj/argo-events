@@ -13,11 +13,7 @@ resources:
   - eventbus-controller
 
 images:
-  - name: argoproj/sensor-controller
-    newTag: latest
-  - name: argoproj/eventbus-controller
-    newTag: latest
-  - name: argoproj/eventsource-controller
+  - name: quay.io/argoproj/argo-events
     newTag: latest
 
 patchesStrategicMerge:
@@ -33,7 +29,7 @@ patchesStrategicMerge:
             - name: eventsource-controller
               env:
                 - name: EVENTSOURCE_IMAGE
-                  value: argoproj/eventsource:latest
+                  value: quay.io/argoproj/argo-events:latest
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -46,4 +42,4 @@ patchesStrategicMerge:
             - name: sensor-controller
               env:
                 - name: SENSOR_IMAGE
-                  value: argoproj/sensor:latest
+                  value: quay.io/argoproj/argo-events:latest

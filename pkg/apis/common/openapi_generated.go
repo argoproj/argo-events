@@ -39,6 +39,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact":    schema_argo_events_pkg_apis_common_S3Artifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":      schema_argo_events_pkg_apis_common_S3Bucket(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":      schema_argo_events_pkg_apis_common_S3Filter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig":    schema_argo_events_pkg_apis_common_SASLConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.Status":        schema_argo_events_pkg_apis_common_Status(ref),
 		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":     schema_argo_events_pkg_apis_common_TLSConfig(ref),
 	}
@@ -367,6 +368,40 @@ func schema_argo_events_pkg_apis_common_S3Filter(ref common.ReferenceCallback) c
 				Required: []string{"prefix", "suffix"},
 			},
 		},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_SASLConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SASLConfig refers to SASL configuration for a client",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"mechanism": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SASLMechanism is the name of the enabled SASL mechanism. Possible values: OAUTHBEARER, PLAIN (defaults to PLAIN).",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"userSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "User is the authentication identity (authcid) to present for SASL/PLAIN or SASL/SCRAM authentication",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"passwordSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password for SASL/PLAIN authentication",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

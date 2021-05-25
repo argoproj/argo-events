@@ -179,6 +179,24 @@
         }
       }
     },
+    "io.argoproj.common.SASLConfig": {
+      "description": "SASLConfig refers to SASL configuration for a client",
+      "type": "object",
+      "properties": {
+        "mechanism": {
+          "description": "SASLMechanism is the name of the enabled SASL mechanism. Possible values: OAUTHBEARER, PLAIN (defaults to PLAIN).",
+          "type": "string"
+        },
+        "passwordSecret": {
+          "description": "Password for SASL/PLAIN authentication",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "userSecret": {
+          "description": "User is the authentication identity (authcid) to present for SASL/PLAIN or SASL/SCRAM authentication",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.common.Status": {
       "description": "Status is a common structure which can be used for Status field.",
       "type": "object",
@@ -1362,6 +1380,10 @@
         "partition": {
           "description": "Partition name",
           "type": "string"
+        },
+        "sasl": {
+          "description": "SASL configuration for the kafka client",
+          "$ref": "#/definitions/io.argoproj.common.SASLConfig"
         },
         "tls": {
           "description": "TLS configuration for the kafka client.",
@@ -2758,6 +2780,10 @@
           "description": "RequiredAcks used in producer to tell the broker how many replica acknowledgements Defaults to 1 (Only wait for the leader to ack).",
           "type": "integer",
           "format": "int32"
+        },
+        "sasl": {
+          "description": "SASL configuration for the kafka client",
+          "$ref": "#/definitions/io.argoproj.common.SASLConfig"
         },
         "tls": {
           "description": "TLS configuration for the Kafka producer.",

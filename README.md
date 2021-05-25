@@ -11,7 +11,7 @@
 
 **Argo Events** is an event-driven workflow automation framework for Kubernetes. It allows you to trigger 10 different
 actions (such as the creation of Kubernetes objects, invoke workflows or serverless workloads) on over 20 different
-events (such as webhook, S3 drop, cron schedule, messaging queues - e.g. Kafka, GCP PubPub, SNS, SQS).
+events (such as webhook, S3 drop, cron schedule, messaging queues - e.g. Kafka, GCP PubSub, SNS, SQS).
 
 [![Argo Events in 3 minutes](https://img.youtube.com/vi/Aqi1zyTpM44/0.jpg)](https://youtu.be/Aqi1zyTpM44)
 
@@ -26,13 +26,13 @@ events (such as webhook, S3 drop, cron schedule, messaging queues - e.g. Kafka, 
 ## Try Argo Events
 
 [Access the demo environment](https://workflows.apps.argoproj.io/event-flow/argo?showWorkflows=true) (login using
-Github)
+GitHub)
 
 ![Screenshot](docs/assets/screenshot.png)
 
 ## Getting Started
 
-Follow these [instruction](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
+Follow these [instructions](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
 
 ## User Interface/API
 

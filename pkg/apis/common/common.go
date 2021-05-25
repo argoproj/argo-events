@@ -128,6 +128,19 @@ type TLSConfig struct {
 	DeprecatedClientKeyPath string `json:"clientKeyPath,omitempty" protobuf:"bytes,6,opt,name=clientKeyPath"`
 }
 
+// SASLConfig refers to SASL configuration for a client
+type SASLConfig struct {
+	// SASLMechanism is the name of the enabled SASL mechanism.
+	// Possible values: OAUTHBEARER, PLAIN (defaults to PLAIN).
+	// +optional
+	Mechanism string `json:"mechanism,omitempty" protobuf:"bytes,1,opt,name=mechanism"`
+	// User is the authentication identity (authcid) to present for
+	// SASL/PLAIN or SASL/SCRAM authentication
+	UserSecret *corev1.SecretKeySelector `json:"userSecret,omitempty" protobuf:"bytes,2,opt,name=user"`
+	// Password for SASL/PLAIN authentication
+	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=password"`
+}
+
 // Backoff for an operation
 type Backoff struct {
 	// The initial duration in nanoseconds or strings like "1s", "3m"
@@ -152,4 +165,14 @@ func (b Backoff) GetSteps() int {
 type Metadata struct {
 	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,rep,name=annotations"`
 	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
+}
+
+func (s SASLConfig) GetMechanism() string {
+	switch s.Mechanism {
+	case "OAUTHBEARER", "SCRAM-SHA-256", "SCRAM-SHA-512", "GSSAPI":
+		return s.Mechanism
+	default:
+		// default to PLAINTEXT mechanism
+		return "PLAIN"
+	}
 }

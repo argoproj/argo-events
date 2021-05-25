@@ -63,6 +63,23 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 			config.Version = version
 		}
 
+		if kafkatrigger.SASL != nil {
+			config.Net.SASL.Enable = true
+			config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkatrigger.SASL.GetMechanism())
+
+			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.UserSecret)
+			if err != nil {
+				return nil, errors.Wrap(err, "Error getting user value from secret")
+			}
+			config.Net.SASL.User = user
+
+			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.PasswordSecret)
+			if err != nil {
+				return nil, errors.Wrap(err, "Error getting password value from secret")
+			}
+			config.Net.SASL.Password = password
+		}
+
 		if kafkatrigger.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(kafkatrigger.TLS)
 			if err != nil {

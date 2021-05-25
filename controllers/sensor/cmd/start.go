@@ -1,28 +1,10 @@
-/*
-Copyright 2020 BlackRock, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-package main
+package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"reflect"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -39,32 +21,14 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 const (
 	sensorImageEnvVar = "SENSOR_IMAGE"
 )
 
-var (
-	namespace        string
-	namespaced       bool
-	managedNamespace string
-)
-
-func init() {
-	ns, defined := os.LookupEnv("NAMESPACE")
-	if !defined {
-		panic(errors.New("required environment variable NAMESPACE not defined"))
-	}
-	namespace = ns
-
-	flag.BoolVar(&namespaced, "namespaced", false, "run the controller as namespaced mode")
-	flag.StringVar(&managedNamespace, "managed-namespace", namespace, "namespace that controller watches, default to the installation namespace")
-	flag.Parse()
-}
-
-func main() {
+func Start(namespaced bool, managedNamespace string) {
 	logger := logging.NewArgoEventsLogger().Named(sensor.ControllerName)
 	sensorImage, defined := os.LookupEnv(sensorImageEnvVar)
 	if !defined {
@@ -92,7 +56,7 @@ func main() {
 		logger.Fatalw("unable add a health check", zap.Error(err))
 	}
 
-	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := sensorv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
@@ -109,7 +73,7 @@ func main() {
 	}
 
 	// Watch Sensor and enqueue Sensor object key
-	if err := c.Watch(&source.Kind{Type: &v1alpha1.Sensor{}}, &handler.EnqueueRequestForObject{},
+	if err := c.Watch(&source.Kind{Type: &sensorv1alpha1.Sensor{}}, &handler.EnqueueRequestForObject{},
 		predicate.Or(
 			predicate.GenerationChangedPredicate{},
 			// TODO: change to use LabelChangedPredicate with controller-runtime v0.8
@@ -128,7 +92,7 @@ func main() {
 	}
 
 	// Watch Deployments and enqueue owning Sensor key
-	if err := c.Watch(&source.Kind{Type: &appv1.Deployment{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.Sensor{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
+	if err := c.Watch(&source.Kind{Type: &appv1.Deployment{}}, &handler.EnqueueRequestForOwner{OwnerType: &sensorv1alpha1.Sensor{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch Deployments", zap.Error(err))
 	}
 

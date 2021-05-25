@@ -7,7 +7,10 @@ resources:
 
 namespace: argo-events
 
-patchesStrategicMerge:
-  - overlays/eventbus-controller-deployment.yaml
-  - overlays/eventsource-controller-deployment.yaml
-  - overlays/sensor-controller-deployment.yaml
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --namespaced
+    target:
+      kind: Deployment

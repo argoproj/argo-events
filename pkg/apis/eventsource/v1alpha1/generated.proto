@@ -627,6 +627,10 @@ message KafkaEventSource {
   // Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
   // +optional
   optional string version = 10;
+
+  // SASL configuration for the kafka client
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 11;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
