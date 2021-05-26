@@ -62,17 +62,13 @@ image: dist/$(BINARY_NAME)-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)  --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
 
-## the command "argo version" has to be removed from dockerfile for this to work
-image-linux-multi: image-linux-amd64 image-linux-arm64
-	echo $(jq -c '. + { "experimental": "enabled" }' ${HOME}/.docker/config.json) > ${HOME}/.docker/config.json
-	docker manifest create $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-arm64 $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-amd64
+image-linux-%: dist/$(BINARY_NAME)-linux-$*
+	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$*; fi
+
+image-multi: image-linux-amd64 image-linux-arm64
+	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-arm64 $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-amd64
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker manifest push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
-image-linux-amd64: dist/$(BINARY_NAME)-linux-amd64
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-amd64  --target $(BINARY_NAME) -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-amd64; fi
-image-linux-arm64: dist/$(BINARY_NAME)-linux-arm64
-	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=arm64" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-arm64  --target $(BINARY_NAME) -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-arm64; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v

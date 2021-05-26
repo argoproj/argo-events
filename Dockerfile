@@ -1,4 +1,4 @@
-ARG ARCH=amd64
+ARG ARCH=$TARGETARCH
 ####################################################################################################
 # base
 ####################################################################################################
@@ -14,7 +14,6 @@ RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/a
 RUN gunzip argo-linux-${ARCH}.gz
 RUN chmod +x argo-linux-${ARCH}
 RUN mv ./argo-linux-${ARCH} /usr/local/bin/argo
-RUN argo version
 
 ####################################################################################################
 # argo-events
