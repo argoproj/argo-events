@@ -152,6 +152,22 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		}
 	}
 
+	if trigger.SecureHeaders != nil {
+		for _, secure := range trigger.SecureHeaders {
+			var value string
+			var err error
+			if secure.ValueFrom.SecretKeyRef != nil {
+				value, err = common.GetSecretFromVolume(secure.ValueFrom.SecretKeyRef)
+			} else {
+				value, err = common.GetConfigMapFromVolume(secure.ValueFrom.ConfigMapKeyRef)
+			}
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to retrieve the value for secureHeader")
+			}
+			request.Header[secure.Name] = []string{value}
+		}
+	}
+
 	basicAuth := trigger.BasicAuth
 
 	if basicAuth != nil {

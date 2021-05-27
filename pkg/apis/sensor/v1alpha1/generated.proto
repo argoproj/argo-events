@@ -354,6 +354,10 @@ message HTTPTrigger {
   // Headers for the HTTP request.
   // +optional
   map<string, string> headers = 8;
+
+  // Secure Headers stored in Kubernetes Secrets for the HTTP requests.
+  // +optional
+  repeated github.com.argoproj.argo_events.pkg.apis.common.SecureHeader secureHeaders = 9;
 }
 
 // K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels
