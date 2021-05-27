@@ -502,11 +502,11 @@ func (in *HTTPTrigger) DeepCopyInto(out *HTTPTrigger) {
 	}
 	if in.SecureHeaders != nil {
 		in, out := &in.SecureHeaders, &out.SecureHeaders
-		*out = make([]*common.SecureHeaders, len(*in))
+		*out = make([]*common.SecureHeader, len(*in))
 		for i := range *in {
 			if (*in)[i] != nil {
 				in, out := &(*in)[i], &(*out)[i]
-				*out = new(common.SecureHeaders)
+				*out = new(common.SecureHeader)
 				(*in).DeepCopyInto(*out)
 			}
 		}

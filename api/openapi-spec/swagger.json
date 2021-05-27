@@ -197,14 +197,16 @@
         }
       }
     },
-    "io.argoproj.common.SecureHeaders": {
+    "io.argoproj.common.SecureHeader": {
+      "description": "SecureHeader refers to HTTP Headers with auth tokens as values",
       "type": "object",
       "properties": {
-        "headerName": {
+        "name": {
           "type": "string"
         },
-        "value": {
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        "valueFrom": {
+          "description": "Values can be read from either secrets or configmaps",
+          "$ref": "#/definitions/io.argoproj.common.ValueFromSource"
         }
       }
     },
@@ -249,6 +251,18 @@
         },
         "clientKeySecret": {
           "description": "ClientKeySecret refers to the secret that contains the client key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
+    "io.argoproj.common.ValueFromSource": {
+      "description": "ValueFromSource allows you to reference keys from either a Configmap or Secret",
+      "type": "object",
+      "properties": {
+        "configMapKeyRef": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ConfigMapKeySelector"
+        },
+        "secretKeyRef": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -2711,7 +2725,7 @@
           "description": "Secure Headers stored in Kubernetes Secrets for the HTTP requests.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/io.argoproj.common.SecureHeaders"
+            "$ref": "#/definitions/io.argoproj.common.SecureHeader"
           }
         },
         "timeout": {

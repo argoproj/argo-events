@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: http-trigger
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: http-trigger
+        http:
+          secureHeaders:
+            - name: serviceToken
+              valueFrom:
+                secretKeyRef:
+                  name: dev-services-secret
+                  key: serviceToken
+          url: http://http-server.default.svc.cluster.local:8080/hello
+          method: GET
+      retryStrategy:
+        steps: 3
+        duration: 3s
+      policy:
+        status:
+          allow:
+            - 200
+            - 201

@@ -342,12 +342,12 @@ spec:
       - args:
         - eventsource-controller
         env:
+        - name: EVENTSOURCE_IMAGE
+          value: quay.io/argoproj/argo-events:latest
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: EVENTSOURCE_IMAGE
-          value: quay.io/argoproj/argo-events:latest
         image: quay.io/argoproj/argo-events:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -387,12 +387,12 @@ spec:
       - args:
         - sensor-controller
         env:
+        - name: SENSOR_IMAGE
+          value: quay.io/argoproj/argo-events:latest
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: SENSOR_IMAGE
-          value: quay.io/argoproj/argo-events:latest
         image: quay.io/argoproj/argo-events:latest
         livenessProbe:
           httpGet:

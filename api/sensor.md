@@ -2593,8 +2593,7 @@ Headers for the HTTP request.
 <td>
 
 <code>secureHeaders</code></br> <em>
-\[\]\*github.com/argoproj/argo-events/pkg/apis/common.SecureHeaders
-</em>
+\[\]\*github.com/argoproj/argo-events/pkg/apis/common.SecureHeader </em>
 
 </td>
 

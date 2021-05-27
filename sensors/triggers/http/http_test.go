@@ -87,13 +87,15 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	defaultValue := "http://default.com"
-	secureHeader := &common.SecureHeaders{HeaderName: "test", Value: &corev1.SecretKeySelector{
-		LocalObjectReference: corev1.LocalObjectReference{
-			Name: "tokens",
-		},
-		Key: "serviceToken"}}
+	secureHeader := &common.SecureHeader{Name: "test", ValueFrom: &common.ValueFromSource{
+		SecretKeyRef: &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "tokens",
+			},
+			Key: "serviceToken"}},
+	}
 
-	secureHeaders := []*common.SecureHeaders{}
+	secureHeaders := []*common.SecureHeader{}
 	secureHeaders = append(secureHeaders, secureHeader)
 	trigger.Trigger.Template.HTTP.SecureHeaders = secureHeaders
 	trigger.Trigger.Template.HTTP.Parameters = []v1alpha1.TriggerParameter{
@@ -122,7 +124,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.NotNil(t, resource)
 
 	updatedTrigger, ok := resource.(*v1alpha1.HTTPTrigger)
-	assert.Equal(t, "serviceToken", updatedTrigger.SecureHeaders[0].Value.Key)
+	assert.Equal(t, "serviceToken", updatedTrigger.SecureHeaders[0].ValueFrom.SecretKeyRef.Key)
 	assert.Nil(t, err)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, "http://fake.com:12000", updatedTrigger.URL)

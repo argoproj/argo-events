@@ -108,9 +108,17 @@ type BasicAuth struct {
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
 }
 
-type SecureHeaders struct {
-	HeaderName string                    `json:"headerName,omitempty" protobuf:"bytes,1,opt,name=headerName"`
-	Value      *corev1.SecretKeySelector `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
+// SecureHeader refers to HTTP Headers with auth tokens as values
+type SecureHeader struct {
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	// Values can be read from either secrets or configmaps
+	ValueFrom *ValueFromSource `json:"valueFrom,omitempty" protobuf:"bytes,2,opt,name=valueFrom"`
+}
+
+// ValueFromSource allows you to reference keys from either a Configmap or Secret
+type ValueFromSource struct {
+	SecretKeyRef    *corev1.SecretKeySelector    `json:"secretKeyRef,omitempty" protobuf:"bytes,1,opt,name=secretKeyRef"`
+	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty" protobuf:"bytes,2,opt,name=configMapKeyRef"`
 }
 
 // TLSConfig refers to TLS configuration for a client.
