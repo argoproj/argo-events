@@ -17,6 +17,7 @@ DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
 VERSION?=latest
 BASE_VERSION:=latest
+DO_BUILD?=true
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -25,6 +26,7 @@ override LDFLAGS += \
   -X ${PACKAGE}.gitTreeState=${GIT_TREE_STATE}
 
 ifeq (${DOCKER_PUSH},true)
+PUSH_OPTION="--push"
 ifndef IMAGE_NAMESPACE
 $(error IMAGE_NAMESPACE must be set to push images (e.g. IMAGE_NAMESPACE=quay.io/argoproj))
 endif
@@ -66,9 +68,12 @@ image-linux-%: dist/$(BINARY_NAME)-linux-$*
 	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$*; fi
 
-image-multi: image-linux-amd64 image-linux-arm64
-	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-arm64 $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-amd64
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker manifest push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
+image-multi: set-qemu $(if $(DO_BUILD), dist/$(BINARY_NAME)-linux-arm64 dist/$(BINARY_NAME)-linux-amd64)
+	docker buildx build --tag $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --target $(BINARY_NAME) --platform linux/amd64,linux/arm64 --file ./Dockerfile ${PUSH_OPTION} .
+
+set-qemu:
+	docker pull tonistiigi/binfmt:latest
+	docker run --rm --privileged tonistiigi/binfmt:latest --install amd64,arm64
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
