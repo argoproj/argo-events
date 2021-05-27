@@ -197,6 +197,19 @@
         }
       }
     },
+    "io.argoproj.common.SecureHeader": {
+      "description": "SecureHeader refers to HTTP Headers with auth tokens as values",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "valueFrom": {
+          "description": "Values can be read from either secrets or configmaps",
+          "$ref": "#/definitions/io.argoproj.common.ValueFromSource"
+        }
+      }
+    },
     "io.argoproj.common.Status": {
       "description": "Status is a common structure which can be used for Status field.",
       "type": "object",
@@ -238,6 +251,18 @@
         },
         "clientKeySecret": {
           "description": "ClientKeySecret refers to the secret that contains the client key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
+    "io.argoproj.common.ValueFromSource": {
+      "description": "ValueFromSource allows you to reference keys from either a Configmap or Secret",
+      "type": "object",
+      "properties": {
+        "configMapKeyRef": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ConfigMapKeySelector"
+        },
+        "secretKeyRef": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -2694,6 +2719,13 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "secureHeaders": {
+          "description": "Secure Headers stored in Kubernetes Secrets for the HTTP requests.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.common.SecureHeader"
           }
         },
         "timeout": {

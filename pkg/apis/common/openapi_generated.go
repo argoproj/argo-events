@@ -29,19 +29,21 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/common.Amount":        schema_argo_events_pkg_apis_common_Amount(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":       schema_argo_events_pkg_apis_common_Backoff(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth":     schema_argo_events_pkg_apis_common_BasicAuth(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Condition":     schema_argo_events_pkg_apis_common_Condition(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Int64OrString": schema_argo_events_pkg_apis_common_Int64OrString(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":      schema_argo_events_pkg_apis_common_Metadata(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Resource":      schema_argo_events_pkg_apis_common_Resource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact":    schema_argo_events_pkg_apis_common_S3Artifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":      schema_argo_events_pkg_apis_common_S3Bucket(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":      schema_argo_events_pkg_apis_common_S3Filter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig":    schema_argo_events_pkg_apis_common_SASLConfig(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Status":        schema_argo_events_pkg_apis_common_Status(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":     schema_argo_events_pkg_apis_common_TLSConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Amount":          schema_argo_events_pkg_apis_common_Amount(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":         schema_argo_events_pkg_apis_common_Backoff(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth":       schema_argo_events_pkg_apis_common_BasicAuth(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Condition":       schema_argo_events_pkg_apis_common_Condition(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Int64OrString":   schema_argo_events_pkg_apis_common_Int64OrString(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":        schema_argo_events_pkg_apis_common_Metadata(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Resource":        schema_argo_events_pkg_apis_common_Resource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact":      schema_argo_events_pkg_apis_common_S3Artifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":        schema_argo_events_pkg_apis_common_S3Bucket(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":        schema_argo_events_pkg_apis_common_S3Filter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig":      schema_argo_events_pkg_apis_common_SASLConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.SecureHeader":    schema_argo_events_pkg_apis_common_SecureHeader(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Status":          schema_argo_events_pkg_apis_common_Status(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":       schema_argo_events_pkg_apis_common_TLSConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.ValueFromSource": schema_argo_events_pkg_apis_common_ValueFromSource(ref),
 	}
 }
 
@@ -405,6 +407,33 @@ func schema_argo_events_pkg_apis_common_SASLConfig(ref common.ReferenceCallback)
 	}
 }
 
+func schema_argo_events_pkg_apis_common_SecureHeader(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SecureHeader refers to HTTP Headers with auth tokens as values",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"valueFrom": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Values can be read from either secrets or configmaps",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.ValueFromSource"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/common.ValueFromSource"},
+	}
+}
+
 func schema_argo_events_pkg_apis_common_Status(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -490,5 +519,30 @@ func schema_argo_events_pkg_apis_common_TLSConfig(ref common.ReferenceCallback) 
 		},
 		Dependencies: []string{
 			"k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_ValueFromSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ValueFromSource allows you to reference keys from either a Configmap or Secret",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"secretKeyRef": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"configMapKeyRef": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.ConfigMapKeySelector"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.ConfigMapKeySelector", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
