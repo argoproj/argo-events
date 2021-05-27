@@ -1586,11 +1586,14 @@ The <code>Status</code> holds a list of response statuses that are considered va
             <span class="n">contextKey</span><span class="p">:</span> <span class="n">type</span>
           <span class="n">dest</span><span class="p">:</span> <span class="n">type</span>
       <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>  <span class="o">//</span> <span class="n">GET</span><span class="p">,</span> <span class="n">DELETE</span><span class="p">,</span> <span class="n">POST</span><span class="p">,</span> <span class="n">PUT</span><span class="p">,</span> <span class="n">HEAD</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span>
-      <span class="n">policy</span><span class="p">:</span>
-        <span class="n">status</span><span class="p">:</span>
-          <span class="n">allow</span><span class="p">:</span>
-            <span class="o">-</span> <span class="mi">200</span>
-            <span class="o">-</span> <span class="mi">201</span>
+  <span class="n">retryStrategy</span><span class="p">:</span>
+    <span class="n">steps</span><span class="p">:</span> <span class="mi">3</span>
+    <span class="n">duration</span><span class="p">:</span> <span class="mi">3</span><span class="n">s</span>
+  <span class="n">policy</span><span class="p">:</span>
+    <span class="n">status</span><span class="p">:</span>
+      <span class="n">allow</span><span class="p">:</span>
+        <span class="o">-</span> <span class="mi">200</span>
+        <span class="o">-</span> <span class="mi">201</span>
 </code></pre></div>
 
 <p>The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status. </p>
