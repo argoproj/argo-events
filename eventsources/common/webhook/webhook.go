@@ -45,7 +45,7 @@ func NewController() *Controller {
 func NewRoute(hookContext *v1alpha1.WebhookContext, logger *zap.SugaredLogger, eventSourceName, eventName string, metrics *metrics.Metrics) *Route {
 	return &Route{
 		Context:         hookContext,
-		Logger:          logger.With(logging.LabelEventSourceName, eventSourceName, logging.LabelEventName, eventName),
+		Logger:          logger,
 		EventSourceName: eventSourceName,
 		EventName:       eventName,
 		Active:          false,

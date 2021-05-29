@@ -139,11 +139,14 @@ The `Status` holds a list of response statuses that are considered valid.
                 contextKey: type
               dest: type
           method: POST  // GET, DELETE, POST, PUT, HEAD, etc.
-          policy:
-            status:
-              allow:
-                - 200
-                - 201
+      retryStrategy:
+        steps: 3
+        duration: 3s
+      policy:
+        status:
+          allow:
+            - 200
+            - 201
 
 The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status. 
 

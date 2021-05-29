@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
@@ -114,54 +115,65 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 
 	api := slack.New(slackToken, slack.OptionDebug(false))
 
-	params := &slack.GetConversationsParameters{
-		Limit: 200,
-		Types: []string{"public_channel", "private_channel"},
-	}
-	channelID := ""
-	isPrivateChannel := false
+	t.Logger.Infow("posting to channel...", zap.Any("channelName", channel))
 	for {
-		channels, nextCursor, err := api.GetConversations(params)
+		channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
 		if err != nil {
-			t.Logger.Errorw("unable to list channels", zap.Error(err))
-			return nil, errors.Wrapf(err, "failed to list channels")
-		}
-		for _, c := range channels {
-			if c.Name == channel {
-				channelID = c.ID
-				isPrivateChannel = c.IsPrivate
-				break
+			if err.Error() == "not_in_channel" {
+				isPrivateChannel := false
+				params := &slack.GetConversationsParameters{
+					Limit:           200,
+					Types:           []string{"public_channel", "private_channel"},
+					ExcludeArchived: "true",
+				}
+
+				for {
+					channels, nextCursor, err := api.GetConversations(params)
+					if err != nil {
+						switch e := err.(type) {
+						case *slack.RateLimitedError:
+							<-time.After(e.RetryAfter)
+							continue
+						default:
+							t.Logger.Errorw("unable to list channels", zap.Error(err))
+							return nil, errors.Wrapf(err, "failed to list channels")
+						}
+					}
+					for _, c := range channels {
+						if c.Name == channel {
+							channelID = c.ID
+							isPrivateChannel = c.IsPrivate
+							break
+						}
+					}
+					if nextCursor == "" || channelID != "" {
+						break
+					}
+					params.Cursor = nextCursor
+				}
+				if channelID == "" {
+					return nil, errors.Errorf("failed to get channelID of %s", channel)
+				}
+				if isPrivateChannel {
+					return nil, errors.Errorf("cannot join private channel %s", channel)
+				}
+
+				c, _, _, err := api.JoinConversation(channelID)
+				if err != nil {
+					t.Logger.Errorw("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
+					return nil, errors.Wrapf(err, "failed to join channel %s", channel)
+				}
+				t.Logger.Debugw("successfully joined channel", zap.Any("channel", c))
+				continue
+			} else {
+				t.Logger.Errorw("unable to post to channel...", zap.Any("channelName", channel), zap.Error(err))
+				return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
 			}
 		}
-		if nextCursor == "" {
-			break
-		}
-		params.Cursor = nextCursor
+		t.Logger.Infow("message successfully sent to channelID with timestamp", zap.Any("message", message), zap.Any("channelID", channelID), zap.Any("timestamp", timestamp))
+		t.Logger.Info("finished executing SlackTrigger")
+		return nil, nil
 	}
-	if channelID == "" {
-		return nil, errors.Errorf("failed to get channelID of %s", channel)
-	}
-	// Only join if not joined? Maybe a join API call is easier.
-	// Not applicable for private channels since bot cannot join private channels
-	if !isPrivateChannel {
-		c, _, _, err := api.JoinConversation(channelID)
-		t.Logger.Debugw("successfully joined channel", zap.Any("channel", c))
-		if err != nil {
-			t.Logger.Errorw("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
-			return nil, errors.Wrapf(err, "failed to join channel %s", channel)
-		}
-	}
-
-	t.Logger.Infow("posting to channel...", zap.Any("channelName", channel))
-	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
-	if err != nil {
-		t.Logger.Errorw("unable to post to channel...", zap.Any("channelName", channel), zap.Error(err))
-		return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
-	}
-
-	t.Logger.Infow("message successfully sent to channelID with timestamp", zap.Any("message", message), zap.Any("channelID", channelID), zap.Any("timestamp", timestamp))
-	t.Logger.Info("finished executing SlackTrigger")
-	return nil, nil
 }
 
 // No Policies for SlackTrigger

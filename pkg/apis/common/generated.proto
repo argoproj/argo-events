@@ -153,6 +153,14 @@ message SASLConfig {
   optional k8s.io.api.core.v1.SecretKeySelector password = 3;
 }
 
+// SecureHeader refers to HTTP Headers with auth tokens as values
+message SecureHeader {
+  optional string name = 1;
+
+  // Values can be read from either secrets or configmaps
+  optional ValueFromSource valueFrom = 2;
+}
+
 // Status is a common structure which can be used for Status field.
 message Status {
   // Conditions are the latest available observations of a resource's current state.
@@ -184,5 +192,12 @@ message TLSConfig {
   // DeprecatedClientKeyPath refers the file path that contains client key.
   // Deprecated: will be removed in v1.5, use ClientKeySecret instead
   optional string clientKeyPath = 6;
+}
+
+// ValueFromSource allows you to reference keys from either a Configmap or Secret
+message ValueFromSource {
+  optional k8s.io.api.core.v1.SecretKeySelector secretKeyRef = 1;
+
+  optional k8s.io.api.core.v1.ConfigMapKeySelector configMapKeyRef = 2;
 }
 
