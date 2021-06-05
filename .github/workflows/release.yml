@@ -45,11 +45,6 @@ jobs:
         target: [ argo-events ]
     steps:
       - uses: actions/checkout@v2
-
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v1
-#        with:
-#          platforms: amd64,arm64
         
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -79,29 +74,6 @@ jobs:
       - name: Container build and push with arm64/amd64
         run: |
           IMAGE_NAMESPACE=quay.io/${{ secrets.QUAYIO_USERNAME }} VERSION=${{ steps.version.outputs.VERSION }} DO_BUILD=false DOCKER_PUSH=true make image-multi
-
-#      - name: set tag csv value
-#        id: tag
-#        env:
-#          QUAYIO_ORG: ${{ secrets.QUAYIO_ORG }}
-#          TARGET: ${{ matrix.target }}
-#        run: |
-#          tag=$(basename $GITHUB_REF)
-#          if [ $tag = "master" ]; then
-#            tag="latest"
-#          fi
-#          image_name="quay.io/${QUAYIO_ORG}/${TARGET}:${tag}"
-#          echo "::set-output name=TAG_LIST::$image_name"
-#
-#      - name: Container build and push
-#        uses: docker/build-push-action@v2
-#        with:
-#          context: .
-#          file: ./Dockerfile
-#          platforms: linux/amd64,linux/arm64
-#          push: "true"
-#          tags: ${{ steps.tag.outputs.TAG_LIST }}
-#          target: ${{ matrix.target }}
   
   release:
     runs-on: ubuntu-latest
