@@ -42,7 +42,7 @@ eval $(minikube docker-env)
 
 #### 5. Build the project
 ```
-make all
+make build
 ```
 
 Follow [README](README.md#install) to install components.

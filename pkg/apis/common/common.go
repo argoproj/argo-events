@@ -108,6 +108,19 @@ type BasicAuth struct {
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
 }
 
+// SecureHeader refers to HTTP Headers with auth tokens as values
+type SecureHeader struct {
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	// Values can be read from either secrets or configmaps
+	ValueFrom *ValueFromSource `json:"valueFrom,omitempty" protobuf:"bytes,2,opt,name=valueFrom"`
+}
+
+// ValueFromSource allows you to reference keys from either a Configmap or Secret
+type ValueFromSource struct {
+	SecretKeyRef    *corev1.SecretKeySelector    `json:"secretKeyRef,omitempty" protobuf:"bytes,1,opt,name=secretKeyRef"`
+	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty" protobuf:"bytes,2,opt,name=configMapKeyRef"`
+}
+
 // TLSConfig refers to TLS configuration for a client.
 type TLSConfig struct {
 	// CACertSecret refers to the secret that contains the CA cert
@@ -136,9 +149,9 @@ type SASLConfig struct {
 	Mechanism string `json:"mechanism,omitempty" protobuf:"bytes,1,opt,name=mechanism"`
 	// User is the authentication identity (authcid) to present for
 	// SASL/PLAIN or SASL/SCRAM authentication
-	User *corev1.SecretKeySelector `json:"user,omitempty" protobuf:"bytes,2,opt,name=user"`
+	UserSecret *corev1.SecretKeySelector `json:"userSecret,omitempty" protobuf:"bytes,2,opt,name=user"`
 	// Password for SASL/PLAIN authentication
-	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,3,opt,name=password"`
+	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=password"`
 }
 
 // Backoff for an operation

@@ -67,13 +67,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 			config.Net.SASL.Enable = true
 			config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkatrigger.SASL.GetMechanism())
 
-			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.User)
+			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.UserSecret)
 			if err != nil {
 				return nil, errors.Wrap(err, "Error getting user value from secret")
 			}
 			config.Net.SASL.User = user
 
-			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.Password)
+			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.PasswordSecret)
 			if err != nil {
 				return nil, errors.Wrap(err, "Error getting password value from secret")
 			}
