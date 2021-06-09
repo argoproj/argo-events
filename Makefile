@@ -11,6 +11,7 @@ GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_BRANCH=$(shell git rev-parse --symbolic-full-name --verify --quiet --abbrev-ref HEAD)
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
 GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ; else echo "dirty"; fi)
+BUILDX_BINARY_URL="https://github.com/docker/buildx/releases/download/v0.5.1/buildx-v0.5.1.linux-amd64"
 
 #  docker image publishing options
 DOCKER_PUSH?=false
@@ -44,7 +45,7 @@ endif
 build: dist/$(BINARY_NAME)-linux-amd64.gz dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-arm.gz dist/$(BINARY_NAME)-linux-ppc64le.gz dist/$(BINARY_NAME)-linux-s390x.gz
 
 dist/$(BINARY_NAME)-%.gz: dist/$(BINARY_NAME)-%
-	gzip --force --keep dist/$(BINARY_NAME)-$*
+	gzip -k dist/$(BINARY_NAME)-$*
 
 dist/$(BINARY_NAME): GOARGS = GOOS= GOARCH=
 dist/$(BINARY_NAME)-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
@@ -68,12 +69,21 @@ image-linux-%: dist/$(BINARY_NAME)-linux-$*
 	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$*; fi
 
-image-multi: set-qemu $(if $(DO_BUILD), dist/$(BINARY_NAME)-linux-arm64 dist/$(BINARY_NAME)-linux-amd64)
+image-multi: set-buildx set-qemu dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-amd64.gz
 	docker buildx build --tag $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --target $(BINARY_NAME) --platform linux/amd64,linux/arm64 --file ./Dockerfile ${PUSH_OPTION} .
 
 set-qemu:
 	docker pull tonistiigi/binfmt:latest
 	docker run --rm --privileged tonistiigi/binfmt:latest --install amd64,arm64
+
+set-buildx:
+	curl --output docker-buildx --silent --show-error --location --fail --retry 3 "${BUILDX_BINARY_URL}"
+	mkdir -p ~/.docker/cli-plugins
+	mv docker-buildx ~/.docker/cli-plugins/
+	chmod a+x ~/.docker/cli-plugins/docker-buildx
+	docker buildx install
+	docker buildx rm
+	docker buildx create --name mybuilder-argo-events --use
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
