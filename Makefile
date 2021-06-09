@@ -12,6 +12,7 @@ GIT_BRANCH=$(shell git rev-parse --symbolic-full-name --verify --quiet --abbrev-
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
 GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ; else echo "dirty"; fi)
 BUILDX_BINARY_URL="https://github.com/docker/buildx/releases/download/v0.5.1/buildx-v0.5.1.linux-amd64"
+EXECUTABLES = curl docker gzip go
 
 #  docker image publishing options
 DOCKER_PUSH?=false
@@ -37,6 +38,8 @@ ifneq (${GIT_TAG},)
 VERSION=$(GIT_TAG)
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
+
+K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(error "No $(exec) in PATH")))
 
 .PHONY: build image clean test
 
@@ -77,13 +80,8 @@ set-qemu:
 	docker run --rm --privileged tonistiigi/binfmt:latest --install amd64,arm64
 
 set-buildx:
-	curl --output docker-buildx --silent --show-error --location --fail --retry 3 "${BUILDX_BINARY_URL}"
-	mkdir -p ~/.docker/cli-plugins
-	mv docker-buildx ~/.docker/cli-plugins/
-	chmod a+x ~/.docker/cli-plugins/docker-buildx
-	docker buildx install
-	docker buildx rm
-	docker buildx create --name mybuilder-argo-events --use
+	docker buildx version || (curl --output docker-buildx --silent --show-error --location --fail --retry 3 "${BUILDX_BINARY_URL}";	mkdir -p ~/.docker/cli-plugins;	mv docker-buildx ~/.docker/cli-plugins/; chmod a+x ~/.docker/cli-plugins/docker-buildx; docker buildx install)
+	docker buildx create --name mybuilder-argo-events --use || (echo "Existing builder, keep"; exit 0)
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
