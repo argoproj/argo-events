@@ -19,7 +19,6 @@ DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
 VERSION?=latest
 BASE_VERSION:=latest
-DO_BUILD?=true
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -39,6 +38,7 @@ VERSION=$(GIT_TAG)
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
 
+# Check that the needed executables are available, else exit before the build
 K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(error "No $(exec) in PATH")))
 
 .PHONY: build image clean test
@@ -48,7 +48,7 @@ K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(er
 build: dist/$(BINARY_NAME)-linux-amd64.gz dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-arm.gz dist/$(BINARY_NAME)-linux-ppc64le.gz dist/$(BINARY_NAME)-linux-s390x.gz
 
 dist/$(BINARY_NAME)-%.gz: dist/$(BINARY_NAME)-%
-	yes n | gzip -k dist/$(BINARY_NAME)-$*
+	[[ -e dist/$(BINARY_NAME)-$*.gz} ]] || gzip -k dist/$(BINARY_NAME)-$*
 
 dist/$(BINARY_NAME): GOARGS = GOOS= GOARCH=
 dist/$(BINARY_NAME)-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
