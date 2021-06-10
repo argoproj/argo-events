@@ -2482,6 +2482,20 @@ func (m *HTTPTrigger) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.SecureHeaders) > 0 {
+		for iNdEx := len(m.SecureHeaders) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SecureHeaders[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenerated(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x4a
+		}
+	}
 	if len(m.Headers) > 0 {
 		keysForHeaders := make([]string, 0, len(m.Headers))
 		for k := range m.Headers {
@@ -4471,6 +4485,12 @@ func (m *HTTPTrigger) Size() (n int) {
 			n += mapEntrySize + 1 + sovGenerated(uint64(mapEntrySize))
 		}
 	}
+	if len(m.SecureHeaders) > 0 {
+		for _, e := range m.SecureHeaders {
+			l = e.Size()
+			n += 1 + l + sovGenerated(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -5286,6 +5306,11 @@ func (this *HTTPTrigger) String() string {
 		repeatedStringForParameters += strings.Replace(strings.Replace(f.String(), "TriggerParameter", "TriggerParameter", 1), `&`, ``, 1) + ","
 	}
 	repeatedStringForParameters += "}"
+	repeatedStringForSecureHeaders := "[]*SecureHeader{"
+	for _, f := range this.SecureHeaders {
+		repeatedStringForSecureHeaders += strings.Replace(fmt.Sprintf("%v", f), "SecureHeader", "common.SecureHeader", 1) + ","
+	}
+	repeatedStringForSecureHeaders += "}"
 	keysForHeaders := make([]string, 0, len(this.Headers))
 	for k := range this.Headers {
 		keysForHeaders = append(keysForHeaders, k)
@@ -5305,6 +5330,7 @@ func (this *HTTPTrigger) String() string {
 		`Timeout:` + fmt.Sprintf("%v", this.Timeout) + `,`,
 		`BasicAuth:` + strings.Replace(fmt.Sprintf("%v", this.BasicAuth), "BasicAuth", "common.BasicAuth", 1) + `,`,
 		`Headers:` + mapStringForHeaders + `,`,
+		`SecureHeaders:` + repeatedStringForSecureHeaders + `,`,
 		`}`,
 	}, "")
 	return s
@@ -9423,6 +9449,40 @@ func (m *HTTPTrigger) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Headers[mapkey] = mapvalue
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SecureHeaders", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SecureHeaders = append(m.SecureHeaders, &common.SecureHeader{})
+			if err := m.SecureHeaders[len(m.SecureHeaders)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

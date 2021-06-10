@@ -2725,7 +2725,18 @@ Headers for the HTTP request.
 </td>
 
 </tr>
-
+<tr>
+<td>
+<code>secureHeaders</code></br> <em>
+\[\]\*github.com/argoproj/argo-events/pkg/apis/common.SecureHeader </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Secure Headers stored in Kubernetes Secrets for the HTTP requests.
+</p>
+</td>
+</tr>
 </tbody>
 
 </table>
