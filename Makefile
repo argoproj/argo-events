@@ -72,16 +72,12 @@ image-linux-%: dist/$(BINARY_NAME)-linux-$*
 	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$*; fi
 
-image-multi: set-buildx set-qemu dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-amd64.gz
+image-multi: set-qemu dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-amd64.gz
 	docker buildx build --tag $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --target $(BINARY_NAME) --platform linux/amd64,linux/arm64 --file ./Dockerfile ${PUSH_OPTION} .
 
 set-qemu:
 	docker pull tonistiigi/binfmt:latest
 	docker run --rm --privileged tonistiigi/binfmt:latest --install amd64,arm64
-
-set-buildx:
-	docker buildx version || (curl --output docker-buildx --silent --show-error --location --fail --retry 3 "${BUILDX_BINARY_URL}";	mkdir -p ~/.docker/cli-plugins;	mv docker-buildx ~/.docker/cli-plugins/; chmod a+x ~/.docker/cli-plugins/docker-buildx; docker buildx install)
-	docker buildx create --name mybuilder-argo-events --use || (echo "Existing builder, keep"; exit 0)
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
