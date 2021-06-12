@@ -568,3 +568,100 @@ func TestFilterEvent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, valid, true)
 }
+
+func TestExprFilter(t *testing.T) {
+	tests := []struct {
+		event   *v1alpha1.Event
+		filters []v1alpha1.ExprFilter
+		result  bool
+		err     error
+	}{
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": "b"}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `a == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a",
+							Name: "a",
+						},
+					},
+				},
+			},
+			result: true,
+			err:    nil,
+		},
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "c"}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+			},
+			result: false,
+			err:    nil,
+		},
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "c"}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+				{
+					Expr: `b == "c"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+			},
+			result: true,
+			err:    nil,
+		},
+		{
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": 2}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b == 2`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+			},
+			result: true,
+			err:    nil,
+		},
+	}
+
+	for _, test := range tests {
+		result, err := filterExpr(test.filters, test.event)
+		assert.Equal(t, test.err, err)
+		assert.Equal(t, test.result, result)
+	}
+}

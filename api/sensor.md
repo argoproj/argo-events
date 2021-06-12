@@ -219,6 +219,10 @@ resource. Default value is Submit.
 </a> </em>
 </td>
 <td>
+<p>
+Parameters is the list of parameters to pass to resolved Argo Workflow
+object
+</p>
 </td>
 </tr>
 <tr>
@@ -547,6 +551,10 @@ gRPC server knows how to interpret.
 </a> </em>
 </td>
 <td>
+<p>
+Parameters is the list of parameters that is applied to resolved custom
+trigger trigger object.
+</p>
 </td>
 </tr>
 <tr>
@@ -556,6 +564,10 @@ gRPC server knows how to interpret.
 </a> </em>
 </td>
 <td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
 </td>
 </tr>
 <tr>
@@ -979,6 +991,64 @@ Data filter constraints with escalation
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>exprs</code></br> <em> <a href="#argoproj.io/v1alpha1.ExprFilter">
+\[\]ExprFilter </a> </em>
+</td>
+<td>
+<p>
+Exprs contains the list of expressions evaluated against the event
+payload.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.ExprFilter">
+ExprFilter
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>expr</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Expr refers to the expression that determines the outcome of the filter.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>fields</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PayloadField"> \[\]PayloadField </a>
+</em>
+</td>
+<td>
+<p>
+Fields refers to set of keys that refer to the paths within event
+payload.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.FileArtifact">
@@ -1325,6 +1395,10 @@ for more info. Default value is POST.
 </a> </em>
 </td>
 <td>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the HTTP trigger resource.
+</p>
 </td>
 </tr>
 <tr>
@@ -1511,6 +1585,10 @@ Partition to write data to.
 </a> </em>
 </td>
 <td>
+<p>
+Parameters is the list of parameters that is applied to resolved Kafka
+trigger object.
+</p>
 </td>
 </tr>
 <tr>
@@ -1567,6 +1645,10 @@ TLS configuration for the Kafka producer.
 </a> </em>
 </td>
 <td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
 </td>
 </tr>
 <tr>
@@ -1816,6 +1898,10 @@ Name of the action/function.
 </a> </em>
 </td>
 <td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
 </td>
 </tr>
 <tr>
@@ -1826,6 +1912,62 @@ Name of the action/function.
 </td>
 <td>
 <em>(Optional)</em>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.PayloadField">
+PayloadField
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ExprFilter">ExprFilter</a>)
+</p>
+<p>
+<p>
+PayloadField binds a value at path within the event payload against a
+name.
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>path</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Path is the JSONPath of the event’s (JSON decoded) data key Path is a
+series of keys separated by a dot. A key may contain wildcard characters
+‘\*’ and ‘?’. To access an array value use the index as the key. The dot
+and wildcard characters can be escaped with ‘&rsquo;. See
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+for more information on how to use this.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>name</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Name acts as key that holds the value at the path.
+</p>
 </td>
 </tr>
 </tbody>
@@ -2163,6 +2305,10 @@ Description
 </td>
 <td>
 <em>(Optional)</em>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
 </td>
 </tr>
 <tr>
@@ -2276,6 +2422,10 @@ Default value is Create.
 </a> </em>
 </td>
 <td>
+<p>
+Parameters is the list of parameters that is applied to resolved K8s
+trigger object.
+</p>
 </td>
 </tr>
 <tr>
