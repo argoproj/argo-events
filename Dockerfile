@@ -14,6 +14,8 @@ RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/a
 RUN gunzip -f argo-linux-${ARCH}.gz
 RUN chmod +x argo-linux-${ARCH}
 RUN mv ./argo-linux-${ARCH} /usr/local/bin/argo
+COPY dist/argo-events-linux-${ARCH} /bin/argo-events
+RUN chmod +x /bin/argo-events
 
 ####################################################################################################
 # argo-events
@@ -23,5 +25,5 @@ ARG ARCH
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=base /usr/local/bin/argo /usr/local/bin/argo
-COPY dist/argo-events-linux-${ARCH} /bin/argo-events
+COPY --from=base /bin/argo-events /bin/argo-events
 ENTRYPOINT [ "/bin/argo-events" ]
