@@ -3,7 +3,7 @@ module github.com/argoproj/argo-events
 go 1.15
 
 require (
-	cloud.google.com/go v0.52.0
+	cloud.google.com/go v0.54.0
 	cloud.google.com/go/pubsub v1.2.0
 	github.com/Azure/azure-amqp-common-go/v3 v3.1.0 // indirect
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.7
@@ -68,7 +68,7 @@ require (
 	github.com/slack-go/slack v0.7.4
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v1.6.4
-	github.com/spf13/cobra v1.0.0
+	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.6.1
@@ -78,70 +78,68 @@ require (
 	github.com/xanzy/go-gitlab v0.33.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
-	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	google.golang.org/api v0.15.1
+	google.golang.org/api v0.20.0
 	google.golang.org/grpc v1.29.1
 	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	gopkg.in/jcmturner/rpc.v0 v0.0.2 // indirect
-	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
-	k8s.io/api v0.19.6
-	k8s.io/apimachinery v0.19.6
-	k8s.io/client-go v0.19.6
-	k8s.io/code-generator v0.19.6
+	k8s.io/api v0.20.4
+	k8s.io/apimachinery v0.20.4
+	k8s.io/client-go v0.20.4
+	k8s.io/code-generator v0.20.4
 	k8s.io/gengo v0.0.0-20200428234225-8167cfdcfc14
 	k8s.io/klog v0.3.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20200805222855-6aeccd4b50c6
+	k8s.io/kube-openapi v0.0.0-20201113171705-d219536bb9fd
 	sigs.k8s.io/controller-runtime v0.7.0
 	sigs.k8s.io/controller-tools v0.4.1
 	sigs.k8s.io/yaml v1.2.0
 )
 
-replace k8s.io/api => k8s.io/api v0.19.6
+replace k8s.io/api => k8s.io/api v0.20.4
 
-replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.19.6
+replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.20.4
 
 replace k8s.io/apimachinery => k8s.io/apimachinery v0.19.7-rc.0
 
-replace k8s.io/apiserver => k8s.io/apiserver v0.19.6
+replace k8s.io/apiserver => k8s.io/apiserver v0.20.4
 
-replace k8s.io/cli-runtime => k8s.io/cli-runtime v0.19.6
+replace k8s.io/cli-runtime => k8s.io/cli-runtime v0.20.4
 
-replace k8s.io/client-go => k8s.io/client-go v0.19.6
+replace k8s.io/client-go => k8s.io/client-go v0.20.4
 
-replace k8s.io/cloud-provider => k8s.io/cloud-provider v0.19.6
+replace k8s.io/cloud-provider => k8s.io/cloud-provider v0.20.4
 
-replace k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.19.6
+replace k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.20.4
 
-replace k8s.io/component-base => k8s.io/component-base v0.19.6
+replace k8s.io/component-base => k8s.io/component-base v0.20.4
 
 replace k8s.io/cri-api => k8s.io/cri-api v0.19.7-rc.0
 
-replace k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.19.6
+replace k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.20.4
 
-replace k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.19.6
+replace k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.20.4
 
-replace k8s.io/kube-controller-manager => k8s.io/kube-controller-manager v0.19.6
+replace k8s.io/kube-controller-manager => k8s.io/kube-controller-manager v0.20.4
 
-replace k8s.io/kube-proxy => k8s.io/kube-proxy v0.19.6
+replace k8s.io/kube-proxy => k8s.io/kube-proxy v0.20.4
 
-replace k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.19.6
+replace k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.20.4
 
-replace k8s.io/kubectl => k8s.io/kubectl v0.19.6
+replace k8s.io/kubectl => k8s.io/kubectl v0.20.4
 
-replace k8s.io/kubelet => k8s.io/kubelet v0.19.6
+replace k8s.io/kubelet => k8s.io/kubelet v0.20.4
 
-replace k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.19.6
+replace k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.20.4
 
-replace k8s.io/metrics => k8s.io/metrics v0.19.6
+replace k8s.io/metrics => k8s.io/metrics v0.20.4
 
 replace k8s.io/node-api => k8s.io/node-api v0.17.5
 
-replace k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.19.6
+replace k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.20.4
 
-replace k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.19.6
+replace k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.20.4
 
-replace k8s.io/sample-controller => k8s.io/sample-controller v0.19.6
+replace k8s.io/sample-controller => k8s.io/sample-controller v0.20.4
 
 replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+incompatible
 
