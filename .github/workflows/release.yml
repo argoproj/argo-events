@@ -22,7 +22,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.14
+          go-version: 1.15
 
       - name: Build binaries
         run: |
@@ -73,7 +73,7 @@ jobs:
 
       - name: Container build and push with arm64/amd64
         run: |
-          IMAGE_NAMESPACE=quay.io/${{ secrets.QUAYIO_USERNAME }} VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true make image-multi
+          IMAGE_NAMESPACE=${{ secrets.QUAYIO_ORG }} VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true make image-multi
   
   release:
     runs-on: ubuntu-latest
