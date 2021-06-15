@@ -87,7 +87,7 @@ require (
 	k8s.io/apimachinery v0.20.4
 	k8s.io/client-go v0.20.4
 	k8s.io/code-generator v0.20.4
-	k8s.io/gengo v0.0.0-20200428234225-8167cfdcfc14
+	k8s.io/gengo v0.0.0-20201113003025-83324d819ded
 	k8s.io/klog v0.3.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20201113171705-d219536bb9fd
 	sigs.k8s.io/controller-runtime v0.7.0
@@ -99,7 +99,7 @@ replace k8s.io/api => k8s.io/api v0.20.4
 
 replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.20.4
 
-replace k8s.io/apimachinery => k8s.io/apimachinery v0.19.7-rc.0
+replace k8s.io/apimachinery => k8s.io/apimachinery v0.20.4-rc.0
 
 replace k8s.io/apiserver => k8s.io/apiserver v0.20.4
 
@@ -113,7 +113,7 @@ replace k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.20.4
 
 replace k8s.io/component-base => k8s.io/component-base v0.20.4
 
-replace k8s.io/cri-api => k8s.io/cri-api v0.19.7-rc.0
+replace k8s.io/cri-api => k8s.io/cri-api v0.20.4-rc.0
 
 replace k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.20.4
 
@@ -133,7 +133,7 @@ replace k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.20.4
 
 replace k8s.io/metrics => k8s.io/metrics v0.20.4
 
-replace k8s.io/node-api => k8s.io/node-api v0.17.5
+replace k8s.io/node-api => k8s.io/node-api v0.20.4
 
 replace k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.20.4
 
@@ -143,6 +143,6 @@ replace k8s.io/sample-controller => k8s.io/sample-controller v0.20.4
 
 replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+incompatible
 
-replace k8s.io/code-generator => k8s.io/code-generator v0.19.7-rc.0
+replace k8s.io/code-generator => k8s.io/code-generator v0.20.4-rc.0
 
-replace k8s.io/controller-manager => k8s.io/controller-manager v0.19.7-rc.0
+replace k8s.io/controller-manager => k8s.io/controller-manager v0.20.4-rc.0
