@@ -22,7 +22,7 @@ set up event-driven pipelines for existing workloads.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
-1. To trigger a pod, we need to create a sensor as defined below,
+1. To trigger a pod, we need to create a sensor as defined below.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -65,7 +65,7 @@ set up event-driven pipelines for existing workloads.
 1. The `group`, `version` and `resource` under `k8s` in the trigger template determines the type of 
    K8s object. Change it accordingly if you want to trigger something else than a pod.
 
-1. Create the sensor,
+1. Create the sensor.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
 
@@ -73,11 +73,11 @@ set up event-driven pipelines for existing workloads.
   
         kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
 
-1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
+1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
    
-1. Inspect the logs of the pod, you will something similar as below,
+1. Inspect the logs of the pod, you will something similar as below.
 
         _________________________________________ 
         / {"context":{"type":"webhook","specVersi \
@@ -110,7 +110,7 @@ set up event-driven pipelines for existing workloads.
 
 You can specify the operation for the trigger using the `operation` key under triggers->template->k8s.
 
-Operation can be either,
+Operation can be either.
 
 1. `create`: Creates the object if not available in K8s cluster.
 2. `update`: Updates the object.

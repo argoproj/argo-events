@@ -32,7 +32,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 1. Create an API token if you don't have one. Follow [instructions](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) to create a new GitHub API Token.
    Grant it the `repo_hook` permissions. 
 
-1. Base64 encode your api token key,
+1. Base64 encode your api token key.
 
         echo -n <api-token-key> | base64
 
@@ -46,7 +46,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
         data:
           token: <base64-encoded-api-token-from-previous-step>
 
-1. Deploy the secret into K8s cluster
+1. Deploy the secret into K8s cluster.
 
         kubectl -n argo-events apply -f github-access.yaml
 
@@ -59,10 +59,9 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
    
         kubectl apply -n argo-events -f <event-source-file-updated-in-previous-step>
 
-1. Go to `Webhooks` under your project settings on GitHub and verify the webhook is registered. You can also do the same by
-    looking at the event-source pod logs.
+1. Go to `Webhooks` under your project settings on GitHub and verify the webhook is registered. You can also do the same by looking at the event-source pod logs.
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
 

@@ -34,11 +34,11 @@ File event-source specification is available [here](https://github.com/argoproj/
 
 1. The event source has configuration to listen to file system events for `test-data` directory and file called `x.txt`.
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/file.yaml
 
-1. Log into the event-source pod by running following command,
+1. Log into the event-source pod by running following command.
 
         kubectl -n argo-events exec -it <event-source-pod-name> -c file-events -- /bin/bash
 

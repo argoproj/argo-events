@@ -9,11 +9,11 @@
 
 #### Cluster-wide Installation
 
-1. Create the namespace
+1. Create the namespace.
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller
+2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller.
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
         # Install with a validating admission controller
@@ -30,17 +30,17 @@
 
                 oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
 
-3. Deploy the eventbus,
+3. Deploy the eventbus.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
 #### Namespace Installation
 
-1. Create the namespace
+1. Create the namespace.
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller
+2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller.
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
@@ -54,7 +54,7 @@
 
                 oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
 
-3. Deploy the eventbus,
+3. Deploy the eventbus.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml        
 
@@ -78,14 +78,14 @@ Make sure you have helm client installed and Tiller server is running. To instal
 
 1. Create namespace called argo-events.
 
-1. Add `argoproj` repository
+1. Add `argoproj` repository.
 
         helm repo add argo https://argoproj.github.io/argo-helm
 
 1. The helm chart for argo-events is maintained solely by the community and hence the image version for controllers can go out of sync.
    Update the image version in values.yaml to v1.0.0.
 
-1. Install `argo-events` chart
+1. Install `argo-events` chart.
 
         helm install argo-events argo/argo-events
 

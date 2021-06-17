@@ -33,14 +33,13 @@ Resource event-source specification is available [here](https://github.com/argop
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/resource.yaml
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/resource.yaml
 
-1. The event source we created in step 1 contains configuration which makes the event-source listen to 
-   Argo workflows marked with label `app: my-workflow`.
+1. The event source we created in step 1 contains configuration which makes the event-source listen to Argo workflows marked with label `app: my-workflow`.
 
-1. Lets create a workflow called `my-workflow` with label `app: my-workflow`
+1. Lets create a workflow called `my-workflow` with label `app: my-workflow`.
    
         apiVersion: argoproj.io/v1alpha1
         kind: Workflow

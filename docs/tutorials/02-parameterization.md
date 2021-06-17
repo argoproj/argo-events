@@ -43,7 +43,7 @@ The structure of the event the Webhook sensor receives from the event-source ove
 1. `Context`: This is the CloudEvent context and it is populated by the event-source regardless of
 type of HTTP request.
 
-2. `Data`: Data contains following fields,
+2. `Data`: Data contains following fields.
    1. `Header`: The `header` within event `data` contains the headers in the HTTP request that was dispatched
    to the event-source. The event-source extracts the headers from the request and put it in
    the `header` within event `data`.

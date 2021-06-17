@@ -19,21 +19,21 @@ The Slack trigger is used to send a custom message to a desired Slack channel in
 ## Create a Slack App
 We need to create a Slack App which will send messages to your Slack Workspace. We will add OAuth Permissions and add the OAuth token to the k8s cluster via a secret.
 
-1. Create a Slack app by clicking `Create New App` at the [Slack API Page](https://api.slack.com/apps). Name your app and choose your intended Slack Workspace
+1. Create a Slack app by clicking `Create New App` at the [Slack API Page](https://api.slack.com/apps). Name your app and choose your intended Slack Workspace.
 
-2. Navigate to your app, then to `Features > OAuth & Permissions`
+2. Navigate to your app, then to `Features > OAuth & Permissions`.
 
-3. Scroll down to `Scopes` and add the scopes `channels:join`, `channels:read`, `groups:read` and `chat:write` to the _Bot Token Scopes_
+3. Scroll down to `Scopes` and add the scopes `channels:join`, `channels:read`, `groups:read` and `chat:write` to the _Bot Token Scopes_.
 
-4. Scroll to the top of the `OAuth & Permissions` page and click `Install App to Workspace` and follow the install Wizard
+4. Scroll to the top of the `OAuth & Permissions` page and click `Install App to Workspace` and follow the install Wizard.
 
 5. You should land back on the `OAuth & Permissions` page. Copy your app's OAuth Access Token. This will allow the trigger to act on behalf of your newly created Slack app.
 
-6. Encode your OAuth token in base64. This can done easily with the command line
+6. Encode your OAuth token in base64. This can done easily with the command line.
 
         echo -n "YOUR-OAUTH-TOKEN" | base64
 
-7. Create a kubernetes secret file `slack-secret.yaml` with your OAuth token in the following format
+7. Create a kubernetes secret file `slack-secret.yaml` with your OAuth token in the following format.
 
         apiVersion: v1
         kind: Secret
@@ -42,7 +42,7 @@ We need to create a Slack App which will send messages to your Slack Workspace. 
         data:
           token: YOUR-BASE64-ENCODED-OAUTH-TOKEN
 
-12. Apply the kubernetes secret
+12. Apply the kubernetes secret.
 
         kubectl -n argo-events apply -f slack-secret.yaml
 
