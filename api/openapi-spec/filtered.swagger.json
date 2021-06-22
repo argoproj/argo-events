@@ -526,6 +526,10 @@
     "io.argoproj.eventsource.v1alpha1.AMQPEventSource": {
       "description": "AMQPEventSource refers to an event-source for AMQP stream events",
       "properties": {
+        "auth": {
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth",
+          "description": "Auth hosts secret selectors for username and password"
+        },
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.common.Backoff",
           "description": "Backoff holds parameters applied to connection."
