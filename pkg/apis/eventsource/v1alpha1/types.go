@@ -379,6 +379,9 @@ type AMQPEventSource struct {
 	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.Consume
 	// +optional
 	Consume *AMQPConsumeConfig `json:"consume,omitempty" protobuf:"bytes,12,opt,name=consume"`
+	// Auth hosts secret selectors for username and password
+	// +optional
+	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,13,opt,name=auth"`
 }
 
 // AMQPExchangeDeclareConfig holds the configuration for the exchange on the server
