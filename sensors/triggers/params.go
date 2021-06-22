@@ -181,10 +181,15 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			tmplt = src.DataTemplate
 			value, err = renderEventDataAsJSON(event)
 		}
-	}
-	if err != nil && src.Value != nil {
-		fmt.Printf("failed to parse the event data, using default value. err: %+v\n", err)
+	} else if src.Value != nil {
 		return *src.Value, nil
+	}
+	if err != nil {
+		if src.Value != nil {
+			fmt.Printf("failed to parse the event data, using default value. err: %+v\n", err)
+			return *src.Value, nil
+		}
+		return "", err
 	}
 	// Get the value corresponding to specified key within JSON object
 	if value != nil {
