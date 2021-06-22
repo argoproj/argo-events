@@ -1,6 +1,5 @@
 package main
 
 type (
-	obj   = map[string]interface{}
-	array = []interface{}
+	obj = map[string]interface{}
 )
