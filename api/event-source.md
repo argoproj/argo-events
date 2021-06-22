@@ -279,6 +279,18 @@ messages For more information, visit
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>auth</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.BasicAuth </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Auth hosts secret selectors for username and password
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AMQPExchangeDeclareConfig">
