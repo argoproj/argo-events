@@ -562,6 +562,10 @@
         "routingKey"
       ],
       "properties": {
+        "auth": {
+          "description": "Auth hosts secret selectors for username and password",
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth"
+        },
         "connectionBackoff": {
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"

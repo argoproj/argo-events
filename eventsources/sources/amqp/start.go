@@ -68,21 +68,35 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	amqpEventSource := &el.AMQPEventSource
 	var conn *amqplib.Connection
 	if err := common.Connect(amqpEventSource.ConnectionBackoff, func() error {
+		c := amqplib.Config{
+			Heartbeat: 10 * time.Second,
+			Locale:    "en_US",
+		}
 		if amqpEventSource.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS)
 			if err != nil {
 				return errors.Wrap(err, "failed to get the tls configuration")
 			}
-			conn, err = amqplib.DialTLS(amqpEventSource.URL, tlsConfig)
+			c.TLSClientConfig = tlsConfig
+		}
+		if amqpEventSource.Auth != nil {
+			username, err := common.GetSecretFromVolume(amqpEventSource.Auth.Username)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "username not founnd")
 			}
-		} else {
-			var err error
-			conn, err = amqplib.Dial(amqpEventSource.URL)
+			password, err := common.GetSecretFromVolume(amqpEventSource.Auth.Password)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "password not founnd")
 			}
+			c.SASL = []amqplib.Authentication{&amqplib.AMQPlainAuth{
+				Username: username,
+				Password: password,
+			}}
+		}
+		var err error
+		conn, err = amqplib.DialConfig(amqpEventSource.URL, c)
+		if err != nil {
+			return err
 		}
 		return nil
 	}); err != nil {
