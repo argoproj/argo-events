@@ -54,6 +54,15 @@ spec:
         exclusive: false
         noLocal: false
         noWait: false
+      # username and password for authentication
+      # use secret selectors
+      auth:
+        username:
+          name: my-secret
+          key: username
+        password:
+          name: my-secret
+          key: password
 
 
 #    example-tls:
