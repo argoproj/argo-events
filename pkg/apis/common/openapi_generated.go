@@ -136,6 +136,7 @@ func schema_argo_events_pkg_apis_common_Condition(ref common.ReferenceCallback) 
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Condition type.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -143,6 +144,7 @@ func schema_argo_events_pkg_apis_common_Condition(ref common.ReferenceCallback) 
 					"status": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Condition status, True, False or Unknown.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -150,6 +152,7 @@ func schema_argo_events_pkg_apis_common_Condition(ref common.ReferenceCallback) 
 					"lastTransitionTime": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Last time the condition transitioned from one status to another.",
+							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
@@ -201,8 +204,9 @@ func schema_argo_events_pkg_apis_common_Metadata(ref common.ReferenceCallback) c
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -215,8 +219,9 @@ func schema_argo_events_pkg_apis_common_Metadata(ref common.ReferenceCallback) c
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -249,8 +254,9 @@ func schema_argo_events_pkg_apis_common_S3Artifact(ref common.ReferenceCallback)
 				Properties: map[string]spec.Schema{
 					"endpoint": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"bucket": {
@@ -286,8 +292,9 @@ func schema_argo_events_pkg_apis_common_S3Artifact(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -305,8 +312,9 @@ func schema_argo_events_pkg_apis_common_S3Artifact(ref common.ReferenceCallback)
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -336,8 +344,9 @@ func schema_argo_events_pkg_apis_common_S3Bucket(ref common.ReferenceCallback) c
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 				},
@@ -356,14 +365,16 @@ func schema_argo_events_pkg_apis_common_S3Filter(ref common.ReferenceCallback) c
 				Properties: map[string]spec.Schema{
 					"prefix": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"suffix": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 				},
@@ -454,7 +465,8 @@ func schema_argo_events_pkg_apis_common_Status(ref common.ReferenceCallback) com
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
 									},
 								},
 							},

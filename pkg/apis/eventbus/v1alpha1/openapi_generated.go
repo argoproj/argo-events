@@ -71,7 +71,8 @@ func schema_pkg_apis_eventbus_v1alpha1_ContainerTemplate(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"resources": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.ResourceRequirements"),
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/api/core/v1.ResourceRequirements"),
 						},
 					},
 				},
@@ -105,17 +106,20 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBus(ref common.ReferenceCallback) co
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec"),
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusStatus"),
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusStatus"),
 						},
 					},
 				},
@@ -150,7 +154,8 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref common.ReferenceCallback
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
 						},
 					},
 					"items": {
@@ -159,7 +164,8 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref common.ReferenceCallback
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBus"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBus"),
 									},
 								},
 							},
@@ -215,7 +221,8 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
 									},
 								},
 							},
@@ -224,6 +231,7 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 					"config": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Config holds the fininalized configuration of EventBus",
+							Default:     map[string]interface{}{},
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig"),
 						},
 					},
@@ -356,8 +364,9 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -370,7 +379,8 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.Toleration"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.Toleration"),
 									},
 								},
 							},
@@ -408,7 +418,8 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.LocalObjectReference"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.LocalObjectReference"),
 									},
 								},
 							},
