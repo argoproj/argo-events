@@ -7,7 +7,7 @@ implementation.
 ## Contract
 
 In order to qualify as generic eventsource, the eventsource server needs to
-implement following gRPC contract,
+implement following gRPC contract.
 
         syntax = "proto3";
 
@@ -34,14 +34,13 @@ implement following gRPC contract,
             bytes payload = 2;
         }
 
-The proto file is available
-[here](https://github.com/argoproj/argo-events/blob/master/eventsources/sources/generic/generic.proto).
+The proto file is available [here](https://github.com/argoproj/argo-events/blob/master/eventsources/sources/generic/generic.proto).
 
 ## Architecture
 
 ![arch](../assets/generic-eventsource.png)
 
-Consider a generic eventsource,
+Consider a generic eventsource.
 
         apiVersion: argoproj.io/v1alpha1
         kind: EventSource

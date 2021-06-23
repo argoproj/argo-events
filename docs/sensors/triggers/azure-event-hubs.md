@@ -12,11 +12,11 @@ The Azure Event Hubs trigger specification is available [here](https://github.co
 
 1. Make sure to have the eventbus deployed in the namespace.
 
-1. [Create an event hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create)
+1. [Create an event hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create).
 
 1. Make sure that the Shared Access Key used to connect to Azure Event Hubs has the `Send` policy.
 
-1. Get the `Primary Key` of the Shared Access Policy, the `Name` of the Shared Access Policy, the `Hub Name`, and the `FQDN` of the Azure Event Hubs Namespace
+1. Get the `Primary Key` of the Shared Access Policy, the `Name` of the Shared Access Policy, the `Hub Name`, and the `FQDN` of the Azure Event Hubs Namespace.
 
 1. Create a secret called `azure-event-hubs-secret` as follows:
 
@@ -81,7 +81,7 @@ The Azure Event Hubs trigger specification is available [here](https://github.co
   
         kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
 
-1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
+1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 

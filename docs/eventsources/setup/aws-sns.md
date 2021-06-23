@@ -27,7 +27,7 @@ The structure of an event dispatched by the event-source over eventbus looks lik
 
 1. Fetch your access and secret key for AWS account and base64 encode them.
 
-1. Create a secret called `aws-secret` as follows,
+1. Create a secret called `aws-secret` as follows.
 
         apiVersion: v1
         kind: Secret
@@ -38,7 +38,7 @@ The structure of an event dispatched by the event-source over eventbus looks lik
           accesskey: <base64-access-key>
           secretkey: <base64-secret-key>
 
-1. Deploy the secret
+1. Deploy the secret.
 
         kubectl -n argo-events apply -f aws-secret.yaml
 
@@ -53,7 +53,7 @@ The structure of an event dispatched by the event-source over eventbus looks lik
 
 1. Go to SNS settings on AWS and verify the webhook is registered. You can also check it by inspecting the event-source pod logs.
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-sns.yaml
 
