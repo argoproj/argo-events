@@ -35,4 +35,4 @@ Available event-sources:
 The complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md).
 
 ## Examples
-Examples are located under `examples/event-sources`.
+Examples are located under [examples/event-sources](https://github.com/argoproj/argo-events/tree/master/examples/event-sources).

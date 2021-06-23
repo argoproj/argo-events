@@ -71,14 +71,14 @@ If data types is bool or float, then you need to pass the exact value.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/07-filters/sensor-data-filters.yaml
 
-2. Send a HTTP request to event-source
+2. Send a HTTP request to event-source.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. You will notice that the sensor logs prints the event is invalid as the sensor expects for
    either `hello` or `hey` as the value of `body.message`.
  
-4.  Send a valid HTTP request to event-source
+4.  Send a valid HTTP request to event-source.
 
         curl -d '{"message":"hello"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -148,7 +148,7 @@ Change the subscriber in the webhook event-source to point it to `context-filter
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/07-filters/sensor-context-filter.yaml
 
-2. Send a HTTP request to event-source
+2. Send a HTTP request to event-source.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -167,7 +167,7 @@ The diagrams below illustlate these behavior.
 
 An example of time filter is available under `examples/sensors`.
 
-1. if `start` < `stop`: event time must be in `[start, stop)`
+1. if `start` < `stop`: event time must be in `[start, stop)`.
 
          00:00:00                            00:00:00                            00:00:00
          ┃     start                   stop  ┃     start                   stop  ┃
@@ -175,7 +175,7 @@ An example of time filter is available under `examples/sensors`.
                ╰───────── OK ──────────╯           ╰───────── OK ──────────╯
 
 2. if `stop` < `start`: event time must be in `[start, stop@Next day)`  
-   (this is equivalent to: event time must be in `[00:00:00, stop) || [start, 00:00:00@Next day)`)
+   (this is equivalent to: event time must be in `[00:00:00, stop) || [start, 00:00:00@Next day)`).
 
          00:00:00                            00:00:00                            00:00:00
          ┃           stop        start       ┃       stop            start       ┃

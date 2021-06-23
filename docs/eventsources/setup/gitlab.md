@@ -32,7 +32,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 1. Create an API token if you don't have one. Follow [instructions](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) to create a new GitLab API Token.
    Grant it the `api` permissions.
 
-1. Base64 encode your api token key,
+1. Base64 encode your api token key.
 
         echo -n <api-token-key> | base64
 
@@ -61,7 +61,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1. Go to `Webhooks` under your project settings on GitLab and verify the webhook is registered.
     
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gitlab.yaml
 

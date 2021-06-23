@@ -29,7 +29,7 @@ Pulsar event-source is available [here](https://github.com/argoproj/argo-events/
 
 ## Setup
 
-1. To test locally, deploy a standalone Pulsar,
+1. To test locally, deploy a standalone Pulsar.
 
         apiVersion: apps/v1
         kind: Deployment
@@ -83,11 +83,11 @@ Pulsar event-source is available [here](https://github.com/argoproj/argo-events/
 
 1. For production deployment, follow the official Pulsar documentation online.
 
-1. Deploy the eventsource,
+1. Deploy the eventsource.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/pulsar.yaml
 
-1. Deploy the sensor,
+1. Deploy the sensor.
         
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/pulsar.yaml
 

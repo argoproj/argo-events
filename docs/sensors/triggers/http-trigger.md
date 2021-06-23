@@ -24,7 +24,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 
 We will set up a basic go http server and connect it with the minio events.
 
-1. The HTTP server simply prints the request body as follows,
+1. The HTTP server simply prints the request body as follows.
 
         package main
         
@@ -50,15 +50,15 @@ We will set up a basic go http server and connect it with the minio events.
         	http.ListenAndServe(":8090", nil)
         }
 
-2. Deploy the HTTP server,
+2. Deploy the HTTP server.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server.yaml
 
-3. Create a service to expose the http server
+3. Create a service to expose the http server.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server-svc.yaml
 
-4. Either use Ingress, OpenShift Route or port-forwarding to expose the http server..
+4. Either use Ingress, OpenShift Route or port-forwarding to expose the http server.
 
         kubectl -n argo-events port-forward <http-server-pod-name> 8090:8090
 
@@ -66,14 +66,14 @@ We will set up a basic go http server and connect it with the minio events.
    lets set up the Minio event-source available [here](https://argoproj.github.io/argo-events/setup/minio/).
    Don't create the sensor as we will be deploying it in next step.
 
-6. Create a sensor as follows,
+6. Create a sensor as follows.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/http-trigger.yaml
 
 7. Now, drop a file onto `input` bucket in Minio server.
 
   
-8. The sensor has triggered a http request to the http server. Take a look at the logs
+8. The sensor has triggered a http request to the http server. Take a look at the logs.
 
         server is listening on 8090
         {"type":"minio","bucket":"input"}
@@ -157,7 +157,7 @@ to invoke OpenFaas function.
 
 1. If you don't have OpenFaas installed, follow the [instructions](https://docs.openfaas.com/deployment/kubernetes/).
 
-2. Let's create a basic function. You can follow the [steps](https://blog.alexellis.io/serverless-golang-with-openfaas/)
+2. Let's create a basic function. You can follow the [steps](https://blog.alexellis.io/serverless-golang-with-openfaas/).
    to set up the function.
         
         
@@ -180,7 +180,7 @@ to invoke OpenFaas function.
 5. Let's set up the Redis Database, Redis PubSub event-source as specified [here](https://argoproj.github.io/argo-events/setup/redis/).
    Do not create the Redis sensor, we are going to create it in next step.
 
-6. Let's create the sensor with OpenFaas trigger
+6. Let's create the sensor with OpenFaas trigger.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -214,7 +214,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
 
 1. If you don't have Kubeless installed, follow the [installation](https://kubeless.io/docs/quick-start/).
 
-2. Lets create a basic function,
+2. Lets create a basic function.
 
         def hello(event, context):
           print event
@@ -227,7 +227,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
 5. Let's set up the NATS event-source. Follow [instructions](https://argoproj.github.io/argo-events/setup/nats/#setup) for details.
    Do not create the NATS sensor, we are going to create it in next step.
    
-6. Let's create NATS sensor with HTTP trigger,
+6. Let's create NATS sensor with HTTP trigger.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -254,11 +254,11 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
                       dest: last_name
                   method: POST
 
-7. Once event-source and sensor pod are up and running, dispatch a message on `foo` subject using nats client,
+7. Once event-source and sensor pod are up and running, dispatch a message on `foo` subject using nats client.
 
         go run main.go -s localhost foo '{"first_name": "foo", "last_name": "bar"}'
 
-8. It will invoke Kubeless function `hello`,
+8. It will invoke Kubeless function `hello`.
         
         {'event-time': None, 'extensions': {'request': <LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/> }, 'event-type': None, 'event-namespace': None, 'data': '{"first_name":"foo","last_name":"bar"}', 'event-id': None}
 

@@ -38,7 +38,7 @@ GCP Pub/Sub event-source specification is available [here](https://github.com/ar
 
      If you use Workload Identity, you can skip this and next steps.
 
-1. Create a K8s secret called `gcp-credentials` to store the credentials file
+1. Create a K8s secret called `gcp-credentials` to store the credentials file.
 
     ```yaml
     apiVersion: v1
@@ -61,7 +61,7 @@ GCP Pub/Sub event-source specification is available [here](https://github.com/ar
 
 1. Inspect the event-source pod logs to make sure it was able to subscribe to the topic.
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
     ```sh
     kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml
