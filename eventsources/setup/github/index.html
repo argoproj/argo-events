@@ -1425,7 +1425,7 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
    Grant it the <code>repo_hook</code> permissions. </p>
 </li>
 <li>
-<p>Base64 encode your api token key,</p>
+<p>Base64 encode your api token key.</p>
 <div class="codehilite"><pre><span></span><code>echo -n &lt;api-token-key&gt; | base64
 </code></pre></div>
 
@@ -1443,7 +1443,7 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 
 </li>
 <li>
-<p>Deploy the secret into K8s cluster</p>
+<p>Deploy the secret into K8s cluster.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f github-access.yaml
 </code></pre></div>
 
@@ -1461,11 +1461,10 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 
 </li>
 <li>
-<p>Go to <code>Webhooks</code> under your project settings on GitHub and verify the webhook is registered. You can also do the same by
-    looking at the event-source pod logs.</p>
+<p>Go to <code>Webhooks</code> under your project settings on GitHub and verify the webhook is registered. You can also do the same by looking at the event-source pod logs.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
 </code></pre></div>
 

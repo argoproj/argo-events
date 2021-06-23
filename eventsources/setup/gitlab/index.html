@@ -1425,7 +1425,7 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
    Grant it the <code>api</code> permissions.</p>
 </li>
 <li>
-<p>Base64 encode your api token key,</p>
+<p>Base64 encode your api token key.</p>
 <div class="codehilite"><pre><span></span><code>echo -n &lt;api-token-key&gt; | base64
 </code></pre></div>
 
@@ -1464,7 +1464,7 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 <p>Go to <code>Webhooks</code> under your project settings on GitLab and verify the webhook is registered.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gitlab.yaml
 </code></pre></div>
 

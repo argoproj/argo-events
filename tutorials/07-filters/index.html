@@ -1512,7 +1512,7 @@ If data types is bool or float, then you need to pass the exact value.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to event-source</p>
+<p>Send a HTTP request to event-source.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1522,7 +1522,7 @@ If data types is bool or float, then you need to pass the exact value.</p>
    either <code>hello</code> or <code>hey</code> as the value of <code>body.message</code>.</p>
 </li>
 <li>
-<p>Send a valid HTTP request to event-source</p>
+<p>Send a valid HTTP request to event-source.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;hello&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1592,7 +1592,7 @@ and it has a label of "Webhook" and "Approved". We could therefore define the pa
 
 </li>
 <li>
-<p>Send a HTTP request to event-source</p>
+<p>Send a HTTP request to event-source.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1612,7 +1612,7 @@ The diagrams below illustlate these behavior.</p>
 <p>An example of time filter is available under <code>examples/sensors</code>.</p>
 <ol>
 <li>
-<p>if <code>start</code> &lt; <code>stop</code>: event time must be in <code>[start, stop)</code></p>
+<p>if <code>start</code> &lt; <code>stop</code>: event time must be in <code>[start, stop)</code>.</p>
 <div class="codehilite"><pre><span></span><code> 00:00:00                            00:00:00                            00:00:00
  ┃     start                   stop  ┃     start                   stop  ┃
 ─┸─────●───────────────────────○─────┸─────●───────────────────────○─────┸─
@@ -1622,7 +1622,7 @@ The diagrams below illustlate these behavior.</p>
 </li>
 <li>
 <p>if <code>stop</code> &lt; <code>start</code>: event time must be in <code>[start, stop@Next day)</code><br />
-   (this is equivalent to: event time must be in <code>[00:00:00, stop) || [start, 00:00:00@Next day)</code>)</p>
+   (this is equivalent to: event time must be in <code>[00:00:00, stop) || [start, 00:00:00@Next day)</code>).</p>
 <div class="codehilite"><pre><span></span><code> 00:00:00                            00:00:00                            00:00:00
  ┃           stop        start       ┃       stop            start       ┃
 ─┸───────────○───────────●───────────┸───────────○───────────●───────────┸─

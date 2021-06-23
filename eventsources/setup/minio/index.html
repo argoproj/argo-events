@@ -1445,13 +1445,13 @@ please set up the AWS SNS event-source.</p>
 
 </li>
 <li>
-<p>Let's install event source in the <code>argo-events</code> namespace,</p>
+<p>Let's install event source in the <code>argo-events</code> namespace.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Let's create the sensor,</p>
+<p>Let's create the sensor.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml
 </code></pre></div>
 

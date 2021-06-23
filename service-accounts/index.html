@@ -1440,13 +1440,13 @@ resource being watched.</p>
 <p>For example, if you want to watch actions on <code>Deployment</code> objects, you need to:</p>
 <ol>
 <li>
-<p>Create a Service Account</p>
+<p>Create a Service Account.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n your-namespace create sa my-sa
 </code></pre></div>
 
 </li>
 <li>
-<p>Grant RBAC privileges to it</p>
+<p>Grant RBAC privileges to it.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n your-namespace create role deployments-watcher --verb=list,watch --resource=deployments.apps
 
 kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa

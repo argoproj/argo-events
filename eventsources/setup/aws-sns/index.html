@@ -1410,7 +1410,7 @@
 <p>Fetch your access and secret key for AWS account and base64 encode them.</p>
 </li>
 <li>
-<p>Create a secret called <code>aws-secret</code> as follows,</p>
+<p>Create a secret called <code>aws-secret</code> as follows.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1423,7 +1423,7 @@
 
 </li>
 <li>
-<p>Deploy the secret</p>
+<p>Deploy the secret.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f aws-secret.yaml
 </code></pre></div>
 
@@ -1444,7 +1444,7 @@
 <p>Go to SNS settings on AWS and verify the webhook is registered. You can also check it by inspecting the event-source pod logs.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-sns.yaml
 </code></pre></div>
 

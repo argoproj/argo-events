@@ -1422,28 +1422,28 @@
 <p>We need to create a Slack App which will send messages to your Slack Workspace. We will add OAuth Permissions and add the OAuth token to the k8s cluster via a secret.</p>
 <ol>
 <li>
-<p>Create a Slack app by clicking <code>Create New App</code> at the <a href="https://api.slack.com/apps">Slack API Page</a>. Name your app and choose your intended Slack Workspace</p>
+<p>Create a Slack app by clicking <code>Create New App</code> at the <a href="https://api.slack.com/apps">Slack API Page</a>. Name your app and choose your intended Slack Workspace.</p>
 </li>
 <li>
-<p>Navigate to your app, then to <code>Features &gt; OAuth &amp; Permissions</code></p>
+<p>Navigate to your app, then to <code>Features &gt; OAuth &amp; Permissions</code>.</p>
 </li>
 <li>
-<p>Scroll down to <code>Scopes</code> and add the scopes <code>channels:join</code>, <code>channels:read</code>, <code>groups:read</code> and <code>chat:write</code> to the <em>Bot Token Scopes</em></p>
+<p>Scroll down to <code>Scopes</code> and add the scopes <code>channels:join</code>, <code>channels:read</code>, <code>groups:read</code> and <code>chat:write</code> to the <em>Bot Token Scopes</em>.</p>
 </li>
 <li>
-<p>Scroll to the top of the <code>OAuth &amp; Permissions</code> page and click <code>Install App to Workspace</code> and follow the install Wizard</p>
+<p>Scroll to the top of the <code>OAuth &amp; Permissions</code> page and click <code>Install App to Workspace</code> and follow the install Wizard.</p>
 </li>
 <li>
 <p>You should land back on the <code>OAuth &amp; Permissions</code> page. Copy your app's OAuth Access Token. This will allow the trigger to act on behalf of your newly created Slack app.</p>
 </li>
 <li>
-<p>Encode your OAuth token in base64. This can done easily with the command line</p>
+<p>Encode your OAuth token in base64. This can done easily with the command line.</p>
 <div class="codehilite"><pre><span></span><code>echo -n &quot;YOUR-OAUTH-TOKEN&quot; | base64
 </code></pre></div>
 
 </li>
 <li>
-<p>Create a kubernetes secret file <code>slack-secret.yaml</code> with your OAuth token in the following format</p>
+<p>Create a kubernetes secret file <code>slack-secret.yaml</code> with your OAuth token in the following format.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1454,7 +1454,7 @@
 
 </li>
 <li>
-<p>Apply the kubernetes secret</p>
+<p>Apply the kubernetes secret.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f slack-secret.yaml
 </code></pre></div>
 

@@ -1377,13 +1377,13 @@
 <p>Make sure to have the eventbus deployed in the namespace.</p>
 </li>
 <li>
-<p><a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create">Create an event hub</a></p>
+<p><a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create">Create an event hub</a>.</p>
 </li>
 <li>
 <p>Make sure that the Shared Access Key used to connect to Azure Event Hubs has the <code>Send</code> policy.</p>
 </li>
 <li>
-<p>Get the <code>Primary Key</code> of the Shared Access Policy, the <code>Name</code> of the Shared Access Policy, the <code>Hub Name</code>, and the <code>FQDN</code> of the Azure Event Hubs Namespace</p>
+<p>Get the <code>Primary Key</code> of the Shared Access Policy, the <code>Name</code> of the Shared Access Policy, the <code>Hub Name</code>, and the <code>FQDN</code> of the Azure Event Hubs Namespace.</p>
 </li>
 <li>
 <p>Create a secret called <code>azure-event-hubs-secret</code> as follows:</p>
@@ -1458,7 +1458,7 @@
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code>.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 

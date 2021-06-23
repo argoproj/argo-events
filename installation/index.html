@@ -1456,13 +1456,13 @@
 <h4 id="cluster-wide-installation">Cluster-wide Installation<a class="headerlink" href="#cluster-wide-installation" title="Permanent link">&para;</a></h4>
 <ol>
 <li>
-<p>Create the namespace</p>
+<p>Create the namespace.</p>
 <div class="codehilite"><pre><span></span><code>kubectl create namespace argo-events
 </code></pre></div>
 
 </li>
 <li>
-<p>Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller</p>
+<p>Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 # Install with a validating admission controller
 kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
@@ -1480,7 +1480,7 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
 
 </li>
 <li>
-<p>Deploy the eventbus,</p>
+<p>Deploy the eventbus.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </code></pre></div>
 
@@ -1489,13 +1489,13 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
 <h4 id="namespace-installation">Namespace Installation<a class="headerlink" href="#namespace-installation" title="Permanent link">&para;</a></h4>
 <ol>
 <li>
-<p>Create the namespace</p>
+<p>Create the namespace.</p>
 <div class="codehilite"><pre><span></span><code>kubectl create namespace argo-events
 </code></pre></div>
 
 </li>
 <li>
-<p>Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller</p>
+<p>Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 </code></pre></div>
 
@@ -1511,7 +1511,7 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
 
 </li>
 <li>
-<p>Deploy the eventbus,</p>
+<p>Deploy the eventbus.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </code></pre></div>
 
@@ -1534,7 +1534,7 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
 <p>Create namespace called argo-events.</p>
 </li>
 <li>
-<p>Add <code>argoproj</code> repository</p>
+<p>Add <code>argoproj</code> repository.</p>
 <div class="codehilite"><pre><span></span><code>helm repo add argo https://argoproj.github.io/argo-helm
 </code></pre></div>
 
@@ -1544,7 +1544,7 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
    Update the image version in values.yaml to v1.0.0.</p>
 </li>
 <li>
-<p>Install <code>argo-events</code> chart</p>
+<p>Install <code>argo-events</code> chart.</p>
 <div class="codehilite"><pre><span></span><code>helm install argo-events argo/argo-events
 </code></pre></div>
 

@@ -1420,13 +1420,13 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Install the event source in the <code>argo-events</code> namespace,</p>
+<p>Install the event source in the <code>argo-events</code> namespace.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/calendar.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>The event-source will generate events at every 10 seconds. Let's create the sensor,</p>
+<p>The event-source will generate events at every 10 seconds. Let's create the sensor.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/calendar.yaml
 </code></pre></div>
 

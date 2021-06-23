@@ -1467,7 +1467,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 <p>We will set up a basic go http server and connect it with the minio events.</p>
 <ol>
 <li>
-<p>The HTTP server simply prints the request body as follows,</p>
+<p>The HTTP server simply prints the request body as follows.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">package</span> <span class="n">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
@@ -1495,19 +1495,19 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 
 </li>
 <li>
-<p>Deploy the HTTP server,</p>
+<p>Deploy the HTTP server.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Create a service to expose the http server</p>
+<p>Create a service to expose the http server.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server-svc.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Either use Ingress, OpenShift Route or port-forwarding to expose the http server..</p>
+<p>Either use Ingress, OpenShift Route or port-forwarding to expose the http server.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;http-server-pod-name&gt; 8090:8090
 </code></pre></div>
 
@@ -1518,7 +1518,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
    Don't create the sensor as we will be deploying it in next step.</p>
 </li>
 <li>
-<p>Create a sensor as follows,</p>
+<p>Create a sensor as follows.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/http-trigger.yaml
 </code></pre></div>
 
@@ -1527,7 +1527,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 <p>Now, drop a file onto <code>input</code> bucket in Minio server.</p>
 </li>
 <li>
-<p>The sensor has triggered a http request to the http server. Take a look at the logs</p>
+<p>The sensor has triggered a http request to the http server. Take a look at the logs.</p>
 <div class="codehilite"><pre><span></span><code>server is listening on 8090
 {&quot;type&quot;:&quot;minio&quot;,&quot;bucket&quot;:&quot;input&quot;}
 </code></pre></div>
@@ -1605,7 +1605,7 @@ to invoke OpenFaas function.</p>
 <p>If you don't have OpenFaas installed, follow the <a href="https://docs.openfaas.com/deployment/kubernetes/">instructions</a>.</p>
 </li>
 <li>
-<p>Let's create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>
+<p>Let's create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>.
    to set up the function.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">package</span> <span class="n">function</span>
 
@@ -1631,7 +1631,7 @@ to invoke OpenFaas function.</p>
    Do not create the Redis sensor, we are going to create it in next step.</p>
 </li>
 <li>
-<p>Let's create the sensor with OpenFaas trigger</p>
+<p>Let's create the sensor with OpenFaas trigger.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="p">:</span>
@@ -1671,7 +1671,7 @@ to invoke OpenFaas function.</p>
 <p>If you don't have Kubeless installed, follow the <a href="https://kubeless.io/docs/quick-start/">installation</a>.</p>
 </li>
 <li>
-<p>Lets create a basic function,</p>
+<p>Lets create a basic function.</p>
 <div class="codehilite"><pre><span></span><code><span class="nv">def</span> <span class="nv">hello</span><span class="ss">(</span><span class="nv">event</span>, <span class="nv">context</span><span class="ss">)</span>:
   <span class="nv">print</span> <span class="nv">event</span>
   <span class="k">return</span> <span class="nv">event</span>[<span class="s1">&#39;</span><span class="s">data</span><span class="s1">&#39;</span>]
@@ -1689,7 +1689,7 @@ to invoke OpenFaas function.</p>
    Do not create the NATS sensor, we are going to create it in next step.</p>
 </li>
 <li>
-<p>Let's create NATS sensor with HTTP trigger,</p>
+<p>Let's create NATS sensor with HTTP trigger.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="p">:</span>
@@ -1718,13 +1718,13 @@ to invoke OpenFaas function.</p>
 
 </li>
 <li>
-<p>Once event-source and sensor pod are up and running, dispatch a message on <code>foo</code> subject using nats client,</p>
+<p>Once event-source and sensor pod are up and running, dispatch a message on <code>foo</code> subject using nats client.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="s1">&#39;{&quot;first_name&quot;: &quot;foo&quot;, &quot;last_name&quot;: &quot;bar&quot;}&#39;</span><span class="w"></span>
 </code></pre></div>
 
 </li>
 <li>
-<p>It will invoke Kubeless function <code>hello</code>,</p>
+<p>It will invoke Kubeless function <code>hello</code>.</p>
 <div class="codehilite"><pre><span></span><code>{&#39;event-time&#39;: None, &#39;extensions&#39;: {&#39;request&#39;: &lt;LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/&gt; }, &#39;event-type&#39;: None, &#39;event-namespace&#39;: None, &#39;data&#39;: &#39;{&quot;first_name&quot;:&quot;foo&quot;,&quot;last_name&quot;:&quot;bar&quot;}&#39;, &#39;event-id&#39;: None}
 </code></pre></div>
 

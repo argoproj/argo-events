@@ -1429,13 +1429,13 @@
 <p>The event source has configuration to listen to file system events for <code>test-data</code> directory and file called <code>x.txt</code>.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/file.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Log into the event-source pod by running following command,</p>
+<p>Log into the event-source pod by running following command.</p>
 <div class="codehilite"><pre><span></span><code><span class="nv">kubectl</span> <span class="o">-</span><span class="nv">n</span> <span class="nv">argo</span><span class="o">-</span><span class="nv">events</span> <span class="k">exec</span> <span class="o">-</span><span class="nv">it</span> <span class="o">&lt;</span><span class="nv">event</span><span class="o">-</span><span class="nv">source</span><span class="o">-</span><span class="nv">pod</span><span class="o">-</span><span class="nv">name</span><span class="o">&gt;</span> <span class="o">-</span><span class="nv">c</span> <span class="nv">file</span><span class="o">-</span><span class="nv">events</span> <span class="o">--</span> <span class="o">/</span><span class="nv">bin</span><span class="o">/</span><span class="nv">bash</span>
 </code></pre></div>
 

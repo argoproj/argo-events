@@ -1418,7 +1418,7 @@ set up event-driven pipelines for existing workloads.</p>
 
 </li>
 <li>
-<p>To trigger a pod, we need to create a sensor as defined below,</p>
+<p>To trigger a pod, we need to create a sensor as defined below.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1464,7 +1464,7 @@ set up event-driven pipelines for existing workloads.</p>
    K8s object. Change it accordingly if you want to trigger something else than a pod.</p>
 </li>
 <li>
-<p>Create the sensor,</p>
+<p>Create the sensor.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
 </code></pre></div>
 
@@ -1476,13 +1476,13 @@ set up event-driven pipelines for existing workloads.</p>
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code>.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
 <li>
-<p>Inspect the logs of the pod, you will something similar as below,</p>
+<p>Inspect the logs of the pod, you will something similar as below.</p>
 <div class="codehilite"><pre><span></span><code>_________________________________________ 
 / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
 | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook&quot;,&quot;e |
@@ -1514,7 +1514,7 @@ set up event-driven pipelines for existing workloads.</p>
 </ol>
 <h2 id="operation">Operation<a class="headerlink" href="#operation" title="Permanent link">&para;</a></h2>
 <p>You can specify the operation for the trigger using the <code>operation</code> key under triggers-&gt;template-&gt;k8s.</p>
-<p>Operation can be either,</p>
+<p>Operation can be either.</p>
 <ol>
 <li><code>create</code>: Creates the object if not available in K8s cluster.</li>
 <li><code>update</code>: Updates the object.</li>

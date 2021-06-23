@@ -1381,7 +1381,7 @@
    Do not create the Minio sensor, we are going to create it in next step.</p>
 </li>
 <li>
-<p>Lets create the sensor,</p>
+<p>Lets create the sensor.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="p">:</span>
@@ -1426,7 +1426,7 @@
 
 <ol>
 <li>
-<p>If you are running NATS on local K8s cluster, make sure to <code>port-forward</code> to pod,</p>
+<p>If you are running NATS on local K8s cluster, make sure to <code>port-forward</code> to pod.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;nats-pod-name&gt; 4222:4222
 </code></pre></div>
 
@@ -1438,8 +1438,7 @@
 
 </li>
 <li>
-<p>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on NATS subscriber
-   as follows,</p>
+<p>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on NATS subscriber as follows.</p>
 <div class="codehilite"><pre><span></span><code>[#1] Received on [minio-events]: &#39;{&quot;bucket&quot;:&quot;input&quot;,&quot;fileName&quot;:&quot;hello.txt&quot;}&#39;
 </code></pre></div>
 

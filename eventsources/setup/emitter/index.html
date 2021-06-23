@@ -1333,7 +1333,7 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Deploy the emitter in your local K8s cluster,</p>
+<p>Deploy the emitter in your local K8s cluster.</p>
 <div class="codehilite"><pre><span></span><code><span class="o">---</span>
 <span class="nv">apiVersion</span>: <span class="nv">v1</span>
 <span class="nv">kind</span>: <span class="nv">Service</span>
@@ -1397,13 +1397,13 @@
 <p>Inspect the event-source pod logs to make sure it was able to subscribe to the topic specified in the event source to consume messages.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/emitter.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Send a message on emitter channel using one of the clients https://emitter.io/develop/golang/</p>
+<p>Send a message on emitter channel using one of the clients https://emitter.io/develop/golang/.</p>
 </li>
 <li>
 <p>Once a message is published, an argo workflow will be triggered. Run <code>argo list</code> to find the workflow. </p>

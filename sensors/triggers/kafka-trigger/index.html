@@ -1373,15 +1373,14 @@
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event
-   on a Kafka topic.</p>
+<p>Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event on a Kafka topic.</p>
 </li>
 <li>
 <p>Set up the Minio Event Source <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>. 
    Do not create the Minio sensor, we are going to create it in next step.</p>
 </li>
 <li>
-<p>Lets create the sensor,</p>
+<p>Lets create the sensor.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="p">:</span>
@@ -1419,7 +1418,7 @@
 </li>
 </ol>
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
-<p>The <code>payload</code> declared above will generate a message body like below,</p>
+<p>The <code>payload</code> declared above will generate a message body like below.</p>
 <div class="codehilite"><pre><span></span><code>    {
         &quot;fileName&quot;: &quot;hello.txt&quot; // name/key of the object
         &quot;bucket&quot;: &quot;input&quot; // name of the bucket

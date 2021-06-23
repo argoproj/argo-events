@@ -1306,13 +1306,8 @@
                 
                 
                 <h1 id="managed-namespace">Managed Namespace<a class="headerlink" href="#managed-namespace" title="Permanent link">&para;</a></h1>
-<p>You can install <code>argo-events</code> in either cluster scoped or namespace scoped
-configuration, accordingly you need to set up ClusterRole or normal Role for
-service account <code>argo-events-sa</code>.</p>
-<p>In namespace scope installation, you must run <code>eventbus-controller</code>,
-<code>eventsource-controller</code> and <code>sensor-controller</code> with <code>--namespaced</code>. If you
-would like to have the controllers watching a separated namespace, add
-<code>--managed-namespace</code> as well.</p>
+<p>You can install <code>argo-events</code> in either cluster scoped or namespace scoped configuration, accordingly you need to set up ClusterRole or normal Role for service account <code>argo-events-sa</code>.</p>
+<p>In namespace scope installation, you must run <code>eventbus-controller</code>, <code>eventsource-controller</code> and <code>sensor-controller</code> with <code>--namespaced</code>. If you would like to have the controllers watching a separated namespace, add <code>--managed-namespace</code> as well.</p>
 <p>For example:</p>
 <div class="codehilite"><pre><span></span><code>      - args:
         - --namespaced

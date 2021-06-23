@@ -1308,13 +1308,13 @@
 <p>Note: You will need to have <a href="https://argoproj.github.io/argo-workflows/">Argo Workflows</a> installed to make this work.</p>
 <ol>
 <li>
-<p>Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus,</p>
+<p>Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Setup event-source for webhook as follows,</p>
+<p>Setup event-source for webhook as follows.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </code></pre></div>
 
@@ -1323,7 +1323,7 @@
 <p>The above event-source contains a single event configuration that runs an HTTP server on port <code>12000</code> with endpoint <code>example</code>.</p>
 <p>After running the above command, the event-source controller will create a pod and service.</p>
 <ol>
-<li>Create webhook sensor,<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+<li>Create webhook sensor.<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 </code></pre></div>
 
 </li>
@@ -1337,7 +1337,7 @@
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the http://localhost:12000/example</p>
+<p>Use either Curl or Postman to send a post request to the http://localhost:12000/example.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 

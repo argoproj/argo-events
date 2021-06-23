@@ -1410,8 +1410,7 @@
 <p>A trigger source is the source of trigger resource. It can be either external source such
 as <code>Git</code>, <code>S3</code>, <code>K8s Configmap</code>, <code>File</code>, any valid <code>URL</code> that hosts the resource or an internal resource
 which is defined in the sensor object itself like <code>Inline</code> or <code>Resource</code>. </p>
-<p>In the previous sections, you have been dealing with the <code>Resource</code> trigger source. In this tutorial, we
-will explore other trigger sources.</p>
+<p>In the previous sections, you have been dealing with the <code>Resource</code> trigger source. In this tutorial, we will explore other trigger sources.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ol>
 <li>The <code>Webhook</code> event-source is already set up.</li>
@@ -1424,10 +1423,10 @@ will explore other trigger sources.</p>
 <p>In order to fetch data from git, you need to set up the private SSH key in sensor.</p>
 </li>
 <li>
-<p>If you don't have ssh keys available, create them following this <a href="https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent">guide</a></p>
+<p>If you don't have ssh keys available, create them following this <a href="https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent">guide</a>.</p>
 </li>
 <li>
-<p>Create a K8s secret that holds the SSH keys</p>
+<p>Create a K8s secret that holds the SSH keys.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/&lt;YOUR_SSH_KEY_FILE_NAME&gt;
 </code></pre></div>
 
@@ -1439,14 +1438,13 @@ will explore other trigger sources.</p>
 
 </li>
 <li>
-<p>Create a sensor with the git trigger source and refer it to the <code>hello world</code> workflow stored
-   on the Argo Git project</p>
+<p>Create a sensor with the git trigger source and refer it to the <code>hello world</code> workflow stored on the Argo Git project.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-git.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code>.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1464,8 +1462,7 @@ will explore other trigger sources.</p>
 <ol>
 <li>
 <p>Create a K8s secret called <code>artifacts-minio</code> that holds your minio access key and secret key.
-   The access key must be stored under <code>accesskey</code> key and secret key must be stored under
-   <code>secretkey</code>.</p>
+   The access key must be stored under <code>accesskey</code> key and secret key must be stored under <code>secretkey</code>.</p>
 </li>
 <li>
 <p>Follow steps described <a href="https://github.com/minio/minio/blob/master/docs/orchestration/kubernetes/k8s-yaml.md#minio-standalone-server-deployment">here</a> to set up the minio server.</p>
@@ -1483,7 +1480,7 @@ will explore other trigger sources.</p>
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code>.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1511,7 +1508,7 @@ will explore other trigger sources.</p>
 
 </li>
 <li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code>.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -1524,7 +1521,7 @@ will explore other trigger sources.</p>
 </li>
 </ol>
 <h2 id="file-url">File &amp; URL<a class="headerlink" href="#file-url" title="Permanent link">&para;</a></h2>
-<p>File and URL trigger sources are pretty self explanatory. The example sensors are available under <code>examples/sensors</code> folder.</p>
+<p>File and URL trigger sources are pretty self explanatory. The example sensors are available under <a href="https://github.com/argoproj/argo-events/tree/master/examples/sensors">examples/sensors</a> folder.</p>
                 
                   
                 

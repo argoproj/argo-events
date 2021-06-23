@@ -1426,14 +1426,13 @@ that are not native to AWS.</p>
 <p>Make sure to have eventbus deployed in the namespace.</p>
 </li>
 <li>
-<p>Make sure your AWS account has permissions to execute Lambda. More info on AWS permissions is available
-   <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_change-permissions.html">here</a>.</p>
+<p>Make sure your AWS account has permissions to execute Lambda. More info on AWS permissions is available <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_change-permissions.html">here</a>.</p>
 </li>
 <li>
 <p>Fetch your access and secret key for AWS account and base64 encode them.</p>
 </li>
 <li>
-<p>Create a secret called <code>aws-secret</code> as follows,</p>
+<p>Create a secret called <code>aws-secret</code> as follows.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1467,7 +1466,7 @@ that are not native to AWS.</p>
 
 </li>
 <li>
-<p>Deploy the webhook sensor with AWS Lambda trigger</p>
+<p>Deploy the webhook sensor with AWS Lambda trigger.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-lambda-trigger.yaml
 </code></pre></div>
 
@@ -1514,8 +1513,7 @@ is invoked when sensor receives an event from the eventbus. In order to construc
 </code></pre></div>
 
 <p>The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>. </p>
-<p><strong>Note</strong>: Take a look at <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">Parameterization</a> in order to understand how to extract particular key-value from
-event data.</p>
+<p><strong>Note</strong>: Take a look at <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">Parameterization</a> in order to understand how to extract particular key-value from event data.</p>
 <h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
 <p>Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
 you want to define a generic trigger template in the sensor and populate values like function name, payload values on the fly.</p>

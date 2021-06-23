@@ -1398,7 +1398,7 @@ This is specifically useful when you want to onboard a custom eventsource
 implementation.</p>
 <h2 id="contract">Contract<a class="headerlink" href="#contract" title="Permanent link">&para;</a></h2>
 <p>In order to qualify as generic eventsource, the eventsource server needs to
-implement following gRPC contract,</p>
+implement following gRPC contract.</p>
 <div class="codehilite"><pre><span></span><code>    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;proto3&quot;</span><span class="p">;</span>
 
     <span class="n">package</span> <span class="n">generic</span><span class="p">;</span>
@@ -1425,11 +1425,10 @@ implement following gRPC contract,</p>
     <span class="p">}</span>
 </code></pre></div>
 
-<p>The proto file is available
-<a href="https://github.com/argoproj/argo-events/blob/master/eventsources/sources/generic/generic.proto">here</a>.</p>
+<p>The proto file is available <a href="https://github.com/argoproj/argo-events/blob/master/eventsources/sources/generic/generic.proto">here</a>.</p>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <p><img alt="arch" src="../../assets/generic-eventsource.png" /></p>
-<p>Consider a generic eventsource,</p>
+<p>Consider a generic eventsource.</p>
 <div class="codehilite"><pre><span></span><code>    apiVersion: argoproj.io/v1alpha1
     kind: EventSource
     metadata:

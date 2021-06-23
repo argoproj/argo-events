@@ -1417,7 +1417,7 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Lets set up RabbitMQ locally,</p>
+<p>Lets set up RabbitMQ locally.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Service</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1460,7 +1460,7 @@
 <p>Make sure the RabbitMQ controller pod is up and running before proceeding further.</p>
 </li>
 <li>
-<p>Expose the RabbitMQ server to local publisher using <code>port-forward</code>,</p>
+<p>Expose the RabbitMQ server to local publisher using <code>port-forward</code>.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;rabbitmq-pod-name&gt; 5672:5672
 </code></pre></div>
 
@@ -1475,13 +1475,13 @@
 <p>Inspect the event-source pod logs to make sure it was able to subscribe to the exchange specified in the event source to consume messages.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/amqp.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Lets set up a rabbitmq publisher. If you don't have <code>pika</code> installed, run,</p>
+<p>Lets set up a rabbitmq publisher. If you don't have <code>pika</code> installed, run.</p>
 <div class="codehilite"><pre><span></span><code>python -m pip install pika --upgrade
 </code></pre></div>
 

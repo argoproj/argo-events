@@ -1421,7 +1421,7 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Deploy NSQ on local K8s cluster</p>
+<p>Deploy NSQ on local K8s cluster.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Service</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1624,13 +1624,13 @@
 
 </li>
 <li>
-<p>Expose NSQD by kubectl <code>port-forward</code>,</p>
+<p>Expose NSQD by kubectl <code>port-forward</code>.</p>
 <div class="codehilite"><pre><span></span><code> kubectl -n argo-events port-forward service/nsqd 4151:4151
 </code></pre></div>
 
 </li>
 <li>
-<p>Create topic <code>hello</code> and channel <code>my-channel</code></p>
+<p>Create topic <code>hello</code> and channel <code>my-channel</code>.</p>
 <div class="codehilite"><pre><span></span><code>curl -X POST &#39;http://localhost:4151/topic/create?topic=hello&#39;
 
 curl -X POST &#39;http://localhost:4151/channel/create?topic=hello&amp;channel=my-channel&#39;
@@ -1644,13 +1644,13 @@ curl -X POST &#39;http://localhost:4151/channel/create?topic=hello&amp;channel=m
 
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/nsq.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Publish a message on topic <code>hello</code> and channel <code>my-channel</code>,</p>
+<p>Publish a message on topic <code>hello</code> and channel <code>my-channel</code>.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;: &quot;hello&quot;}&#39; &#39;http://localhost:4151/pub?topic=hello&amp;channel=my-channel&#39;
 </code></pre></div>
 

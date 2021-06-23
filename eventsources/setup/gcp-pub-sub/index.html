@@ -1442,7 +1442,7 @@
 <p>If you use Workload Identity, you can skip this and next steps.</p>
 </li>
 <li>
-<p>Create a K8s secret called <code>gcp-credentials</code> to store the credentials file</p>
+<p>Create a K8s secret called <code>gcp-credentials</code> to store the credentials file.</p>
 <p><code>yaml
 apiVersion: v1
 data:
@@ -1463,7 +1463,7 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 <p>Inspect the event-source pod logs to make sure it was able to subscribe to the topic.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <p><code>sh
 kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml</code></p>
 </li>

@@ -1422,8 +1422,7 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Make sure to set up the Kafka cluster in Kubernetes if you don't already have one. You can refer to https://github.com/Yolean/kubernetes-kafka
-for installation instructions.</p>
+<p>Make sure to set up the Kafka cluster in Kubernetes if you don't already have one. You can refer to https://github.com/Yolean/kubernetes-kafka for installation instructions.</p>
 </li>
 <li>
 <p>Create the event source by running the following command. Make sure to update the appropriate fields.</p>
@@ -1432,13 +1431,13 @@ for installation instructions.</p>
 
 </li>
 <li>
-<p>Create the sensor by running the following command,</p>
+<p>Create the sensor by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/kafka.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Send message by using Kafka client. More info on how to send message at https://kafka.apache.org/quickstart</p>
+<p>Send message by using Kafka client. More info on how to send message at https://kafka.apache.org/quickstart.</p>
 </li>
 <li>
 <p>Once a message is published, an argo workflow will be triggered. Run <code>argo list</code> to find the workflow. </p>
