@@ -75,7 +75,13 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 		return errors.Errorf("no triggers found")
 	}
 
+	trigNames := make(map[string]bool)
+
 	for _, trigger := range triggers {
+		if _, ok := trigNames[trigger.Template.Name]; ok {
+			return fmt.Errorf("duplicate trigger name: %s", trigger.Template.Name)
+		}
+		trigNames[trigger.Template.Name] = true
 		if err := validateTriggerTemplate(trigger.Template); err != nil {
 			return err
 		}
@@ -152,10 +158,10 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 // validateK8STrigger validates a kubernetes trigger
 func validateK8STrigger(trigger *v1alpha1.StandardK8STrigger) error {
 	if trigger == nil {
-		return errors.New("k8s trigger for can't be nil")
+		return errors.New("k8s trigger can't be nil")
 	}
 	if trigger.Source == nil {
-		return errors.New("k8s trigger for does not contain an absolute action")
+		return errors.New("k8s trigger does not contain an absolute action")
 	}
 	if trigger.GroupVersionResource.Size() == 0 {
 		return errors.New("must provide group, version and resource for the resource")
@@ -179,10 +185,10 @@ func validateK8STrigger(trigger *v1alpha1.StandardK8STrigger) error {
 // validateArgoWorkflowTrigger validates an Argo workflow trigger
 func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	if trigger == nil {
-		return errors.New("k8s trigger for can't be nil")
+		return errors.New("argoWorkflow trigger can't be nil")
 	}
 	if trigger.Source == nil {
-		return errors.New("k8s trigger for does not contain an absolute action")
+		return errors.New("argoWorkflow trigger does not contain an absolute action")
 	}
 	if trigger.GroupVersionResource.Size() == 0 {
 		return errors.New("must provide group, version and resource for the resource")
@@ -205,7 +211,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 // validateHTTPTrigger validates the HTTP trigger
 func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 	if trigger == nil {
-		return errors.New("openfaas trigger for can't be nil")
+		return errors.New("HTTP trigger for can't be nil")
 	}
 	if trigger.URL == "" {
 		return errors.New("server URL is not specified")
