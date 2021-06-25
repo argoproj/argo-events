@@ -537,7 +537,7 @@ same namespace to use for pulling any of the images used by this
 PodSpec. If specified, these secrets will be passed to individual puller
 implementations for them to use. For example, in the case of docker,
 only DockerConfig type secrets are honored. More info:
-<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a>
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images\#specifying-imagepullsecrets-on-a-pod</a>
 </p>
 </td>
 </tr>
@@ -633,7 +633,7 @@ Description
 <em>(Optional)</em>
 <p>
 Name of the StorageClass required by the claim. More info:
-<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1">https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1</a>
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1">https://kubernetes.io/docs/concepts/storage/persistent-volumes\#class-1</a>
 </p>
 </td>
 </tr>
@@ -647,7 +647,7 @@ Kubernetes core/v1.PersistentVolumeAccessMode </a> </em>
 <em>(Optional)</em>
 <p>
 Available access modes such as ReadWriteOnce, ReadWriteMany
-<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes</a>
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">https://kubernetes.io/docs/concepts/storage/persistent-volumes/\#access-modes</a>
 </p>
 </td>
 </tr>
