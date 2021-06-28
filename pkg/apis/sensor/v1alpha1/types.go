@@ -46,11 +46,12 @@ type ArgoWorkflowOperation string
 
 // possible values for ArgoWorkflowOperation
 const (
-	Submit   ArgoWorkflowOperation = "submit"   // submit a workflow
-	Suspend  ArgoWorkflowOperation = "suspend"  // suspends a workflow
-	Resubmit ArgoWorkflowOperation = "resubmit" // resubmit a workflow
-	Retry    ArgoWorkflowOperation = "retry"    // retry a workflow
-	Resume   ArgoWorkflowOperation = "resume"   // resume a workflow
+	Submit    ArgoWorkflowOperation = "submit"    // submit a workflow
+	Suspend   ArgoWorkflowOperation = "suspend"   // suspends a workflow
+	Resubmit  ArgoWorkflowOperation = "resubmit"  // resubmit a workflow
+	Retry     ArgoWorkflowOperation = "retry"     // retry a workflow
+	Resume    ArgoWorkflowOperation = "resume"    // resume a workflow
+	Terminate ArgoWorkflowOperation = "terminate" // terminate a workflow
 )
 
 // Comparator refers to the comparator operator for a data filter
