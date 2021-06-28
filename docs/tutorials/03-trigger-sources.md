@@ -46,7 +46,7 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
 1. Create a K8s secret called `artifacts-minio` that holds your minio access key and secret key.
    The access key must be stored under `accesskey` key and secret key must be stored under `secretkey`.
 
-2. Follow steps described [here](https://github.com/minio/minio/blob/master/docs/orchestration/kubernetes/k8s-yaml.md#minio-standalone-server-deployment) to set up the minio server.
+2. Follow steps described [here](https://github.com/minio/minio/tree/master/docs/orchestration/kubernetes#minio-deployment-on-kubernetes) to set up the minio server.
 
 3. Make sure a service is available to expose the minio server.
 
