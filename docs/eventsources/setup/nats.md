@@ -87,7 +87,7 @@ NATS event-source specification is available [here](https://github.com/argoproj/
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nats.yaml
 
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/nats.yaml
 

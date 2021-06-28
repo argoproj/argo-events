@@ -56,11 +56,11 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
         mc mb minio/input
 
-1. Let's install event source in the `argo-events` namespace,
+1. Let's install event source in the `argo-events` namespace.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
 
-1. Let's create the sensor,
+1. Let's create the sensor.
    
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml   
 

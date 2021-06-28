@@ -11,21 +11,16 @@ to any type of event-source.
 - Make sure to configure Argo Workflow controller to listen to workflow objects
   created in `argo-events` namespace.
 - Make sure to read the concepts behind
-  [eventbus](https://argoproj.github.io/argo-events/concepts/eventbus/),
-  [sensor](https://argoproj.github.io/argo-events/concepts/sensor/),
+  [eventbus](https://argoproj.github.io/argo-events/concepts/eventbus/).
+  [sensor](https://argoproj.github.io/argo-events/concepts/sensor/).
   [event source](https://argoproj.github.io/argo-events/concepts/event_source/).
-- Follow the
-  [instruction](https://github.com/argoproj/argo-events/tree/master/examples) to
-  create a Service Account `operate-workflow-sa` with proper privileges, and
-  make sure the Service Account used by Workflows (here we use `default` in the
-  turorials for demonstration purpose) has proper RBAC settings.
+- Follow the [instruction](https://github.com/argoproj/argo-events/tree/master/examples) to create a Service Account `operate-workflow-sa` with proper privileges, and make sure the Service Account used by Workflows (here we use `default` in the turorials for demonstration purpose) has proper RBAC settings.
 
 ## Get Started
 
-We are going to set up a sensor and event-source for webhook. The goal is to
-trigger an Argo workflow upon a HTTP Post request.
+We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.
 
-- Let' set up the eventbus,
+- Let' set up the eventbus.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
@@ -37,17 +32,14 @@ trigger an Argo workflow upon a HTTP Post request.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 
-If the commands are executed successfully, the eventbus, event-source and sensor
-pods will get created. You will also notice that a service is created for the
-event-source.
+If the commands are executed successfully, the eventbus, event-source and sensor pods will get created. You will also notice that a service is created for the event-source.
 
-- Expose the event-source pod via Ingress, OpenShift Route or port forward to
-  consume requests over HTTP.
+- Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.
 
         kubectl -n argo-events port-forward <event-source-pod-name> 12000:12000
 
 - Use either Curl or Postman to send a post request to the
-  `http://localhost:12000/example`
+`http://localhost:12000/example`.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -93,19 +85,19 @@ pass it to the workflow as arguments.
 
 If you don't see the event-source and sensor pod in `argo-events` namespace,
 
-1. Inspect the event-source
+1. Inspect the event-source.
 
    kubectl -n argo-events get eventsource event-source-object-name -o yaml
 
-   Inspect the sensor,
+2. Inspect the sensor.
 
    kubectl -n argo-events get sensor sensor-object-name -o yaml
 
    and look for any errors within the `Status`.
 
-2. Make sure the correct Role and RoleBindings are applied to the service
+3. Make sure the correct Role and RoleBindings are applied to the service
    account and there are no errors in both event-source and sensor controller.
-3. Check the logs of event-source and sensor controller. Make sure the
+4. Check the logs of event-source and sensor controller. Make sure the
    controllers have processed the event-source and sensor objects and there are
    no errors.
-4. Raise an issue on GitHub or post a question on `argo-events` slack channel.
+5. Raise an issue on GitHub or post a question on `argo-events` slack channel.

@@ -19,12 +19,11 @@ that are not native to AWS.
 
 1. Make sure to have eventbus deployed in the namespace.
 
-1. Make sure your AWS account has permissions to execute Lambda. More info on AWS permissions is available
-   [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_change-permissions.html).
+1. Make sure your AWS account has permissions to execute Lambda. More info on AWS permissions is available [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_change-permissions.html).
 
 1. Fetch your access and secret key for AWS account and base64 encode them.
 
-1. Create a secret called `aws-secret` as follows,
+1. Create a secret called `aws-secret` as follows.
 
         apiVersion: v1
         kind: Secret
@@ -50,7 +49,7 @@ that are not native to AWS.
 
         kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
 
-1. Deploy the webhook sensor with AWS Lambda trigger
+1. Deploy the webhook sensor with AWS Lambda trigger.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-lambda-trigger.yaml
 
@@ -98,8 +97,7 @@ The `payload` declared above will generate a request payload like below,
 
 The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of `src` and `dest` under `payload`. 
 
-**Note**: Take a look at [Parameterization](https://argoproj.github.io/argo-events/tutorials/02-parameterization/) in order to understand how to extract particular key-value from
-event data.
+**Note**: Take a look at [Parameterization](https://argoproj.github.io/argo-events/tutorials/02-parameterization/) in order to understand how to extract particular key-value from event data.
 
 ## Parameterization
 Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when

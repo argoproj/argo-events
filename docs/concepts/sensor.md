@@ -9,4 +9,4 @@ A dependency is an event the sensor is waiting to happen.
 Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md).
 
 ## Examples
-Examples are located under `examples/sensors`.
+Examples are located under [examples/sensors](https://github.com/argoproj/argo-events/tree/master/examples/sensors).

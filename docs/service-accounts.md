@@ -10,11 +10,11 @@ resource being watched.
 
 For example, if you want to watch actions on `Deployment` objects, you need to:
 
-1.  Create a Service Account
+1.  Create a Service Account.
 
         kubectl -n your-namespace create sa my-sa
 
-2.  Grant RBAC privileges to it
+2.  Grant RBAC privileges to it.
 
         kubectl -n your-namespace create role deployments-watcher --verb=list,watch --resource=deployments.apps
 

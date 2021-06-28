@@ -38,7 +38,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Setup
 
-1. Lets set up RabbitMQ locally,
+1. Lets set up RabbitMQ locally.
 
         apiVersion: v1
         kind: Service
@@ -78,7 +78,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 2. Make sure the RabbitMQ controller pod is up and running before proceeding further.
 
-3. Expose the RabbitMQ server to local publisher using `port-forward`,
+3. Expose the RabbitMQ server to local publisher using `port-forward`.
 
         kubectl -n argo-events port-forward <rabbitmq-pod-name> 5672:5672
 
@@ -88,11 +88,11 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 6. Inspect the event-source pod logs to make sure it was able to subscribe to the exchange specified in the event source to consume messages.
 
-7. Create the sensor by running the following command,
+7. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/amqp.yaml
 
-8. Lets set up a rabbitmq publisher. If you don't have `pika` installed, run,
+8. Lets set up a rabbitmq publisher. If you don't have `pika` installed, run.
 
         python -m pip install pika --upgrade
 
