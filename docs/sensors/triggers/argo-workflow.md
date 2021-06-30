@@ -66,6 +66,6 @@ To make use of Argo CLI operations, The sensor provides the `argoWorkflow` trigg
           group: argoproj.io
           version: v1alpha1
           resource: workflows
-          operation: submit  # submit, resubmit, resume, retry or suspend 
+          operation: submit  # submit, resubmit, resume, retry, suspend or terminate
 
 Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/special-workflow-trigger.yaml).

@@ -194,7 +194,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 		return errors.New("must provide group, version and resource for the resource")
 	}
 	switch trigger.Operation {
-	case v1alpha1.Submit, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit:
+	case v1alpha1.Submit, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit, v1alpha1.Terminate:
 	default:
 		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
