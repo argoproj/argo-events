@@ -90,7 +90,7 @@ Make sure there are no errors in any of the event-sources.
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-02.yaml
 
     Send a HTTP request and perform a file drop on Minio bucket as done above.
-    You should following output,
+    You should get the following output.
 
 
          _______________________________
