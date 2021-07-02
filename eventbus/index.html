@@ -1599,7 +1599,12 @@ for the full spec of <code>native</code>.</p>
 <h4 id="more-about-native-nats-eventbus">More About Native NATS EventBus<a class="headerlink" href="#more-about-native-nats-eventbus" title="Permanent link">&para;</a></h4>
 <ul>
 <li>
-<p>Messages limit is 1,000,000.</p>
+<p>Messages limit per channel defaults to 1,000,000. It could be customized by
+  setting <code>spec.nats.native.maxMsgs</code>, <code>0</code> means unlimited.</p>
+</li>
+<li>
+<p>Message bytes per channel defaults to <code>1GB</code>, setting
+  <code>spec.nats.native.maxBytes</code> to customize it, <code>"0"</code> means unlimited.</p>
 </li>
 <li>
 <p>Max age of messages is 72 hours, which means messages over 72 hours will be
