@@ -10,7 +10,7 @@ RUN apk update && apk upgrade && \
 
 ENV ARGO_VERSION=v3.1.1
 
-RUN wget -q https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-${ARCH}.gz
+RUN wget -q https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-${ARCH}.gz
 RUN gunzip -f argo-linux-${ARCH}.gz
 RUN chmod +x argo-linux-${ARCH}
 RUN mv ./argo-linux-${ARCH} /usr/local/bin/argo
