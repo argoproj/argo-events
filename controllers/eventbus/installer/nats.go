@@ -445,6 +445,14 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
+	maxMsgs := uint64(1000000)
+	if i.eventBus.Spec.NATS.Native.MaxMsgs != nil {
+		maxMsgs = *i.eventBus.Spec.NATS.Native.MaxMsgs
+	}
+	maxBytes := "1GB"
+	if i.eventBus.Spec.NATS.Native.MaxBytes != nil {
+		maxBytes = *i.eventBus.Spec.NATS.Native.MaxBytes
+	}
 	peers := []string{}
 	routes := []string{}
 	for j := 0; j < replicas; j++ {
@@ -470,8 +478,10 @@ streaming {
   }
   store_limits {
     max_age: %s
+	max_msgs: %v
+	max_bytes: %s
   }
-}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), strings.Join(routes, ","), clusterID, strings.Join(peers, ","), maxAge)
+}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), strings.Join(routes, ","), clusterID, strings.Join(peers, ","), maxAge, maxMsgs, maxBytes)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,

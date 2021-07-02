@@ -125,6 +125,10 @@ type NativeStrategy struct {
 	// More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,16,opt,name=affinity"`
+	// Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000
+	MaxMsgs *uint64 `json:"maxMsgs,omitempty" protobuf:"bytes,17,opt,name=maxMsgs"`
+	// Total size of messages per channel, 0 means unlimited. Defaults to 1GB
+	MaxBytes *string `json:"maxBytes,omitempty" protobuf:"bytes,18,opt,name=maxBytes"`
 }
 
 // ContainerTemplate defines customized spec for a container
