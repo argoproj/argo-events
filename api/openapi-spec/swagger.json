@@ -436,6 +436,15 @@
           "description": "Max Age of existing messages, i.e. \"72h\", “4h35m”",
           "type": "string"
         },
+        "maxBytes": {
+          "description": "Total size of messages per channel, 0 means unlimited. Defaults to 1GB",
+          "type": "string"
+        },
+        "maxMsgs": {
+          "description": "Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000",
+          "type": "integer",
+          "format": "int64"
+        },
         "metadata": {
           "description": "Metadata sets the pods's metadata, i.e. annotations and labels",
           "$ref": "#/definitions/io.argoproj.common.Metadata"

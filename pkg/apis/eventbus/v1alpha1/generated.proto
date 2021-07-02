@@ -182,6 +182,12 @@ message NativeStrategy {
   // More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   // +optional
   optional k8s.io.api.core.v1.Affinity affinity = 16;
+
+  // Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000
+  optional uint64 maxMsgs = 17;
+
+  // Total size of messages per channel, 0 means unlimited. Defaults to 1GB
+  optional string maxBytes = 18;
 }
 
 // PersistenceStrategy defines the strategy of persistence
