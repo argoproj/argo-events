@@ -288,6 +288,16 @@ func (in *NativeStrategy) DeepCopyInto(out *NativeStrategy) {
 		*out = new(v1.Affinity)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.MaxMsgs != nil {
+		in, out := &in.MaxMsgs, &out.MaxMsgs
+		*out = new(uint64)
+		**out = **in
+	}
+	if in.MaxBytes != nil {
+		in, out := &in.MaxBytes, &out.MaxBytes
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 

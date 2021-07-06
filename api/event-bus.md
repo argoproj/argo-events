@@ -599,6 +599,27 @@ The pod’s scheduling constraints More info:
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>maxMsgs</code></br> <em> uint64 </em>
+</td>
+<td>
+<p>
+Maximum number of messages per channel, 0 means unlimited. Defaults to
+1000000
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxBytes</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Total size of messages per channel, 0 means unlimited. Defaults to 1GB
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.PersistenceStrategy">

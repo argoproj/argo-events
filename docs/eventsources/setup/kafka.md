@@ -29,18 +29,17 @@ Kafka event-source specification is available [here](https://github.com/argoproj
 
 ## Setup
 
-1. Make sure to set up the Kafka cluster in Kubernetes if you don't already have one. You can refer to https://github.com/Yolean/kubernetes-kafka
-for installation instructions.
+1. Make sure to set up the Kafka cluster in Kubernetes if you don't already have one. You can refer to https://github.com/Yolean/kubernetes-kafka for installation instructions.
 
 1. Create the event source by running the following command. Make sure to update the appropriate fields.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/kafka.yaml
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/kafka.yaml
 
-1. Send message by using Kafka client. More info on how to send message at https://kafka.apache.org/quickstart
+1. Send message by using Kafka client. More info on how to send message at https://kafka.apache.org/quickstart.
 
 1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
 

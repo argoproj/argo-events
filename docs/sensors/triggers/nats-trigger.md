@@ -13,7 +13,7 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
 1. Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/). 
    Do not create the Minio sensor, we are going to create it in next step.
    
-1. Lets create the sensor,
+1. Lets create the sensor.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -54,7 +54,7 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
             "bucket": "input" // name of the bucket
         }
 
-1. If you are running NATS on local K8s cluster, make sure to `port-forward` to pod,
+1. If you are running NATS on local K8s cluster, make sure to `port-forward` to pod.
 
         kubectl -n argo-events port-forward <nats-pod-name> 4222:4222
         
@@ -62,7 +62,6 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
    
            go run main.go -s localhost minio-events'
 
-1. Drop a file called `hello.txt` onto the bucket `input` and you will receive the message on NATS subscriber
-   as follows,
+1. Drop a file called `hello.txt` onto the bucket `input` and you will receive the message on NATS subscriber as follows.
    
         [#1] Received on [minio-events]: '{"bucket":"input","fileName":"hello.txt"}'

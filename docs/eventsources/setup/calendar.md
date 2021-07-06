@@ -27,11 +27,11 @@ Calendar event-source specification is available [here](https://github.com/argop
 
 ## Setup
 
-1. Install the event source in the `argo-events` namespace,
+1. Install the event source in the `argo-events` namespace.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/calendar.yaml
 
-1. The event-source will generate events at every 10 seconds. Let's create the sensor,
+1. The event-source will generate events at every 10 seconds. Let's create the sensor.
     
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/calendar.yaml   
 

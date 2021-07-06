@@ -23,7 +23,7 @@ want to trigger an Argo workflow if the sensor receives an event from the
 `Minio` event-source.
 
 1.  Create the webhook event-source and event-source. The event-source listens
-    to HTTP requests on port `12000`
+    to HTTP requests on port `12000`.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/webhook-event-source.yaml
 
@@ -41,7 +41,7 @@ Make sure there are no errors in any of the event-sources.
 
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-01.yaml
 
-4.  Send a HTTP request to Webhook event-source,
+4.  Send a HTTP request to Webhook event-source.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -90,7 +90,7 @@ Make sure there are no errors in any of the event-sources.
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-02.yaml
 
     Send a HTTP request and perform a file drop on Minio bucket as done above.
-    You should following output,
+    You should get the following output.
 
 
          _______________________________

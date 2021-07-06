@@ -35,11 +35,11 @@ Redis event-source specification is available [here](https://github.com/argoproj
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/redis.yaml
 
-1. Create the sensor by running the following command,
+1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/redis.yaml
 
-1. Log into redis pod using `kubectl`,
+1. Log into redis pod using `kubectl`.
 
         kubectl -n argo-events exec -it <redis-pod-name> -c <redis-container-name> -- /bin/bash
 
