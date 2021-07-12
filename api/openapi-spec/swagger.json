@@ -3708,7 +3708,8 @@
                               "type": "string"
                             }
                           }
-                        }
+                        },
+                        "x-kubernetes-map-type": "atomic"
                       },
                       "namespaces": {
                         "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -3783,7 +3784,8 @@
                           "type": "string"
                         }
                       }
-                    }
+                    },
+                    "x-kubernetes-map-type": "atomic"
                   },
                   "namespaces": {
                     "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -3865,7 +3867,8 @@
                               "type": "string"
                             }
                           }
-                        }
+                        },
+                        "x-kubernetes-map-type": "atomic"
                       },
                       "namespaces": {
                         "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -3940,7 +3943,8 @@
                           "type": "string"
                         }
                       }
-                    }
+                    },
+                    "x-kubernetes-map-type": "atomic"
                   },
                   "namespaces": {
                     "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -4966,7 +4970,7 @@
           "format": "int64"
         },
         "fsGroupChangePolicy": {
-          "description": "fsGroupChangePolicy defines behavior of changing ownership and permission of the volume before being exposed inside Pod. This field will only apply to volume types which support fsGroup based ownership(and permissions). It will have no effect on ephemeral volume types such as: secret, configmaps and emptydir. Valid values are \"OnRootMismatch\" and \"Always\". If not specified defaults to \"Always\".",
+          "description": "fsGroupChangePolicy defines behavior of changing ownership and permission of the volume before being exposed inside Pod. This field will only apply to volume types which support fsGroup based ownership(and permissions). It will have no effect on ephemeral volume types such as: secret, configmaps and emptydir. Valid values are \"OnRootMismatch\" and \"Always\". If not specified, \"Always\" is used.",
           "type": "string"
         },
         "runAsGroup": {
@@ -5139,7 +5143,7 @@
           "type": "string"
         },
         "nodePort": {
-          "description": "The port on each node on which this service is exposed when type=NodePort or LoadBalancer. Usually assigned by the system. If specified, it will be allocated to the service if unused or else creation of the service will fail. Default is to auto-allocate a port if the ServiceType of this Service requires one. More info: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+          "description": "The port on each node on which this service is exposed when type is NodePort or LoadBalancer.  Usually assigned by the system. If a value is specified, in-range, and not in use it will be used, otherwise the operation will fail.  If not specified, a port will be allocated if this Service requires one.  If this field is specified when creating a Service which does not need it, creation will fail. This field will be wiped when updating a Service to no longer need it (e.g. changing type from NodePort to ClusterIP). More info: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
           "type": "integer",
           "format": "int32"
         },
@@ -5782,7 +5786,8 @@
                             "type": "string"
                           }
                         }
-                      }
+                      },
+                      "x-kubernetes-map-type": "atomic"
                     },
                     "storageClassName": {
                       "description": "Name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
@@ -6122,9 +6127,6 @@
         "projected": {
           "description": "Represents a projected volume source",
           "type": "object",
-          "required": [
-            "sources"
-          ],
           "properties": {
             "defaultMode": {
               "description": "Mode bits used to set permissions on created files by default. Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON requires decimal values for mode bits. Directories within the path are not affected by this setting. This might be in conflict with other options that affect the file mode, like fsGroup, and the result can be other mode bits set.",

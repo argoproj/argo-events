@@ -133,6 +133,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL for rabbitmq service",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -140,6 +141,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 					"exchangeName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ExchangeName is the exchange name For more information, visit https://www.rabbitmq.com/tutorials/amqp-concepts.html",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -147,6 +149,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 					"exchangeType": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ExchangeType is rabbitmq exchange type",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -154,6 +157,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 					"routingKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Routing key for bindings",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -185,8 +189,9 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -350,6 +355,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 					"fqdn": {
 						SchemaProps: spec.SchemaProps{
 							Description: "FQDN of the EventHubs namespace you created More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -369,6 +375,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 					"hubName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Event Hub path/name",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -381,8 +388,9 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -407,6 +415,7 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 					"schedule": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -414,6 +423,7 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 					"interval": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -424,8 +434,9 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -453,8 +464,9 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -537,6 +549,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 					"broker": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Broker URI to connect to.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -544,6 +557,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 					"channelKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ChannelKey refers to the channel key",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -551,6 +565,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 					"channelName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ChannelName refers to the channel name",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -594,8 +609,9 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -659,17 +675,20 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSource(ref common.ReferenceCallba
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceSpec"),
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceStatus"),
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceStatus"),
 						},
 					},
 				},
@@ -704,7 +723,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceList(ref common.ReferenceCa
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
 						},
 					},
 					"items": {
@@ -713,7 +733,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceList(ref common.ReferenceCa
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSource"),
 									},
 								},
 							},
@@ -769,7 +790,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.S3Artifact"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/common.S3Artifact"),
 									},
 								},
 							},
@@ -783,7 +805,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource"),
 									},
 								},
 							},
@@ -797,7 +820,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource"),
 									},
 								},
 							},
@@ -811,7 +835,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource"),
 									},
 								},
 							},
@@ -825,7 +850,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 									},
 								},
 							},
@@ -839,7 +865,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource"),
 									},
 								},
 							},
@@ -853,7 +880,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource"),
 									},
 								},
 							},
@@ -867,7 +895,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource"),
 									},
 								},
 							},
@@ -881,7 +910,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource"),
 									},
 								},
 							},
@@ -895,7 +925,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource"),
 									},
 								},
 							},
@@ -909,7 +940,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource"),
 									},
 								},
 							},
@@ -923,7 +955,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource"),
 									},
 								},
 							},
@@ -937,7 +970,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource"),
 									},
 								},
 							},
@@ -951,7 +985,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource"),
 									},
 								},
 							},
@@ -965,7 +1000,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource"),
 									},
 								},
 							},
@@ -979,7 +1015,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource"),
 									},
 								},
 							},
@@ -993,7 +1030,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource"),
 									},
 								},
 							},
@@ -1007,7 +1045,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource"),
 									},
 								},
 							},
@@ -1021,7 +1060,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource"),
 									},
 								},
 							},
@@ -1035,7 +1075,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource"),
 									},
 								},
 							},
@@ -1049,7 +1090,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource"),
 									},
 								},
 							},
@@ -1063,7 +1105,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource"),
 									},
 								},
 							},
@@ -1077,7 +1120,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource"),
 									},
 								},
 							},
@@ -1091,7 +1135,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource"),
 									},
 								},
 							},
@@ -1132,7 +1177,8 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceStatus(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
 									},
 								},
 							},
@@ -1156,6 +1202,7 @@ func schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref common.ReferenceCa
 					"eventType": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1163,6 +1210,7 @@ func schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref common.ReferenceCa
 					"watchPathConfig": {
 						SchemaProps: spec.SchemaProps{
 							Description: "WatchPathConfig contains configuration about the file path to watch",
+							Default:     map[string]interface{}{},
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig"),
 						},
 					},
@@ -1181,8 +1229,9 @@ func schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1207,6 +1256,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref common.Referenc
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL of the gRPC server that implements the event source.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1214,6 +1264,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref common.Referenc
 					"config": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Config is the event source configuration",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1240,8 +1291,9 @@ func schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref common.Referenc
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1272,6 +1324,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 					"id": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Id is the webhook's id Deprecated: This is not used at all, will be removed in v1.6",
+							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
@@ -1285,6 +1338,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 					"owner": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated: use Repositories instead. Will be unsupported in v 1.6",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1292,6 +1346,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 					"repository": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeprecatedRepository refers to GitHub repo name i.e. argo-events Deprecated: use Repositories instead. Will be unsupported in v 1.6",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1302,8 +1357,9 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1371,8 +1427,9 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1385,7 +1442,8 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories"),
 									},
 								},
 							},
@@ -1416,6 +1474,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					"projectID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ProjectID is the id of project for which integration needs to setup",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1427,8 +1486,9 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1450,6 +1510,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					"gitlabBaseURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "GitlabBaseURL is the base URL for API requests to a custom endpoint",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1469,8 +1530,9 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1495,6 +1557,7 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 					"directory": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Directory to watch for events",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1516,6 +1579,7 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of file operations to watch",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1533,8 +1597,9 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1594,8 +1659,9 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1619,6 +1685,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 					"groupName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The name for the consumer group to use",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1633,6 +1700,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaConsumerGroup(ref common.Referenc
 					"rebalanceStrategy": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1654,6 +1722,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL to kafka cluster, multiple URLs separated by comma",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1661,6 +1730,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					"partition": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Partition name",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1668,6 +1738,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					"topic": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Topic name",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1699,8 +1770,9 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1722,6 +1794,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					"version": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1751,6 +1824,7 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL to connect to broker",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1758,6 +1832,7 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 					"topic": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Topic name",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1765,6 +1840,7 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 					"clientId": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ClientID is the id of the client",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1796,8 +1872,9 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1861,6 +1938,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL to connect to NATS cluster",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1868,6 +1946,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 					"subject": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Subject holds the name of the subject onto which messages are published",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1899,8 +1978,9 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1931,6 +2011,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 					"hostAddress": {
 						SchemaProps: spec.SchemaProps{
 							Description: "HostAddress is the address of the host for NSQ lookup",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1938,6 +2019,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 					"topic": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Topic to subscribe to.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1945,6 +2027,7 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 					"channel": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Channel used for subscription",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1976,8 +2059,9 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2012,8 +2096,9 @@ func schema_pkg_apis_eventsource_v1alpha1_OwnedRepositories(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2035,6 +2120,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					"projectID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ProjectID is GCP project ID for the subscription. Required if you run Argo Events outside of GKE/GCE. (otherwise, the default value is its project)",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2042,6 +2128,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					"topicProjectID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TopicProjectID is GCP project ID for the topic. By default, it is same as ProjectID.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2049,6 +2136,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					"topic": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Topic to which the subscription should belongs. Required if you want the eventsource to create a new subscription. If you specify this field along with an existing subscription, it will be verified whether it actually belongs to the specified topic.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2056,6 +2144,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					"subscriptionID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "SubscriptionID is ID of subscription. Required if you use existing subscription. The default value will be auto generated hash based on this eventsource setting, so the subscription might be recreated every time you update the setting, which has a possibility of event loss.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2083,6 +2172,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 					"credentialsFile": {
 						SchemaProps: spec.SchemaProps{
 							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated: will be removed in v1.5, use CredentialSecret instead",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2095,8 +2185,9 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2125,8 +2216,9 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2142,6 +2234,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Configure the service URL for the Pulsar service.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2193,8 +2286,9 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2219,6 +2313,7 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 					"hostAddress": {
 						SchemaProps: spec.SchemaProps{
 							Description: "HostAddress refers to the address of the Redis host/server",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2249,8 +2344,9 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2270,8 +2366,9 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2296,6 +2393,7 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref common.Referen
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Namespace where resource is deployed",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2308,20 +2406,23 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref common.Referen
 					},
 					"group": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"version": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"resource": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"eventTypes": {
@@ -2331,8 +2432,9 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref common.Referen
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2346,8 +2448,9 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref common.Referen
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2383,7 +2486,8 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector"),
 									},
 								},
 							},
@@ -2396,7 +2500,8 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector"),
 									},
 								},
 							},
@@ -2405,6 +2510,7 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 					"createdBy": {
 						SchemaProps: spec.SchemaProps{
 							Description: "If resource is created before the specified time then the event is treated as valid.",
+							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
@@ -2439,6 +2545,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 					"topicArn": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TopicArn",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2458,6 +2565,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 					"region": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Region is AWS region",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2477,8 +2585,9 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2522,6 +2631,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 					"region": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Region is AWS region",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2529,6 +2639,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 					"queue": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Queue is AWS SQS queue to listen to for messages",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2536,6 +2647,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 					"waitTimeSeconds": {
 						SchemaProps: spec.SchemaProps{
 							Description: "WaitTimeSeconds is The duration (in seconds) for which the call waits for a message to arrive in the queue before returning.",
+							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
@@ -2569,8 +2681,9 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2595,6 +2708,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Selector(ref common.ReferenceCallback)
 					"key": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Key name",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2609,6 +2723,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Selector(ref common.ReferenceCallback)
 					"value": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Value",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2645,7 +2760,8 @@ func schema_pkg_apis_eventsource_v1alpha1_Service(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.ServicePort"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.ServicePort"),
 									},
 								},
 							},
@@ -2699,8 +2815,9 @@ func schema_pkg_apis_eventsource_v1alpha1_SlackEventSource(ref common.ReferenceC
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2733,8 +2850,9 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2749,6 +2867,7 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 					"topicArn": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TopicArn",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2756,6 +2875,7 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 					"bucket": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name of the bucket to register notifications for.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2776,6 +2896,7 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 					"apiURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "APIURL is the url of the storagegrid api.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2788,8 +2909,9 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridEventSource(ref common.Refe
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2813,14 +2935,16 @@ func schema_pkg_apis_eventsource_v1alpha1_StorageGridFilter(ref common.Reference
 				Properties: map[string]spec.Schema{
 					"prefix": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"suffix": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 				},
@@ -2863,8 +2987,9 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2878,8 +3003,9 @@ func schema_pkg_apis_eventsource_v1alpha1_StripeEventSource(ref common.Reference
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2932,7 +3058,8 @@ func schema_pkg_apis_eventsource_v1alpha1_Template(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.Volume"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.Volume"),
 									},
 								},
 							},
@@ -2957,7 +3084,8 @@ func schema_pkg_apis_eventsource_v1alpha1_Template(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.Toleration"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.Toleration"),
 									},
 								},
 							},
@@ -2971,8 +3099,9 @@ func schema_pkg_apis_eventsource_v1alpha1_Template(ref common.ReferenceCallback)
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2991,7 +3120,8 @@ func schema_pkg_apis_eventsource_v1alpha1_Template(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.LocalObjectReference"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.LocalObjectReference"),
 									},
 								},
 							},
@@ -3028,6 +3158,7 @@ func schema_pkg_apis_eventsource_v1alpha1_WatchPathConfig(ref common.ReferenceCa
 					"directory": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Directory to watch for events",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3063,6 +3194,7 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 					"endpoint": {
 						SchemaProps: spec.SchemaProps{
 							Description: "REST API endpoint",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3070,6 +3202,7 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 					"method": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3077,6 +3210,7 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 					"port": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Port on which HTTP server is listening for incoming events.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3084,6 +3218,7 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL is the url of the server.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3108,8 +3243,9 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},

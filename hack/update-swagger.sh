@@ -20,11 +20,10 @@ if [ "`command -v swagger`" = "" ]; then
   go install -mod=vendor ./vendor/github.com/go-swagger/go-swagger/cmd/swagger
 fi
 
-curl -Ls https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.19/api/openapi-spec/swagger.json -o ${k8s_swagger}
+curl -Ls https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.20/api/openapi-spec/swagger.json -o ${k8s_swagger}
 
 go run ./hack/gen-openapi-spec/main.go ${VERSION} ${k8s_swagger} ${kubeified_swagger}
 
 swagger flatten --with-flatten minimal ${kubeified_swagger} -o ${output}
 
 swagger validate ${output}
-
