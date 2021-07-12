@@ -18,7 +18,6 @@ func NewEventBusControllerCommand() *cobra.Command {
 		Short: "Start an EventBus controller",
 		Run: func(cmd *cobra.Command, args []string) {
 			eventbuscmd.Start(namespaced, managedNamespace)
-
 		},
 	}
 	command.Flags().BoolVar(&namespaced, "namespaced", false, "Whether to run in namespaced scope, defaults to false.")

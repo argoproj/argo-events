@@ -81,6 +81,7 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 					"functionName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "FunctionName refers to the name of the function to invoke.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -100,6 +101,7 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 					"region": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Region is AWS region",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -111,7 +113,8 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -124,7 +127,8 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -173,7 +177,8 @@ func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCal
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -181,20 +186,23 @@ func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCal
 					},
 					"group": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"version": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"resource": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 				},
@@ -274,6 +282,7 @@ func schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref common.ReferenceC
 					"fqdn": {
 						SchemaProps: spec.SchemaProps{
 							Description: "FQDN refers to the namespace dns of Azure Event Hubs to be used i.e. <namespace>.servicebus.windows.net",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -281,6 +290,7 @@ func schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref common.ReferenceC
 					"hubName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "HubName refers to the Azure Event Hub to send events to",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -304,7 +314,8 @@ func schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref common.ReferenceC
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -317,7 +328,8 @@ func schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref common.ReferenceC
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -342,6 +354,7 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 					"serverURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ServerURL is the url of the gRPC server that executes custom trigger",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -349,6 +362,7 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 					"secure": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Secure refers to type of the connection between sensor to custom trigger gRPC",
+							Default:     false,
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
@@ -374,8 +388,9 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -388,7 +403,8 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -401,7 +417,8 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -433,6 +450,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					"path": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -440,6 +458,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type contains the JSON type of the data",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -451,8 +470,9 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -489,6 +509,7 @@ func schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref common.ReferenceCallbac
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name of the group",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -500,8 +521,9 @@ func schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref common.ReferenceCallbac
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -551,6 +573,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"id": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ID of the event; must be non-empty and unique within the scope of the producer.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -558,6 +581,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"source": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Source - A URI describing the event producer.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -565,6 +589,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"specversion": {
 						SchemaProps: spec.SchemaProps{
 							Description: "SpecVersion - The version of the CloudEvents specification used by the event.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -572,6 +597,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type - The type of the occurrence which has happened.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -579,6 +605,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"datacontenttype": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DataContentType - A MIME (RFC2046) string describing the media type of `data`.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -586,6 +613,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"subject": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Subject - The subject of the event in the context of the event producer",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -593,6 +621,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"time": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Time - A Timestamp when the event happened.",
+							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
@@ -615,6 +644,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name is a unique name of this dependency",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -622,6 +652,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					"eventSourceName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "EventSourceName is the name of EventSource that Sensor depends on",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -629,6 +660,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					"eventName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "EventName is the name of the event",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -674,7 +706,8 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter"),
 									},
 								},
 							},
@@ -687,7 +720,8 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ExprFilter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ExprFilter"),
 									},
 								},
 							},
@@ -710,6 +744,7 @@ func schema_pkg_apis_sensor_v1alpha1_ExprFilter(ref common.ReferenceCallback) co
 					"expr": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Expr refers to the expression that determines the outcome of the filter.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -721,7 +756,8 @@ func schema_pkg_apis_sensor_v1alpha1_ExprFilter(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PayloadField"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PayloadField"),
 									},
 								},
 							},
@@ -765,6 +801,7 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Git URL",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -772,6 +809,7 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 					"cloneDirectory": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any specific Git service providers. Hence we don't use any specific git provider client.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -791,6 +829,7 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 					"filePath": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Path to file that contains trigger resource definition",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -873,6 +912,7 @@ func schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref common.ReferenceCallbac
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name of the remote to fetch from.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -884,8 +924,9 @@ func schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref common.ReferenceCallbac
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -908,6 +949,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL refers to the URL to send HTTP request to.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -918,7 +960,8 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -944,7 +987,8 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -971,8 +1015,9 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1015,8 +1060,9 @@ func schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref common.ReferenceCallb
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1031,6 +1077,7 @@ func schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref common.ReferenceCallb
 					"errorOnBackoffTimeout": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
+							Default:     false,
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
@@ -1054,6 +1101,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL of the Kafka broker, multiple URLs separated by comma.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1061,6 +1109,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					"topic": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name of the topic. More info at https://kafka.apache.org/documentation/#intro_topics",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1068,6 +1117,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					"partition": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Partition to write data to.",
+							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -1079,7 +1129,8 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1119,7 +1170,8 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1183,6 +1235,7 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "URL of the NATS cluster.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1190,6 +1243,7 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 					"subject": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name of the subject to put message on.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1200,7 +1254,8 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1212,7 +1267,8 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1243,6 +1299,7 @@ func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallba
 					"host": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Host URL of the OpenWhisk.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1270,6 +1327,7 @@ func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallba
 					"actionName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name of the action/function.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1281,7 +1339,8 @@ func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1294,7 +1353,8 @@ func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1319,6 +1379,7 @@ func schema_pkg_apis_sensor_v1alpha1_PayloadField(ref common.ReferenceCallback) 
 					"path": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1326,6 +1387,7 @@ func schema_pkg_apis_sensor_v1alpha1_PayloadField(ref common.ReferenceCallback) 
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name acts as key that holds the value at the path.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1360,17 +1422,20 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec"),
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus"),
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus"),
 						},
 					},
 				},
@@ -1405,7 +1470,8 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
 						},
 					},
 					"items": {
@@ -1414,7 +1480,8 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor"),
 									},
 								},
 							},
@@ -1443,7 +1510,8 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency"),
 									},
 								},
 							},
@@ -1456,7 +1524,8 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"),
 									},
 								},
 							},
@@ -1475,7 +1544,8 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup"),
 									},
 								},
 							},
@@ -1538,7 +1608,8 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
 									},
 								},
 							},
@@ -1566,7 +1637,8 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1609,20 +1681,23 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref common.ReferenceCall
 				Properties: map[string]spec.Schema{
 					"group": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"version": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"resource": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"source": {
@@ -1645,7 +1720,8 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref common.ReferenceCall
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1687,8 +1763,9 @@ func schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"integer"},
-										Format: "int32",
+										Default: 0,
+										Type:    []string{"integer"},
+										Format:  "int32",
 									},
 								},
 							},
@@ -1740,7 +1817,8 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.Volume"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.Volume"),
 									},
 								},
 							},
@@ -1760,8 +1838,9 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -1774,7 +1853,8 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.Toleration"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.Toleration"),
 									},
 								},
 							},
@@ -1793,7 +1873,8 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.LocalObjectReference"),
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.LocalObjectReference"),
 									},
 								},
 							},
@@ -1837,6 +1918,7 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 					"start": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Start is the beginning of a time window in UTC. Before this time, events for this dependency are ignored. Format is hh:mm:ss.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1844,6 +1926,7 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 					"stop": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Stop is the end of a time window in UTC. After or equal to this time, events for this dependency are ignored and Format is hh:mm:ss. If it is smaller than Start, it is treated as next day of Start (e.g.: 22:00:00-01:00:00 means 22:00:00-25:00:00).",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1875,7 +1958,8 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
@@ -1917,6 +2001,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref common.ReferenceCallba
 					"dest": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Dest is the JSONPath of a resource key. A path is a series of keys separated by a dot. The colon character can be escaped with '.' The -1 key can be used to append a value to an existing array. See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1947,6 +2032,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 					"dependencyName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DependencyName refers to the name of the dependency. The event which is stored for this dependency is used as payload for the parameterization. Make sure to refer to one of the dependencies you have defined under Dependencies list.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2034,8 +2120,9 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2048,8 +2135,9 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},
@@ -2071,6 +2159,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name is a unique name of the action to take.",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2173,6 +2262,7 @@ func schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref common.ReferenceCallback) c
 					"path": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Path is the complete URL",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
