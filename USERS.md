@@ -4,6 +4,8 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 
 1. [3Rein](https://www.3rein.com)
 1. [7shifts](https://www.7shifts.com)
+1. [Alibaba Group](https://www.alibabagroup.com/)
+1. [Ant Group](https://www.antgroup.com/)
 1. [BioBox Analytics](https://biobox.io)
 1. [BlackRock](https://www.blackrock.com/)
 1. [Canva](https://www.canva.com/)
