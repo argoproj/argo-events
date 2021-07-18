@@ -45,6 +45,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.14.6
 	github.com/hokaccha/go-prettyjson v0.0.0-20190818114111-108c894c2c0e // indirect
 	github.com/imdario/mergo v0.3.12
+	github.com/itchyny/gojq v0.12.4
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/minio/minio-go v1.0.1-0.20190523192347-c6c2912aa552
 	github.com/mitchellh/mapstructure v1.4.1 // indirect

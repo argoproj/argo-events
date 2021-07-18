@@ -160,6 +160,22 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 			defer conn.Close()
 
+			transformFunc := func(depName string, event *cloudevents.Event) (*cloudevents.Event, error) {
+				dep, ok := depMapping[depName]
+				if !ok {
+					return nil, fmt.Errorf("dependency not found")
+				}
+				if dep.JQExpr == "" {
+					return event, nil
+				}
+				transformedEvent, err := sensordependencies.Transform(event, dep.JQExpr)
+				if err != nil {
+					logger.Errorw("failed to apply jq transformation", zap.Error(err))
+					return nil, err
+				}
+				return transformedEvent, nil
+			}
+
 			filterFunc := func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
@@ -196,7 +212,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					logger.Infof("started subscribing to events for triggers %s with client %s", fmt.Sprintf("[%s]", strings.Join(triggerNames, " ")), clientID)
 
-					err = ebDriver.SubscribeEventSources(cctx, conn, group, closeSubCh, depExpression, deps, filterFunc, actionFunc)
+					err = ebDriver.SubscribeEventSources(cctx, conn, group, closeSubCh, depExpression, deps, transformFunc, filterFunc, actionFunc)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
 						return
