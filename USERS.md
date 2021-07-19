@@ -23,3 +23,4 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Viaduct](https://www.viaduct.ai/)
 1. [WooliesX](https://wooliesx.com.au/)
 1. [Woolworths Group](https://www.woolworthsgroup.com.au/)
+1. [Metabob](https://metabob.com)
