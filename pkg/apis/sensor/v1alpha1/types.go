@@ -192,6 +192,9 @@ type EventDependency struct {
 	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
 	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
+	// JQExpr transforms the incoming event payload by applying JQ expression on the payload.
+	// +optional
+	JQExpr string `json:"jqExpr,omitempty" protobuf:"bytes,5,opt,name=jqExpr"`
 }
 
 // DependencyGroup is the group of dependencies
