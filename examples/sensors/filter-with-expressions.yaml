@@ -64,4 +64,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: name
               dest: spec.arguments.parameters.0.value

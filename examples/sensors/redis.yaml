@@ -36,4 +36,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: body
               dest: spec.templates.0.container.args.0
