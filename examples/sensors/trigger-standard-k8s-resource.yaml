@@ -34,6 +34,7 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: body
               dest: spec.containers.0.args.0
 #    - template:
 #        name: webhook-deployment-trigger
