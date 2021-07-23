@@ -42,6 +42,7 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: eventTime
               dest: spec.arguments.parameters.0.value
       retryStrategy:
         steps: 3

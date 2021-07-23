@@ -42,4 +42,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: body
               dest: spec.arguments.parameters.0.value
