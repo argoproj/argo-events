@@ -11,7 +11,7 @@ GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_BRANCH=$(shell git rev-parse --symbolic-full-name --verify --quiet --abbrev-ref HEAD)
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
 GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ; else echo "dirty"; fi)
-EXECUTABLES = curl docker gzip go
+EXECUTABLES = curl docker gzip go pandoc
 
 #  docker image publishing options
 DOCKER_PUSH?=false
