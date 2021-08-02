@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
@@ -307,6 +308,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
+
 	clientID := generateClientID(e.hostname)
 	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 	if err != nil {
@@ -321,6 +323,13 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 		return err
 	}
 	defer e.eventBusConn.Close()
+
+	namespace := e.eventSource.ObjectMeta.Namespace
+	cfConfig, err := codefresh.GetCodefreshConfig(ctx, namespace)
+	if err != nil {
+		logger.Errorw("failed to get Codefresh config", zap.Error(err))
+		return err
+	}
 
 	cctx, cancel := context.WithCancel(ctx)
 	connWG := &sync.WaitGroup{}
@@ -411,6 +420,16 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						logger.Infow("succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
+
+						err = codefresh.ReportEventToCodefresh(eventBody, cfConfig)
+						if err != nil {
+							logger.Errorw("failed to report an event to Codefresh", zap.Error(err),
+								zap.String(logging.LabelEventName, s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+						} else {
+							logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, s.GetEventName()),
+								zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
+						}
+
 						return nil
 					})
 				}); err != nil {

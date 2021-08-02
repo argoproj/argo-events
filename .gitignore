@@ -12,3 +12,6 @@ debug.test
 *.out
 site/
 /go-diagrams/
+# telepresence
+.env
+telepresence.log
