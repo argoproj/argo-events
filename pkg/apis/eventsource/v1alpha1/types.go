@@ -756,7 +756,7 @@ type GitlabEventSource struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 	// List of project IDs or project namespace paths like "whynowy/test"
-	Projects []string `json:"projectIDs,omitempty" protobuf:"bytes,10,rep,name=projectIDs"`
+	Projects []string `json:"projects,omitempty" protobuf:"bytes,10,rep,name=projects"`
 	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
 	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,11,opt,name=secretToken"`
 }

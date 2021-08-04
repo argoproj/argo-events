@@ -1538,7 +1538,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							},
 						},
 					},
-					"projectIDs": {
+					"projects": {
 						SchemaProps: spec.SchemaProps{
 							Description: "List of project IDs or project namespace paths like \"whynowy/test\"",
 							Type:        []string{"array"},

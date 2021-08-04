@@ -1284,7 +1284,7 @@
           "description": "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use Projects instead. Will be unsupported in v 1.7",
           "type": "string"
         },
-        "projectIDs": {
+        "projects": {
           "description": "List of project IDs or project namespace paths like \"whynowy/test\"",
           "type": "array",
           "items": {

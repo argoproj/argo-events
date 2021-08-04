@@ -536,7 +536,7 @@ message GitlabEventSource {
   map<string, string> metadata = 9;
 
   // List of project IDs or project namespace paths like "whynowy/test"
-  repeated string projectIDs = 10;
+  repeated string projects = 10;
 
   // SecretToken references to k8 secret which holds the Secret Token used by webhook config
   optional k8s.io.api.core.v1.SecretKeySelector secretToken = 11;

@@ -2280,7 +2280,7 @@ event payload.
 </tr>
 <tr>
 <td>
-<code>projectIDs</code></br> <em> \[\]string </em>
+<code>projects</code></br> <em> \[\]string </em>
 </td>
 <td>
 <p>
