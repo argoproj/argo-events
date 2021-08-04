@@ -765,7 +765,10 @@ func (g GitlabEventSource) GetProjects() []string {
 	if len(g.Projects) > 0 {
 		return g.Projects
 	}
-	return []string{g.DeprecatedProjectID}
+	if g.DeprecatedProjectID != "" {
+		return []string{g.DeprecatedProjectID}
+	}
+	return []string{}
 }
 
 func (g GitlabEventSource) NeedToCreateHooks() bool {
