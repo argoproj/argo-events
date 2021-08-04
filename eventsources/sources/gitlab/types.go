@@ -61,9 +61,3 @@ type Router struct {
 	// gitlab webhook secret token
 	secretToken string
 }
-
-// cred stores the api access token
-type cred struct {
-	// token is gitlab api access token
-	token string
-}
