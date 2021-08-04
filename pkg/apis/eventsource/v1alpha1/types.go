@@ -736,12 +736,13 @@ func (g GithubEventSource) NeedToCreateHooks() bool {
 type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// ProjectID is the id of project for which integration needs to setup
-	ProjectID string `json:"projectID" protobuf:"bytes,2,opt,name=projectID"`
+	// DeprecatedProjectID is the id of project for which integration needs to setup
+	// Deprecated: use ProjectIDs instead. Will be unsupported in v 1.7
+	DeprecatedProjectID string `json:"projectID" protobuf:"bytes,2,opt,name=projectID"`
 	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
 	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`
-	// AccessToken is reference to k8 secret which holds the gitlab api access information
+	// AccessToken references to k8 secret which holds the gitlab api access information
 	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,4,opt,name=accessToken"`
 	// EnableSSLVerification to enable ssl verification
 	// +optional
@@ -754,6 +755,21 @@ type GitlabEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+	// List of project IDs
+	ProjectIDs []string `json:"projectIDs,omitempty" protobuf:"bytes,10,rep,name=projectIDs"`
+	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
+	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,11,opt,name=secretToken"`
+}
+
+func (g GitlabEventSource) GetProjectIDs() []string {
+	if len(g.ProjectIDs) > 0 {
+		return g.ProjectIDs
+	}
+	return []string{g.DeprecatedProjectID}
+}
+
+func (g GitlabEventSource) NeedToCreateHooks() bool {
+	return g.AccessToken != nil && g.Webhook != nil && g.Webhook.URL != ""
 }
 
 // HDFSEventSource refers to event-source for HDFS related events

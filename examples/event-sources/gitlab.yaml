@@ -11,7 +11,9 @@ spec:
   gitlab:
     example:
       # id of the project
-      projectID: "1"
+      projectIDs:
+        - "1"
+        - "3"
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
@@ -36,11 +38,16 @@ spec:
         key: token
         # Name of the K8s secret that contains the access token
         name: gitlab-access
+      # secret token used by gitlab webhook
+      secretToken:
+        key: token
+        name: gitlab-secret
       # Do SSL verification when triggering the hook
       enableSSLVerification: false
       # Gitlab Base url.
       # Change it to your private GitLab instance url if you have one.
       gitlabBaseURL: https://gitlab.com
+      deleteHookOnFinish: true
 
 #    example-secure:
 #      projectId: "2"

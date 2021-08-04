@@ -731,6 +731,16 @@ func (in *GitlabEventSource) DeepCopyInto(out *GitlabEventSource) {
 			(*out)[key] = val
 		}
 	}
+	if in.ProjectIDs != nil {
+		in, out := &in.ProjectIDs, &out.ProjectIDs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.SecretToken != nil {
+		in, out := &in.SecretToken, &out.SecretToken
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

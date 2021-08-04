@@ -54,12 +54,12 @@ type Router struct {
 	route *webhook.Route
 	// gitlabClient is the client to connect to GitLab
 	gitlabClient *gitlab.Client
-	// hook is gitlab project hook
-	// GitLab API docs:
-	// https://docs.gitlab.com/ce/api/projects.html#list-project-hooks
-	hook *gitlab.ProjectHook
+	// projectID -> hook ID
+	hookIDs map[string]int
 	// gitlabEventSource is the event source that contains configuration necessary to consume events from GitLab
 	gitlabEventSource *v1alpha1.GitlabEventSource
+	// gitlab webhook secret token
+	secretToken string
 }
 
 // cred stores the api access token
