@@ -1281,11 +1281,11 @@
           }
         },
         "projectID": {
-          "description": "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use ProjectIDs instead. Will be unsupported in v 1.7",
+          "description": "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use Projects instead. Will be unsupported in v 1.7",
           "type": "string"
         },
         "projectIDs": {
-          "description": "List of project IDs",
+          "description": "List of project IDs or project namespace paths like \"whynowy/test\"",
           "type": "array",
           "items": {
             "type": "string"

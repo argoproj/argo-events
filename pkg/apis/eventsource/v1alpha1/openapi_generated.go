@@ -1473,7 +1473,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"projectID": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use ProjectIDs instead. Will be unsupported in v 1.7",
+							Description: "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use Projects instead. Will be unsupported in v 1.7",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -1540,7 +1540,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"projectIDs": {
 						SchemaProps: spec.SchemaProps{
-							Description: "List of project IDs",
+							Description: "List of project IDs or project namespace paths like \"whynowy/test\"",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{

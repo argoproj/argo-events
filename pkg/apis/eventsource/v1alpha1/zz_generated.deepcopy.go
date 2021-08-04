@@ -731,8 +731,8 @@ func (in *GitlabEventSource) DeepCopyInto(out *GitlabEventSource) {
 			(*out)[key] = val
 		}
 	}
-	if in.ProjectIDs != nil {
-		in, out := &in.ProjectIDs, &out.ProjectIDs
+	if in.Projects != nil {
+		in, out := &in.Projects, &out.Projects
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}

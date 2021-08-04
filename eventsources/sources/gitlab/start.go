@@ -129,15 +129,15 @@ func (router *Router) PostInactivate() error {
 	logger := router.route.Logger
 	logger.Info("deleting Gitlab hooks...")
 
-	for _, pID := range gitlabEventSource.GetProjectIDs() {
-		id, ok := router.hookIDs[pID]
+	for _, p := range gitlabEventSource.GetProjects() {
+		id, ok := router.hookIDs[p]
 		if !ok {
-			return errors.Errorf("can not find hook ID for project %s", pID)
+			return errors.Errorf("can not find hook ID for project %s", p)
 		}
-		if _, err := router.gitlabClient.Projects.DeleteProjectHook(pID, id); err != nil {
-			return errors.Errorf("failed to delete hook for project %s. err: %+v", pID, err)
+		if _, err := router.gitlabClient.Projects.DeleteProjectHook(p, id); err != nil {
+			return errors.Errorf("failed to delete hook for project %s. err: %+v", p, err)
 		}
-		logger.Infof("Gitlab hook deleted for project %s", pID)
+		logger.Infof("Gitlab hook deleted for project %s", p)
 	}
 	return nil
 }
@@ -227,24 +227,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		router.hookIDs = make(map[string]int)
 
 		f := func() {
-			for _, pID := range gitlabEventSource.GetProjectIDs() {
-				hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(pID, &gitlab.ListProjectHooksOptions{})
+			for _, p := range gitlabEventSource.GetProjects() {
+				hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(p, &gitlab.ListProjectHooksOptions{})
 				if err != nil {
-					logger.Errorf("failed to list existing webhooks of project %s. err: %+v", pID, err)
+					logger.Errorf("failed to list existing webhooks of project %s. err: %+v", p, err)
 					continue
 				}
 				hook := getHook(hooks, formattedURL, gitlabEventSource.Events)
 				if hook != nil {
-					router.hookIDs[pID] = hook.ID
+					router.hookIDs[p] = hook.ID
 					continue
 				}
-				logger.Infof("hook not found for project %s, creating ...", pID)
-				hook, _, err = router.gitlabClient.Projects.AddProjectHook(pID, opt)
+				logger.Infof("hook not found for project %s, creating ...", p)
+				hook, _, err = router.gitlabClient.Projects.AddProjectHook(p, opt)
 				if err != nil {
-					logger.Errorf("failed to create gitlab webhook for project %s. err: %+v", pID, err)
+					logger.Errorf("failed to create gitlab webhook for project %s. err: %+v", p, err)
 					continue
 				}
-				router.hookIDs[pID] = hook.ID
+				router.hookIDs[p] = hook.ID
 				time.Sleep(500 * time.Millisecond)
 			}
 		}

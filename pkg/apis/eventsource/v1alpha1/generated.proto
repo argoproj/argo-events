@@ -510,7 +510,7 @@ message GitlabEventSource {
   optional WebhookContext webhook = 1;
 
   // DeprecatedProjectID is the id of project for which integration needs to setup
-  // Deprecated: use ProjectIDs instead. Will be unsupported in v 1.7
+  // Deprecated: use Projects instead. Will be unsupported in v 1.7
   optional string projectID = 2;
 
   // Events are gitlab event to listen to.
@@ -535,7 +535,7 @@ message GitlabEventSource {
   // +optional
   map<string, string> metadata = 9;
 
-  // List of project IDs
+  // List of project IDs or project namespace paths like "whynowy/test"
   repeated string projectIDs = 10;
 
   // SecretToken references to k8 secret which holds the Secret Token used by webhook config

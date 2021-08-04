@@ -2205,7 +2205,7 @@ Webhook holds configuration to run a http server
 <td>
 <p>
 DeprecatedProjectID is the id of project for which integration needs to
-setup Deprecated: use ProjectIDs instead. Will be unsupported in v 1.7
+setup Deprecated: use Projects instead. Will be unsupported in v 1.7
 </p>
 </td>
 </tr>
@@ -2284,7 +2284,7 @@ event payload.
 </td>
 <td>
 <p>
-List of project IDs
+List of project IDs or project namespace paths like “whynowy/test”
 </p>
 </td>
 </tr>
