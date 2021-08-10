@@ -1473,7 +1473,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"projectID": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ProjectID is the id of project for which integration needs to setup",
+							Description: "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use Projects instead. Will be unsupported in v 1.7",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -1496,7 +1496,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"accessToken": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AccessToken is reference to k8 secret which holds the gitlab api access information",
+							Description: "AccessToken references to k8 secret which holds the gitlab api access information",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -1536,6 +1536,27 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 									},
 								},
 							},
+						},
+					},
+					"projects": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of project IDs or project namespace paths like \"whynowy/test\"",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"secretToken": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SecretToken references to k8 secret which holds the Secret Token used by webhook config",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 				},
