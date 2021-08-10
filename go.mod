@@ -73,7 +73,7 @@ require (
 	github.com/stripe/stripe-go v70.15.0+incompatible
 	github.com/tidwall/gjson v1.7.5
 	github.com/tidwall/sjson v1.1.1
-	github.com/xanzy/go-gitlab v0.33.0
+	github.com/xanzy/go-gitlab v0.50.2
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	google.golang.org/api v0.20.0
