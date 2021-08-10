@@ -16,7 +16,7 @@ require (
 	github.com/antonmedv/expr v1.8.8
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.1.1
-	github.com/argoproj/pkg v0.9.0
+	github.com/argoproj/pkg v0.10.0
 	github.com/aws/aws-sdk-go v1.33.16
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/cloudevents/sdk-go/v2 v2.1.0
