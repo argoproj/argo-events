@@ -1312,7 +1312,7 @@
       ],
       "properties": {
         "accessToken": {
-          "description": "AccessToken is reference to K8s secret which holds the gitlab api access information",
+          "description": "AccessToken references to k8 secret which holds the gitlab api access information",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "deleteHookOnFinish": {
@@ -1342,8 +1342,19 @@
           }
         },
         "projectID": {
-          "description": "ProjectID is the id of project for which integration needs to setup",
+          "description": "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use Projects instead. Will be unsupported in v 1.7",
           "type": "string"
+        },
+        "projects": {
+          "description": "List of project IDs or project namespace paths like \"whynowy/test\"",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "secretToken": {
+          "description": "SecretToken references to k8 secret which holds the Secret Token used by webhook config",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "webhook": {
           "description": "Webhook holds configuration to run a http server",

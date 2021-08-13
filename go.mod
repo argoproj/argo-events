@@ -16,7 +16,7 @@ require (
 	github.com/antonmedv/expr v1.8.8
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.1.1
-	github.com/argoproj/pkg v0.9.0
+	github.com/argoproj/pkg v0.10.1
 	github.com/aws/aws-sdk-go v1.33.16
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/cloudevents/sdk-go/v2 v2.1.0
@@ -74,7 +74,7 @@ require (
 	github.com/stripe/stripe-go v70.15.0+incompatible
 	github.com/tidwall/gjson v1.7.5
 	github.com/tidwall/sjson v1.1.1
-	github.com/xanzy/go-gitlab v0.33.0
+	github.com/xanzy/go-gitlab v0.50.2
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect

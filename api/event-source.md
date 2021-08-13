@@ -2362,7 +2362,8 @@ Webhook holds configuration to run a http server
 </td>
 <td>
 <p>
-ProjectID is the id of project for which integration needs to setup
+DeprecatedProjectID is the id of project for which integration needs to
+setup Deprecated: use Projects instead. Will be unsupported in v 1.7
 </p>
 </td>
 </tr>
@@ -2385,7 +2386,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessToken is reference to K8s secret which holds the gitlab api access
+AccessToken references to k8 secret which holds the gitlab api access
 information
 </p>
 </td>
@@ -2432,6 +2433,29 @@ project once the event source is stopped.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projects</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+List of project IDs or project namespace paths like “whynowy/test”
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>secretToken</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+SecretToken references to k8 secret which holds the Secret Token used by
+webhook config
 </p>
 </td>
 </tr>

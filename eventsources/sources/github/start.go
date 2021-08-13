@@ -135,7 +135,7 @@ func (router *Router) PostInactivate() error {
 
 	if githubEventSource.NeedToCreateHooks() && githubEventSource.DeleteHookOnFinish {
 		logger := router.route.Logger
-		logger.Info("deleting GitHub hook...")
+		logger.Info("deleting GitHub hooks...")
 
 		for _, r := range githubEventSource.GetOwnedRepositories() {
 			for _, n := range r.Names {

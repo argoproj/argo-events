@@ -738,12 +738,13 @@ func (g GithubEventSource) NeedToCreateHooks() bool {
 type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// ProjectID is the id of project for which integration needs to setup
-	ProjectID string `json:"projectID" protobuf:"bytes,2,opt,name=projectID"`
+	// DeprecatedProjectID is the id of project for which integration needs to setup
+	// Deprecated: use Projects instead. Will be unsupported in v 1.7
+	DeprecatedProjectID string `json:"projectID" protobuf:"bytes,2,opt,name=projectID"`
 	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
 	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`
-	// AccessToken is reference to K8s secret which holds the gitlab api access information
+	// AccessToken references to k8 secret which holds the gitlab api access information
 	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,4,opt,name=accessToken"`
 	// EnableSSLVerification to enable ssl verification
 	// +optional
@@ -756,6 +757,24 @@ type GitlabEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+	// List of project IDs or project namespace paths like "whynowy/test"
+	Projects []string `json:"projects,omitempty" protobuf:"bytes,10,rep,name=projects"`
+	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
+	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,11,opt,name=secretToken"`
+}
+
+func (g GitlabEventSource) GetProjects() []string {
+	if len(g.Projects) > 0 {
+		return g.Projects
+	}
+	if g.DeprecatedProjectID != "" {
+		return []string{g.DeprecatedProjectID}
+	}
+	return []string{}
+}
+
+func (g GitlabEventSource) NeedToCreateHooks() bool {
+	return g.AccessToken != nil && g.Webhook != nil && g.Webhook.URL != ""
 }
 
 // BitbucketServerEventSource refers to event-source related to Bitbucket Server events
