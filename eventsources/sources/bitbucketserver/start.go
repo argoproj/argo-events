@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -131,17 +132,74 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 // PostActivate performs operations once the route is activated and ready to consume requests
 func (router *Router) PostActivate() error {
-	route := router.GetRoute()
+	return nil
+}
+
+// PostInactivate performs operations after the route is inactivated
+func (router *Router) PostInactivate() error {
+
 	bitbucketserverEventSource := router.bitbucketserverEventSource
+	route := router.route
 
 	logger := route.Logger.With(
-		logging.LabelEndpoint, route.Context.Endpoint,
-		logging.LabelPort, route.Context.Port,
-		logging.LabelHTTPMethod, route.Context.Method,
+		"project-key", bitbucketserverEventSource.ProjectKey,
+		"repository-slug", bitbucketserverEventSource.RepositorySlug,
+		"hook-id", router.hookID,
+	)
+
+	if bitbucketserverEventSource.DeleteHookOnFinish && router.hookID > 0 {
+		logger.Info("deleting webhook from bitbucket")
+
+		bitbucketCredentials, err := router.getCredentials(bitbucketserverEventSource.AccessToken)
+		if err != nil {
+			return errors.Errorf("failed to get bitbucketserver credentials. err: %+v", err)
+		}
+
+		bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
+		bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
+		bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketCredentials.token)
+
+		bitbucketClient := bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
+
+		_, err = bitbucketClient.DefaultApi.DeleteWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(router.hookID))
+		if err != nil {
+			return errors.Errorf("failed to delete bitbucketserver webhook. err: %+v", err)
+		}
+
+		logger.Info("bitbucket server webhook deleted")
+	} else {
+		logger.Info("hook not found, not deleting")
+	}
+
+	return nil
+}
+
+// StartListening starts an event source
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+	defer sources.Recover(el.GetEventName())
+
+	bitbucketserverEventSource := &el.BitbucketServerEventSource
+
+	logger := logging.FromContext(ctx).With(
+		logging.LabelEventSourceType, el.GetEventSourceType(),
+		logging.LabelEventName, el.GetEventName(),
 		"project-key", bitbucketserverEventSource.ProjectKey,
 		"repository-slug", bitbucketserverEventSource.RepositorySlug,
 		"base-url", bitbucketserverEventSource.BitbucketServerBaseURL,
 	)
+
+	logger.Info("started processing the Bitbucket Server event source...")
+
+	route := webhook.NewRoute(bitbucketserverEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
+	router := &Router{
+		route:                      route,
+		bitbucketserverEventSource: bitbucketserverEventSource,
+	}
 
 	logger.Info("retrieving the access token credentials...")
 	bitbucketCredentials, err := router.getCredentials(bitbucketserverEventSource.AccessToken)
@@ -154,22 +212,25 @@ func (router *Router) PostActivate() error {
 	bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
 	bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
 
-	ctx := context.WithValue(context.Background(), bitbucketv1.ContextAccessToken, bitbucketCredentials.token)
-
 	// When running multiple replicas of the eventsource, they will all try to create the webhook.
 	// Randomly sleep some time to mitigate the issue.
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketCredentials.token)
 	err = router.CreateBitbucketWebhook(ctx, bitbucketConfig)
 
 	if err != nil {
-		logger.Errorw("failed to create Bitbucket webhook", zap.Error(err))
+		logger.Errorw("failed to create/update Bitbucket webhook", zap.Error(err))
 	}
 
 	go func() {
 		// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
-		// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from bitbucket.
+		// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from Bitbucket.
 		// This is a workround to mitigate the race conditions.
 		logger.Info("starting bitbucket hooks manager daemon")
 		ticker := time.NewTicker(60 * time.Second)
@@ -183,36 +244,13 @@ func (router *Router) PostActivate() error {
 				err := router.CreateBitbucketWebhook(ctx, bitbucketConfig)
 
 				if err != nil {
-					logger.Errorw("failed to create Bitbucket webhook", zap.Error(err))
+					logger.Errorw("failed to create/update Bitbucket webhook", zap.Error(err))
 				}
 			}
 		}
 	}()
 
-	return nil
-}
-
-// PostInactivate performs operations after the route is inactivated
-func (router *Router) PostInactivate() error {
-	bitbucketserverEventSource := router.bitbucketserverEventSource
-	route := router.route
-
-	if bitbucketserverEventSource.DeleteHookOnFinish {
-		logger := route.Logger.With(
-			"project-key", bitbucketserverEventSource.ProjectKey,
-			"repository-slug", bitbucketserverEventSource.RepositorySlug,
-			"hook-id", router.hook.ID,
-		)
-
-		logger.Info("deleting webhook...")
-
-		if _, err := router.bitbucketClient.DefaultApi.DeleteWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(router.hook.ID)); err != nil {
-			return errors.Errorf("failed to delete webhook. err: %+v", err)
-		}
-
-		logger.Info("bitbucket server webhook deleted")
-	}
-	return nil
+	return webhook.ManageRoute(ctx, router, controller, dispatch)
 }
 
 func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration) error {
@@ -228,11 +266,11 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		"base-url", bitbucketserverEventSource.BitbucketServerBaseURL,
 	)
 
-	router.bitbucketClient = bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
+	bitbucketClient := bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
 
 	formattedURL := common.FormattedURL(bitbucketserverEventSource.Webhook.URL, bitbucketserverEventSource.Webhook.Endpoint)
 
-	apiResponse, err := router.bitbucketClient.DefaultApi.FindWebhooks(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, nil)
+	apiResponse, err := bitbucketClient.DefaultApi.FindWebhooks(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, nil)
 
 	if err != nil {
 		return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for repository %s/%s", router.bitbucketserverEventSource.ProjectKey, router.bitbucketserverEventSource.RepositorySlug)
@@ -249,8 +287,10 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 
 	for _, hook := range hooks {
 		if hook.Url == formattedURL {
-			existingHook = hook
 			isAlreadyExists = true
+			existingHook = hook
+			router.hookID = hook.ID
+			break
 		}
 	}
 
@@ -273,50 +313,42 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		return errors.Wrapf(err, "failed to marshal new webhook to JSON")
 	}
 
+	var createdHook *bitbucketv1.Webhook
+
+	// Create the webhook when it doesn't exist yet
 	if !isAlreadyExists {
-		apiResponse, err = router.bitbucketClient.DefaultApi.CreateWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, localVarPostBody, []string{"application/json"})
+		apiResponse, err = bitbucketClient.DefaultApi.CreateWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, localVarPostBody, []string{"application/json"})
 
 		if err != nil {
 			return errors.Errorf("failed to add webhook. err: %+v", err)
 		}
 
-	} else {
-		logger.Info("webhook already exists, updating it...")
+		err = mapstructure.Decode(apiResponse.Values, &createdHook)
+		if err != nil {
+			return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
+		}
+		router.hookID = createdHook.ID
 
-		apiResponse, err = router.bitbucketClient.DefaultApi.UpdateWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(existingHook.ID), localVarPostBody, []string{"application/json"})
+		logger.With("hook-id", createdHook.ID).Info("hook succesfully registered")
+	}
+
+	// Update the webhook when it does exist and the configuration has chagned
+	if isAlreadyExists && (!reflect.DeepEqual(existingHook.Events, newHook.Events) || !reflect.DeepEqual(existingHook.Configuration, newHook.Configuration)) {
+		logger.Info("webhook already exists and configuration has changed. Updating webhook.")
+
+		apiResponse, err = bitbucketClient.DefaultApi.UpdateWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(existingHook.ID), localVarPostBody, []string{"application/json"})
 
 		if err != nil {
 			return errors.Errorf("failed to update webhook. err: %+v", err)
 		}
+
+		err = mapstructure.Decode(apiResponse.Values, &createdHook)
+		if err != nil {
+			return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
+		}
+
+		logger.With("hook-id", createdHook.ID).Info("hook succesfully updated")
 	}
-
-	var createdHook *bitbucketv1.Webhook
-	err = mapstructure.Decode(apiResponse.Values, &createdHook)
-
-	if err != nil {
-		return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
-	}
-
-	router.hook = createdHook
-	logger.With("hook-id", createdHook.ID).Info("hook succesfully registered")
 
 	return nil
-}
-
-// StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
-	logger := logging.FromContext(ctx).
-		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
-	logger.Info("started processing the Bitbucket Server event source...")
-
-	defer sources.Recover(el.GetEventName())
-
-	bitbucketserverEventSource := &el.BitbucketServerEventSource
-
-	route := webhook.NewRoute(bitbucketserverEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
-
-	return webhook.ManageRoute(ctx, &Router{
-		route:                      route,
-		bitbucketserverEventSource: bitbucketserverEventSource,
-	}, controller, dispatch)
 }

@@ -212,10 +212,6 @@ message BitbucketServerEventSource {
   // WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
   optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 6;
 
-  // EnableSSLVerification to enable ssl verification
-  // +optional
-  optional bool enableSSLVerification = 7;
-
   // BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
   optional string bitbucketserverBaseURL = 8;
 

@@ -773,9 +773,6 @@ type BitbucketServerEventSource struct {
 	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,5,opt,name=accessToken"`
 	// WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
 	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,6,opt,name=webhookSecret"`
-	// EnableSSLVerification to enable ssl verification
-	// +optional
-	EnableSSLVerification bool `json:"enableSSLVerification,omitempty" protobuf:"varint,7,opt,name=enableSSLVerification"`
 	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
 	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,8,opt,name=bitbucketserverBaseURL"`
 	// DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.

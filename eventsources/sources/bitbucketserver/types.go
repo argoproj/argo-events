@@ -20,7 +20,6 @@ import (
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 )
 
 // EventListener implements ConfigExecutor
@@ -50,12 +49,10 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 type Router struct {
 	// route contains information about a API endpoint
 	route *webhook.Route
-	// bitbucketClient is the client to connect to Bitbucket Server
-	bitbucketClient *bitbucketv1.APIClient
-	// hook is bitbucket Webhook
+	// hookID is bitbucket Webhook ID
 	// Bitbucket Server API docs:
 	// https://developer.atlassian.com/server/bitbucket/reference/rest-api/
-	hook *bitbucketv1.Webhook
+	hookID int
 	// bitbucketserverEventSource is the event source that contains configuration necessary to consume events from Bitbucket Server
 	bitbucketserverEventSource *v1alpha1.BitbucketServerEventSource
 }

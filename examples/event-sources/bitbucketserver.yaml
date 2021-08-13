@@ -21,10 +21,10 @@ spec:
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
         method: POST
-        # url the event-source will use to register at GitLab.
+        # url the event-source will use to register in Bitbucket Server.
         # This url must be reachable from outside the cluster.
         # The name for the service is in `<event-source-name>-eventsource-svc` format.
-        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from GitLab.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket Server.
         url: http://url-that-is-reachable-from-Bitbucket-Server
       # events to listen to
       # Visit https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
@@ -41,8 +41,6 @@ spec:
         name: bitbucketserver-access
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is the webhook secret
         key: secret
-      # Do SSL verification when triggering the hook
-      enableSSLVerification: true
       # Delete the webhook when the eventsource is deleted
       deleteHookOnFinish: true
       # Bitbucket Base url to the REST API. This URL should include the "/rest" path.

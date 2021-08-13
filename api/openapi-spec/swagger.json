@@ -718,10 +718,6 @@
           "description": "DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.",
           "type": "boolean"
         },
-        "enableSSLVerification": {
-          "description": "EnableSSLVerification to enable ssl verification",
-          "type": "boolean"
-        },
         "events": {
           "description": "Events are bitbucket event to listen to. Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html",
           "type": "array",

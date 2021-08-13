@@ -673,17 +673,6 @@ webhook secret (for HMAC validation)
 </tr>
 <tr>
 <td>
-<code>enableSSLVerification</code></br> <em> bool </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-EnableSSLVerification to enable ssl verification
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>bitbucketserverBaseURL</code></br> <em> string </em>
 </td>
 <td>

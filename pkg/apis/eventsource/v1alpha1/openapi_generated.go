@@ -462,13 +462,6 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"enableSSLVerification": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EnableSSLVerification to enable ssl verification",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
 					"bitbucketserverBaseURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "BitbucketServerBaseURL is the base URL for API requests to a custom endpoint",
