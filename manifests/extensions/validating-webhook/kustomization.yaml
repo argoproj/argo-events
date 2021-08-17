@@ -10,6 +10,6 @@ resources:
 namespace: argo-events
 
 images:
-  - name: quay.io/argoproj/argo-events
-    newTag: v1.4.0
-
+- name: quay.io/argoproj/argo-events
+  newName: quay.io/codefresh/argo-events
+  newTag: v0.0.1-cf
