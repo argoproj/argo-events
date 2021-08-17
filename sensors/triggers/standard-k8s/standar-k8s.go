@@ -1,12 +1,9 @@
 /*
 Copyright 2020 BlackRock, Inc.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
 	http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +36,7 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/artifacts"
+	"github.com/argoproj/argo-events/sensors/common"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -177,6 +175,14 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 		labels["events.argoproj.io/sensor"] = k8sTrigger.Sensor.Name
 		labels["events.argoproj.io/trigger"] = trigger.Template.Name
 		labels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
+
+		if obj.GetKind() == "Workflow" {
+			err := common.ApplyEventLabels(labels, events)
+			if err != nil {
+				k8sTrigger.Logger.Info("failed to apply event labels, skipping...")
+			}
+		}
+
 		obj.SetLabels(labels)
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(ctx, obj, metav1.CreateOptions{})
 
