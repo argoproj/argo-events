@@ -3,8 +3,8 @@ module github.com/argoproj/argo-events
 go 1.15
 
 require (
-	cloud.google.com/go v0.54.0
-	cloud.google.com/go/pubsub v1.2.0
+	cloud.google.com/go v0.65.0
+	cloud.google.com/go/pubsub v1.3.1
 	github.com/Azure/azure-amqp-common-go/v3 v3.1.0 // indirect
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.7
 	github.com/Azure/azure-sdk-for-go v52.6.0+incompatible // indirect
@@ -27,6 +27,7 @@ require (
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gavv/httpexpect/v2 v2.2.0
+	github.com/gfleury/go-bitbucket-v1 v0.0.0-20210707202713-7d616f7c18ac
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/go-openapi/inflect v0.19.0
@@ -47,7 +48,7 @@ require (
 	github.com/imdario/mergo v0.3.12
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/minio/minio-go v1.0.1-0.20190523192347-c6c2912aa552
-	github.com/mitchellh/mapstructure v1.4.1 // indirect
+	github.com/mitchellh/mapstructure v1.4.1
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
 	github.com/nats-io/go-nats v1.7.2
@@ -76,8 +77,12 @@ require (
 	github.com/xanzy/go-gitlab v0.50.2
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
-	google.golang.org/api v0.20.0
-	google.golang.org/grpc v1.29.1
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
+	golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a // indirect
+	google.golang.org/api v0.30.0
+	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/grpc v1.31.0
+	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/jcmturner/goidentity.v2 v2.0.0 // indirect
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	gopkg.in/jcmturner/rpc.v0 v0.0.2 // indirect
