@@ -320,7 +320,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 			return errors.Errorf("failed to update webhook. err: %+v", err)
 		}
 
-		logger.With("hook-id", createdHook.ID).Info("hook succesfully updated")
+		logger.With("hook-id", existingHook.ID).Info("hook succesfully updated")
 	}
 
 	return nil
