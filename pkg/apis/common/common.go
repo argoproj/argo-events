@@ -72,7 +72,6 @@ var (
 		HDFSEvent,
 		FileEvent,
 		GenericEvent,
-		BitbucketServerEvent,
 	}
 )
 
