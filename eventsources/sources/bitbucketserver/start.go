@@ -314,7 +314,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 	if isAlreadyExists && (!reflect.DeepEqual(existingHook.Events, newHook.Events) || !reflect.DeepEqual(existingHook.Configuration, newHook.Configuration)) {
 		logger.Info("webhook already exists and configuration has changed. Updating webhook.")
 
-		apiResponse, err = bitbucketClient.DefaultApi.UpdateWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(existingHook.ID), localVarPostBody, []string{"application/json"})
+		_, err = bitbucketClient.DefaultApi.UpdateWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, int32(existingHook.ID), localVarPostBody, []string{"application/json"})
 
 		if err != nil {
 			return errors.Errorf("failed to update webhook. err: %+v", err)
