@@ -306,6 +306,8 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		router.hookID = createdHook.ID
 
 		logger.With("hook-id", createdHook.ID).Info("hook succesfully registered")
+
+		return nil
 	}
 
 	// Update the webhook when it does exist and the configuration has chagned
