@@ -226,7 +226,7 @@ AMQPExchangeDeclareConfig </a> </em>
 <p>
 ExchangeDeclare holds the configuration for the exchange on the server
 For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare">https://godoc.org/github.com/streadway/amqp\#Channel.ExchangeDeclare</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare">https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare</a>
 </p>
 </td>
 </tr>
@@ -243,7 +243,7 @@ QueueDeclare holds the configuration of a queue to hold messages and
 deliver to consumers. Declaring creates a queue if it doesn’t already
 exist, or ensures that an existing queue matches the same parameters For
 more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare">https://godoc.org/github.com/streadway/amqp\#Channel.QueueDeclare</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare">https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare</a>
 </p>
 </td>
 </tr>
@@ -260,7 +260,7 @@ QueueBind holds the configuration that binds an exchange to a queue so
 that publishings to the exchange will be routed to the queue when the
 publishing routing key matches the binding routing key For more
 information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueBind">https://godoc.org/github.com/streadway/amqp\#Channel.QueueBind</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueBind">https://godoc.org/github.com/streadway/amqp#Channel.QueueBind</a>
 </p>
 </td>
 </tr>
@@ -275,7 +275,7 @@ information, visit
 <p>
 Consume holds the configuration to immediately starts delivering queued
 messages For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.Consume">https://godoc.org/github.com/streadway/amqp\#Channel.Consume</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.Consume">https://godoc.org/github.com/streadway/amqp#Channel.Consume</a>
 </p>
 </td>
 </tr>
@@ -559,6 +559,138 @@ SharedAccessKey is the generated value of the key
 <td>
 <p>
 Event Hub path/name
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.BitbucketServerEventSource">
+BitbucketServerEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+BitbucketServerEventSource refers to event-source related to Bitbucket
+Server events
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
+</td>
+<td>
+<p>
+Webhook holds configuration to run a http server
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projectKey</code></br> <em> string </em>
+</td>
+<td>
+<p>
+ProjectKey is the key of project for which integration needs to setup
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositorySlug</code></br> <em> string </em>
+</td>
+<td>
+<p>
+RepositorySlug is the slug of the repository for which integration needs
+to setup
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>events</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Events are bitbucket event to listen to. Refer
+<a href="https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html">https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>accessToken</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+AccessToken is reference to K8s secret which holds the bitbucket api
+access information
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>webhookSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+WebhookSecret is reference to K8s secret which holds the bitbucket
+webhook secret (for HMAC validation)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>bitbucketserverBaseURL</code></br> <em> string </em>
+</td>
+<td>
+<p>
+BitbucketServerBaseURL is the base URL for API requests to a custom
+endpoint
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>deleteHookOnFinish</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DeleteHookOnFinish determines whether to delete the Bitbucket Server
+hook for the project once the event source is stopped.
 </p>
 </td>
 </tr>
@@ -1354,6 +1486,19 @@ Replicas is the event source deployment replicas
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>bitbucketserver</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Bitbucket Server event sources
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1760,6 +1905,19 @@ Replicas is the event source deployment replicas
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>bitbucketserver</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Bitbucket Server event sources
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventSourceStatus">
@@ -2087,7 +2245,7 @@ Insecure tls verification
 <em>(Optional)</em>
 <p>
 Active refers to status of the webhook for event deliveries.
-<a href="https://developer.github.com/webhooks/creating/#active">https://developer.github.com/webhooks/creating/\#active</a>
+<a href="https://developer.github.com/webhooks/creating/#active">https://developer.github.com/webhooks/creating/#active</a>
 </p>
 </td>
 </tr>
@@ -2216,7 +2374,7 @@ setup Deprecated: use Projects instead. Will be unsupported in v 1.7
 <td>
 <p>
 Events are gitlab event to listen to. Refer
-<a href="https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794">https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go\#L794</a>.
+<a href="https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794">https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794</a>.
 </p>
 </td>
 </tr>
@@ -3401,7 +3559,7 @@ RedisEventSource
 <p>
 RedisEventSource describes an event source for the Redis PubSub. More
 info at
-<a href="https://godoc.org/github.com/go-redis/redis#example-PubSub">https://godoc.org/github.com/go-redis/redis\#example-PubSub</a>
+<a href="https://godoc.org/github.com/go-redis/redis#example-PubSub">https://godoc.org/github.com/go-redis/redis#example-PubSub</a>
 </p>
 </p>
 <table>
@@ -3610,7 +3768,7 @@ ResourceFilter
 </p>
 <p>
 <p>
-ResourceFilter contains K8 ObjectMeta information to further filter
+ResourceFilter contains K8s ObjectMeta information to further filter
 resource event objects
 </p>
 </p>
@@ -3749,7 +3907,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessKey refers K8 secret containing aws access key
+AccessKey refers K8s secret containing aws access key
 </p>
 </td>
 </tr>
@@ -3761,7 +3919,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SecretKey refers K8 secret containing aws secret key
+SecretKey refers K8s secret containing aws secret key
 </p>
 </td>
 </tr>
@@ -3844,7 +4002,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessKey refers K8 secret containing aws access key
+AccessKey refers K8s secret containing aws access key
 </p>
 </td>
 </tr>
@@ -3856,7 +4014,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SecretKey refers K8 secret containing aws secret key
+SecretKey refers K8s secret containing aws secret key
 </p>
 </td>
 </tr>
@@ -3981,9 +4139,8 @@ Key name
 <td>
 <em>(Optional)</em>
 <p>
-Supported operations like ==, !=, &lt;=, &gt;= etc. Defaults to ==.
-Refer
-<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/\#label-selectors</a>
+Supported operations like ==, !=, \<=, \>= etc. Defaults to ==. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors</a>
 for more info.
 </p>
 </td>
@@ -4050,7 +4207,7 @@ creation of the service will fail. This field can not be changed through
 updates. Valid values are “None”, empty string (“”), or a valid IP
 address. “None” can be specified for headless services when proxying is
 not required. More info:
-<a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies">https://kubernetes.io/docs/concepts/services-networking/service/\#virtual-ips-and-service-proxies</a>
+<a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies">https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies</a>
 </p>
 </td>
 </tr>
@@ -4528,7 +4685,7 @@ same namespace to use for pulling any of the images used by this
 PodSpec. If specified, these secrets will be passed to individual puller
 implementations for them to use. For example, in the case of docker,
 only DockerConfig type secrets are honored. More info:
-<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images\#specifying-imagepullsecrets-on-a-pod</a>
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a>
 </p>
 </td>
 </tr>
@@ -4627,6 +4784,7 @@ WebhookContext
 </h3>
 <p>
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
 <a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,

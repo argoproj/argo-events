@@ -696,6 +696,60 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.BitbucketServerEventSource": {
+      "description": "BitbucketServerEventSource refers to event-source related to Bitbucket Server events",
+      "type": "object",
+      "required": [
+        "projectKey",
+        "repositorySlug",
+        "events",
+        "bitbucketserverBaseURL"
+      ],
+      "properties": {
+        "accessToken": {
+          "description": "AccessToken is reference to K8s secret which holds the bitbucket api access information",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "bitbucketserverBaseURL": {
+          "description": "BitbucketServerBaseURL is the base URL for API requests to a custom endpoint",
+          "type": "string"
+        },
+        "deleteHookOnFinish": {
+          "description": "DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.",
+          "type": "boolean"
+        },
+        "events": {
+          "description": "Events are bitbucket event to listen to. Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "projectKey": {
+          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "type": "string"
+        },
+        "repositorySlug": {
+          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "type": "string"
+        },
+        "webhook": {
+          "description": "Webhook holds configuration to run a http server",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
+        },
+        "webhookSecret": {
+          "description": "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.CalendarEventSource": {
       "description": "CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed. Schedule takes precedence over interval; interval takes precedence over recurrence",
       "type": "object",
@@ -899,6 +953,13 @@
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureEventsHubEventSource"
+          }
+        },
+        "bitbucketserver": {
+          "description": "Bitbucket Server event sources",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketServerEventSource"
           }
         },
         "calendar": {
@@ -1808,7 +1869,7 @@
       }
     },
     "io.argoproj.eventsource.v1alpha1.ResourceFilter": {
-      "description": "ResourceFilter contains K8 ObjectMeta information to further filter resource event objects",
+      "description": "ResourceFilter contains K8s ObjectMeta information to further filter resource event objects",
       "type": "object",
       "properties": {
         "afterStart": {
@@ -1848,7 +1909,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "metadata": {
@@ -1867,7 +1928,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "topicArn": {
@@ -1894,7 +1955,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "jsonBody": {
@@ -1925,7 +1986,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "waitTimeSeconds": {
@@ -2259,7 +2320,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "functionName": {
@@ -2289,7 +2350,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -2321,7 +2382,7 @@
           "type": "string"
         },
         "source": {
-          "description": "Source of the K8 resource file(s)",
+          "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
         },
         "version": {
@@ -3181,7 +3242,7 @@
           "type": "string"
         },
         "source": {
-          "description": "Source of the K8 resource file(s)",
+          "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
         },
         "version": {
