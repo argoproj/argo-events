@@ -289,8 +289,6 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		return errors.Wrapf(err, "failed to marshal new webhook to JSON")
 	}
 
-	var createdHook *bitbucketv1.Webhook
-
 	// Create the webhook when it doesn't exist yet
 	if !isAlreadyExists {
 		apiResponse, err = bitbucketClient.DefaultApi.CreateWebhook(bitbucketserverEventSource.ProjectKey, bitbucketserverEventSource.RepositorySlug, localVarPostBody, []string{"application/json"})
@@ -299,6 +297,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 			return errors.Errorf("failed to add webhook. err: %+v", err)
 		}
 
+		var createdHook *bitbucketv1.Webhook
 		err = mapstructure.Decode(apiResponse.Values, &createdHook)
 		if err != nil {
 			return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
