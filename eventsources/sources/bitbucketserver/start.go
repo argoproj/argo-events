@@ -320,11 +320,6 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 			return errors.Errorf("failed to update webhook. err: %+v", err)
 		}
 
-		err = mapstructure.Decode(apiResponse.Values, &createdHook)
-		if err != nil {
-			return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
-		}
-
 		logger.With("hook-id", createdHook.ID).Info("hook succesfully updated")
 	}
 
