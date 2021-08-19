@@ -33,7 +33,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // controller controls the webhook operations
@@ -44,28 +43,6 @@ var (
 // set up the activation and inactivation channels to control the state of routes.
 func init() {
 	go webhook.ProcessRouteStatus(controller)
-}
-
-// getCredentials retrieves credentials to connect to Bitbucket Server
-func (router *Router) getCredentials(keySelector *corev1.SecretKeySelector) (*cred, error) {
-	token, err := common.GetSecretFromVolume(keySelector)
-	if err != nil {
-		return nil, errors.Wrap(err, "token not founnd")
-	}
-	return &cred{
-		token: token,
-	}, nil
-}
-
-// getCredentials retrieves credentials to connect to Bitbucket Server
-func (router *Router) getWebhookSecret(keySelector *corev1.SecretKeySelector) (*webhookSecret, error) {
-	secret, err := common.GetSecretFromVolume(keySelector)
-	if err != nil {
-		return nil, errors.Wrap(err, "token not founnd")
-	}
-	return &webhookSecret{
-		secret: secret,
-	}, nil
 }
 
 // Implement Router
@@ -137,7 +114,6 @@ func (router *Router) PostActivate() error {
 
 // PostInactivate performs operations after the route is inactivated
 func (router *Router) PostInactivate() error {
-
 	bitbucketserverEventSource := router.bitbucketserverEventSource
 	route := router.route
 
@@ -150,9 +126,9 @@ func (router *Router) PostInactivate() error {
 	if bitbucketserverEventSource.DeleteHookOnFinish && router.hookID > 0 {
 		logger.Info("deleting webhook from bitbucket")
 
-		bitbucketCredentials, err := router.getCredentials(bitbucketserverEventSource.AccessToken)
+		bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
 		if err != nil {
-			return errors.Errorf("failed to get bitbucketserver credentials. err: %+v", err)
+			return errors.Errorf("failed to get bitbucketserver token. err: %+v", err)
 		}
 
 		bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
@@ -162,7 +138,7 @@ func (router *Router) PostInactivate() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketCredentials.token)
+		ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
 
 		bitbucketClient := bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
 
@@ -202,9 +178,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	logger.Info("retrieving the access token credentials...")
-	bitbucketCredentials, err := router.getCredentials(bitbucketserverEventSource.AccessToken)
+	bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
 	if err != nil {
-		return errors.Errorf("failed to get bitbucketserver credentials. err: %+v", err)
+		return errors.Errorf("failed to get bitbucketserver token. err: %+v", err)
 	}
 
 	logger.Info("setting up the client to connect to Bitbucket Server...")
@@ -221,7 +197,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketCredentials.token)
+	ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
 	err = router.CreateBitbucketWebhook(ctx, bitbucketConfig)
 
 	if err != nil {
@@ -295,7 +271,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 	}
 
 	logger.Info("retrieving the webhook secret...")
-	webhookSecret, err := router.getWebhookSecret(bitbucketserverEventSource.WebhookSecret)
+	webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
 	if err != nil {
 		return errors.Errorf("failed to get bitbucketserver webhook secret. err: %+v", err)
 	}
@@ -305,7 +281,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		Url:           formattedURL,
 		Active:        true,
 		Events:        bitbucketserverEventSource.Events,
-		Configuration: bitbucketv1.WebhookConfiguration{Secret: webhookSecret.secret},
+		Configuration: bitbucketv1.WebhookConfiguration{Secret: webhookSecret},
 	}
 
 	localVarPostBody, err := json.Marshal(newHook)

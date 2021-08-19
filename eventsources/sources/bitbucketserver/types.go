@@ -56,14 +56,3 @@ type Router struct {
 	// bitbucketserverEventSource is the event source that contains configuration necessary to consume events from Bitbucket Server
 	bitbucketserverEventSource *v1alpha1.BitbucketServerEventSource
 }
-
-// cred stores the api access token
-type cred struct {
-	// token is Bitbucket Server API access token
-	token string
-}
-
-// webhookSecret stores the webhook secret
-type webhookSecret struct {
-	secret string
-}
