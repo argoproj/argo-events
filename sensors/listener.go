@@ -95,8 +95,6 @@ func initRateLimiter(trigger v1alpha1.Trigger) {
 			duration = time.Minute
 		case v1alpha1.Hour:
 			duration = time.Hour
-		default:
-			duration = time.Second
 		}
 		rateLimiters[trigger.Template.Name] = ratelimit.New(int(trigger.RateLimit.RequestsPerUnit), ratelimit.Per(duration))
 	} else {

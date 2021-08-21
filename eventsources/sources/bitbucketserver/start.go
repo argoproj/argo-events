@@ -18,13 +18,14 @@ package bitbucketserver
 import (
 	"context"
 	"encoding/json"
-	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
-	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"reflect"
 	"time"
+
+	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -304,7 +305,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		}
 		router.hookID = createdHook.ID
 
-		logger.With("hook-id", createdHook.ID).Info("hook succesfully registered")
+		logger.With("hook-id", createdHook.ID).Info("hook successfully registered")
 
 		return nil
 	}
@@ -319,7 +320,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 			return errors.Errorf("failed to update webhook. err: %+v", err)
 		}
 
-		logger.With("hook-id", existingHook.ID).Info("hook succesfully updated")
+		logger.With("hook-id", existingHook.ID).Info("hook successfully updated")
 	}
 
 	return nil
