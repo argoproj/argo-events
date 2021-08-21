@@ -3061,6 +3061,19 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.RateLimit": {
+      "type": "object",
+      "properties": {
+        "requestsPerUnit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unit": {
+          "description": "Defaults to Second",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.Sensor": {
       "description": "Sensor is the definition of a sensor resource",
       "type": "object",
@@ -3365,6 +3378,10 @@
         "policy": {
           "description": "Policy to configure backoff and execution criteria for the trigger",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerPolicy"
+        },
+        "rateLimit": {
+          "description": "Rate limit, default unit is Second",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.RateLimit"
         },
         "retryStrategy": {
           "description": "Retry strategy, defaults to no retry",
