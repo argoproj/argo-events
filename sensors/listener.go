@@ -87,6 +87,23 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	return nil
 }
 
+func initRateLimiter(trigger v1alpha1.Trigger) {
+	duration := time.Second
+	if trigger.RateLimit != nil {
+		switch trigger.RateLimit.Unit {
+		case v1alpha1.Minute:
+			duration = time.Minute
+		case v1alpha1.Hour:
+			duration = time.Hour
+		default:
+			duration = time.Second
+		}
+		rateLimiters[trigger.Template.Name] = ratelimit.New(int(trigger.RateLimit.RequestsPerUnit), ratelimit.Per(duration))
+	} else {
+		rateLimiters[trigger.Template.Name] = ratelimit.NewUnlimited()
+	}
+}
+
 // listenEvents watches and handles events received from the gateway.
 func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
@@ -105,6 +122,9 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 		}
 		triggers = append(triggers, trigger)
 		triggerMapping[depExpr] = triggers
+
+		// Init rate limiter for the trigger
+		initRateLimiter(trigger)
 	}
 
 	depMapping := make(map[string]v1alpha1.EventDependency)
@@ -275,23 +295,6 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 
 func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) {
 	if rl, ok := rateLimiters[trigger.Template.Name]; ok {
-		rl.Take()
-	} else {
-		duration := time.Second
-		if trigger.RateLimit != nil {
-			switch trigger.RateLimit.Unit {
-			case v1alpha1.Minute:
-				duration = time.Minute
-			case v1alpha1.Hour:
-				duration = time.Hour
-			default:
-				duration = time.Second
-			}
-			rl = ratelimit.New(int(trigger.RateLimit.RequestsPerUnit), ratelimit.Per(duration))
-		} else {
-			rl = ratelimit.NewUnlimited()
-		}
-		rateLimiters[trigger.Template.Name] = rl
 		rl.Take()
 	}
 
