@@ -1184,6 +1184,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#trigger-rate-limit" title="Trigger Rate Limit" class="md-nav__link">
+    Trigger Rate Limit
+  </a>
+  
+</li>
+      
       
       
       
@@ -1387,6 +1394,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#trigger-rate-limit" title="Trigger Rate Limit" class="md-nav__link">
+    Trigger Rate Limit
+  </a>
+  
+</li>
+      
       
       
       
@@ -1497,6 +1511,17 @@ results.</p>
         <span class="c1">#</span>
         <span class="c1"># Defaults to &quot;1&quot;</span>
         <span class="nt">jitter</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+</code></pre></div>
+
+<h2 id="trigger-rate-limit">Trigger Rate Limit<a class="headerlink" href="#trigger-rate-limit" title="Permanent link">&para;</a></h2>
+<p>There's no rate limit for a trigger unless you configure the spec as following:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">triggers</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">rateLimit</span><span class="p">:</span>
+        <span class="c1"># Second, Minute or Hour, defaults to Second</span>
+        <span class="nt">unit</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Second</span>
+        <span class="c1"># Requests per unit</span>
+        <span class="nt">requestsPerUnit</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20</span>
 </code></pre></div>
                 
                   
