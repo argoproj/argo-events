@@ -299,6 +299,23 @@ type Trigger struct {
 	// Retry strategy, defaults to no retry
 	// +optional
 	RetryStrategy *apicommon.Backoff `json:"retryStrategy,omitempty" protobuf:"bytes,4,opt,name=retryStrategy"`
+	// Rate limit, default unit is Second
+	// +optional
+	RateLimit *RateLimit `json:"rateLimit,omitempty" protobuf:"bytes,5,opt,name=rateLimit"`
+}
+
+type RateLimiteUnit string
+
+const (
+	Second RateLimiteUnit = "Second"
+	Minute RateLimiteUnit = "Minute"
+	Hour   RateLimiteUnit = "Hour"
+)
+
+type RateLimit struct {
+	// Defaults to Second
+	Unit            RateLimiteUnit `json:"unit,omitempty" protobuf:"bytes,1,opt,name=unit"`
+	RequestsPerUnit int32          `json:"requestsPerUnit,omitempty" protobuf:"bytes,2,opt,name=requestsPerUnit"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.

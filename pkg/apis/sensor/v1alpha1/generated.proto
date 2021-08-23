@@ -507,6 +507,13 @@ message PayloadField {
   optional string name = 2;
 }
 
+message RateLimit {
+  // Defaults to Second
+  optional string unit = 1;
+
+  optional int32 requestsPerUnit = 2;
+}
+
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
@@ -727,6 +734,10 @@ message Trigger {
   // Retry strategy, defaults to no retry
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.Backoff retryStrategy = 4;
+
+  // Rate limit, default unit is Second
+  // +optional
+  optional RateLimit rateLimit = 5;
 }
 
 // TriggerParameter indicates a passed parameter to a service template
