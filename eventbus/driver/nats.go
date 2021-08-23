@@ -317,7 +317,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	}
 	log.Debugf("Triggering actions for client %s", n.clientID)
 
-	go action(messages)
+	action(messages)
 
 	msgHolder.reset(depName)
 	msgHolder.ackAndCache(m, event.ID())

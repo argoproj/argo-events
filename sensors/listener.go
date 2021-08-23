@@ -29,6 +29,7 @@ import (
 	"github.com/antonmedv/expr"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
+	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -42,6 +43,8 @@ import (
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
 )
+
+var rateLimiters = make(map[string]ratelimit.Limiter)
 
 func subscribeOnce(subLock *uint32, subscribe func()) {
 	// acquire subLock if not already held
@@ -84,6 +87,21 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	return nil
 }
 
+func initRateLimiter(trigger v1alpha1.Trigger) {
+	duration := time.Second
+	if trigger.RateLimit != nil {
+		switch trigger.RateLimit.Unit {
+		case v1alpha1.Minute:
+			duration = time.Minute
+		case v1alpha1.Hour:
+			duration = time.Hour
+		}
+		rateLimiters[trigger.Template.Name] = ratelimit.New(int(trigger.RateLimit.RequestsPerUnit), ratelimit.Per(duration))
+	} else {
+		rateLimiters[trigger.Template.Name] = ratelimit.NewUnlimited()
+	}
+}
+
 // listenEvents watches and handles events received from the gateway.
 func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
@@ -102,6 +120,9 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 		}
 		triggers = append(triggers, trigger)
 		triggerMapping[depExpr] = triggers
+
+		// Init rate limiter for the trigger
+		initRateLimiter(trigger)
 	}
 
 	depMapping := make(map[string]v1alpha1.EventDependency)
@@ -256,7 +277,6 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 }
 
 func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1alpha1.Sensor, events map[string]cloudevents.Event, triggers []v1alpha1.Trigger) error {
-	log := logging.FromContext(ctx)
 	eventsMapping := make(map[string]*v1alpha1.Event)
 	depNames := make([]string, 0, len(events))
 	eventIDs := make([]string, 0, len(events))
@@ -266,24 +286,31 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		eventIDs = append(eventIDs, v.ID())
 	}
 	for _, trigger := range triggers {
-		if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, eventIDs, log); err != nil {
-			// Log the error, and let it continue
-			log.Errorw("failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
-				zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
-			sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
-		} else {
-			sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
-		}
+		go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
 	}
 	return nil
+}
+
+func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) {
+	if rl, ok := rateLimiters[trigger.Template.Name]; ok {
+		rl.Take()
+	}
+
+	log := logging.FromContext(ctx)
+	if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, eventIDs, log); err != nil {
+		// Log the error, and let it continue
+		log.Errorw("failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
+			zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
+		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
+	} else {
+		sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
+	}
 }
 
 func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string, log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
-
-	defer sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(time.Since(time.Now())/time.Millisecond))
 
 	if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
 		log.Errorf("failed to apply template parameters, %v", err)
