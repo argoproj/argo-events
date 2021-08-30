@@ -60,7 +60,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessKey refers K8 secret containing aws access key
+AccessKey refers K8s secret containing aws access key
 </p>
 </td>
 </tr>
@@ -72,7 +72,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SecretKey refers K8 secret containing aws secret key
+SecretKey refers K8s secret containing aws secret key
 </p>
 </td>
 </tr>
@@ -194,7 +194,7 @@ Description
 </td>
 <td>
 <p>
-Source of the K8 resource file(s)
+Source of the K8s resource file(s)
 </p>
 </td>
 </tr>
@@ -1972,6 +1972,58 @@ Name acts as key that holds the value at the path.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.RateLimit">
+RateLimit
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>unit</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RateLimiteUnit"> RateLimiteUnit </a>
+</em>
+</td>
+<td>
+<p>
+Defaults to Second
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>requestsPerUnit</code></br> <em> int32 </em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RateLimiteUnit">
+RateLimiteUnit (<code>string</code> alias)
+</p>
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.RateLimit">RateLimit</a>)
+</p>
+<p>
+</p>
 <h3 id="argoproj.io/v1alpha1.Sensor">
 Sensor
 </h3>
@@ -2397,7 +2449,7 @@ appropriate kubernetes api client for this resource
 </td>
 <td>
 <p>
-Source of the K8 resource file(s)
+Source of the K8s resource file(s)
 </p>
 </td>
 </tr>
@@ -2802,6 +2854,18 @@ github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 <em>(Optional)</em>
 <p>
 Retry strategy, defaults to no retry
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>rateLimit</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RateLimit"> RateLimit </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Rate limit, default unit is Second
 </p>
 </td>
 </tr>

@@ -52,6 +52,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger":            schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger":       schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PayloadField":           schema_pkg_apis_sensor_v1alpha1_PayloadField(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit":              schema_pkg_apis_sensor_v1alpha1_RateLimit(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                 schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":             schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":             schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
@@ -88,13 +89,13 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 					},
 					"accessKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AccessKey refers K8 secret containing aws access key",
+							Description: "AccessKey refers K8s secret containing aws access key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"secretKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SecretKey refers K8 secret containing aws secret key",
+							Description: "SecretKey refers K8s secret containing aws secret key",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -159,7 +160,7 @@ func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"source": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Source of the K8 resource file(s)",
+							Description: "Source of the K8s resource file(s)",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
 						},
 					},
@@ -1399,6 +1400,31 @@ func schema_pkg_apis_sensor_v1alpha1_PayloadField(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_RateLimit(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"unit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Defaults to Second",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"requestsPerUnit": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1702,7 +1728,7 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref common.ReferenceCall
 					},
 					"source": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Source of the K8 resource file(s)",
+							Description: "Source of the K8s resource file(s)",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
 						},
 					},
@@ -1977,11 +2003,17 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
+					"rateLimit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Rate limit, default unit is Second",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
 	}
 }
 

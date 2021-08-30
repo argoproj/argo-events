@@ -34,10 +34,10 @@ message AWSLambdaTrigger {
   // FunctionName refers to the name of the function to invoke.
   optional string functionName = 1;
 
-  // AccessKey refers K8 secret containing aws access key
+  // AccessKey refers K8s secret containing aws access key
   optional k8s.io.api.core.v1.SecretKeySelector accessKey = 2;
 
-  // SecretKey refers K8 secret containing aws secret key
+  // SecretKey refers K8s secret containing aws secret key
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 3;
 
   // Region is AWS region
@@ -69,7 +69,7 @@ message AWSLambdaTrigger {
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
 message ArgoWorkflowTrigger {
-  // Source of the K8 resource file(s)
+  // Source of the K8s resource file(s)
   optional ArtifactLocation source = 1;
 
   // Operation refers to the type of operation performed on the argo workflow resource.
@@ -507,6 +507,13 @@ message PayloadField {
   optional string name = 2;
 }
 
+message RateLimit {
+  // Defaults to Second
+  optional string unit = 1;
+
+  optional int32 requestsPerUnit = 2;
+}
+
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
@@ -590,7 +597,7 @@ message StandardK8STrigger {
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
   optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 1;
 
-  // Source of the K8 resource file(s)
+  // Source of the K8s resource file(s)
   optional ArtifactLocation source = 2;
 
   // Operation refers to the type of operation performed on the k8s resource.
@@ -727,6 +734,10 @@ message Trigger {
   // Retry strategy, defaults to no retry
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.Backoff retryStrategy = 4;
+
+  // Rate limit, default unit is Second
+  // +optional
+  optional RateLimit rateLimit = 5;
 }
 
 // TriggerParameter indicates a passed parameter to a service template

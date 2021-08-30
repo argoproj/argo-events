@@ -97,9 +97,9 @@ crds:
 
 .PHONY: manifests
 manifests: crds
-	kustomize build manifests/cluster-install > manifests/install.yaml
-	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
-	kustomize build manifests/extensions/validating-webhook > manifests/install-validating-webhook.yaml
+	kubectl kustomize manifests/cluster-install > manifests/install.yaml
+	kubectl kustomize manifests/namespace-install > manifests/namespace-install.yaml
+	kubectl kustomize manifests/extensions/validating-webhook > manifests/install-validating-webhook.yaml
 
 .PHONY: swagger
 swagger:
@@ -126,7 +126,7 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 .PHONY: start
 start: image
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kustomize build test/manifests | sed 's@quay.io/argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
+	kubectl kustomize test/manifests | sed 's@quay.io/argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
