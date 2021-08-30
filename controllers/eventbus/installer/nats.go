@@ -414,7 +414,11 @@ func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
 			Ports: []corev1.ServicePort{
-				{Name: "client", Port: clientPort},
+				// Prefix tcp- to enable clients to connect from
+				// an istio-enabled namespace, following:
+				// https://github.com/nats-io/nats-operator/issues/88
+				// https://github.com/istio/istio/issues/28623
+				{Name: "tcp-client", Port: clientPort},
 				{Name: "cluster", Port: clusterPort},
 				{Name: "monitor", Port: monitorPort},
 			},
