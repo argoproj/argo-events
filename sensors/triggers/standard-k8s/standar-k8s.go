@@ -45,7 +45,7 @@ import (
 
 var clusterResources = map[string]bool{
 	"namespaces": true,
-	"nodes":   true,
+	"nodes":      true,
 }
 
 // StandardK8STrigger implements Trigger interface for standard Kubernetes resources
