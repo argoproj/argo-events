@@ -384,17 +384,14 @@ func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, conf
 		if ss.Annotations != nil && ss.Annotations[common.AnnotationResourceSpecHash] == expectedSs.Annotations[common.AnnotationResourceSpecHash] {
 			return nil
 		}
-		ss.Spec = expectedSs.Spec
-		ss.SetLabels(expectedSs.Labels)
-		ss.Annotations[common.AnnotationResourceSpecHash] = expectedSs.Annotations[common.AnnotationResourceSpecHash]
-		if err := i.client.Update(ctx, ss); err != nil {
-			i.eventBus.Status.MarkDeployFailed("UpdateStatefulSetFailed", "Failed to update existing statefulset")
-			log.Errorw("error updating existing statefulset", zap.Error(err))
+		// Delete the existing one to recreate it
+		err := i.client.Delete(ctx, ss)
+		if err != nil {
+			i.eventBus.Status.MarkDeployFailed("DeleteOldStatefulSetFailed", "Failed to delete a statefulset")
+			log.Errorw("error deleting a statefulset", zap.Error(err))
 			return err
-		} else {
-			log.Infow("old statefulset is updated", "statefulsetName", ss.Name)
-			return nil
 		}
+		log.Infow("old statefulset is deleted", "statefulsetName", ss.Name)
 	}
 	err = i.client.Create(ctx, expectedSs)
 	if err != nil {
