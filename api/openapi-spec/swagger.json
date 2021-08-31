@@ -280,6 +280,9 @@
       "description": "ContainerTemplate defines customized spec for a container",
       "type": "object",
       "properties": {
+        "imagePullPolicy": {
+          "type": "string"
+        },
         "resources": {
           "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements"
         }
@@ -442,6 +445,11 @@
         },
         "maxMsgs": {
           "description": "Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000",
+          "type": "integer",
+          "format": "int64"
+        },
+        "maxSubs": {
+          "description": "Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000",
           "type": "integer",
           "format": "int64"
         },

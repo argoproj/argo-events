@@ -298,6 +298,11 @@ func (in *NativeStrategy) DeepCopyInto(out *NativeStrategy) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.MaxSubs != nil {
+		in, out := &in.MaxSubs, &out.MaxSubs
+		*out = new(uint64)
+		**out = **in
+	}
 	return
 }
 
