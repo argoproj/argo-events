@@ -221,7 +221,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: NATS_STREAMING_IMAGE
-          value: nats-streaming:0.17.0
+          value: nats-streaming:0.22.1
         - name: NATS_METRICS_EXPORTER_IMAGE
           value: synadia/prometheus-nats-exporter:0.6.2
         image: quay.io/argoproj/argo-events:latest
