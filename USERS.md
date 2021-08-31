@@ -9,6 +9,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [BioBox Analytics](https://biobox.io)
 1. [BlackRock](https://www.blackrock.com/)
 1. [Canva](https://www.canva.com/)
+1. [Codefresh](https://codefresh.io/)
 1. [DevSamurai](https://www.devsamurai.com/)
 1. [Fairwinds](https://fairwinds.com/)
 1. [Greenhouse Software](https://www.greenhouse.io/)
