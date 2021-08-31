@@ -75,6 +75,12 @@ func schema_pkg_apis_eventbus_v1alpha1_ContainerTemplate(ref common.ReferenceCal
 							Ref:     ref("k8s.io/api/core/v1.ResourceRequirements"),
 						},
 					},
+					"imagePullPolicy": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
 			},
 		},
@@ -464,6 +470,13 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Description: "Total size of messages per channel, 0 means unlimited. Defaults to 1GB",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"maxSubs": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000",
+							Type:        []string{"integer"},
+							Format:      "int64",
 						},
 					},
 				},

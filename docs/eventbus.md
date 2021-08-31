@@ -165,7 +165,8 @@ affinity:
   deleted automatically. It can be cutomized by setting
   `spec.nats.native.maxAge`, i.e. `240h`.
 
-- Max subscription number is 1000.
+- Max subscription number is defaults to `1000`, it could be customized by
+  setting `spec.nats.native.maxSubs`.
 
 ### Exotic
 

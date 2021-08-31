@@ -129,11 +129,14 @@ type NativeStrategy struct {
 	MaxMsgs *uint64 `json:"maxMsgs,omitempty" protobuf:"bytes,17,opt,name=maxMsgs"`
 	// Total size of messages per channel, 0 means unlimited. Defaults to 1GB
 	MaxBytes *string `json:"maxBytes,omitempty" protobuf:"bytes,18,opt,name=maxBytes"`
+	// Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000
+	MaxSubs *uint64 `json:"maxSubs,omitempty" protobuf:"bytes,19,opt,name=maxSubs"`
 }
 
 // ContainerTemplate defines customized spec for a container
 type ContainerTemplate struct {
-	Resources corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
+	Resources       corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
+	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy,omitempty" protobuf:"bytes,2,opt,name=imagePullPolicy,casttype=PullPolicy"`
 }
 
 // GetReplicas return the replicas of statefulset
