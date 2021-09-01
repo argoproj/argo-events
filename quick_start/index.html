@@ -1323,7 +1323,18 @@
 <p>The above event-source contains a single event configuration that runs an HTTP server on port <code>12000</code> with endpoint <code>example</code>.</p>
 <p>After running the above command, the event-source controller will create a pod and service.</p>
 <ol>
-<li>Create webhook sensor.<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+<li>
+<p>Create a service account with RBAC settings to allow the sensor to trigger workflows, and allow workflows to function.</p>
+<div class="codehilite"><pre><span></span><code> # sensor rbac
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/sensor-rbac.yaml
+ # workflow rbac
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/workflow-rbac.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Create webhook sensor.</p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 </code></pre></div>
 
 </li>
