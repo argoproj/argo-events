@@ -16,9 +16,12 @@ Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-wor
 
    After running the above command, the event-source controller will create a pod and service.
 
-1. Create a service account with RBAC settings to allow the sensor to trigger workflows.
-
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/operate-workflow-sa.yaml
+1. Create a service account with RBAC settings to allow the sensor to trigger workflows, and allow workflows to function.
+   
+         # sensor rbac
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/sensor-rbac.yaml
+         # workflow rbac
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/workflow-rbac.yaml
 
 1. Create webhook sensor.
 
