@@ -414,7 +414,11 @@ func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
 			Ports: []corev1.ServicePort{
-				{Name: "client", Port: clientPort},
+				// Prefix tcp- to enable clients to connect from
+				// an istio-enabled namespace, following:
+				// https://github.com/nats-io/nats-operator/issues/88
+				// https://github.com/istio/istio/issues/28623
+				{Name: "tcp-client", Port: clientPort},
 				{Name: "cluster", Port: clusterPort},
 				{Name: "monitor", Port: monitorPort},
 			},
@@ -449,6 +453,10 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if i.eventBus.Spec.NATS.Native.MaxMsgs != nil {
 		maxMsgs = *i.eventBus.Spec.NATS.Native.MaxMsgs
 	}
+	maxSubs := uint64(1000)
+	if i.eventBus.Spec.NATS.Native.MaxSubs != nil {
+		maxSubs = *i.eventBus.Spec.NATS.Native.MaxSubs
+	}
 	maxBytes := "1GB"
 	if i.eventBus.Spec.NATS.Native.MaxBytes != nil {
 		maxBytes = *i.eventBus.Spec.NATS.Native.MaxBytes
@@ -480,8 +488,9 @@ streaming {
     max_age: %s
 	max_msgs: %v
 	max_bytes: %s
+	max_subs: %v
   }
-}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), strings.Join(routes, ","), clusterID, strings.Join(peers, ","), maxAge, maxMsgs, maxBytes)
+}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), strings.Join(routes, ","), clusterID, strings.Join(peers, ","), maxAge, maxMsgs, maxBytes, maxSubs)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
@@ -573,6 +582,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 	if replicas < 3 {
 		replicas = 3
 	}
+	var stanContainerPullPolicy, metricsContainerPullPolicy corev1.PullPolicy
 	stanContainerResources := corev1.ResourceRequirements{
 		Requests: corev1.ResourceList{
 			corev1.ResourceCPU: apiresource.MustParse("0"),
@@ -581,10 +591,12 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 	containerTmpl := i.eventBus.Spec.NATS.Native.ContainerTemplate
 	if containerTmpl != nil {
 		stanContainerResources = containerTmpl.Resources
+		stanContainerPullPolicy = containerTmpl.ImagePullPolicy
 	}
 	metricsContainerResources := corev1.ResourceRequirements{}
 	if i.eventBus.Spec.NATS.Native.MetricsContainerTemplate != nil {
 		metricsContainerResources = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.Resources
+		metricsContainerPullPolicy = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.ImagePullPolicy
 	}
 	podTemplateLabels := make(map[string]string)
 	if i.eventBus.Spec.NATS.Native.Metadata != nil &&
@@ -654,8 +666,9 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				},
 				Containers: []corev1.Container{
 					{
-						Name:  "stan",
-						Image: i.streamingImage,
+						Name:            "stan",
+						Image:           i.streamingImage,
+						ImagePullPolicy: stanContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: clientPort},
 							{Name: "cluster", ContainerPort: clusterPort},
@@ -683,8 +696,9 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						},
 					},
 					{
-						Name:  "metrics",
-						Image: i.metricsImage,
+						Name:            "metrics",
+						Image:           i.metricsImage,
+						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "metrics", ContainerPort: common.EventBusMetricsPort},
 						},

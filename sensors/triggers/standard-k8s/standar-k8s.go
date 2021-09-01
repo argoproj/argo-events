@@ -43,6 +43,11 @@ import (
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
+var clusterResources = map[string]bool{
+	"namespaces": true,
+	"nodes":      true,
+}
+
 // StandardK8STrigger implements Trigger interface for standard Kubernetes resources
 type StandardK8sTrigger struct {
 	// K8sClient is kubernetes client
@@ -110,8 +115,10 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource(ctx context.Context) (interf
 		if objName == "" {
 			return nil, fmt.Errorf("resource name must be specified for fetching live object")
 		}
+
 		objNamespace := uObj.GetNamespace()
-		if objNamespace == "" {
+		_, isClusterResource := clusterResources[trigger.Template.K8s.GroupVersionResource.Resource]
+		if objNamespace == "" && !isClusterResource {
 			return nil, fmt.Errorf("resource namespace must be specified for fetching live object")
 		}
 		rObj, err = k8sTrigger.namespableDynamicClient.Namespace(objNamespace).Get(ctx, objName, metav1.GetOptions{})
@@ -145,10 +152,13 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
 
-	namespace := obj.GetNamespace()
-	// Defaults to sensor's namespace
-	if namespace == "" {
-		namespace = k8sTrigger.Sensor.Namespace
+	namespace := ""
+	if _, isClusterResource := clusterResources[trigger.Template.K8s.GroupVersionResource.Resource]; !isClusterResource {
+		namespace = obj.GetNamespace()
+		// Defaults to sensor's namespace
+		if namespace == "" {
+			namespace = k8sTrigger.Sensor.Namespace
+		}
 	}
 	obj.SetNamespace(namespace)
 

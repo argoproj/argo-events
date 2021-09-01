@@ -98,6 +98,15 @@ Kubernetes core/v1.ResourceRequirements </a> </em>
 <td>
 </td>
 </tr>
+<tr>
+<td>
+<code>imagePullPolicy</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#pullpolicy-v1-core">
+Kubernetes core/v1.PullPolicy </a> </em>
+</td>
+<td>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventBus">
@@ -617,6 +626,17 @@ Maximum number of messages per channel, 0 means unlimited. Defaults to
 <td>
 <p>
 Total size of messages per channel, 0 means unlimited. Defaults to 1GB
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxSubs</code></br> <em> uint64 </em>
+</td>
+<td>
+<p>
+Maximum number of subscriptions per channel, 0 means unlimited. Defaults
+to 1000
 </p>
 </td>
 </tr>
