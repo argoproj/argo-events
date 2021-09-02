@@ -40,9 +40,6 @@ func validate(eventSource *v1alpha1.AMQPEventSource) error {
 	if eventSource.RoutingKey == "" {
 		return errors.New("routing key must be specified")
 	}
-	if eventSource.ExchangeName == "" {
-		return errors.New("exchange name must be specified")
-	}
 	if eventSource.ExchangeType == "" {
 		return errors.New("exchange type must be specified")
 	}
