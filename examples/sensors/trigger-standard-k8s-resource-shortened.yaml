@@ -36,9 +36,6 @@ spec:
 #    - template:
 #        name: webhook-deployment-trigger
 #        k8s:
-#          group: apps
-#          version: v1
-#          resource: deployments
 #          operation: create
 #          source:
 #            resource:
