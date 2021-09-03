@@ -25,7 +25,7 @@ Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-wor
 
 1. Create webhook sensor.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook-shortened.yaml
 
    Once the sensor object is created, sensor controller will create corresponding pod and a service. 
 
