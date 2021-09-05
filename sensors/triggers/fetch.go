@@ -36,6 +36,9 @@ func FetchKubernetesResource(source *v1alpha1.ArtifactLocation) (*unstructured.U
 	if err != nil {
 		return nil, err
 	}
+
+	// uObj will either hold the resource definition stored in the trigger or just
+	// a stub to provide enough information to fetch the object from K8s cluster
 	uObj, err := artifacts.FetchArtifact(reader)
 	if err != nil {
 		return nil, err

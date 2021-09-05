@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: webhook-pod-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: v1
+              kind: Pod
+              metadata:
+                generateName: hello-world-
+              spec:
+                containers:
+                  - name: hello-container
+                    args:
+                      - "hello-world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: body
+              dest: spec.containers.0.args.0
+#    - template:
+#        name: webhook-deployment-trigger
+#        k8s:
+#          operation: create
+#          source:
+#            resource:
+#              apiVersion: apps/v1
+#              kind: Deployment
+#              metadata:
+#                generateName: hello-world-
+#              spec:
+#                replicas: 1
+#                selector:
+#                  matchLabels:
+#                    app: mydeploy
+#                template:
+#                  metadata:
+#                    labels:
+#                      app: mydeploy
+#                  spec:
+#                    containers:
+#                      - name: hello-container
+#                        args:
+#                         - "hello world"
+#                        command:
+#                         - cowsay
+#                        image: "docker/whalesay:latest"
