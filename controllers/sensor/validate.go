@@ -163,9 +163,7 @@ func validateK8STrigger(trigger *v1alpha1.StandardK8STrigger) error {
 	if trigger.Source == nil {
 		return errors.New("k8s trigger does not contain an absolute action")
 	}
-	if trigger.GroupVersionResource.Size() == 0 {
-		return errors.New("must provide group, version and resource for the resource")
-	}
+
 	switch trigger.Operation {
 	case "", v1alpha1.Create, v1alpha1.Patch, v1alpha1.Update, v1alpha1.Delete:
 
@@ -190,9 +188,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	if trigger.Source == nil {
 		return errors.New("argoWorkflow trigger does not contain an absolute action")
 	}
-	if trigger.GroupVersionResource.Size() == 0 {
-		return errors.New("must provide group, version and resource for the resource")
-	}
+
 	switch trigger.Operation {
 	case v1alpha1.Submit, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit, v1alpha1.Terminate:
 	default:
