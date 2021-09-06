@@ -112,6 +112,9 @@ message AMQPEventSource {
   // Auth hosts secret selectors for username and password
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.BasicAuth auth = 13;
+
+  // URLSecret is secret reference for rabbitmq service URL
+  optional k8s.io.api.core.v1.SecretKeySelector urlSecret = 14;
 }
 
 // AMQPExchangeDeclareConfig holds the configuration for the exchange on the server

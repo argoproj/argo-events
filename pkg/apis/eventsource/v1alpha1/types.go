@@ -341,7 +341,7 @@ type Selector struct {
 // AMQPEventSource refers to an event-source for AMQP stream events
 type AMQPEventSource struct {
 	// URL for rabbitmq service
-	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// ExchangeName is the exchange name
 	// For more information, visit https://www.rabbitmq.com/tutorials/amqp-concepts.html
 	ExchangeName string `json:"exchangeName" protobuf:"bytes,2,opt,name=exchangeName"`
@@ -384,6 +384,8 @@ type AMQPEventSource struct {
 	// Auth hosts secret selectors for username and password
 	// +optional
 	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,13,opt,name=auth"`
+	// URLSecret is secret reference for rabbitmq service URL
+	URLSecret *corev1.SecretKeySelector `json:"urlSecret,omitempty" protobuf:"bytes,14,opt,name=urlSecret"`
 }
 
 // AMQPExchangeDeclareConfig holds the configuration for the exchange on the server
