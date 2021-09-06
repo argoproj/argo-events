@@ -38,7 +38,7 @@ func validate(eventSource *v1alpha1.AMQPEventSource) error {
 		return errors.New("either url or urlSecret must be specified")
 	}
 	if eventSource.URL != "" && eventSource.URLSecret != nil {
-		return errors.New("only one of url or urlSecret must be specified")
+		return errors.New("only one of url or urlSecret can be specified")
 	}
 	if eventSource.RoutingKey == "" {
 		return errors.New("routing key must be specified")
