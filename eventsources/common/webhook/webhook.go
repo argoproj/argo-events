@@ -146,6 +146,8 @@ func startServer(router Router, controller *Controller) {
 					common.SendResponse(writer, http.StatusUnauthorized, "Invalid Auth token")
 					return
 				}
+			}
+			if request.Header.Get("Authorization") != "" {
 				// Auth secret stops here
 				request.Header.Set("Authorization", "*** Masked Auth Secret ***")
 			}
