@@ -89,6 +89,11 @@ func (in *AMQPEventSource) DeepCopyInto(out *AMQPEventSource) {
 		*out = new(common.BasicAuth)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.URLSecret != nil {
+		in, out := &in.URLSecret, &out.URLSecret
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

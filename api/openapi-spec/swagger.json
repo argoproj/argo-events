@@ -550,7 +550,6 @@
       "description": "AMQPEventSource refers to an event-source for AMQP stream events",
       "type": "object",
       "required": [
-        "url",
         "exchangeName",
         "exchangeType",
         "routingKey"
@@ -610,6 +609,10 @@
         "url": {
           "description": "URL for rabbitmq service",
           "type": "string"
+        },
+        "urlSecret": {
+          "description": "URLSecret is secret reference for rabbitmq service URL",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
     },

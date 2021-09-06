@@ -291,6 +291,18 @@ Auth hosts secret selectors for username and password
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>urlSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+URLSecret is secret reference for rabbitmq service URL
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AMQPExchangeDeclareConfig">
