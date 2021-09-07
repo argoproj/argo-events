@@ -147,6 +147,10 @@ func startServer(router Router, controller *Controller) {
 					return
 				}
 			}
+			if request.Header.Get("Authorization") != "" {
+				// Auth secret stops here
+				request.Header.Set("Authorization", "*** Masked Auth Secret ***")
+			}
 			router.HandleRoute(writer, request)
 		})
 	}
