@@ -77,7 +77,7 @@ spec:
                 dependencyName: test-dep
                 dataTemplate: "{{ .Input.body.pull_request.head.sha | substr 0 7 }}"
               dest: spec.arguments.parameters.2.value
-            # Append pull request number and short sha to dynamically assign worklfow name <github-21500-2c065a>
+            # Append pull request number and short sha to dynamically assign workflow name <github-21500-2c065a>
             - src:
                 dependencyName: test-dep
                 dataTemplate: "{{ .Input.body.pull_request.number }}-{{ .Input.body.pull_request.head.sha | substr 0 7 }}"
