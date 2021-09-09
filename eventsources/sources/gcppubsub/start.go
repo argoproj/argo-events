@@ -237,6 +237,11 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	subscExists := false
 	if addr := os.Getenv("PUBSUB_EMULATOR_HOST"); addr != "" {
 		logger.Debug("using pubsub emulator - skipping permissions check")
+		subscExists, err = subscription.Exists(ctx)
+		if err != nil {
+			client.Close()
+			return nil, nil, errors.Errorf("failed to check if subscription %s exists", subscription)
+		}
 	} else {
 		// trick: you don't need to have get permission to check only whether it exists
 		perms, err := subscription.IAM().TestPermissions(ctx, []string{"pubsub.subscriptions.consume"})
