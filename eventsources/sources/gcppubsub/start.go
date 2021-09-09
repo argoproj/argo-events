@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"cloud.google.com/go/compute/metadata"
@@ -233,23 +234,28 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	// no            | yes         | yes          | create subsc.         | pubsub.subscriptions.create (proj.) + pubsub.topics.attachSubscription (topic)
 	// no            | yes         | no           | create topic & subsc. | above + pubsub.topics.create (proj. for topic)
 
-	// trick: you don't need to have get permission to check only whether it exists
-	perms, err := subscription.IAM().TestPermissions(ctx, []string{"pubsub.subscriptions.consume"})
-	subscExists := len(perms) == 1
-	if !subscExists {
-		switch status.Code(err) {
-		case codes.OK:
-			client.Close()
-			return nil, nil, errors.Errorf("you lack permission to pull from %s", subscription)
-		case codes.NotFound:
-			// OK, maybe the subscription doesn't exist yet, so create it later
-			// (it possibly means project itself doesn't exist, but it's ok because we'll see an error later in such case)
-		default:
-			client.Close()
-			return nil, nil, errors.Wrapf(err, "failed to test permission for subscription %s", subscription)
+	subscExists := false
+	if addr := os.Getenv("PUBSUB_EMULATOR_HOST"); addr != "" {
+		logger.Debug("using pubsub emulator - skipping permissions check")
+	} else {
+		// trick: you don't need to have get permission to check only whether it exists
+		perms, err := subscription.IAM().TestPermissions(ctx, []string{"pubsub.subscriptions.consume"})
+		subscExists = len(perms) == 1
+		if !subscExists {
+			switch status.Code(err) {
+			case codes.OK:
+				client.Close()
+				return nil, nil, errors.Errorf("you lack permission to pull from %s", subscription)
+			case codes.NotFound:
+				// OK, maybe the subscription doesn't exist yet, so create it later
+				// (it possibly means project itself doesn't exist, but it's ok because we'll see an error later in such case)
+			default:
+				client.Close()
+				return nil, nil, errors.Wrapf(err, "failed to test permission for subscription %s", subscription)
+			}
 		}
+		logger.Debug("checked if subscription exists and you have right permission")
 	}
-	logger.Debug("checked if subscription exists and you have right permission")
 
 	// subsc. exists | topic given | topic exists | action                | required permissions
 	// :------------ | :---------- | :----------- | :-------------------- | :-----------------------------------------------------------------------------
