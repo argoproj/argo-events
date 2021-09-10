@@ -1425,13 +1425,13 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
    Grant it the <code>repo_hook</code> permissions. </p>
 </li>
 <li>
-<p>Base64 encode your api token key.</p>
+<p>Base64 encode your API token key.</p>
 <div class="codehilite"><pre><span></span><code>echo -n &lt;api-token-key&gt; | base64
 </code></pre></div>
 
 </li>
 <li>
-<p>Create a secret called <code>github-access</code>.</p>
+<p>Create a secret called <code>github-access</code> that contains your encoded GitHub API token. You can also include a secret key that is encoded with <code>base64</code> for your webhook if any.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
 <span class="n">metadata</span><span class="o">:</span>
@@ -1439,6 +1439,7 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 <span class="n">type</span><span class="o">:</span> <span class="n">Opaque</span>
 <span class="n">data</span><span class="o">:</span>
   <span class="n">token</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span>
+  <span class="n">secret</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">webhook</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
 </code></pre></div>
 
 </li>
