@@ -27,3 +27,13 @@ Full spec is available [here](https://github.com/argoproj/argo-events/tree/stabl
 
 See a PubSub EventSource
 [example](https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml).
+
+## Running With PubSub Emulator
+
+You can point this event source at the
+[PubSub Emulator](https://cloud.google.com/pubsub/docs/emulator) by
+configuring the `PUBSUB_EMULATOR_HOST` environment variable for the event
+source pod. This can be configured on the `EventSource` resource under the
+`spec.template.container.env` key. This option is also documented in the
+PubSub EventSource
+[example](https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml).
