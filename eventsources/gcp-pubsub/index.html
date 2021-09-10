@@ -935,6 +935,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#running-with-pubsub-emulator" title="Running With PubSub Emulator" class="md-nav__link">
+    Running With PubSub Emulator
+  </a>
+  
+</li>
+      
       
       
       
@@ -1345,6 +1352,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#running-with-pubsub-emulator" title="Running With PubSub Emulator" class="md-nav__link">
+    Running With PubSub Emulator
+  </a>
+  
+</li>
+      
       
       
       
@@ -1426,6 +1440,14 @@ combination.</p>
 and want to use it for a PubSub EventSource, leave <code>credentialSecret</code> nil.</p>
 <p>Full spec is available <a href="https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#pubsubeventsource">here</a>.</p>
 <p>See a PubSub EventSource
+<a href="https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml">example</a>.</p>
+<h2 id="running-with-pubsub-emulator">Running With PubSub Emulator<a class="headerlink" href="#running-with-pubsub-emulator" title="Permanent link">&para;</a></h2>
+<p>You can point this event source at the
+<a href="https://cloud.google.com/pubsub/docs/emulator">PubSub Emulator</a> by
+configuring the <code>PUBSUB_EMULATOR_HOST</code> environment variable for the event
+source pod. This can be configured on the <code>EventSource</code> resource under the
+<code>spec.template.container.env</code> key. This option is also documented in the
+PubSub EventSource
 <a href="https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml">example</a>.</p>
                 
                   
