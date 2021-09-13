@@ -92,5 +92,6 @@ jobs:
           files: |
             dist/*.gz
             dist/*.gz.sha256
+            manifests/*.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
