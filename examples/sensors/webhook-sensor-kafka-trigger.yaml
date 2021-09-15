@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-kafka-trigger
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: kafka-trigger
+        kafka:
+          # Kafka URL
+          url: kafka.argo-events:9092
+          # Name of the topic
+          topic: webhooks-events
+          # partition id
+          partition: 0
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.message
+              dest: fileName
