@@ -22,7 +22,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v1
         with:
-          go-version: "1.15.7"
+          go-version: "1.17.1"
       - name: Add bins to PATH
         run: |
           echo /home/runner/go/bin >> $GITHUB_PATH
@@ -64,7 +64,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: "1.15.7"
+          go-version: "1.17.1"
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -93,7 +93,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v1
         with:
-          go-version: "1.15.7"
+          go-version: "1.17.1"
       - name: Add bins to PATH
         run: |
           echo /home/runner/go/bin >> $GITHUB_PATH
