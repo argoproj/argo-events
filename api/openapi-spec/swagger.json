@@ -2369,15 +2369,7 @@
     "io.argoproj.sensor.v1alpha1.ArgoWorkflowTrigger": {
       "description": "ArgoWorkflowTrigger is the trigger for the Argo Workflow",
       "type": "object",
-      "required": [
-        "group",
-        "version",
-        "resource"
-      ],
       "properties": {
-        "group": {
-          "type": "string"
-        },
         "operation": {
           "description": "Operation refers to the type of operation performed on the argo workflow resource. Default value is Submit.",
           "type": "string"
@@ -2389,15 +2381,9 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           }
         },
-        "resource": {
-          "type": "string"
-        },
         "source": {
           "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
-        },
-        "version": {
-          "type": "string"
         }
       }
     },
@@ -3234,15 +3220,7 @@
     "io.argoproj.sensor.v1alpha1.StandardK8STrigger": {
       "description": "StandardK8STrigger is the standard Kubernetes resource trigger",
       "type": "object",
-      "required": [
-        "group",
-        "version",
-        "resource"
-      ],
       "properties": {
-        "group": {
-          "type": "string"
-        },
         "liveObject": {
           "description": "LiveObject specifies whether the resource should be directly fetched from K8s instead of being marshaled from the resource artifact. If set to true, the resource artifact must contain the information required to uniquely identify the resource in the cluster, that is, you must specify \"apiVersion\", \"kind\" as well as \"name\" and \"namespace\" meta data. Only valid for operation type `update`",
           "type": "boolean"
@@ -3262,15 +3240,9 @@
           "description": "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
           "type": "string"
         },
-        "resource": {
-          "type": "string"
-        },
         "source": {
           "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
-        },
-        "version": {
-          "type": "string"
         }
       }
     },
