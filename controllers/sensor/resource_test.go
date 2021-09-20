@@ -76,11 +76,6 @@ var (
 					Template: &v1alpha1.TriggerTemplate{
 						Name: "fake-trigger",
 						K8s: &v1alpha1.StandardK8STrigger{
-							GroupVersionResource: metav1.GroupVersionResource{
-								Group:    "k8s.io",
-								Version:  "",
-								Resource: "pods",
-							},
 							Operation: "create",
 							Source:    &v1alpha1.ArtifactLocation{},
 						},
