@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Argo Events",
-    "version": "v1.4.1"
+    "version": "v1.4.2"
   },
   "paths": {},
   "definitions": {
