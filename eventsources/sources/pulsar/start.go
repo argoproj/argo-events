@@ -112,10 +112,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				log.Errorw("failed to get ClientKeyPath from the volume", "error", err)
 				return err
 			}
-		case pulsarEventSource.TLS.DeprecatedClientCertPath != "" && pulsarEventSource.TLS.DeprecatedClientKeyPath != "":
-			// DEPRECATED.
-			clientCertPath = pulsarEventSource.TLS.DeprecatedClientCertPath
-			clientKeyPath = pulsarEventSource.TLS.DeprecatedClientKeyPath
 		default:
 			return errors.New("invalid TLS config")
 		}

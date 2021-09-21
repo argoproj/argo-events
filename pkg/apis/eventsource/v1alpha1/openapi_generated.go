@@ -552,13 +552,6 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 							Format:      "",
 						},
 					},
-					"userPayload": {
-						SchemaProps: spec.SchemaProps{
-							Description: "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated: will be removed in v1.5. Please use Metadata instead.",
-							Type:        []string{"string"},
-							Format:      "byte",
-						},
-					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
@@ -876,13 +869,6 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 						SchemaProps: spec.SchemaProps{
 							Description: "Service is the specifications of the service to expose the event source",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Service"),
-						},
-					},
-					"replica": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedReplica is the event source deployment replicas Deprecated: use replicas instead, will be removed in v1.5",
-							Type:        []string{"integer"},
-							Format:      "int32",
 						},
 					},
 					"minio": {
@@ -2308,14 +2294,6 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"credentialsFile": {
-						SchemaProps: spec.SchemaProps{
-							Description: "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated: will be removed in v1.5, use CredentialSecret instead",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
@@ -2333,7 +2311,6 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"credentialsFile"},
 			},
 		},
 		Dependencies: []string{
@@ -3394,20 +3371,6 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookContext(ref common.ReferenceCal
 						SchemaProps: spec.SchemaProps{
 							Description: "AuthSecret holds a secret selector that contains a bearer token for authentication",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"serverCertPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedServerCertPath refers the file that contains the cert.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"serverKeyPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedServerKeyPath refers the file that contains private key",
-							Type:        []string{"string"},
-							Format:      "",
 						},
 					},
 				},

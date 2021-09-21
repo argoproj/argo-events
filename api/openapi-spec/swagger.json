@@ -229,25 +229,13 @@
       "description": "TLSConfig refers to TLS configuration for a client.",
       "type": "object",
       "properties": {
-        "caCertPath": {
-          "description": "DeprecatedCACertPath refers the file path that contains the CA cert. Deprecated: will be removed in v1.5, use CACertSecret instead",
-          "type": "string"
-        },
         "caCertSecret": {
           "description": "CACertSecret refers to the secret that contains the CA cert",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
-        "clientCertPath": {
-          "description": "DeprecatedClientCertPath refers the file path that contains client cert. Deprecated: will be removed in v1.5, use ClientCertSecret instead",
-          "type": "string"
-        },
         "clientCertSecret": {
           "description": "ClientCertSecret refers to the secret that contains the client cert",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "clientKeyPath": {
-          "description": "DeprecatedClientKeyPath refers the file path that contains client key. Deprecated: will be removed in v1.5, use ClientKeySecret instead",
-          "type": "string"
         },
         "clientKeySecret": {
           "description": "ClientKeySecret refers to the secret that contains the client key",
@@ -414,10 +402,6 @@
         "affinity": {
           "description": "The pod's scheduling constraints More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
           "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
-        },
-        "antiAffinity": {
-          "description": "Deprecated: use Affinity instead, will be removed in v1.5",
-          "type": "boolean"
         },
         "auth": {
           "type": "string"
@@ -797,11 +781,6 @@
         "timezone": {
           "description": "Timezone in which to run the schedule",
           "type": "string"
-        },
-        "userPayload": {
-          "description": "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated: will be removed in v1.5. Please use Metadata instead.",
-          "type": "string",
-          "format": "byte"
         }
       }
     },
@@ -1081,11 +1060,6 @@
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.RedisEventSource"
           }
-        },
-        "replica": {
-          "description": "DeprecatedReplica is the event source deployment replicas Deprecated: use replicas instead, will be removed in v1.5",
-          "type": "integer",
-          "format": "int32"
         },
         "replicas": {
           "description": "Replicas is the event source deployment replicas",
@@ -1690,17 +1664,10 @@
     "io.argoproj.eventsource.v1alpha1.PubSubEventSource": {
       "description": "PubSubEventSource refers to event-source for GCP PubSub related events.",
       "type": "object",
-      "required": [
-        "credentialsFile"
-      ],
       "properties": {
         "credentialSecret": {
           "description": "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicitly uses Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "credentialsFile": {
-          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated: will be removed in v1.5, use CredentialSecret instead",
-          "type": "string"
         },
         "deleteSubscriptionOnFinish": {
           "description": "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
@@ -2299,17 +2266,9 @@
           "description": "Port on which HTTP server is listening for incoming events.",
           "type": "string"
         },
-        "serverCertPath": {
-          "description": "DeprecatedServerCertPath refers the file that contains the cert.",
-          "type": "string"
-        },
         "serverCertSecret": {
           "description": "ServerCertPath refers the file that contains the cert.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "serverKeyPath": {
-          "description": "DeprecatedServerKeyPath refers the file that contains private key",
-          "type": "string"
         },
         "serverKeySecret": {
           "description": "ServerKeyPath refers the file that contains private key",
@@ -2473,10 +2432,6 @@
         "payload"
       ],
       "properties": {
-        "certFilePath": {
-          "description": "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. Deprecated: will be removed in v1.5, use CertSecret instead",
-          "type": "string"
-        },
         "certSecret": {
           "description": "CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -2547,27 +2502,6 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.DependencyGroup": {
-      "description": "DependencyGroup is the group of dependencies",
-      "type": "object",
-      "required": [
-        "name",
-        "dependencies"
-      ],
-      "properties": {
-        "dependencies": {
-          "description": "Dependencies of events",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "name": {
-          "description": "Name of the group",
-          "type": "string"
         }
       }
     },
@@ -2746,10 +2680,6 @@
         "remote": {
           "description": "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitRemoteConfig"
-        },
-        "sshKeyPath": {
-          "description": "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret instead.",
-          "type": "string"
         },
         "sshKeySecret": {
           "description": "SSHKeySecret refers to the secret that contains SSH key",
@@ -3133,22 +3063,11 @@
         "triggers"
       ],
       "properties": {
-        "circuit": {
-          "description": "Circuit is a boolean expression of dependency groups Deprecated: will be removed in v1.5, use Switch in triggers instead.",
-          "type": "string"
-        },
         "dependencies": {
           "description": "Dependencies is a list of the events that this sensor is dependent on.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependency"
-          }
-        },
-        "dependencyGroups": {
-          "description": "DependencyGroups is a list of the groups of events.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DependencyGroup"
           }
         },
         "errorOnFailedRound": {
@@ -3444,26 +3363,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.TriggerSwitch": {
-      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. Deprecated: will be removed in v1.5",
-      "type": "object",
-      "properties": {
-        "all": {
-          "description": "All acts as a AND operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "any": {
-          "description": "Any acts as a OR operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.TriggerTemplate": {
       "description": "TriggerTemplate is the template that describes trigger specification.",
       "type": "object",
@@ -3522,10 +3421,6 @@
         "slack": {
           "description": "Slack refers to the trigger designed to send slack notification message.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackTrigger"
-        },
-        "switch": {
-          "description": "DeprecatedSwitch is the condition to execute the trigger. Deprecated: will be removed in v1.5, use conditions instead",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerSwitch"
         }
       }
     },

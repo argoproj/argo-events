@@ -100,10 +100,6 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 		}
 		return getSSHKeyAuth(sshKeyPath)
 	}
-	// DEPRECATED
-	if g.artifact.DeprecatedSSHKeyPath != "" {
-		return getSSHKeyAuth(g.artifact.DeprecatedSSHKeyPath)
-	}
 	return nil, nil
 }
 

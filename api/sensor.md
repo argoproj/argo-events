@@ -553,18 +553,6 @@ construct the request payload.
 </p>
 </td>
 </tr>
-<tr>
-<td>
-<code>certFilePath</code></br> <em> string </em>
-</td>
-<td>
-<p>
-DeprecatedCertFilePath is path to the cert file within sensor for secure
-connection between sensor and custom trigger gRPC server. Deprecated:
-will be removed in v1.5, use CertSecret instead
-</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.DataFilter">
@@ -658,52 +646,6 @@ extra functions. See
 <a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
 and
 <a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.DependencyGroup">
-DependencyGroup
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
-</p>
-<p>
-<p>
-DependencyGroup is the group of dependencies
-</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>name</code></br> <em> string </em>
-</td>
-<td>
-<p>
-Name of the group
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code></br> <em> \[\]string </em>
-</td>
-<td>
-<p>
-Dependencies of events
 </p>
 </td>
 </tr>
@@ -1193,20 +1135,6 @@ fetch.
 Remote to manage set of tracked repositories. Defaults to “origin”.
 Refer
 <a href="https://git-scm.com/docs/git-remote">https://git-scm.com/docs/git-remote</a>
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>sshKeyPath</code></br> <em> string </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don’t
-want to provide username and password. ssh key path must be mounted in
-sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret
-instead.
 </p>
 </td>
 </tr>
@@ -2084,18 +2012,6 @@ Template is the pod specification for the sensor
 </tr>
 <tr>
 <td>
-<code>dependencyGroups</code></br> <em>
-<a href="#argoproj.io/v1alpha1.DependencyGroup"> \[\]DependencyGroup
-</a> </em>
-</td>
-<td>
-<p>
-DependencyGroups is a list of the groups of events.
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>errorOnFailedRound</code></br> <em> bool </em>
 </td>
 <td>
@@ -2115,17 +2031,6 @@ processed.
 <p>
 EventBusName references to a EventBus name. By default the value is
 “default”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>circuit</code></br> <em> string </em>
-</td>
-<td>
-<p>
-Circuit is a boolean expression of dependency groups Deprecated: will be
-removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
 </tr>
@@ -2214,18 +2119,6 @@ Template is the pod specification for the sensor
 </tr>
 <tr>
 <td>
-<code>dependencyGroups</code></br> <em>
-<a href="#argoproj.io/v1alpha1.DependencyGroup"> \[\]DependencyGroup
-</a> </em>
-</td>
-<td>
-<p>
-DependencyGroups is a list of the groups of events.
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>errorOnFailedRound</code></br> <em> bool </em>
 </td>
 <td>
@@ -2245,17 +2138,6 @@ processed.
 <p>
 EventBusName references to a EventBus name. By default the value is
 “default”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>circuit</code></br> <em> string </em>
-</td>
-<td>
-<p>
-Circuit is a boolean expression of dependency groups Deprecated: will be
-removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
 </tr>
@@ -3094,55 +2976,6 @@ response status
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.TriggerSwitch">
-TriggerSwitch
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
-</p>
-<p>
-<p>
-TriggerSwitch describes condition which must be satisfied in order to
-execute a trigger. Depending upon condition type, status of dependency
-groups is used to evaluate the result. Deprecated: will be removed in
-v1.5
-</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>any</code></br> <em> \[\]string </em>
-</td>
-<td>
-<p>
-Any acts as a OR operator between dependencies
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>all</code></br> <em> \[\]string </em>
-</td>
-<td>
-<p>
-All acts as a AND operator between dependencies
-</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="argoproj.io/v1alpha1.TriggerTemplate">
 TriggerTemplate
 </h3>
@@ -3313,19 +3146,6 @@ LogTrigger </a> </em>
 <em>(Optional)</em>
 <p>
 Log refers to the trigger designed to invoke log the event.
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>switch</code></br> <em>
-<a href="#argoproj.io/v1alpha1.TriggerSwitch"> TriggerSwitch </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-DeprecatedSwitch is the condition to execute the trigger. Deprecated:
-will be removed in v1.5, use conditions instead
 </p>
 </td>
 </tr>

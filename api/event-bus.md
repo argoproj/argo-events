@@ -424,16 +424,6 @@ Size is the NATS StatefulSet size
 </tr>
 <tr>
 <td>
-<code>antiAffinity</code></br> <em> bool </em>
-</td>
-<td>
-<p>
-Deprecated: use Affinity instead, will be removed in v1.5
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>persistence</code></br> <em>
 <a href="#argoproj.io/v1alpha1.PersistenceStrategy"> PersistenceStrategy
 </a> </em>
