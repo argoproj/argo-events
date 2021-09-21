@@ -150,10 +150,6 @@ message CustomTrigger {
 
   // Payload is the list of key-value extracted from an event payload to construct the request payload.
   repeated TriggerParameter payload = 7;
-
-  // DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-  // Deprecated: will be removed in v1.5, use CertSecret instead
-  optional string certFilePath = 8;
 }
 
 // DataFilter describes constraints and filters for event data
@@ -186,15 +182,6 @@ message DataFilter {
   // The templating follows the standard go-template syntax as well as sprig's extra functions.
   // See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
   optional string template = 5;
-}
-
-// DependencyGroup is the group of dependencies
-message DependencyGroup {
-  // Name of the group
-  optional string name = 1;
-
-  // Dependencies of events
-  repeated string dependencies = 2;
 }
 
 // Event represents the cloudevent received from an event source.
@@ -309,12 +296,6 @@ message GitArtifact {
   // Refer https://git-scm.com/docs/git-remote
   // +optional
   optional GitRemoteConfig remote = 9;
-
-  // DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
-  // ssh key path must be mounted in sensor pod.
-  // Deprecated: will be removed in v1.5, use SSHKeySecret instead.
-  // +optional
-  optional string sshKeyPath = 10;
 }
 
 // GitCreds contain reference to git username and password
@@ -547,22 +528,15 @@ message SensorSpec {
   // +optional
   optional Template template = 3;
 
-  // DependencyGroups is a list of the groups of events.
-  repeated DependencyGroup dependencyGroups = 4;
-
   // ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
   // Once sensor state is set to `error`, no further triggers will be processed.
-  optional bool errorOnFailedRound = 5;
+  optional bool errorOnFailedRound = 4;
 
   // EventBusName references to a EventBus name. By default the value is "default"
-  optional string eventBusName = 6;
-
-  // Circuit is a boolean expression of dependency groups
-  // Deprecated: will be removed in v1.5, use Switch in triggers instead.
-  optional string circuit = 7;
+  optional string eventBusName = 5;
 
   // Replicas is the sensor deployment replicas
-  optional int32 replicas = 8;
+  optional int32 replicas = 6;
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -795,17 +769,6 @@ message TriggerPolicy {
   optional StatusPolicy status = 2;
 }
 
-// TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
-// Depending upon condition type, status of dependency groups is used to evaluate the result.
-// Deprecated: will be removed in v1.5
-message TriggerSwitch {
-  // Any acts as a OR operator between dependencies
-  repeated string any = 1;
-
-  // All acts as a AND operator between dependencies
-  repeated string all = 2;
-}
-
 // TriggerTemplate is the template that describes trigger specification.
 message TriggerTemplate {
   // Name is a unique name of the action to take.
@@ -854,16 +817,11 @@ message TriggerTemplate {
 
   // Log refers to the trigger designed to invoke log the event.
   // +optional
-  optional LogTrigger log = 13;
-
-  // DeprecatedSwitch is the condition to execute the trigger.
-  // Deprecated: will be removed in v1.5, use conditions instead
-  // +optional
-  optional TriggerSwitch switch = 12;
+  optional LogTrigger log = 12;
 
   // AzureEventHubs refers to the trigger send an event to an Azure Event Hub.
   // +optional
-  optional AzureEventHubsTrigger azureEventHubs = 14;
+  optional AzureEventHubsTrigger azureEventHubs = 13;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

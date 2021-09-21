@@ -2436,10 +2436,6 @@
         "payload"
       ],
       "properties": {
-        "certFilePath": {
-          "description": "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. Deprecated: will be removed in v1.5, use CertSecret instead",
-          "type": "string"
-        },
         "certSecret": {
           "description": "CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -2510,27 +2506,6 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.DependencyGroup": {
-      "description": "DependencyGroup is the group of dependencies",
-      "type": "object",
-      "required": [
-        "name",
-        "dependencies"
-      ],
-      "properties": {
-        "dependencies": {
-          "description": "Dependencies of events",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "name": {
-          "description": "Name of the group",
-          "type": "string"
         }
       }
     },
@@ -2709,10 +2684,6 @@
         "remote": {
           "description": "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitRemoteConfig"
-        },
-        "sshKeyPath": {
-          "description": "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret instead.",
-          "type": "string"
         },
         "sshKeySecret": {
           "description": "SSHKeySecret refers to the secret that contains SSH key",
@@ -3096,22 +3067,11 @@
         "triggers"
       ],
       "properties": {
-        "circuit": {
-          "description": "Circuit is a boolean expression of dependency groups Deprecated: will be removed in v1.5, use Switch in triggers instead.",
-          "type": "string"
-        },
         "dependencies": {
           "description": "Dependencies is a list of the events that this sensor is dependent on.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependency"
-          }
-        },
-        "dependencyGroups": {
-          "description": "DependencyGroups is a list of the groups of events.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DependencyGroup"
           }
         },
         "errorOnFailedRound": {
@@ -3407,26 +3367,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.TriggerSwitch": {
-      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. Deprecated: will be removed in v1.5",
-      "type": "object",
-      "properties": {
-        "all": {
-          "description": "All acts as a AND operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "any": {
-          "description": "Any acts as a OR operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.TriggerTemplate": {
       "description": "TriggerTemplate is the template that describes trigger specification.",
       "type": "object",
@@ -3485,10 +3425,6 @@
         "slack": {
           "description": "Slack refers to the trigger designed to send slack notification message.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackTrigger"
-        },
-        "switch": {
-          "description": "DeprecatedSwitch is the condition to execute the trigger. Deprecated: will be removed in v1.5, use conditions instead",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerSwitch"
         }
       }
     },

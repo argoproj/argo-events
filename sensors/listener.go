@@ -405,34 +405,7 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 			key := strings.ReplaceAll(dep.Name, "-", "_")
 			depGroupMapping[key] = dep.Name
 		}
-		for _, depGroup := range sensor.Spec.DependencyGroups {
-			key := strings.ReplaceAll(depGroup.Name, "-", "_")
-			depGroupMapping[key] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
-		}
 		depExpression, err = translate(conditions, depGroupMapping)
-		if err != nil {
-			return "", err
-		}
-	case len(sensor.Spec.DependencyGroups) > 0 && sensor.Spec.DeprecatedCircuit != "" && trigger.Template.DeprecatedSwitch != nil:
-		// DEPRECATED.
-		logger.Warn("Circuit and Switch are deprecated, please use \"conditions\".")
-		temp := ""
-		sw := trigger.Template.DeprecatedSwitch
-		switch {
-		case len(sw.All) > 0:
-			temp = strings.Join(sw.All, "&&")
-		case len(sw.Any) > 0:
-			temp = strings.Join(sw.Any, "||")
-		default:
-			return "", errors.New("invalid trigger switch")
-		}
-		groupDepExpr := fmt.Sprintf("(%s) && (%s)", sensor.Spec.DeprecatedCircuit, temp)
-		depGroupMapping := make(map[string]string)
-		for _, depGroup := range sensor.Spec.DependencyGroups {
-			key := strings.ReplaceAll(depGroup.Name, "-", "_")
-			depGroupMapping[key] = fmt.Sprintf("(%s)", strings.Join(depGroup.Dependencies, "&&"))
-		}
-		depExpression, err = translate(groupDepExpr, depGroupMapping)
 		if err != nil {
 			return "", err
 		}
