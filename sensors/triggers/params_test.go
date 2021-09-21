@@ -41,13 +41,7 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: metav1.GroupVersionResource{
-							Group:    "apps",
-							Version:  "v1",
-							Resource: "deployments",
-						},
-					},
+					K8s:  &v1alpha1.StandardK8STrigger{},
 				},
 			},
 		},
@@ -484,5 +478,4 @@ func TestApplyTemplateParameters(t *testing.T) {
 	}
 	err := ApplyTemplateParameters(testEvents, &obj.Spec.Triggers[0])
 	assert.Nil(t, err)
-	assert.Equal(t, "fake", obj.Spec.Triggers[0].Template.K8s.GroupVersionResource.Group)
 }

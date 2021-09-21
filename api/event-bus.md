@@ -428,7 +428,7 @@ Size is the NATS StatefulSet size
 </td>
 <td>
 <p>
-Deprecated, use Affinity instead, will be removed in v1.5
+Deprecated: use Affinity instead, will be removed in v1.5
 </p>
 </td>
 </tr>

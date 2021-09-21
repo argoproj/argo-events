@@ -180,7 +180,7 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 	return expectedSvc, nil
 }
 
-//Create a Configmap for NATS config
+// Create a Configmap for NATS config
 func (i *natsInstaller) createConfigMap(ctx context.Context) (*corev1.ConfigMap, error) {
 	log := i.logger
 	cm, err := i.getConfigMap(ctx)

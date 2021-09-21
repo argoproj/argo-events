@@ -225,23 +225,6 @@ object
 </p>
 </td>
 </tr>
-<tr>
-<td>
-<code>GroupVersionResource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
-Kubernetes meta/v1.GroupVersionResource </a> </em>
-</td>
-<td>
-<p>
-(Members of <code>GroupVersionResource</code> are embedded into this
-type.)
-</p>
-<p>
-The unambiguous kind of this object - used in order to retrieve the
-appropriate kubernetes api client for this resource
-</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ArtifactLocation">
@@ -2424,23 +2407,6 @@ Description
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>
-<code>GroupVersionResource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
-Kubernetes meta/v1.GroupVersionResource </a> </em>
-</td>
-<td>
-<p>
-(Members of <code>GroupVersionResource</code> are embedded into this
-type.)
-</p>
-<p>
-The unambiguous kind of this object - used in order to retrieve the
-appropriate kubernetes api client for this resource
-</p>
-</td>
-</tr>
 <tr>
 <td>
 <code>source</code></br> <em>

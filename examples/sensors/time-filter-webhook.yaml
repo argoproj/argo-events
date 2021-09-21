@@ -26,9 +26,6 @@ spec:
     - template:
         name: hello-world-workflow-trigger
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:

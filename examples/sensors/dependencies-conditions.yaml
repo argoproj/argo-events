@@ -20,9 +20,6 @@ spec:
         conditions: "test-dep"
         name: webhook-workflow-trigger
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:
@@ -45,9 +42,6 @@ spec:
         conditions: "test-dep-foo"
         name: webhook-workflow-trigger-2
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:

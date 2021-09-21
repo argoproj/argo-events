@@ -89,7 +89,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//filter out "default" fields from swagger definitions properties because they are being set to empty strings and it makes the swagger validation fail.
+	// filter out "default" fields from swagger definitions properties because they are being set to empty strings and it makes the swagger validation fail.
 	swaggerObj := obj{}
 	err = json.NewDecoder(f).Decode(&swaggerObj)
 	if err != nil {

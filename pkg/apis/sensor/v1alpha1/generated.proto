@@ -79,9 +79,6 @@ message ArgoWorkflowTrigger {
 
   // Parameters is the list of parameters to pass to resolved Argo Workflow object
   repeated TriggerParameter parameters = 3;
-
-  // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 4;
 }
 
 // ArtifactLocation describes the source location for an external artifact
@@ -594,19 +591,16 @@ message SlackTrigger {
 
 // StandardK8STrigger is the standard Kubernetes resource trigger
 message StandardK8STrigger {
-  // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 1;
-
   // Source of the K8s resource file(s)
-  optional ArtifactLocation source = 2;
+  optional ArtifactLocation source = 1;
 
   // Operation refers to the type of operation performed on the k8s resource.
   // Default value is Create.
   // +optional
-  optional string operation = 3;
+  optional string operation = 2;
 
   // Parameters is the list of parameters that is applied to resolved K8s trigger object.
-  repeated TriggerParameter parameters = 4;
+  repeated TriggerParameter parameters = 3;
 
   // PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
   // possible values:
@@ -616,7 +610,7 @@ message StandardK8STrigger {
   // "application/apply-patch+yaml".
   // Defaults to "application/merge-patch+json"
   // +optional
-  optional string patchStrategy = 5;
+  optional string patchStrategy = 4;
 
   // LiveObject specifies whether the resource should be directly fetched from K8s instead
   // of being marshaled from the resource artifact. If set to true, the resource artifact
@@ -625,7 +619,7 @@ message StandardK8STrigger {
   // data.
   // Only valid for operation type `update`
   // +optional
-  optional bool liveObject = 6;
+  optional bool liveObject = 5;
 }
 
 // StatusPolicy refers to the policy used to check the state of the trigger using response status

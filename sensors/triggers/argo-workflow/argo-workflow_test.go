@@ -40,13 +40,7 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: metav1.GroupVersionResource{
-							Group:    "apps",
-							Version:  "v1",
-							Resource: "deployments",
-						},
-					},
+					K8s:  &v1alpha1.StandardK8STrigger{},
 				},
 			},
 		},
@@ -82,11 +76,6 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 					Resource: &artifact,
 				},
 				Operation: "Submit",
-				GroupVersionResource: metav1.GroupVersionResource{
-					Group:    "argoproj.io",
-					Version:  "v1alpha1",
-					Resource: "workflows",
-				},
 			},
 		},
 	}

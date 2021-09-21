@@ -39,9 +39,6 @@ set up event-driven pipelines for existing workloads.
             - template:
                 name: webhook-pod-trigger
                 k8s:
-                  group: ""
-                  version: v1
-                  resource: pods
                   operation: create
                   source:
                     resource:
@@ -61,9 +58,6 @@ set up event-driven pipelines for existing workloads.
                     - src:
                         dependencyName: test-dep
                       dest: spec.containers.0.args.0
-
-1. The `group`, `version` and `resource` under `k8s` in the trigger template determines the type of 
-   K8s object. Change it accordingly if you want to trigger something else than a pod.
 
 1. Create the sensor.
 

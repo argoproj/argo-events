@@ -37,12 +37,7 @@ provides an avenue to set up pipelines for existing workloads.
 
 ## Pod
 
-1.  Create a sensor with K8s trigger. Pay close attention to the `group`,
-    `version` and `kind` keys within the trigger resource. These keys determine
-    the type of kubernetes object.
-
-    You will notice that the `group` key is empty, that means we want to use
-    `core` group. For any other groups, you need to specify the `group` key.
+1.  Create a sensor with K8s trigger.
 
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
 
