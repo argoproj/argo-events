@@ -24,9 +24,6 @@ spec:
     - template:
         name: workflow-trigger-1
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             git:
@@ -44,9 +41,6 @@ spec:
     - template:
         name: workflow-trigger-2
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             git:

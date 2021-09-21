@@ -377,16 +377,14 @@ type TriggerSwitch struct {
 
 // StandardK8STrigger is the standard Kubernetes resource trigger
 type StandardK8STrigger struct {
-	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,1,opt,name=groupVersionResource"`
 	// Source of the K8s resource file(s)
-	Source *ArtifactLocation `json:"source,omitempty" protobuf:"bytes,2,opt,name=source"`
+	Source *ArtifactLocation `json:"source,omitempty" protobuf:"bytes,1,opt,name=source"`
 	// Operation refers to the type of operation performed on the k8s resource.
 	// Default value is Create.
 	// +optional
-	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,3,opt,name=operation,casttype=KubernetesResourceOperation"`
+	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation,casttype=KubernetesResourceOperation"`
 	// Parameters is the list of parameters that is applied to resolved K8s trigger object.
-	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
 	// possible values:
 	// "application/json-patch+json"
@@ -395,7 +393,7 @@ type StandardK8STrigger struct {
 	// "application/apply-patch+yaml".
 	// Defaults to "application/merge-patch+json"
 	// +optional
-	PatchStrategy k8stypes.PatchType `json:"patchStrategy,omitempty" protobuf:"bytes,5,opt,name=patchStrategy,casttype=k8s.io/apimachinery/pkg/types.PatchType"`
+	PatchStrategy k8stypes.PatchType `json:"patchStrategy,omitempty" protobuf:"bytes,4,opt,name=patchStrategy,casttype=k8s.io/apimachinery/pkg/types.PatchType"`
 	// LiveObject specifies whether the resource should be directly fetched from K8s instead
 	// of being marshaled from the resource artifact. If set to true, the resource artifact
 	// must contain the information required to uniquely identify the resource in the cluster,
@@ -403,7 +401,7 @@ type StandardK8STrigger struct {
 	// data.
 	// Only valid for operation type `update`
 	// +optional
-	LiveObject bool `json:"liveObject,omitempty" protobuf:"varint,6,opt,name=liveObject"`
+	LiveObject bool `json:"liveObject,omitempty" protobuf:"varint,5,opt,name=liveObject"`
 }
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
@@ -416,8 +414,6 @@ type ArgoWorkflowTrigger struct {
 	Operation ArgoWorkflowOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation,casttype=ArgoWorkflowOperation"`
 	// Parameters is the list of parameters to pass to resolved Argo Workflow object
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
-	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
 }
 
 // HTTPTrigger is the trigger for the HTTP request

@@ -75,7 +75,7 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 	if event == nil {
 		return errors.Errorf("event object is nil")
 	}
-	//Using Connect util func for backoff retry if K8s API returns error
+	// Using Connect util func for backoff retry if K8s API returns error
 	err := common.Connect(&common.DefaultBackoff, func() error {
 		cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.ctx, cmp.name, metav1.GetOptions{})
 		if err != nil {

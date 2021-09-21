@@ -112,7 +112,7 @@ message NativeStrategy {
 
   optional string auth = 2;
 
-  // Deprecated, use Affinity instead, will be removed in v1.5
+  // Deprecated: use Affinity instead, will be removed in v1.5
   optional bool antiAffinity = 3;
 
   // +optional
