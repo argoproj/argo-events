@@ -403,10 +403,6 @@
           "description": "The pod's scheduling constraints More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
           "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
         },
-        "antiAffinity": {
-          "description": "Deprecated: use Affinity instead, will be removed in v1.5",
-          "type": "boolean"
-        },
         "auth": {
           "type": "string"
         },

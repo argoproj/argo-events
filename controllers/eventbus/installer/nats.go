@@ -758,20 +758,6 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/data/stan"})
 		spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 	}
-	if spec.Template.Spec.Affinity == nil && i.eventBus.Spec.NATS.Native.DeprecatedAntiAffinity {
-		spec.Template.Spec.Affinity = &corev1.Affinity{
-			PodAntiAffinity: &corev1.PodAntiAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-					{
-						TopologyKey: "kubernetes.io/hostname",
-						LabelSelector: &metav1.LabelSelector{
-							MatchLabels: i.labels,
-						},
-					},
-				},
-			},
-		}
-	}
 	return &spec, nil
 }
 
