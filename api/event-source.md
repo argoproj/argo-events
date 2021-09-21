@@ -788,19 +788,6 @@ Timezone in which to run the schedule
 </tr>
 <tr>
 <td>
-<code>userPayload</code></br> <em> encoding/json.RawMessage </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-UserPayload will be sent to sensor as extra data once the event is
-triggered Deprecated: will be removed in v1.5. Please use Metadata
-instead.
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>metadata</code></br> <em> map\[string\]string </em>
 </td>
 <td>
@@ -1163,17 +1150,6 @@ Service </a> </em>
 <em>(Optional)</em>
 <p>
 Service is the specifications of the service to expose the event source
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>replica</code></br> <em> int32 </em>
-</td>
-<td>
-<p>
-DeprecatedReplica is the event source deployment replicas Deprecated:
-use replicas instead, will be removed in v1.5
 </p>
 </td>
 </tr>
@@ -1582,17 +1558,6 @@ Service </a> </em>
 <em>(Optional)</em>
 <p>
 Service is the specifications of the service to expose the event source
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>replica</code></br> <em> int32 </em>
-</td>
-<td>
-<p>
-DeprecatedReplica is the event source deployment replicas Deprecated:
-use replicas instead, will be removed in v1.5
 </p>
 </td>
 </tr>
@@ -3394,18 +3359,6 @@ will be JSON
 </tr>
 <tr>
 <td>
-<code>credentialsFile</code></br> <em> string </em>
-</td>
-<td>
-<p>
-CredentialsFile is the file that contains credentials to authenticate
-for GCP Deprecated: will be removed in v1.5, use CredentialSecret
-instead
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>metadata</code></br> <em> map\[string\]string </em>
 </td>
 <td>
@@ -4912,26 +4865,6 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 AuthSecret holds a secret selector that contains a bearer token for
 authentication
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>serverCertPath</code></br> <em> string </em>
-</td>
-<td>
-<p>
-DeprecatedServerCertPath refers the file that contains the cert.
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>serverKeyPath</code></br> <em> string </em>
-</td>
-<td>
-<p>
-DeprecatedServerKeyPath refers the file that contains private key
 </p>
 </td>
 </tr>

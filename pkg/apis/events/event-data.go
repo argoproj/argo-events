@@ -116,8 +116,6 @@ type BitbucketServerEventData struct {
 type CalendarEventData struct {
 	// EventTime is time at which event occurred
 	EventTime string `json:"eventTime"`
-	// Deprecated.
-	UserPayload json.RawMessage `json:"userPayload,omitempty"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	Metadata map[string]string `json:"metadata,omitempty"`
 }

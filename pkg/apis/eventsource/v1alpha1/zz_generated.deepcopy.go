@@ -22,8 +22,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	json "encoding/json"
-
 	common "github.com/argoproj/argo-events/pkg/apis/common"
 	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -240,11 +238,6 @@ func (in *CalendarEventSource) DeepCopyInto(out *CalendarEventSource) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.UserPayload != nil {
-		in, out := &in.UserPayload, &out.UserPayload
-		*out = make(json.RawMessage, len(*in))
-		copy(*out, *in)
-	}
 	if in.Metadata != nil {
 		in, out := &in.Metadata, &out.Metadata
 		*out = make(map[string]string, len(*in))
@@ -444,11 +437,6 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 		in, out := &in.Service, &out.Service
 		*out = new(Service)
 		(*in).DeepCopyInto(*out)
-	}
-	if in.DeprecatedReplica != nil {
-		in, out := &in.DeprecatedReplica, &out.DeprecatedReplica
-		*out = new(int32)
-		**out = **in
 	}
 	if in.Minio != nil {
 		in, out := &in.Minio, &out.Minio
