@@ -1434,9 +1434,6 @@ set up event-driven pipelines for existing workloads.</p>
     <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
         <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">trigger</span>
         <span class="n">k8s</span><span class="o">:</span>
-          <span class="n">group</span><span class="o">:</span> <span class="s2">&quot;&quot;</span>
-          <span class="n">version</span><span class="o">:</span> <span class="n">v1</span>
-          <span class="n">resource</span><span class="o">:</span> <span class="n">pods</span>
           <span class="n">operation</span><span class="o">:</span> <span class="n">create</span>
           <span class="n">source</span><span class="o">:</span>
             <span class="n">resource</span><span class="o">:</span>
@@ -1458,10 +1455,6 @@ set up event-driven pipelines for existing workloads.</p>
               <span class="n">dest</span><span class="o">:</span> <span class="n">spec</span><span class="o">.</span><span class="na">containers</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="mi">0</span>
 </code></pre></div>
 
-</li>
-<li>
-<p>The <code>group</code>, <code>version</code> and <code>resource</code> under <code>k8s</code> in the trigger template determines the type of 
-   K8s object. Change it accordingly if you want to trigger something else than a pod.</p>
 </li>
 <li>
 <p>Create the sensor.</p>

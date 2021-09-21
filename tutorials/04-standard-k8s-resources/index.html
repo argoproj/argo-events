@@ -1418,11 +1418,7 @@ provides an avenue to set up pipelines for existing workloads.</p>
 <h2 id="pod">Pod<a class="headerlink" href="#pod" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Create a sensor with K8s trigger. Pay close attention to the <code>group</code>,
-    <code>version</code> and <code>kind</code> keys within the trigger resource. These keys determine
-    the type of kubernetes object.</p>
-<p>You will notice that the <code>group</code> key is empty, that means we want to use
-<code>core</code> group. For any other groups, you need to specify the <code>group</code> key.</p>
+<p>Create a sensor with K8s trigger.</p>
 <div class="codehilite"><pre><span></span><code> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
 </code></pre></div>
 
