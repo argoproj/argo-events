@@ -11,15 +11,15 @@ func ValidateTLSConfig(tlsConfig *TLSConfig) error {
 	}
 	var caCertSet, clientCertSet, clientKeySet bool
 
-	if tlsConfig.CACertSecret != nil || tlsConfig.DeprecatedCACertPath != "" {
+	if tlsConfig.CACertSecret != nil {
 		caCertSet = true
 	}
 
-	if tlsConfig.ClientCertSecret != nil || tlsConfig.DeprecatedClientCertPath != "" {
+	if tlsConfig.ClientCertSecret != nil {
 		clientCertSet = true
 	}
 
-	if tlsConfig.ClientKeySecret != nil || tlsConfig.DeprecatedClientKeyPath != "" {
+	if tlsConfig.ClientKeySecret != nil {
 		clientKeySet = true
 	}
 

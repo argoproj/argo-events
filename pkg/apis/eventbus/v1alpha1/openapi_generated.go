@@ -339,13 +339,6 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Format: "",
 						},
 					},
-					"antiAffinity": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Deprecated: use Affinity instead, will be removed in v1.5",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
 					"persistence": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"),

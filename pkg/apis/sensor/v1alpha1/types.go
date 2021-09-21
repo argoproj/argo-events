@@ -34,7 +34,6 @@ type KubernetesResourceOperation string
 
 // possible values for KubernetesResourceOperation
 const (
-	// deprecate create.
 	Create KubernetesResourceOperation = "create" // create the resource
 	Update KubernetesResourceOperation = "update" // updates the resource
 	Patch  KubernetesResourceOperation = "patch"  // patch resource
@@ -99,18 +98,13 @@ type SensorSpec struct {
 	// Template is the pod specification for the sensor
 	// +optional
 	Template *Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
-	// DependencyGroups is a list of the groups of events.
-	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,4,rep,name=dependencyGroups"`
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
 	// Once sensor state is set to `error`, no further triggers will be processed.
-	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,5,opt,name=errorOnFailedRound"`
+	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,4,opt,name=errorOnFailedRound"`
 	// EventBusName references to a EventBus name. By default the value is "default"
-	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,6,opt,name=eventBusName"`
-	// Circuit is a boolean expression of dependency groups
-	// Deprecated: will be removed in v1.5, use Switch in triggers instead.
-	DeprecatedCircuit string `json:"circuit,omitempty" protobuf:"bytes,7,opt,name=circuit"`
+	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,5,opt,name=eventBusName"`
 	// Replicas is the sensor deployment replicas
-	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,8,opt,name=replicas"`
+	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,6,opt,name=replicas"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {
@@ -192,14 +186,6 @@ type EventDependency struct {
 	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
 	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
-}
-
-// DependencyGroup is the group of dependencies
-type DependencyGroup struct {
-	// Name of the group
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-	// Dependencies of events
-	Dependencies []string `json:"dependencies" protobuf:"bytes,2,rep,name=dependencies"`
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
@@ -355,24 +341,10 @@ type TriggerTemplate struct {
 	OpenWhisk *OpenWhiskTrigger `json:"openWhisk,omitempty" protobuf:"bytes,11,opt,name=openWhisk"`
 	// Log refers to the trigger designed to invoke log the event.
 	// +optional
-	Log *LogTrigger `json:"log,omitempty" protobuf:"bytes,13,opt,name=log"`
-	// DeprecatedSwitch is the condition to execute the trigger.
-	// Deprecated: will be removed in v1.5, use conditions instead
-	// +optional
-	DeprecatedSwitch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,12,opt,name=switch"`
+	Log *LogTrigger `json:"log,omitempty" protobuf:"bytes,12,opt,name=log"`
 	// AzureEventHubs refers to the trigger send an event to an Azure Event Hub.
 	// +optional
-	AzureEventHubs *AzureEventHubsTrigger `json:"azureEventHubs,omitempty" protobuf:"bytes,14,opt,name=azureEventHubs"`
-}
-
-// TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
-// Depending upon condition type, status of dependency groups is used to evaluate the result.
-// Deprecated: will be removed in v1.5
-type TriggerSwitch struct {
-	// Any acts as a OR operator between dependencies
-	Any []string `json:"any,omitempty" protobuf:"bytes,1,rep,name=any"`
-	// All acts as a AND operator between dependencies
-	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
+	AzureEventHubs *AzureEventHubsTrigger `json:"azureEventHubs,omitempty" protobuf:"bytes,13,opt,name=azureEventHubs"`
 }
 
 // StandardK8STrigger is the standard Kubernetes resource trigger
@@ -573,9 +545,6 @@ type CustomTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
-	// DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-	// Deprecated: will be removed in v1.5, use CertSecret instead
-	DeprecatedCertFilePath string `json:"certFilePath,omitempty" protobuf:"bytes,8,opt,name=certFilePath"`
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
@@ -835,11 +804,6 @@ type GitArtifact struct {
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
 	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,9,opt,name=remote"`
-	// DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
-	// ssh key path must be mounted in sensor pod.
-	// Deprecated: will be removed in v1.5, use SSHKeySecret instead.
-	// +optional
-	DeprecatedSSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,10,opt,name=sshKeyPath"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote

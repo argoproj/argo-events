@@ -222,9 +222,6 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if config.DeprecatedCACertPath != "" {
-		// DEPRECATED.
-		caCertPath = config.DeprecatedCACertPath
 	}
 
 	if config.ClientCertSecret != nil {
@@ -232,9 +229,6 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if config.DeprecatedClientCertPath != "" {
-		// DEPRECATED.
-		clientCertPath = config.DeprecatedClientCertPath
 	}
 
 	if config.ClientKeySecret != nil {
@@ -242,9 +236,6 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if config.DeprecatedClientKeyPath != "" {
-		// DEPRECATED.
-		clientKeyPath = config.DeprecatedClientKeyPath
 	}
 
 	if len(caCertPath)+len(clientCertPath)+len(clientKeyPath) == 0 {

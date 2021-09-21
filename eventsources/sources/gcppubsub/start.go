@@ -210,9 +210,6 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 			return nil, nil, errors.Wrap(err, "could not find credentials")
 		}
 		opts = append(opts, option.WithCredentialsJSON([]byte(jsonCred)))
-	} else if credFile := el.PubSubEventSource.DeprecatedCredentialsFile; credFile != "" {
-		logger.Debug("using credentials from file (DEPRECATED)")
-		opts = append(opts, option.WithCredentialsFile(credFile))
 	} else {
 		logger.Debug("using default credentials")
 	}

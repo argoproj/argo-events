@@ -25,8 +25,4 @@ type WebhookContext struct {
 	// AuthSecret holds a secret selector that contains a bearer token for authentication
 	// +optional
 	AuthSecret *corev1.SecretKeySelector `json:"authSecret,omitempty" protobuf:"bytes,8,opt,name=authSecret"`
-	// DeprecatedServerCertPath refers the file that contains the cert.
-	DeprecatedServerCertPath string `json:"serverCertPath,omitempty" protobuf:"bytes,9,opt,name=serverCertPath"`
-	// DeprecatedServerKeyPath refers the file that contains private key
-	DeprecatedServerKeyPath string `json:"serverKeyPath,omitempty" protobuf:"bytes,10,opt,name=serverKeyPath"`
 }

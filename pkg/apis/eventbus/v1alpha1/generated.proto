@@ -112,41 +112,38 @@ message NativeStrategy {
 
   optional string auth = 2;
 
-  // Deprecated: use Affinity instead, will be removed in v1.5
-  optional bool antiAffinity = 3;
-
   // +optional
-  optional PersistenceStrategy persistence = 4;
+  optional PersistenceStrategy persistence = 3;
 
   // ContainerTemplate contains customized spec for NATS container
   // +optional
-  optional ContainerTemplate containerTemplate = 5;
+  optional ContainerTemplate containerTemplate = 4;
 
   // MetricsContainerTemplate contains customized spec for metrics container
   // +optional
-  optional ContainerTemplate metricsContainerTemplate = 6;
+  optional ContainerTemplate metricsContainerTemplate = 5;
 
   // NodeSelector is a selector which must be true for the pod to fit on a node.
   // Selector which must match a node's labels for the pod to be scheduled on that node.
   // More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   // +optional
-  map<string, string> nodeSelector = 7;
+  map<string, string> nodeSelector = 6;
 
   // If specified, the pod's tolerations.
   // +optional
-  repeated k8s.io.api.core.v1.Toleration tolerations = 8;
+  repeated k8s.io.api.core.v1.Toleration tolerations = 7;
 
   // Metadata sets the pods's metadata, i.e. annotations and labels
-  optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 9;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 8;
 
   // SecurityContext holds pod-level security attributes and common container settings.
   // Optional: Defaults to empty.  See type description for default values of each field.
   // +optional
-  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 10;
+  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 9;
 
   // Max Age of existing messages, i.e. "72h", “4h35m”
   // +optional
-  optional string maxAge = 11;
+  optional string maxAge = 10;
 
   // ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
   // If specified, these secrets will be passed to individual puller implementations for them to use. For example,
@@ -155,11 +152,11 @@ message NativeStrategy {
   // +optional
   // +patchMergeKey=name
   // +patchStrategy=merge
-  repeated k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 12;
+  repeated k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 11;
 
   // ServiceAccountName to apply to NATS StatefulSet
   // +optional
-  optional string serviceAccountName = 13;
+  optional string serviceAccountName = 12;
 
   // If specified, indicates the EventSource pod's priority. "system-node-critical"
   // and "system-cluster-critical" are two special keywords which indicate the
@@ -169,7 +166,7 @@ message NativeStrategy {
   // default.
   // More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
   // +optional
-  optional string priorityClassName = 14;
+  optional string priorityClassName = 13;
 
   // The priority value. Various system components use this field to find the
   // priority of the EventSource pod. When Priority Admission Controller is enabled,
@@ -178,21 +175,21 @@ message NativeStrategy {
   // The higher the value, the higher the priority.
   // More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
   // +optional
-  optional int32 priority = 15;
+  optional int32 priority = 14;
 
   // The pod's scheduling constraints
   // More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   // +optional
-  optional k8s.io.api.core.v1.Affinity affinity = 16;
+  optional k8s.io.api.core.v1.Affinity affinity = 15;
 
   // Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000
-  optional uint64 maxMsgs = 17;
+  optional uint64 maxMsgs = 16;
 
   // Total size of messages per channel, 0 means unlimited. Defaults to 1GB
-  optional string maxBytes = 18;
+  optional string maxBytes = 17;
 
   // Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000
-  optional uint64 maxSubs = 19;
+  optional uint64 maxSubs = 18;
 }
 
 // PersistenceStrategy defines the strategy of persistence

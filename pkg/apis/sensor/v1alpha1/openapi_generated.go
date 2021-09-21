@@ -36,7 +36,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger":  schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":          schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":             schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup":        schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                  schema_pkg_apis_sensor_v1alpha1_Event(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":           schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":        schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
@@ -67,7 +66,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource": schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy":          schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch":          schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":        schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":            schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
@@ -404,13 +402,6 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 							},
 						},
 					},
-					"certFilePath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. Deprecated: will be removed in v1.5, use CertSecret instead",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
 				Required: []string{"serverURL", "secure", "spec", "payload"},
 			},
@@ -474,43 +465,6 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					},
 				},
 				Required: []string{"path", "type", "value"},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "DependencyGroup is the group of dependencies",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name of the group",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"dependencies": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Dependencies of events",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"name", "dependencies"},
 			},
 		},
 	}
@@ -839,13 +793,6 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 						SchemaProps: spec.SchemaProps{
 							Description: "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig"),
-						},
-					},
-					"sshKeyPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret instead.",
-							Type:        []string{"string"},
-							Format:      "",
 						},
 					},
 				},
@@ -1542,20 +1489,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template"),
 						},
 					},
-					"dependencyGroups": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DependencyGroups is a list of the groups of events.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup"),
-									},
-								},
-							},
-						},
-					},
 					"errorOnFailedRound": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails. Once sensor state is set to `error`, no further triggers will be processed.",
@@ -1566,13 +1499,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					"eventBusName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "EventBusName references to a EventBus name. By default the value is \"default\"",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"circuit": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Circuit is a boolean expression of dependency groups Deprecated: will be removed in v1.5, use Switch in triggers instead.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1589,7 +1515,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
 	}
 }
 
@@ -2095,49 +2021,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref common.ReferenceCallback)
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. Deprecated: will be removed in v1.5",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"any": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Any acts as a OR operator between dependencies",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-					"all": {
-						SchemaProps: spec.SchemaProps{
-							Description: "All acts as a AND operator between dependencies",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -2220,12 +2103,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger"),
 						},
 					},
-					"switch": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedSwitch is the condition to execute the trigger. Deprecated: will be removed in v1.5, use conditions instead",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"),
-						},
-					},
 					"azureEventHubs": {
 						SchemaProps: spec.SchemaProps{
 							Description: "AzureEventHubs refers to the trigger send an event to an Azure Event Hub.",
@@ -2237,7 +2114,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"},
 	}
 }
 
