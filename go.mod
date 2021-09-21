@@ -76,6 +76,7 @@ require (
 	github.com/tidwall/gjson v1.7.5
 	github.com/tidwall/sjson v1.1.1
 	github.com/xanzy/go-gitlab v0.33.0
+	go.mongodb.org/mongo-driver v1.7.2 // indirect
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
