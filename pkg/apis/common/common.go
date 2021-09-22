@@ -86,6 +86,7 @@ var (
 	CustomTrigger         TriggerType = "Custom"
 	HTTPTrigger           TriggerType = "HTTP"
 	KafkaTrigger          TriggerType = "Kafka"
+	PulsarTrigger         TriggerType = "Pulsar"
 	LogTrigger            TriggerType = "Log"
 	NATSTrigger           TriggerType = "NATS"
 	SlackTrigger          TriggerType = "Slack"

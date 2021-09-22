@@ -32,6 +32,7 @@ import (
 	"github.com/argoproj/argo-events/sensors/triggers/kafka"
 	logtrigger "github.com/argoproj/argo-events/sensors/triggers/log"
 	"github.com/argoproj/argo-events/sensors/triggers/nats"
+	"github.com/argoproj/argo-events/sensors/triggers/pulsar"
 	"github.com/argoproj/argo-events/sensors/triggers/slack"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 )
@@ -91,6 +92,15 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 		result, err := kafka.NewKafkaTrigger(sensorCtx.sensor, trigger, sensorCtx.kafkaProducers, log)
 		if err != nil {
 			log.Errorw("failed to new a Kafka trigger", zap.Error(err))
+			return nil
+		}
+		return result
+	}
+
+	if trigger.Template.Pulsar != nil {
+		result, err := pulsar.NewPulsarTrigger(sensorCtx.sensor, trigger, sensorCtx.pulsarProducers, log)
+		if err != nil {
+			log.Errorw("failed to new a Pulsar trigger", zap.Error(err))
 			return nil
 		}
 		return result
