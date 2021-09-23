@@ -2988,6 +2988,63 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.PulsarTrigger": {
+      "description": "PulsarTrigger refers to the specification of the Pulsar trigger.",
+      "type": "object",
+      "required": [
+        "url",
+        "topic",
+        "payload"
+      ],
+      "properties": {
+        "authTokenSecret": {
+          "description": "Authentication token for the pulsar client.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "connectionBackoff": {
+          "description": "Backoff holds parameters applied to connection.",
+          "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "parameters": {
+          "description": "Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "tls": {
+          "description": "TLS configuration for the pulsar client.",
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
+        },
+        "tlsAllowInsecureConnection": {
+          "description": "Whether the Pulsar client accept untrusted TLS certificate from broker.",
+          "type": "boolean"
+        },
+        "tlsTrustCertsSecret": {
+          "description": "Trusted TLS certificate secret.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "tlsValidateHostname": {
+          "description": "Whether the Pulsar client verify the validity of the host name from broker.",
+          "type": "boolean"
+        },
+        "topic": {
+          "description": "Name of the topic. See https://pulsar.apache.org/docs/en/concepts-messaging/",
+          "type": "string"
+        },
+        "url": {
+          "description": "Configure the service URL for the Pulsar service.",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.RateLimit": {
       "type": "object",
       "properties": {
@@ -3417,6 +3474,10 @@
         "openWhisk": {
           "description": "OpenWhisk refers to the trigger designed to invoke OpenWhisk action.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.OpenWhiskTrigger"
+        },
+        "pulsar": {
+          "description": "Pulsar refers to the trigger designed to place messages on Pulsar topic.",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.PulsarTrigger"
         },
         "slack": {
           "description": "Slack refers to the trigger designed to send slack notification message.",

@@ -23,6 +23,7 @@ import (
 	eventhubs "github.com/Azure/azure-event-hubs-go/v3"
 	"github.com/Shopify/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
+	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	natslib "github.com/nats-io/go-nats"
 	"google.golang.org/grpc"
@@ -56,6 +57,8 @@ type SensorContext struct {
 	slackHTTPClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
 	kafkaProducers map[string]sarama.AsyncProducer
+	// pulsarProducers holds references to the active pulsar producers
+	pulsarProducers map[string]pulsar.Producer
 	// natsConnections holds the references to the active nats connections.
 	natsConnections map[string]*natslib.Conn
 	// awsLambdaClients holds the references to active AWS Lambda clients.
@@ -82,6 +85,7 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 			Timeout: time.Minute * 5,
 		},
 		kafkaProducers:        make(map[string]sarama.AsyncProducer),
+		pulsarProducers:       make(map[string]pulsar.Producer),
 		natsConnections:       make(map[string]*natslib.Conn),
 		awsLambdaClients:      make(map[string]*lambda.Lambda),
 		openwhiskClients:      make(map[string]*whisk.Client),

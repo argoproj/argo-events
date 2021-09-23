@@ -1883,6 +1883,152 @@ Name acts as key that holds the value at the path.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.PulsarTrigger">
+PulsarTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+<p>
+PulsarTrigger refers to the specification of the Pulsar trigger.
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>url</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Configure the service URL for the Pulsar service.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topic</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Name of the topic. See
+<a href="https://pulsar.apache.org/docs/en/concepts-messaging/">https://pulsar.apache.org/docs/en/concepts-messaging/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<p>
+Parameters is the list of parameters that is applied to resolved Kafka
+trigger object.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsTrustCertsSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Trusted TLS certificate secret.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsAllowInsecureConnection</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Whether the Pulsar client accept untrusted TLS certificate from broker.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsValidateHostname</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Whether the Pulsar client verify the validity of the host name from
+broker.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the pulsar client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authTokenSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication token for the pulsar client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>connectionBackoff</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Backoff holds parameters applied to connection.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.RateLimit">
 RateLimit
 </h3>
@@ -2732,6 +2878,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>,
+<a href="#argoproj.io/v1alpha1.PulsarTrigger">PulsarTrigger</a>,
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
@@ -3160,6 +3307,18 @@ AzureEventHubsTrigger </a> </em>
 <p>
 AzureEventHubs refers to the trigger send an event to an Azure Event
 Hub.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>pulsar</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PulsarTrigger"> PulsarTrigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Pulsar refers to the trigger designed to place messages on Pulsar topic.
 </p>
 </td>
 </tr>
