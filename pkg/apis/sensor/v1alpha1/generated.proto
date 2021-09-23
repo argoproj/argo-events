@@ -485,6 +485,47 @@ message PayloadField {
   optional string name = 2;
 }
 
+// PulsarTrigger refers to the specification of the Pulsar trigger.
+message PulsarTrigger {
+  // Configure the service URL for the Pulsar service.
+  // +required
+  optional string url = 1;
+
+  // Name of the topic.
+  // See https://pulsar.apache.org/docs/en/concepts-messaging/
+  optional string topic = 2;
+
+  // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
+  repeated TriggerParameter parameters = 3;
+
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
+  repeated TriggerParameter payload = 4;
+
+  // Trusted TLS certificate secret.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector tlsTrustCertsSecret = 5;
+
+  // Whether the Pulsar client accept untrusted TLS certificate from broker.
+  // +optional
+  optional bool tlsAllowInsecureConnection = 6;
+
+  // Whether the Pulsar client verify the validity of the host name from broker.
+  // +optional
+  optional bool tlsValidateHostname = 7;
+
+  // TLS configuration for the pulsar client.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 8;
+
+  // Authentication token for the pulsar client.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 9;
+
+  // Backoff holds parameters applied to connection.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 10;
+}
+
 message RateLimit {
   // Defaults to Second
   optional string unit = 1;
@@ -822,6 +863,10 @@ message TriggerTemplate {
   // AzureEventHubs refers to the trigger send an event to an Azure Event Hub.
   // +optional
   optional AzureEventHubsTrigger azureEventHubs = 13;
+
+  // Pulsar refers to the trigger designed to place messages on Pulsar topic.
+  // +optional
+  optional PulsarTrigger pulsar = 14;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

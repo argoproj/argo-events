@@ -345,6 +345,9 @@ type TriggerTemplate struct {
 	// AzureEventHubs refers to the trigger send an event to an Azure Event Hub.
 	// +optional
 	AzureEventHubs *AzureEventHubsTrigger `json:"azureEventHubs,omitempty" protobuf:"bytes,13,opt,name=azureEventHubs"`
+	// Pulsar refers to the trigger designed to place messages on Pulsar topic.
+	// +optional
+	Pulsar *PulsarTrigger `json:"pulsar,omitempty" protobuf:"bytes,14,opt,name=pulsar"`
 }
 
 // StandardK8STrigger is the standard Kubernetes resource trigger
@@ -510,6 +513,38 @@ type KafkaTrigger struct {
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,12,opt,name=sasl"`
+}
+
+// PulsarTrigger refers to the specification of the Pulsar trigger.
+type PulsarTrigger struct {
+	// Configure the service URL for the Pulsar service.
+	// +required
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
+	// Name of the topic.
+	// See https://pulsar.apache.org/docs/en/concepts-messaging/
+	Topic string `json:"topic" protobuf:"bytes,2,name=topic"`
+	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,4,rep,name=payload"`
+	// Trusted TLS certificate secret.
+	// +optional
+	TLSTrustCertsSecret *corev1.SecretKeySelector `json:"tlsTrustCertsSecret,omitempty" protobuf:"bytes,5,opt,name=tlsTrustCertsSecret"`
+	// Whether the Pulsar client accept untrusted TLS certificate from broker.
+	// +optional
+	TLSAllowInsecureConnection bool `json:"tlsAllowInsecureConnection,omitempty" protobuf:"bytes,6,opt,name=tlsAllowInsecureConnection"`
+	// Whether the Pulsar client verify the validity of the host name from broker.
+	// +optional
+	TLSValidateHostname bool `json:"tlsValidateHostname,omitempty" protobuf:"bytes,7,opt,name=tlsValidateHostname"`
+	// TLS configuration for the pulsar client.
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
+	// Authentication token for the pulsar client.
+	// +optional
+	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,9,opt,name=authTokenSecret"`
+	// Backoff holds parameters applied to connection.
+	// +optional
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,10,opt,name=connectionBackoff"`
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.
