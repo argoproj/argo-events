@@ -1024,6 +1024,9 @@ type PulsarEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
+	// Authentication token for the pulsar client.
+	// +optional
+	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,11,opt,name=authTokenSecret"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
