@@ -226,7 +226,7 @@ AMQPExchangeDeclareConfig </a> </em>
 <p>
 ExchangeDeclare holds the configuration for the exchange on the server
 For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare">https://godoc.org/github.com/streadway/amqp\#Channel.ExchangeDeclare</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare">https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare</a>
 </p>
 </td>
 </tr>
@@ -243,7 +243,7 @@ QueueDeclare holds the configuration of a queue to hold messages and
 deliver to consumers. Declaring creates a queue if it doesn’t already
 exist, or ensures that an existing queue matches the same parameters For
 more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare">https://godoc.org/github.com/streadway/amqp\#Channel.QueueDeclare</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare">https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare</a>
 </p>
 </td>
 </tr>
@@ -260,7 +260,7 @@ QueueBind holds the configuration that binds an exchange to a queue so
 that publishings to the exchange will be routed to the queue when the
 publishing routing key matches the binding routing key For more
 information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueBind">https://godoc.org/github.com/streadway/amqp\#Channel.QueueBind</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueBind">https://godoc.org/github.com/streadway/amqp#Channel.QueueBind</a>
 </p>
 </td>
 </tr>
@@ -275,7 +275,7 @@ information, visit
 <p>
 Consume holds the configuration to immediately starts delivering queued
 messages For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.Consume">https://godoc.org/github.com/streadway/amqp\#Channel.Consume</a>
+<a href="https://godoc.org/github.com/streadway/amqp#Channel.Consume">https://godoc.org/github.com/streadway/amqp#Channel.Consume</a>
 </p>
 </td>
 </tr>
@@ -2222,7 +2222,7 @@ Insecure tls verification
 <em>(Optional)</em>
 <p>
 Active refers to status of the webhook for event deliveries.
-<a href="https://developer.github.com/webhooks/creating/#active">https://developer.github.com/webhooks/creating/\#active</a>
+<a href="https://developer.github.com/webhooks/creating/#active">https://developer.github.com/webhooks/creating/#active</a>
 </p>
 </td>
 </tr>
@@ -2351,7 +2351,7 @@ setup Deprecated: use Projects instead. Will be unsupported in v 1.7
 <td>
 <p>
 Events are gitlab event to listen to. Refer
-<a href="https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794">https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go\#L794</a>.
+<a href="https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794">https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794</a>.
 </p>
 </td>
 </tr>
@@ -3524,7 +3524,7 @@ RedisEventSource
 <p>
 RedisEventSource describes an event source for the Redis PubSub. More
 info at
-<a href="https://godoc.org/github.com/go-redis/redis#example-PubSub">https://godoc.org/github.com/go-redis/redis\#example-PubSub</a>
+<a href="https://godoc.org/github.com/go-redis/redis#example-PubSub">https://godoc.org/github.com/go-redis/redis#example-PubSub</a>
 </p>
 </p>
 <table>
@@ -4104,9 +4104,8 @@ Key name
 <td>
 <em>(Optional)</em>
 <p>
-Supported operations like ==, !=, &lt;=, &gt;= etc. Defaults to ==.
-Refer
-<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/\#label-selectors</a>
+Supported operations like ==, !=, \<=, \>= etc. Defaults to ==. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors</a>
 for more info.
 </p>
 </td>
@@ -4173,7 +4172,7 @@ creation of the service will fail. This field can not be changed through
 updates. Valid values are “None”, empty string (“”), or a valid IP
 address. “None” can be specified for headless services when proxying is
 not required. More info:
-<a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies">https://kubernetes.io/docs/concepts/services-networking/service/\#virtual-ips-and-service-proxies</a>
+<a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies">https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies</a>
 </p>
 </td>
 </tr>
@@ -4651,7 +4650,7 @@ same namespace to use for pulling any of the images used by this
 PodSpec. If specified, these secrets will be passed to individual puller
 implementations for them to use. For example, in the case of docker,
 only DockerConfig type secrets are honored. More info:
-<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images\#specifying-imagepullsecrets-on-a-pod</a>
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a>
 </p>
 </td>
 </tr>
