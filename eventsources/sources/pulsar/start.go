@@ -97,6 +97,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		TLSValidateHostname:        pulsarEventSource.TLSValidateHostname,
 	}
 
+	if pulsarEventSource.AuthTokenSecret != nil {
+		token, err := common.GetSecretFromVolume(pulsarEventSource.AuthTokenSecret)
+		if err != nil {
+			log.Errorw("failed to get AuthTokenSecret from the volume", "error", err)
+			return err
+		}
+		clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
+	}
+
 	if pulsarEventSource.TLS != nil {
 		log.Info("setting tls auth option...")
 		var clientCertPath, clientKeyPath string

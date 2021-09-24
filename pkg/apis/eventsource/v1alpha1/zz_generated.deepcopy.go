@@ -1120,6 +1120,11 @@ func (in *PulsarEventSource) DeepCopyInto(out *PulsarEventSource) {
 			(*out)[key] = val
 		}
 	}
+	if in.AuthTokenSecret != nil {
+		in, out := &in.AuthTokenSecret, &out.AuthTokenSecret
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
