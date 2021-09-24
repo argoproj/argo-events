@@ -20,10 +20,17 @@ func cleanCRD(filename string) {
 	}
 	delete(crd, "status")
 	metadata := crd["metadata"].(obj)
+	if metadata["name"] == "eventbuses.argoproj.io" {
+		metadata["name"] = "eventbus.argoproj.io"
+	}
 	delete(metadata, "annotations")
 	delete(metadata, "creationTimestamp")
 	spec := crd["spec"].(obj)
 	delete(spec, "validation")
+	names := spec["names"].(obj)
+	if names["plural"] == "eventbuses" {
+		names["plural"] = "eventbus"
+	}
 	versions := spec["versions"].([]interface{})
 	version := versions[0].(obj)
 	properties := version["schema"].(obj)["openAPIV3Schema"].(obj)["properties"].(obj)
