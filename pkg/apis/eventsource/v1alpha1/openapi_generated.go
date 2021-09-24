@@ -2410,6 +2410,12 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 							},
 						},
 					},
+					"authTokenSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Authentication token for the pulsar client.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 				Required: []string{"topics", "url"},
 			},

@@ -879,6 +879,10 @@ message PulsarEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 10;
+
+  // Authentication token for the pulsar client.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 11;
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.

@@ -1710,6 +1710,10 @@
         "url"
       ],
       "properties": {
+        "authTokenSecret": {
+          "description": "Authentication token for the pulsar client.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "connectionBackoff": {
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
