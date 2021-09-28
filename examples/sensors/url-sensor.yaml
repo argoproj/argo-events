@@ -16,7 +16,7 @@ spec:
           operation: create
           source:
             url:
-              path: "https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml"
+              path: "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples/hello-world.yaml"
               verifycert: false
       retryStrategy:
         steps: 3
