@@ -416,15 +416,8 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 		}
 		depExpression = strings.Join(deps, "&&")
 	}
-	logger.Infof("Dependency expression for trigger %s before simplification: %s", trigger.Template.Name, depExpression)
-	boolSimplifier, err := common.NewBoolExpression(depExpression)
-	if err != nil {
-		logger.Errorw("Invalid dependency expression", zap.Error(err))
-		return "", err
-	}
-	result := boolSimplifier.GetExpression()
-	logger.Infof("Dependency expression for trigger %s after simplification: %s", trigger.Template.Name, result)
-	return result, nil
+	logger.Infof("Dependency expression for trigger %s: %s", trigger.Template.Name, depExpression)
+	return depExpression, nil
 }
 
 func convertEvent(event cloudevents.Event) *v1alpha1.Event {
