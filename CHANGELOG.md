@@ -1,8 +1,8 @@
 # Changelog
 
-## v1.15.0 (2021-10-12)
+## v1.5.0 (2021-10-12)
 
- * [0dd6e627](https://github.com/argoproj/argo-events/commit/0dd6e62763909a945b6fee210234034bd0532ca0) Update manifests to v1.15.0
+ * [e7dcd3d2](https://github.com/argoproj/argo-events/commit/e7dcd3d21925e80561d7f82a2dc45b213a618d0b) Update manifests to v1.5.0
  * [327bdf74](https://github.com/argoproj/argo-events/commit/327bdf74a7f3dce5f1e87412ce5a1c406ff92e9c) feat: Generate CHANGELOG.md automatically (#1368)
  * [a1af470f](https://github.com/argoproj/argo-events/commit/a1af470f7b6de34f5d899c9a203d262ec6720cd1) fix: disable bool simplifier due to performance issue. Fixes #1339 (#1363)
  * [d556788e](https://github.com/argoproj/argo-events/commit/d556788e04971f74ef90fbca0058819eca3243df) fix(example): url sensor argo-workflow link (#1362)
