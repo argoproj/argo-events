@@ -13,7 +13,10 @@ spec:
     - template:
         name: templated-workflow-trigger
         k8s:
+          group: argoproj.io
           operation: create
+          resource: workflows
+          version: v1alpha1
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
