@@ -271,4 +271,3 @@ func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(ctx context.Context, resource 
 
 	return nil
 }
-
