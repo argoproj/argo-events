@@ -6,16 +6,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- crds
-- argo-events-sa.yaml
-- eventsource-controller
-- sensor-controller
-- eventbus-controller
+  - crds
+  - argo-events-sa.yaml
+  - eventsource-controller
+  - sensor-controller
+  - eventbus-controller
 
 images:
   - name: quay.io/argoproj/argo-events
-  newName: quay.io/codefresh/argo-events
-  newTag: v1.5.0-cf-CR-7204
+    newName: quay.io/codefresh/argo-events
+    newTag: v1.5.0
 
 patchesStrategicMerge:
   - |-
@@ -30,7 +30,7 @@ patchesStrategicMerge:
             - name: eventsource-controller
               env:
                 - name: EVENTSOURCE_IMAGE
-                  value: quay.io/codefresh/argo-events:v1.5.0-cf-CR-7204
+                  value: quay.io/codefresh/argo-events:v1.5.0
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -43,4 +43,4 @@ patchesStrategicMerge:
             - name: sensor-controller
               env:
                 - name: SENSOR_IMAGE
-                  value: quay.io/codefresh/argo-events:v1.5.0-cf-CR-7204
+                  value: quay.io/codefresh/argo-events:v1.5.0
