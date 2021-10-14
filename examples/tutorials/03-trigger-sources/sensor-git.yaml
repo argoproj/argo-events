@@ -33,13 +33,10 @@ spec:
     - template:
         name: workflow-trigger
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             git:
-              url: "git@github.com:argoproj/argo.git"
+              url: "git@github.com:argoproj/argo-workflows.git"
               cloneDirectory: "/git/argoproj"
               sshKeyPath: "/secret/key"
               namespace: argo-events

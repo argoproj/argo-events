@@ -129,7 +129,7 @@ e.g.
 
               filters:
                 data:
-                  - path: body.value
+                  - path: body.message
                     type: string
                     value:
                       - "hello world"

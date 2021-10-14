@@ -5,7 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// ConfigMapReader implements the ArtifactReader interface for k8 configmap
+// ConfigMapReader implements the ArtifactReader interface for K8s configmap
 type ConfigMapReader struct {
 	configmapArtifact *corev1.ConfigMapKeySelector
 }

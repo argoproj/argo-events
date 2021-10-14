@@ -60,11 +60,6 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
 			K8s: &v1alpha1.StandardK8STrigger{
-				GroupVersionResource: metav1.GroupVersionResource{
-					Group:    "apps",
-					Resource: "deployments",
-					Version:  "v1",
-				},
 				Source: &v1alpha1.ArtifactLocation{
 					Resource: &artifact,
 				},
@@ -87,9 +82,9 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	}
 
 	namespacableClient := client.Resource(schema.GroupVersionResource{
-		Resource: trigger.Template.K8s.GroupVersionResource.Resource,
-		Version:  trigger.Template.K8s.GroupVersionResource.Version,
-		Group:    trigger.Template.K8s.GroupVersionResource.Group,
+		Resource: "deployments",
+		Version:  "v1",
+		Group:    "apps",
 	})
 
 	ctx := context.TODO()

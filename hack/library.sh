@@ -45,6 +45,13 @@ ensure_pandoc() {
   fi
 }
 
+ensure_protobuf() {
+  if [ "`command -v protoc`" = "" ]; then
+    warning "Please install protobuf with - brew install protobuf"
+    exit 1
+  fi
+}
+
 ensure_mockery() {
   if [ "`command -v mockery`" = "" ]; then
     warning "Please install mockery with - brew install vektra/tap/mockery"

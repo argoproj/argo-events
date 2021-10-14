@@ -23,7 +23,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.15
+          go-version: 1.17.1
 
       - name: Build binaries
         run: |
@@ -93,5 +93,6 @@ jobs:
           files: |
             dist/*.gz
             dist/*.gz.sha256
+            manifests/*.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

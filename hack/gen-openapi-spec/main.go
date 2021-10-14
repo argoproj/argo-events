@@ -16,6 +16,10 @@ import (
 	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
+type (
+	obj = map[string]interface{}
+)
+
 // Generate OpenAPI spec definitions for Workflow Resource
 func main() {
 	if len(os.Args) <= 3 {
@@ -78,6 +82,54 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	err = ioutil.WriteFile(output, jsonBytes, 0644)
+	if err != nil {
+		panic(err)
+	}
+	f, err := os.Open(output)
+	if err != nil {
+		panic(err)
+	}
+	// filter out "default" fields from swagger definitions properties because they are being set to empty strings and it makes the swagger validation fail.
+	swaggerObj := obj{}
+	err = json.NewDecoder(f).Decode(&swaggerObj)
+	if err != nil {
+		panic(err)
+	}
+	definitions := swaggerObj["definitions"].(obj)
+
+	for _, d := range definitions {
+		props, ok := d.(obj)["properties"].(obj)
+		if ok {
+			for _, prop := range props {
+				prop := prop.(obj)
+				delete(prop, "default")
+				items, ok := prop["items"].(obj)
+				if ok {
+					delete(items, "default")
+				}
+				additionalProperties, ok := prop["additionalProperties"].(obj)
+				if ok {
+					delete(additionalProperties, "default")
+				}
+			}
+		}
+		props, ok = d.(obj)["additionalProperties"].(obj)
+		if ok {
+			delete(props, "default")
+		}
+	}
+
+	f, err = os.Create(output)
+	if err != nil {
+		panic(err)
+	}
+	e := json.NewEncoder(f)
+	e.SetIndent("", "  ")
+	err = e.Encode(swaggerObj)
+	if err != nil {
+		panic(err)
+	}
+	err = f.Close()
 	if err != nil {
 		panic(err)
 	}

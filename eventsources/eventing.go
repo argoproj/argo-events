@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
+	"github.com/argoproj/argo-events/eventsources/sources/bitbucketserver"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
 	"github.com/argoproj/argo-events/eventsources/sources/file"
@@ -82,6 +83,13 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AzureEventsHub] = servers
+	}
+	if len(eventSource.Spec.BitbucketServer) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.BitbucketServer {
+			servers = append(servers, &bitbucketserver.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketServerEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.BitbucketServerEvent] = servers
 	}
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}

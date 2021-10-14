@@ -94,7 +94,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}}
 		}
 		var err error
-		conn, err = amqplib.DialConfig(amqpEventSource.URL, c)
+		var url string
+		if amqpEventSource.URLSecret != nil {
+			url, err = common.GetSecretFromVolume(amqpEventSource.URLSecret)
+			if err != nil {
+				return errors.Wrap(err, "urlSecret not found")
+			}
+		} else {
+			url = amqpEventSource.URL
+		}
+		conn, err = amqplib.DialConfig(url, c)
 		if err != nil {
 			return err
 		}

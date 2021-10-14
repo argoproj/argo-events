@@ -13,9 +13,6 @@ spec:
     - template:
         name: hdfs-workflow-trigger
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:
@@ -36,4 +33,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: body
               dest: spec.templates.0.container.args.1

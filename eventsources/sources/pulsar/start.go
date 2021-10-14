@@ -97,6 +97,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		TLSValidateHostname:        pulsarEventSource.TLSValidateHostname,
 	}
 
+	if pulsarEventSource.AuthTokenSecret != nil {
+		token, err := common.GetSecretFromVolume(pulsarEventSource.AuthTokenSecret)
+		if err != nil {
+			log.Errorw("failed to get AuthTokenSecret from the volume", "error", err)
+			return err
+		}
+		clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
+	}
+
 	if pulsarEventSource.TLS != nil {
 		log.Info("setting tls auth option...")
 		var clientCertPath, clientKeyPath string
@@ -112,10 +121,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				log.Errorw("failed to get ClientKeyPath from the volume", "error", err)
 				return err
 			}
-		case pulsarEventSource.TLS.DeprecatedClientCertPath != "" && pulsarEventSource.TLS.DeprecatedClientKeyPath != "":
-			// DEPRECATED.
-			clientCertPath = pulsarEventSource.TLS.DeprecatedClientCertPath
-			clientKeyPath = pulsarEventSource.TLS.DeprecatedClientKeyPath
 		default:
 			return errors.New("invalid TLS config")
 		}

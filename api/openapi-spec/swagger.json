@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Argo Events",
-    "version": "v1.4.0"
+    "version": "v1.5.0"
   },
   "paths": {},
   "definitions": {
@@ -229,25 +229,13 @@
       "description": "TLSConfig refers to TLS configuration for a client.",
       "type": "object",
       "properties": {
-        "caCertPath": {
-          "description": "DeprecatedCACertPath refers the file path that contains the CA cert. Deprecated: will be removed in v1.5, use CACertSecret instead",
-          "type": "string"
-        },
         "caCertSecret": {
           "description": "CACertSecret refers to the secret that contains the CA cert",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
-        "clientCertPath": {
-          "description": "DeprecatedClientCertPath refers the file path that contains client cert. Deprecated: will be removed in v1.5, use ClientCertSecret instead",
-          "type": "string"
-        },
         "clientCertSecret": {
           "description": "ClientCertSecret refers to the secret that contains the client cert",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "clientKeyPath": {
-          "description": "DeprecatedClientKeyPath refers the file path that contains client key. Deprecated: will be removed in v1.5, use ClientKeySecret instead",
-          "type": "string"
         },
         "clientKeySecret": {
           "description": "ClientKeySecret refers to the secret that contains the client key",
@@ -280,6 +268,9 @@
       "description": "ContainerTemplate defines customized spec for a container",
       "type": "object",
       "properties": {
+        "imagePullPolicy": {
+          "type": "string"
+        },
         "resources": {
           "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements"
         }
@@ -412,10 +403,6 @@
           "description": "The pod's scheduling constraints More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
           "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
         },
-        "antiAffinity": {
-          "description": "Deprecated, use Affinity instead, will be removed in v1.5",
-          "type": "boolean"
-        },
         "auth": {
           "type": "string"
         },
@@ -442,6 +429,11 @@
         },
         "maxMsgs": {
           "description": "Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000",
+          "type": "integer",
+          "format": "int64"
+        },
+        "maxSubs": {
+          "description": "Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000",
           "type": "integer",
           "format": "int64"
         },
@@ -542,7 +534,6 @@
       "description": "AMQPEventSource refers to an event-source for AMQP stream events",
       "type": "object",
       "required": [
-        "url",
         "exchangeName",
         "exchangeType",
         "routingKey"
@@ -602,6 +593,10 @@
         "url": {
           "description": "URL for rabbitmq service",
           "type": "string"
+        },
+        "urlSecret": {
+          "description": "URLSecret is secret reference for rabbitmq service URL",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
     },
@@ -696,6 +691,60 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.BitbucketServerEventSource": {
+      "description": "BitbucketServerEventSource refers to event-source related to Bitbucket Server events",
+      "type": "object",
+      "required": [
+        "projectKey",
+        "repositorySlug",
+        "events",
+        "bitbucketserverBaseURL"
+      ],
+      "properties": {
+        "accessToken": {
+          "description": "AccessToken is reference to K8s secret which holds the bitbucket api access information",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "bitbucketserverBaseURL": {
+          "description": "BitbucketServerBaseURL is the base URL for API requests to a custom endpoint",
+          "type": "string"
+        },
+        "deleteHookOnFinish": {
+          "description": "DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.",
+          "type": "boolean"
+        },
+        "events": {
+          "description": "Events are bitbucket event to listen to. Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "projectKey": {
+          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "type": "string"
+        },
+        "repositorySlug": {
+          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "type": "string"
+        },
+        "webhook": {
+          "description": "Webhook holds configuration to run a http server",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
+        },
+        "webhookSecret": {
+          "description": "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.CalendarEventSource": {
       "description": "CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed. Schedule takes precedence over interval; interval takes precedence over recurrence",
       "type": "object",
@@ -732,11 +781,6 @@
         "timezone": {
           "description": "Timezone in which to run the schedule",
           "type": "string"
-        },
-        "userPayload": {
-          "description": "UserPayload will be sent to sensor as extra data once the event is triggered Deprecated: will be removed in v1.5. Please use Metadata instead.",
-          "type": "string",
-          "format": "byte"
         }
       }
     },
@@ -901,6 +945,13 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureEventsHubEventSource"
           }
         },
+        "bitbucketserver": {
+          "description": "Bitbucket Server event sources",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketServerEventSource"
+          }
+        },
         "calendar": {
           "description": "Calendar event sources",
           "type": "object",
@@ -1009,11 +1060,6 @@
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.RedisEventSource"
           }
-        },
-        "replica": {
-          "description": "DeprecatedReplica is the event source deployment replicas Deprecated: use replicas instead, will be removed in v1.5",
-          "type": "integer",
-          "format": "int32"
         },
         "replicas": {
           "description": "Replicas is the event source deployment replicas",
@@ -1251,7 +1297,7 @@
       ],
       "properties": {
         "accessToken": {
-          "description": "AccessToken is reference to k8 secret which holds the gitlab api access information",
+          "description": "AccessToken references to k8 secret which holds the gitlab api access information",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "deleteHookOnFinish": {
@@ -1281,8 +1327,19 @@
           }
         },
         "projectID": {
-          "description": "ProjectID is the id of project for which integration needs to setup",
+          "description": "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use Projects instead. Will be unsupported in v 1.7",
           "type": "string"
+        },
+        "projects": {
+          "description": "List of project IDs or project namespace paths like \"whynowy/test\"",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "secretToken": {
+          "description": "SecretToken references to k8 secret which holds the Secret Token used by webhook config",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "webhook": {
           "description": "Webhook holds configuration to run a http server",
@@ -1607,17 +1664,10 @@
     "io.argoproj.eventsource.v1alpha1.PubSubEventSource": {
       "description": "PubSubEventSource refers to event-source for GCP PubSub related events.",
       "type": "object",
-      "required": [
-        "credentialsFile"
-      ],
       "properties": {
         "credentialSecret": {
           "description": "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicitly uses Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "credentialsFile": {
-          "description": "CredentialsFile is the file that contains credentials to authenticate for GCP Deprecated: will be removed in v1.5, use CredentialSecret instead",
-          "type": "string"
         },
         "deleteSubscriptionOnFinish": {
           "description": "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
@@ -1660,6 +1710,10 @@
         "url"
       ],
       "properties": {
+        "authTokenSecret": {
+          "description": "Authentication token for the pulsar client.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "connectionBackoff": {
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
@@ -1797,7 +1851,7 @@
       }
     },
     "io.argoproj.eventsource.v1alpha1.ResourceFilter": {
-      "description": "ResourceFilter contains K8 ObjectMeta information to further filter resource event objects",
+      "description": "ResourceFilter contains K8s ObjectMeta information to further filter resource event objects",
       "type": "object",
       "properties": {
         "afterStart": {
@@ -1837,7 +1891,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "metadata": {
@@ -1856,7 +1910,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "topicArn": {
@@ -1883,7 +1937,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "jsonBody": {
@@ -1914,7 +1968,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "waitTimeSeconds": {
@@ -2216,17 +2270,9 @@
           "description": "Port on which HTTP server is listening for incoming events.",
           "type": "string"
         },
-        "serverCertPath": {
-          "description": "DeprecatedServerCertPath refers the file that contains the cert.",
-          "type": "string"
-        },
         "serverCertSecret": {
           "description": "ServerCertPath refers the file that contains the cert.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
-        "serverKeyPath": {
-          "description": "DeprecatedServerKeyPath refers the file that contains private key",
-          "type": "string"
         },
         "serverKeySecret": {
           "description": "ServerKeyPath refers the file that contains private key",
@@ -2248,7 +2294,7 @@
       ],
       "properties": {
         "accessKey": {
-          "description": "AccessKey refers K8 secret containing aws access key",
+          "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "functionName": {
@@ -2278,7 +2324,7 @@
           "type": "string"
         },
         "secretKey": {
-          "description": "SecretKey refers K8 secret containing aws secret key",
+          "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -2286,15 +2332,7 @@
     "io.argoproj.sensor.v1alpha1.ArgoWorkflowTrigger": {
       "description": "ArgoWorkflowTrigger is the trigger for the Argo Workflow",
       "type": "object",
-      "required": [
-        "group",
-        "version",
-        "resource"
-      ],
       "properties": {
-        "group": {
-          "type": "string"
-        },
         "operation": {
           "description": "Operation refers to the type of operation performed on the argo workflow resource. Default value is Submit.",
           "type": "string"
@@ -2306,15 +2344,9 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           }
         },
-        "resource": {
-          "type": "string"
-        },
         "source": {
-          "description": "Source of the K8 resource file(s)",
+          "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
-        },
-        "version": {
-          "type": "string"
         }
       }
     },
@@ -2404,10 +2436,6 @@
         "payload"
       ],
       "properties": {
-        "certFilePath": {
-          "description": "DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server. Deprecated: will be removed in v1.5, use CertSecret instead",
-          "type": "string"
-        },
         "certSecret": {
           "description": "CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
@@ -2478,27 +2506,6 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.DependencyGroup": {
-      "description": "DependencyGroup is the group of dependencies",
-      "type": "object",
-      "required": [
-        "name",
-        "dependencies"
-      ],
-      "properties": {
-        "dependencies": {
-          "description": "Dependencies of events",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "name": {
-          "description": "Name of the group",
-          "type": "string"
         }
       }
     },
@@ -2677,10 +2684,6 @@
         "remote": {
           "description": "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitRemoteConfig"
-        },
-        "sshKeyPath": {
-          "description": "DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret instead.",
-          "type": "string"
         },
         "sshKeySecret": {
           "description": "SSHKeySecret refers to the secret that contains SSH key",
@@ -2989,6 +2992,76 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.PulsarTrigger": {
+      "description": "PulsarTrigger refers to the specification of the Pulsar trigger.",
+      "type": "object",
+      "required": [
+        "url",
+        "topic",
+        "payload"
+      ],
+      "properties": {
+        "authTokenSecret": {
+          "description": "Authentication token for the pulsar client.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "connectionBackoff": {
+          "description": "Backoff holds parameters applied to connection.",
+          "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "parameters": {
+          "description": "Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "tls": {
+          "description": "TLS configuration for the pulsar client.",
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
+        },
+        "tlsAllowInsecureConnection": {
+          "description": "Whether the Pulsar client accept untrusted TLS certificate from broker.",
+          "type": "boolean"
+        },
+        "tlsTrustCertsSecret": {
+          "description": "Trusted TLS certificate secret.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "tlsValidateHostname": {
+          "description": "Whether the Pulsar client verify the validity of the host name from broker.",
+          "type": "boolean"
+        },
+        "topic": {
+          "description": "Name of the topic. See https://pulsar.apache.org/docs/en/concepts-messaging/",
+          "type": "string"
+        },
+        "url": {
+          "description": "Configure the service URL for the Pulsar service.",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.RateLimit": {
+      "type": "object",
+      "properties": {
+        "requestsPerUnit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unit": {
+          "description": "Defaults to Second",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.Sensor": {
       "description": "Sensor is the definition of a sensor resource",
       "type": "object",
@@ -3051,22 +3124,11 @@
         "triggers"
       ],
       "properties": {
-        "circuit": {
-          "description": "Circuit is a boolean expression of dependency groups Deprecated: will be removed in v1.5, use Switch in triggers instead.",
-          "type": "string"
-        },
         "dependencies": {
           "description": "Dependencies is a list of the events that this sensor is dependent on.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependency"
-          }
-        },
-        "dependencyGroups": {
-          "description": "DependencyGroups is a list of the groups of events.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DependencyGroup"
           }
         },
         "errorOnFailedRound": {
@@ -3138,15 +3200,7 @@
     "io.argoproj.sensor.v1alpha1.StandardK8STrigger": {
       "description": "StandardK8STrigger is the standard Kubernetes resource trigger",
       "type": "object",
-      "required": [
-        "group",
-        "version",
-        "resource"
-      ],
       "properties": {
-        "group": {
-          "type": "string"
-        },
         "liveObject": {
           "description": "LiveObject specifies whether the resource should be directly fetched from K8s instead of being marshaled from the resource artifact. If set to true, the resource artifact must contain the information required to uniquely identify the resource in the cluster, that is, you must specify \"apiVersion\", \"kind\" as well as \"name\" and \"namespace\" meta data. Only valid for operation type `update`",
           "type": "boolean"
@@ -3166,15 +3220,9 @@
           "description": "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
           "type": "string"
         },
-        "resource": {
-          "type": "string"
-        },
         "source": {
-          "description": "Source of the K8 resource file(s)",
+          "description": "Source of the K8s resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
-        },
-        "version": {
-          "type": "string"
         }
       }
     },
@@ -3294,6 +3342,10 @@
           "description": "Policy to configure backoff and execution criteria for the trigger",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerPolicy"
         },
+        "rateLimit": {
+          "description": "Rate limit, default unit is Second",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.RateLimit"
+        },
         "retryStrategy": {
           "description": "Retry strategy, defaults to no retry",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
@@ -3372,26 +3424,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.TriggerSwitch": {
-      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result. Deprecated: will be removed in v1.5",
-      "type": "object",
-      "properties": {
-        "all": {
-          "description": "All acts as a AND operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "any": {
-          "description": "Any acts as a OR operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.TriggerTemplate": {
       "description": "TriggerTemplate is the template that describes trigger specification.",
       "type": "object",
@@ -3447,13 +3479,13 @@
           "description": "OpenWhisk refers to the trigger designed to invoke OpenWhisk action.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.OpenWhiskTrigger"
         },
+        "pulsar": {
+          "description": "Pulsar refers to the trigger designed to place messages on Pulsar topic.",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.PulsarTrigger"
+        },
         "slack": {
           "description": "Slack refers to the trigger designed to send slack notification message.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackTrigger"
-        },
-        "switch": {
-          "description": "DeprecatedSwitch is the condition to execute the trigger. Deprecated: will be removed in v1.5, use conditions instead",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerSwitch"
         }
       }
     },
@@ -3708,7 +3740,8 @@
                               "type": "string"
                             }
                           }
-                        }
+                        },
+                        "x-kubernetes-map-type": "atomic"
                       },
                       "namespaces": {
                         "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -3783,7 +3816,8 @@
                           "type": "string"
                         }
                       }
-                    }
+                    },
+                    "x-kubernetes-map-type": "atomic"
                   },
                   "namespaces": {
                     "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -3865,7 +3899,8 @@
                               "type": "string"
                             }
                           }
-                        }
+                        },
+                        "x-kubernetes-map-type": "atomic"
                       },
                       "namespaces": {
                         "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -3940,7 +3975,8 @@
                           "type": "string"
                         }
                       }
-                    }
+                    },
+                    "x-kubernetes-map-type": "atomic"
                   },
                   "namespaces": {
                     "description": "namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty list means \"this pod's namespace\"",
@@ -4966,7 +5002,7 @@
           "format": "int64"
         },
         "fsGroupChangePolicy": {
-          "description": "fsGroupChangePolicy defines behavior of changing ownership and permission of the volume before being exposed inside Pod. This field will only apply to volume types which support fsGroup based ownership(and permissions). It will have no effect on ephemeral volume types such as: secret, configmaps and emptydir. Valid values are \"OnRootMismatch\" and \"Always\". If not specified defaults to \"Always\".",
+          "description": "fsGroupChangePolicy defines behavior of changing ownership and permission of the volume before being exposed inside Pod. This field will only apply to volume types which support fsGroup based ownership(and permissions). It will have no effect on ephemeral volume types such as: secret, configmaps and emptydir. Valid values are \"OnRootMismatch\" and \"Always\". If not specified, \"Always\" is used.",
           "type": "string"
         },
         "runAsGroup": {
@@ -5139,7 +5175,7 @@
           "type": "string"
         },
         "nodePort": {
-          "description": "The port on each node on which this service is exposed when type=NodePort or LoadBalancer. Usually assigned by the system. If specified, it will be allocated to the service if unused or else creation of the service will fail. Default is to auto-allocate a port if the ServiceType of this Service requires one. More info: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+          "description": "The port on each node on which this service is exposed when type is NodePort or LoadBalancer.  Usually assigned by the system. If a value is specified, in-range, and not in use it will be used, otherwise the operation will fail.  If not specified, a port will be allocated if this Service requires one.  If this field is specified when creating a Service which does not need it, creation will fail. This field will be wiped when updating a Service to no longer need it (e.g. changing type from NodePort to ClusterIP). More info: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
           "type": "integer",
           "format": "int32"
         },
@@ -5782,7 +5818,8 @@
                             "type": "string"
                           }
                         }
-                      }
+                      },
+                      "x-kubernetes-map-type": "atomic"
                     },
                     "storageClassName": {
                       "description": "Name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
@@ -6122,9 +6159,6 @@
         "projected": {
           "description": "Represents a projected volume source",
           "type": "object",
-          "required": [
-            "sources"
-          ],
           "properties": {
             "defaultMode": {
               "description": "Mode bits used to set permissions on created files by default. Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON requires decimal values for mode bits. Directories within the path are not affected by this setting. This might be in conflict with other options that affect the file mode, like fsGroup, and the result can be other mode bits set.",

@@ -135,7 +135,7 @@ func (router *Router) PostInactivate() error {
 
 	if githubEventSource.NeedToCreateHooks() && githubEventSource.DeleteHookOnFinish {
 		logger := router.route.Logger
-		logger.Info("deleting GitHub hook...")
+		logger.Info("deleting GitHub hooks...")
 
 		for _, r := range githubEventSource.GetOwnedRepositories() {
 			for _, n := range r.Names {
@@ -271,7 +271,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 		}
 
-		// Github can not handle race condtions well - it might create multiple hooks with same config
+		// Github can not handle race conditions well - it might create multiple hooks with same config
 		// when replicas > 1
 		// Randomly sleep some time to mitigate the issue.
 		s1 := rand.NewSource(time.Now().UnixNano())

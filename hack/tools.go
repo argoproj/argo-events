@@ -1,3 +1,4 @@
+//go:build tools
 // +build tools
 
 // This package contains code generation utilities

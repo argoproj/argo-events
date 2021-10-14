@@ -13,9 +13,6 @@ spec:
     - template:
         name: calendar-workflow-trigger
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:
@@ -42,6 +39,7 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: eventTime
               dest: spec.arguments.parameters.0.value
       retryStrategy:
         steps: 3

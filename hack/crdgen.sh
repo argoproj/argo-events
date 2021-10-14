@@ -16,6 +16,8 @@ fi
 header "Generating CRDs"
 controller-gen crd:crdVersions=v1,trivialVersions=true,maxDescLen=0 paths=./pkg/apis/... output:dir=manifests/base/crds
 
+mv manifests/base/crds/argoproj.io_eventbuses.yaml manifests/base/crds/argoproj.io_eventbus.yaml
+
 find manifests/base/crds -name 'argoproj.io*.yaml' | while read -r file; do
   echo "Patching ${file}"
   # remove junk fields

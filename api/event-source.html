@@ -276,6 +276,19 @@ github.com/argoproj/argo-events/pkg/apis/common.BasicAuth
 <p>Auth hosts secret selectors for username and password</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>urlSecret</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>URLSecret is secret reference for rabbitmq service URL</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AMQPExchangeDeclareConfig">AMQPExchangeDeclareConfig
@@ -540,6 +553,133 @@ map[string]string
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>BitbucketServerEventSource refers to event-source related to Bitbucket Server events</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>webhook</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.WebhookContext">
+WebhookContext
+</a>
+</em>
+</td>
+<td>
+<p>Webhook holds configuration to run a http server</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projectKey</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>ProjectKey is the key of project for which integration needs to setup</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositorySlug</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>RepositorySlug is the slug of the repository for which integration needs to setup</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>events</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Events are bitbucket event to listen to.
+Refer <a href="https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html">https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>accessToken</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>AccessToken is reference to K8s secret which holds the bitbucket api access information</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>webhookSecret</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>bitbucketserverBaseURL</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>BitbucketServerBaseURL is the base URL for API requests to a custom endpoint</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>deleteHookOnFinish</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.CalendarEventSource">CalendarEventSource
 </h3>
 <p>
@@ -600,19 +740,6 @@ string
 <td>
 <em>(Optional)</em>
 <p>Timezone in which to run the schedule</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>userPayload</code></br>
-<em>
-encoding/json.RawMessage
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>UserPayload will be sent to sensor as extra data once the event is triggered
-Deprecated: will be removed in v1.5. Please use Metadata instead.</p>
 </td>
 </tr>
 <tr>
@@ -977,18 +1104,6 @@ Service
 </tr>
 <tr>
 <td>
-<code>replica</code></br>
-<em>
-int32
-</em>
-</td>
-<td>
-<p>DeprecatedReplica is the event source deployment replicas
-Deprecated: use replicas instead, will be removed in v1.5</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>minio</code></br>
 <em>
 map[string]github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
@@ -1306,6 +1421,19 @@ int32
 </td>
 <td>
 <p>Replicas is the event source deployment replicas</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>bitbucketserver</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Bitbucket Server event sources</p>
 </td>
 </tr>
 </table>
@@ -1384,18 +1512,6 @@ Service
 </tr>
 <tr>
 <td>
-<code>replica</code></br>
-<em>
-int32
-</em>
-</td>
-<td>
-<p>DeprecatedReplica is the event source deployment replicas
-Deprecated: use replicas instead, will be removed in v1.5</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>minio</code></br>
 <em>
 map[string]github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
@@ -1713,6 +1829,19 @@ int32
 </td>
 <td>
 <p>Replicas is the event source deployment replicas</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>bitbucketserver</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Bitbucket Server event sources</p>
 </td>
 </tr>
 </tbody>
@@ -2149,7 +2278,8 @@ string
 </em>
 </td>
 <td>
-<p>ProjectID is the id of project for which integration needs to setup</p>
+<p>DeprecatedProjectID is the id of project for which integration needs to setup
+Deprecated: use Projects instead. Will be unsupported in v 1.7</p>
 </td>
 </tr>
 <tr>
@@ -2174,7 +2304,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>AccessToken is reference to k8 secret which holds the gitlab api access information</p>
+<p>AccessToken references to k8 secret which holds the gitlab api access information</p>
 </td>
 </tr>
 <tr>
@@ -2222,6 +2352,30 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projects</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>List of project IDs or project namespace paths like &ldquo;whynowy/test&rdquo;</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>secretToken</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>SecretToken references to k8 secret which holds the Secret Token used by webhook config</p>
 </td>
 </tr>
 </tbody>
@@ -3132,18 +3286,6 @@ source will be JSON</p>
 </tr>
 <tr>
 <td>
-<code>credentialsFile</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>CredentialsFile is the file that contains credentials to authenticate for GCP
-Deprecated: will be removed in v1.5, use CredentialSecret instead</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>metadata</code></br>
 <em>
 map[string]string
@@ -3294,6 +3436,20 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authTokenSecret</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Authentication token for the pulsar client.</p>
 </td>
 </tr>
 </tbody>
@@ -3504,7 +3660,7 @@ map[string]string
 <a href="#argoproj.io/v1alpha1.ResourceEventSource">ResourceEventSource</a>)
 </p>
 <p>
-<p>ResourceFilter contains K8 ObjectMeta information to further filter resource event objects</p>
+<p>ResourceFilter contains K8s ObjectMeta information to further filter resource event objects</p>
 </p>
 <table>
 <thead>
@@ -3638,7 +3794,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>AccessKey refers K8 secret containing aws access key</p>
+<p>AccessKey refers K8s secret containing aws access key</p>
 </td>
 </tr>
 <tr>
@@ -3651,7 +3807,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>SecretKey refers K8 secret containing aws secret key</p>
+<p>SecretKey refers K8s secret containing aws secret key</p>
 </td>
 </tr>
 <tr>
@@ -3730,7 +3886,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>AccessKey refers K8 secret containing aws access key</p>
+<p>AccessKey refers K8s secret containing aws access key</p>
 </td>
 </tr>
 <tr>
@@ -3743,7 +3899,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>SecretKey refers K8 secret containing aws secret key</p>
+<p>SecretKey refers K8s secret containing aws secret key</p>
 </td>
 </tr>
 <tr>
@@ -4491,6 +4647,7 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>, 
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>, 
@@ -4605,28 +4762,6 @@ Kubernetes core/v1.SecretKeySelector
 <td>
 <em>(Optional)</em>
 <p>AuthSecret holds a secret selector that contains a bearer token for authentication</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>serverCertPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>DeprecatedServerCertPath refers the file that contains the cert.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>serverKeyPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>DeprecatedServerKeyPath refers the file that contains private key</p>
 </td>
 </tr>
 </tbody>

@@ -66,33 +66,31 @@ type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
 	Replicas int32         `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
 	Auth     *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth,casttype=AuthStrategy"`
-	// Deprecated, use Affinity instead, will be removed in v1.5
-	DeprecatedAntiAffinity bool `json:"antiAffinity,omitempty" protobuf:"varint,3,opt,name=antiAffinity"`
 	// +optional
-	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
+	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,3,opt,name=persistence"`
 	// ContainerTemplate contains customized spec for NATS container
 	// +optional
-	ContainerTemplate *ContainerTemplate `json:"containerTemplate,omitempty" protobuf:"bytes,5,opt,name=containerTemplate"`
+	ContainerTemplate *ContainerTemplate `json:"containerTemplate,omitempty" protobuf:"bytes,4,opt,name=containerTemplate"`
 	// MetricsContainerTemplate contains customized spec for metrics container
 	// +optional
-	MetricsContainerTemplate *ContainerTemplate `json:"metricsContainerTemplate,omitempty" protobuf:"bytes,6,opt,name=metricsContainerTemplate"`
+	MetricsContainerTemplate *ContainerTemplate `json:"metricsContainerTemplate,omitempty" protobuf:"bytes,5,opt,name=metricsContainerTemplate"`
 	// NodeSelector is a selector which must be true for the pod to fit on a node.
 	// Selector which must match a node's labels for the pod to be scheduled on that node.
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,6,rep,name=nodeSelector"`
 	// If specified, the pod's tolerations.
 	// +optional
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,8,rep,name=tolerations"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,7,rep,name=tolerations"`
 	// Metadata sets the pods's metadata, i.e. annotations and labels
-	Metadata *common.Metadata `json:"metadata,omitempty" protobuf:"bytes,9,opt,name=metadata"`
+	Metadata *common.Metadata `json:"metadata,omitempty" protobuf:"bytes,8,opt,name=metadata"`
 	// SecurityContext holds pod-level security attributes and common container settings.
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
-	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,10,opt,name=securityContext"`
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,9,opt,name=securityContext"`
 	// Max Age of existing messages, i.e. "72h", “4h35m”
 	// +optional
-	MaxAge *string `json:"maxAge,omitempty" protobuf:"bytes,11,opt,name=maxAge"`
+	MaxAge *string `json:"maxAge,omitempty" protobuf:"bytes,10,opt,name=maxAge"`
 	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
 	// If specified, these secrets will be passed to individual puller implementations for them to use. For example,
 	// in the case of docker, only DockerConfig type secrets are honored.
@@ -100,10 +98,10 @@ type NativeStrategy struct {
 	// +optional
 	// +patchMergeKey=name
 	// +patchStrategy=merge
-	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,12,rep,name=imagePullSecrets"`
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,11,rep,name=imagePullSecrets"`
 	// ServiceAccountName to apply to NATS StatefulSet
 	// +optional
-	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,13,opt,name=serviceAccountName"`
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,12,opt,name=serviceAccountName"`
 	// If specified, indicates the EventSource pod's priority. "system-node-critical"
 	// and "system-cluster-critical" are two special keywords which indicate the
 	// highest priorities with the former being the highest priority. Any other
@@ -112,7 +110,7 @@ type NativeStrategy struct {
 	// default.
 	// More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
 	// +optional
-	PriorityClassName string `json:"priorityClassName,omitempty" protobuf:"bytes,14,opt,name=priorityClassName"`
+	PriorityClassName string `json:"priorityClassName,omitempty" protobuf:"bytes,13,opt,name=priorityClassName"`
 	// The priority value. Various system components use this field to find the
 	// priority of the EventSource pod. When Priority Admission Controller is enabled,
 	// it prevents users from setting this field. The admission controller populates
@@ -120,20 +118,23 @@ type NativeStrategy struct {
 	// The higher the value, the higher the priority.
 	// More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
 	// +optional
-	Priority *int32 `json:"priority,omitempty" protobuf:"bytes,15,opt,name=priority"`
+	Priority *int32 `json:"priority,omitempty" protobuf:"bytes,14,opt,name=priority"`
 	// The pod's scheduling constraints
 	// More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 	// +optional
-	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,16,opt,name=affinity"`
+	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,15,opt,name=affinity"`
 	// Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000
-	MaxMsgs *uint64 `json:"maxMsgs,omitempty" protobuf:"bytes,17,opt,name=maxMsgs"`
+	MaxMsgs *uint64 `json:"maxMsgs,omitempty" protobuf:"bytes,16,opt,name=maxMsgs"`
 	// Total size of messages per channel, 0 means unlimited. Defaults to 1GB
-	MaxBytes *string `json:"maxBytes,omitempty" protobuf:"bytes,18,opt,name=maxBytes"`
+	MaxBytes *string `json:"maxBytes,omitempty" protobuf:"bytes,17,opt,name=maxBytes"`
+	// Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000
+	MaxSubs *uint64 `json:"maxSubs,omitempty" protobuf:"bytes,18,opt,name=maxSubs"`
 }
 
 // ContainerTemplate defines customized spec for a container
 type ContainerTemplate struct {
-	Resources corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
+	Resources       corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
+	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy,omitempty" protobuf:"bytes,2,opt,name=imagePullPolicy,casttype=PullPolicy"`
 }
 
 // GetReplicas return the replicas of statefulset

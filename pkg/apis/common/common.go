@@ -25,30 +25,31 @@ type EventSourceType string
 
 // possible event source types
 var (
-	MinioEvent       EventSourceType = "minio"
-	CalendarEvent    EventSourceType = "calendar"
-	FileEvent        EventSourceType = "file"
-	ResourceEvent    EventSourceType = "resource"
-	WebhookEvent     EventSourceType = "webhook"
-	AMQPEvent        EventSourceType = "amqp"
-	KafkaEvent       EventSourceType = "kafka"
-	MQTTEvent        EventSourceType = "mqtt"
-	NATSEvent        EventSourceType = "nats"
-	SNSEvent         EventSourceType = "sns"
-	SQSEvent         EventSourceType = "sqs"
-	PubSubEvent      EventSourceType = "pubsub"
-	GithubEvent      EventSourceType = "github"
-	GitlabEvent      EventSourceType = "gitlab"
-	HDFSEvent        EventSourceType = "hdfs"
-	SlackEvent       EventSourceType = "slack"
-	StorageGridEvent EventSourceType = "storagegrid"
-	AzureEventsHub   EventSourceType = "azureEventsHub"
-	StripeEvent      EventSourceType = "stripe"
-	EmitterEvent     EventSourceType = "emitter"
-	RedisEvent       EventSourceType = "redis"
-	NSQEvent         EventSourceType = "nsq"
-	PulsarEvent      EventSourceType = "pulsar"
-	GenericEvent     EventSourceType = "generic"
+	MinioEvent           EventSourceType = "minio"
+	CalendarEvent        EventSourceType = "calendar"
+	FileEvent            EventSourceType = "file"
+	ResourceEvent        EventSourceType = "resource"
+	WebhookEvent         EventSourceType = "webhook"
+	AMQPEvent            EventSourceType = "amqp"
+	KafkaEvent           EventSourceType = "kafka"
+	MQTTEvent            EventSourceType = "mqtt"
+	NATSEvent            EventSourceType = "nats"
+	SNSEvent             EventSourceType = "sns"
+	SQSEvent             EventSourceType = "sqs"
+	PubSubEvent          EventSourceType = "pubsub"
+	GithubEvent          EventSourceType = "github"
+	GitlabEvent          EventSourceType = "gitlab"
+	HDFSEvent            EventSourceType = "hdfs"
+	SlackEvent           EventSourceType = "slack"
+	StorageGridEvent     EventSourceType = "storagegrid"
+	AzureEventsHub       EventSourceType = "azureEventsHub"
+	StripeEvent          EventSourceType = "stripe"
+	EmitterEvent         EventSourceType = "emitter"
+	RedisEvent           EventSourceType = "redis"
+	NSQEvent             EventSourceType = "nsq"
+	PulsarEvent          EventSourceType = "pulsar"
+	GenericEvent         EventSourceType = "generic"
+	BitbucketServerEvent EventSourceType = "bitbucketserver"
 )
 
 var (
@@ -85,6 +86,7 @@ var (
 	CustomTrigger         TriggerType = "Custom"
 	HTTPTrigger           TriggerType = "HTTP"
 	KafkaTrigger          TriggerType = "Kafka"
+	PulsarTrigger         TriggerType = "Pulsar"
 	LogTrigger            TriggerType = "Log"
 	NATSTrigger           TriggerType = "NATS"
 	SlackTrigger          TriggerType = "Slack"
@@ -129,16 +131,6 @@ type TLSConfig struct {
 	ClientCertSecret *corev1.SecretKeySelector `json:"clientCertSecret,omitempty" protobuf:"bytes,2,opt,name=clientCertSecret"`
 	// ClientKeySecret refers to the secret that contains the client key
 	ClientKeySecret *corev1.SecretKeySelector `json:"clientKeySecret,omitempty" protobuf:"bytes,3,opt,name=clientKeySecret"`
-
-	// DeprecatedCACertPath refers the file path that contains the CA cert.
-	// Deprecated: will be removed in v1.5, use CACertSecret instead
-	DeprecatedCACertPath string `json:"caCertPath,omitempty" protobuf:"bytes,4,opt,name=caCertPath"`
-	// DeprecatedClientCertPath refers the file path that contains client cert.
-	// Deprecated: will be removed in v1.5, use ClientCertSecret instead
-	DeprecatedClientCertPath string `json:"clientCertPath,omitempty" protobuf:"bytes,5,opt,name=clientCertPath"`
-	// DeprecatedClientKeyPath refers the file path that contains client key.
-	// Deprecated: will be removed in v1.5, use ClientKeySecret instead
-	DeprecatedClientKeyPath string `json:"clientKeyPath,omitempty" protobuf:"bytes,6,opt,name=clientKeyPath"`
 }
 
 // SASLConfig refers to SASL configuration for a client

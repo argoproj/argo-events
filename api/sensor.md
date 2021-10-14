@@ -60,7 +60,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-AccessKey refers K8 secret containing aws access key
+AccessKey refers K8s secret containing aws access key
 </p>
 </td>
 </tr>
@@ -72,7 +72,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SecretKey refers K8 secret containing aws secret key
+SecretKey refers K8s secret containing aws secret key
 </p>
 </td>
 </tr>
@@ -194,7 +194,7 @@ Description
 </td>
 <td>
 <p>
-Source of the K8 resource file(s)
+Source of the K8s resource file(s)
 </p>
 </td>
 </tr>
@@ -222,23 +222,6 @@ resource. Default value is Submit.
 <p>
 Parameters is the list of parameters to pass to resolved Argo Workflow
 object
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>GroupVersionResource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
-Kubernetes meta/v1.GroupVersionResource </a> </em>
-</td>
-<td>
-<p>
-(Members of <code>GroupVersionResource</code> are embedded into this
-type.)
-</p>
-<p>
-The unambiguous kind of this object - used in order to retrieve the
-appropriate kubernetes api client for this resource
 </p>
 </td>
 </tr>
@@ -570,18 +553,6 @@ construct the request payload.
 </p>
 </td>
 </tr>
-<tr>
-<td>
-<code>certFilePath</code></br> <em> string </em>
-</td>
-<td>
-<p>
-DeprecatedCertFilePath is path to the cert file within sensor for secure
-connection between sensor and custom trigger gRPC server. Deprecated:
-will be removed in v1.5, use CertSecret instead
-</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.DataFilter">
@@ -621,7 +592,7 @@ Path is the JSONPath of the event’s (JSON decoded) data key Path is a
 series of keys separated by a dot. A key may contain wildcard characters
 ‘\*’ and ‘?’. To access an array value use the index as the key. The dot
 and wildcard characters can be escaped with ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>
@@ -656,9 +627,9 @@ strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 </td>
 <td>
 <p>
-Comparator compares the event data with a user given value. Can be
-“&gt;=”, “&gt;”, “=”, “!=”, “&lt;”, or “&lt;=”. Is optional, and if left
-blank treated as equality “=”.
+Comparator compares the event data with a user given value. Can be “>=”,
+“>”, “=”, “!=”, “\<”, or “\<=”. Is optional, and if left blank treated
+as equality “=”.
 </p>
 </td>
 </tr>
@@ -675,52 +646,6 @@ extra functions. See
 <a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
 and
 <a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.DependencyGroup">
-DependencyGroup
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
-</p>
-<p>
-<p>
-DependencyGroup is the group of dependencies
-</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>name</code></br> <em> string </em>
-</td>
-<td>
-<p>
-Name of the group
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code></br> <em> \[\]string </em>
-</td>
-<td>
-<p>
-Dependencies of events
 </p>
 </td>
 </tr>
@@ -1213,20 +1138,6 @@ Refer
 </p>
 </td>
 </tr>
-<tr>
-<td>
-<code>sshKeyPath</code></br> <em> string </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don’t
-want to provide username and password. ssh key path must be mounted in
-sensor pod. Deprecated: will be removed in v1.5, use SSHKeySecret
-instead.
-</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.GitCreds">
@@ -1564,7 +1475,7 @@ URL of the Kafka broker, multiple URLs separated by comma.
 <td>
 <p>
 Name of the topic. More info at
-<a href="https://kafka.apache.org/documentation/#intro_topics">https://kafka.apache.org/documentation/\#intro\_topics</a>
+<a href="https://kafka.apache.org/documentation/#intro_topics">https://kafka.apache.org/documentation/#intro_topics</a>
 </p>
 </td>
 </tr>
@@ -1955,7 +1866,7 @@ Path is the JSONPath of the event’s (JSON decoded) data key Path is a
 series of keys separated by a dot. A key may contain wildcard characters
 ‘\*’ and ‘?’. To access an array value use the index as the key. The dot
 and wildcard characters can be escaped with ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>
@@ -1972,6 +1883,204 @@ Name acts as key that holds the value at the path.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.PulsarTrigger">
+PulsarTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+<p>
+PulsarTrigger refers to the specification of the Pulsar trigger.
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>url</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Configure the service URL for the Pulsar service.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topic</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Name of the topic. See
+<a href="https://pulsar.apache.org/docs/en/concepts-messaging/">https://pulsar.apache.org/docs/en/concepts-messaging/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<p>
+Parameters is the list of parameters that is applied to resolved Kafka
+trigger object.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsTrustCertsSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Trusted TLS certificate secret.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsAllowInsecureConnection</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Whether the Pulsar client accept untrusted TLS certificate from broker.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsValidateHostname</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Whether the Pulsar client verify the validity of the host name from
+broker.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the pulsar client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authTokenSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication token for the pulsar client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>connectionBackoff</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Backoff holds parameters applied to connection.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RateLimit">
+RateLimit
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>unit</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RateLimiteUnit"> RateLimiteUnit </a>
+</em>
+</td>
+<td>
+<p>
+Defaults to Second
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>requestsPerUnit</code></br> <em> int32 </em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RateLimiteUnit">
+RateLimiteUnit (<code>string</code> alias)
+</p>
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.RateLimit">RateLimit</a>)
+</p>
+<p>
+</p>
 <h3 id="argoproj.io/v1alpha1.Sensor">
 Sensor
 </h3>
@@ -2049,18 +2158,6 @@ Template is the pod specification for the sensor
 </tr>
 <tr>
 <td>
-<code>dependencyGroups</code></br> <em>
-<a href="#argoproj.io/v1alpha1.DependencyGroup"> \[\]DependencyGroup
-</a> </em>
-</td>
-<td>
-<p>
-DependencyGroups is a list of the groups of events.
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>errorOnFailedRound</code></br> <em> bool </em>
 </td>
 <td>
@@ -2080,17 +2177,6 @@ processed.
 <p>
 EventBusName references to a EventBus name. By default the value is
 “default”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>circuit</code></br> <em> string </em>
-</td>
-<td>
-<p>
-Circuit is a boolean expression of dependency groups Deprecated: will be
-removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
 </tr>
@@ -2179,18 +2265,6 @@ Template is the pod specification for the sensor
 </tr>
 <tr>
 <td>
-<code>dependencyGroups</code></br> <em>
-<a href="#argoproj.io/v1alpha1.DependencyGroup"> \[\]DependencyGroup
-</a> </em>
-</td>
-<td>
-<p>
-DependencyGroups is a list of the groups of events.
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>errorOnFailedRound</code></br> <em> bool </em>
 </td>
 <td>
@@ -2210,17 +2284,6 @@ processed.
 <p>
 EventBusName references to a EventBus name. By default the value is
 “default”
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>circuit</code></br> <em> string </em>
-</td>
-<td>
-<p>
-Circuit is a boolean expression of dependency groups Deprecated: will be
-removed in v1.5, use Switch in triggers instead.
 </p>
 </td>
 </tr>
@@ -2374,30 +2437,13 @@ Description
 <tbody>
 <tr>
 <td>
-<code>GroupVersionResource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
-Kubernetes meta/v1.GroupVersionResource </a> </em>
-</td>
-<td>
-<p>
-(Members of <code>GroupVersionResource</code> are embedded into this
-type.)
-</p>
-<p>
-The unambiguous kind of this object - used in order to retrieve the
-appropriate kubernetes api client for this resource
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>source</code></br> <em>
 <a href="#argoproj.io/v1alpha1.ArtifactLocation"> ArtifactLocation </a>
 </em>
 </td>
 <td>
 <p>
-Source of the K8 resource file(s)
+Source of the K8s resource file(s)
 </p>
 </td>
 </tr>
@@ -2627,7 +2673,7 @@ same namespace to use for pulling any of the images used by this
 PodSpec. If specified, these secrets will be passed to individual puller
 implementations for them to use. For example, in the case of docker,
 only DockerConfig type secrets are honored. More info:
-<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images\#specifying-imagepullsecrets-on-a-pod</a>
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a>
 </p>
 </td>
 </tr>
@@ -2805,6 +2851,18 @@ Retry strategy, defaults to no retry
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>rateLimit</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RateLimit"> RateLimit </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Rate limit, default unit is Second
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TriggerParameter">
@@ -2820,6 +2878,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>,
+<a href="#argoproj.io/v1alpha1.PulsarTrigger">PulsarTrigger</a>,
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
@@ -2863,7 +2922,7 @@ dependency
 Dest is the JSONPath of a resource key. A path is a series of keys
 separated by a dot. The colon character can be escaped with ‘.’ The -1
 key can be used to append a value to an existing array. See
-<a href="https://github.com/tidwall/sjson#path-syntax">https://github.com/tidwall/sjson\#path-syntax</a>
+<a href="https://github.com/tidwall/sjson#path-syntax">https://github.com/tidwall/sjson#path-syntax</a>
 for more information about how this is used.
 </p>
 </td>
@@ -2946,7 +3005,7 @@ ContextKey is a series of keys separated by a dot. A key may contain
 wildcard characters ‘\*’ and ‘?’. To access an array value use the index
 as the key. The dot and wildcard characters can be escaped with
 ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>
@@ -2978,7 +3037,7 @@ DataKey is the JSONPath of the event’s (JSON decoded) data key DataKey
 is a series of keys separated by a dot. A key may contain wildcard
 characters ‘\*’ and ‘?’. To access an array value use the index as the
 key. The dot and wildcard characters can be escaped with ‘&rsquo;. See
-<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a>
 for more information on how to use this.
 </p>
 </td>
@@ -3059,55 +3118,6 @@ based triggers using using labels
 <p>
 Status refers to the policy used to check the state of the trigger using
 response status
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.TriggerSwitch">
-TriggerSwitch
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
-</p>
-<p>
-<p>
-TriggerSwitch describes condition which must be satisfied in order to
-execute a trigger. Depending upon condition type, status of dependency
-groups is used to evaluate the result. Deprecated: will be removed in
-v1.5
-</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>any</code></br> <em> \[\]string </em>
-</td>
-<td>
-<p>
-Any acts as a OR operator between dependencies
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>all</code></br> <em> \[\]string </em>
-</td>
-<td>
-<p>
-All acts as a AND operator between dependencies
 </p>
 </td>
 </tr>
@@ -3288,19 +3298,6 @@ Log refers to the trigger designed to invoke log the event.
 </tr>
 <tr>
 <td>
-<code>switch</code></br> <em>
-<a href="#argoproj.io/v1alpha1.TriggerSwitch"> TriggerSwitch </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-DeprecatedSwitch is the condition to execute the trigger. Deprecated:
-will be removed in v1.5, use conditions instead
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>azureEventHubs</code></br> <em>
 <a href="#argoproj.io/v1alpha1.AzureEventHubsTrigger">
 AzureEventHubsTrigger </a> </em>
@@ -3310,6 +3307,18 @@ AzureEventHubsTrigger </a> </em>
 <p>
 AzureEventHubs refers to the trigger send an event to an Azure Event
 Hub.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>pulsar</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PulsarTrigger"> PulsarTrigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Pulsar refers to the trigger designed to place messages on Pulsar topic.
 </p>
 </td>
 </tr>

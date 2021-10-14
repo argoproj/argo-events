@@ -111,3 +111,17 @@ spec:
         # Defaults to "1"
         jitter: 2
 ```
+
+## Trigger Rate Limit
+
+There's no rate limit for a trigger unless you configure the spec as following:
+
+```yaml
+spec:
+  triggers:
+    - rateLimit:
+        # Second, Minute or Hour, defaults to Second
+        unit: Second
+        # Requests per unit
+        requestsPerUnit: 20
+```

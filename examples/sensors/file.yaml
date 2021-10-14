@@ -13,9 +13,6 @@ spec:
     - template:
         name: file-workflow-trigger
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:
@@ -37,6 +34,7 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: name
               dest: spec.templates.0.container.args.0
       retryStrategy:
         steps: 3

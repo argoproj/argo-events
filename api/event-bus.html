@@ -80,6 +80,18 @@ Kubernetes core/v1.ResourceRequirements
 <td>
 </td>
 </tr>
+<tr>
+<td>
+<code>imagePullPolicy</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#pullpolicy-v1-core">
+Kubernetes core/v1.PullPolicy
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventBus">EventBus
@@ -387,17 +399,6 @@ AuthStrategy
 </tr>
 <tr>
 <td>
-<code>antiAffinity</code></br>
-<em>
-bool
-</em>
-</td>
-<td>
-<p>Deprecated, use Affinity instead, will be removed in v1.5</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>persistence</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.PersistenceStrategy">
@@ -602,6 +603,17 @@ string
 </td>
 <td>
 <p>Total size of messages per channel, 0 means unlimited. Defaults to 1GB</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxSubs</code></br>
+<em>
+uint64
+</em>
+</td>
+<td>
+<p>Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000</p>
 </td>
 </tr>
 </tbody>

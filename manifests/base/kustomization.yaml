@@ -13,34 +13,34 @@ resources:
 - eventbus-controller
 
 images:
-- name: quay.io/argoproj/argo-events
+  - name: quay.io/argoproj/argo-events
   newName: quay.io/codefresh/argo-events
-  newTag: v0.0.2-cf
+  newTag: v1.5.0-cf-CR-7204
 
 patchesStrategicMerge:
-- |-
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: eventsource-controller
-  spec:
-    template:
-      spec:
-        containers:
-          - name: eventsource-controller
-            env:
-              - name: EVENTSOURCE_IMAGE
-                value: quay.io/codefresh/argo-events:v0.0.2-cf
-- |-
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: sensor-controller
-  spec:
-    template:
-      spec:
-        containers:
-          - name: sensor-controller
-            env:
-              - name: SENSOR_IMAGE
-                value: quay.io/codefresh/argo-events:v0.0.2-cf
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: eventsource-controller
+    spec:
+      template:
+        spec:
+          containers:
+            - name: eventsource-controller
+              env:
+                - name: EVENTSOURCE_IMAGE
+                  value: quay.io/codefresh/argo-events:v1.5.0-cf-CR-7204
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: sensor-controller
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sensor-controller
+              env:
+                - name: SENSOR_IMAGE
+                  value: quay.io/codefresh/argo-events:v1.5.0-cf-CR-7204
