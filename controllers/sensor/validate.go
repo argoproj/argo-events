@@ -54,13 +54,13 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 	trigNames := make(map[string]bool)
 
 	for _, trigger := range triggers {
+		if err := validateTriggerTemplate(trigger.Template); err != nil {
+			return err
+		}
 		if _, ok := trigNames[trigger.Template.Name]; ok {
 			return fmt.Errorf("duplicate trigger name: %s", trigger.Template.Name)
 		}
 		trigNames[trigger.Template.Name] = true
-		if err := validateTriggerTemplate(trigger.Template); err != nil {
-			return err
-		}
 		if err := validateTriggerPolicy(&trigger); err != nil {
 			return err
 		}
