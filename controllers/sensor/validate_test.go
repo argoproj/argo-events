@@ -115,4 +115,15 @@ func TestValidTriggers(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, true, strings.Contains(err.Error(), "duplicate trigger name:"))
 	})
+
+	t.Run("empty trigger template", func(t *testing.T) {
+		triggers := []v1alpha1.Trigger{
+			{
+				Template: nil,
+			},
+		}
+		err := validateTriggers(triggers)
+		assert.NotNil(t, err)
+		assert.Equal(t, true, strings.Contains(err.Error(), "trigger template can't be nil"))
+	})
 }
