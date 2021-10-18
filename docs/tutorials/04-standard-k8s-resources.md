@@ -50,7 +50,7 @@ provides an avenue to set up pipelines for existing workloads.
 
         kubectl -n argo-events get po
 
-Output
+4.  After the pod was completed, inspect the logs of the pod, you will something similar as below.
 
         _________________________________________
         / {"context":{"type":"webhook","specVersi \
@@ -93,7 +93,7 @@ Output
 
         kubectl -n argo-events get deployments
 
-Output
+4. After the pod was completed, inspect the logs of the pod, you will see something similar as below.
 
         _________________________________________
         / {"context":{"type":"webhook","specVersi \
