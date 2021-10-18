@@ -14,7 +14,7 @@ open to support other technologies.
 EventBus is namespaced, an EventBus object is required in a namespace to make
 EventSource and Sensor work.
 
-The common pratice is to create an EventBus named `default` in the namespace. If
+The common practice is to create an EventBus named `default` in the namespace. If
 you want to use a different name, or you want to have multiple EventBus in one
 namespace, you need to specifiy `eventBusName` in the spec of EventSource and
 Sensor correspondingly, so that they can find the right one. See EventSource
