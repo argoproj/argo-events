@@ -1,9 +1,12 @@
 /*
 Copyright 2020 BlackRock, Inc.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
 	http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +29,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
@@ -35,11 +37,15 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/artifacts"
 	"github.com/argoproj/argo-events/sensors/common"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
+
+var clusterResources = map[string]bool{
+	"namespaces": true,
+	"nodes":      true,
+}
 
 // StandardK8STrigger implements Trigger interface for standard Kubernetes resources
 type StandardK8sTrigger struct {
@@ -76,40 +82,25 @@ func (k8sTrigger *StandardK8sTrigger) GetTriggerType() apicommon.TriggerType {
 // FetchResource fetches the trigger resource from external source
 func (k8sTrigger *StandardK8sTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 	trigger := k8sTrigger.Trigger
-	if trigger.Template.K8s.Source == nil {
-		return nil, errors.Errorf("trigger source for k8s is empty")
-	}
-	creds, err := artifacts.GetCredentials(trigger.Template.K8s.Source)
-	if err != nil {
-		return nil, err
-	}
-	reader, err := artifacts.GetArtifactReader(trigger.Template.K8s.Source, creds)
-	if err != nil {
-		return nil, err
-	}
-
 	var rObj runtime.Object
 
-	// uObj will either hold the resource definition stored in the trigger or just
-	// a stub to provide enough information to fetch the object from K8s cluster
-	uObj, err := artifacts.FetchArtifact(reader)
+	uObj, err := triggers.FetchKubernetesResource(trigger.Template.K8s.Source)
 	if err != nil {
 		return nil, err
 	}
 
-	k8sTrigger.namespableDynamicClient = k8sTrigger.DynamicClient.Resource(schema.GroupVersionResource{
-		Group:    trigger.Template.K8s.GroupVersionResource.Group,
-		Version:  trigger.Template.K8s.GroupVersionResource.Version,
-		Resource: trigger.Template.K8s.GroupVersionResource.Resource,
-	})
+	gvr := triggers.GetGroupVersionResource(uObj)
+	k8sTrigger.namespableDynamicClient = k8sTrigger.DynamicClient.Resource(gvr)
 
 	if trigger.Template.K8s.LiveObject && trigger.Template.K8s.Operation == v1alpha1.Update {
 		objName := uObj.GetName()
 		if objName == "" {
 			return nil, fmt.Errorf("resource name must be specified for fetching live object")
 		}
+
 		objNamespace := uObj.GetNamespace()
-		if objNamespace == "" {
+		_, isClusterResource := clusterResources[gvr.Resource]
+		if objNamespace == "" && !isClusterResource {
 			return nil, fmt.Errorf("resource namespace must be specified for fetching live object")
 		}
 		rObj, err = k8sTrigger.namespableDynamicClient.Namespace(objNamespace).Get(ctx, objName, metav1.GetOptions{})
@@ -143,10 +134,14 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
 
-	namespace := obj.GetNamespace()
-	// Defaults to sensor's namespace
-	if namespace == "" {
-		namespace = k8sTrigger.Sensor.Namespace
+	gvr := triggers.GetGroupVersionResource(obj)
+	namespace := ""
+	if _, isClusterResource := clusterResources[gvr.Resource]; !isClusterResource {
+		namespace = obj.GetNamespace()
+		// Defaults to sensor's namespace
+		if namespace == "" {
+			namespace = k8sTrigger.Sensor.Namespace
+		}
 	}
 	obj.SetNamespace(namespace)
 
@@ -157,11 +152,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 
 	// We might have a client from FetchResource() already, or we might not have one yet.
 	if k8sTrigger.namespableDynamicClient == nil {
-		k8sTrigger.namespableDynamicClient = k8sTrigger.DynamicClient.Resource(schema.GroupVersionResource{
-			Group:    trigger.Template.K8s.GroupVersionResource.Group,
-			Version:  trigger.Template.K8s.GroupVersionResource.Version,
-			Resource: trigger.Template.K8s.GroupVersionResource.Resource,
-		})
+		k8sTrigger.namespableDynamicClient = k8sTrigger.DynamicClient.Resource(gvr)
 	}
 
 	switch op {

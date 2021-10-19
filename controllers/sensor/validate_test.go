@@ -25,7 +25,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestValidateSensor(t *testing.T) {
@@ -97,11 +96,6 @@ func TestValidTriggers(t *testing.T) {
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
 					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: metav1.GroupVersionResource{
-							Group:    "k8s.io",
-							Version:  "",
-							Resource: "pods",
-						},
 						Operation: "create",
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
@@ -111,11 +105,6 @@ func TestValidTriggers(t *testing.T) {
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
 					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: metav1.GroupVersionResource{
-							Group:    "k8s.io",
-							Version:  "",
-							Resource: "pods",
-						},
 						Operation: "create",
 						Source:    &v1alpha1.ArtifactLocation{},
 					},

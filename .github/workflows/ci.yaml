@@ -24,7 +24,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v1
         with:
-          go-version: "1.15.7"
+          go-version: "1.17.1"
       - name: Add bins to PATH
         run: |
           echo /home/runner/go/bin >> $GITHUB_PATH
@@ -32,7 +32,8 @@ jobs:
       - name: Install protoc
         run: |
           set -eux -o pipefail
-          PROTOC_ZIP=protoc-3.11.1-linux-x86_64.zip
+          PROTOC_VERSION=3.11.1
+          PROTOC_ZIP=protoc-$PROTOC_VERSION-linux-x86_64.zip
           curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.1/$PROTOC_ZIP
           sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
           sudo unzip -o $PROTOC_ZIP -d /usr/local 'include/*'
@@ -44,11 +45,12 @@ jobs:
       - name: Install pandoc
         run: |
           set -eux -o pipefail
-          PANDOC_ZIP=pandoc-2.11.1-linux-amd64.tar.gz
-          curl -OL https://github.com/jgm/pandoc/releases/download/2.11.1/$PANDOC_ZIP
+          PANDOC_VERSION=2.14.2
+          PANDOC_ZIP=pandoc-$PANDOC_VERSION-linux-amd64.tar.gz
+          curl -OL https://github.com/jgm/pandoc/releases/download/$PANDOC_VERSION/$PANDOC_ZIP
           sudo tar xvzf $PANDOC_ZIP --strip-components 1 -C /usr/local
           rm -f $PANDOC_ZIP
-          echo /usr/local/pandoc-2.11.1/bin >> $GITHUB_PATH
+          echo /usr/local/pandoc-$PANDOC_VERSION/bin >> $GITHUB_PATH
       - name: Get dependencies
         run: go mod download
       - name: Make codegen
@@ -66,7 +68,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: "1.15.7"
+          go-version: "1.17.1"
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -95,7 +97,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v1
         with:
-          go-version: "1.15.7"
+          go-version: "1.17.1"
       - name: Add bins to PATH
         run: |
           echo /home/runner/go/bin >> $GITHUB_PATH

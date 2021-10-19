@@ -5,4 +5,4 @@ This is a partial copy of
 current
 [nats-streaming-server](https://github.com/nats-io/nats-streaming-server)
 version is
-[v0.17.0](https://github.com/nats-io/nats-streaming-server/tree/v0.17.0).
+[v0.22.1](https://github.com/nats-io/nats-streaming-server/tree/v0.22.1).

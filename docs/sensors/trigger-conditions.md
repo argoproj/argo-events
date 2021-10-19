@@ -21,8 +21,8 @@ spec:
       eventSourceName: webhook-a
       eventName: example02
    - name: dep03
-      eventSourceName: webhook-b
-      eventName: example03
+     eventSourceName: webhook-b
+     eventName: example03
   triggers:
     - template:
         conditions: "dep02"

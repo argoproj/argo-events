@@ -104,13 +104,6 @@ func startServer(router Router, controller *Controller) {
 				if err != nil {
 					route.Logger.With("port", route.Context.Port).Errorw("failed to listen and serve with TLS configured", zap.Error(err))
 				}
-			case route.Context.DeprecatedServerCertPath != "" && route.Context.DeprecatedServerKeyPath != "":
-				// DEPRECATED.
-				route.Logger.Warn("ServerCertPath and ServerKeyPath are deprecated, please use ServerCertSecret and ServerKeySecret")
-				err := server.ListenAndServeTLS(route.Context.DeprecatedServerCertPath, route.Context.DeprecatedServerKeyPath)
-				if err != nil {
-					route.Logger.With("port", route.Context.Port).Errorw("failed to listen and serve with TLS configured", zap.Error(err))
-				}
 			default:
 				err := server.ListenAndServe()
 				if err != nil {
@@ -146,6 +139,10 @@ func startServer(router Router, controller *Controller) {
 					common.SendResponse(writer, http.StatusUnauthorized, "Invalid Auth token")
 					return
 				}
+			}
+			if request.Header.Get("Authorization") != "" {
+				// Auth secret stops here
+				request.Header.Set("Authorization", "*** Masked Auth Secret ***")
 			}
 			router.HandleRoute(writer, request)
 		})

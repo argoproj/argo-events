@@ -17,8 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"encoding/json"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -58,71 +56,67 @@ type EventSourceSpec struct {
 	// Service is the specifications of the service to expose the event source
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,3,opt,name=service"`
-	// DeprecatedReplica is the event source deployment replicas
-	// Deprecated: use replicas instead, will be removed in v1.5
-	DeprecatedReplica *int32 `json:"replica,omitempty" protobuf:"varint,4,opt,name=replica"`
-
 	// Minio event sources
-	Minio map[string]apicommon.S3Artifact `json:"minio,omitempty" protobuf:"bytes,5,rep,name=minio"`
+	Minio map[string]apicommon.S3Artifact `json:"minio,omitempty" protobuf:"bytes,4,rep,name=minio"`
 	// Calendar event sources
-	Calendar map[string]CalendarEventSource `json:"calendar,omitempty" protobuf:"bytes,6,rep,name=calendar"`
+	Calendar map[string]CalendarEventSource `json:"calendar,omitempty" protobuf:"bytes,5,rep,name=calendar"`
 	// File event sources
-	File map[string]FileEventSource `json:"file,omitempty" protobuf:"bytes,7,rep,name=file"`
+	File map[string]FileEventSource `json:"file,omitempty" protobuf:"bytes,6,rep,name=file"`
 	// Resource event sources
-	Resource map[string]ResourceEventSource `json:"resource,omitempty" protobuf:"bytes,8,rep,name=resource"`
+	Resource map[string]ResourceEventSource `json:"resource,omitempty" protobuf:"bytes,7,rep,name=resource"`
 	// Webhook event sources
-	Webhook map[string]WebhookContext `json:"webhook,omitempty" protobuf:"bytes,9,rep,name=webhook"`
+	Webhook map[string]WebhookContext `json:"webhook,omitempty" protobuf:"bytes,8,rep,name=webhook"`
 	// AMQP event sources
-	AMQP map[string]AMQPEventSource `json:"amqp,omitempty" protobuf:"bytes,10,rep,name=amqp"`
+	AMQP map[string]AMQPEventSource `json:"amqp,omitempty" protobuf:"bytes,9,rep,name=amqp"`
 	// Kafka event sources
-	Kafka map[string]KafkaEventSource `json:"kafka,omitempty" protobuf:"bytes,11,rep,name=kafka"`
+	Kafka map[string]KafkaEventSource `json:"kafka,omitempty" protobuf:"bytes,10,rep,name=kafka"`
 	// MQTT event sources
-	MQTT map[string]MQTTEventSource `json:"mqtt,omitempty" protobuf:"bytes,12,rep,name=mqtt"`
+	MQTT map[string]MQTTEventSource `json:"mqtt,omitempty" protobuf:"bytes,11,rep,name=mqtt"`
 	// NATS event sources
-	NATS map[string]NATSEventsSource `json:"nats,omitempty" protobuf:"bytes,13,rep,name=nats"`
+	NATS map[string]NATSEventsSource `json:"nats,omitempty" protobuf:"bytes,12,rep,name=nats"`
 	// SNS event sources
-	SNS map[string]SNSEventSource `json:"sns,omitempty" protobuf:"bytes,14,rep,name=sns"`
+	SNS map[string]SNSEventSource `json:"sns,omitempty" protobuf:"bytes,13,rep,name=sns"`
 	// SQS event sources
-	SQS map[string]SQSEventSource `json:"sqs,omitempty" protobuf:"bytes,15,rep,name=sqs"`
+	SQS map[string]SQSEventSource `json:"sqs,omitempty" protobuf:"bytes,14,rep,name=sqs"`
 	// PubSub event sources
-	PubSub map[string]PubSubEventSource `json:"pubSub,omitempty" protobuf:"bytes,16,rep,name=pubSub"`
+	PubSub map[string]PubSubEventSource `json:"pubSub,omitempty" protobuf:"bytes,15,rep,name=pubSub"`
 	// Github event sources
-	Github map[string]GithubEventSource `json:"github,omitempty" protobuf:"bytes,17,rep,name=github"`
+	Github map[string]GithubEventSource `json:"github,omitempty" protobuf:"bytes,16,rep,name=github"`
 	// Gitlab event sources
-	Gitlab map[string]GitlabEventSource `json:"gitlab,omitempty" protobuf:"bytes,18,rep,name=gitlab"`
+	Gitlab map[string]GitlabEventSource `json:"gitlab,omitempty" protobuf:"bytes,17,rep,name=gitlab"`
 	// HDFS event sources
-	HDFS map[string]HDFSEventSource `json:"hdfs,omitempty" protobuf:"bytes,19,rep,name=hdfs"`
+	HDFS map[string]HDFSEventSource `json:"hdfs,omitempty" protobuf:"bytes,18,rep,name=hdfs"`
 	// Slack event sources
-	Slack map[string]SlackEventSource `json:"slack,omitempty" protobuf:"bytes,20,rep,name=slack"`
+	Slack map[string]SlackEventSource `json:"slack,omitempty" protobuf:"bytes,19,rep,name=slack"`
 	// StorageGrid event sources
-	StorageGrid map[string]StorageGridEventSource `json:"storageGrid,omitempty" protobuf:"bytes,21,rep,name=storageGrid"`
+	StorageGrid map[string]StorageGridEventSource `json:"storageGrid,omitempty" protobuf:"bytes,20,rep,name=storageGrid"`
 	// AzureEventsHub event sources
-	AzureEventsHub map[string]AzureEventsHubEventSource `json:"azureEventsHub,omitempty" protobuf:"bytes,22,rep,name=azureEventsHub"`
+	AzureEventsHub map[string]AzureEventsHubEventSource `json:"azureEventsHub,omitempty" protobuf:"bytes,21,rep,name=azureEventsHub"`
 	// Stripe event sources
-	Stripe map[string]StripeEventSource `json:"stripe,omitempty" protobuf:"bytes,23,rep,name=stripe"`
+	Stripe map[string]StripeEventSource `json:"stripe,omitempty" protobuf:"bytes,22,rep,name=stripe"`
 	// Emitter event source
-	Emitter map[string]EmitterEventSource `json:"emitter,omitempty" protobuf:"bytes,24,rep,name=emitter"`
+	Emitter map[string]EmitterEventSource `json:"emitter,omitempty" protobuf:"bytes,23,rep,name=emitter"`
 	// Redis event source
-	Redis map[string]RedisEventSource `json:"redis,omitempty" protobuf:"bytes,25,rep,name=redis"`
+	Redis map[string]RedisEventSource `json:"redis,omitempty" protobuf:"bytes,24,rep,name=redis"`
 	// NSQ event source
-	NSQ map[string]NSQEventSource `json:"nsq,omitempty" protobuf:"bytes,26,rep,name=nsq"`
+	NSQ map[string]NSQEventSource `json:"nsq,omitempty" protobuf:"bytes,25,rep,name=nsq"`
 	// Pulsar event source
-	Pulsar map[string]PulsarEventSource `json:"pulsar,omitempty" protobuf:"bytes,27,opt,name=pulsar"`
+	Pulsar map[string]PulsarEventSource `json:"pulsar,omitempty" protobuf:"bytes,26,opt,name=pulsar"`
 	// Generic event source
-	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,28,rep,name=generic"`
+	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,27,rep,name=generic"`
 	// Replicas is the event source deployment replicas
-	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,29,opt,name=replicas"`
+	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,28,opt,name=replicas"`
+	// Bitbucket Server event sources
+	BitbucketServer map[string]BitbucketServerEventSource `json:"bitbucketserver,omitempty" protobuf:"bytes,29,rep,name=bitbucketserver"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
-	if e.Replicas == nil && e.DeprecatedReplica == nil {
+	if e.Replicas == nil {
 		return 1
 	}
 	var replicas int32
 	if e.Replicas != nil {
 		replicas = *e.Replicas
-	} else {
-		replicas = *e.DeprecatedReplica
 	}
 	if replicas < 1 {
 		replicas = 1
@@ -221,15 +215,11 @@ type CalendarEventSource struct {
 	// Timezone in which to run the schedule
 	// +optional
 	Timezone string `json:"timezone,omitempty" protobuf:"bytes,4,opt,name=timezone"`
-	// UserPayload will be sent to sensor as extra data once the event is triggered
-	// +optional
-	// Deprecated: will be removed in v1.5. Please use Metadata instead.
-	UserPayload json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload,casttype=encoding/json.RawMessage"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
 	// Persistence hold the configuration for event persistence
-	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,7,opt,name=persistence"`
+	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,6,opt,name=persistence"`
 }
 
 type EventPersistence struct {
@@ -299,7 +289,7 @@ type ResourceEventSource struct {
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
 }
 
-// ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
+// ResourceFilter contains K8s ObjectMeta information to further filter resource event objects
 type ResourceFilter struct {
 	// Prefix filter is applied on the resource name.
 	// +optional
@@ -339,7 +329,7 @@ type Selector struct {
 // AMQPEventSource refers to an event-source for AMQP stream events
 type AMQPEventSource struct {
 	// URL for rabbitmq service
-	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// ExchangeName is the exchange name
 	// For more information, visit https://www.rabbitmq.com/tutorials/amqp-concepts.html
 	ExchangeName string `json:"exchangeName" protobuf:"bytes,2,opt,name=exchangeName"`
@@ -382,6 +372,8 @@ type AMQPEventSource struct {
 	// Auth hosts secret selectors for username and password
 	// +optional
 	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,13,opt,name=auth"`
+	// URLSecret is secret reference for rabbitmq service URL
+	URLSecret *corev1.SecretKeySelector `json:"urlSecret,omitempty" protobuf:"bytes,14,opt,name=urlSecret"`
 }
 
 // AMQPExchangeDeclareConfig holds the configuration for the exchange on the server
@@ -569,9 +561,9 @@ type SNSEventSource struct {
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
 	// TopicArn
 	TopicArn string `json:"topicArn" protobuf:"bytes,2,opt,name=topicArn"`
-	// AccessKey refers K8 secret containing aws access key
+	// AccessKey refers K8s secret containing aws access key
 	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,3,opt,name=accessKey"`
-	// SecretKey refers K8 secret containing aws secret key
+	// SecretKey refers K8s secret containing aws secret key
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,4,opt,name=secretKey"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,5,opt,name=region"`
@@ -588,9 +580,9 @@ type SNSEventSource struct {
 
 // SQSEventSource refers to event-source for AWS SQS related events
 type SQSEventSource struct {
-	// AccessKey refers K8 secret containing aws access key
+	// AccessKey refers K8s secret containing aws access key
 	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,1,opt,name=accessKey"`
-	// SecretKey refers K8 secret containing aws secret key
+	// SecretKey refers K8s secret containing aws secret key
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,2,opt,name=secretKey"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,3,opt,name=region"`
@@ -649,12 +641,9 @@ type PubSubEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,7,opt,name=jsonBody"`
-	// CredentialsFile is the file that contains credentials to authenticate for GCP
-	// Deprecated: will be removed in v1.5, use CredentialSecret instead
-	DeprecatedCredentialsFile string `json:"credentialsFile" protobuf:"bytes,8,opt,name=credentialsFile"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
 }
 
 type OwnedRepositories struct {
@@ -736,12 +725,13 @@ func (g GithubEventSource) NeedToCreateHooks() bool {
 type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// ProjectID is the id of project for which integration needs to setup
-	ProjectID string `json:"projectID" protobuf:"bytes,2,opt,name=projectID"`
+	// DeprecatedProjectID is the id of project for which integration needs to setup
+	// Deprecated: use Projects instead. Will be unsupported in v 1.7
+	DeprecatedProjectID string `json:"projectID" protobuf:"bytes,2,opt,name=projectID"`
 	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
 	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`
-	// AccessToken is reference to k8 secret which holds the gitlab api access information
+	// AccessToken references to k8 secret which holds the gitlab api access information
 	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,4,opt,name=accessToken"`
 	// EnableSSLVerification to enable ssl verification
 	// +optional
@@ -754,6 +744,49 @@ type GitlabEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+	// List of project IDs or project namespace paths like "whynowy/test"
+	Projects []string `json:"projects,omitempty" protobuf:"bytes,10,rep,name=projects"`
+	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
+	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,11,opt,name=secretToken"`
+}
+
+func (g GitlabEventSource) GetProjects() []string {
+	if len(g.Projects) > 0 {
+		return g.Projects
+	}
+	if g.DeprecatedProjectID != "" {
+		return []string{g.DeprecatedProjectID}
+	}
+	return []string{}
+}
+
+func (g GitlabEventSource) NeedToCreateHooks() bool {
+	return g.AccessToken != nil && g.Webhook != nil && g.Webhook.URL != ""
+}
+
+// BitbucketServerEventSource refers to event-source related to Bitbucket Server events
+type BitbucketServerEventSource struct {
+	// Webhook holds configuration to run a http server
+	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
+	// ProjectKey is the key of project for which integration needs to setup
+	ProjectKey string `json:"projectKey" protobuf:"bytes,2,opt,name=projectKey"`
+	// RepositorySlug is the slug of the repository for which integration needs to setup
+	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,3,opt,name=repositorySlug"`
+	// Events are bitbucket event to listen to.
+	// Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
+	Events []string `json:"events" protobuf:"bytes,4,opt,name=events"`
+	// AccessToken is reference to K8s secret which holds the bitbucket api access information
+	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,5,opt,name=accessToken"`
+	// WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
+	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,6,opt,name=webhookSecret"`
+	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
+	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,8,opt,name=bitbucketserverBaseURL"`
+	// DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
+	// +optional
+	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,9,opt,name=deleteHookOnFinish"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
@@ -991,6 +1024,9 @@ type PulsarEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
+	// Authentication token for the pulsar client.
+	// +optional
+	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,11,opt,name=authTokenSecret"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

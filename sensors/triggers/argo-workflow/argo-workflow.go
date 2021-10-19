@@ -110,7 +110,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 			return nil, errors.Errorf("failed to execute the workflow %v operation, no name is given", op)
 		}
 		if obj.GetGenerateName() == "" {
-			return nil, errors.New("failed to trigger the workflow, neither name nor generatedName is given")
+			return nil, errors.New("failed to trigger the workflow, neither name nor generateName is given")
 		}
 	}
 

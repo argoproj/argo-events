@@ -98,6 +98,15 @@ Kubernetes core/v1.ResourceRequirements </a> </em>
 <td>
 </td>
 </tr>
+<tr>
+<td>
+<code>imagePullPolicy</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#pullpolicy-v1-core">
+Kubernetes core/v1.PullPolicy </a> </em>
+</td>
+<td>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventBus">
@@ -415,16 +424,6 @@ Size is the NATS StatefulSet size
 </tr>
 <tr>
 <td>
-<code>antiAffinity</code></br> <em> bool </em>
-</td>
-<td>
-<p>
-Deprecated, use Affinity instead, will be removed in v1.5
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>persistence</code></br> <em>
 <a href="#argoproj.io/v1alpha1.PersistenceStrategy"> PersistenceStrategy
 </a> </em>
@@ -537,7 +536,7 @@ same namespace to use for pulling any of the images used by this
 PodSpec. If specified, these secrets will be passed to individual puller
 implementations for them to use. For example, in the case of docker,
 only DockerConfig type secrets are honored. More info:
-<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images\#specifying-imagepullsecrets-on-a-pod</a>
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a>
 </p>
 </td>
 </tr>
@@ -620,6 +619,17 @@ Total size of messages per channel, 0 means unlimited. Defaults to 1GB
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>maxSubs</code></br> <em> uint64 </em>
+</td>
+<td>
+<p>
+Maximum number of subscriptions per channel, 0 means unlimited. Defaults
+to 1000
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.PersistenceStrategy">
@@ -654,7 +664,7 @@ Description
 <em>(Optional)</em>
 <p>
 Name of the StorageClass required by the claim. More info:
-<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1">https://kubernetes.io/docs/concepts/storage/persistent-volumes\#class-1</a>
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1">https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1</a>
 </p>
 </td>
 </tr>
@@ -668,7 +678,7 @@ Kubernetes core/v1.PersistentVolumeAccessMode </a> </em>
 <em>(Optional)</em>
 <p>
 Available access modes such as ReadWriteOnce, ReadWriteMany
-<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">https://kubernetes.io/docs/concepts/storage/persistent-volumes/\#access-modes</a>
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes</a>
 </p>
 </td>
 </tr>

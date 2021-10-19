@@ -58,7 +58,7 @@ func GetVersion() Version {
 	} else {
 		// otherwise formulate a version string based on as much metadata
 		// information we have available.
-		versionStr = "v" + version
+		versionStr = version
 		if len(gitCommit) >= 7 {
 			versionStr += "+" + gitCommit[0:7]
 			if gitTreeState != "clean" {

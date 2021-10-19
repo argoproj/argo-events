@@ -17,9 +17,6 @@ spec:
     - template:
         name: multi-dependencies-workflow-trigger
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:
@@ -51,7 +48,9 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dependency-webhook
+                dataKey: body.a
               dest: spec.arguments.parameters.0.value
             - src:
                 dependencyName: test-dependency-calendar
+                dataKey: eventTime
               dest: spec.arguments.parameters.1.value

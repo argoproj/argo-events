@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
-VERSION?=v1.4.0
-BASE_VERSION:=v1.4.0
+VERSION?=v1.5.0-cf-CR-7204
+BASE_VERSION:=v1.5.0-cf-CR-7204
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -97,9 +97,9 @@ crds:
 
 .PHONY: manifests
 manifests: crds
-	kustomize build manifests/cluster-install > manifests/install.yaml
-	kustomize build manifests/namespace-install > manifests/namespace-install.yaml
-	kustomize build manifests/extensions/validating-webhook > manifests/install-validating-webhook.yaml
+	kubectl kustomize manifests/cluster-install > manifests/install.yaml
+	kubectl kustomize manifests/namespace-install > manifests/namespace-install.yaml
+	kubectl kustomize manifests/extensions/validating-webhook > manifests/install-validating-webhook.yaml
 
 .PHONY: swagger
 swagger:
@@ -126,11 +126,11 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 .PHONY: start
 start: image
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kustomize build test/manifests | sed 's@quay.io/argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
+	kubectl kustomize test/manifests | sed 's@quay.io/codefresh/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.26.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.42.1
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
@@ -162,7 +162,7 @@ check-version-warning:
 
 .PHONY: update-manifests-version
 update-manifests-version:
-	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: quay.io/argoproj/argo-events:.*@value: quay.io/argoproj/argo-events:$(VERSION)@' > /tmp/base_kustomization.yaml
+	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: quay.io/codefresh/argo-events:.*@value: quay.io/codefresh/argo-events:$(VERSION)@' > /tmp/base_kustomization.yaml
 	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
 	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml

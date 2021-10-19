@@ -20,9 +20,6 @@ spec:
     - template:
         name: data-workflow
         k8s:
-          group: argoproj.io
-          version: v1alpha1
-          resource: workflows
           operation: create
           source:
             resource:

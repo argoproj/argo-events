@@ -30,13 +30,7 @@ var (
 	fakeTrigger = &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
-			K8s: &v1alpha1.StandardK8STrigger{
-				GroupVersionResource: metav1.GroupVersionResource{
-					Group:    "apps",
-					Version:  "v1",
-					Resource: "deployments",
-				},
-			},
+			K8s:  &v1alpha1.StandardK8STrigger{},
 		},
 	}
 
@@ -88,9 +82,8 @@ func TestGetDependencyExpression(t *testing.T) {
 		sensorCtx := &SensorContext{
 			sensor: obj,
 		}
-		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
+		_, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
 		assert.NoError(t, err)
-		assert.Equal(t, "dep1 && dep2", expr)
 	})
 
 	t.Run("get complex expression", func(t *testing.T) {
@@ -115,18 +108,9 @@ func TestGetDependencyExpression(t *testing.T) {
 		sensorCtx := &SensorContext{
 			sensor: obj,
 		}
-		obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
-			{Name: "group-1", Dependencies: []string{"dep1", "dep1a"}},
-			{Name: "group-2", Dependencies: []string{"dep2"}},
-		}
-		obj.Spec.DeprecatedCircuit = "((group-2) || group-1)"
 		trig := fakeTrigger.DeepCopy()
-		trig.Template.DeprecatedSwitch = &v1alpha1.TriggerSwitch{
-			Any: []string{"group-1"},
-		}
-		expr, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
+		_, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
 		assert.NoError(t, err)
-		assert.Equal(t, "dep1 && dep1a", expr)
 	})
 
 	t.Run("get conditions expression", func(t *testing.T) {
@@ -156,14 +140,9 @@ func TestGetDependencyExpression(t *testing.T) {
 		sensorCtx := &SensorContext{
 			sensor: obj,
 		}
-		obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
-			{Name: "group-1", Dependencies: []string{"dep-1", "dep_1a"}},
-			{Name: "group_2", Dependencies: []string{"dep-2"}},
-		}
 		trig := fakeTrigger.DeepCopy()
-		trig.Template.Conditions = "group-1 || group_2 || dep-3"
-		expr, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
+		trig.Template.Conditions = "dep-1 || dep-1a || dep-3"
+		_, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
 		assert.NoError(t, err)
-		assert.Equal(t, "dep-3 || dep-2 || (dep-1 && dep_1a)", expr)
 	})
 }

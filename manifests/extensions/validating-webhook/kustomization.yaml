@@ -2,14 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- argo-events-webhook-sa.yaml
-- rbac
-- events-webhook-deployment.yaml
-- events-webhook-service.yaml
+  - argo-events-webhook-sa.yaml
+  - rbac
+  - events-webhook-deployment.yaml
+  - events-webhook-service.yaml
 
 namespace: argo-events
 
 images:
-- name: quay.io/argoproj/argo-events
-  newName: quay.io/codefresh/argo-events
-  newTag: v0.0.2-cf
+  - name: quay.io/argoproj/argo-events
+    newName: quay.io/codefresh/argo-events
+    newTag: v1.5.0-cf-CR-7204

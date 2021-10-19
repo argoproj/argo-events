@@ -83,9 +83,6 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 			if err != nil {
 				return nil, err
 			}
-		case ct.DeprecatedCertFilePath != "":
-			// DEPRECATED
-			certFilePath = ct.DeprecatedCertFilePath
 		default:
 			return nil, errors.New("invalid config, CERT secret not defined")
 		}

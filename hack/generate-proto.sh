@@ -7,6 +7,7 @@ set -o pipefail
 source $(dirname $0)/library.sh
 header "generating proto files"
 
+ensure_protobuf
 ensure_vendor
 
 if [ "`command -v protoc-gen-gogo`" = "" ]; then

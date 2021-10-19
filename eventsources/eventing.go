@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
+	"github.com/argoproj/argo-events/eventsources/sources/bitbucketserver"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
 	"github.com/argoproj/argo-events/eventsources/sources/emitter"
 	"github.com/argoproj/argo-events/eventsources/sources/file"
@@ -82,6 +83,13 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AzureEventsHub] = servers
+	}
+	if len(eventSource.Spec.BitbucketServer) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.BitbucketServer {
+			servers = append(servers, &bitbucketserver.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketServerEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.BitbucketServerEvent] = servers
 	}
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}
@@ -328,7 +336,6 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	cfConfig, err := codefresh.GetCodefreshConfig(ctx, namespace)
 	if err != nil {
 		logger.Errorw("failed to get Codefresh config", zap.Error(err))
-		return err
 	}
 
 	cctx, cancel := context.WithCancel(ctx)
@@ -421,12 +428,17 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 
-						err = codefresh.ReportEventToCodefresh(eventBody, cfConfig)
-						if err != nil {
-							logger.Errorw("failed to report an event to Codefresh", zap.Error(err),
-								zap.String(logging.LabelEventName, s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+						if cfConfig != nil {
+							err = codefresh.ReportEventToCodefresh(eventBody, cfConfig)
+							if err != nil {
+								logger.Errorw("failed to report an event to Codefresh", zap.Error(err),
+									zap.String(logging.LabelEventName, s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+							} else {
+								logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, s.GetEventName()),
+									zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
+							}
 						} else {
-							logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, s.GetEventName()),
+							logger.Warnw("WARNING: skipping event reporting to Codefresh", zap.String(logging.LabelEventName, s.GetEventName()),
 								zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						}
 

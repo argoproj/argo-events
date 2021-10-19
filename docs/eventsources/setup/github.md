@@ -32,11 +32,11 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 1. Create an API token if you don't have one. Follow [instructions](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) to create a new GitHub API Token.
    Grant it the `repo_hook` permissions. 
 
-1. Base64 encode your api token key.
+1. Base64 encode your API token key.
 
         echo -n <api-token-key> | base64
 
-1. Create a secret called `github-access`.
+1. Create a secret called `github-access` that contains your encoded GitHub API token. You can also include a secret key that is encoded with `base64` for your webhook if any.
 
         apiVersion: v1
         kind: Secret
@@ -45,6 +45,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
         type: Opaque
         data:
           token: <base64-encoded-api-token-from-previous-step>
+          secret: <base64-encoded-webhook-secret-key>
 
 1. Deploy the secret into K8s cluster.
 

@@ -44,6 +44,12 @@ spec:
 
 #   template:
 #     serviceAccountName: my-sa
+#     # (optional) you can add a PUBSUB_EMULATOR_HOST environment variable to the EventSource pod to connect
+#     # to a PubSub emulator (no credentials needed)
+#     container:
+#       env:
+#         - name: PUBSUB_EMULATOR_HOST
+#           value: pubsub-emulator:9030
 #   pubSub:
 #     example-workload-identity:
 #       # (optional) jsonBody specifies that all event body payload coming from this

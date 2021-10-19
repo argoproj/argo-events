@@ -48,7 +48,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>AccessKey refers K8 secret containing aws access key</p>
+<p>AccessKey refers K8s secret containing aws access key</p>
 </td>
 </tr>
 <tr>
@@ -61,7 +61,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>SecretKey refers K8 secret containing aws secret key</p>
+<p>SecretKey refers K8s secret containing aws secret key</p>
 </td>
 </tr>
 <tr>
@@ -163,7 +163,7 @@ ArtifactLocation
 </em>
 </td>
 <td>
-<p>Source of the K8 resource file(s)</p>
+<p>Source of the K8s resource file(s)</p>
 </td>
 </tr>
 <tr>
@@ -192,22 +192,6 @@ Default value is Submit.</p>
 </td>
 <td>
 <p>Parameters is the list of parameters to pass to resolved Argo Workflow object</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>GroupVersionResource</code></br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
-Kubernetes meta/v1.GroupVersionResource
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>GroupVersionResource</code> are embedded into this type.)
-</p>
-<p>The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource</p>
 </td>
 </tr>
 </tbody>
@@ -525,18 +509,6 @@ map[string]string
 <p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
 </td>
 </tr>
-<tr>
-<td>
-<code>certFilePath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>DeprecatedCertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-Deprecated: will be removed in v1.5, use CertSecret instead</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.DataFilter">DataFilter
@@ -627,47 +599,6 @@ string
 A Template is evaluated with provided path, type and value.
 The templating follows the standard go-template syntax as well as sprig&rsquo;s extra functions.
 See <a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a> and <a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a></p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.DependencyGroup">DependencyGroup
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
-</p>
-<p>
-<p>DependencyGroup is the group of dependencies</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>name</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Name of the group</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code></br>
-<em>
-[]string
-</em>
-</td>
-<td>
-<p>Dependencies of events</p>
 </td>
 </tr>
 </tbody>
@@ -1143,20 +1074,6 @@ GitRemoteConfig
 <em>(Optional)</em>
 <p>Remote to manage set of tracked repositories. Defaults to &ldquo;origin&rdquo;.
 Refer <a href="https://git-scm.com/docs/git-remote">https://git-scm.com/docs/git-remote</a></p>
-</td>
-</tr>
-<tr>
-<td>
-<code>sshKeyPath</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>DeprecatedSSHKeyPath is path to your ssh key path. Use this if you don&rsquo;t want to provide username and password.
-ssh key path must be mounted in sensor pod.
-Deprecated: will be removed in v1.5, use SSHKeySecret instead.</p>
 </td>
 </tr>
 </tbody>
@@ -1873,6 +1790,199 @@ string
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.PulsarTrigger">PulsarTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+<p>PulsarTrigger refers to the specification of the Pulsar trigger.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>url</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Configure the service URL for the Pulsar service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topic</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name of the topic.
+See <a href="https://pulsar.apache.org/docs/en/concepts-messaging/">https://pulsar.apache.org/docs/en/concepts-messaging/</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>parameters</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter">
+[]TriggerParameter
+</a>
+</em>
+</td>
+<td>
+<p>Parameters is the list of parameters that is applied to resolved Kafka trigger object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>payload</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter">
+[]TriggerParameter
+</a>
+</em>
+</td>
+<td>
+<p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsTrustCertsSecret</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Trusted TLS certificate secret.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsAllowInsecureConnection</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Whether the Pulsar client accept untrusted TLS certificate from broker.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tlsValidateHostname</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Whether the Pulsar client verify the validity of the host name from broker.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>TLS configuration for the pulsar client.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authTokenSecret</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Authentication token for the pulsar client.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>connectionBackoff</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Backoff holds parameters applied to connection.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RateLimit">RateLimit
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>unit</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.RateLimiteUnit">
+RateLimiteUnit
+</a>
+</em>
+</td>
+<td>
+<p>Defaults to Second</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>requestsPerUnit</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RateLimiteUnit">RateLimiteUnit
+(<code>string</code> alias)</p></h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.RateLimit">RateLimit</a>)
+</p>
+<p>
+</p>
 <h3 id="argoproj.io/v1alpha1.Sensor">Sensor
 </h3>
 <p>
@@ -1955,19 +2065,6 @@ Template
 </tr>
 <tr>
 <td>
-<code>dependencyGroups</code></br>
-<em>
-<a href="#argoproj.io/v1alpha1.DependencyGroup">
-[]DependencyGroup
-</a>
-</em>
-</td>
-<td>
-<p>DependencyGroups is a list of the groups of events.</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>errorOnFailedRound</code></br>
 <em>
 bool
@@ -1987,18 +2084,6 @@ string
 </td>
 <td>
 <p>EventBusName references to a EventBus name. By default the value is &ldquo;default&rdquo;</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>circuit</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Circuit is a boolean expression of dependency groups
-Deprecated: will be removed in v1.5, use Switch in triggers instead.</p>
 </td>
 </tr>
 <tr>
@@ -2089,19 +2174,6 @@ Template
 </tr>
 <tr>
 <td>
-<code>dependencyGroups</code></br>
-<em>
-<a href="#argoproj.io/v1alpha1.DependencyGroup">
-[]DependencyGroup
-</a>
-</em>
-</td>
-<td>
-<p>DependencyGroups is a list of the groups of events.</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>errorOnFailedRound</code></br>
 <em>
 bool
@@ -2121,18 +2193,6 @@ string
 </td>
 <td>
 <p>EventBusName references to a EventBus name. By default the value is &ldquo;default&rdquo;</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>circuit</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Circuit is a boolean expression of dependency groups
-Deprecated: will be removed in v1.5, use Switch in triggers instead.</p>
 </td>
 </tr>
 <tr>
@@ -2270,22 +2330,6 @@ string
 <tbody>
 <tr>
 <td>
-<code>GroupVersionResource</code></br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
-Kubernetes meta/v1.GroupVersionResource
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>GroupVersionResource</code> are embedded into this type.)
-</p>
-<p>The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>source</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">
@@ -2294,7 +2338,7 @@ ArtifactLocation
 </em>
 </td>
 <td>
-<p>Source of the K8 resource file(s)</p>
+<p>Source of the K8s resource file(s)</p>
 </td>
 </tr>
 <tr>
@@ -2690,6 +2734,20 @@ github.com/argoproj/argo-events/pkg/apis/common.Backoff
 <p>Retry strategy, defaults to no retry</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>rateLimit</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.RateLimit">
+RateLimit
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Rate limit, default unit is Second</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TriggerParameter">TriggerParameter
@@ -2704,6 +2762,7 @@ github.com/argoproj/argo-events/pkg/apis/common.Backoff
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>, 
+<a href="#argoproj.io/v1alpha1.PulsarTrigger">PulsarTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>, 
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
@@ -2917,49 +2976,6 @@ StatusPolicy
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.TriggerSwitch">TriggerSwitch
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
-</p>
-<p>
-<p>TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
-Depending upon condition type, status of dependency groups is used to evaluate the result.
-Deprecated: will be removed in v1.5</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>any</code></br>
-<em>
-[]string
-</em>
-</td>
-<td>
-<p>Any acts as a OR operator between dependencies</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>all</code></br>
-<em>
-[]string
-</em>
-</td>
-<td>
-<p>All acts as a AND operator between dependencies</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate
 </h3>
 <p>
@@ -3141,21 +3157,6 @@ LogTrigger
 </tr>
 <tr>
 <td>
-<code>switch</code></br>
-<em>
-<a href="#argoproj.io/v1alpha1.TriggerSwitch">
-TriggerSwitch
-</a>
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>DeprecatedSwitch is the condition to execute the trigger.
-Deprecated: will be removed in v1.5, use conditions instead</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>azureEventHubs</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.AzureEventHubsTrigger">
@@ -3166,6 +3167,20 @@ AzureEventHubsTrigger
 <td>
 <em>(Optional)</em>
 <p>AzureEventHubs refers to the trigger send an event to an Azure Event Hub.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>pulsar</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.PulsarTrigger">
+PulsarTrigger
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Pulsar refers to the trigger designed to place messages on Pulsar topic.</p>
 </td>
 </tr>
 </tbody>
