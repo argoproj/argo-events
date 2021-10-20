@@ -16,11 +16,12 @@ type Driver interface {
 	// Parameter - conn, eventbus connection
 	// Parameter - group, NATS Streaming queue group or Kafka consumer group
 	// Parameter - closeCh, channel to indicate to close the subscription
+	// Parameter - resetConditionsCh, channel to indicate to reset trigger conditions
 	// Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
 	// Parameter - dependencies, array of dependencies information
 	// Parameter - filter, a function used to filter the message
 	// Parameter - action, a function to be triggered after all conditions meet
-	SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
+	SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
 
 	// Publish a message
 	Publish(conn Connection, message []byte) error
