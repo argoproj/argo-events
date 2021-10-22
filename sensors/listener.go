@@ -231,9 +231,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						opts = append(opts, cronlib.WithLocation(location))
 					}
 					cr := cronlib.New(opts...)
-					cr.AddFunc(c.ByTime.Cron, func() {
+					_, err = cr.AddFunc(c.ByTime.Cron, func() {
 						resetConditionsCh <- struct{}{}
 					})
+					if err != nil {
+						logger.Errorw("failed to add cron schedule", zap.Error(err))
+						continue
+					}
 					cr.Start()
 				}
 			}
