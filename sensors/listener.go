@@ -113,29 +113,11 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 		depMapping[d.Name] = d
 	}
 
-	// Get a mapping of dependencyExpression: []triggers
-	triggerMapping := make(map[string][]v1alpha1.Trigger)
-	for _, trigger := range sensor.Spec.Triggers {
-		depExpr, err := sensorCtx.getDependencyExpression(ctx, trigger)
-		if err != nil {
-			logger.Errorw("failed to get dependency expression", zap.Error(err))
-			return err
-		}
-		triggers, ok := triggerMapping[depExpr]
-		if !ok {
-			triggers = []v1alpha1.Trigger{}
-		}
-		triggers = append(triggers, trigger)
-		triggerMapping[depExpr] = triggers
-
-		// Init rate limiter for the trigger
-		initRateLimiter(trigger)
-	}
-
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	wg := &sync.WaitGroup{}
 	for _, t := range sensor.Spec.Triggers {
+		initRateLimiter(t)
 		wg.Add(1)
 		go func(trigger v1alpha1.Trigger) {
 			defer wg.Done()

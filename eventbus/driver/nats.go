@@ -304,6 +304,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		return
 	}
 	if result != true {
+		// Log current meet dependency information
 		meetDeps := []string{}
 		meetMsgIds := []string{}
 		for k, v := range msgHolder.msgs {
@@ -338,7 +339,8 @@ type eventSourceMessage struct {
 
 // eventSourceMessageHolder is a struct used to hold the message information of subscribed dependencies
 type eventSourceMessageHolder struct {
-	// time that resets everything, usually the time all conditions meet
+	// time that resets conditions, usually the time all conditions meet,
+	// or the time getting an external signal to reset.
 	lastResetTime int64
 	// timestamp of last msg
 	latestGoodMsgTimestamp int64
@@ -376,9 +378,6 @@ func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependenc
 		parameters[dep] = false
 	}
 
-	if err != nil {
-		return nil, errors.Errorf("failed to get next conditions reset time: %w", err)
-	}
 	return &eventSourceMessageHolder{
 		lastResetTime:          int64(0),
 		latestGoodMsgTimestamp: int64(0),
