@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: redis-stream
+spec:
+  redisStream:
+    example:
+      # HostAddress refers to the address of the Redis host/server
+      hostAddress: redis.argo-events.svc:6379
+      # Password required for authentication.
+      # +optional
+
+#      password:
+#        name: name_of_secret_that_holds_password
+#        key: key_within_secret_which_holds_password_value
+
+      # DB to use. If not specified, default DB 0 will be used.
+      # +optional
+      db: 0
+      # Streams to listen for events.
+      streams:
+        - FOO
+
+#    example-tls:
+#      hostAddress: redis.argo-events.svc:6379
+#      db: 0
+#      channels:
+#        - FOO
+#      tls:
+#        caCertSecret:
+#          name: my-secret
+#          key: ca-cert-key
+#        clientCertSecret:
+#          name: my-secret
+#          key: client-cert-key
+#        clientKeySecret:
+#          name: my-secret
+#          key: client-key-key

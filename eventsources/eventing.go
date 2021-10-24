@@ -39,6 +39,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
 	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
+	"github.com/argoproj/argo-events/eventsources/sources/redisstream"
 	"github.com/argoproj/argo-events/eventsources/sources/resource"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
@@ -180,6 +181,13 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &redis.EventListener{EventSourceName: eventSource.Name, EventName: k, RedisEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.RedisEvent] = servers
+	}
+	if len(eventSource.Spec.RedisStream) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.RedisStream {
+			servers = append(servers, &redisstream.EventListener{EventSourceName: eventSource.Name, EventName: k, EventSource: v, Metrics: metrics})
+		}
+		result[apicommon.RedisStreamEvent] = servers
 	}
 	if len(eventSource.Spec.SNS) != 0 {
 		servers := []EventingServer{}

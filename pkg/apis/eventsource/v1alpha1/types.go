@@ -108,6 +108,8 @@ type EventSourceSpec struct {
 	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,28,opt,name=replicas"`
 	// Bitbucket Server event sources
 	BitbucketServer map[string]BitbucketServerEventSource `json:"bitbucketserver,omitempty" protobuf:"bytes,29,rep,name=bitbucketserver"`
+	// Redis stream source
+	RedisStream map[string]RedisStreamEventSource `json:"redisStream,omitempty" protobuf:"bytes,30,rep,name=redisStream"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -957,6 +959,31 @@ type RedisEventSource struct {
 	// Channels to subscribe to listen events.
 
 	Channels []string `json:"channels" protobuf:"bytes,5,rep,name=channels"`
+	// TLS configuration for the redis client.
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+}
+
+// RedisStreamEventSource describes an event source for
+// Redis streams (https://redis.io/topics/streams-intro)
+type RedisStreamEventSource struct {
+	// HostAddress refers to the address of the Redis host/server
+	HostAddress string `json:"hostAddress" protobuf:"bytes,1,opt,name=hostAddress"`
+	// Password required for authentication if any.
+	// +optional
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
+	// Namespace to use to retrieve the password from. It should only be specified if password is declared
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+	// DB to use. If not specified, default DB 0 will be used.
+	// +optional
+	DB int32 `json:"db,omitempty" protobuf:"varint,4,opt,name=db"`
+	// Channels to subscribe to listen events.
+
+	Streams []string `json:"streams" protobuf:"bytes,5,rep,name=streams"`
 	// TLS configuration for the redis client.
 	// +optional
 	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`

@@ -46,6 +46,7 @@ var (
 	StripeEvent          EventSourceType = "stripe"
 	EmitterEvent         EventSourceType = "emitter"
 	RedisEvent           EventSourceType = "redis"
+	RedisStreamEvent     EventSourceType = "redisStream"
 	NSQEvent             EventSourceType = "nsq"
 	PulsarEvent          EventSourceType = "pulsar"
 	GenericEvent         EventSourceType = "generic"
@@ -68,6 +69,7 @@ var (
 		NSQEvent,
 		PulsarEvent,
 		RedisEvent,
+		RedisStreamEvent,
 		ResourceEvent,
 		HDFSEvent,
 		FileEvent,
