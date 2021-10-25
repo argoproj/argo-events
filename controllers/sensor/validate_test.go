@@ -131,7 +131,7 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name:       "fake-trigger",
 					Conditions: "A && B",
 					ConditionsReset: []v1alpha1.ConditionsResetCriteria{
 						{
@@ -156,12 +156,12 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name:       "fake-trigger",
 					Conditions: "A && B",
 					ConditionsReset: []v1alpha1.ConditionsResetCriteria{
 						{
 							ByTime: &v1alpha1.ConditionsResetByTime{
-								Cron: "* * * * *",
+								Cron:     "* * * * *",
 								Timezone: "fake",
 							},
 						},
