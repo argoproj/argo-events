@@ -2,8 +2,7 @@
 
 > v1.0 and after
 
-`Conditions` is a new feature to replace `Circuit` and `Switch`. With
-`conditions`, triggers can be executed based on different dependency conditions.
+Triggers can be executed based on different dependency `conditions`.
 
 An example with `conditions`:
 
@@ -55,3 +54,23 @@ won't be executed until the expression resolves to true. The operators in
 
 If `conditions` is missing, the default conditions to execute the trigger is
 `&&` logic of all the defined dependencies.
+
+## Conditions Reset
+
+When multiple dependencies are defined for a trigger, the trigger won't be executed until the condition expression is resolved to `true`. Sometimes you might want to reset all the stakeholders of the conditions, `conditions reset` is the way to do it.
+
+For example, your trigger has a condtion as `A && B`, both `A` and `B` are expected to have an event everyday. One day for some reason, `A` gets an event but `B` does't, then it ends up with today's `A` and tomorrow's `B` triggering an action, which might not be something you want. To avoid that, you can reset the conditons as following:
+
+```yaml
+  triggers:
+    - template:
+        conditions: "dep01 && dep02"
+        conditionsReset:
+          - byTime:
+              # Reset conditions as 23:59
+              cron: "59 23 * * *"
+              # Optional, defaults to UTC
+              # More info for timezone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+              timezone: America/Los_Angeles
+        name: trigger01
+```
