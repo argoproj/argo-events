@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -29,11 +30,13 @@ type reconciler struct {
 
 	eventSourceImage string
 	logger           *zap.SugaredLogger
+
+	cfAPI *codefresh.API
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, eventSourceImage: eventSourceImage, logger: logger}
+func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImage string, logger *zap.SugaredLogger, cfAPI *codefresh.API) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, eventSourceImage: eventSourceImage, logger: logger, cfAPI: cfAPI}
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -51,6 +54,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	reconcileErr := r.reconcile(ctx, esCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
+		r.cfAPI.ReportError(reconcileErr)
 	}
 	if r.needsUpdate(eventSource, esCopy) {
 		if err := r.client.Update(ctx, esCopy); err != nil {

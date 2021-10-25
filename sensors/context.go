@@ -30,6 +30,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
+	"github.com/argoproj/argo-events/codefresh"
 	sensormetrics "github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -68,10 +69,12 @@ type SensorContext struct {
 	// azureEventHubsClients holds the references to active Azure Event Hub clients.
 	azureEventHubsClients map[string]*eventhubs.Hub
 	metrics               *sensormetrics.Metrics
+
+	cfAPI *codefresh.API
 }
 
 // NewSensorContext returns a new sensor execution context.
-func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics) *SensorContext {
+func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics, cfAPI *codefresh.API) *SensorContext {
 	return &SensorContext{
 		kubeClient:           kubeClient,
 		dynamicClient:        dynamicClient,
@@ -91,5 +94,6 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		openwhiskClients:      make(map[string]*whisk.Client),
 		azureEventHubsClients: make(map[string]*eventhubs.Hub),
 		metrics:               metrics,
+		cfAPI:                 cfAPI,
 	}
 }

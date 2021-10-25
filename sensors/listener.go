@@ -112,6 +112,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 		depExpr, err := sensorCtx.getDependencyExpression(ctx, trigger)
 		if err != nil {
 			logger.Errorw("failed to get dependency expression", zap.Error(err))
+			sensorCtx.cfAPI.ReportError(errors.Wrap(err, "failed to get dependency expression"))
 			return err
 		}
 		triggers, ok := triggerMapping[depExpr]
@@ -141,6 +142,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			expr, err := govaluate.NewEvaluableExpression(de)
 			if err != nil {
 				logger.Errorw("failed to get new evaluable expression", zap.Error(err))
+				sensorCtx.cfAPI.ReportError(errors.Wrap(err, "failed to get new evaluable expression"))
 				return
 			}
 			depNames := unique(expr.Vars())
@@ -149,6 +151,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				dep, ok := depMapping[depName]
 				if !ok {
 					logger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
+					sensorCtx.cfAPI.ReportError(errors.Wrapf(err, "Dependency expression and dependency list do not match, %s is not found", depName))
 					return
 				}
 				d := eventbusdriver.Dependency{
@@ -163,6 +166,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			ebDriver, err := eventbus.GetDriver(cctx, *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
 			if err != nil {
 				logger.Errorw("failed to get eventbus driver", zap.Error(err))
+				sensorCtx.cfAPI.ReportError(errors.Wrap(err, "failed to get eventbus driver"))
 				return
 			}
 			triggerNames := []string{}
@@ -176,6 +180,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				return err
 			})
 			if err != nil {
+				sensorCtx.cfAPI.ReportError(errors.Wrap(err, "failed to connect to event bus")) // report before fatal exit
 				logger.Fatalw("failed to connect to event bus", zap.Error(err))
 				return
 			}
@@ -193,6 +198,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				result, err := sensordependencies.Filter(e, dep.Filters)
 				if err != nil {
 					logger.Errorw("failed to apply filters", zap.Error(err))
+					sensorCtx.cfAPI.ReportError(errors.Wrap(err, "failed to apply filters"))
 					return false
 				}
 				return result
@@ -201,6 +207,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			actionFunc := func(events map[string]cloudevents.Event) {
 				if err := sensorCtx.triggerActions(cctx, sensor, events, triggers); err != nil {
 					logger.Errorw("failed to trigger actions", zap.Error(err))
+					sensorCtx.cfAPI.ReportError(errors.Wrap(err, "failed to trigger actions"))
 				}
 			}
 
@@ -220,6 +227,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					err = ebDriver.SubscribeEventSources(cctx, conn, group, closeSubCh, depExpression, deps, filterFunc, actionFunc)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+						sensorCtx.cfAPI.ReportError(errors.Wrapf(err, "failed to subscribe to eventbus, clientID: %v", clientID))
 						return
 					}
 				}()
