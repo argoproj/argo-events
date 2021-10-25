@@ -62,6 +62,7 @@ When multiple dependencies are defined for a trigger, the trigger won't be execu
 For example, your trigger has a condtion as `A && B`, both `A` and `B` are expected to have an event everyday. One day for some reason, `A` gets an event but `B` does't, then it ends up with today's `A` and tomorrow's `B` triggering an action, which might not be something you want. To avoid that, you can reset the conditons as following:
 
 ```yaml
+spec:
   triggers:
     - template:
         conditions: "dep01 && dep02"
