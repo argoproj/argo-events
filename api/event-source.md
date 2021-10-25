@@ -1487,6 +1487,19 @@ Bitbucket Server event sources
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>redisStream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Redis stream source
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1892,6 +1905,19 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Bitbu
 <td>
 <p>
 Bitbucket Server event sources
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>redisStream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Redis stream source
 </p>
 </td>
 </tr>
@@ -3601,6 +3627,110 @@ DB to use. If not specified, default DB 0 will be used.
 <tr>
 <td>
 <code>channels</code></br> <em> \[\]string </em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the redis client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RedisStreamEventSource">
+RedisStreamEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+RedisStreamEventSource describes an event source for Redis streams
+(<a href="https://redis.io/topics/streams-intro">https://redis.io/topics/streams-intro</a>)
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>hostAddress</code></br> <em> string </em>
+</td>
+<td>
+<p>
+HostAddress refers to the address of the Redis host/server
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>password</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Password required for authentication if any.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>namespace</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Namespace to use to retrieve the password from. It should only be
+specified if password is declared
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>db</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DB to use. If not specified, default DB 0 will be used.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>streams</code></br> <em> \[\]string </em>
 </td>
 <td>
 </td>

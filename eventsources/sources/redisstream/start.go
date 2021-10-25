@@ -19,6 +19,7 @@ package redisstream
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -57,7 +58,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 	return apicommon.RedisStreamEvent
 }
 
-// StartListening listens events published by redis
+// StartListening listens for new data on specified redis streams
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
@@ -94,7 +95,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if status := client.Ping(); status.Err() != nil {
 		return errors.Wrapf(status.Err(), "failed to connect to host %s and db %d for event source %s", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName())
 	}
-	log.Infof("connected to redis server %s")
+	log.Infof("connected to redis server %s", redisEventSource.HostAddress)
 
 	// Create a common consumer group on all streams.
 	// Only proceeds if all the streams are already present
@@ -109,7 +110,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
-	readGroupArgs := make([]string, 2*len(redisEventSource.Streams))
+	readGroupArgs := make([]string, len(redisEventSource.Streams), 2*len(redisEventSource.Streams))
 	copy(readGroupArgs, redisEventSource.Streams)
 	for i := 0; i < len(redisEventSource.Streams); i++ {
 		readGroupArgs = append(readGroupArgs, ">")
@@ -134,7 +135,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			if err == redis.Nil {
 				continue
 			}
-			log.Fatal(err)
+			return errors.Wrapf(err, "reading streams %s using XREADGROUP", strings.Join(redisEventSource.Streams, " "))
 		}
 
 		for _, entry := range entries {

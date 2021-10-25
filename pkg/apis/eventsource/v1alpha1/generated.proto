@@ -425,6 +425,9 @@ message EventSourceSpec {
 
   // Bitbucket Server event sources
   map<string, BitbucketServerEventSource> bitbucketserver = 29;
+
+  // Redis stream source
+  map<string, RedisStreamEventSource> redisStream = 30;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -904,6 +907,35 @@ message RedisEventSource {
   optional int32 db = 4;
 
   repeated string channels = 5;
+
+  // TLS configuration for the redis client.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
+}
+
+// RedisStreamEventSource describes an event source for
+// Redis streams (https://redis.io/topics/streams-intro)
+message RedisStreamEventSource {
+  // HostAddress refers to the address of the Redis host/server
+  optional string hostAddress = 1;
+
+  // Password required for authentication if any.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+
+  // Namespace to use to retrieve the password from. It should only be specified if password is declared
+  // +optional
+  optional string namespace = 3;
+
+  // DB to use. If not specified, default DB 0 will be used.
+  // +optional
+  optional int32 db = 4;
+
+  repeated string streams = 5;
 
   // TLS configuration for the redis client.
   // +optional

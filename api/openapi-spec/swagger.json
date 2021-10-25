@@ -1061,6 +1061,13 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.RedisEventSource"
           }
         },
+        "redisStream": {
+          "description": "Redis stream source",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.RedisStreamEventSource"
+          }
+        },
         "replicas": {
           "description": "Replicas is the event source deployment replicas",
           "type": "integer",
@@ -1799,6 +1806,50 @@
         "password": {
           "description": "Password required for authentication if any.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "tls": {
+          "description": "TLS configuration for the redis client.",
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.RedisStreamEventSource": {
+      "description": "RedisStreamEventSource describes an event source for Redis streams (https://redis.io/topics/streams-intro)",
+      "type": "object",
+      "required": [
+        "hostAddress",
+        "streams"
+      ],
+      "properties": {
+        "db": {
+          "description": "DB to use. If not specified, default DB 0 will be used.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "hostAddress": {
+          "description": "HostAddress refers to the address of the Redis host/server",
+          "type": "string"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "namespace": {
+          "description": "Namespace to use to retrieve the password from. It should only be specified if password is declared",
+          "type": "string"
+        },
+        "password": {
+          "description": "Password required for authentication if any.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "streams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "tls": {
           "description": "TLS configuration for the redis client.",
