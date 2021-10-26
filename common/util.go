@@ -110,10 +110,7 @@ func ErrEventSourceTypeMismatch(eventSourceType string) string {
 }
 
 func CreateKubeClient() (kubernetes.Interface, error) {
-	kubeConfig, ok := os.LookupEnv(EnvVarKubeConfig)
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("failed to get a K8s config, %s env variable not set", EnvVarKubeConfig))
-	}
+	kubeConfig, _ := os.LookupEnv(EnvVarKubeConfig)
 	restConfig, err := GetClientConfig(kubeConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get a K8s rest config")
