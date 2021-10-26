@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	cronlib "github.com/robfig/cron"
+	cronlib "github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 

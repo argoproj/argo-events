@@ -348,6 +348,21 @@ type TriggerTemplate struct {
 	// Pulsar refers to the trigger designed to place messages on Pulsar topic.
 	// +optional
 	Pulsar *PulsarTrigger `json:"pulsar,omitempty" protobuf:"bytes,14,opt,name=pulsar"`
+	// Criteria to reset the conditons
+	// +optional
+	ConditionsReset []ConditionsResetCriteria `json:"conditionsReset,omitempty" protobuf:"bytes,15,rep,name=conditionsReset"`
+}
+
+type ConditionsResetCriteria struct {
+	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+	ByTime *ConditionsResetByTime `json:"byTime,omitempty" protobuf:"bytes,1,opt,name=byTime"`
+}
+
+type ConditionsResetByTime struct {
+	// Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+	Cron string `json:"cron,omitempty" protobuf:"bytes,1,opt,name=cron"`
+	// +optional
+	Timezone string `json:"timezone,omitempty" protobuf:"bytes,2,opt,name=timezone"`
 }
 
 // StandardK8STrigger is the standard Kubernetes resource trigger

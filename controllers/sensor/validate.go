@@ -21,9 +21,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+	cronlib "github.com/robfig/cron/v3"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it
@@ -38,7 +40,7 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	s.Status.MarkDependenciesProvided()
 	err := validateTriggers(s.Spec.Triggers)
 	if err != nil {
-		s.Status.MarkTriggersNotProvided("InvalidTriggers", "Invalid triggers.")
+		s.Status.MarkTriggersNotProvided("InvalidTriggers", err.Error())
 		return err
 	}
 	s.Status.MarkTriggersProvided()
@@ -78,6 +80,20 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	}
 	if template.Name == "" {
 		return errors.Errorf("trigger must define a name")
+	}
+	if len(template.ConditionsReset) > 0 {
+		for _, c := range template.ConditionsReset {
+			if c.ByTime == nil {
+				return errors.Errorf("invalid conditionsReset")
+			}
+			parser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
+			if _, err := parser.Parse(c.ByTime.Cron); err != nil {
+				return errors.Errorf("invalid cron expression %q", c.ByTime.Cron)
+			}
+			if _, err := time.LoadLocation(c.ByTime.Timezone); err != nil {
+				return errors.Errorf("invalid timezone %q", c.ByTime.Timezone)
+			}
+		}
 	}
 	if template.K8s != nil {
 		if err := validateK8STrigger(template.K8s); err != nil {
