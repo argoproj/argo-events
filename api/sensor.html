@@ -405,6 +405,77 @@ the trigger resource.</p>
 <p>
 <p>Comparator refers to the comparator operator for a data filter</p>
 </p>
+<h3 id="argoproj.io/v1alpha1.ConditionsResetByTime">ConditionsResetByTime
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ConditionsResetCriteria">ConditionsResetCriteria</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>cron</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Cron is a cron-like expression. For reference, see: <a href="https://en.wikipedia.org/wiki/Cron">https://en.wikipedia.org/wiki/Cron</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>timezone</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.ConditionsResetCriteria">ConditionsResetCriteria
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>byTime</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.ConditionsResetByTime">
+ConditionsResetByTime
+</a>
+</em>
+</td>
+<td>
+<p>Schedule is a cron-like expression. For reference, see: <a href="https://en.wikipedia.org/wiki/Cron">https://en.wikipedia.org/wiki/Cron</a></p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.CustomTrigger">CustomTrigger
 </h3>
 <p>
@@ -3181,6 +3252,20 @@ PulsarTrigger
 <td>
 <em>(Optional)</em>
 <p>Pulsar refers to the trigger designed to place messages on Pulsar topic.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>conditionsReset</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.ConditionsResetCriteria">
+[]ConditionsResetCriteria
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Criteria to reset the conditons</p>
 </td>
 </tr>
 </tbody>

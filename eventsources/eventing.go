@@ -330,7 +330,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	}
 	defer e.eventBusConn.Close()
 
-	cctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(ctx)
 	connWG := &sync.WaitGroup{}
 
 	// Daemon to reconnect
@@ -342,7 +342,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 		defer ticker.Stop()
 		for {
 			select {
-			case <-cctx.Done():
+			case <-ctx.Done():
 				logger.Info("exiting eventbus connection daemon...")
 				return
 			case <-ticker.C:
@@ -350,7 +350,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 					clientID := generateClientID(e.hostname)
-					driver, err := eventbus.GetDriver(cctx, *e.eventBusConfig, e.eventBusSubject, clientID)
+					driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 					if err != nil {
 						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
@@ -370,7 +370,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	for _, ss := range servers {
 		for _, server := range ss {
 			// Validation has been done in eventsource-controller, it's harmless to do it again here.
-			err := server.ValidateEventSource(cctx)
+			err := server.ValidateEventSource(ctx)
 			if err != nil {
 				logger.Errorw("Validation failed", zap.Error(err), zap.Any(logging.LabelEventName,
 					server.GetEventName()), zap.Any(logging.LabelEventSourceType, server.GetEventSourceType()))
@@ -379,9 +379,9 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 			}
 			wg.Add(1)
 			go func(s EventingServer) {
+				defer wg.Done()
 				e.metrics.IncRunningServices(s.GetEventSourceName())
 				defer e.metrics.DecRunningServices(s.GetEventSourceName())
-				defer wg.Done()
 				duration := apicommon.FromString("1s")
 				factor := apicommon.NewAmount("1")
 				jitter := apicommon.NewAmount("30")
@@ -392,7 +392,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					Jitter:   &jitter,
 				}
 				if err = common.Connect(&backoff, func() error {
-					return s.StartListening(cctx, func(data []byte) error {
+					return s.StartListening(ctx, func(data []byte) error {
 						event := cloudevents.NewEvent()
 						event.SetID(fmt.Sprintf("%x", uuid.New()))
 						event.SetType(string(s.GetEventSourceType()))

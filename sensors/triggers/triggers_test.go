@@ -17,8 +17,9 @@ limitations under the License.
 package triggers
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/stretchr/testify/assert"
 )

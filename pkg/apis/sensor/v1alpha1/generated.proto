@@ -128,6 +128,19 @@ message AzureEventHubsTrigger {
   repeated TriggerParameter parameters = 6;
 }
 
+message ConditionsResetByTime {
+  // Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+  optional string cron = 1;
+
+  // +optional
+  optional string timezone = 2;
+}
+
+message ConditionsResetCriteria {
+  // Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+  optional ConditionsResetByTime byTime = 1;
+}
+
 // CustomTrigger refers to the specification of the custom trigger.
 message CustomTrigger {
   // ServerURL is the url of the gRPC server that executes custom trigger
@@ -867,6 +880,10 @@ message TriggerTemplate {
   // Pulsar refers to the trigger designed to place messages on Pulsar topic.
   // +optional
   optional PulsarTrigger pulsar = 14;
+
+  // Criteria to reset the conditons
+  // +optional
+  repeated ConditionsResetCriteria conditionsReset = 15;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.
