@@ -50,7 +50,7 @@ func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alph
 
 	lambdaClient, ok := lambdaClients[trigger.Template.Name]
 	if !ok {
-		awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(lambdatrigger.Region, "", lambdatrigger.AccessKey, lambdatrigger.SecretKey)
+		awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(lambdatrigger.Region, lambdatrigger.RoleARN, lambdatrigger.AccessKey, lambdatrigger.SecretKey)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to create a AWS session")
 		}
