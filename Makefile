@@ -104,6 +104,10 @@ manifests: crds
 .PHONY: swagger
 swagger:
 	./hack/update-swagger.sh ${VERSION}
+	$(MAKE) api/jsonschema/schema.json
+
+api/jsonschema/schema.json: api/openapi-spec/swagger.json hack/jsonschema/main.go
+	go run ./hack/jsonschema
 
 .PHONY: codegen
 codegen:
