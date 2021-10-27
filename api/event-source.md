@@ -3707,18 +3707,6 @@ Password required for authentication if any.
 </tr>
 <tr>
 <td>
-<code>namespace</code></br> <em> string </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Namespace to use to retrieve the password from. It should only be
-specified if password is declared
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>db</code></br> <em> int32 </em>
 </td>
 <td>
@@ -3733,6 +3721,39 @@ DB to use. If not specified, default DB 0 will be used.
 <code>streams</code></br> <em> \[\]string </em>
 </td>
 <td>
+<p>
+Streams to look for entries. XREADGROUP is used on all streams using a
+single consumer group.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxMsgCountPerRead</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MaxMsgCountPerRead holds the maximum number of messages per stream that
+will be read in each XREADGROUP of all streams Example: if there are 2
+streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a
+total of 20 messages. Same as COUNT option in
+XREADGROUP(<a href="https://redis.io/topics/streams-intro">https://redis.io/topics/streams-intro</a>).
+Defaults to 10
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>commonConsumerGroup</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+CommonCG refers to the Redis stream consumer group that will be created
+on all redis streams. Messages are read through this group. Defaults to
+‘argo-events-cg’
+</p>
 </td>
 </tr>
 <tr>

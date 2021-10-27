@@ -97,9 +97,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 	log.Infof("connected to redis server %s", redisEventSource.HostAddress)
 
-	// Create a common consumer group on all streams.
+	// Create a common consumer group on all streams to start reading from beginning of the streams.
 	// Only proceeds if all the streams are already present
 	consumersGroup := "argo-events-cg"
+	if len(redisEventSource.CommonCG) != 0 {
+		consumersGroup = redisEventSource.CommonCG
+	}
 	for _, stream := range redisEventSource.Streams {
 		if err := client.XGroupCreate(stream, consumersGroup, "0").Err(); err != nil {
 			// redis package doesn't seem to expose concrete error types
@@ -110,16 +113,30 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
-	readGroupArgs := make([]string, len(redisEventSource.Streams), 2*len(redisEventSource.Streams))
+	readGroupArgs := make([]string, 2*len(redisEventSource.Streams))
 	copy(readGroupArgs, redisEventSource.Streams)
-	for i := 0; i < len(redisEventSource.Streams); i++ {
-		readGroupArgs = append(readGroupArgs, ">")
+	// Start by reading our pending messages(previously read but not acknowledged).
+	streamToLastEntryMapping := make(map[string]string, len(redisEventSource.Streams))
+	for _, s := range redisEventSource.Streams {
+		streamToLastEntryMapping[s] = "0-0"
+	}
+
+	updateReadGroupArgs := func() {
+		for i, s := range redisEventSource.Streams {
+			readGroupArgs[i+len(redisEventSource.Streams)] = streamToLastEntryMapping[s]
+		}
+	}
+	updateReadGroupArgs()
+
+	msgCount := redisEventSource.MaxMsgCountPerRead
+	if msgCount == 0 {
+		msgCount = 10
 	}
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Info("Redis stream event source for host %s is stopped", redisEventSource.HostAddress)
+			log.Infof("Redis stream event source for host %s is stopped", redisEventSource.HostAddress)
 			return nil
 		default:
 		}
@@ -127,7 +144,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			Group:    consumersGroup,
 			Consumer: "argo-events-worker",
 			Streams:  readGroupArgs,
-			Count:    5,
+			Count:    int64(msgCount),
 			Block:    2 * time.Second,
 			NoAck:    false,
 		}).Result()
@@ -135,10 +152,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			if err == redis.Nil {
 				continue
 			}
-			return errors.Wrapf(err, "reading streams %s using XREADGROUP", strings.Join(redisEventSource.Streams, " "))
+			return errors.Wrapf(err, "reading streams %s using XREADGROUP", strings.Join(redisEventSource.Streams, ", "))
 		}
 
 		for _, entry := range entries {
+			if len(entry.Messages) == 0 {
+				// Completed consuming pending messages. Now start consuming new messages
+				streamToLastEntryMapping[entry.Stream] = ">"
+			}
 			for _, message := range entry.Messages {
 				if err := el.handleOne(entry.Stream, message, dispatch, log); err != nil {
 					log.With("stream", entry.Stream, "message_id", message.ID).Errorw("failed to process Redis stream message", zap.Error(err))
@@ -148,9 +169,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				if err := client.XAck(entry.Stream, consumersGroup, message.ID).Err(); err != nil {
 					log.With("stream", entry.Stream, "message_id", message.ID).Errorw("failed to acknowledge Redis stream message", zap.Error(err))
 				}
+				if streamToLastEntryMapping[entry.Stream] != ">" {
+					streamToLastEntryMapping[entry.Stream] = message.ID
+				}
 			}
 		}
-
+		updateReadGroupArgs()
 	}
 }
 

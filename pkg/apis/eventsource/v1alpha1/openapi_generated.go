@@ -2542,13 +2542,6 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisStreamEventSource(ref common.Refe
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace to use to retrieve the password from. It should only be specified if password is declared",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"db": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DB to use. If not specified, default DB 0 will be used.",
@@ -2558,7 +2551,8 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisStreamEventSource(ref common.Refe
 					},
 					"streams": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
+							Description: "Streams to look for entries. XREADGROUP is used on all streams using a single consumer group.",
+							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -2568,6 +2562,20 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisStreamEventSource(ref common.Refe
 									},
 								},
 							},
+						},
+					},
+					"maxMsgCountPerRead": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP of all streams Example: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a total of 20 messages. Same as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro). Defaults to 10",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"commonConsumerGroup": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CommonCG refers to the Redis stream consumer group that will be created on all redis streams. Messages are read through this group. Defaults to 'argo-events-cg'",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"tls": {

@@ -40,9 +40,6 @@ func validate(eventSource *v1alpha1.RedisStreamEventSource) error {
 	if eventSource.Streams == nil {
 		return errors.New("stream/streams must be specified")
 	}
-	if eventSource.Password != nil && eventSource.Namespace == "" {
-		return errors.New("namespace must be defined in order to retrieve the password from the secret")
-	}
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)
 	}

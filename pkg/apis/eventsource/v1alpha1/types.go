@@ -975,21 +975,26 @@ type RedisStreamEventSource struct {
 	// Password required for authentication if any.
 	// +optional
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
-	// Namespace to use to retrieve the password from. It should only be specified if password is declared
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
 	// DB to use. If not specified, default DB 0 will be used.
 	// +optional
-	DB int32 `json:"db,omitempty" protobuf:"varint,4,opt,name=db"`
-	// Channels to subscribe to listen events.
-
-	Streams []string `json:"streams" protobuf:"bytes,5,rep,name=streams"`
+	DB int32 `json:"db,omitempty" protobuf:"varint,3,opt,name=db"`
+	// Streams to look for entries. XREADGROUP is used on all streams using a single consumer group.
+	Streams []string `json:"streams" protobuf:"bytes,4,rep,name=streams"`
+	// MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP of all streams
+	// Example: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a total of 20 messages.
+	// Same as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro). Defaults to 10
+	// +optional
+	MaxMsgCountPerRead int32 `json:"maxMsgCountPerRead,omitempty" protobuf:"varint,5,opt,name=maxMsgCountPerRead"`
+	// CommonCG refers to the Redis stream consumer group that will be
+	// created on all redis streams. Messages are read through this group. Defaults to 'argo-events-cg'
+	// +optional
+	CommonCG string `json:"commonConsumerGroup,omitempty" protobuf:"bytes,6,opt,name=commonConsumerGroup"`
 	// TLS configuration for the redis client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
