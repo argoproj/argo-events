@@ -271,9 +271,6 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 	if trigger.Region == "" {
 		return errors.New("region in not specified")
 	}
-	if trigger.AccessKey == nil || trigger.SecretKey == nil {
-		return errors.New("either accesskey or secretkey secret selector is not specified")
-	}
 	if trigger.Payload == nil {
 		return errors.New("payload parameters are not specified")
 	}

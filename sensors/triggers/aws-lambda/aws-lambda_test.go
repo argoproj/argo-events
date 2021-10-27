@@ -29,7 +29,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-var sensorObj = &v1alpha1.Sensor{
+var sensorObjSparse = &v1alpha1.Sensor{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:      "fake-sensor",
 		Namespace: "fake",
@@ -38,7 +38,27 @@ var sensorObj = &v1alpha1.Sensor{
 		Triggers: []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name: "fake-trigger-sparse",
+					AWSLambda: &v1alpha1.AWSLambdaTrigger{
+						FunctionName: "fake-function",
+						Region:       "us-east",
+					},
+				},
+			},
+		},
+	},
+}
+
+var sensorObjFull = &v1alpha1.Sensor{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "fake-sensor",
+		Namespace: "fake",
+	},
+	Spec: v1alpha1.SensorSpec{
+		Triggers: []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger-full",
 					AWSLambda: &v1alpha1.AWSLambdaTrigger{
 						FunctionName: "fake-function",
 						AccessKey: &corev1.SecretKeySelector{
@@ -53,7 +73,17 @@ var sensorObj = &v1alpha1.Sensor{
 							},
 							Key: "secretkey",
 						},
-						Region: "us-east",
+						Region:  "us-east",
+						RoleARN: "arn:aws:iam::123456789012:role/fake-trigger-full",
+						Payload: []v1alpha1.TriggerParameter{
+							{
+								Src: &v1alpha1.TriggerParameterSource{
+									DependencyName: "fake-dependency",
+									Value:          new(string),
+								},
+								Dest: "metadata.label.value",
+							},
+						},
 					},
 				},
 			},
@@ -61,84 +91,98 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getAWSTrigger() *AWSLambdaTrigger {
-	return &AWSLambdaTrigger{
-		LambdaClient: nil,
-		Sensor:       sensorObj.DeepCopy(),
-		Trigger:      &sensorObj.Spec.Triggers[0],
-		Logger:       logging.NewArgoEventsLogger(),
+func getAWSTriggers() []AWSLambdaTrigger {
+	return []AWSLambdaTrigger{
+		{
+			LambdaClient: nil,
+			Sensor:       sensorObjSparse.DeepCopy(),
+			Trigger:      &sensorObjSparse.Spec.Triggers[0],
+			Logger:       logging.NewArgoEventsLogger(),
+		},
+		{
+			LambdaClient: nil,
+			Sensor:       sensorObjFull.DeepCopy(),
+			Trigger:      &sensorObjFull.Spec.Triggers[0],
+			Logger:       logging.NewArgoEventsLogger(),
+		},
 	}
 }
 
 func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
-	trigger := getAWSTrigger()
-	resource, err := trigger.FetchResource(context.TODO())
-	assert.Nil(t, err)
-	assert.NotNil(t, resource)
+	triggers := getAWSTriggers()
+	for _, trigger := range triggers {
+		resource, err := trigger.FetchResource(context.TODO())
+		assert.Nil(t, err)
+		assert.NotNil(t, resource)
 
-	at, ok := resource.(*v1alpha1.AWSLambdaTrigger)
-	assert.Nil(t, err)
-	assert.Equal(t, true, ok)
-	assert.Equal(t, "fake-function", at.FunctionName)
+		at, ok := resource.(*v1alpha1.AWSLambdaTrigger)
+		assert.Nil(t, err)
+		assert.Equal(t, true, ok)
+		assert.Equal(t, "fake-function", at.FunctionName)
+	}
 }
 
 func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
-	trigger := getAWSTrigger()
-	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
-			Context: &v1alpha1.EventContext{
-				ID:              "1",
-				Type:            "webhook",
-				Source:          "webhook-gateway",
-				DataContentType: "application/json",
-				SpecVersion:     cloudevents.VersionV1,
-				Subject:         "example-1",
+	triggers := getAWSTriggers()
+	for _, trigger := range triggers {
+		testEvents := map[string]*v1alpha1.Event{
+			"fake-dependency": {
+				Context: &v1alpha1.EventContext{
+					ID:              "1",
+					Type:            "webhook",
+					Source:          "webhook-gateway",
+					DataContentType: "application/json",
+					SpecVersion:     cloudevents.VersionV1,
+					Subject:         "example-1",
+				},
+				Data: []byte(`{"function": "real-function"}`),
 			},
-			Data: []byte(`{"function": "real-function"}`),
-		},
+		}
+
+		defaultValue := "default"
+		defaultRegion := "region"
+
+		trigger.Trigger.Template.AWSLambda.Parameters = []v1alpha1.TriggerParameter{
+			{
+				Src: &v1alpha1.TriggerParameterSource{
+					DependencyName: "fake-dependency",
+					DataKey:        "function",
+					Value:          &defaultValue,
+				},
+				Dest: "functionName",
+			},
+			{
+				Src: &v1alpha1.TriggerParameterSource{
+					DependencyName: "fake-dependency",
+					DataKey:        "region",
+					Value:          &defaultRegion,
+				},
+				Dest: "region",
+			},
+		}
+
+		response, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.AWSLambda)
+		assert.Nil(t, err)
+		assert.NotNil(t, response)
+
+		updatedObj, ok := response.(*v1alpha1.AWSLambdaTrigger)
+		assert.Equal(t, true, ok)
+		assert.Equal(t, "real-function", updatedObj.FunctionName)
+		assert.Equal(t, "region", updatedObj.Region)
 	}
-
-	defaultValue := "default"
-	defaultRegion := "region"
-
-	trigger.Trigger.Template.AWSLambda.Parameters = []v1alpha1.TriggerParameter{
-		{
-			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "function",
-				Value:          &defaultValue,
-			},
-			Dest: "functionName",
-		},
-		{
-			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "region",
-				Value:          &defaultRegion,
-			},
-			Dest: "region",
-		},
-	}
-
-	response, err := trigger.ApplyResourceParameters(testEvents, trigger.Trigger.Template.AWSLambda)
-	assert.Nil(t, err)
-	assert.NotNil(t, response)
-
-	updatedObj, ok := response.(*v1alpha1.AWSLambdaTrigger)
-	assert.Equal(t, true, ok)
-	assert.Equal(t, "real-function", updatedObj.FunctionName)
-	assert.Equal(t, "region", updatedObj.Region)
 }
 
 func TestAWSLambdaTrigger_ApplyPolicy(t *testing.T) {
-	trigger := getAWSTrigger()
-	status := int64(200)
-	response := &lambda.InvokeOutput{
-		StatusCode: &status,
+	triggers := getAWSTriggers()
+	for _, trigger := range triggers {
+		status := int64(200)
+		response := &lambda.InvokeOutput{
+			StatusCode: &status,
+		}
+		trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
+			Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
+		}
+		err := trigger.ApplyPolicy(context.TODO(), response)
+		assert.Nil(t, err)
 	}
-	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
-	}
-	err := trigger.ApplyPolicy(context.TODO(), response)
-	assert.Nil(t, err)
 }

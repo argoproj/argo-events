@@ -12,18 +12,27 @@ spec:
         name: lambda-trigger
         awsLambda:
           functionName: hello
-          accessKey:
-            name: aws-secret
-            key: accesskey
-          secretKey:
-            name: aws-secret
-            key: secretkey
           region: us-east-1
           payload:
             - src:
                 dependencyName: test-dep
                 dataKey: body.name
               dest: name
+
           # Optional, possible values: RequestResponse, Event and DryRun
           # Defaults to RequestResponse, which means invoke the function synchronously.
           invocationType: Event
+
+          # Optional, use if ServiceAccount doesn't have IAM Role assigned.
+          # More information on IAM roles for service accounts:
+          # https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
+          accessKey:
+            name: aws-secret
+            key: accesskey
+          secretKey:
+            name: aws-secret
+            key: secretkey
+
+          # Optional, use if your IAM user/role should assume another role to
+          # perform this action
+          roleARN: arn:aws:iam::123456789012:role/some-role
