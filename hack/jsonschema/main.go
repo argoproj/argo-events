@@ -65,12 +65,14 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
 		e := json.NewEncoder(f)
 		e.SetIndent("", "  ")
 		err = e.Encode(schema)
 		if err != nil {
 			panic(err)
 		}
+
 		err = f.Close()
 		if err != nil {
 			panic(err)
