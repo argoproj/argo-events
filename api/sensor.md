@@ -59,6 +59,7 @@ FunctionName refers to the name of the function to invoke.
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 AccessKey refers K8s secret containing aws access key
 </p>
@@ -71,6 +72,7 @@ AccessKey refers K8s secret containing aws access key
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 SecretKey refers K8s secret containing aws secret key
 </p>
@@ -144,6 +146,17 @@ permission to invoke the function.
 </p>
 </li>
 </ul>
+</td>
+</tr>
+<tr>
+<td>
+<code>roleARN</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+RoleARN is the Amazon Resource Name (ARN) of the role to assume.
+</p>
 </td>
 </tr>
 </tbody>

@@ -444,8 +444,10 @@ type AWSLambdaTrigger struct {
 	// FunctionName refers to the name of the function to invoke.
 	FunctionName string `json:"functionName" protobuf:"bytes,1,opt,name=functionName"`
 	// AccessKey refers K8s secret containing aws access key
+	// +optional
 	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,2,opt,name=accessKey"`
 	// SecretKey refers K8s secret containing aws secret key
+	// +optional
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,3,opt,name=secretKey"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,4,opt,name=region"`
@@ -469,6 +471,9 @@ type AWSLambdaTrigger struct {
 	//    has permission to invoke the function.
 	// +optional
 	InvocationType *string `json:"invocationType,omitempty" protobuf:"bytes,7,opt,name=invocationType"`
+	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
+	// +optional
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,8,opt,name=roleARN"`
 }
 
 // AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger
