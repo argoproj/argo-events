@@ -449,23 +449,23 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	maxMsgs := uint64(1000000)
+	maxMsgs := common.NATSStreamingMaxMsgs
 	if i.eventBus.Spec.NATS.Native.MaxMsgs != nil {
 		maxMsgs = *i.eventBus.Spec.NATS.Native.MaxMsgs
 	}
-	maxSubs := uint64(1000)
+	maxSubs := common.NATSStreamingMaxSubs
 	if i.eventBus.Spec.NATS.Native.MaxSubs != nil {
 		maxSubs = *i.eventBus.Spec.NATS.Native.MaxSubs
 	}
-	maxBytes := "1GB"
+	maxBytes := common.NATSStreamingMaxBytes
 	if i.eventBus.Spec.NATS.Native.MaxBytes != nil {
 		maxBytes = *i.eventBus.Spec.NATS.Native.MaxBytes
 	}
-	maxPayload := "1MB"
+	maxPayload := common.NATSStreamingMaxPayload
 	if i.eventBus.Spec.NATS.Native.MaxPayload != nil {
 		maxPayload = *i.eventBus.Spec.NATS.Native.MaxPayload
 	}
-	raftHeartbeatTimeout := "2s"
+	raftHeartbeatTimeout := common.NATSStreamingRaftHeartbeatTimeout
 	if i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout != nil {
 		raftHeartbeatTimeout = *i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout
 	}
@@ -473,7 +473,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftElectionTimeout := "2s"
+	raftElectionTimeout := common.NATSStreamingRaftElectionTimeout
 	if i.eventBus.Spec.NATS.Native.RaftElectionTimeout != nil {
 		raftElectionTimeout = *i.eventBus.Spec.NATS.Native.RaftElectionTimeout
 	}
@@ -481,7 +481,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftLeaseTimeout := "1s"
+	raftLeaseTimeout := common.NATSStreamingRaftLeaseTimeout
 	if i.eventBus.Spec.NATS.Native.RaftLeaseTimeout != nil {
 		raftLeaseTimeout = *i.eventBus.Spec.NATS.Native.RaftLeaseTimeout
 	}
@@ -489,7 +489,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftCommitTimeout := "100ms"
+	raftCommitTimeout := common.NATSStreamingRaftCommitTimeout
 	if i.eventBus.Spec.NATS.Native.RaftCommitTimeout != nil {
 		raftCommitTimeout = *i.eventBus.Spec.NATS.Native.RaftCommitTimeout
 	}
