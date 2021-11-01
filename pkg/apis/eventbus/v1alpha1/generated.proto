@@ -190,6 +190,21 @@ message NativeStrategy {
 
   // Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000
   optional uint64 maxSubs = 18;
+
+  // Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB
+  optional string maxPayload = 19;
+
+  // Specifies the time in follower state without a leader before attempting an election, i.e. "72h", “4h35m”. Defaults to 2s
+  optional string raftHeartbeatTimeout = 20;
+
+  // Specifies the time in candidate state without a leader before attempting an election, i.e. "72h", “4h35m”. Defaults to 2s
+  optional string raftElectionTimeout = 21;
+
+  // Specifies how long a leader waits without being able to contact a quorum of nodes before stepping down as leader, i.e. "72h", “4h35m”. Defaults to 1s
+  optional string raftLeaseTimeout = 22;
+
+  // Specifies the time without an Apply() operation before sending an heartbeat to ensure timely commit, i.e. "72h", “4h35m”. Defaults to 100ms
+  optional string raftCommitTimeout = 23;
 }
 
 // PersistenceStrategy defines the strategy of persistence

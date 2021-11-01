@@ -461,6 +461,42 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if i.eventBus.Spec.NATS.Native.MaxBytes != nil {
 		maxBytes = *i.eventBus.Spec.NATS.Native.MaxBytes
 	}
+	maxPayload := "1MB"
+	if i.eventBus.Spec.NATS.Native.MaxPayload != nil {
+		maxPayload = *i.eventBus.Spec.NATS.Native.MaxPayload
+	}
+	raftHeartbeatTimeout := "2s"
+	if i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout != nil {
+		raftHeartbeatTimeout = *i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout
+	}
+	_, err = time.ParseDuration(raftHeartbeatTimeout)
+	if err != nil {
+		return nil, err
+	}
+	raftElectionTimeout := "2s"
+	if i.eventBus.Spec.NATS.Native.RaftElectionTimeout != nil {
+		raftElectionTimeout = *i.eventBus.Spec.NATS.Native.RaftElectionTimeout
+	}
+	_, err = time.ParseDuration(raftElectionTimeout)
+	if err != nil {
+		return nil, err
+	}
+	raftLeaseTimeout := "1s"
+	if i.eventBus.Spec.NATS.Native.RaftLeaseTimeout != nil {
+		raftLeaseTimeout = *i.eventBus.Spec.NATS.Native.RaftLeaseTimeout
+	}
+	_, err = time.ParseDuration(raftLeaseTimeout)
+	if err != nil {
+		return nil, err
+	}
+	raftCommitTimeout := "100ms"
+	if i.eventBus.Spec.NATS.Native.RaftCommitTimeout != nil {
+		raftCommitTimeout = *i.eventBus.Spec.NATS.Native.RaftCommitTimeout
+	}
+	_, err = time.ParseDuration(raftCommitTimeout)
+	if err != nil {
+		return nil, err
+	}
 	peers := []string{}
 	routes := []string{}
 	for j := 0; j < replicas; j++ {
@@ -475,6 +511,7 @@ cluster {
   cluster_advertise: $CLUSTER_ADVERTISE
   connect_retries: 10
 }
+max_payload: %s
 streaming {
   id: %s
   store: file
@@ -483,6 +520,10 @@ streaming {
 	node_id: $POD_NAME
 	peers: [%s]
 	log_path: /data/stan/logs
+	raft_heartbeat_timeout: "%s"
+    raft_election_timeout: "%s"
+	raft_lease_timeout: "%s"
+	raft_commit_timeout: "%s"
   }
   store_limits {
     max_age: %s
@@ -490,7 +531,7 @@ streaming {
 	max_bytes: %s
 	max_subs: %v
   }
-}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), strings.Join(routes, ","), clusterID, strings.Join(peers, ","), maxAge, maxMsgs, maxBytes, maxSubs)
+}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), strings.Join(routes, ","), maxPayload, clusterID, strings.Join(peers, ","), raftHeartbeatTimeout, raftElectionTimeout, raftLeaseTimeout, raftCommitTimeout, maxAge, maxMsgs, maxBytes, maxSubs)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
