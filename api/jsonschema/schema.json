@@ -1968,6 +1968,10 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "AccessKey refers K8s secret containing aws access key"
         },
+        "dlq": {
+          "description": "DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully. If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue. The default value is false.",
+          "type": "boolean"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"

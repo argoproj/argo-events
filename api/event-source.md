@@ -4074,6 +4074,20 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>dlq</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DLQ specifies if a dead-letter queue is configured for messages that
+can’t be processed successfully. If set to true, messages with invalid
+payload won’t be acknowledged to allow to forward them farther to the
+dead-letter queue. The default value is false.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.Selector">
