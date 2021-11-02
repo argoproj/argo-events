@@ -41,6 +41,22 @@ const (
 	EventBusAuthFileMountPath = "/etc/eventbus/auth"
 	// Default NATS Streaming messages max age
 	NATSStreamingMaxAge = "72h"
+	// Default NATS Streaming max messages per channel
+	NATSStreamingMaxMsgs = uint64(1000000)
+	// Default NATS Streaming max subscriptions per channel
+	NATSStreamingMaxSubs = uint64(1000)
+	// Default NATS Streaming max total size of messages per channel
+	NATSStreamingMaxBytes = "1GB"
+	// Default NATS Streaming max size of message payload
+	NATSStreamingMaxPayload = "1MB"
+	// Default NATS Streaming RAFT heartbeat timeout
+	NATSStreamingRaftHeartbeatTimeout = "2s"
+	// Default NATS Streaming RAFT election timeout
+	NATSStreamingRaftElectionTimeout = "2s"
+	// Default NATS Streaming RAFT lease timeout
+	NATSStreamingRaftLeaseTimeout = "1s"
+	// Default NATS Streaming RAFT commit timeout
+	NATSStreamingRaftCommitTimeout = "100ms"
 	// Default EventBus name
 	DefaultEventBusName = "default"
 )

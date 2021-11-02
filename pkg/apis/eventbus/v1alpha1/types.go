@@ -129,6 +129,16 @@ type NativeStrategy struct {
 	MaxBytes *string `json:"maxBytes,omitempty" protobuf:"bytes,17,opt,name=maxBytes"`
 	// Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000
 	MaxSubs *uint64 `json:"maxSubs,omitempty" protobuf:"bytes,18,opt,name=maxSubs"`
+	// Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB
+	MaxPayload *string `json:"maxPayload,omitempty" protobuf:"bytes,19,opt,name=maxPayload"`
+	// Specifies the time in follower state without a leader before attempting an election, i.e. "72h", “4h35m”. Defaults to 2s
+	RaftHeartbeatTimeout *string `json:"raftHeartbeatTimeout,omitempty" protobuf:"bytes,20,opt,name=raftHeartbeatTimeout"`
+	// Specifies the time in candidate state without a leader before attempting an election, i.e. "72h", “4h35m”. Defaults to 2s
+	RaftElectionTimeout *string `json:"raftElectionTimeout,omitempty" protobuf:"bytes,21,opt,name=raftElectionTimeout"`
+	// Specifies how long a leader waits without being able to contact a quorum of nodes before stepping down as leader, i.e. "72h", “4h35m”. Defaults to 1s
+	RaftLeaseTimeout *string `json:"raftLeaseTimeout,omitempty" protobuf:"bytes,22,opt,name=raftLeaseTimeout"`
+	// Specifies the time without an Apply() operation before sending an heartbeat to ensure timely commit, i.e. "72h", “4h35m”. Defaults to 100ms
+	RaftCommitTimeout *string `json:"raftCommitTimeout,omitempty" protobuf:"bytes,23,opt,name=raftCommitTimeout"`
 }
 
 // ContainerTemplate defines customized spec for a container

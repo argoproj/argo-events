@@ -630,6 +630,63 @@ to 1000
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>maxPayload</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Maximum number of bytes in a message payload, 0 means unlimited.
+Defaults to 1MB
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftHeartbeatTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies the time in follower state without a leader before attempting
+an election, i.e. “72h”, “4h35m”. Defaults to 2s
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftElectionTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies the time in candidate state without a leader before attempting
+an election, i.e. “72h”, “4h35m”. Defaults to 2s
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftLeaseTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies how long a leader waits without being able to contact a quorum
+of nodes before stepping down as leader, i.e. “72h”, “4h35m”. Defaults
+to 1s
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftCommitTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies the time without an Apply() operation before sending an
+heartbeat to ensure timely commit, i.e. “72h”, “4h35m”. Defaults to
+100ms
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.PersistenceStrategy">
