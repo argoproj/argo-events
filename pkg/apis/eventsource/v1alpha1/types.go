@@ -604,6 +604,11 @@ type SQSEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+	// DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully.
+	// If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue.
+	// The default value is false.
+	// +optional
+	DLQ bool `json:"dlq,omitempty" protobuf:"varint,10,opt,name=dlq"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.

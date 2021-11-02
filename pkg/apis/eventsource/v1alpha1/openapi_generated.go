@@ -2811,6 +2811,13 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 							},
 						},
 					},
+					"dlq": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully. If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue. The default value is false.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"region", "queue", "waitTimeSeconds"},
 			},
