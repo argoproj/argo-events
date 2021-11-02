@@ -473,6 +473,41 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Format:      "int64",
 						},
 					},
+					"maxPayload": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"raftHeartbeatTimeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specifies the time in follower state without a leader before attempting an election, i.e. \"72h\", “4h35m”. Defaults to 2s",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"raftElectionTimeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specifies the time in candidate state without a leader before attempting an election, i.e. \"72h\", “4h35m”. Defaults to 2s",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"raftLeaseTimeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specifies how long a leader waits without being able to contact a quorum of nodes before stepping down as leader, i.e. \"72h\", “4h35m”. Defaults to 1s",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"raftCommitTimeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specifies the time without an Apply() operation before sending an heartbeat to ensure timely commit, i.e. \"72h\", “4h35m”. Defaults to 100ms",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},

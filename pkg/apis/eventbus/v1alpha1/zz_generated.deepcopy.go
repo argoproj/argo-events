@@ -304,6 +304,31 @@ func (in *NativeStrategy) DeepCopyInto(out *NativeStrategy) {
 		*out = new(uint64)
 		**out = **in
 	}
+	if in.MaxPayload != nil {
+		in, out := &in.MaxPayload, &out.MaxPayload
+		*out = new(string)
+		**out = **in
+	}
+	if in.RaftHeartbeatTimeout != nil {
+		in, out := &in.RaftHeartbeatTimeout, &out.RaftHeartbeatTimeout
+		*out = new(string)
+		**out = **in
+	}
+	if in.RaftElectionTimeout != nil {
+		in, out := &in.RaftElectionTimeout, &out.RaftElectionTimeout
+		*out = new(string)
+		**out = **in
+	}
+	if in.RaftLeaseTimeout != nil {
+		in, out := &in.RaftLeaseTimeout, &out.RaftLeaseTimeout
+		*out = new(string)
+		**out = **in
+	}
+	if in.RaftCommitTimeout != nil {
+		in, out := &in.RaftCommitTimeout, &out.RaftCommitTimeout
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 

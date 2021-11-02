@@ -436,6 +436,10 @@
           "format": "int64",
           "type": "integer"
         },
+        "maxPayload": {
+          "description": "Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB",
+          "type": "string"
+        },
         "maxSubs": {
           "description": "Maximum number of subscriptions per channel, 0 means unlimited. Defaults to 1000",
           "format": "int64",
@@ -466,6 +470,22 @@
         },
         "priorityClassName": {
           "description": "If specified, indicates the EventSource pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/",
+          "type": "string"
+        },
+        "raftCommitTimeout": {
+          "description": "Specifies the time without an Apply() operation before sending an heartbeat to ensure timely commit, i.e. \"72h\", “4h35m”. Defaults to 100ms",
+          "type": "string"
+        },
+        "raftElectionTimeout": {
+          "description": "Specifies the time in candidate state without a leader before attempting an election, i.e. \"72h\", “4h35m”. Defaults to 2s",
+          "type": "string"
+        },
+        "raftHeartbeatTimeout": {
+          "description": "Specifies the time in follower state without a leader before attempting an election, i.e. \"72h\", “4h35m”. Defaults to 2s",
+          "type": "string"
+        },
+        "raftLeaseTimeout": {
+          "description": "Specifies how long a leader waits without being able to contact a quorum of nodes before stepping down as leader, i.e. \"72h\", “4h35m”. Defaults to 1s",
           "type": "string"
         },
         "replicas": {
@@ -2329,6 +2349,10 @@
         },
         "region": {
           "description": "Region is AWS region",
+          "type": "string"
+        },
+        "roleARN": {
+          "description": "RoleARN is the Amazon Resource Name (ARN) of the role to assume.",
           "type": "string"
         },
         "secretKey": {
