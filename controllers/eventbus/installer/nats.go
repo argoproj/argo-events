@@ -521,7 +521,7 @@ streaming {
 	peers: [%s]
 	log_path: /data/stan/logs
 	raft_heartbeat_timeout: "%s"
-    raft_election_timeout: "%s"
+	raft_election_timeout: "%s"
 	raft_lease_timeout: "%s"
 	raft_commit_timeout: "%s"
   }
