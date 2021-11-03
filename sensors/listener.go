@@ -78,7 +78,7 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
 			if err := sensorCtx.listenEvents(ctx); err != nil {
-				log.Errorw("failed to start", zap.Error(err))
+				log.Fatalw("failed to start", zap.Error(err))
 			}
 		},
 		OnStoppedLeading: func() {
