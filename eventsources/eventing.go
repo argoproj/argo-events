@@ -301,7 +301,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
 			if err := e.run(ctx, servers); err != nil {
-				log.Errorw("failed to start", zap.Error(err))
+				log.Fatalw("failed to start", zap.Error(err))
 			}
 		},
 		OnStoppedLeading: func() {
