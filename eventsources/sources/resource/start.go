@@ -199,6 +199,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case v1alpha1.UPDATE:
 			handlerFuncs.UpdateFunc = func(oldObj, newObj interface{}) {
 				log.Info("detected update event")
+				uNewObj := newObj.(*unstructured.Unstructured)
+				uOldObj := oldObj.(*unstructured.Unstructured)
+				if uNewObj.GetResourceVersion() == uOldObj.GetResourceVersion() {
+					log.Infof("rejecting update event with identical resource versions: %s", uNewObj.GetResourceVersion())
+					return
+				}
 				informerEventCh <- &InformerEvent{
 					Obj:    newObj,
 					OldObj: oldObj,
