@@ -9,7 +9,7 @@ theme:
     text: 'Work Sans'
   logo: 'assets/logo.png'
 google_analytics:
-  - 'UA-105170809-2'
+  - 'UA-105170809-9'
   - 'auto'
 markdown_extensions:
   - codehilite
@@ -79,6 +79,7 @@ nav:
           - 'sensors/triggers/openwhisk-trigger.md'
           - 'sensors/triggers/slack-trigger.md'
           - 'sensors/triggers/azure-event-hubs.md'
+          - 'sensors/triggers/plusar-trigger.md'
           - 'sensors/triggers/build-your-own-trigger.md'
       - 'sensors/trigger-conditions.md'
       - 'sensors/ha.md'
