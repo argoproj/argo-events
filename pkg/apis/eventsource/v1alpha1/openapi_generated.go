@@ -1457,7 +1457,8 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 					},
 					"events": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
+							Description: "Events refer to Github events to which the event source will subscribe",
+							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -1541,13 +1542,28 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 					},
 					"repositories": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value",
+							Description: "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value. Not required if Organizations is set.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
 										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories"),
+									},
+								},
+							},
+						},
+					},
+					"organizations": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Organizations holds the names of organizations (used for organization level webhooks). Not required if Repositories is set.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
 									},
 								},
 							},

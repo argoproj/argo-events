@@ -2175,6 +2175,9 @@ Deprecated: use Repositories instead. Will be unsupported in v 1.6
 <code>events</code></br> <em> \[\]string </em>
 </td>
 <td>
+<p>
+Events refer to Github events to which the event source will subscribe
+</p>
 </td>
 </tr>
 <tr>
@@ -2291,7 +2294,19 @@ event payload.
 <td>
 <p>
 Repositories holds the information of repositories, which uses repo
-owner as the key, and list of repo names as the value
+owner as the key, and list of repo names as the value. Not required if
+Organizations is set.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>organizations</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Organizations holds the names of organizations (used for organization
+level webhooks). Not required if Repositories is set.
 </p>
 </td>
 </tr>
