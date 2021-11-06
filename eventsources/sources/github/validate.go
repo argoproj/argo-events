@@ -34,6 +34,9 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	if githubEventSource.GetOwnedRepositories() == nil && githubEventSource.Organizations == nil {
 		return fmt.Errorf("either repositories or organizations is required")
 	}
+	if githubEventSource.GetOwnedRepositories() != nil && githubEventSource.Organizations != nil {
+		return fmt.Errorf("only one of repositories and organizations is allowed")
+	}
 	if githubEventSource.NeedToCreateHooks() && len(githubEventSource.Events) == 0 {
 		return fmt.Errorf("events must be defined to create a github webhook")
 	}
