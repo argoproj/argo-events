@@ -22,7 +22,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/minio/minio-go"
+	"github.com/minio/minio-go/v7/pkg/notification"
 )
 
 // ValidateEventSource validates the minio event source
@@ -48,7 +48,7 @@ func validate(eventSource *apicommon.S3Artifact) error {
 	}
 	if eventSource.Events != nil {
 		for _, event := range eventSource.Events {
-			if minio.NotificationEventType(event) == "" {
+			if notification.EventType(event) == "" {
 				return fmt.Errorf("unknown event %s", event)
 			}
 		}
