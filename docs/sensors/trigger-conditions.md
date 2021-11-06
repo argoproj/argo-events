@@ -68,7 +68,7 @@ spec:
         conditions: "dep01 && dep02"
         conditionsReset:
           - byTime:
-              # Reset conditions as 23:59
+              # Reset conditions at 23:59
               cron: "59 23 * * *"
               # Optional, defaults to UTC
               # More info for timezone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
