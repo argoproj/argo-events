@@ -72,7 +72,7 @@
   }
   ga.l = +new Date
   /* Setup integration and send page view */
-  ga("create", "UA-105170809-2", "auto")
+  ga("create", "UA-105170809-9", "auto")
   ga("set", "anonymizeIp", true)
   ga("send", "pageview")
   /* Register handler to log search on blur */
@@ -1082,6 +1082,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../triggers/pulsar-trigger/" title="Pulsar Trigger" class="md-nav__link">
+      Pulsar Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
       Build Your Own Trigger
     </a>
@@ -1128,6 +1140,13 @@
         <li class="md-nav__item">
   <a href="#triggers-without-conditions" title="Triggers Without Conditions" class="md-nav__link">
     Triggers Without Conditions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conditions-reset" title="Conditions Reset" class="md-nav__link">
+    Conditions Reset
   </a>
   
 </li>
@@ -1331,6 +1350,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#conditions-reset" title="Conditions Reset" class="md-nav__link">
+    Conditions Reset
+  </a>
+  
+</li>
+      
       
       
       
@@ -1354,8 +1380,7 @@
 <blockquote>
 <p>v1.0 and after</p>
 </blockquote>
-<p><code>Conditions</code> is a new feature to replace <code>Circuit</code> and <code>Switch</code>. With
-<code>conditions</code>, triggers can be executed based on different dependency conditions.</p>
+<p>Triggers can be executed based on different dependency <code>conditions</code>.</p>
 <p>An example with <code>conditions</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Sensor</span>
@@ -1403,6 +1428,22 @@ won't be executed until the expression resolves to true. The operators in
 <h2 id="triggers-without-conditions">Triggers Without Conditions<a class="headerlink" href="#triggers-without-conditions" title="Permanent link">&para;</a></h2>
 <p>If <code>conditions</code> is missing, the default conditions to execute the trigger is
 <code>&amp;&amp;</code> logic of all the defined dependencies.</p>
+<h2 id="conditions-reset">Conditions Reset<a class="headerlink" href="#conditions-reset" title="Permanent link">&para;</a></h2>
+<p>When multiple dependencies are defined for a trigger, the trigger won't be executed until the condition expression is resolved to <code>true</code>. Sometimes you might want to reset all the stakeholders of the conditions, <code>conditions reset</code> is the way to do it.</p>
+<p>For example, your trigger has a condtion as <code>A &amp;&amp; B</code>, both <code>A</code> and <code>B</code> are expected to have an event everyday. One day for some reason, <code>A</code> gets an event but <code>B</code> does't, then it ends up with today's <code>A</code> and tomorrow's <code>B</code> triggering an action, which might not be something you want. To avoid that, you can reset the conditons as following:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">triggers</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
+        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;dep01</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep02&quot;</span>
+        <span class="nt">conditionsReset</span><span class="p">:</span>
+          <span class="p p-Indicator">-</span> <span class="nt">byTime</span><span class="p">:</span>
+              <span class="c1"># Reset conditions at 23:59</span>
+              <span class="nt">cron</span><span class="p">:</span> <span class="s">&quot;59</span><span class="nv"> </span><span class="s">23</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+              <span class="c1"># Optional, defaults to UTC</span>
+              <span class="c1"># More info for timezone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</span>
+              <span class="nt">timezone</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">America/Los_Angeles</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger01</span>
+</code></pre></div>
                 
                   
                 

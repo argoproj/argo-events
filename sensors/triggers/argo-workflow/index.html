@@ -72,7 +72,7 @@
   }
   ga.l = +new Date
   /* Setup integration and send page view */
-  ga("create", "UA-105170809-2", "auto")
+  ga("create", "UA-105170809-9", "auto")
   ga("set", "anonymizeIp", true)
   ga("send", "pageview")
   /* Register handler to log search on blur */
@@ -1143,6 +1143,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../pulsar-trigger/" title="Pulsar Trigger" class="md-nav__link">
+      Pulsar Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
       Build Your Own Trigger
     </a>
@@ -1395,7 +1407,7 @@
                 
                 
                 <h1 id="argo-workflow-trigger">Argo Workflow Trigger<a class="headerlink" href="#argo-workflow-trigger" title="Permanent link">&para;</a></h1>
-<p>Argo workflow is K8s custom resource which help orchestrating parallel jobs on Kubernetes. </p>
+<p>Argo workflow is K8s custom resource which help orchestrating parallel jobs on Kubernetes.</p>
 <p><br/>
 <br/></p>
 <p align="center">
@@ -1405,12 +1417,19 @@
 <p><br/>
 <br/></p>
 <h2 id="trigger-a-workflow">Trigger a workflow<a class="headerlink" href="#trigger-a-workflow" title="Permanent link">&para;</a></h2>
+<p>Note: You will need to have <a href="https://argoproj.github.io/argo-workflows/">Argo Workflows</a> installed to make this work.</p>
 <ol>
 <li>
 <p>Make sure to have the eventbus deployed in the namespace.</p>
 </li>
 <li>
 <p>We will use webhook event-source and sensor to trigger an Argo workflow.</p>
+</li>
+<li>
+<p>Set up the <code>operate-workflow-sa</code> service account that the sensor will use</p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/sensor-rbac.yaml
+</code></pre></div>
+
 </li>
 <li>
 <p>Let's set up a webhook event-source to process incoming requests.</p>
