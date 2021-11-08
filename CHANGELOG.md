@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.5.1 (2021-11-07)
+
+ * [f1c013b8](https://github.com/argoproj/argo-events/commit/f1c013b8201db90a81604a87cca74a6c80b3456b) Update manifests to v1.5.1
+ * [3a0f77f6](https://github.com/argoproj/argo-events/commit/3a0f77f6d54fc6af39536a4d6fa90850c0f0f466) feat: trigger conditions reset. Closes #1381 (#1392)
+ * [ee13f505](https://github.com/argoproj/argo-events/commit/ee13f5057cc5a0a2763441469fec6ced920f5ee8) fix: sensor controller validate sensor (#1378)
+
+### Contributors
+
+ * Derek Wang
+ * Luca Iachini
+
 ## v1.5.0 (2021-10-12)
 
  * [e7dcd3d2](https://github.com/argoproj/argo-events/commit/e7dcd3d21925e80561d7f82a2dc45b213a618d0b) Update manifests to v1.5.0
