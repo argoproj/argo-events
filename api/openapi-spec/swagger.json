@@ -1253,6 +1253,7 @@
           "type": "boolean"
         },
         "events": {
+          "description": "Events refer to Github events to which the event source will subscribe",
           "type": "array",
           "items": {
             "type": "string"
@@ -1282,12 +1283,19 @@
             "type": "string"
           }
         },
+        "organizations": {
+          "description": "Organizations holds the names of organizations (used for organization level webhooks). Not required if Repositories is set.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "owner": {
           "description": "DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated: use Repositories instead. Will be unsupported in v 1.6",
           "type": "string"
         },
         "repositories": {
-          "description": "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value",
+          "description": "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value. Not required if Organizations is set.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.OwnedRepositories"

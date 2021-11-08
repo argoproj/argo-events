@@ -57,7 +57,9 @@ type Router struct {
 	// githubClient is the client to connect to GitHub
 	githubClient *github.Client
 	// (owner + "," + repo name) -> hook ID
-	hookIDs map[string]int64
+	repoHookIDs map[string]int64
+	// org name -> hook ID
+	orgHookIDs map[string]int64
 	// hookSecret is a GitHub webhook secret
 	hookSecret string
 }
