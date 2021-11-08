@@ -737,6 +737,11 @@ func (in *GithubEventSource) DeepCopyInto(out *GithubEventSource) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.Organizations != nil {
+		in, out := &in.Organizations, &out.Organizations
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

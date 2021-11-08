@@ -135,11 +135,26 @@ func (router *Router) PostInactivate() error {
 
 	if githubEventSource.NeedToCreateHooks() && githubEventSource.DeleteHookOnFinish {
 		logger := router.route.Logger
-		logger.Info("deleting GitHub hooks...")
+		logger.Info("deleting GitHub org hooks...")
+
+		for _, org := range githubEventSource.Organizations {
+			id, ok := router.orgHookIDs[org]
+			if !ok {
+				return errors.Errorf("can not find hook ID for organization %s", org)
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			if _, err := router.githubClient.Organizations.DeleteHook(ctx, org, id); err != nil {
+				return errors.Errorf("failed to delete hook for organization %s. err: %+v", org, err)
+			}
+			logger.Infof("GitHub hook deleted for organization %s", org)
+		}
+
+		logger.Info("deleting GitHub repo hooks...")
 
 		for _, r := range githubEventSource.GetOwnedRepositories() {
 			for _, n := range r.Names {
-				id, ok := router.hookIDs[r.Owner+","+n]
+				id, ok := router.repoHookIDs[r.Owner+","+n]
 				if !ok {
 					return errors.Errorf("can not find hook ID for repo %s/%s", r.Owner, n)
 				}
@@ -235,7 +250,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			client.UploadURL = uploadURL
 		}
 		router.githubClient = client
-		router.hookIDs = make(map[string]int64)
+		router.repoHookIDs = make(map[string]int64)
+		router.orgHookIDs = make(map[string]int64)
 
 		hook := &gh.Hook{
 			Events: githubEventSource.Events,
@@ -247,6 +263,27 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		defer cancel()
 
 		f := func() {
+			for _, org := range githubEventSource.Organizations {
+				hooks, _, err := router.githubClient.Organizations.ListHooks(ctx, org, nil)
+				if err != nil {
+					logger.Errorf("failed to list existing webhooks of organization %s. err: %+v", org, err)
+					continue
+				}
+				h := getHook(hooks, formattedURL, githubEventSource.Events)
+				if h != nil {
+					router.orgHookIDs[org] = *h.ID
+					continue
+				}
+				logger.Infof("hook not found for organization %s, creating ...", org)
+				h, _, err = router.githubClient.Organizations.CreateHook(ctx, org, hook)
+				if err != nil {
+					logger.Errorf("failed to create github webhook for organization %s. err: %+v", org, err)
+					continue
+				}
+				router.orgHookIDs[org] = *h.ID
+				time.Sleep(500 * time.Millisecond)
+			}
+
 			for _, r := range githubEventSource.GetOwnedRepositories() {
 				for _, name := range r.Names {
 					hooks, _, err := router.githubClient.Repositories.ListHooks(ctx, r.Owner, name, nil)
@@ -256,7 +293,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					}
 					h := getHook(hooks, formattedURL, githubEventSource.Events)
 					if h != nil {
-						router.hookIDs[r.Owner+","+name] = *h.ID
+						router.repoHookIDs[r.Owner+","+name] = *h.ID
 						continue
 					}
 					logger.Infof("hook not found for %s/%s, creating ...", r.Owner, name)
@@ -265,7 +302,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 						logger.Errorf("failed to create github webhook for %s/%s. err: %+v", r.Owner, name, err)
 						continue
 					}
-					router.hookIDs[r.Owner+","+name] = *h.ID
+					router.repoHookIDs[r.Owner+","+name] = *h.ID
 					time.Sleep(500 * time.Millisecond)
 				}
 			}

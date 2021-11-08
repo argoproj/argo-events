@@ -671,8 +671,7 @@ type GithubEventSource struct {
 	// DeprecatedRepository refers to GitHub repo name i.e. argo-events
 	// Deprecated: use Repositories instead. Will be unsupported in v 1.6
 	DeprecatedRepository string `json:"repository" protobuf:"bytes,4,opt,name=repository"`
-	// Events refer to Github events to subscribe to which the event source will subscribe
-
+	// Events refer to Github events to which the event source will subscribe
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
 	// APIToken refers to a K8s secret containing github api token
 	// +optional
@@ -702,8 +701,10 @@ type GithubEventSource struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,14,rep,name=metadata"`
 	// Repositories holds the information of repositories, which uses repo owner as the key,
-	// and list of repo names as the value
+	// and list of repo names as the value. Not required if Organizations is set.
 	Repositories []OwnedRepositories `json:"repositories,omitempty" protobuf:"bytes,15,rep,name=repositories"`
+	// Organizations holds the names of organizations (used for organization level webhooks). Not required if Repositories is set.
+	Organizations []string `json:"organizations,omitempty" protobuf:"bytes,16,rep,name=organizations"`
 }
 
 func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {
