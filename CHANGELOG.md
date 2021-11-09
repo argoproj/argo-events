@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.5.2 (2021-11-09)
+
+ * [aa6bd169](https://github.com/argoproj/argo-events/commit/aa6bd169e8ccb28865462d5677b2314f18eef974) Update manifests to v1.5.2
+ * [84939d6a](https://github.com/argoproj/argo-events/commit/84939d6a61e607c71d273f04f7172a4fdfe9455c) fix: fatal the services if starting failed (#1405)
+
+### Contributors
+
+ * Derek Wang
+
 ## v1.5.1 (2021-11-07)
 
  * [f1c013b8](https://github.com/argoproj/argo-events/commit/f1c013b8201db90a81604a87cca74a6c80b3456b) Update manifests to v1.5.1
