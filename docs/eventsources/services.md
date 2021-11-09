@@ -29,5 +29,25 @@ expose the endpoint for external access, please manage it by using native K8s
 objects (i.e. a Load Balancer type Service, or an Ingress), and remove `service`
 field from the EventSource object.
 
+For example, you can create a K8s service with the selector `eventsource-name: webhook`
+to select pods created for the "webhook" event source, like the following:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: github-eventsource-svc
+spec:
+  ports:
+  - port: 12000
+    protocol: TCP
+    targetPort: 12000
+  selector:
+    eventsource-name: webhook
+  type: NodePort
+```
+
+Then you can expose the service for external access using native K8s objects as mentioned above.
+
 You can refer to [webhook heath check](webhook-health-check.md) if you need a
 health check endpoint for LB Service or Ingress configuration.
