@@ -36,7 +36,7 @@ to select pods created for the "webhook" event source, like the following:
 apiVersion: v1
 kind: Service
 metadata:
-  name: github-eventsource-svc
+  name: webhook-eventsource
 spec:
   ports:
   - port: 12000
