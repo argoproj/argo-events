@@ -1343,6 +1343,23 @@ help you create a <code>ClusterIP</code> service for testing.</p>
 expose the endpoint for external access, please manage it by using native K8s
 objects (i.e. a Load Balancer type Service, or an Ingress), and remove <code>service</code>
 field from the EventSource object.</p>
+<p>For example, you can create a K8s service with the selector <code>eventsource-name: webhook</code>
+to select pods created for the "webhook" event source, like the following:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-eventsource</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">ports</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">12000</span>
+    <span class="nt">protocol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">TCP</span>
+    <span class="nt">targetPort</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">12000</span>
+  <span class="nt">selector</span><span class="p">:</span>
+    <span class="nt">eventsource-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook</span>
+  <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NodePort</span>
+</code></pre></div>
+
+<p>Then you can expose the service for external access using native K8s objects as mentioned above.</p>
 <p>You can refer to <a href="../webhook-health-check/">webhook heath check</a> if you need a
 health check endpoint for LB Service or Ingress configuration.</p>
                 
