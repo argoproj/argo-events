@@ -231,11 +231,14 @@ message BitbucketServerEventSource {
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 message CalendarEventSource {
   // Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+  // +optional
   optional string schedule = 1;
 
   // Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
+  // +optional
   optional string interval = 2;
 
+  // ExclusionDates defines the list of DATE-TIME exceptions for recurring events.
   repeated string exclusionDates = 3;
 
   // Timezone in which to run the schedule
@@ -478,6 +481,7 @@ message GenericEventSource {
 message GithubEventSource {
   // Id is the webhook's id
   // Deprecated: This is not used at all, will be removed in v1.6
+  // +optional
   optional int64 id = 1;
 
   // Webhook refers to the configuration required to run a http server
@@ -485,10 +489,12 @@ message GithubEventSource {
 
   // DeprecatedOwner refers to GitHub owner name i.e. argoproj
   // Deprecated: use Repositories instead. Will be unsupported in v 1.6
+  // +optional
   optional string owner = 3;
 
   // DeprecatedRepository refers to GitHub repo name i.e. argo-events
   // Deprecated: use Repositories instead. Will be unsupported in v 1.6
+  // +optional
   optional string repository = 4;
 
   // Events refer to Github events to which the event source will subscribe

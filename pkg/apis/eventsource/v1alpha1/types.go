@@ -206,11 +206,12 @@ type Service struct {
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 type CalendarEventSource struct {
 	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+	// +optional
 	Schedule string `json:"schedule" protobuf:"bytes,1,opt,name=schedule"`
 	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
+	// +optional
 	Interval string `json:"interval" protobuf:"bytes,2,opt,name=interval"`
 	// ExclusionDates defines the list of DATE-TIME exceptions for recurring events.
-
 	ExclusionDates []string `json:"exclusionDates,omitempty" protobuf:"bytes,3,rep,name=exclusionDates"`
 	// Timezone in which to run the schedule
 	// +optional
@@ -662,14 +663,17 @@ type OwnedRepositories struct {
 type GithubEventSource struct {
 	// Id is the webhook's id
 	// Deprecated: This is not used at all, will be removed in v1.6
+	// +optional
 	ID int64 `json:"id" protobuf:"varint,1,opt,name=id"`
 	// Webhook refers to the configuration required to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,2,opt,name=webhook"`
 	// DeprecatedOwner refers to GitHub owner name i.e. argoproj
 	// Deprecated: use Repositories instead. Will be unsupported in v 1.6
+	// +optional
 	DeprecatedOwner string `json:"owner" protobuf:"bytes,3,opt,name=owner"`
 	// DeprecatedRepository refers to GitHub repo name i.e. argo-events
 	// Deprecated: use Repositories instead. Will be unsupported in v 1.6
+	// +optional
 	DeprecatedRepository string `json:"repository" protobuf:"bytes,4,opt,name=repository"`
 	// Events refer to Github events to which the event source will subscribe
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`

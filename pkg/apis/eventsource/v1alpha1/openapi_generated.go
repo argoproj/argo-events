@@ -533,7 +533,8 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 					},
 					"exclusionDates": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
+							Description: "ExclusionDates defines the list of DATE-TIME exceptions for recurring events.",
+							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -575,7 +576,6 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 						},
 					},
 				},
-				Required: []string{"schedule", "interval"},
 			},
 		},
 		Dependencies: []string{
@@ -1570,7 +1570,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"id", "owner", "repository", "events"},
+				Required: []string{"events"},
 			},
 		},
 		Dependencies: []string{
