@@ -768,12 +768,9 @@
     "io.argoproj.eventsource.v1alpha1.CalendarEventSource": {
       "description": "CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed. Schedule takes precedence over interval; interval takes precedence over recurrence",
       "type": "object",
-      "required": [
-        "schedule",
-        "interval"
-      ],
       "properties": {
         "exclusionDates": {
+          "description": "ExclusionDates defines the list of DATE-TIME exceptions for recurring events.",
           "type": "array",
           "items": {
             "type": "string"
@@ -1230,9 +1227,6 @@
       "description": "GithubEventSource refers to event-source for github related events",
       "type": "object",
       "required": [
-        "id",
-        "owner",
-        "repository",
         "events"
       ],
       "properties": {

@@ -751,6 +751,7 @@ Description
 <code>schedule</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Schedule is a cron-like expression. For reference, see:
 <a href="https://en.wikipedia.org/wiki/Cron">https://en.wikipedia.org/wiki/Cron</a>
@@ -762,6 +763,7 @@ Schedule is a cron-like expression. For reference, see:
 <code>interval</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Interval is a string that describes an interval duration, e.g. 1s, 30m,
 2h…
@@ -773,6 +775,10 @@ Interval is a string that describes an interval duration, e.g. 1s, 30m,
 <code>exclusionDates</code></br> <em> \[\]string </em>
 </td>
 <td>
+<p>
+ExclusionDates defines the list of DATE-TIME exceptions for recurring
+events.
+</p>
 </td>
 </tr>
 <tr>
@@ -2130,6 +2136,7 @@ Description
 <code>id</code></br> <em> int64 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Id is the webhook’s id Deprecated: This is not used at all, will be
 removed in v1.6
@@ -2153,6 +2160,7 @@ Webhook refers to the configuration required to run a http server
 <code>owner</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated:
 use Repositories instead. Will be unsupported in v 1.6
@@ -2164,6 +2172,7 @@ use Repositories instead. Will be unsupported in v 1.6
 <code>repository</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 DeprecatedRepository refers to GitHub repo name i.e. argo-events
 Deprecated: use Repositories instead. Will be unsupported in v 1.6

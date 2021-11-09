@@ -774,6 +774,7 @@
       "description": "CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed. Schedule takes precedence over interval; interval takes precedence over recurrence",
       "properties": {
         "exclusionDates": {
+          "description": "ExclusionDates defines the list of DATE-TIME exceptions for recurring events.",
           "items": {
             "type": "string"
           },
@@ -803,10 +804,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "schedule",
-        "interval"
-      ],
       "type": "object"
     },
     "io.argoproj.eventsource.v1alpha1.CatchupConfiguration": {
@@ -1322,9 +1319,6 @@
         }
       },
       "required": [
-        "id",
-        "owner",
-        "repository",
         "events"
       ],
       "type": "object"
