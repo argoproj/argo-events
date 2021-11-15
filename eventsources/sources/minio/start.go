@@ -101,8 +101,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
-	<-ctx.Done()
-
 	log.Info("event source is stopped")
 	return nil
 }
