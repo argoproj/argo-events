@@ -191,6 +191,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case v1alpha1.ADD:
 			handlerFuncs.AddFunc = func(obj interface{}) {
 				log.Info("detected create event")
+				logResourceMetadata(obj.(*unstructured.Unstructured), log)
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.ADD,
@@ -199,6 +200,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case v1alpha1.UPDATE:
 			handlerFuncs.UpdateFunc = func(oldObj, newObj interface{}) {
 				log.Info("detected update event")
+				logResourceMetadata(newObj.(*unstructured.Unstructured), log)
 				informerEventCh <- &InformerEvent{
 					Obj:    newObj,
 					OldObj: oldObj,
@@ -208,6 +210,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case v1alpha1.DELETE:
 			handlerFuncs.DeleteFunc = func(obj interface{}) {
 				log.Info("detected delete event")
+				logResourceMetadata(obj.(*unstructured.Unstructured), log)
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.DELETE,
@@ -347,4 +350,18 @@ func getEventTime(obj *unstructured.Unstructured, eventType v1alpha1.ResourceEve
 	default:
 		return obj.GetCreationTimestamp()
 	}
+}
+
+func logResourceMetadata(uObj *unstructured.Unstructured, log *zap.SugaredLogger) {
+	kind := uObj.GetKind()
+	// ATM we want to log additional metadata only for workflows
+	if kind != "Workflow" {
+		return
+	}
+
+	uid := uObj.GetUID()
+	name := uObj.GetName()
+	namespace := uObj.GetNamespace()
+	generation := uObj.GetGeneration()
+	log.Infof("handling resource: %s, name: %s, namespace: %s, uid: %s, generation: %d", kind, name, namespace, uid, generation)
 }
