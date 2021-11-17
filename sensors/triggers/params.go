@@ -167,7 +167,10 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	var eventPayload []byte
 	var key string
 	var tmplt string
-	if event, ok := events[src.DependencyName]; ok {
+
+	event, eventExists := events[src.DependencyName]
+	switch {
+	case eventExists:
 		// If context or data keys are not set, return the event payload as is
 		if src.ContextKey == "" && src.DataKey == "" && src.DataTemplate == "" && src.ContextTemplate == "" {
 			eventPayload, err = json.Marshal(&event)
@@ -184,10 +187,11 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			tmplt = src.DataTemplate
 			eventPayload, err = renderEventDataAsJSON(event)
 		}
-	} else if src.Value != nil {
+	case src.Value != nil:
+		// Use the default value set by the user in case the event is missing
 		return src.Value, nil
-	} else {
-		// The parameter doesn't have a default value and is referring to a dependency that is
+	default:
+		// The parameter doesn't have a default value and is referencing a dependency that is
 		// missing in the received events. This is not an error and may happen with || conditions.
 		return nil, nil
 	}
