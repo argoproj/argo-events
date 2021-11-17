@@ -42,7 +42,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
-		tmp, err := sjson.SetBytes(payload, parameter.Dest, value)
+		tmp, err := sjson.SetBytes(payload, parameter.Dest, *value)
 		if err != nil {
 			return nil, err
 		}
@@ -95,9 +95,12 @@ func ApplyResourceParameters(events map[string]*v1alpha1.Event, parameters []v1a
 func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]*v1alpha1.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
-		v, err := ResolveParamValue(param.Src, events)
+		value, err := ResolveParamValue(param.Src, events)
 		if err != nil {
 			return nil, err
+		}
+		if value == nil {
+			continue
 		}
 
 		switch op := param.Operation; op {
@@ -107,9 +110,9 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 
 			if current.Exists() {
 				if op == v1alpha1.TriggerParameterOpAppend {
-					v = current.String() + v
+					*value = current.String() + *value
 				} else {
-					v += current.String()
+					*value += current.String()
 				}
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:
@@ -119,7 +122,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 		}
 
 		// now let's set the value
-		tmp, err := sjson.SetBytes(jsonObj, param.Dest, v)
+		tmp, err := sjson.SetBytes(jsonObj, param.Dest, *value)
 		if err != nil {
 			return nil, err
 		}
@@ -159,60 +162,67 @@ func renderEventDataAsJSON(event *v1alpha1.Event) ([]byte, error) {
 
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*v1alpha1.Event) (string, error) {
+func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*v1alpha1.Event) (*string, error) {
 	var err error
-	var value []byte
+	var eventPayload []byte
 	var key string
 	var tmplt string
 	if event, ok := events[src.DependencyName]; ok {
 		// If context or data keys are not set, return the event payload as is
 		if src.ContextKey == "" && src.DataKey == "" && src.DataTemplate == "" && src.ContextTemplate == "" {
-			value, err = json.Marshal(&event)
+			eventPayload, err = json.Marshal(&event)
 		}
 		// Get the context bytes
 		if src.ContextKey != "" || src.ContextTemplate != "" {
 			key = src.ContextKey
 			tmplt = src.ContextTemplate
-			value, err = json.Marshal(&event.Context)
+			eventPayload, err = json.Marshal(&event.Context)
 		}
 		// Get the payload bytes
 		if src.DataKey != "" || src.DataTemplate != "" {
 			key = src.DataKey
 			tmplt = src.DataTemplate
-			value, err = renderEventDataAsJSON(event)
+			eventPayload, err = renderEventDataAsJSON(event)
 		}
 	} else if src.Value != nil {
-		return *src.Value, nil
+		return src.Value, nil
+	} else {
+		// The parameter doesn't have a default value and is referring to a dependency that is
+		// missing in the received events. This is not an error and may happen with || conditions.
+		return nil, nil
 	}
+
 	if err != nil {
 		if src.Value != nil {
 			fmt.Printf("failed to parse the event data, using default value. err: %+v\n", err)
-			return *src.Value, nil
+			return src.Value, nil
 		}
-		return "", err
+		return nil, err
 	}
 	// Get the value corresponding to specified key within JSON object
-	if value != nil {
+	if eventPayload != nil {
 		if tmplt != "" {
-			out, err := getValueWithTemplate(value, tmplt)
+			out, err := getValueWithTemplate(eventPayload, tmplt)
 			if err == nil {
-				return out, nil
+				return &out, nil
 			}
 			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
 		}
 		if key != "" {
-			res, err := getValueByKey(value, key)
+			res, err := getValueByKey(eventPayload, key)
 			if err == nil {
-				return res, nil
+				return &res, nil
 			}
 			fmt.Printf("Failed to get value by key: %+v\n", err)
 		}
 		if src.Value != nil {
-			return *src.Value, nil
+			return src.Value, nil
 		}
-		return string(value), nil
+
+		strPayload := string(eventPayload)
+		return &strPayload, nil
 	}
-	return "", errors.Wrapf(err, "unable to resolve '%s' parameter value", src.DependencyName)
+	return nil, errors.Wrapf(err, "unable to resolve '%s' parameter value", src.DependencyName)
 }
 
 // getValueWithTemplate will attempt to execute the provided template against
