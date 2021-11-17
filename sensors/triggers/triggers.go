@@ -17,7 +17,6 @@ limitations under the License.
 package triggers
 
 import (
-	"fmt"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -26,9 +25,17 @@ import (
 
 func GetGroupVersionResource(obj *unstructured.Unstructured) schema.GroupVersionResource {
 	gvk := obj.GroupVersionKind()
+	lowercaseKind := strings.ToLower(gvk.Kind)
+	var resource string
+	if strings.HasSuffix(lowercaseKind, "s") {
+		resource = lowercaseKind + "es"
+	} else {
+		resource = lowercaseKind + "s"
+	}
+
 	return schema.GroupVersionResource{
 		Group:    gvk.Group,
 		Version:  gvk.Version,
-		Resource: fmt.Sprintf("%ss", strings.ToLower(gvk.Kind)),
+		Resource: resource,
 	}
 }
