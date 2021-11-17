@@ -72,9 +72,7 @@ Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/stab
 
 ### Using Helm Chart
 
-Note: This method does not work with Helm 3, only Helm 2.
-
-Make sure you have helm client installed and Tiller server is running. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a>
+Make sure you have helm client installed. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a>
 
 1. Create namespace called argo-events.
 
