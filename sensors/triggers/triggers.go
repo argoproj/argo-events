@@ -17,21 +17,19 @@ limitations under the License.
 package triggers
 
 import (
-	"strings"
-
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/gengo/namer"
+	"k8s.io/gengo/types"
 )
 
 func GetGroupVersionResource(obj *unstructured.Unstructured) schema.GroupVersionResource {
 	gvk := obj.GroupVersionKind()
-	lowercaseKind := strings.ToLower(gvk.Kind)
-	var resource string
-	if strings.HasSuffix(lowercaseKind, "s") {
-		resource = lowercaseKind + "es"
-	} else {
-		resource = lowercaseKind + "s"
-	}
+	resource := namer.NewAllLowercasePluralNamer(nil).Name(&types.Type{
+		Name: types.Name{
+			Name: gvk.Kind,
+		},
+	})
 
 	return schema.GroupVersionResource{
 		Group:    gvk.Group,
