@@ -24,7 +24,6 @@ import (
 
 	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/ghodss/yaml"
-	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -226,7 +225,8 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		strPayload := string(eventPayload)
 		return &strPayload, nil
 	}
-	return nil, errors.Wrapf(err, "unable to resolve '%s' parameter value", src.DependencyName)
+
+	return nil, fmt.Errorf("unable to resolve '%s' parameter value", src.DependencyName)
 }
 
 // getValueWithTemplate will attempt to execute the provided template against
