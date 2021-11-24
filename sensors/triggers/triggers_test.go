@@ -43,8 +43,8 @@ func TestGetGroupVersionResource(t *testing.T) {
 
 	eventbus := newUnstructured("argoproj.io/v1alpha1", "EventBus", "fake", "test-eb")
 	expectedEventBusGVR := schema.GroupVersionResource{
-		Group:    "argoproj.io/v1alpha1",
-		Version:  "v1",
+		Group:    "argoproj.io",
+		Version:  "v1alpha1",
 		Resource: "eventbus",
 	}
 	assert.Equal(t, expectedEventBusGVR, GetGroupVersionResource(eventbus))
