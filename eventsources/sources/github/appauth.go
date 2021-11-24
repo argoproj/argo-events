@@ -20,10 +20,10 @@ import (
 )
 
 type AppsAuthStrategy struct {
-	AppID int64
+	AppID          int64
 	InstallationID int64
-	PrivateKey string
-	Transport http.RoundTripper
+	PrivateKey     string
+	Transport      http.RoundTripper
 }
 
 // AuthTransport implements the AuthStrategy interface.
