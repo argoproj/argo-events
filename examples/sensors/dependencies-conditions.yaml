@@ -18,6 +18,11 @@ spec:
     - template:
         # Boolean expression contains dependency names to determine whether to execute the trigger or not
         conditions: "test-dep"
+        conditionsReset:
+          - byTime:
+              # Reset conditions at 23:59 everyday
+              cron: "59 23 * * *"
+              timezone: "America/Los_Angeles"
         name: webhook-workflow-trigger
         k8s:
           operation: create

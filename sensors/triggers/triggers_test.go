@@ -17,19 +17,27 @@ limitations under the License.
 package triggers
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetGroupVersionResource(t *testing.T) {
-	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	expectedGVR := schema.GroupVersionResource{
+	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test-deployment")
+	expectedDeploymentGVR := schema.GroupVersionResource{
 		Group:    "apps",
 		Version:  "v1",
 		Resource: "deployments",
 	}
-	result := GetGroupVersionResource(deployment)
-	assert.Equal(t, expectedGVR, result)
+	assert.Equal(t, expectedDeploymentGVR, GetGroupVersionResource(deployment))
+
+	ingress := newUnstructured("networking.k8s.io/v1", "Ingress", "fake", "test-ingress")
+	expectedIngressGVR := schema.GroupVersionResource{
+		Group:    "networking.k8s.io",
+		Version:  "v1",
+		Resource: "ingresses",
+	}
+	assert.Equal(t, expectedIngressGVR, GetGroupVersionResource(ingress))
 }
