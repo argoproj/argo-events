@@ -132,12 +132,17 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	if err != nil {
 		return nil, err
 	}
+	sensor := args.Sensor
 	sensorCopy := &v1alpha1.Sensor{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: args.Sensor.Namespace,
-			Name:      args.Sensor.Name,
+		TypeMeta: metav1.TypeMeta{
+			Kind:       sensor.Kind,
+			APIVersion: sensor.APIVersion,
 		},
-		Spec: args.Sensor.Spec,
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: sensor.Namespace,
+			Name:      sensor.Name,
+		},
+		Spec: sensor.Spec,
 	}
 	sensorBytes, err := json.Marshal(sensorCopy)
 	if err != nil {
@@ -151,7 +156,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		},
 		{
 			Name:  common.EnvVarEventBusSubject,
-			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
+			Value: fmt.Sprintf("eventbus-%s", sensor.Namespace),
 		},
 		{
 			Name:      "POD_NAME",
@@ -234,13 +239,13 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    args.Sensor.Namespace,
-			GenerateName: fmt.Sprintf("%s-sensor-", args.Sensor.Name),
-			Labels:       mergeLabels(args.Sensor.Labels, args.Labels),
+			Namespace:    sensor.Namespace,
+			GenerateName: fmt.Sprintf("%s-sensor-", sensor.Name),
+			Labels:       mergeLabels(sensor.Labels, args.Labels),
 		},
 		Spec: *deploymentSpec,
 	}
-	if err := controllerscommon.SetObjectMeta(args.Sensor, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(sensor, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return deployment, nil

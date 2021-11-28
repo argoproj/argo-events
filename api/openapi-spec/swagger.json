@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Argo Events",
-    "version": "v1.5.3"
+    "version": "v1.5.0-cap-CR-7514"
   },
   "paths": {},
   "definitions": {
@@ -2426,27 +2426,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.ConditionsResetByTime": {
-      "type": "object",
-      "properties": {
-        "cron": {
-          "description": "Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
-          "type": "string"
-        },
-        "timezone": {
-          "type": "string"
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.ConditionsResetCriteria": {
-      "type": "object",
-      "properties": {
-        "byTime": {
-          "description": "Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ConditionsResetByTime"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.CustomTrigger": {
       "description": "CustomTrigger refers to the specification of the custom trigger.",
       "type": "object",
@@ -3467,13 +3446,6 @@
         "conditions": {
           "description": "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) \u0026\u0026 dep04\"",
           "type": "string"
-        },
-        "conditionsReset": {
-          "description": "Criteria to reset the conditons",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ConditionsResetCriteria"
-          }
         },
         "custom": {
           "description": "CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom trigger.",
