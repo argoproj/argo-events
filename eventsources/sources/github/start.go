@@ -74,6 +74,38 @@ func (router *Router) GetRoute() *webhook.Route {
 	return router.route
 }
 
+func (router *Router) isPRCommentAddedEvent(body common.Obj) bool {
+	githubEvent := body[githubEventHeader]
+	githubAction := body["action"]
+	if githubEvent == "issue_comment" && githubAction == "created" {
+		issueMeta := body["issue"].(common.Obj)
+		if prMeta, ok := issueMeta["pull_request"]; ok {
+			if _, ok := prMeta.(common.Obj)["url"]; ok {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (router *Router) getPRFromPRCommentAddedEvent(eventPayload common.Obj) ([]byte, error) {
+	prNumber := int(eventPayload["issue"].(common.Obj)["number"].(float64))
+	repoMeta := eventPayload["repository"].(common.Obj)
+	repoOwner := repoMeta["owner"].(common.Obj)["login"].(string)
+	repoName := repoMeta["name"].(string)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pr, _, err := router.githubClient.PullRequests.Get(ctx, repoOwner, repoName, prNumber)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to delete hook for repo %s/%s", repoOwner, repoName)
+	}
+
+	return json.Marshal(pr)
+}
+
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.route
@@ -103,10 +135,26 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	extras, err := router.fetchExtras(body)
+	if err != nil {
+		logger.Errorw("failed to enrich event payload with additional information", zap.Error(err))
+		common.SendErrorResponse(writer, err.Error()) // TODO: should fail the webhook and the event if failed to enrich?
+		return
+	}
+
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		logger.Info("failed to marshal event body")
+		common.SendErrorResponse(writer, "invalid event")
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
+		return
+	}
+
 	event := &events.GithubEventData{
 		Headers:  request.Header,
-		Body:     (*json.RawMessage)(&body),
+		Body:     (*json.RawMessage)(&jsonBody),
 		Metadata: router.githubEventSource.Metadata,
+		Extras:   extras,
 	}
 
 	eventBody, err := json.Marshal(event)
@@ -122,6 +170,20 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	logger.Info("request successfully processed")
 
 	common.SendSuccessResponse(writer, "success")
+}
+
+func (router *Router) fetchExtras(body map[string]interface{}) (map[string]*json.RawMessage, error) {
+	extras := make(map[string]*json.RawMessage)
+	if router.githubEventSource.EnrichPayload.FetchPROnPRCommentAdded && router.isPRCommentAddedEvent(body) {
+		pr, err := router.getPRFromPRCommentAddedEvent(body)
+		if err != nil {
+			return nil, err // TODO: should drop the rest of the extras in case one is a failing?
+		}
+
+		extras["pull_request"] = (*json.RawMessage)(&pr)
+	}
+
+	return extras, nil
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -304,7 +366,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 // parseValidateRequest parses a http request and checks if it is valid GitHub notification
-func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
+func parseValidateRequest(r *http.Request, secret []byte) (map[string]interface{}, error) {
 	body, err := gh.ValidatePayload(r, secret)
 	if err != nil {
 		return nil, err
@@ -320,5 +382,6 @@ func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
 	} {
 		payload[h] = r.Header.Get(h)
 	}
-	return json.Marshal(payload)
+	return payload, nil
+	//return json.Marshal(payload)
 }
