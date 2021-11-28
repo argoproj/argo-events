@@ -30,45 +30,47 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger":       schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger":    schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":       schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger":  schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":          schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":             schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                  schema_pkg_apis_sensor_v1alpha1_Event(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":           schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":        schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":  schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ExprFilter":             schema_pkg_apis_sensor_v1alpha1_ExprFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":           schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact":            schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds":               schema_pkg_apis_sensor_v1alpha1_GitCreds(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig":        schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger":            schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8SResourcePolicy":      schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger":           schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger":             schema_pkg_apis_sensor_v1alpha1_LogTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger":            schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger":       schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PayloadField":           schema_pkg_apis_sensor_v1alpha1_PayloadField(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger":          schema_pkg_apis_sensor_v1alpha1_PulsarTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit":              schema_pkg_apis_sensor_v1alpha1_RateLimit(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                 schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":             schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":             schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":           schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger":           schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger":     schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":           schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template":               schema_pkg_apis_sensor_v1alpha1_Template(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":             schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource": schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy":          schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":        schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":            schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger":        schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger":     schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":        schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger":   schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetByTime":   schema_pkg_apis_sensor_v1alpha1_ConditionsResetByTime(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria": schema_pkg_apis_sensor_v1alpha1_ConditionsResetCriteria(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":           schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":              schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                   schema_pkg_apis_sensor_v1alpha1_Event(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":            schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":   schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ExprFilter":              schema_pkg_apis_sensor_v1alpha1_ExprFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":            schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact":             schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds":                schema_pkg_apis_sensor_v1alpha1_GitCreds(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig":         schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger":             schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8SResourcePolicy":       schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger":            schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger":              schema_pkg_apis_sensor_v1alpha1_LogTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger":             schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger":        schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PayloadField":            schema_pkg_apis_sensor_v1alpha1_PayloadField(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger":           schema_pkg_apis_sensor_v1alpha1_PulsarTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit":               schema_pkg_apis_sensor_v1alpha1_RateLimit(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                  schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":              schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger":            schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger":      schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":            schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template":                schema_pkg_apis_sensor_v1alpha1_Template(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":        schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource":  schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy":           schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":         schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":             schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
 }
 
@@ -320,6 +322,51 @@ func schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref common.ReferenceC
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_ConditionsResetByTime(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"cron": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"timezone": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_ConditionsResetCriteria(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"byTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetByTime"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetByTime"},
 	}
 }
 
@@ -2214,12 +2261,26 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger"),
 						},
 					},
+					"conditionsReset": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Criteria to reset the conditons",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"},
 	}
 }
 
