@@ -653,7 +653,7 @@ type OwnedRepositories struct {
 	Names []string `json:"names,omitempty" protobuf:"bytes,2,rep,name=names"`
 }
 
-type EnrichPayload struct {
+type PayloadEnrichmentFlags struct {
 	// FetchPROnPRCommentAdded determines whether to enrich the payload provided by GitHub
 	// on "pull request comment added" events, with the full pull request info
 	// +optional
@@ -706,9 +706,10 @@ type GithubEventSource struct {
 	// Repositories holds the information of repositories, which uses repo owner as the key,
 	// and list of repo names as the value
 	Repositories []OwnedRepositories `json:"repositories,omitempty" protobuf:"bytes,15,rep,name=repositories"`
-	// EnrichPayload holds flags which determine whether to enrich GitHub's original payload with additional information.
+	// PayloadEnrichment holds flags that determine whether to enrich GitHub's original payload with
+	// additional information.
 	// +optional
-	EnrichPayload EnrichPayload `json:"enrichPayload,omitempty" protobuf:"bytes,16,rep,name=enrichPayload"`
+	PayloadEnrichment PayloadEnrichmentFlags `json:"payloadEnrichment,omitempty" protobuf:"bytes,16,rep,name=payloadEnrichment"`
 }
 
 func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {

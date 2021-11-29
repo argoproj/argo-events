@@ -36,10 +36,13 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events"
 )
 
-// GitHub headers
 const (
+	// GitHub headers
 	githubEventHeader    = "X-GitHub-Event"
 	githubDeliveryHeader = "X-GitHub-Delivery"
+
+	// Key names in Extras map (payload enrichment flags feature)
+	pullRequestExtrasKey = "pull_request" // holds PR info
 )
 
 // controller controls the webhook operations
@@ -74,13 +77,13 @@ func (router *Router) GetRoute() *webhook.Route {
 	return router.route
 }
 
-func (router *Router) isPRCommentAddedEvent(body common.Obj) bool {
-	githubEvent := body[githubEventHeader]
-	githubAction := body["action"]
+func (router *Router) isPRCommentAddedEvent(eventPayload common.Object) bool {
+	githubEvent := eventPayload[githubEventHeader]
+	githubAction := eventPayload["action"]
 	if githubEvent == "issue_comment" && githubAction == "created" {
-		issueMeta := body["issue"].(common.Obj)
-		if prMeta, ok := issueMeta["pull_request"]; ok {
-			if _, ok := prMeta.(common.Obj)["url"]; ok {
+		issueInfo := eventPayload["issue"].(common.Object)
+		if prInfo, ok := issueInfo["pull_request"]; ok {
+			if _, ok := prInfo.(common.Object)["url"]; ok {
 				return true
 			}
 		}
@@ -89,10 +92,10 @@ func (router *Router) isPRCommentAddedEvent(body common.Obj) bool {
 	return false
 }
 
-func (router *Router) getPRFromPRCommentAddedEvent(eventPayload common.Obj) ([]byte, error) {
-	prNumber := int(eventPayload["issue"].(common.Obj)["number"].(float64))
-	repoMeta := eventPayload["repository"].(common.Obj)
-	repoOwner := repoMeta["owner"].(common.Obj)["login"].(string)
+func (router *Router) getPRFromPRCommentAddedEvent(eventPayload common.Object) ([]byte, error) {
+	prNumber := int(eventPayload["issue"].(common.Object)["number"].(float64))
+	repoMeta := eventPayload["repository"].(common.Object)
+	repoOwner := repoMeta["owner"].(common.Object)["login"].(string)
 	repoName := repoMeta["name"].(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -100,7 +103,7 @@ func (router *Router) getPRFromPRCommentAddedEvent(eventPayload common.Obj) ([]b
 
 	pr, _, err := router.githubClient.PullRequests.Get(ctx, repoOwner, repoName, prNumber)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to delete hook for repo %s/%s", repoOwner, repoName)
+		return nil, errors.Wrapf(err, "failed to get PR for repo %s/%s", repoOwner, repoName)
 	}
 
 	return json.Marshal(pr)
@@ -138,7 +141,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	extras, err := router.fetchExtras(body)
 	if err != nil {
 		logger.Errorw("failed to enrich event payload with additional information", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error()) // TODO: should fail the webhook and the event if failed to enrich?
+		common.SendErrorResponse(writer, err.Error())
 		return
 	}
 
@@ -172,15 +175,15 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	common.SendSuccessResponse(writer, "success")
 }
 
-func (router *Router) fetchExtras(body map[string]interface{}) (map[string]*json.RawMessage, error) {
+func (router *Router) fetchExtras(eventPayload common.Object) (map[string]*json.RawMessage, error) {
 	extras := make(map[string]*json.RawMessage)
-	if router.githubEventSource.EnrichPayload.FetchPROnPRCommentAdded && router.isPRCommentAddedEvent(body) {
-		pr, err := router.getPRFromPRCommentAddedEvent(body)
+	if router.githubEventSource.PayloadEnrichment.FetchPROnPRCommentAdded && router.isPRCommentAddedEvent(eventPayload) {
+		pr, err := router.getPRFromPRCommentAddedEvent(eventPayload)
 		if err != nil {
-			return nil, err // TODO: should drop the rest of the extras in case one is a failing?
+			return nil, errors.Wrap(err, "failed to fetch PR info for PR comment added event")
 		}
 
-		extras["pull_request"] = (*json.RawMessage)(&pr)
+		extras[pullRequestExtrasKey] = (*json.RawMessage)(&pr)
 	}
 
 	return extras, nil

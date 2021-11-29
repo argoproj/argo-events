@@ -96,4 +96,4 @@ var (
 	ConfigMapKeySelectorType = reflect.TypeOf(&corev1.ConfigMapKeySelector{})
 )
 
-type Obj = map[string]interface{}
+type Object = map[string]interface{}
