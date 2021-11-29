@@ -25,7 +25,10 @@ import (
 
 func GetGroupVersionResource(obj *unstructured.Unstructured) schema.GroupVersionResource {
 	gvk := obj.GroupVersionKind()
-	resource := namer.NewAllLowercasePluralNamer(nil).Name(&types.Type{
+	pluralExceptions := map[string]string{
+		"EventBus": "eventbus",
+	}
+	resource := namer.NewAllLowercasePluralNamer(pluralExceptions).Name(&types.Type{
 		Name: types.Name{
 			Name: gvk.Kind,
 		},
