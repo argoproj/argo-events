@@ -17,10 +17,12 @@ limitations under the License.
 package github
 
 import (
+	"net/http"
+
 	"github.com/google/go-github/v31/github"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	metrics "github.com/argoproj/argo-events/metrics"
+	"github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -65,4 +67,11 @@ type Router struct {
 // cred stores the api access token or webhook secret
 type cred struct {
 	secret string
+}
+
+// AuthStrategy is implemented by the different GitHub auth strategies that are supported
+type AuthStrategy interface {
+	// AuthTransport returns an http.RoundTripper that is used with an http.Client to make
+	// authenticated requests using HTTP Basic Authentication.
+	AuthTransport() (http.RoundTripper, error)
 }

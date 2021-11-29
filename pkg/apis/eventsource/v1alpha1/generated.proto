@@ -474,6 +474,17 @@ message GenericEventSource {
   optional k8s.io.api.core.v1.SecretKeySelector authSecret = 6;
 }
 
+message GithubAppCreds {
+  // PrivateKey refers to a K8s secret containing the GitHub app private key
+  optional k8s.io.api.core.v1.SecretKeySelector privateKey = 1;
+
+  // AppID refers to the GitHub App ID for the application you created
+  optional int64 appID = 2;
+
+  // InstallationID refers to the Installation ID of the GitHub app you created and installed
+  optional int64 installationID = 3;
+}
+
 // GithubEventSource refers to event-source for github related events
 message GithubEventSource {
   // Id is the webhook's id
@@ -532,6 +543,13 @@ message GithubEventSource {
   // Repositories holds the information of repositories, which uses repo owner as the key,
   // and list of repo names as the value
   repeated OwnedRepositories repositories = 15;
+
+  // Organizations holds the names of organizations (used for organization level webhooks). Not required if Repositories is set.
+  repeated string organizations = 16;
+
+  // GitHubApp holds the GitHub app credentials
+  // +optional
+  optional GithubAppCreds githubApp = 17;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
@@ -781,7 +799,7 @@ message NSQEventSource {
 }
 
 message OwnedRepositories {
-  // Orgnization or user name
+  // Organization or user name
   optional string owner = 1;
 
   // Repository names

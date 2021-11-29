@@ -48,6 +48,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceStatus":          schema_pkg_apis_eventsource_v1alpha1_EventSourceStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource":            schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource":         schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubAppCreds":             schema_pkg_apis_eventsource_v1alpha1_GithubAppCreds(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource":          schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource":          schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource":            schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref),
@@ -1418,6 +1419,43 @@ func schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref common.Referenc
 	}
 }
 
+func schema_pkg_apis_eventsource_v1alpha1_GithubAppCreds(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"privateKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PrivateKey refers to a K8s secret containing the GitHub app private key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"appID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AppID refers to the GitHub App ID for the application you created",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"installationID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "InstallationID refers to the Installation ID of the GitHub app you created and installed",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+				},
+				Required: []string{"privateKey", "appID", "installationID"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
 func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1553,12 +1591,33 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							},
 						},
 					},
+					"organizations": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Organizations holds the names of organizations (used for organization level webhooks). Not required if Repositories is set.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"githubApp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GitHubApp holds the GitHub app credentials",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubAppCreds"),
+						},
+					},
 				},
 				Required: []string{"id", "owner", "repository", "events"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubAppCreds", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2209,7 +2268,7 @@ func schema_pkg_apis_eventsource_v1alpha1_OwnedRepositories(ref common.Reference
 				Properties: map[string]spec.Schema{
 					"owner": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Orgnization or user name",
+							Description: "Organization or user name",
 							Type:        []string{"string"},
 							Format:      "",
 						},

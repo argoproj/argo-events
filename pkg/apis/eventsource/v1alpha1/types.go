@@ -647,10 +647,19 @@ type PubSubEventSource struct {
 }
 
 type OwnedRepositories struct {
-	// Orgnization or user name
+	// Organization or user name
 	Owner string `json:"owner,omitempty" protobuf:"bytes,1,opt,name=owner"`
 	// Repository names
 	Names []string `json:"names,omitempty" protobuf:"bytes,2,rep,name=names"`
+}
+
+type GithubAppCreds struct {
+	// PrivateKey refers to a K8s secret containing the GitHub app private key
+	PrivateKey *corev1.SecretKeySelector `json:"privateKey" protobuf:"bytes,1,opt,name=privateKey"`
+	// AppID refers to the GitHub App ID for the application you created
+	AppID int64 `json:"appID" protobuf:"bytes,2,opt,name=appID"`
+	// InstallationID refers to the Installation ID of the GitHub app you created and installed
+	InstallationID int64 `json:"installationID" protobuf:"bytes,3,opt,name=installationID"`
 }
 
 // GithubEventSource refers to event-source for github related events
@@ -699,6 +708,11 @@ type GithubEventSource struct {
 	// Repositories holds the information of repositories, which uses repo owner as the key,
 	// and list of repo names as the value
 	Repositories []OwnedRepositories `json:"repositories,omitempty" protobuf:"bytes,15,rep,name=repositories"`
+	// Organizations holds the names of organizations (used for organization level webhooks). Not required if Repositories is set.
+	Organizations []string `json:"organizations,omitempty" protobuf:"bytes,16,rep,name=organizations"`
+	// GitHubApp holds the GitHub app credentials
+	// +optional
+	GithubApp *GithubAppCreds `json:"githubApp,omitempty" protobuf:"bytes,17,opt,name=githubApp"`
 }
 
 func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {
@@ -717,8 +731,20 @@ func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {
 	return nil
 }
 
+func (g GithubEventSource) HasGithubAPIToken() bool {
+	return g.APIToken != nil
+}
+
+func (g GithubEventSource) HasGithubAppCreds() bool {
+	return g.GithubApp != nil && g.GithubApp.PrivateKey != nil
+}
+
+func (g GithubEventSource) HasConfiguredWebhook() bool {
+	return g.Webhook != nil && g.Webhook.URL != ""
+}
+
 func (g GithubEventSource) NeedToCreateHooks() bool {
-	return g.APIToken != nil && g.Webhook != nil && g.Webhook.URL != ""
+	return (g.HasGithubAPIToken() || g.HasGithubAppCreds()) && g.HasConfiguredWebhook()
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
