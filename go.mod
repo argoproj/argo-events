@@ -16,6 +16,7 @@ require (
 	github.com/argoproj/pkg v0.10.1
 	github.com/aws/aws-sdk-go v1.33.16
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
+	github.com/bradleyfalzon/ghinstallation v1.1.1
 	github.com/cloudevents/sdk-go/v2 v2.1.0
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/eclipse/paho.mqtt.golang v1.2.0
@@ -63,7 +64,7 @@ require (
 	github.com/xanzy/go-gitlab v0.50.2
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.17.0
-	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
+	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871
 	google.golang.org/api v0.30.0
 	google.golang.org/grpc v1.31.0
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
@@ -105,6 +106,7 @@ require (
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/devigned/tab v0.1.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
@@ -133,7 +135,8 @@ require (
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/snappy v0.0.3 // indirect
-	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/go-github/v29 v29.0.2 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/googleapis/gnostic v0.5.1 // indirect
@@ -222,7 +225,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect

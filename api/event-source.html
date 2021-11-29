@@ -2039,6 +2039,59 @@ Kubernetes core/v1.SecretKeySelector
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.GithubAppCreds">GithubAppCreds
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>privateKey</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>PrivateKey refers to a K8s secret containing the GitHub app private key</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>appID</code></br>
+<em>
+int64
+</em>
+</td>
+<td>
+<p>AppID refers to the GitHub App ID for the application you created</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>installationID</code></br>
+<em>
+int64
+</em>
+</td>
+<td>
+<p>InstallationID refers to the Installation ID of the GitHub app you created and installed</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.GithubEventSource">GithubEventSource
 </h3>
 <p>
@@ -2254,6 +2307,20 @@ and list of repo names as the value. Not required if Organizations is set.</p>
 </td>
 <td>
 <p>Organizations holds the names of organizations (used for organization level webhooks). Not required if Repositories is set.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>githubApp</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.GithubAppCreds">
+GithubAppCreds
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>GitHubApp holds the GitHub app credentials</p>
 </td>
 </tr>
 </tbody>
@@ -3171,7 +3238,7 @@ string
 </em>
 </td>
 <td>
-<p>Orgnization or user name</p>
+<p>Organization or user name</p>
 </td>
 </tr>
 <tr>
