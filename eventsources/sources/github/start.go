@@ -386,5 +386,4 @@ func parseValidateRequest(r *http.Request, secret []byte) (map[string]interface{
 		payload[h] = r.Header.Get(h)
 	}
 	return payload, nil
-	//return json.Marshal(payload)
 }
