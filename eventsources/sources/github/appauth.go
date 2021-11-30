@@ -1,5 +1,5 @@
 /*
-Copyright 2018 KompiTech GmbH
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,7 +16,7 @@ package github
 import (
 	"net/http"
 
-	"github.com/bradleyfalzon/ghinstallation"
+	"github.com/bradleyfalzon/ghinstallation/v2"
 )
 
 type AppsAuthStrategy struct {
