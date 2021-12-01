@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 )
 
@@ -44,7 +46,7 @@ func Filter(event *v1alpha1.Event, filters *v1alpha1.EventDependencyFilter) (boo
 	return ok, nil
 }
 
-// apply the filters to an Event
+// filterEvent applies the filters to an Event
 func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) (bool, error) {
 	dataFilter, err := filterData(filter.Data, event)
 	if err != nil {
@@ -106,7 +108,7 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 	}
 }
 
-// applyContextFilter checks the expected EventContext against the actual EventContext
+// filterContext checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
 func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContext) bool {
@@ -132,7 +134,7 @@ func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContex
 	return res
 }
 
-// applyDataFilter runs the dataFilter against the Event's data
+// filterData runs the dataFilter against the Event's data
 // returns (true, nil) when data passes filters, false otherwise
 func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error) {
 	if data == nil {
@@ -154,7 +156,8 @@ func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error)
 	if err != nil {
 		return false, err
 	}
-filter:
+
+filterData:
 	for _, f := range data {
 		res := gjson.GetBytes(jsData, f.Path)
 		if !res.Exists() {
@@ -187,7 +190,7 @@ filter:
 					return false, err
 				}
 				if val == res.Bool() {
-					continue filter
+					continue filterData
 				}
 			}
 			return false, nil
@@ -203,27 +206,27 @@ filter:
 				switch f.Comparator {
 				case v1alpha1.GreaterThanOrEqualTo:
 					if eventVal >= filterVal {
-						continue filter
+						continue filterData
 					}
 				case v1alpha1.GreaterThan:
 					if eventVal > filterVal {
-						continue filter
+						continue filterData
 					}
 				case v1alpha1.LessThan:
 					if eventVal < filterVal {
-						continue filter
+						continue filterData
 					}
 				case v1alpha1.LessThanOrEqualTo:
 					if eventVal <= filterVal {
-						continue filter
+						continue filterData
 					}
 				case v1alpha1.NotEqualTo:
 					if eventVal != filterVal {
-						continue filter
+						continue filterData
 					}
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if eventVal == filterVal {
-						continue filter
+						continue filterData
 					}
 				}
 			}
@@ -240,11 +243,11 @@ filter:
 				switch f.Comparator {
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if match {
-						continue filter
+						continue filterData
 					}
 				case v1alpha1.NotEqualTo:
 					if !match {
-						continue filter
+						continue filterData
 					}
 				}
 			}
@@ -258,7 +261,10 @@ filter:
 }
 
 // filterExpr applies expression based filters against event data
+// expression evaluation is based on https://github.com/Knetic/govaluate
 func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
+	var err error
+
 	if filters == nil {
 		return true, nil
 	}
@@ -270,39 +276,48 @@ func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, err
 		return true, nil
 	}
 	var js *json.RawMessage
-	if err := json.Unmarshal(payload, &js); err != nil {
+	err = json.Unmarshal(payload, &js)
+	if err != nil {
 		return false, err
 	}
 	var jsData []byte
-	jsData, err := json.Marshal(js)
+	jsData, err = json.Marshal(js)
 	if err != nil {
 		return false, err
 	}
 
+	errMessages := make([]string, 0)
+filterExpr:
 	for _, filter := range filters {
 		parameters := map[string]interface{}{}
 		for _, field := range filter.Fields {
 			result := gjson.GetBytes(jsData, field.Path)
 			if !result.Exists() {
-				return false, fmt.Errorf("path %s does not exist", field.Path)
+				errMessages = append(errMessages, fmt.Sprintf("path %s does not exist", field.Path))
+				continue filterExpr
 			}
 			parameters[field.Name] = result.Value()
 		}
 		if len(parameters) == 0 {
 			continue
 		}
-		expr, err := govaluate.NewEvaluableExpression(filter.Expr)
-		if err != nil {
-			return false, err
+		expr, exprErr := govaluate.NewEvaluableExpression(filter.Expr)
+		if exprErr != nil {
+			errMessages = append(errMessages, exprErr.Error())
+			continue
 		}
-		result, err := expr.Evaluate(parameters)
-		if err != nil {
-			return false, err
+		result, resErr := expr.Evaluate(parameters)
+		if resErr != nil {
+			errMessages = append(errMessages, resErr.Error())
+			continue
 		}
 		if result == true {
 			return true, nil
 		}
 	}
 
+	if len(errMessages) > 0 {
+		return false, errors.New(strings.Join(errMessages, " / "))
+	}
 	return false, nil
 }

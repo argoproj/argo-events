@@ -569,14 +569,16 @@ func TestFilterEvent(t *testing.T) {
 	assert.Equal(t, valid, true)
 }
 
-func TestExprFilter(t *testing.T) {
+func TestFilterExpr(t *testing.T) {
 	tests := []struct {
-		event   *v1alpha1.Event
-		filters []v1alpha1.ExprFilter
-		result  bool
-		err     error
+		id             int
+		event          *v1alpha1.Event
+		filters        []v1alpha1.ExprFilter
+		expectedResult bool
+		expectedErrMsg string
 	}{
 		{
+			id: 1,
 			event: &v1alpha1.Event{
 				Data: []byte(`{"a": "b"}`),
 			},
@@ -591,10 +593,30 @@ func TestExprFilter(t *testing.T) {
 					},
 				},
 			},
-			result: true,
-			err:    nil,
+			expectedResult: true,
+			expectedErrMsg: "",
 		},
 		{
+			id: 2,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": "c"}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `a != "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a",
+							Name: "a",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			id: 3,
 			event: &v1alpha1.Event{
 				Data: []byte(`{"a": {"b": "c"}}`),
 			},
@@ -609,10 +631,87 @@ func TestExprFilter(t *testing.T) {
 					},
 				},
 			},
-			result: false,
-			err:    nil,
+			expectedResult: false,
+			expectedErrMsg: "",
 		},
 		{
+			id: 4,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": 2}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b == 2`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			id: 5,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": 2}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b < 1`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+			},
+			expectedResult: false,
+			expectedErrMsg: "",
+		},
+		{
+			id: 6,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "start long string"}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b =~ "start"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			id: 7,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "long string"}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b !~ "start"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			id: 8,
 			event: &v1alpha1.Event{
 				Data: []byte(`{"a": {"b": "c"}}`),
 			},
@@ -636,16 +735,54 @@ func TestExprFilter(t *testing.T) {
 					},
 				},
 			},
-			result: true,
-			err:    nil,
+			expectedResult: true,
+			expectedErrMsg: "",
 		},
 		{
+			id: 9,
 			event: &v1alpha1.Event{
-				Data: []byte(`{"a": {"b": 2}}`),
+				Data: []byte(`{"a": {"b": "x", "d": "y"}}`),
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == 2`,
+					Expr: `b == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+				{
+					Expr: `d == "d"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.d",
+							Name: "d",
+						},
+					},
+				},
+			},
+			expectedResult: false,
+			expectedErrMsg: "",
+		},
+		{
+			id: 10,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "x", "d": "y"}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `c == "c"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.c",
+							Name: "c",
+						},
+					},
+				},
+				{
+					Expr: `b == "b"`,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a.b",
@@ -654,14 +791,181 @@ func TestExprFilter(t *testing.T) {
 					},
 				},
 			},
-			result: true,
-			err:    nil,
+			expectedResult: false,
+			expectedErrMsg: "path a.c does not exist",
+		},
+		{
+			id: 11,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "x", "d": {"e": true}}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `c == "c"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.c",
+							Name: "c",
+						},
+					},
+				},
+				{
+					Expr: `b == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+					},
+				},
+				{
+					Expr: `e == true`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.d.e",
+							Name: "e",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			id: 12,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "x", "c": {"d": true}}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b != "b" && d == true`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+						{
+							Path: "a.d",
+							Name: "d",
+						},
+					},
+				},
+			},
+			expectedResult: false,
+			expectedErrMsg: "path a.d does not exist",
+		},
+		{
+			id: 13,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "x", "c": {"d": true}}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b != "b" && d == true`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+						{
+							Path: "a.c.d",
+							Name: "d",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			id: 14,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "b", "c": {"d": false}}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b == "b" && d == true`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+						{
+							Path: "a.d",
+							Name: "d",
+						},
+					},
+				},
+			},
+			expectedResult: false,
+			expectedErrMsg: "path a.d does not exist",
+		},
+		{
+			id: 15,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "b", "c": {"d": false}}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b == "b" || d == true`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+						{
+							Path: "a.c.d",
+							Name: "d",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			id: 16,
+			event: &v1alpha1.Event{
+				Data: []byte(`{"a": {"b": "b", "c": {"d": false}, "e": 2}}`),
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `b == "b" || (d == true && e == 2)`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "b",
+						},
+						{
+							Path: "a.c.d",
+							Name: "d",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
 		},
 	}
 
 	for _, test := range tests {
-		result, err := filterExpr(test.filters, test.event)
-		assert.Equal(t, test.err, err)
-		assert.Equal(t, test.result, result)
+		t.Logf("Run TestFilterExpr #%d", test.id)
+		actualResult, actualErr := filterExpr(test.filters, test.event)
+
+		if (test.expectedErrMsg != "" && actualErr == nil) ||
+			(test.expectedErrMsg == "" && actualErr != nil) {
+			t.Logf("Test #%d failed: expected error '%s' got '%v'",
+				test.id, test.expectedErrMsg, actualErr)
+		}
+		if test.expectedErrMsg != "" {
+			assert.EqualError(t, actualErr, test.expectedErrMsg)
+		} else {
+			assert.NoError(t, actualErr)
+		}
+
+		if test.expectedResult != actualResult {
+			t.Logf("Test #%d failed: expected result '%t' got '%t'", test.id, test.expectedResult, actualResult)
+		}
+		assert.Equal(t, test.expectedResult, actualResult)
 	}
 }
