@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 const (
@@ -59,7 +61,22 @@ func NewAPI(ctx context.Context, namespace string) (*API, error) {
 	}, nil
 }
 
+func (a *API) shouldReportEvent(event cloudevents.Event) bool {
+	whitelist := map[apicommon.EventSourceType]bool{
+		apicommon.GithubEvent:          true,
+		apicommon.GitlabEvent:          true,
+		apicommon.BitbucketServerEvent: true,
+		apicommon.CalendarEvent:        true,
+	}
+
+	return whitelist[apicommon.EventSourceType(event.Type())]
+}
+
 func (a *API) ReportEvent(event cloudevents.Event) {
+	if !a.shouldReportEvent(event) {
+		return
+	}
+
 	if !a.isInitialised {
 		a.logger.Warnw("WARNING: skipping reporting of an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
 			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))

@@ -58,6 +58,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource":           schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource":             schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories":          schema_pkg_apis_eventsource_v1alpha1_OwnedRepositories(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PayloadEnrichmentFlags":     schema_pkg_apis_eventsource_v1alpha1_PayloadEnrichmentFlags(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource":          schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource":          schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource":           schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref),
@@ -1553,12 +1554,19 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							},
 						},
 					},
+					"payloadEnrichment": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PayloadEnrichment holds flags that determine whether to enrich GitHub's original payload with additional information.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PayloadEnrichmentFlags"),
+						},
+					},
 				},
 				Required: []string{"id", "owner", "repository", "events"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PayloadEnrichmentFlags", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2227,6 +2235,25 @@ func schema_pkg_apis_eventsource_v1alpha1_OwnedRepositories(ref common.Reference
 									},
 								},
 							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_PayloadEnrichmentFlags(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"fetchPROnPRCommentAdded": {
+						SchemaProps: spec.SchemaProps{
+							Description: "FetchPROnPRCommentAdded determines whether to enrich the payload provided by GitHub on \"pull request comment added\" events, with the full pull request info",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},

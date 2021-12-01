@@ -18,7 +18,6 @@ package github
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -154,12 +153,10 @@ func TestAddEventTypeBody(t *testing.T) {
 		convey.Convey("Delivery headers should be written to message", func() {
 			body, err := parseValidateRequest(request, []byte{})
 			convey.So(err, convey.ShouldBeNil)
-			payload := make(map[string]interface{})
-			err = json.Unmarshal(body, &payload)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(err, convey.ShouldBeNil)
-			convey.So(payload["X-GitHub-Event"], convey.ShouldEqual, eventType)
-			convey.So(payload["X-GitHub-Delivery"], convey.ShouldEqual, deliveryID)
+			convey.So(body["X-GitHub-Event"], convey.ShouldEqual, eventType)
+			convey.So(body["X-GitHub-Delivery"], convey.ShouldEqual, deliveryID)
 		})
 	})
 }

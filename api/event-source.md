@@ -2295,6 +2295,20 @@ owner as the key, and list of repo names as the value
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>payloadEnrichment</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PayloadEnrichmentFlags">
+PayloadEnrichmentFlags </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+PayloadEnrichment holds flags that determine whether to enrich GitHub’s
+original payload with additional information.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.GitlabEventSource">
@@ -3235,6 +3249,42 @@ Orgnization or user name
 <td>
 <p>
 Repository names
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.PayloadEnrichmentFlags">
+PayloadEnrichmentFlags
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>fetchPROnPRCommentAdded</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+FetchPROnPRCommentAdded determines whether to enrich the payload
+provided by GitHub on “pull request comment added” events, with the full
+pull request info
 </p>
 </td>
 </tr>

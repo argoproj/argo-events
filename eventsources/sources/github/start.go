@@ -36,10 +36,13 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events"
 )
 
-// GitHub headers
 const (
+	// GitHub headers
 	githubEventHeader    = "X-GitHub-Event"
 	githubDeliveryHeader = "X-GitHub-Delivery"
+
+	// Key names in Extras map (payload enrichment flags feature)
+	pullRequestExtrasKey = "pull_request" // holds PR info
 )
 
 // controller controls the webhook operations
@@ -74,6 +77,38 @@ func (router *Router) GetRoute() *webhook.Route {
 	return router.route
 }
 
+func (router *Router) isPRCommentAddedEvent(eventPayload common.Object) bool {
+	githubEvent := eventPayload[githubEventHeader]
+	githubAction := eventPayload["action"]
+	if githubEvent == "issue_comment" && githubAction == "created" {
+		issueInfo := eventPayload["issue"].(common.Object)
+		if prInfo, ok := issueInfo["pull_request"]; ok {
+			if _, ok := prInfo.(common.Object)["url"]; ok {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (router *Router) getPRFromPRCommentAddedEvent(eventPayload common.Object) ([]byte, error) {
+	prNumber := int(eventPayload["issue"].(common.Object)["number"].(float64))
+	repoMeta := eventPayload["repository"].(common.Object)
+	repoOwner := repoMeta["owner"].(common.Object)["login"].(string)
+	repoName := repoMeta["name"].(string)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pr, _, err := router.githubClient.PullRequests.Get(ctx, repoOwner, repoName, prNumber)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get PR for repo %s/%s", repoOwner, repoName)
+	}
+
+	return json.Marshal(pr)
+}
+
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	route := router.route
@@ -103,10 +138,26 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	extras, err := router.fetchExtras(body)
+	if err != nil {
+		logger.Errorw("failed to enrich event payload with additional information", zap.Error(err))
+		common.SendErrorResponse(writer, err.Error())
+		return
+	}
+
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		logger.Info("failed to marshal event body")
+		common.SendErrorResponse(writer, "invalid event")
+		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
+		return
+	}
+
 	event := &events.GithubEventData{
 		Headers:  request.Header,
-		Body:     (*json.RawMessage)(&body),
+		Body:     (*json.RawMessage)(&jsonBody),
 		Metadata: router.githubEventSource.Metadata,
+		Extras:   extras,
 	}
 
 	eventBody, err := json.Marshal(event)
@@ -122,6 +173,20 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	logger.Info("request successfully processed")
 
 	common.SendSuccessResponse(writer, "success")
+}
+
+func (router *Router) fetchExtras(eventPayload common.Object) (map[string]*json.RawMessage, error) {
+	extras := make(map[string]*json.RawMessage)
+	if router.githubEventSource.PayloadEnrichment.FetchPROnPRCommentAdded && router.isPRCommentAddedEvent(eventPayload) {
+		pr, err := router.getPRFromPRCommentAddedEvent(eventPayload)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to fetch PR info for PR comment added event")
+		}
+
+		extras[pullRequestExtrasKey] = (*json.RawMessage)(&pr)
+	}
+
+	return extras, nil
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -304,7 +369,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 // parseValidateRequest parses a http request and checks if it is valid GitHub notification
-func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
+func parseValidateRequest(r *http.Request, secret []byte) (map[string]interface{}, error) {
 	body, err := gh.ValidatePayload(r, secret)
 	if err != nil {
 		return nil, err
@@ -320,5 +385,5 @@ func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
 	} {
 		payload[h] = r.Header.Get(h)
 	}
-	return json.Marshal(payload)
+	return payload, nil
 }

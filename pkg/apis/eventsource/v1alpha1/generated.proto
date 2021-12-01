@@ -532,6 +532,11 @@ message GithubEventSource {
   // Repositories holds the information of repositories, which uses repo owner as the key,
   // and list of repo names as the value
   repeated OwnedRepositories repositories = 15;
+
+  // PayloadEnrichment holds flags that determine whether to enrich GitHub's original payload with
+  // additional information.
+  // +optional
+  optional PayloadEnrichmentFlags payloadEnrichment = 16;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
@@ -786,6 +791,13 @@ message OwnedRepositories {
 
   // Repository names
   repeated string names = 2;
+}
+
+message PayloadEnrichmentFlags {
+  // FetchPROnPRCommentAdded determines whether to enrich the payload provided by GitHub
+  // on "pull request comment added" events, with the full pull request info
+  // +optional
+  optional bool fetchPROnPRCommentAdded = 1;
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
