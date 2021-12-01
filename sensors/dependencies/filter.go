@@ -145,7 +145,7 @@ func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContex
 func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error) {
 	var err error
 
-	if data == nil || len(data) == 0 {
+	if len(data) == 0 {
 		return true, nil
 	}
 	if event == nil {
@@ -281,7 +281,7 @@ filterData:
 		}
 	}
 
-	if errMessages != nil && len(errMessages) > 0 {
+	if len(errMessages) > 0 {
 		return false, errors.New(strings.Join(errMessages, " / "))
 	}
 
@@ -293,7 +293,7 @@ filterData:
 func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
 	var err error
 
-	if filters == nil || len(filters) == 0 {
+	if len(filters) == 0 {
 		return true, nil
 	}
 	if event == nil {
