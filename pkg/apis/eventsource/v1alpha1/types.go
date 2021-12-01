@@ -689,11 +689,14 @@ type GithubEventSource struct {
 	// APIToken refers to a K8s secret containing github api token
 	// +optional
 	APIToken *corev1.SecretKeySelector `json:"apiToken,omitempty" protobuf:"bytes,6,opt,name=apiToken"`
+	// Whether to skip TLS verification when connecting to GitHub for webhook creation, useful for GitHub Enterprise use cases.
+	// +optional
+	APISkipTLSVerify bool `json:"apiSkipTLSVerify,omitempty" protobuf:"varint,18,opt,name=apiSkipTLSVerify"`
 	// WebhookSecret refers to K8s secret containing GitHub webhook secret
 	// https://developer.github.com/webhooks/securing/
 	// +optional
 	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,7,opt,name=webhookSecret"`
-	// Insecure tls verification
+	// Insecure TLS verification for the GitHub webhook
 	Insecure bool `json:"insecure,omitempty" protobuf:"varint,8,opt,name=insecure"`
 	// Active refers to status of the webhook for event deliveries.
 	// https://developer.github.com/webhooks/creating/#active

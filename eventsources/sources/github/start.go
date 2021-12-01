@@ -17,6 +17,7 @@ package github
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -255,6 +256,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return errors.Wrap(err, "failed to set up auth transport for http client")
 		}
 
+		logger.Info("setting up client for GitHub...")
+		if !githubEventSource.APISkipTLSVerify {
+			authTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		}
+		client := gh.NewClient(&http.Client{Transport: authTransport})
+
 		logger.Info("configuring GitHub hook...")
 		formattedURL := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
 		hookConfig := map[string]interface{}{
@@ -271,9 +278,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if router.hookSecret != "" {
 			hookConfig["secret"] = router.hookSecret
 		}
-
-		logger.Info("setting up client for GitHub...")
-		client := gh.NewClient(&http.Client{Transport: authTransport})
 
 		logger.Info("setting up base url for GitHub client...")
 		if githubEventSource.GithubBaseURL != "" {
@@ -292,6 +296,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			client.UploadURL = uploadURL
 		}
+
 		router.githubClient = client
 		router.repoHookIDs = make(map[string]int64)
 		router.orgHookIDs = make(map[string]int64)

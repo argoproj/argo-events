@@ -1268,6 +1268,10 @@
           "description": "Active refers to status of the webhook for event deliveries. https://developer.github.com/webhooks/creating/#active",
           "type": "boolean"
         },
+        "apiSkipTLSVerify": {
+          "description": "Whether to skip TLS verification when connecting to GitHub for webhook creation, useful for GitHub Enterprise use cases.",
+          "type": "boolean"
+        },
         "apiToken": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "APIToken refers to a K8s secret containing github api token"
@@ -1305,7 +1309,7 @@
           "type": "integer"
         },
         "insecure": {
-          "description": "Insecure tls verification",
+          "description": "Insecure TLS verification for the GitHub webhook",
           "type": "boolean"
         },
         "metadata": {
