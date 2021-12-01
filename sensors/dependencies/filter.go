@@ -39,10 +39,12 @@ func Filter(event *v1alpha1.Event, filters *v1alpha1.EventDependencyFilter) (boo
 	if filters == nil {
 		return true, nil
 	}
+
 	ok, err := filterEvent(filters, event)
 	if err != nil {
 		return false, err
 	}
+
 	return ok, nil
 }
 
@@ -52,11 +54,14 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) 
 	if err != nil {
 		return false, err
 	}
+
 	timeFilter, err := filterTime(filter.Time, event.Context.Time.Time)
 	if err != nil {
 		return false, err
 	}
+
 	ctxFilter := filterContext(filter.Context, event.Context)
+
 	exprFilter, err := filterExpr(filter.Exprs, event)
 	if err != nil {
 		return false, err
@@ -108,6 +113,7 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 	}
 }
 
+// TODO review default result (false instead of true?)
 // filterContext checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
@@ -137,7 +143,9 @@ func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContex
 // filterData runs the dataFilter against the Event's data
 // returns (true, nil) when data passes filters, false otherwise
 func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error) {
-	if data == nil {
+	var err error
+
+	if data == nil || len(data) == 0 {
 		return true, nil
 	}
 	if event == nil {
@@ -148,116 +156,136 @@ func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error)
 		return true, nil
 	}
 	var js *json.RawMessage
-	if err := json.Unmarshal(payload, &js); err != nil {
+	err = json.Unmarshal(payload, &js)
+	if err != nil {
 		return false, err
 	}
 	var jsData []byte
-	jsData, err := json.Marshal(js)
+	jsData, err = json.Marshal(js)
 	if err != nil {
 		return false, err
 	}
 
+	errMessages := make([]string, 0)
 filterData:
 	for _, f := range data {
-		res := gjson.GetBytes(jsData, f.Path)
-		if !res.Exists() {
-			return false, nil
+		pathResult := gjson.GetBytes(jsData, f.Path)
+		if !pathResult.Exists() {
+			errMessages = append(errMessages, fmt.Sprintf("path '%s' does not exist", f.Path))
+			continue
+		}
+
+		if f.Value == nil || len(f.Value) == 0 {
+			errMessages = append(errMessages, "no values specified")
+			continue
 		}
 
 		if f.Template != "" {
-			tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.Template)
-			if err != nil {
-				return false, err
+			tpl, tplErr := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.Template)
+			if tplErr != nil {
+				errMessages = append(errMessages, tplErr.Error())
+				continue
 			}
 			var buf bytes.Buffer
-			if err := tpl.Execute(&buf, map[string]interface{}{
-				"Input": res.String(),
-			}); err != nil {
-				return false, err
+			execErr := tpl.Execute(&buf, map[string]interface{}{"Input": pathResult.String()})
+			if execErr != nil {
+				errMessages = append(errMessages, execErr.Error())
+				continue
 			}
 			out := buf.String()
 			if out == "" || out == "<no value>" {
-				return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.Template)
+				errMessages = append(errMessages, fmt.Sprintf("template evaluated to empty string or no value: '%s'", f.Template))
+				continue
 			}
-			res = gjson.Parse(strconv.Quote(out))
+			pathResult = gjson.Parse(strconv.Quote(out))
 		}
 
 		switch f.Type {
+
 		case v1alpha1.JSONTypeBool:
 			for _, value := range f.Value {
-				val, err := strconv.ParseBool(value)
-				if err != nil {
-					return false, err
-				}
-				if val == res.Bool() {
+				val, boolErr := strconv.ParseBool(value)
+				if boolErr != nil {
+					errMessages = append(errMessages, boolErr.Error())
 					continue filterData
 				}
+				if val == pathResult.Bool() {
+					return true, nil
+				}
 			}
-			return false, nil
+			continue filterData
 
 		case v1alpha1.JSONTypeNumber:
 			for _, value := range f.Value {
-				filterVal, err := strconv.ParseFloat(value, 64)
-				eventVal := res.Float()
-				if err != nil {
-					return false, err
+				filterVal, floatErr := strconv.ParseFloat(value, 64)
+				eventVal := pathResult.Float()
+				if floatErr != nil {
+					errMessages = append(errMessages, floatErr.Error())
+					continue filterData
 				}
 
 				switch f.Comparator {
 				case v1alpha1.GreaterThanOrEqualTo:
 					if eventVal >= filterVal {
-						continue filterData
+						return true, nil
 					}
 				case v1alpha1.GreaterThan:
 					if eventVal > filterVal {
-						continue filterData
+						return true, nil
 					}
 				case v1alpha1.LessThan:
 					if eventVal < filterVal {
-						continue filterData
+						return true, nil
 					}
 				case v1alpha1.LessThanOrEqualTo:
 					if eventVal <= filterVal {
-						continue filterData
+						return true, nil
 					}
 				case v1alpha1.NotEqualTo:
 					if eventVal != filterVal {
-						continue filterData
+						return true, nil
 					}
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if eventVal == filterVal {
-						continue filterData
+						return true, nil
 					}
 				}
 			}
-			return false, nil
+			continue filterData
 
 		case v1alpha1.JSONTypeString:
 			for _, value := range f.Value {
-				exp, err := regexp.Compile(value)
-				if err != nil {
-					return false, err
+				exp, expErr := regexp.Compile(value)
+				if expErr != nil {
+					errMessages = append(errMessages, expErr.Error())
+					continue filterData
 				}
 
-				match := exp.Match([]byte(res.String()))
+				match := exp.Match([]byte(pathResult.String()))
 				switch f.Comparator {
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if match {
-						continue filterData
+						return true, nil
 					}
 				case v1alpha1.NotEqualTo:
 					if !match {
-						continue filterData
+						return true, nil
 					}
 				}
 			}
-			return false, nil
+			continue filterData
 
 		default:
-			return false, fmt.Errorf("unsupported JSON type %s", f.Type)
+			errMessages = append(errMessages, fmt.Sprintf("unsupported JSON type '%s'", f.Type))
+			continue filterData
 		}
 	}
-	return true, nil
+
+	if errMessages != nil && len(errMessages) > 0 {
+		return false, errors.New(strings.Join(errMessages, " / "))
+	}
+
+	return false, nil
 }
 
 // filterExpr applies expression based filters against event data
@@ -265,7 +293,7 @@ filterData:
 func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
 	var err error
 
-	if filters == nil {
+	if filters == nil || len(filters) == 0 {
 		return true, nil
 	}
 	if event == nil {
@@ -291,12 +319,12 @@ filterExpr:
 	for _, filter := range filters {
 		parameters := map[string]interface{}{}
 		for _, field := range filter.Fields {
-			result := gjson.GetBytes(jsData, field.Path)
-			if !result.Exists() {
-				errMessages = append(errMessages, fmt.Sprintf("path %s does not exist", field.Path))
+			pathResult := gjson.GetBytes(jsData, field.Path)
+			if !pathResult.Exists() {
+				errMessages = append(errMessages, fmt.Sprintf("path '%s' does not exist", field.Path))
 				continue filterExpr
 			}
-			parameters[field.Name] = result.Value()
+			parameters[field.Name] = pathResult.Value()
 		}
 		if len(parameters) == 0 {
 			continue
@@ -316,7 +344,7 @@ filterExpr:
 		}
 	}
 
-	if len(errMessages) > 0 {
+	if errMessages != nil && len(errMessages) > 0 {
 		return false, errors.New(strings.Join(errMessages, " / "))
 	}
 	return false, nil

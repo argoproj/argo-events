@@ -27,6 +27,683 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
+func TestFilterEvent_AllTypes_Valid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "19:19:19",
+		},
+		Context: &v1alpha1.EventContext{
+			Type:   "webhook",
+			Source: "webhook-gateway",
+		},
+		Data: []v1alpha1.DataFilter{
+			{
+				Path:  "k",
+				Type:  v1alpha1.JSONTypeString,
+				Value: []string{"v"},
+			},
+		},
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k != "x"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.True(t, valid)
+}
+
+func TestFilterEvent_AllTypes_TimeNotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "10:10:10",
+		},
+		Context: &v1alpha1.EventContext{
+			Type:   "webhook",
+			Source: "webhook-gateway",
+		},
+		Data: []v1alpha1.DataFilter{
+			{
+				Path:  "k",
+				Type:  v1alpha1.JSONTypeString,
+				Value: []string{"v"},
+			},
+		},
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k != "x"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_AllTypes_ContextNotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "19:19:19",
+		},
+		Context: &v1alpha1.EventContext{
+			Type:   "webhook",
+			Source: "webhook-gateway",
+		},
+		Data: []v1alpha1.DataFilter{
+			{
+				Path:  "k",
+				Type:  v1alpha1.JSONTypeString,
+				Value: []string{"v"},
+			},
+		},
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k != "x"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-fake",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_AllTypes_DataNotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "19:19:19",
+		},
+		Context: &v1alpha1.EventContext{
+			Type:   "webhook",
+			Source: "webhook-gateway",
+		},
+		Data: []v1alpha1.DataFilter{
+			{
+				Path:  "k",
+				Type:  v1alpha1.JSONTypeString,
+				Value: []string{"v"},
+			},
+		},
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k == "x"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "x"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_AllTypes_ExprNotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "19:19:19",
+		},
+		Context: &v1alpha1.EventContext{
+			Type:   "webhook",
+			Source: "webhook-gateway",
+		},
+		Data: []v1alpha1.DataFilter{
+			{
+				Path:  "k",
+				Type:  v1alpha1.JSONTypeString,
+				Value: []string{"v"},
+			},
+		},
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k != "v"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_TimeType_Valid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "19:19:19",
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.True(t, valid)
+}
+
+func TestFilterEvent_TimeType_NotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "10:10:10",
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_TimeType_Error(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Time: &v1alpha1.TimeFilter{
+			Start: "09:09:09",
+			Stop:  "10:10",
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Error(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_ContextType_Valid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Context: &v1alpha1.EventContext{
+			Type:   "webhook",
+			Source: "webhook-gateway",
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.True(t, valid)
+}
+
+func TestFilterEvent_ContextType_NotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Context: &v1alpha1.EventContext{
+			Type:   "webhook",
+			Source: "webhook-fake",
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_DataType_Valid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Data: []v1alpha1.DataFilter{
+			{
+				Path:  "k",
+				Type:  v1alpha1.JSONTypeString,
+				Value: []string{"v"},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.True(t, valid)
+}
+
+func TestFilterEvent_DataType_NotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Data: []v1alpha1.DataFilter{
+			{
+				Path:  "k",
+				Type:  v1alpha1.JSONTypeString,
+				Value: []string{"x"},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_DataType_Error(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Data: []v1alpha1.DataFilter{
+			{
+				Path: "k",
+				Type: v1alpha1.JSONTypeString,
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Error(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_ExprType_Valid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k != "x"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.True(t, valid)
+}
+
+func TestFilterEvent_ExprType_NotValid(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k != "v"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Nil(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterEvent_ExprType_Error(t *testing.T) {
+	filter := v1alpha1.EventDependencyFilter{
+		Exprs: []v1alpha1.ExprFilter{
+			{
+				Expr: `k !== "x"`,
+				Fields: []v1alpha1.PayloadField{
+					{
+						Path: "k",
+						Name: "k",
+					},
+				},
+			},
+		},
+	}
+
+	now := time.Now().UTC()
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			Type:        "webhook",
+			SpecVersion: "0.3",
+			Source:      "webhook-gateway",
+			ID:          "1",
+			Time: metav1.Time{
+				Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+			},
+			DataContentType: "application/json",
+			Subject:         "example-1",
+		},
+		Data: []byte(`{"k": "v"}`),
+	}
+
+	valid, err := filterEvent(&filter, event)
+
+	assert.Error(t, err)
+	assert.False(t, valid)
+}
+
+func TestFilterTime(t *testing.T) {
+	now := time.Now().UTC()
+	eventTimes := [6]time.Time{
+		time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 4, 5, 6, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 8, 9, 10, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 12, 13, 14, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 16, 17, 18, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day(), 20, 21, 22, 0, time.UTC),
+	}
+
+	time1 := eventTimes[2].Format("15:04:05")
+	time2 := eventTimes[4].Format("15:04:05")
+
+	tests := []struct {
+		name       string
+		timeFilter *v1alpha1.TimeFilter
+		results    [6]bool
+	}{
+		{
+			name:       "no filter",
+			timeFilter: nil,
+			results:    [6]bool{true, true, true, true, true, true},
+			// With no filter, any event time should pass
+		},
+		{
+			name: "start less than stop",
+			timeFilter: &v1alpha1.TimeFilter{
+				Start: time1,
+				Stop:  time2,
+			},
+			results: [6]bool{false, false, true, true, false, false},
+			//                             ~~~~~~~~~~
+			//                            [time1     , time2)
+		},
+		{
+			name: "stop less than start",
+			timeFilter: &v1alpha1.TimeFilter{
+				Start: time2,
+				Stop:  time1,
+			},
+			results: [6]bool{true, true, false, false, true, true},
+			//               ~~~~~~~~~~                ~~~~~~~~~~
+			//              [          , time1)       [time2     , )
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for i, eventTime := range eventTimes {
+				result, err := filterTime(test.timeFilter, eventTime)
+				assert.Nil(t, err)
+				assert.Equal(t, test.results[i], result)
+			}
+		})
+	}
+}
+
 func TestFilterContext(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -96,6 +773,7 @@ func TestFilterData(t *testing.T) {
 		data  []v1alpha1.DataFilter
 		event *v1alpha1.Event
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -109,31 +787,97 @@ func TestFilterData(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "unsupported content type",
-			args:    args{data: nil, event: &v1alpha1.Event{Data: []byte("a")}},
+			name: "unsupported content type",
+			args: args{
+				data:  nil,
+				event: &v1alpha1.Event{Data: []byte("a")},
+			},
 			want:    true,
 			wantErr: false,
 		},
 		{
 			name: "empty data",
-			args: args{data: nil, event: &v1alpha1.Event{
-				Context: &v1alpha1.EventContext{
-					DataContentType: ("application/json"),
+			args: args{
+				data: nil,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
 				},
-			}},
+			},
 			want:    true,
 			wantErr: false,
 		},
 		{
 			name: "nil filters, JSON data",
-			args: args{data: nil, event: &v1alpha1.Event{
-				Context: &v1alpha1.EventContext{
-					DataContentType: ("application/json"),
+			args: args{
+				data: nil,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": "v"}`),
 				},
-				Data: []byte("{\"k\": \"v\"}"),
-			}},
+			},
 			want:    true,
 			wantErr: false,
+		},
+		{
+			name: "invalid filter path, JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path: "",
+						Type: v1alpha1.JSONTypeString,
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": "v"}`),
+				},
+			},
+			want:    false,
+			wantErr: true,
+		},
+		{
+			name: "invalid filter type, JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path: "k",
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": "v"}`),
+				},
+			},
+			want:    false,
+			wantErr: true,
+		},
+		{
+			name: "invalid filter values, JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{},
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": "v"}`),
+				},
+			},
+			want:    false,
+			wantErr: true,
 		},
 		{
 			name: "string filter, JSON data",
@@ -147,9 +891,9 @@ func TestFilterData(t *testing.T) {
 				},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"v\"}"),
+					Data: []byte(`{"k": "v"}`),
 				},
 			},
 			want:    true,
@@ -168,9 +912,9 @@ func TestFilterData(t *testing.T) {
 				},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"v\"}"),
+					Data: []byte(`{"k": "v"}`),
 				},
 			},
 			want:    true,
@@ -189,16 +933,16 @@ func TestFilterData(t *testing.T) {
 				},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"v\"}"),
+					Data: []byte(`{"k": "v"}`),
 				},
 			},
 			want:    true,
 			wantErr: false,
 		},
 		{
-			name: "number filter, JSON data",
+			name: "number filter (data: string, filter: number), JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
 					Path:  "k",
@@ -208,15 +952,15 @@ func TestFilterData(t *testing.T) {
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"1.0\"}"),
+					Data: []byte(`{"k": "1.0"}`),
 				}},
 			want:    true,
 			wantErr: false,
 		},
 		{
-			name: "comparator filter GreaterThan return true, JSON data",
+			name: "comparator filter GreaterThan return true (data: string, filter: number), JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
 					Path:       "k",
@@ -227,15 +971,15 @@ func TestFilterData(t *testing.T) {
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"2.0\"}"),
+					Data: []byte(`{"k": "2.0"}`),
 				}},
 			want:    true,
 			wantErr: false,
 		},
 		{
-			name: "comparator filter LessThanOrEqualTo return false, JSON data",
+			name: "comparator filter LessThanOrEqualTo return false (data: string, filter: number), JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
 					Path:       "k",
@@ -246,15 +990,15 @@ func TestFilterData(t *testing.T) {
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"2.0\"}"),
+					Data: []byte(`{"k": "2.0"}`),
 				}},
 			want:    false,
 			wantErr: false,
 		},
 		{
-			name: "comparator filter NotEqualTo, JSON data",
+			name: "comparator filter NotEqualTo (data: string, filter: number), JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
 					Path:       "k",
@@ -265,15 +1009,15 @@ func TestFilterData(t *testing.T) {
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"1.0\"}"),
+					Data: []byte(`{"k": "1.0"}`),
 				}},
 			want:    false,
 			wantErr: false,
 		},
 		{
-			name: "comparator filter EqualTo, JSON data",
+			name: "comparator filter EqualTo (data: string, filter: number), JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
 					Path:       "k",
@@ -284,15 +1028,15 @@ func TestFilterData(t *testing.T) {
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"5.0\"}"),
+					Data: []byte(`{"k": "5.0"}`),
 				}},
 			want:    true,
 			wantErr: false,
 		},
 		{
-			name: "comparator filter empty, JSON data",
+			name: "comparator filter empty (data: string, filter: number), JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
 					Path:  "k",
@@ -302,15 +1046,127 @@ func TestFilterData(t *testing.T) {
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"10.0\"}"),
+					Data: []byte(`{"k": "10.0"}`),
 				}},
 			want:    true,
 			wantErr: false,
 		},
 		{
-			name: "multiple filters, nested JSON data",
+			name: "number filter (data: number, filter: number), JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:  "k",
+					Type:  v1alpha1.JSONTypeNumber,
+					Value: []string{"1.0"},
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 1.0}`),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter GreaterThan return true (data: number, filter: number), JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"1.0"},
+					Comparator: ">",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 2.0}`),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter LessThanOrEqualTo return false (data: number, filter: number), JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"1.0"},
+					Comparator: "<=",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 2.0}`),
+				}},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter NotEqualTo (data: number, filter: number), JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"1.0"},
+					Comparator: "!=",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 1.0}`),
+				}},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter EqualTo (data: number, filter: number), JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"5.0"},
+					Comparator: "=",
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 5.0}`),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter empty (data: number, filter: number), JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:  "k",
+					Type:  v1alpha1.JSONTypeNumber,
+					Value: []string{"10.0"},
+				},
+			},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 10.0}`),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "multiple filters return false, nested JSON data",
 			args: args{
 				data: []v1alpha1.DataFilter{
 					{
@@ -321,7 +1177,7 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:  "k1.k",
 						Type:  v1alpha1.JSONTypeNumber,
-						Value: []string{"3.14"},
+						Value: []string{"2.14"},
 					},
 					{
 						Path:  "k1.k2",
@@ -331,11 +1187,40 @@ func TestFilterData(t *testing.T) {
 				},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": true, \"k1\": {\"k\": 3.14, \"k2\": \"hello, world\"}}"),
+					Data: []byte(`{"k": true, "k1": {"k": 3.14, "k2": "hello, world"}}`),
 				}},
 			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "multiple filters return true, nested JSON data",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeBool,
+						Value: []string{"false"},
+					},
+					{
+						Path:  "k1.k2",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"hello,world", "hello there"},
+					},
+					{
+						Path:  "k1.k",
+						Type:  v1alpha1.JSONTypeNumber,
+						Value: []string{"3.14"},
+					},
+				},
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": true, "k1": {"k": 3.14, "k2": "hello, world"}}`),
+				}},
+			want:    true,
 			wantErr: false,
 		},
 		{
@@ -343,7 +1228,7 @@ func TestFilterData(t *testing.T) {
 			args: args{
 				data: []v1alpha1.DataFilter{
 					{
-						Path:       "[k,k1.a.#(k2==\"v2\").k2]",
+						Path:       `[k,k1.a.#(k2=="v2").k2]`,
 						Type:       v1alpha1.JSONTypeString,
 						Value:      []string{"\\bv\\b.*\\bv2\\b"},
 						Comparator: "=",
@@ -351,9 +1236,9 @@ func TestFilterData(t *testing.T) {
 				},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"v\", \"k1\": {\"a\": [{\"k2\": \"v2\"}]}}"),
+					Data: []byte(`{"k": "v", "k1": {"a": [{"k2": "v2"}]}}`),
 				},
 			},
 			want:    true,
@@ -364,16 +1249,16 @@ func TestFilterData(t *testing.T) {
 			args: args{
 				data: []v1alpha1.DataFilter{
 					{
-						Path:  "[k,k1.a.#(k2==\"v2\").k2,,k1.a.#(k2==\"v3\").k2]",
+						Path:  `[k,k1.a.#(k2=="v2").k2,,k1.a.#(k2=="v3").k2]`,
 						Type:  v1alpha1.JSONTypeString,
 						Value: []string{"(\\bz\\b.*\\bv2\\b)|(\\bv\\b.*(\\bv2\\b.*\\bv3\\b))"},
 					},
 				},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"v\", \"k1\": {\"a\": [{\"k2\": \"v2\"}, {\"k2\": \"v3\"}]}}"),
+					Data: []byte(`{"k": "v", "k1": {"a": [{"k2": "v2"}, {"k2": "v3"}]}}`),
 				},
 			},
 			want:    true,
@@ -386,14 +1271,14 @@ func TestFilterData(t *testing.T) {
 					Path:     "k",
 					Type:     v1alpha1.JSONTypeString,
 					Value:    []string{"HELLO WORLD"},
-					Template: "{{ b64dec .Input | upper }}",
+					Template: `{{ b64dec .Input | upper }}`,
 				},
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ=\"}"),
+					Data: []byte(`{"k": "aGVsbG8gd29ybGQ="}`),
 				}},
 			want:    true,
 			wantErr: false,
@@ -406,14 +1291,14 @@ func TestFilterData(t *testing.T) {
 					Type:       v1alpha1.JSONTypeNumber,
 					Value:      []string{"3.13"},
 					Comparator: ">",
-					Template:   "{{ b64dec .Input }}",
+					Template:   `{{ b64dec .Input }}`,
 				},
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"My4xNA==\"}"), // 3.14
+					Data: []byte(`{"k": "My4xNA=="}`), // 3.14
 				}},
 			want:    true,
 			wantErr: false,
@@ -425,15 +1310,15 @@ func TestFilterData(t *testing.T) {
 					Path:       "k",
 					Type:       v1alpha1.JSONTypeString,
 					Value:      []string{"hello world"},
-					Template:   "{{ b64dec .Input }}",
+					Template:   `{{ b64dec .Input }}`,
 					Comparator: "!=",
 				},
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ\"}"),
+					Data: []byte(`{"k": "aGVsbG8gd29ybGQ"}`),
 				}},
 			want:    true,
 			wantErr: false,
@@ -445,19 +1330,20 @@ func TestFilterData(t *testing.T) {
 					Path:     "k",
 					Type:     v1alpha1.JSONTypeString,
 					Value:    []string{"world$"},
-					Template: "{{ b64dec .Input }}",
+					Template: `{{ b64dec .Input }}`,
 				},
 			},
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: ("application/json"),
+						DataContentType: "application/json",
 					},
-					Data: []byte("{\"k\": \"aGVsbG8gd29ybGQ=\"}"),
+					Data: []byte(`{"k": "aGVsbG8gd29ybGQ="}`),
 				}},
 			want:    true,
 			wantErr: false,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := filterData(tt.args.data, tt.args.event)
@@ -470,103 +1356,6 @@ func TestFilterData(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestFilterTime(t *testing.T) {
-	now := time.Now().UTC()
-	eventTimes := [6]time.Time{
-		time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC),
-		time.Date(now.Year(), now.Month(), now.Day(), 4, 5, 6, 0, time.UTC),
-		time.Date(now.Year(), now.Month(), now.Day(), 8, 9, 10, 0, time.UTC),
-		time.Date(now.Year(), now.Month(), now.Day(), 12, 13, 14, 0, time.UTC),
-		time.Date(now.Year(), now.Month(), now.Day(), 16, 17, 18, 0, time.UTC),
-		time.Date(now.Year(), now.Month(), now.Day(), 20, 21, 22, 0, time.UTC),
-	}
-
-	time1 := eventTimes[2].Format("15:04:05")
-	time2 := eventTimes[4].Format("15:04:05")
-
-	tests := []struct {
-		name       string
-		timeFilter *v1alpha1.TimeFilter
-		results    [6]bool
-	}{
-		{
-			name:       "no filter",
-			timeFilter: nil,
-			results:    [6]bool{true, true, true, true, true, true},
-			// With no filter, any event time should pass
-		},
-		{
-			name: "start < stop",
-			timeFilter: &v1alpha1.TimeFilter{
-				Start: time1,
-				Stop:  time2,
-			},
-			results: [6]bool{false, false, true, true, false, false},
-			//                             ~~~~~~~~~~
-			//                            [time1     , time2)
-		},
-		{
-			name: "stop < start",
-			timeFilter: &v1alpha1.TimeFilter{
-				Start: time2,
-				Stop:  time1,
-			},
-			results: [6]bool{true, true, false, false, true, true},
-			//               ~~~~~~~~~~                ~~~~~~~~~~
-			//              [          , time1)       [time2     , )
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			for i, eventTime := range eventTimes {
-				result, err := filterTime(test.timeFilter, eventTime)
-				assert.Nil(t, err)
-				assert.Equal(t, test.results[i], result)
-			}
-		})
-	}
-}
-
-func TestFilterEvent(t *testing.T) {
-	now := time.Now().UTC()
-	eventTime := time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC)
-
-	filter := v1alpha1.EventDependencyFilter{
-		Time: &v1alpha1.TimeFilter{
-			Start: "09:09:09",
-			Stop:  "19:19:19",
-		},
-		Context: &v1alpha1.EventContext{
-			Type:   "webhook",
-			Source: "webhook-gateway",
-		},
-		Data: []v1alpha1.DataFilter{
-			{
-				Path:  "k",
-				Type:  v1alpha1.JSONTypeString,
-				Value: []string{"v"},
-			},
-		},
-	}
-	event := &v1alpha1.Event{
-		Context: &v1alpha1.EventContext{
-			Type:            "webhook",
-			SpecVersion:     "0.3",
-			Source:          "webhook-gateway",
-			ID:              "1",
-			Time:            metav1.Time{Time: eventTime},
-			DataContentType: ("application/json"),
-			Subject:         ("example-1"),
-		},
-		Data: []byte("{\"k\": \"v\"}"),
-	}
-
-	valid, err := filterEvent(&filter, event)
-	assert.Nil(t, err)
-	assert.Equal(t, valid, true)
 }
 
 func TestFilterExpr(t *testing.T) {
@@ -792,7 +1581,7 @@ func TestFilterExpr(t *testing.T) {
 				},
 			},
 			expectedResult: false,
-			expectedErrMsg: "path a.c does not exist",
+			expectedErrMsg: "path 'a.c' does not exist",
 		},
 		{
 			id: 11,
@@ -852,7 +1641,7 @@ func TestFilterExpr(t *testing.T) {
 				},
 			},
 			expectedResult: false,
-			expectedErrMsg: "path a.d does not exist",
+			expectedErrMsg: "path 'a.d' does not exist",
 		},
 		{
 			id: 13,
@@ -898,7 +1687,7 @@ func TestFilterExpr(t *testing.T) {
 				},
 			},
 			expectedResult: false,
-			expectedErrMsg: "path a.d does not exist",
+			expectedErrMsg: "path 'a.d' does not exist",
 		},
 		{
 			id: 15,
