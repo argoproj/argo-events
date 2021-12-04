@@ -29,7 +29,7 @@ var (
 	SchemeGroupVersion = schema.GroupVersion{Group: sensor.Group, Version: "v1alpha1"}
 
 	// SchemaGroupVersionKind is a group version kind used to attach owner references
-	SchemaGroupVersionKind = schema.GroupVersionKind{Group: sensor.Group, Version: "v1alpha1", Kind: sensor.Kind}
+	SchemaGroupVersionKind = SchemeGroupVersion.WithKind(sensor.Kind)
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
