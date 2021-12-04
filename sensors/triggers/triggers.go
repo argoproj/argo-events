@@ -17,18 +17,26 @@ limitations under the License.
 package triggers
 
 import (
-	"fmt"
-	"strings"
-
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/gengo/namer"
+	"k8s.io/gengo/types"
 )
 
 func GetGroupVersionResource(obj *unstructured.Unstructured) schema.GroupVersionResource {
 	gvk := obj.GroupVersionKind()
+	pluralExceptions := map[string]string{
+		"EventBus": "eventbus",
+	}
+	resource := namer.NewAllLowercasePluralNamer(pluralExceptions).Name(&types.Type{
+		Name: types.Name{
+			Name: gvk.Kind,
+		},
+	})
+
 	return schema.GroupVersionResource{
 		Group:    gvk.Group,
 		Version:  gvk.Version,
-		Resource: fmt.Sprintf("%ss", strings.ToLower(gvk.Kind)),
+		Resource: resource,
 	}
 }

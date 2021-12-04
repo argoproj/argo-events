@@ -16,6 +16,7 @@ require (
 	github.com/argoproj/pkg v0.10.1
 	github.com/aws/aws-sdk-go v1.35.24
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
+	github.com/bradleyfalzon/ghinstallation/v2 v2.0.3
 	github.com/cloudevents/sdk-go/v2 v2.1.0
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/eclipse/paho.mqtt.golang v1.2.0
@@ -63,7 +64,7 @@ require (
 	github.com/xanzy/go-gitlab v0.50.2
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.17.0
-	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
+	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871
 	google.golang.org/api v0.44.0
 	google.golang.org/grpc v1.38.0
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
@@ -71,7 +72,7 @@ require (
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.21.6
 	k8s.io/code-generator v0.21.6
-	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027
+	k8s.io/gengo v0.0.0-20211115164449-b448ea381d54
 	k8s.io/kube-openapi v0.0.0-20210305001622-591a79e4bda7
 	sigs.k8s.io/controller-runtime v0.7.0
 	sigs.k8s.io/controller-tools v0.7.0
@@ -130,10 +131,12 @@ require (
 	github.com/go-openapi/validate v0.19.10 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gobuffalo/flect v0.2.3 // indirect
+	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/snappy v0.0.3 // indirect
-	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/go-github/v39 v39.0.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/googleapis/gnostic v0.5.1 // indirect
@@ -223,7 +226,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect

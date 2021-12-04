@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.5.3 (2021-11-22)
+
+ * [fd398f1d](https://github.com/argoproj/argo-events/commit/fd398f1d76c01d8a549ba5d84d829ce956b281d3) Update manifests to v1.5.3
+ * [9663255c](https://github.com/argoproj/argo-events/commit/9663255caff567277759e10ffc62c632589d375c) fix: Creation of ingress resource with k8s trigger (#1434)
+ * [bbef0bbe](https://github.com/argoproj/argo-events/commit/bbef0bbe683f7ee65452994f623f473b66fbedd4) fix: Eval of params with missing src dep and no default value (#1433)
+
+### Contributors
+
+ * Daniel
+ * Derek Wang
+
 ## v1.5.2 (2021-11-09)
 
  * [aa6bd169](https://github.com/argoproj/argo-events/commit/aa6bd169e8ccb28865462d5677b2314f18eef974) Update manifests to v1.5.2

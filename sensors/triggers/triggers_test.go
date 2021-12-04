@@ -25,12 +25,27 @@ import (
 )
 
 func TestGetGroupVersionResource(t *testing.T) {
-	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	expectedGVR := schema.GroupVersionResource{
+	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test-deployment")
+	expectedDeploymentGVR := schema.GroupVersionResource{
 		Group:    "apps",
 		Version:  "v1",
 		Resource: "deployments",
 	}
-	result := GetGroupVersionResource(deployment)
-	assert.Equal(t, expectedGVR, result)
+	assert.Equal(t, expectedDeploymentGVR, GetGroupVersionResource(deployment))
+
+	ingress := newUnstructured("networking.k8s.io/v1", "Ingress", "fake", "test-ingress")
+	expectedIngressGVR := schema.GroupVersionResource{
+		Group:    "networking.k8s.io",
+		Version:  "v1",
+		Resource: "ingresses",
+	}
+	assert.Equal(t, expectedIngressGVR, GetGroupVersionResource(ingress))
+
+	eventbus := newUnstructured("argoproj.io/v1alpha1", "EventBus", "fake", "test-eb")
+	expectedEventBusGVR := schema.GroupVersionResource{
+		Group:    "argoproj.io",
+		Version:  "v1alpha1",
+		Resource: "eventbus",
+	}
+	assert.Equal(t, expectedEventBusGVR, GetGroupVersionResource(eventbus))
 }
