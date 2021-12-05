@@ -14,7 +14,7 @@ if [ "$(command -v controller-gen)" = "" ]; then
 fi
 
 header "Generating CRDs"
-${GOPATH}/bin/controller-gen crd:crdVersions=v1,maxDescLen=262143,maxDescLen=0 paths=./pkg/apis/... output:dir=manifests/base/crds
+controller-gen crd:crdVersions=v1,maxDescLen=262143,maxDescLen=0 paths=./pkg/apis/... output:dir=manifests/base/crds
 
 mv manifests/base/crds/argoproj.io_eventbuses.yaml manifests/base/crds/argoproj.io_eventbus.yaml
 
