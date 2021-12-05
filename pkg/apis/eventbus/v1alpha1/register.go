@@ -18,7 +18,9 @@ var (
 	SchemeGroupVersion = schema.GroupVersion{Group: eventbus.Group, Version: "v1alpha1"}
 
 	// SchemaGroupVersionKind is a group version kind used to attach owner references
-	SchemaGroupVersionKind = schema.GroupVersionKind{Group: eventbus.Group, Version: "v1alpha1", Kind: eventbus.Kind}
+	SchemaGroupVersionKind = SchemeGroupVersion.WithKind(eventbus.Kind)
+
+	SchemaGroupVersionResource = SchemeGroupVersion.WithResource(eventbus.Plural)
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
