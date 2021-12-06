@@ -55,7 +55,10 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
-		r.cfAPI.ReportError(reconcileErr)
+		r.cfAPI.ReportError(reconcileErr, codefresh.ErrorContext{
+			ObjectMeta: eventBus.ObjectMeta,
+			TypeMeta:   eventBus.TypeMeta,
+		})
 	}
 	if r.needsUpdate(eventBus, busCopy) {
 		if err := r.client.Update(ctx, busCopy); err != nil {
