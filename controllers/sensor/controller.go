@@ -72,7 +72,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 		r.cfAPI.ReportError(reconcileErr, codefresh.ErrorContext{
 			ObjectMeta: sensor.ObjectMeta,
-			TypeMeta: sensor.TypeMeta,
+			TypeMeta:   sensor.TypeMeta,
 		})
 	}
 	if r.needsUpdate(sensor, sensorCopy) {
