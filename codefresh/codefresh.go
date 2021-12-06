@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"time"
 
-	"go.uber.org/zap"
-
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
@@ -28,20 +28,42 @@ const (
 	cfAuthSecretKey       = "token"
 )
 
-type Config struct {
-	BaseURL   string
-	AuthToken string
+var withRetry = common.Connect // alias
+
+type config struct {
+	baseURL   string
+	authToken string
 }
 
 type API struct {
 	ctx           context.Context
 	logger        *zap.SugaredLogger
-	cfConfig      *Config
+	cfConfig      *config
 	client        *http.Client
 	isInitialised bool
 }
 
-var withRetry = common.Connect // alias
+type ErrorContext struct {
+	metav1.ObjectMeta
+	metav1.TypeMeta
+}
+
+type objectUniqueness struct {
+	Group     string `json:"group"`
+	Version   string `json:"version"`
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type errorContext struct {
+	Object objectUniqueness `json:"object"`
+}
+
+type errorPayload struct {
+	ErrMsg  string       `json:"errMsg"`
+	Context errorContext `json:"context"`
+}
 
 func NewAPI(ctx context.Context, namespace string) (*API, error) {
 	logger := logging.FromContext(ctx)
@@ -90,7 +112,7 @@ func (a *API) ReportEvent(event cloudevents.Event) {
 		return
 	}
 
-	url := a.cfConfig.BaseURL + "/2.0/api/events/event-payload"
+	url := a.cfConfig.baseURL + "/2.0/api/events/event-payload"
 	err = a.sendJSON(eventJson, url)
 	if err != nil {
 		a.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
@@ -101,25 +123,42 @@ func (a *API) ReportEvent(event cloudevents.Event) {
 	}
 }
 
-func (a *API) ReportError(originalError error) {
-	originalErrorMsg := originalError.Error()
+func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload {
+	gvk := errContext.GroupVersionKind()
+
+	return errorPayload{
+		ErrMsg: errMsg,
+		Context: errorContext{
+			Object: objectUniqueness{
+				Name:      errContext.Name,
+				Namespace: errContext.Namespace,
+				Group:     gvk.Group,
+				Version:   gvk.Version,
+				Kind:      gvk.Kind,
+			},
+		},
+	}
+}
+
+func (a *API) ReportError(originalErr error, errContext ErrorContext) {
+	originalErrMsg := originalErr.Error()
 	if !a.isInitialised {
-		a.logger.Warnw("WARNING: skipping reporting of an error to Codefresh", zap.String("originalError", originalErrorMsg))
+		a.logger.Warnw("WARNING: skipping reporting of an error to Codefresh", zap.String("originalError", originalErrMsg))
 		return
 	}
 
-	errorJson, err := json.Marshal(originalErrorMsg)
+	errPayloadJson, err := json.Marshal(constructErrorPayload(originalErrMsg, errContext))
 	if err != nil {
-		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrorMsg))
+		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
 		return
 	}
 
-	url := a.cfConfig.BaseURL + "/2.0/api/events/error"
-	err = a.sendJSON(errorJson, url)
+	url := a.cfConfig.baseURL + "/2.0/api/events/error"
+	err = a.sendJSON(errPayloadJson, url)
 	if err != nil {
-		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrorMsg))
+		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
 	} else {
-		a.logger.Infow("succeeded to report an error to Codefresh", zap.String("originalError", originalErrorMsg))
+		a.logger.Infow("succeeded to report an error to Codefresh", zap.String("originalError", originalErrMsg))
 	}
 }
 
@@ -131,7 +170,7 @@ func (a *API) sendJSON(jsonBody []byte, url string) error {
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", a.cfConfig.AuthToken)
+		req.Header.Set("Authorization", a.cfConfig.authToken)
 
 		res, err := a.client.Do(req)
 		if err != nil {
@@ -150,7 +189,7 @@ func (a *API) sendJSON(jsonBody []byte, url string) error {
 	})
 }
 
-func getCodefreshConfig(ctx context.Context, namespace string) (*Config, error) {
+func getCodefreshConfig(ctx context.Context, namespace string) (*config, error) {
 	kubeClient, err := common.CreateKubeClient()
 	if err != nil {
 		return nil, err
@@ -164,9 +203,9 @@ func getCodefreshConfig(ctx context.Context, namespace string) (*Config, error) 
 		return nil, err
 	}
 
-	return &Config{
-		BaseURL:   baseURL,
-		AuthToken: token,
+	return &config{
+		baseURL:   baseURL,
+		authToken: token,
 	}, nil
 }
 
