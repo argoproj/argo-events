@@ -33,8 +33,8 @@ var (
 	// SchemeGroupVersion is a group version used to register these objects
 	SchemeGroupVersion = schema.GroupVersion{Group: eventsource.Group, Version: "v1alpha1"}
 
-	// SchemaGroupVersionKind is a group version kind used to attach owner references to gateway-controller
-	SchemaGroupVersionKind = schema.GroupVersionKind{Group: eventsource.Group, Version: "v1alpha1", Kind: eventsource.Kind}
+	// SchemaGroupVersionKind is a group version kind used to attach owner references to eventsource-controller
+	SchemaGroupVersionKind = SchemeGroupVersion.WithKind(eventsource.Kind)
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
