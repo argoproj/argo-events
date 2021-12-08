@@ -28,6 +28,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -62,14 +63,14 @@ type messageHandler struct {
 	eventSourceName string
 	eventName       string
 	metrics         *metrics.Metrics
-	dispatch        func([]byte) error
+	dispatch        func([]byte, ...eventsourcecommon.Options) error
 	logger          *zap.SugaredLogger
 	isJSON          bool
 	metadata        map[string]string
 }
 
 // StartListening listens NSQ events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the NSQ event source...")

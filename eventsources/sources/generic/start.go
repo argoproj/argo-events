@@ -14,6 +14,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -47,7 +48,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening listens to generic events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	logger := logging.FromContext(ctx).
 		With(zap.String(logging.LabelEventSourceType, string(el.GetEventSourceType())),
 			zap.String(logging.LabelEventName, el.GetEventName()),
@@ -93,7 +94,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) handleOne(event *Event, dispatch func([]byte) error, logger *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(event *Event, dispatch func([]byte, ...eventsourcecommon.Options) error, logger *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
