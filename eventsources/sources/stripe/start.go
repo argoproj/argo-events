@@ -30,6 +30,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -190,7 +191,7 @@ func filterEvent(event *stripe.Event, filters []string) bool {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Stripe event source...")
