@@ -233,7 +233,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 
 		kafkaID := genUniqueID(el.GetEventSourceName(), el.GetEventName(), kafkaEventSource.URL, msg.Topic, msg.Partition, msg.Offset)
 
-		if err = dispatch(eventBody, eventsourcecommon.SetCustomID(kafkaID)); err != nil {
+		if err = dispatch(eventBody, eventsourcecommon.WithID(kafkaID)); err != nil {
 			return errors.Wrap(err, "failed to dispatch a Kafka event...")
 		}
 		return nil
