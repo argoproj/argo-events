@@ -380,9 +380,9 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
 	}
 
-	kafkaID := genUniqueID(consumer.eventSourceName, consumer.eventName, consumer.kafkaEventSource.URL, message.Topic, message.Partition, message.Offset)
+	messageID := genUniqueID(consumer.eventSourceName, consumer.eventName, consumer.kafkaEventSource.URL, message.Topic, message.Partition, message.Offset)
 
-	if err = consumer.dispatch(eventBody, eventsourcecommon.SetCustomID(kafkaID)); err != nil {
+	if err = consumer.dispatch(eventBody, eventsourcecommon.WithID(messageID)); err != nil {
 		return errors.Wrap(err, "failed to dispatch a kafka event...")
 	}
 	session.MarkMessage(message, "")
@@ -391,9 +391,9 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 
 // Function can be passed as Option to generate unique id for kafka event
 // eventSourceName:eventName:kafka-url:topic:partition:offset
-func genUniqueID(eventSourceName string, eventName string, kafkaURL string, topic string, partition int32, offset int64) string {
+func genUniqueID(eventSourceName, eventName, kafkaURL, topic string, partition int32, offset int64) string {
 
-	kafkaID := fmt.Sprintf("%s:%s:%s:%s:%d:%d", eventSourceName, eventName, kafkaURL, topic, partition, offset)
+	kafkaID := fmt.Sprintf("%s:%s:%s:%s:%d:%d", eventSourceName, eventName, strings.Split(kafkaURL, ",")[0], topic, partition, offset)
 
 	return kafkaID
 }
