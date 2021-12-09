@@ -158,6 +158,8 @@ consumeMessages:
 			if err := el.handleOne(msg, dispatch, log); err != nil {
 				log.Errorw("failed to process a Pulsar event", zap.Error(err))
 				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+			} else {
+				consumer.Ack(msg.Message)
 			}
 		case <-ctx.Done():
 			consumer.Close()
