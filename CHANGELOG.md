@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.5.4 (2021-12-10)
+
+ * [ad7f7fa7](https://github.com/argoproj/argo-events/commit/ad7f7fa7c80706a94275c0d566cf73d15f2cff37) Update manifests to v1.5.4
+ * [6f0d4fcc](https://github.com/argoproj/argo-events/commit/6f0d4fccb43f4b224d7aa66aeb05daa3b95a2ec5) fix: changed method call in event-sources/sources/kafka/start.go (#1457)
+ * [76777a71](https://github.com/argoproj/argo-events/commit/76777a71382b310e0d945c37629f5ebd746147e3) feat: Adding support to propagate unique ID to message for Kafka EventSource messages (#1453)
+ * [202e50eb](https://github.com/argoproj/argo-events/commit/202e50eb6030a761f9200d7910223b5ebfa8bb62) fix: Update minio-go to v7 (#1411)
+ * [d4464372](https://github.com/argoproj/argo-events/commit/d4464372d829e62a0967deeaa3b830de9ac13979) fix: Ack handled messages in pulsar eventsource (#1455)
+ * [29b1182c](https://github.com/argoproj/argo-events/commit/29b1182c59912bf3f334b03f47ddc9641e013a5a) fix: resource eventsource duplicate update events. Fixes #760 (#1025) (#1404)
+
+### Contributors
+
+ * Arnar
+ * Derek Wang
+ * Dillen Padhiar
+ * Michael Seiwald
+ * dubeau
+
 ## v1.5.3 (2021-11-22)
 
  * [fd398f1d](https://github.com/argoproj/argo-events/commit/fd398f1d76c01d8a549ba5d84d829ce956b281d3) Update manifests to v1.5.3
