@@ -105,6 +105,14 @@ for the full spec of `native`.
 - `maxAge` - Max Age of existing messages, i.e. `72h`, `4h35m`, defaults to
   `72h`.
 
+- `maxMsgs` - Max number of messages before expiring the oldest messages, 0 means unlimited. Defaults to 1000000.
+
+- `maxBytes` - Total size of messages before expiring the oldest messages, 0 means unlimited. Defaults to 1GB.
+
+- `maxSubs` - Maximum number of subscriptions, 0 means unlimited. Defaults to 1000.
+
+- `maxPayload` - Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB.
+
 - `imagePullSecrets` - Secrets used to pull images.
 
 - `serviceAccountName` - In case your firm requires to use a service account
