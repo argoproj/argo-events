@@ -75,7 +75,10 @@
     },
     "io.argoproj.common.Int64OrString": {
       "format": "int64-or-string",
-      "type": "string"
+      "type": [
+        "integer",
+        "string"
+      ]
     },
     "io.argoproj.common.Metadata": {
       "description": "Metadata holds the annotations and labels of an event source pod",
@@ -4357,7 +4360,10 @@
                     "port": {
                       "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                       "format": "int-or-string",
-                      "type": "string"
+                      "type": [
+                        "integer",
+                        "string"
+                      ]
                     },
                     "scheme": {
                       "description": "Scheme to use for connecting to the host. Defaults to HTTP.",
@@ -4379,7 +4385,10 @@
                     "port": {
                       "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                       "format": "int-or-string",
-                      "type": "string"
+                      "type": [
+                        "integer",
+                        "string"
+                      ]
                     }
                   },
                   "required": [
@@ -4442,7 +4451,10 @@
                     "port": {
                       "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                       "format": "int-or-string",
-                      "type": "string"
+                      "type": [
+                        "integer",
+                        "string"
+                      ]
                     },
                     "scheme": {
                       "description": "Scheme to use for connecting to the host. Defaults to HTTP.",
@@ -4464,7 +4476,10 @@
                     "port": {
                       "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                       "format": "int-or-string",
-                      "type": "string"
+                      "type": [
+                        "integer",
+                        "string"
+                      ]
                     }
                   },
                   "required": [
@@ -4535,7 +4550,10 @@
                 "port": {
                   "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                   "format": "int-or-string",
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 },
                 "scheme": {
                   "description": "Scheme to use for connecting to the host. Defaults to HTTP.",
@@ -4572,7 +4590,10 @@
                 "port": {
                   "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                   "format": "int-or-string",
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 }
               },
               "required": [
@@ -4691,7 +4712,10 @@
                 "port": {
                   "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                   "format": "int-or-string",
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 },
                 "scheme": {
                   "description": "Scheme to use for connecting to the host. Defaults to HTTP.",
@@ -4728,7 +4752,10 @@
                 "port": {
                   "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                   "format": "int-or-string",
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 }
               },
               "required": [
@@ -4944,7 +4971,10 @@
                 "port": {
                   "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                   "format": "int-or-string",
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 },
                 "scheme": {
                   "description": "Scheme to use for connecting to the host. Defaults to HTTP.",
@@ -4981,7 +5011,10 @@
                 "port": {
                   "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
                   "format": "int-or-string",
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 }
               },
               "required": [
@@ -5296,7 +5329,10 @@
         "targetPort": {
           "description": "IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number.",
           "format": "int-or-string",
-          "type": "string"
+          "type": [
+            "integer",
+            "string"
+          ]
         }
       },
       "required": [
