@@ -56,15 +56,15 @@ rules:
 
 How many configured events in the EventSource object are actively running.
 
-#### argo_events_events_sent_total
+#### argo_events_event_sent_total
 
 How many events have been sent successfully.
 
-#### argo_events_events_sent_failed_total
+#### argo_events_event_sent_failed_total
 
 How many events failed to send to EventBus.
 
-#### argo_events_events_processing_failed_total
+#### argo_events_event_processing_failed_total
 
 How many events failed to process due to all the reasons, it includes
 `argo_events_events_sent_failed_total`.
@@ -132,13 +132,13 @@ of monitoring your applictions running with Argo Events.
 
 - Traffic
 
-  - `argo_events_events_sent_total`
+  - `argo_events_event_sent_total`
   - `argo_events_action_triggered_total`
 
 - Errors
 
-  - `argo_events_events_processing_failed_total`
-  - `argo_events_events_sent_failed_total`
+  - `argo_events_event_processing_failed_total`
+  - `argo_events_event_sent_failed_total`
   - `argo_events_action_failed_total`
 
 - Saturation
