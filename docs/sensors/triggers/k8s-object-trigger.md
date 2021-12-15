@@ -110,6 +110,7 @@ Operation can be either.
 1. `create`: Creates the object if not available in K8s cluster.
 2. `update`: Updates the object.
 3. `patch`: Patches the object using given patch strategy.
+4. `delete`: Deletes the object if it exists.
 
 More info available at [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.StandardK8sTrigger).
 
