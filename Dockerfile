@@ -8,7 +8,7 @@ RUN apk update && apk upgrade && \
     apk add ca-certificates && \
     apk --no-cache add tzdata
 
-ENV ARGO_VERSION=v3.1.1
+ENV ARGO_VERSION=v3.2.4
 
 RUN wget -q https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-${ARCH}.gz
 RUN gunzip -f argo-linux-${ARCH}.gz
