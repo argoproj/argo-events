@@ -100,7 +100,7 @@ Priority could be set through `spec.nats.native.priorityClassName` or
 
 ### PDB
 
-EventBus service is essential to EventSource and Sensor Pods, it would be better to have a `PodDisruptionBudget` to prevent it from [Pod Disruptions](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/). The following PDB object states `maxUnavailable` is 1 for a 3 replica EventBus object.
+EventBus service is essential to EventSource and Sensor Pods, it would be better to have a `PodDisruptionBudget` to prevent it from [Pod Disruptions](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/). The following PDB object states `maxUnavailable` is 1, which is suitable for a 3 replica EventBus object.
 
 If your EventBus has a name other than `default`, change it accordingly in the yaml.
 
