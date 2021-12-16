@@ -98,6 +98,25 @@ could reduce the chance of PODs being evicted.
 Priority could be set through `spec.nats.native.priorityClassName` or
 `spec.nats.native.priority`.
 
+### PDB
+
+EventBus service is essential to EventSource and Sensor Pods, it would be better to have a `PodDisruptionBudget` to prevent it from [Pod Disruptions](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/). The following PDB object states `maxUnavailable` is 1, which is suitable for a 3 replica EventBus object.
+
+If your EventBus has a name other than `default`, change it accordingly in the yaml.
+
+```yaml
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: eventbus-default-pdb
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      controller: eventbus-controller
+      eventbus-name: default
+```
+
 ## EventSources
 
 ### Replicas
