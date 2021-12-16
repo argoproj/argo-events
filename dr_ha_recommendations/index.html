@@ -1262,6 +1262,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pdb" title="PDB" class="md-nav__link">
+    PDB
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1460,6 +1467,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pdb" title="PDB" class="md-nav__link">
+    PDB
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1632,6 +1646,21 @@ also could be set through <code>spec.nats.native.nodeSelector</code> and
 could reduce the chance of PODs being evicted.</p>
 <p>Priority could be set through <code>spec.nats.native.priorityClassName</code> or
 <code>spec.nats.native.priority</code>.</p>
+<h3 id="pdb">PDB<a class="headerlink" href="#pdb" title="Permanent link">&para;</a></h3>
+<p>EventBus service is essential to EventSource and Sensor Pods, it would be better to have a <code>PodDisruptionBudget</code> to prevent it from <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Pod Disruptions</a>. The following PDB object states <code>maxUnavailable</code> is 1, which is suitable for a 3 replica EventBus object.</p>
+<p>If your EventBus has a name other than <code>default</code>, change it accordingly in the yaml.</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">policy/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">PodDisruptionBudget</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-default-pdb</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">maxUnavailable</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">selector</span><span class="p">:</span>
+    <span class="nt">matchLabels</span><span class="p">:</span>
+      <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
+      <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+</code></pre></div>
+
 <h2 id="eventsources">EventSources<a class="headerlink" href="#eventsources" title="Permanent link">&para;</a></h2>
 <h3 id="replicas">Replicas<a class="headerlink" href="#replicas" title="Permanent link">&para;</a></h3>
 <p>EventSources can run with HA by setting <code>spec.replicas</code> to a number <code>&gt;1</code>, see
