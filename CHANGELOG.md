@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.5 (2021-12-18)
+
+ * [3bfd7f9f](https://github.com/argoproj/argo-events/commit/3bfd7f9fd58152fc86b4533fef6912289e4ef39e) Update manifests to v1.5.5
+ * [8342f67d](https://github.com/argoproj/argo-events/commit/8342f67d4b3e2dcb8c6e64e9cfafdcd5f8d71d98) feat: Sensor/AWSLambdaTrigger: allow using AWS IAM Role specified in Service Account (#1394)
+
+### Contributors
+
+ * Derek Wang
+ * Krzysztof Romanowski
+
 ## v1.5.4 (2021-12-10)
 
  * [ad7f7fa7](https://github.com/argoproj/argo-events/commit/ad7f7fa7c80706a94275c0d566cf73d15f2cff37) Update manifests to v1.5.4
