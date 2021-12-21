@@ -19,6 +19,7 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -30,6 +31,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -70,7 +72,7 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
@@ -85,7 +87,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
+func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	config, err := getSaramaConfig(kafkaEventSource, log)
 	if err != nil {
 		return err
@@ -155,7 +157,7 @@ func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.Sug
 	return nil
 }
 
-func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte) error) error {
+func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	defer sources.Recover(el.GetEventName())
 
 	log.Info("start kafka event source...")
@@ -228,7 +230,10 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		if err != nil {
 			return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
 		}
-		if err = dispatch(eventBody); err != nil {
+
+		kafkaID := genUniqueID(el.GetEventSourceName(), el.GetEventName(), kafkaEventSource.URL, msg.Topic, msg.Partition, msg.Offset)
+
+		if err = dispatch(eventBody, eventsourcecommon.WithID(kafkaID)); err != nil {
 			return errors.Wrap(err, "failed to dispatch a Kafka event...")
 		}
 		return nil
@@ -310,7 +315,7 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 // Consumer represents a Sarama consumer group consumer
 type Consumer struct {
 	ready            chan bool
-	dispatch         func([]byte) error
+	dispatch         func([]byte, ...eventsourcecommon.Options) error
 	logger           *zap.SugaredLogger
 	kafkaEventSource *v1alpha1.KafkaEventSource
 	eventSourceName  string
@@ -375,9 +380,20 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
 	}
 
-	if err = consumer.dispatch(eventBody); err != nil {
+	messageID := genUniqueID(consumer.eventSourceName, consumer.eventName, consumer.kafkaEventSource.URL, message.Topic, message.Partition, message.Offset)
+
+	if err = consumer.dispatch(eventBody, eventsourcecommon.WithID(messageID)); err != nil {
 		return errors.Wrap(err, "failed to dispatch a kafka event...")
 	}
 	session.MarkMessage(message, "")
 	return nil
+}
+
+// Function can be passed as Option to generate unique id for kafka event
+// eventSourceName:eventName:kafka-url:topic:partition:offset
+func genUniqueID(eventSourceName, eventName, kafkaURL, topic string, partition int32, offset int64) string {
+
+	kafkaID := fmt.Sprintf("%s:%s:%s:%s:%d:%d", eventSourceName, eventName, strings.Split(kafkaURL, ",")[0], topic, partition, offset)
+
+	return kafkaID
 }

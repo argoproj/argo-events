@@ -15,7 +15,7 @@ resources:
 images:
   - name: quay.io/argoproj/argo-events
     newName: quay.io/codefresh/argo-events
-    newTag: v1.5.3-cap-CR-7899
+    newTag: v1.5.5-cap-CR-7756
 
 patchesStrategicMerge:
   - |-
@@ -30,7 +30,7 @@ patchesStrategicMerge:
             - name: eventsource-controller
               env:
                 - name: EVENTSOURCE_IMAGE
-                  value: quay.io/codefresh/argo-events:v1.5.3-cap-CR-7899
+                  value: quay.io/codefresh/argo-events:v1.5.5-cap-CR-7756
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -43,4 +43,4 @@ patchesStrategicMerge:
             - name: sensor-controller
               env:
                 - name: SENSOR_IMAGE
-                  value: quay.io/codefresh/argo-events:v1.5.3-cap-CR-7899
+                  value: quay.io/codefresh/argo-events:v1.5.5-cap-CR-7756

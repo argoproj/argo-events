@@ -21,12 +21,15 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/minio/minio-go"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7/pkg/notification"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -57,7 +60,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName(),
 			zap.String("bucketName", el.MinioEventSource.Bucket.Name))
@@ -78,17 +81,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	log.Info("setting up a minio client...")
-	minioClient, err := minio.New(minioEventSource.Endpoint, accessKey, secretKey, !minioEventSource.Insecure)
+	minioClient, err := minio.New(minioEventSource.Endpoint, &minio.Options{
+		Creds: credentials.NewStaticV4(accessKey, secretKey, ""), Secure: !minioEventSource.Insecure})
 	if err != nil {
 		return errors.Wrapf(err, "failed to create a client for event source %s", el.GetEventName())
 	}
 
 	prefix, suffix := getFilters(minioEventSource)
 
-	doneCh := make(chan struct{})
-
 	log.Info("started listening to bucket notifications...")
-	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events, doneCh) {
+	for notification := range minioClient.ListenBucketNotification(ctx, minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events) {
 		if notification.Err != nil {
 			log.Errorw("invalid notification", zap.Error(notification.Err))
 			continue
@@ -101,13 +103,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	<-ctx.Done()
-	doneCh <- struct{}{}
 
 	log.Info("event source is stopped")
 	return nil
 }
 
-func (el *EventListener) handleOne(notification minio.NotificationInfo, dispatch func([]byte) error, log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(notification notification.Info, dispatch func([]byte, ...eventsourcecommon.Options) error, log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())

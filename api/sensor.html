@@ -48,6 +48,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>AccessKey refers K8s secret containing aws access key</p>
 </td>
 </tr>
@@ -61,6 +62,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>SecretKey refers K8s secret containing aws secret key</p>
 </td>
 </tr>
@@ -123,6 +125,18 @@ response only includes a status code.</p></li>
 <li><p>DryRun - Validate parameter values and verify that the user or role
 has permission to invoke the function.</p></li>
 </ul>
+</td>
+</tr>
+<tr>
+<td>
+<code>roleARN</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RoleARN is the Amazon Resource Name (ARN) of the role to assume.</p>
 </td>
 </tr>
 </tbody>
