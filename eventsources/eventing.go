@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
@@ -258,16 +259,19 @@ type EventSourceAdaptor struct {
 	eventBusConn eventbusdriver.Connection
 
 	metrics *eventsourcemetrics.Metrics
+
+	cfAPI *codefresh.API
 }
 
 // NewEventSourceAdaptor returns a new EventSourceAdaptor
-func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *eventsourcemetrics.Metrics) *EventSourceAdaptor {
+func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *eventsourcemetrics.Metrics, cfAPI *codefresh.API) *EventSourceAdaptor {
 	return &EventSourceAdaptor{
 		eventSource:     eventSource,
 		eventBusConfig:  eventBusConfig,
 		eventBusSubject: eventBusSubject,
 		hostname:        hostname,
 		metrics:         metrics,
+		cfAPI:           cfAPI,
 	}
 }
 
@@ -316,10 +320,15 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
+
 	clientID := generateClientID(e.hostname)
 	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
 	if err != nil {
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
+		e.cfAPI.ReportError(errors.Wrap(err, "failed to get eventbus driver"), codefresh.ErrorContext{
+			ObjectMeta: e.eventSource.ObjectMeta,
+			TypeMeta:   e.eventSource.TypeMeta,
+		})
 		return err
 	}
 	if err = common.Connect(&common.DefaultBackoff, func() error {
@@ -327,6 +336,10 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 		return err
 	}); err != nil {
 		logger.Errorw("failed to connect to eventbus", zap.Error(err))
+		e.cfAPI.ReportError(errors.Wrap(err, "failed to connect to eventbus"), codefresh.ErrorContext{
+			ObjectMeta: e.eventSource.ObjectMeta,
+			TypeMeta:   e.eventSource.TypeMeta,
+		})
 		return err
 	}
 	defer e.eventBusConn.Close()
@@ -375,6 +388,11 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 			if err != nil {
 				logger.Errorw("Validation failed", zap.Error(err), zap.Any(logging.LabelEventName,
 					server.GetEventName()), zap.Any(logging.LabelEventSourceType, server.GetEventSourceType()))
+				e.cfAPI.ReportError(errors.Wrap(err, "Validation failed"), codefresh.ErrorContext{
+					ObjectMeta: e.eventSource.ObjectMeta,
+					TypeMeta:   e.eventSource.TypeMeta,
+				})
+
 				// Continue starting other event services instead of failing all of them
 				continue
 			}
@@ -421,11 +439,21 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
+							e.cfAPI.ReportError(
+								errors.Wrapf(err, "failed to publish an event: %s", string(eventBody)),
+								codefresh.ErrorContext{
+									ObjectMeta: e.eventSource.ObjectMeta,
+									TypeMeta:   e.eventSource.TypeMeta,
+								},
+							)
 							return err
 						}
 						logger.Infow("succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
+
+						e.cfAPI.ReportEvent(event)
+
 						return nil
 					})
 				}); err != nil {

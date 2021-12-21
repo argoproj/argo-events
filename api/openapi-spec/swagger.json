@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Argo Events",
-    "version": "v1.5.5"
+    "version": "v1.5.3-cap-CR-7899"
   },
   "paths": {},
   "definitions": {
@@ -1266,6 +1266,10 @@
           "description": "DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated: use Repositories instead. Will be unsupported in v 1.6",
           "type": "string"
         },
+        "payloadEnrichment": {
+          "description": "PayloadEnrichment holds flags that determine whether to enrich GitHub's original payload with additional information.",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.PayloadEnrichmentFlags"
+        },
         "repositories": {
           "description": "Repositories holds the information of repositories, which uses repo owner as the key, and list of repo names as the value",
           "type": "array",
@@ -1658,6 +1662,15 @@
         "owner": {
           "description": "Orgnization or user name",
           "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.PayloadEnrichmentFlags": {
+      "type": "object",
+      "properties": {
+        "fetchPROnPRCommentAdded": {
+          "description": "FetchPROnPRCommentAdded determines whether to enrich the payload provided by GitHub on \"pull request comment added\" events, with the full pull request info",
+          "type": "boolean"
         }
       }
     },

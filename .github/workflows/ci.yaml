@@ -5,7 +5,9 @@ on:
       - "master"
       - "release-*"
   pull_request:
-    branches: [ master ]
+    branches:
+      - "master"
+      - "release-*"
 jobs:
   codegen:
     name: Codegen
@@ -117,4 +119,3 @@ jobs:
         env:
           GOPATH: /home/runner/go
         run: KUBECONFIG=~/.kube/argo-events-e2e-config make test-functional
-
