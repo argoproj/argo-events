@@ -63,6 +63,9 @@ type Options struct {
 	// Namespace is the namespace in which everything above lives
 	Namespace string
 
+	// Whether or not the webhook should be constrained to this namespace. See: scope in https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+	Namespaced bool
+
 	// Port where the webhook is served. Per k8s admission
 	// registration requirements this should be 443 unless there is
 	// only a single port for the service.
@@ -125,7 +128,14 @@ func (ac *AdmissionController) Run(ctx context.Context) error {
 // Register registers the validating admission webhook
 func (ac *AdmissionController) register(
 	ctx context.Context, client clientadmissionregistrationv1.ValidatingWebhookConfigurationInterface, caCert []byte) error {
+	var scope admissionregistrationv1.ScopeType
 	failurePolicy := admissionregistrationv1.Ignore
+
+	if ac.Options.Namespaced == true {
+		scope = "Namespaced"
+	} else {
+		scope = "*"
+	}
 
 	var rules []admissionregistrationv1.RuleWithOperations
 	for gvk := range ac.Handlers {
@@ -141,6 +151,7 @@ func (ac *AdmissionController) register(
 				APIGroups:   []string{gvk.Group},
 				APIVersions: []string{gvk.Version},
 				Resources:   []string{plural},
+				Scope:		 &scope,
 			},
 		})
 	}

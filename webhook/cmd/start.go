@@ -25,7 +25,7 @@ const (
 	namespaceEnvVar = "NAMESPACE"
 )
 
-func Start() {
+func Start(namespaced bool) {
 	logger := logging.NewArgoEventsLogger().Named("webhook")
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
@@ -43,13 +43,14 @@ func Start() {
 	}
 
 	options := webhook.Options{
-		ServiceName:    "events-webhook",
-		DeploymentName: "events-webhook",
-		Namespace:      namespace,
-		Port:           443,
-		SecretName:     "events-webhook-certs",
-		WebhookName:    "webhook.argo-events.argoproj.io",
-		ClientAuth:     tls.VerifyClientCertIfGiven,
+		ServiceName:    	"events-webhook",
+		DeploymentName: 	"events-webhook",
+		Namespace:      	namespace,
+		Namespaced:     	namespaced,
+		Port:           	443,
+		SecretName:     	"events-webhook-certs",
+		WebhookName:    	"webhook.argo-events.argoproj.io",
+		ClientAuth:     	tls.VerifyClientCertIfGiven,
 	}
 	controller := webhook.AdmissionController{
 		Client:            kubeClient,
