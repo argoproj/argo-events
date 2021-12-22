@@ -131,7 +131,7 @@ func (ac *AdmissionController) register(
 	var scope admissionregistrationv1.ScopeType
 	failurePolicy := admissionregistrationv1.Ignore
 
-	if ac.Options.Namespaced == true {
+	if ac.Options.Namespaced {
 		scope = "Namespaced"
 	} else {
 		scope = "*"

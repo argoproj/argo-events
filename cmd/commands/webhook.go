@@ -8,7 +8,7 @@ import (
 
 func NewWebhookCommand() *cobra.Command {
 	var (
-		namespaced       bool
+		namespaced bool
 	)
 
 	command := &cobra.Command{
