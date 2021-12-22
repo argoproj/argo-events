@@ -66,6 +66,12 @@ type Options struct {
 	// Whether or not the webhook should be constrained to this namespace. See: scope in https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
 	Namespaced bool
 
+	// If the validating webhook should only be scoped to a namespace, pass a key for the matchExpression
+	NamespacedKey string
+
+	// If the validating webhook should only be scoped to a namespace, pass a comma separated array for the matchExpression
+	NamespacedValues string
+
 	// Port where the webhook is served. Per k8s admission
 	// registration requirements this should be 443 unless there is
 	// only a single port for the service.
@@ -128,14 +134,7 @@ func (ac *AdmissionController) Run(ctx context.Context) error {
 // Register registers the validating admission webhook
 func (ac *AdmissionController) register(
 	ctx context.Context, client clientadmissionregistrationv1.ValidatingWebhookConfigurationInterface, caCert []byte) error {
-	var scope admissionregistrationv1.ScopeType
 	failurePolicy := admissionregistrationv1.Ignore
-
-	if ac.Options.Namespaced {
-		scope = "Namespaced"
-	} else {
-		scope = "*"
-	}
 
 	var rules []admissionregistrationv1.RuleWithOperations
 	for gvk := range ac.Handlers {
@@ -151,7 +150,6 @@ func (ac *AdmissionController) register(
 				APIGroups:   []string{gvk.Group},
 				APIVersions: []string{gvk.Version},
 				Resources:   []string{plural},
-				Scope:		 &scope,
 			},
 		})
 	}
@@ -191,6 +189,19 @@ func (ac *AdmissionController) register(
 			FailurePolicy: &failurePolicy,
 		}},
 	}
+
+	if ac.Options.Namespaced {
+		for i, _ := range webhook.Webhooks {
+			webhook.Webhooks[i].NamespaceSelector = &metav1.LabelSelector{
+				MatchExpressions: []metav1.LabelSelectorRequirement{{
+					Key: ac.Options.NamespacedKey,
+					Operator: metav1.LabelSelectorOpIn,
+					Values: strings.Split(ac.Options.NamespacedValues, ","),
+				}},
+			}
+		}
+	}
+
 	deployment, err := ac.Client.AppsV1().Deployments(ac.Options.Namespace).Get(ctx, ac.Options.DeploymentName, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "failed to fetch webhook deployment")

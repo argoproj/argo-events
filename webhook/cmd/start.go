@@ -25,7 +25,7 @@ const (
 	namespaceEnvVar = "NAMESPACE"
 )
 
-func Start(namespaced bool) {
+func Start(namespaced bool, namespacedKey string, namespacedValues string) {
 	logger := logging.NewArgoEventsLogger().Named("webhook")
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
@@ -47,6 +47,8 @@ func Start(namespaced bool) {
 		DeploymentName: 	"events-webhook",
 		Namespace:      	namespace,
 		Namespaced:     	namespaced,
+		NamespacedKey:      namespacedKey,
+		NamespacedValues:   namespacedValues,
 		Port:           	443,
 		SecretName:     	"events-webhook-certs",
 		WebhookName:    	"webhook.argo-events.argoproj.io",
