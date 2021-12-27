@@ -217,7 +217,8 @@ func (router *Router) saveBitbucketWebhook() error {
 	}
 
 	existingHookSubscription, isFound := router.findWebhook(hooks, formattedWebhookURL)
-	if isFound {
+	if isFound && router.shouldUpdateWebhook(existingHookSubscription) {
+		logger.Info("webhook already exists but requires an update...")
 		if _, err = router.updateWebhook(existingHookSubscription); err != nil {
 			logger.Errorw("failed to update existing webhook", zap.Error(err))
 			return errors.Wrap(err, "failed to update existing webhook")
@@ -227,6 +228,7 @@ func (router *Router) saveBitbucketWebhook() error {
 		return nil
 	}
 
+	logger.Info("creating new webhook...")
 	newWebhook, err := router.createWebhook(formattedWebhookURL)
 	if err != nil {
 		logger.Errorw("failed to create new webhook", zap.Error(err))
@@ -316,7 +318,7 @@ func (router *Router) extractHooksFromListResponse(listHooksResponse interface{}
 	return hooks, nil
 }
 
-// findWebhook searches for a target webhook in a list and returns it if its found
+// findWebhook searches for a webhook in a list by its URL and returns the webhook if its found
 func (router *Router) findWebhook(hooks []WebhookSubscription, targetWebhookURL string) (*WebhookSubscription, bool) {
 	var existingHookSubscription *WebhookSubscription
 	isFound := false
@@ -330,4 +332,11 @@ func (router *Router) findWebhook(hooks []WebhookSubscription, targetWebhookURL 
 	}
 
 	return existingHookSubscription, isFound
+}
+
+func (router *Router) shouldUpdateWebhook(existingHookSubscription *WebhookSubscription) bool {
+	oldEvents := existingHookSubscription.Events
+	newEvents := router.bitbucketEventSource.Events
+
+	return common.SliceEqual(oldEvents, newEvents)
 }
