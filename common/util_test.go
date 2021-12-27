@@ -239,3 +239,30 @@ func TestGetTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "failed to read ca cert file"))
 	})
 }
+
+func TestSliceEqual(t *testing.T) {
+	assert.True(t, SliceEqual(nil, nil))
+	assert.True(t, SliceEqual([]string{"hello"}, []string{"hello"}))
+	assert.True(t, SliceEqual([]string{"hello", "world"}, []string{"hello", "world"}))
+	assert.True(t, SliceEqual([]string{}, []string{}))
+
+	assert.False(t, SliceEqual([]string{"hello"}, nil))
+	assert.False(t, SliceEqual([]string{"hello"}, []string{}))
+	assert.False(t, SliceEqual([]string{}, []string{"hello"}))
+	assert.False(t, SliceEqual([]string{"hello"}, []string{"hello", "world"}))
+	assert.False(t, SliceEqual([]string{"hello", "world"}, []string{"hello"}))
+	assert.False(t, SliceEqual([]string{"hello", "world"}, []string{"hello", "moon"}))
+	assert.True(t, SliceEqual([]string{"hello", "world"}, []string{"world", "hello"}))
+	assert.True(t, SliceEqual([]string{"hello", "*"}, []string{"*"}))
+	assert.True(t, SliceEqual([]string{"hello", "*"}, []string{"*", "world"}))
+	assert.True(t, SliceEqual([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, SliceEqual([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, SliceEqual([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
+	assert.False(t, SliceEqual([]string{"hello"}, []string{"*", "hello"}))
+	assert.False(t, SliceEqual([]string{"hello", "*"}, []string{"hello"}))
+	assert.False(t, SliceEqual([]string{"*", "hello", "*"}, []string{"hello"}))
+	assert.False(t, SliceEqual([]string{"hello"}, []string{"world", "world"}))
+	assert.False(t, SliceEqual([]string{"hello", "hello"}, []string{"world", "world"}))
+	assert.True(t, SliceEqual([]string{"*", "hello", "*"}, []string{"*", "world", "hello", "world"}))
+}
+
