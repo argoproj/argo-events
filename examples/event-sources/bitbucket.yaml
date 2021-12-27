@@ -27,7 +27,7 @@ spec:
         # url the event-source will use to register in Bitbucket.
         # This url must be reachable from outside the cluster.
         # The name for the service is in `<event-source-name>-eventsource-svc` format.
-        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket Server.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket.
         url: http://url-that-is-reachable-from-bitbucket
       # events to listen to
       # Visit https://support.atlassian.com/bitbucket-cloud/docs/manage-webhooks/
