@@ -2668,6 +2668,10 @@
           "description": "Filters and rules governing toleration of success and constraints on the context and data of an event",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyFilter"
         },
+        "filtersLogicalOperator": {
+          "description": "FiltersLogicalOperator defines how filters are evaluated together. Available values: \u0026\u0026 (and, default), || (or)",
+          "type": "string"
+        },
         "name": {
           "description": "Name is a unique name of this dependency",
           "type": "string"
@@ -2695,6 +2699,10 @@
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ExprFilter"
           }
+        },
+        "logicalOperator": {
+          "description": "LogicalOperator defines how multiple Data or Exprs filters are evaluated together. Available values: \u0026\u0026 (and, default), || (or)",
+          "type": "string"
         },
         "time": {
           "description": "Time filter on the event with escalation",

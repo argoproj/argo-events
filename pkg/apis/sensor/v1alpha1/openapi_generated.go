@@ -660,6 +660,13 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
+					"filtersLogicalOperator": {
+						SchemaProps: spec.SchemaProps{
+							Description: "FiltersLogicalOperator defines how filters are evaluated together. Available values: && (and, default), || (or)",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"name", "eventSourceName", "eventName"},
 			},
@@ -714,6 +721,13 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 									},
 								},
 							},
+						},
+					},
+					"logicalOperator": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LogicalOperator defines how multiple Data or Exprs filters are evaluated together. Available values: && (and, default), || (or)",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},

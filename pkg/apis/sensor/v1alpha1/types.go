@@ -186,6 +186,8 @@ type EventDependency struct {
 	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
 	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
+	// FiltersLogicalOperator defines how filters are evaluated together. Available values: && (and, default), || (or)
+	FiltersLogicalOperator string `json:"filtersLogicalOperator,omitempty" protobuf:"string,5,opt,name=filtersLogicalOperator"`
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
@@ -198,6 +200,8 @@ type EventDependencyFilter struct {
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 	// Exprs contains the list of expressions evaluated against the event payload.
 	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,4,rep,name=exprs"`
+	// LogicalOperator defines how multiple Data or Exprs filters are evaluated together. Available values: && (and, default), || (or)
+	LogicalOperator string `json:"logicalOperator,omitempty" protobuf:"string,5,opt,name=logicalOperator"`
 }
 
 type ExprFilter struct {
