@@ -37,24 +37,29 @@ func Filter(event *v1alpha1.Event, filters *v1alpha1.EventDependencyFilter) (boo
 	if filters == nil {
 		return true, nil
 	}
+
 	ok, err := filterEvent(filters, event)
 	if err != nil {
 		return false, err
 	}
+
 	return ok, nil
 }
 
-// apply the filters to an Event
+// filterEvent applies the filters to an Event
 func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) (bool, error) {
 	dataFilter, err := filterData(filter.Data, event)
 	if err != nil {
 		return false, err
 	}
+
 	timeFilter, err := filterTime(filter.Time, event.Context.Time.Time)
 	if err != nil {
 		return false, err
 	}
+
 	ctxFilter := filterContext(filter.Context, event.Context)
+
 	exprFilter, err := filterExpr(filter.Exprs, event)
 	if err != nil {
 		return false, err
@@ -106,7 +111,8 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 	}
 }
 
-// applyContextFilter checks the expected EventContext against the actual EventContext
+// TODO review default result (false instead of true?)
+// filterContext checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
 func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContext) bool {
@@ -132,10 +138,10 @@ func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContex
 	return res
 }
 
-// applyDataFilter runs the dataFilter against the Event's data
+// filterData runs the dataFilter against the Event's data
 // returns (true, nil) when data passes filters, false otherwise
 func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error) {
-	if data == nil {
+	if len(data) == 0 {
 		return true, nil
 	}
 	if event == nil {
@@ -258,6 +264,7 @@ filter:
 }
 
 // filterExpr applies expression based filters against event data
+// expression evaluation is based on https://github.com/Knetic/govaluate
 func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
 	if filters == nil {
 		return true, nil
