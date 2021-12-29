@@ -2680,7 +2680,7 @@
           "description": "Filters and rules governing toleration of success and constraints on the context and data of an event"
         },
         "filtersLogicalOperator": {
-          "description": "FiltersLogicalOperator defines how filters are evaluated together. Available values: \u0026\u0026 (and, default), || (or)",
+          "description": "FiltersLogicalOperator defines how filters are evaluated together. Available values: and (\u0026\u0026, default), or (||) Is optional, and if left blank treated as and \"\u0026\u0026\".",
           "type": "string"
         },
         "name": {
@@ -2717,7 +2717,7 @@
           "type": "array"
         },
         "logicalOperator": {
-          "description": "LogicalOperator defines how multiple Data or Exprs filters are evaluated together. Available values: \u0026\u0026 (and, default), || (or)",
+          "description": "LogicalOperator defines how multiple Data and/or Exprs filters are evaluated together. Available values: and (\u0026\u0026, default), or (||) Is optional, and if left blank treated as and \"\u0026\u0026\".",
           "type": "string"
         },
         "time": {

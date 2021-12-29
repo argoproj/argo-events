@@ -948,6 +948,20 @@ context and data of an event
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filtersLogicalOperator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
+</em>
+</td>
+<td>
+<p>
+FiltersLogicalOperator defines how filters are evaluated together.
+Available values: and (&&, default), or (\|\|) Is optional, and if left
+blank treated as and “&&”.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventDependencyFilter">
@@ -1016,6 +1030,20 @@ Data filter constraints with escalation
 <p>
 Exprs contains the list of expressions evaluated against the event
 payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>logicalOperator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
+</em>
+</td>
+<td>
+<p>
+LogicalOperator defines how multiple Data and/or Exprs filters are
+evaluated together. Available values: and (&&, default), or (\|\|) Is
+optional, and if left blank treated as and “&&”.
 </p>
 </td>
 </tr>
@@ -1739,6 +1767,17 @@ data for busy events.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.LogicalOperator">
+LogicalOperator (<code>string</code> alias)
+</p>
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependency">EventDependency</a>,
+<a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
+</p>
+<p>
+</p>
 <h3 id="argoproj.io/v1alpha1.NATSTrigger">
 NATSTrigger
 </h3>

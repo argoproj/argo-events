@@ -250,7 +250,9 @@ message EventDependency {
   // Filters and rules governing toleration of success and constraints on the context and data of an event
   optional EventDependencyFilter filters = 4;
 
-  // FiltersLogicalOperator defines how filters are evaluated together. Available values: && (and, default), || (or)
+  // FiltersLogicalOperator defines how filters are evaluated together.
+  // Available values: and (&&, default), or (||)
+  // Is optional, and if left blank treated as and "&&".
   optional string filtersLogicalOperator = 5;
 }
 
@@ -268,7 +270,9 @@ message EventDependencyFilter {
   // Exprs contains the list of expressions evaluated against the event payload.
   repeated ExprFilter exprs = 4;
 
-  // LogicalOperator defines how multiple Data or Exprs filters are evaluated together. Available values: && (and, default), || (or)
+  // LogicalOperator defines how multiple Data and/or Exprs filters are evaluated together.
+  // Available values: and (&&, default), or (||)
+  // Is optional, and if left blank treated as and "&&".
   optional string logicalOperator = 5;
 }
 

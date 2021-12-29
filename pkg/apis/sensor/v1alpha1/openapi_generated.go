@@ -662,7 +662,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					},
 					"filtersLogicalOperator": {
 						SchemaProps: spec.SchemaProps{
-							Description: "FiltersLogicalOperator defines how filters are evaluated together. Available values: && (and, default), || (or)",
+							Description: "FiltersLogicalOperator defines how filters are evaluated together. Available values: and (&&, default), or (||) Is optional, and if left blank treated as and \"&&\".",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -725,7 +725,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 					},
 					"logicalOperator": {
 						SchemaProps: spec.SchemaProps{
-							Description: "LogicalOperator defines how multiple Data or Exprs filters are evaluated together. Available values: && (and, default), || (or)",
+							Description: "LogicalOperator defines how multiple Data and/or Exprs filters are evaluated together. Available values: and (&&, default), or (||) Is optional, and if left blank treated as and \"&&\".",
 							Type:        []string{"string"},
 							Format:      "",
 						},
