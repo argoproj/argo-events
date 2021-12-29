@@ -175,7 +175,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					return true
 				}
 				e := convertEvent(event)
-				result, err := sensordependencies.Filter(e, dep.Filters)
+				result, err := sensordependencies.Filter(e, dep.Filters, dep.FiltersLogicalOperator)
 				if err != nil {
 					logger.Errorw("failed to apply filters", zap.Error(err))
 					return false

@@ -19,6 +19,7 @@ package dependencies
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -32,13 +33,15 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// TODO improve overall documentation
+
 // Filter filters the event with dependency's defined filters
-func Filter(event *v1alpha1.Event, filters *v1alpha1.EventDependencyFilter) (bool, error) {
-	if filters == nil {
+func Filter(event *v1alpha1.Event, filter *v1alpha1.EventDependencyFilter, filtersLogicalOperator v1alpha1.LogicalOperator) (bool, error) {
+	if filter == nil {
 		return true, nil
 	}
 
-	ok, err := filterEvent(filters, event)
+	ok, err := filterEvent(filter, filtersLogicalOperator, event)
 	if err != nil {
 		return false, err
 	}
@@ -47,95 +50,79 @@ func Filter(event *v1alpha1.Event, filters *v1alpha1.EventDependencyFilter) (boo
 }
 
 // filterEvent applies the filters to an Event
-func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) (bool, error) {
-	dataFilter, err := filterData(filter.Data, event)
-	if err != nil {
-		return false, err
+func filterEvent(filter *v1alpha1.EventDependencyFilter, filtersLogicalOperator v1alpha1.LogicalOperator, event *v1alpha1.Event) (bool, error) {
+	exprFilter, exprErr := filterExpr(filter.Exprs, event)
+	if exprErr != nil {
+		return false, exprErr
 	}
 
-	timeFilter, err := filterTime(filter.Time, event.Context.Time.Time)
-	if err != nil {
-		return false, err
+	dataFilter, dataErr := filterData(filter.Data, event)
+	if dataErr != nil {
+		return false, dataErr
 	}
 
 	ctxFilter := filterContext(filter.Context, event.Context)
 
-	exprFilter, err := filterExpr(filter.Exprs, event)
-	if err != nil {
-		return false, err
+	timeFilter, timeErr := filterTime(filter.Time, event.Context.Time.Time)
+	if timeErr != nil {
+		return false, timeErr
 	}
 
-	return timeFilter && ctxFilter && dataFilter && exprFilter, nil
+	if filtersLogicalOperator == v1alpha1.OrLogicalOperator {
+		return exprFilter || dataFilter || ctxFilter || timeFilter, nil
+	}
+	return exprFilter && dataFilter && ctxFilter && timeFilter, nil
 }
 
-// filterTime checks the eventTime falls into time range specified by the timeFilter.
-// Start is inclusive, and Stop is exclusive.
-//
-// if Start < Stop: eventTime must be in [Start, Stop)
-//
-//   0:00        Start       Stop        0:00
-//   ├───────────●───────────○───────────┤
-//               └─── OK ────┘
-//
-// if Stop < Start: eventTime must be in [Start, Stop@Next day)
-//
-// this is equivalent to: eventTime must be in [0:00, Stop) or [Start, 0:00@Next day)
-//
-//   0:00                    Start       0:00       Stop                     0:00
-//   ├───────────○───────────●───────────┼───────────○───────────●───────────┤
-//                           └───────── OK ──────────┘
-//
-//   0:00        Stop        Start       0:00
-//   ●───────────○───────────●───────────○
-//   └─── OK ────┘           └─── OK ────┘
-func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, error) {
-	if timeFilter == nil {
+// filterExpr applies expression based filters against event data
+// expression evaluation is based on https://github.com/Knetic/govaluate
+func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
+	if filters == nil {
 		return true, nil
 	}
-
-	// Parse start and stop
-	startTime, err := common.ParseTime(timeFilter.Start, eventTime)
+	if event == nil {
+		return false, fmt.Errorf("nil event")
+	}
+	payload := event.Data
+	if payload == nil {
+		return true, nil
+	}
+	var js *json.RawMessage
+	if err := json.Unmarshal(payload, &js); err != nil {
+		return false, err
+	}
+	var jsData []byte
+	jsData, err := json.Marshal(js)
 	if err != nil {
 		return false, err
 	}
-	stopTime, err := common.ParseTime(timeFilter.Stop, eventTime)
-	if err != nil {
-		return false, err
+
+	for _, filter := range filters {
+		parameters := map[string]interface{}{}
+		for _, field := range filter.Fields {
+			result := gjson.GetBytes(jsData, field.Path)
+			if !result.Exists() {
+				return false, fmt.Errorf("path %s does not exist", field.Path)
+			}
+			parameters[field.Name] = result.Value()
+		}
+		if len(parameters) == 0 {
+			continue
+		}
+		expr, err := govaluate.NewEvaluableExpression(filter.Expr)
+		if err != nil {
+			return false, err
+		}
+		result, err := expr.Evaluate(parameters)
+		if err != nil {
+			return false, err
+		}
+		if result == true {
+			return true, nil
+		}
 	}
 
-	// Filtering logic
-	if startTime.Before(stopTime) {
-		return (eventTime.After(startTime) || eventTime.Equal(startTime)) && eventTime.Before(stopTime), nil
-	} else {
-		return (eventTime.After(startTime) || eventTime.Equal(startTime)) || eventTime.Before(stopTime), nil
-	}
-}
-
-// TODO review default result (false instead of true?)
-// filterContext checks the expected EventContext against the actual EventContext
-// values are only enforced if they are non-zero values
-// map types check that the expected map is a subset of the actual map
-func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContext) bool {
-	if expected == nil {
-		return true
-	}
-	if actual == nil {
-		return false
-	}
-	res := true
-	if expected.Type != "" {
-		res = res && expected.Type == actual.Type
-	}
-	if expected.Subject != "" {
-		res = res && expected.Subject == actual.Subject
-	}
-	if expected.Source != "" {
-		res = res && expected.Source == actual.Source
-	}
-	if expected.DataContentType != "" {
-		res = res && expected.DataContentType == actual.DataContentType
-	}
-	return res
+	return false, nil
 }
 
 // filterData runs the dataFilter against the Event's data
@@ -165,6 +152,10 @@ filter:
 		res := gjson.GetBytes(jsData, f.Path)
 		if !res.Exists() {
 			return false, nil
+		}
+
+		if f.Value == nil || len(f.Value) == 0 {
+			return false, errors.New("no values specified")
 		}
 
 		if f.Template != "" {
@@ -263,53 +254,73 @@ filter:
 	return true, nil
 }
 
-// filterExpr applies expression based filters against event data
-// expression evaluation is based on https://github.com/Knetic/govaluate
-func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
-	if filters == nil {
-		return true, nil
+// TODO review default result (false instead of true?)
+// filterContext checks the expected EventContext against the actual EventContext
+// values are only enforced if they are non-zero values
+// map types check that the expected map is a subset of the actual map
+func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContext) bool {
+	if expected == nil {
+		return true
 	}
-	if event == nil {
-		return false, fmt.Errorf("nil event")
-	}
-	payload := event.Data
-	if payload == nil {
-		return true, nil
-	}
-	var js *json.RawMessage
-	if err := json.Unmarshal(payload, &js); err != nil {
-		return false, err
-	}
-	var jsData []byte
-	jsData, err := json.Marshal(js)
-	if err != nil {
-		return false, err
+	if actual == nil {
+		return false
 	}
 
-	for _, filter := range filters {
-		parameters := map[string]interface{}{}
-		for _, field := range filter.Fields {
-			result := gjson.GetBytes(jsData, field.Path)
-			if !result.Exists() {
-				return false, fmt.Errorf("path %s does not exist", field.Path)
-			}
-			parameters[field.Name] = result.Value()
-		}
-		if len(parameters) == 0 {
-			continue
-		}
-		expr, err := govaluate.NewEvaluableExpression(filter.Expr)
-		if err != nil {
-			return false, err
-		}
-		result, err := expr.Evaluate(parameters)
-		if err != nil {
-			return false, err
-		}
-		if result == true {
-			return true, nil
-		}
+	res := true
+	if expected.Type != "" {
+		res = res && expected.Type == actual.Type
+	}
+	if expected.Subject != "" {
+		res = res && expected.Subject == actual.Subject
+	}
+	if expected.Source != "" {
+		res = res && expected.Source == actual.Source
+	}
+	if expected.DataContentType != "" {
+		res = res && expected.DataContentType == actual.DataContentType
+	}
+	return res
+}
+
+// filterTime checks the eventTime falls into time range specified by the timeFilter.
+// Start is inclusive, and Stop is exclusive.
+//
+// if Start < Stop: eventTime must be in [Start, Stop)
+//
+//   0:00        Start       Stop        0:00
+//   ├───────────●───────────○───────────┤
+//               └─── OK ────┘
+//
+// if Stop < Start: eventTime must be in [Start, Stop@Next day)
+//
+// this is equivalent to: eventTime must be in [0:00, Stop) or [Start, 0:00@Next day)
+//
+//   0:00                    Start       0:00       Stop                     0:00
+//   ├───────────○───────────●───────────┼───────────○───────────●───────────┤
+//                           └───────── OK ──────────┘
+//
+//   0:00        Stop        Start       0:00
+//   ●───────────○───────────●───────────○
+//   └─── OK ────┘           └─── OK ────┘
+func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, error) {
+	if timeFilter == nil {
+		return true, nil
 	}
 
-	return false, nil
+	// Parse start and stop
+	startTime, startErr := common.ParseTime(timeFilter.Start, eventTime)
+	if startErr != nil {
+		return false, startErr
+	}
+	stopTime, stopErr := common.ParseTime(timeFilter.Stop, eventTime)
+	if stopErr != nil {
+		return false, stopErr
+	}
+
+	// Filtering logic
+	if startTime.Before(stopTime) {
+		return (eventTime.After(startTime) || eventTime.Equal(startTime)) && eventTime.Before(stopTime), nil
+	} else {
+		return (eventTime.After(startTime) || eventTime.Equal(startTime)) || eventTime.Before(stopTime), nil
+	}
 }
