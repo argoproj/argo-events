@@ -493,7 +493,7 @@ func TestFilterData(t *testing.T) {
 				data: []v1alpha1.DataFilter{
 					{
 						Path:  "k",
-						Type:  v1alpha1.JSONTypeString,
+						Type:  v1alpha1.JSONTypeBool,
 						Value: []string{"true"},
 					},
 					{

@@ -28,7 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO add example files with logical operator
 func TestValidateSensor(t *testing.T) {
 	dir := "../../examples/sensors"
 	files, dirErr := ioutil.ReadDir(dir)
