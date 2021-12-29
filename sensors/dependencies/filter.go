@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
@@ -34,6 +35,13 @@ import (
 )
 
 // TODO improve overall documentation
+// PLEASE NOTE: order of filters matters!!
+
+// TODO enable back action on save
+
+const (
+	errMsgListSeparator = " / "
+)
 
 // Filter filters the event with dependency's defined filters
 func Filter(event *v1alpha1.Event, filter *v1alpha1.EventDependencyFilter, filtersLogicalOperator v1alpha1.LogicalOperator) (bool, error) {
@@ -51,12 +59,12 @@ func Filter(event *v1alpha1.Event, filter *v1alpha1.EventDependencyFilter, filte
 
 // filterEvent applies the filters to an Event
 func filterEvent(filter *v1alpha1.EventDependencyFilter, filtersLogicalOperator v1alpha1.LogicalOperator, event *v1alpha1.Event) (bool, error) {
-	exprFilter, exprErr := filterExpr(filter.Exprs, event)
+	exprFilter, exprErr := filterExpr(filter.Exprs, filter.LogicalOperator, event)
 	if exprErr != nil {
 		return false, exprErr
 	}
 
-	dataFilter, dataErr := filterData(filter.Data, event)
+	dataFilter, dataErr := filterData(filter.Data, filter.LogicalOperator, event)
 	if dataErr != nil {
 		return false, dataErr
 	}
@@ -76,104 +84,189 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, filtersLogicalOperator 
 
 // filterExpr applies expression based filters against event data
 // expression evaluation is based on https://github.com/Knetic/govaluate
-func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, error) {
+// in case "operator input" is equal to v1alpha1.OrLogicalOperator, filters are evaluated as mutual exclusive
+func filterExpr(filters []v1alpha1.ExprFilter, operator v1alpha1.LogicalOperator, event *v1alpha1.Event) (bool, error) {
 	if filters == nil {
 		return true, nil
 	}
 	if event == nil {
 		return false, fmt.Errorf("nil event")
 	}
+
 	payload := event.Data
 	if payload == nil {
 		return true, nil
 	}
-	var js *json.RawMessage
-	if err := json.Unmarshal(payload, &js); err != nil {
-		return false, err
-	}
-	var jsData []byte
-	jsData, err := json.Marshal(js)
-	if err != nil {
-		return false, err
+
+	var rawMsg *json.RawMessage
+	payloadErr := json.Unmarshal(payload, &rawMsg)
+	if payloadErr != nil {
+		return false, payloadErr
 	}
 
+	var rawMsgData []byte
+	var rawErr error
+	rawMsgData, rawErr = json.Marshal(rawMsg)
+	if rawErr != nil {
+		return false, rawErr
+	}
+
+	var errMessages []string
+	if operator == v1alpha1.OrLogicalOperator {
+		errMessages = make([]string, 0)
+	}
+filterExpr:
 	for _, filter := range filters {
 		parameters := map[string]interface{}{}
 		for _, field := range filter.Fields {
-			result := gjson.GetBytes(jsData, field.Path)
-			if !result.Exists() {
-				return false, fmt.Errorf("path %s does not exist", field.Path)
+			pathResult := gjson.GetBytes(rawMsgData, field.Path)
+			if !pathResult.Exists() {
+				errMsg := "path '%s' does not exist"
+				if operator == v1alpha1.OrLogicalOperator {
+					errMessages = append(errMessages, fmt.Sprintf(errMsg, field.Path))
+					continue filterExpr
+				} else {
+					return false, fmt.Errorf(errMsg, field.Path)
+				}
 			}
-			parameters[field.Name] = result.Value()
+			parameters[field.Name] = pathResult.Value()
 		}
+
 		if len(parameters) == 0 {
 			continue
 		}
-		expr, err := govaluate.NewEvaluableExpression(filter.Expr)
-		if err != nil {
-			return false, err
+
+		expr, exprErr := govaluate.NewEvaluableExpression(filter.Expr)
+		if exprErr != nil {
+			if operator == v1alpha1.OrLogicalOperator {
+				errMessages = append(errMessages, exprErr.Error())
+				continue
+			} else {
+				return false, exprErr
+			}
 		}
-		result, err := expr.Evaluate(parameters)
-		if err != nil {
-			return false, err
+
+		result, resErr := expr.Evaluate(parameters)
+		if resErr != nil {
+			if operator == v1alpha1.OrLogicalOperator {
+				errMessages = append(errMessages, resErr.Error())
+				continue
+			} else {
+				return false, resErr
+			}
 		}
+
 		if result == true {
-			return true, nil
+			if operator == v1alpha1.OrLogicalOperator {
+				return true, nil
+			}
+		} else {
+			if operator != v1alpha1.OrLogicalOperator {
+				return false, nil
+			}
 		}
 	}
 
-	return false, nil
+	if operator == v1alpha1.OrLogicalOperator {
+		if len(errMessages) > 0 {
+			return false, errors.New(strings.Join(errMessages, errMsgListSeparator))
+		}
+		return false, nil
+	} else {
+		return true, nil
+	}
 }
 
 // filterData runs the dataFilter against the Event's data
 // returns (true, nil) when data passes filters, false otherwise
-func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error) {
-	if len(data) == 0 {
+// in case "operator input" is equal to v1alpha1.OrLogicalOperator, filters are evaluated as mutual exclusive
+func filterData(filters []v1alpha1.DataFilter, operator v1alpha1.LogicalOperator, event *v1alpha1.Event) (bool, error) {
+	if len(filters) == 0 {
 		return true, nil
 	}
 	if event == nil {
 		return false, fmt.Errorf("nil Event")
 	}
+
 	payload := event.Data
 	if payload == nil {
 		return true, nil
 	}
-	var js *json.RawMessage
-	if err := json.Unmarshal(payload, &js); err != nil {
-		return false, err
+	var rawMsg *json.RawMessage
+	payloadErr := json.Unmarshal(payload, &rawMsg)
+	if payloadErr != nil {
+		return false, payloadErr
 	}
-	var jsData []byte
-	jsData, err := json.Marshal(js)
-	if err != nil {
-		return false, err
+
+	var rawMsgData []byte
+	var rawErr error
+	rawMsgData, rawErr = json.Marshal(rawMsg)
+	if rawErr != nil {
+		return false, rawErr
 	}
-filter:
-	for _, f := range data {
-		res := gjson.GetBytes(jsData, f.Path)
-		if !res.Exists() {
-			return false, nil
+
+	var errMessages []string
+	if operator == v1alpha1.OrLogicalOperator {
+		errMessages = make([]string, 0)
+	}
+filterData:
+	for _, f := range filters {
+		pathResult := gjson.GetBytes(rawMsgData, f.Path)
+		if !pathResult.Exists() {
+			errMsg := "path '%s' does not exist"
+			if operator == v1alpha1.OrLogicalOperator {
+				errMessages = append(errMessages, fmt.Sprintf(errMsg, f.Path))
+				continue
+			} else {
+				return false, fmt.Errorf(errMsg, f.Path)
+			}
 		}
 
 		if f.Value == nil || len(f.Value) == 0 {
-			return false, errors.New("no values specified")
+			errMsg := "no values specified"
+			if operator == v1alpha1.OrLogicalOperator {
+				errMessages = append(errMessages, errMsg)
+				continue
+			} else {
+				return false, errors.New(errMsg)
+			}
 		}
 
 		if f.Template != "" {
-			tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.Template)
-			if err != nil {
-				return false, err
+			tpl, tplErr := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.Template)
+			if tplErr != nil {
+				if operator == v1alpha1.OrLogicalOperator {
+					errMessages = append(errMessages, tplErr.Error())
+					continue
+				} else {
+					return false, tplErr
+				}
 			}
+
 			var buf bytes.Buffer
-			if err := tpl.Execute(&buf, map[string]interface{}{
-				"Input": res.String(),
-			}); err != nil {
-				return false, err
+			execErr := tpl.Execute(&buf, map[string]interface{}{
+				"Input": pathResult.String(),
+			})
+			if execErr != nil {
+				if operator == v1alpha1.OrLogicalOperator {
+					errMessages = append(errMessages, execErr.Error())
+					continue
+				} else {
+					return false, execErr
+				}
 			}
+
 			out := buf.String()
 			if out == "" || out == "<no value>" {
-				return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.Template)
+				if operator == v1alpha1.OrLogicalOperator {
+					errMessages = append(errMessages, fmt.Sprintf("template evaluated to empty string or no value: '%s'", f.Template))
+					continue
+				} else {
+					return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.Template)
+				}
 			}
-			res = gjson.Parse(strconv.Quote(out))
+
+			pathResult = gjson.Parse(strconv.Quote(out))
 		}
 
 		switch f.Type {
@@ -181,83 +274,148 @@ filter:
 			for _, value := range f.Value {
 				val, err := strconv.ParseBool(value)
 				if err != nil {
-					return false, err
+					if operator == v1alpha1.OrLogicalOperator {
+						errMessages = append(errMessages, err.Error())
+						continue filterData
+					} else {
+						return false, err
+					}
 				}
-				if val == res.Bool() {
-					continue filter
+
+				if val == pathResult.Bool() {
+					if operator == v1alpha1.OrLogicalOperator {
+						return true, nil
+					} else {
+						continue filterData
+					}
 				}
 			}
-			return false, nil
+
+			if operator == v1alpha1.OrLogicalOperator {
+				continue filterData
+			} else {
+				return false, nil
+			}
 
 		case v1alpha1.JSONTypeNumber:
 			for _, value := range f.Value {
 				filterVal, err := strconv.ParseFloat(value, 64)
-				eventVal := res.Float()
+				eventVal := pathResult.Float()
 				if err != nil {
-					return false, err
+					if operator == v1alpha1.OrLogicalOperator {
+						errMessages = append(errMessages, err.Error())
+						continue filterData
+					} else {
+						return false, err
+					}
 				}
 
+				compareResult := false
 				switch f.Comparator {
 				case v1alpha1.GreaterThanOrEqualTo:
 					if eventVal >= filterVal {
-						continue filter
+						compareResult = true
 					}
 				case v1alpha1.GreaterThan:
 					if eventVal > filterVal {
-						continue filter
+						compareResult = true
 					}
 				case v1alpha1.LessThan:
 					if eventVal < filterVal {
-						continue filter
+						compareResult = true
 					}
 				case v1alpha1.LessThanOrEqualTo:
 					if eventVal <= filterVal {
-						continue filter
+						compareResult = true
 					}
 				case v1alpha1.NotEqualTo:
 					if eventVal != filterVal {
-						continue filter
+						compareResult = true
 					}
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if eventVal == filterVal {
-						continue filter
+						compareResult = true
+					}
+				}
+
+				if compareResult {
+					if operator == v1alpha1.OrLogicalOperator {
+						return true, nil
+					} else {
+						continue filterData
 					}
 				}
 			}
-			return false, nil
+			if operator == v1alpha1.OrLogicalOperator {
+				continue filterData
+			} else {
+				return false, nil
+			}
 
 		case v1alpha1.JSONTypeString:
 			for _, value := range f.Value {
 				exp, err := regexp.Compile(value)
 				if err != nil {
-					return false, err
+					if operator == v1alpha1.OrLogicalOperator {
+						errMessages = append(errMessages, err.Error())
+						continue filterData
+					} else {
+						return false, err
+					}
 				}
 
-				match := exp.Match([]byte(res.String()))
+				matchResult := false
+				match := exp.Match([]byte(pathResult.String()))
 				switch f.Comparator {
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if match {
-						continue filter
+						matchResult = true
 					}
 				case v1alpha1.NotEqualTo:
 					if !match {
-						continue filter
+						matchResult = true
+					}
+				}
+
+				if matchResult {
+					if operator == v1alpha1.OrLogicalOperator {
+						return true, nil
+					} else {
+						continue filterData
 					}
 				}
 			}
-			return false, nil
+
+			if operator == v1alpha1.OrLogicalOperator {
+				continue filterData
+			} else {
+				return false, nil
+			}
 
 		default:
-			return false, fmt.Errorf("unsupported JSON type %s", f.Type)
+			errMsg := "unsupported JSON type '%s'"
+			if operator == v1alpha1.OrLogicalOperator {
+				errMessages = append(errMessages, fmt.Sprintf(errMsg, f.Type))
+				continue filterData
+			} else {
+				return false, fmt.Errorf(errMsg, f.Type)
+			}
 		}
 	}
-	return true, nil
+
+	if operator == v1alpha1.OrLogicalOperator {
+		if len(errMessages) > 0 {
+			return false, errors.New(strings.Join(errMessages, errMsgListSeparator))
+		}
+		return false, nil
+	} else {
+		return true, nil
+	}
 }
 
-// TODO review default result (false instead of true?)
-// filterContext checks the expected EventContext against the actual EventContext
+// filterContext checks the expectedResult EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
-// map types check that the expected map is a subset of the actual map
+// map types check that the expectedResult map is a subset of the actual map
 func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContext) bool {
 	if expected == nil {
 		return true
