@@ -34,11 +34,6 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TODO improve overall documentation
-// PLEASE NOTE: order of filters matters!!
-
-// TODO enable back action on save
-
 const (
 	errMsgListSeparator = " / "
 )

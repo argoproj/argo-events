@@ -194,9 +194,9 @@ type EventDependency struct {
 	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
 	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
-	// FiltersLogicalOperator defines how filters are evaluated together.
-	// Available values: and (&&, default), or (||)
-	// Is optional, and if left blank treated as and "&&".
+	// FiltersLogicalOperator defines how different filters are evaluated together.
+	// Available values: and (&&), or (||)
+	// Is optional and if left blank treated as and (&&).
 	FiltersLogicalOperator LogicalOperator `json:"filtersLogicalOperator,omitempty" protobuf:"bytes,5,opt,name=filtersLogicalOperator,casttype=LogicalOperator"`
 }
 
@@ -210,9 +210,9 @@ type EventDependencyFilter struct {
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 	// Exprs contains the list of expressions evaluated against the event payload.
 	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,4,rep,name=exprs"`
-	// LogicalOperator defines how multiple Data and/or Exprs filters are evaluated together.
-	// Available values: and (&&, default), or (||)
-	// Is optional, and if left blank treated as and "&&".
+	// LogicalOperator defines how multiple Data filters (if defined) or Exprs filters (if defined) are evaluated together.
+	// Available values: and (&&), or (||)
+	// Is optional and if left blank treated as and (&&).
 	LogicalOperator LogicalOperator `json:"logicalOperator,omitempty" protobuf:"bytes,5,opt,name=logicalOperator,casttype=LogicalOperator"`
 }
 
