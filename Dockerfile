@@ -17,10 +17,10 @@ RUN mv ./argo-linux-${ARCH} /usr/local/bin/argo
 COPY dist/argo-events-linux-${ARCH} /bin/argo-events
 RUN chmod +x /bin/argo-events
 
-ENV LUAJSON_VERSION=1.2.3
-RUN wget -q https://github.com/grafi-tt/lunajson/archive/refs/tags/${LUAJSON_VERSION}.tar.gz
-RUN tar -xf ${LUAJSON_VERSION}.tar.gz
-ADD lunajson-${LUAJSON_VERSION}/src /bin/
+ENV LUNAJSON_VERSION=1.2.3
+RUN wget -q https://github.com/grafi-tt/lunajson/archive/refs/tags/${LUNAJSON_VERSION}.tar.gz
+RUN tar -xf ${LUNAJSON_VERSION}.tar.gz
+ADD lunajson-${LUNAJSON_VERSION}/src /bin/
 
 ####################################################################################################
 # argo-events
