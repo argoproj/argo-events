@@ -179,23 +179,19 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				defer l.Close()
 				content, err := json.Marshal(&event)
 				if err != nil {
-					logger.Errorw("failed to parse the cloudevent for transformation", zap.Error(err))
 					return nil, err
 				}
 				l.SetGlobal("event", lua.LString(string(content)))
 				if err = l.DoString(dep.Transform); err != nil {
-					logger.Errorw("error running the transformation script", zap.Error(err))
 					return nil, err
 				}
 				lv := l.Get(-1)
 				str, ok := lv.(lua.LString)
 				if !ok {
-					logger.Error("transformation result type is not a JSON object string")
-					return nil, err
+					return nil, fmt.Errorf("transformation result type is not of string")
 				}
 				var result *cloudevents.Event
 				if err = json.Unmarshal([]byte(str), &result); err != nil {
-					logger.Errorw("failed to parse the transformation result", zap.Error(err))
 					return nil, err
 				}
 				return result, nil
