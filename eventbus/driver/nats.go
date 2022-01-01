@@ -241,7 +241,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		return
 	}
 
-	if depName == "" || !filter(depName, *event) {
+	if !filter(depName, *event) {
 		// message not interested
 		_ = m.Ack()
 		return
