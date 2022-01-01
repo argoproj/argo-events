@@ -2682,6 +2682,10 @@
         "name": {
           "description": "Name is a unique name of this dependency",
           "type": "string"
+        },
+        "transform": {
+          "description": "Transform refers to a Lua script used to transform the event",
+          "type": "string"
         }
       },
       "required": [

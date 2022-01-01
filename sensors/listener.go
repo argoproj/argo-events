@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -27,13 +28,6 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/antonmedv/expr"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/pkg/errors"
-	cronlib "github.com/robfig/cron/v3"
-	"go.uber.org/ratelimit"
-	"go.uber.org/zap"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
@@ -43,6 +37,13 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/pkg/errors"
+	cronlib "github.com/robfig/cron/v3"
+	"github.com/yuin/gopher-lua"
+	"go.uber.org/ratelimit"
+	"go.uber.org/zap"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var rateLimiters = make(map[string]ratelimit.Limiter)
@@ -166,6 +167,40 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 			defer conn.Close()
 
+			transformFunc := func(depName string, event cloudevents.Event) (*cloudevents.Event, error) {
+				dep, ok := depMapping[depName]
+				if !ok {
+					return nil, fmt.Errorf("dependency %s not found", dep.Name)
+				}
+				if dep.Transform == "" {
+					return &event, nil
+				}
+				l := lua.NewState()
+				defer l.Close()
+				content, err := json.Marshal(&event)
+				if err != nil {
+					logger.Errorw("failed to parse the cloudevent for transformation", zap.Error(err))
+					return nil, err
+				}
+				l.SetGlobal("event", lua.LString(string(content)))
+				if err = l.DoString(dep.Transform); err != nil {
+					logger.Errorw("error running the transformation script", zap.Error(err))
+					return nil, err
+				}
+				lv := l.Get(-1)
+				str, ok := lv.(lua.LString)
+				if !ok {
+					logger.Error("transformation result type is not a JSON object string")
+					return nil, err
+				}
+				var result *cloudevents.Event
+				if err = json.Unmarshal([]byte(str), &result); err != nil {
+					logger.Errorw("failed to parse the transformation result", zap.Error(err))
+					return nil, err
+				}
+				return result, nil
+			}
+
 			filterFunc := func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
@@ -203,7 +238,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
 
-					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, depExpression, deps, filterFunc, actionFunc)
+					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, depExpression, deps, transformFunc, filterFunc, actionFunc)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
 						return

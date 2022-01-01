@@ -660,6 +660,13 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
+					"transform": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Transform refers to a Lua script used to transform the event",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"name", "eventSourceName", "eventName"},
 			},

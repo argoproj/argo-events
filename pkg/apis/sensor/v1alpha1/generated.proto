@@ -249,6 +249,9 @@ message EventDependency {
 
   // Filters and rules governing toleration of success and constraints on the context and data of an event
   optional EventDependencyFilter filters = 4;
+
+  // Transform refers to a Lua script used to transform the event
+  optional string transform = 5;
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
