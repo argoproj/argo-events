@@ -420,18 +420,18 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketAuth(ref common.ReferenceCall
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "BitbucketAuth contains auth strategies for connecting to Bitbucket",
+				Description: "BitbucketAuth holds the different auth strategies for connecting to Bitbucket",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"basic": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Basic is BasicAuth authentication strategy.",
+							Description: "Basic is BasicAuth auth strategy.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketBasicAuth"),
 						},
 					},
 					"oauthToken": {
 						SchemaProps: spec.SchemaProps{
-							Description: "OAuthToken is OAuth Bearer token.",
+							Description: "OAuthToken refers to the K8s secret that holds the OAuth Bearer token.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -452,7 +452,7 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketBasicAuth(ref common.Referenc
 				Properties: map[string]spec.Schema{
 					"username": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Username refers to K8s secret that holds the username.",
+							Description: "Username refers to the K8s secret that holds the username.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -480,14 +480,14 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref common.Refere
 				Properties: map[string]spec.Schema{
 					"deleteHookOnFinish": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.",
+							Description: "DeleteHookOnFinish determines whether to delete the defined Bitbucket hook once the event source is stopped.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Description: "Metadata holds the user defined metadata which will be passed along the event payload.",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
@@ -503,7 +503,7 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref common.Refere
 					},
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook holds configuration for a REST endpoint",
+							Description: "Webhook refers to the configuration required to run an http server",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
@@ -538,7 +538,7 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref common.Refere
 					},
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ProjectKey is the key of project for which integration needs to setup",
+							Description: "ProjectKey is the key of the project for which integration needs to setup",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",

@@ -560,7 +560,7 @@ map[string]string
 <a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>)
 </p>
 <p>
-<p>BitbucketAuth contains auth strategies for connecting to Bitbucket</p>
+<p>BitbucketAuth holds the different auth strategies for connecting to Bitbucket</p>
 </p>
 <table>
 <thead>
@@ -581,7 +581,7 @@ BitbucketBasicAuth
 </td>
 <td>
 <em>(Optional)</em>
-<p>Basic is BasicAuth authentication strategy.</p>
+<p>Basic is BasicAuth auth strategy.</p>
 </td>
 </tr>
 <tr>
@@ -595,7 +595,7 @@ Kubernetes core/v1.SecretKeySelector
 </td>
 <td>
 <em>(Optional)</em>
-<p>OAuthToken is OAuth Bearer token.</p>
+<p>OAuthToken refers to the K8s secret that holds the OAuth Bearer token.</p>
 </td>
 </tr>
 </tbody>
@@ -627,7 +627,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>Username refers to K8s secret that holds the username.</p>
+<p>Username refers to the K8s secret that holds the username.</p>
 </td>
 </tr>
 <tr>
@@ -671,7 +671,7 @@ bool
 </td>
 <td>
 <em>(Optional)</em>
-<p>DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.</p>
+<p>DeleteHookOnFinish determines whether to delete the defined Bitbucket hook once the event source is stopped.</p>
 </td>
 </tr>
 <tr>
@@ -683,7 +683,7 @@ map[string]string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+<p>Metadata holds the user defined metadata which will be passed along the event payload.</p>
 </td>
 </tr>
 <tr>
@@ -696,7 +696,7 @@ WebhookContext
 </em>
 </td>
 <td>
-<p>Webhook holds configuration for a REST endpoint</p>
+<p>Webhook refers to the configuration required to run an http server</p>
 </td>
 </tr>
 <tr>
@@ -742,7 +742,7 @@ string
 </em>
 </td>
 <td>
-<p>ProjectKey is the key of project for which integration needs to setup</p>
+<p>ProjectKey is the key of the project for which integration needs to setup</p>
 </td>
 </tr>
 <tr>

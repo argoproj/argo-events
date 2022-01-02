@@ -597,7 +597,8 @@ BitbucketAuth
 </p>
 <p>
 <p>
-BitbucketAuth contains auth strategies for connecting to Bitbucket
+BitbucketAuth holds the different auth strategies for connecting to
+Bitbucket
 </p>
 </p>
 <table>
@@ -621,7 +622,7 @@ Description
 <td>
 <em>(Optional)</em>
 <p>
-Basic is BasicAuth authentication strategy.
+Basic is BasicAuth auth strategy.
 </p>
 </td>
 </tr>
@@ -634,7 +635,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 <em>(Optional)</em>
 <p>
-OAuthToken is OAuth Bearer token.
+OAuthToken refers to the K8s secret that holds the OAuth Bearer token.
 </p>
 </td>
 </tr>
@@ -673,7 +674,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-Username refers to K8s secret that holds the username.
+Username refers to the K8s secret that holds the username.
 </p>
 </td>
 </tr>
@@ -722,8 +723,8 @@ Description
 <td>
 <em>(Optional)</em>
 <p>
-DeleteHookOnFinish determines whether to delete the Bitbucket Server
-hook for the project once the event source is stopped.
+DeleteHookOnFinish determines whether to delete the defined Bitbucket
+hook once the event source is stopped.
 </p>
 </td>
 </tr>
@@ -734,7 +735,7 @@ hook for the project once the event source is stopped.
 <td>
 <em>(Optional)</em>
 <p>
-Metadata holds the user defined metadata which will passed along the
+Metadata holds the user defined metadata which will be passed along the
 event payload.
 </p>
 </td>
@@ -747,7 +748,7 @@ event payload.
 </td>
 <td>
 <p>
-Webhook holds configuration for a REST endpoint
+Webhook refers to the configuration required to run an http server
 </p>
 </td>
 </tr>
@@ -788,7 +789,8 @@ Owner of the repository.
 </td>
 <td>
 <p>
-ProjectKey is the key of project for which integration needs to setup
+ProjectKey is the key of the project for which integration needs to
+setup
 </p>
 </td>
 </tr>

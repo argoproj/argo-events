@@ -712,15 +712,15 @@
       }
     },
     "io.argoproj.eventsource.v1alpha1.BitbucketAuth": {
-      "description": "BitbucketAuth contains auth strategies for connecting to Bitbucket",
+      "description": "BitbucketAuth holds the different auth strategies for connecting to Bitbucket",
       "type": "object",
       "properties": {
         "basic": {
-          "description": "Basic is BasicAuth authentication strategy.",
+          "description": "Basic is BasicAuth auth strategy.",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketBasicAuth"
         },
         "oauthToken": {
-          "description": "OAuthToken is OAuth Bearer token.",
+          "description": "OAuthToken refers to the K8s secret that holds the OAuth Bearer token.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -738,7 +738,7 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "username": {
-          "description": "Username refers to K8s secret that holds the username.",
+          "description": "Username refers to the K8s secret that holds the username.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -760,7 +760,7 @@
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketAuth"
         },
         "deleteHookOnFinish": {
-          "description": "DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.",
+          "description": "DeleteHookOnFinish determines whether to delete the defined Bitbucket hook once the event source is stopped.",
           "type": "boolean"
         },
         "events": {
@@ -771,7 +771,7 @@
           }
         },
         "metadata": {
-          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "description": "Metadata holds the user defined metadata which will be passed along the event payload.",
           "type": "object",
           "additionalProperties": {
             "type": "string"
@@ -782,7 +782,7 @@
           "type": "string"
         },
         "projectKey": {
-          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "description": "ProjectKey is the key of the project for which integration needs to setup",
           "type": "string"
         },
         "repositorySlug": {
@@ -790,7 +790,7 @@
           "type": "string"
         },
         "webhook": {
-          "description": "Webhook holds configuration for a REST endpoint",
+          "description": "Webhook refers to the configuration required to run an http server",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         }
       }
