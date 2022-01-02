@@ -438,3 +438,13 @@ func AreSlicesEqual(first []string, second []string) bool {
 	}
 	return true
 }
+
+// SliceContains checks if a string slice contains a specific string
+func SliceContains(strSlice []string, targetStr string) bool {
+	for _, curr := range strSlice {
+		if curr == targetStr {
+			return true
+		}
+	}
+	return false
+}

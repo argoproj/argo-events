@@ -7,7 +7,7 @@ import (
 )
 
 // compareHook returns true if the hook matches the url and event.
-func compareHook(hook *gh.Hook, url string, event []string) bool {
+func compareHook(hook *gh.Hook, url string, events []string) bool {
 	if hook == nil {
 		return false
 	}
@@ -16,7 +16,10 @@ func compareHook(hook *gh.Hook, url string, event []string) bool {
 		return false
 	}
 
-	return common.AreSlicesEqual(hook.Events, event)
+	// Webhook events are equal if both old events slice and new events slice
+	// contain the same events, or if both have "*" event.
+	return common.AreSlicesEqual(hook.Events, events) ||
+		(common.SliceContains(hook.Events, "*") && common.SliceContains(events, "*"))
 }
 
 // getHook returns the hook that matches the url and event, or nil if not found.

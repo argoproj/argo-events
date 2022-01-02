@@ -240,7 +240,7 @@ func TestGetTLSConfig(t *testing.T) {
 	})
 }
 
-func TestSliceEqual(t *testing.T) {
+func TestAreSlicesEqual(t *testing.T) {
 	assert.True(t, AreSlicesEqual(nil, nil))
 	assert.True(t, AreSlicesEqual([]string{"hello"}, []string{"hello"}))
 	assert.True(t, AreSlicesEqual([]string{"hello", "world"}, []string{"hello", "world"}))
@@ -253,8 +253,6 @@ func TestSliceEqual(t *testing.T) {
 	assert.False(t, AreSlicesEqual([]string{"hello", "world"}, []string{"hello"}))
 	assert.False(t, AreSlicesEqual([]string{"hello", "world"}, []string{"hello", "moon"}))
 	assert.True(t, AreSlicesEqual([]string{"hello", "world"}, []string{"world", "hello"}))
-	assert.True(t, AreSlicesEqual([]string{"hello", "*"}, []string{"*"}))
-	assert.True(t, AreSlicesEqual([]string{"hello", "*"}, []string{"*", "world"}))
 	assert.True(t, AreSlicesEqual([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
 	assert.True(t, AreSlicesEqual([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
 	assert.True(t, AreSlicesEqual([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
@@ -263,5 +261,12 @@ func TestSliceEqual(t *testing.T) {
 	assert.False(t, AreSlicesEqual([]string{"*", "hello", "*"}, []string{"hello"}))
 	assert.False(t, AreSlicesEqual([]string{"hello"}, []string{"world", "world"}))
 	assert.False(t, AreSlicesEqual([]string{"hello", "hello"}, []string{"world", "world"}))
-	assert.True(t, AreSlicesEqual([]string{"*", "hello", "*"}, []string{"*", "world", "hello", "world"}))
+}
+
+func TestSliceContains(t *testing.T) {
+	assert.True(t, SliceContains([]string{"hello", "*"}, "*"))
+	assert.True(t, SliceContains([]string{"*", "world"}, "*"))
+	assert.True(t, SliceContains([]string{"*", "world"}, "world"))
+	assert.True(t, SliceContains([]string{"*", "hello", "*"}, "*"))
+	assert.False(t, SliceContains([]string{"hello", "world"}, "*"))
 }
