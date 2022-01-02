@@ -16,7 +16,7 @@ func compareHook(hook *gh.Hook, url string, event []string) bool {
 		return false
 	}
 
-	return common.SliceEqual(hook.Events, event)
+	return common.AreSlicesEqual(hook.Events, event)
 }
 
 // getHook returns the hook that matches the url and event, or nil if not found.

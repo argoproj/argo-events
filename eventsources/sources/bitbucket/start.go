@@ -339,5 +339,5 @@ func (router *Router) shouldUpdateWebhook(existingHookSubscription *WebhookSubsc
 	oldEvents := existingHookSubscription.Events
 	newEvents := router.bitbucketEventSource.Events
 
-	return common.SliceEqual(oldEvents, newEvents)
+	return !common.AreSlicesEqual(oldEvents, newEvents)
 }
