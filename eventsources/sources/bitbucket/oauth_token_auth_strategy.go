@@ -38,7 +38,7 @@ func NewOAuthTokenAuthStrategy(oauthTokenSecret *corev1.SecretKeySelector) (*OAu
 	}, nil
 }
 
-// Client implements the AuthStrategy interface.
+// BitbucketClient implements the AuthStrategy interface.
 func (as *OAuthTokenAuthStrategy) BitbucketClient() *bitbucketv2.Client {
 	return bitbucketv2.NewOAuthbearerToken(as.token)
 }

@@ -45,7 +45,7 @@ func NewBasicAuthStrategy(usernameSecret, passwordSecret *corev1.SecretKeySelect
 	}, nil
 }
 
-// Client implements the AuthStrategy interface.
+// BitbucketClient implements the AuthStrategy interface.
 func (as *BasicAuthStrategy) BitbucketClient() *bitbucketv2.Client {
 	return bitbucketv2.NewBasicAuth(as.username, as.password)
 }
