@@ -3,6 +3,7 @@ package dependencies
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -66,10 +67,10 @@ func applyJQTransform(event *cloudevents.Event, command string) (*cloudevents.Ev
 		if err = event.SetData(cloudevents.ApplicationJSON, resultContent); err != nil {
 			return nil, err
 		}
+		return event, nil
 	default:
 		return nil, fmt.Errorf("jq transformation output must be a JSON object")
 	}
-	return event, nil
 }
 
 func applyScriptTransform(event *cloudevents.Event, script string) (*cloudevents.Event, error) {
@@ -88,20 +89,110 @@ func applyScriptTransform(event *cloudevents.Event, script string) (*cloudevents
 	if err != nil {
 		return nil, err
 	}
-	l.SetGlobal("event", lua.LString(string(jsData)))
+	var payloadJson map[string]interface{}
+	if err = json.Unmarshal(jsData, &payloadJson); err != nil {
+		return nil, err
+	}
+	lEvent := mapToTable(payloadJson)
+	l.SetGlobal("event", lEvent)
 	if err = l.DoString(script); err != nil {
 		return nil, err
 	}
 	lv := l.Get(-1)
-	result, ok := lv.(lua.LString)
+	tbl, ok := lv.(*lua.LTable)
 	if !ok {
-		return nil, fmt.Errorf("transformation result type is not of string")
+		return nil, fmt.Errorf("transformation script output type is not of lua table")
 	}
-	if !gjson.Valid(result.String()) {
+	result := toGoValue(tbl)
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+	if !gjson.Valid(string(resultJson)) {
 		return nil, fmt.Errorf("script transformation output is not a JSON object")
 	}
-	if err = event.SetData(cloudevents.ApplicationJSON, []byte(result.String())); err != nil {
+	if err := event.SetData(cloudevents.ApplicationJSON, resultJson); err != nil {
 		return nil, err
 	}
 	return event, nil
+}
+
+// MapToTable converts a Go map to a lua table
+func mapToTable(m map[string]interface{}) *lua.LTable {
+	resultTable := &lua.LTable{}
+	for key, element := range m {
+		switch element.(type) {
+		case float64:
+			resultTable.RawSetString(key, lua.LNumber(element.(float64)))
+		case int64:
+			resultTable.RawSetString(key, lua.LNumber(element.(int64)))
+		case string:
+			resultTable.RawSetString(key, lua.LString(element.(string)))
+		case bool:
+			resultTable.RawSetString(key, lua.LBool(element.(bool)))
+		case []byte:
+			resultTable.RawSetString(key, lua.LString(string(element.([]byte))))
+		case map[string]interface{}:
+			table := mapToTable(element.(map[string]interface{}))
+			resultTable.RawSetString(key, table)
+		case time.Time:
+			resultTable.RawSetString(key, lua.LNumber(element.(time.Time).Unix()))
+		case []map[string]interface{}:
+			sliceTable := &lua.LTable{}
+			for _, s := range element.([]map[string]interface{}) {
+				table := mapToTable(s)
+				sliceTable.Append(table)
+			}
+			resultTable.RawSetString(key, sliceTable)
+		case []interface{}:
+			sliceTable := &lua.LTable{}
+			for _, s := range element.([]interface{}) {
+				switch s.(type) {
+				case map[string]interface{}:
+					t := mapToTable(s.(map[string]interface{}))
+					sliceTable.Append(t)
+				case float64:
+					sliceTable.Append(lua.LNumber(s.(float64)))
+				case string:
+					sliceTable.Append(lua.LString(s.(string)))
+				case bool:
+					sliceTable.Append(lua.LBool(s.(bool)))
+				}
+			}
+			resultTable.RawSetString(key, sliceTable)
+		}
+	}
+	return resultTable
+}
+
+// toGoValue converts the given LValue to a Go object.
+func toGoValue(lv lua.LValue) interface{} {
+	switch v := lv.(type) {
+	case *lua.LNilType:
+		return nil
+	case lua.LBool:
+		return bool(v)
+	case lua.LString:
+		return string(v)
+	case lua.LNumber:
+		return float64(v)
+	case *lua.LTable:
+		maxn := v.MaxN()
+		if maxn == 0 { // table
+			ret := make(map[string]interface{})
+			v.ForEach(func(key, value lua.LValue) {
+				keystr := key.String()
+				ret[keystr] = toGoValue(value)
+			})
+			return ret
+		} else { // array
+			ret := make([]interface{}, 0, maxn)
+			for i := 1; i <= maxn; i++ {
+				ret = append(ret, toGoValue(v.RawGetInt(i)))
+			}
+			return ret
+		}
+	default:
+		return v
+	}
 }
