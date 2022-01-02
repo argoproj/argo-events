@@ -42,7 +42,7 @@ func validate(eventSource *v1alpha1.BitbucketEventSource) error {
 	if eventSource.Owner == "" {
 		return fmt.Errorf("owner can't be empty")
 	}
-	if eventSource.ShouldCreateHook() && len(eventSource.Events) == 0 {
+	if eventSource.ShouldCreateWebhook() && len(eventSource.Events) == 0 {
 		return fmt.Errorf("events must be defined to create a bitbucket webhook")
 	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)

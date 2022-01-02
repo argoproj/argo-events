@@ -16,7 +16,7 @@ limitations under the License.
 package bitbucket
 
 import (
-	"github.com/ktrysmt/go-bitbucket"
+	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/metrics"
@@ -44,7 +44,7 @@ func (el *EventListener) GetEventName() string {
 
 // GetEventSourceType return type of event server
 func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.GitlabEvent
+	return apicommon.BitbucketEvent
 }
 
 // Router contains the configuration information for a route
@@ -52,7 +52,7 @@ type Router struct {
 	// route contains information about a API endpoint
 	route *webhook.Route
 	// client to connect to Bitbucket
-	client *bitbucket.Client
+	client *bitbucketv2.Client
 	// hookID holds the the uuid of the webhook that is created in Bitbucket
 	hookID string
 	// bitbucketEventSource is the event source that holds information to consume events from Bitbucket
@@ -77,5 +77,5 @@ type WebhookSubscription struct {
 // AuthStrategy is implemented by the different Bitbucket auth strategies that are supported
 type AuthStrategy interface {
 	// BitbucketClient returns a bitbucket client initialized with the specific auth strategy
-	BitbucketClient() *bitbucket.Client
+	BitbucketClient() *bitbucketv2.Client
 }

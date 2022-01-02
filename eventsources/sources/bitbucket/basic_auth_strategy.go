@@ -16,7 +16,7 @@ limitations under the License.
 package bitbucket
 
 import (
-	"github.com/ktrysmt/go-bitbucket"
+	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 
@@ -46,6 +46,6 @@ func NewBasicAuthStrategy(usernameSecret, passwordSecret *corev1.SecretKeySelect
 }
 
 // Client implements the AuthStrategy interface.
-func (as *BasicAuthStrategy) BitbucketClient() *bitbucket.Client {
-	return bitbucket.NewBasicAuth(as.username, as.password)
+func (as *BasicAuthStrategy) BitbucketClient() *bitbucketv2.Client {
+	return bitbucketv2.NewBasicAuth(as.username, as.password)
 }

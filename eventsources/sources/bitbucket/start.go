@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ktrysmt/go-bitbucket"
+	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -141,8 +141,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		bitbucketEventSource: bitbucketEventSource,
 	}
 
-	if !bitbucketEventSource.ShouldCreateHook() {
-		logger.Info("no need to create webhooks")
+	if !bitbucketEventSource.ShouldCreateWebhook() {
+		logger.Info("no need to create webhook")
 		return webhook.ManageRoute(ctx, router, controller, dispatch)
 	}
 
@@ -216,6 +216,7 @@ func (router *Router) saveBitbucketWebhook() error {
 		return errors.Wrap(err, "failed to list webhooks")
 	}
 
+	logger.Info("checking if webhook already exists...")
 	existingHookSubscription, isFound := router.findWebhook(hooks, formattedWebhookURL)
 	if isFound && router.shouldUpdateWebhook(existingHookSubscription) {
 		logger.Info("webhook already exists but requires an update...")
@@ -228,7 +229,7 @@ func (router *Router) saveBitbucketWebhook() error {
 		return nil
 	}
 
-	logger.Info("creating new webhook...")
+	logger.Info("webhook doesn't exist yet, creating a new webhook...")
 	newWebhook, err := router.createWebhook(formattedWebhookURL)
 	if err != nil {
 		logger.Errorw("failed to create new webhook", zap.Error(err))
@@ -242,9 +243,9 @@ func (router *Router) saveBitbucketWebhook() error {
 }
 
 // createWebhook creates a new webhook
-func (router *Router) createWebhook(formattedWebhookURL string) (*bitbucket.Webhook, error) {
+func (router *Router) createWebhook(formattedWebhookURL string) (*bitbucketv2.Webhook, error) {
 	es := router.bitbucketEventSource
-	opt := &bitbucket.WebhooksOptions{
+	opt := &bitbucketv2.WebhooksOptions{
 		Owner:       es.Owner,
 		RepoSlug:    es.RepositorySlug,
 		Url:         formattedWebhookURL,
@@ -257,9 +258,9 @@ func (router *Router) createWebhook(formattedWebhookURL string) (*bitbucket.Webh
 }
 
 // updateWebhook updates an existing webhook
-func (router *Router) updateWebhook(existingHookSubscription *WebhookSubscription) (*bitbucket.Webhook, error) {
+func (router *Router) updateWebhook(existingHookSubscription *WebhookSubscription) (*bitbucketv2.Webhook, error) {
 	es := router.bitbucketEventSource
-	opt := &bitbucket.WebhooksOptions{
+	opt := &bitbucketv2.WebhooksOptions{
 		Owner:       es.Owner,
 		RepoSlug:    es.RepositorySlug,
 		Uuid:        existingHookSubscription.Uuid,
@@ -275,7 +276,7 @@ func (router *Router) updateWebhook(existingHookSubscription *WebhookSubscriptio
 // deleteWebhook deletes an existing webhook
 func (router *Router) deleteWebhook(hookID string) error {
 	es := router.bitbucketEventSource
-	_, err := router.client.Repositories.Webhooks.Delete(&bitbucket.WebhooksOptions{
+	_, err := router.client.Repositories.Webhooks.Delete(&bitbucketv2.WebhooksOptions{
 		Owner:    es.Owner,
 		RepoSlug: es.RepositorySlug,
 		Uuid:     hookID,
@@ -287,7 +288,7 @@ func (router *Router) deleteWebhook(hookID string) error {
 // listWebhooks gets a list of all existing webhooks in target repository
 func (router *Router) listWebhooks() ([]WebhookSubscription, error) {
 	es := router.bitbucketEventSource
-	hooksResponse, err := router.client.Repositories.Webhooks.Gets(&bitbucket.WebhooksOptions{
+	hooksResponse, err := router.client.Repositories.Webhooks.Gets(&bitbucketv2.WebhooksOptions{
 		Owner:    es.Owner,
 		RepoSlug: es.RepositorySlug,
 		Active:   true,

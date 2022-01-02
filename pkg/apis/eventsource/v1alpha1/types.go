@@ -834,7 +834,7 @@ func (b BitbucketEventSource) HasConfiguredWebhook() bool {
 	return b.Webhook != nil && b.Webhook.URL != ""
 }
 
-func (b BitbucketEventSource) ShouldCreateHook() bool {
+func (b BitbucketEventSource) ShouldCreateWebhook() bool {
 	return (b.HasBitbucketBasicAuth() || b.HasBitbucketOAuthToken()) && b.HasConfiguredWebhook()
 }
 
