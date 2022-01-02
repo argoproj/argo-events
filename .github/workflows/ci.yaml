@@ -119,7 +119,7 @@ jobs:
         env:
           GOPATH: /home/runner/go
         run: KUBECONFIG=~/.kube/argo-events-e2e-config make test-functional | tee /tmp/e2e.log
-      - name: Upload e2e-controller logs
+      - name: Upload e2e results
         uses: actions/upload-artifact@v2
         with:
           name: e2e.log
