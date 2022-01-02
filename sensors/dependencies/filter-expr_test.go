@@ -286,7 +286,7 @@ func TestFilterExpr(t *testing.T) {
 			},
 			operator:       v1alpha1.OrLogicalOperator,
 			expectedResult: false,
-			expectedErrMsg: "path 'a.c' does not exist",
+			expectedErrMsg: "expr filter errors [path 'a.c' does not exist]",
 		},
 		{
 			name: "multiple filters, OR operator, one field not existing but not reached because first filter is false",
@@ -382,7 +382,7 @@ func TestFilterExpr(t *testing.T) {
 			},
 			operator:       v1alpha1.EmptyLogicalOperator,
 			expectedResult: false,
-			expectedErrMsg: "path 'a.c' does not exist",
+			expectedErrMsg: "expr filter error (path 'a.c' does not exist)",
 		},
 		{
 			name: "multiple filters, AND operator, one field not existing",
@@ -420,7 +420,7 @@ func TestFilterExpr(t *testing.T) {
 			},
 			operator:       v1alpha1.AndLogicalOperator,
 			expectedResult: false,
-			expectedErrMsg: "path 'a.c' does not exist",
+			expectedErrMsg: "expr filter error (path 'a.c' does not exist)",
 		},
 		{
 			name: "AND comparator inside expr (different than expr logical operator), one field not existing",
@@ -444,7 +444,7 @@ func TestFilterExpr(t *testing.T) {
 			},
 			operator:       v1alpha1.EmptyLogicalOperator,
 			expectedResult: false,
-			expectedErrMsg: "path 'a.d' does not exist",
+			expectedErrMsg: "expr filter error (path 'a.d' does not exist)",
 		},
 		{
 			name: "AND comparator inside expr (different than expr logical operator)",

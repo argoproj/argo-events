@@ -166,7 +166,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 			defer conn.Close()
 
-			filterFunc := func(depName string, event cloudevents.Event) bool {
+			filterFunc := func(depName string, cloudEvent cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
 					return false
@@ -174,11 +174,21 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				if dep.Filters == nil {
 					return true
 				}
-				e := convertEvent(event)
-				result, err := sensordependencies.Filter(e, dep.Filters, dep.FiltersLogicalOperator)
+				argoEvent := convertEvent(cloudEvent)
+
+				result, err := sensordependencies.Filter(argoEvent, dep.Filters, dep.FiltersLogicalOperator)
 				if err != nil {
-					logger.Errorw("failed to apply filters", zap.Error(err))
-					return false
+					if !result {
+						logger.Warnf("Event [%s] discarded due to filtering error: %s",
+							eventToString(argoEvent), err.Error())
+					} else {
+						logger.Warnf("Event [%s] passed but with filtering error: %s",
+							eventToString(argoEvent), err.Error())
+					}
+				} else {
+					if !result {
+						logger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
+					}
 				}
 				return result
 			}
@@ -431,6 +441,11 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 	}
 	logger.Infof("Dependency expression for trigger %s: %s", trigger.Template.Name, depExpression)
 	return depExpression, nil
+}
+
+func eventToString(event *v1alpha1.Event) string {
+	return fmt.Sprintf("ID '%s', Source '%s', Time '%s', Data '%s'",
+		event.Context.ID, event.Context.Source, event.Context.Time.Time.Format(time.RFC3339), string(event.Data))
 }
 
 func convertEvent(event cloudevents.Event) *v1alpha1.Event {

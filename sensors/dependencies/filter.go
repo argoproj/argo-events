@@ -36,6 +36,8 @@ import (
 
 const (
 	errMsgListSeparator = " / "
+	errMsgTemplate      = "%s filter error (%s)"
+	multiErrMsgTemplate = "%s filter errors [%s]"
 )
 
 // Filter filters the event with dependency's defined filters
@@ -53,25 +55,43 @@ func Filter(event *v1alpha1.Event, filter *v1alpha1.EventDependencyFilter, filte
 }
 
 // filterEvent applies the filters to an Event
-func filterEvent(filter *v1alpha1.EventDependencyFilter, filtersLogicalOperator v1alpha1.LogicalOperator, event *v1alpha1.Event) (bool, error) {
+func filterEvent(filter *v1alpha1.EventDependencyFilter, operator v1alpha1.LogicalOperator, event *v1alpha1.Event) (bool, error) {
+	var errMessages []string
+	if operator == v1alpha1.OrLogicalOperator {
+		errMessages = make([]string, 0)
+	}
+
 	exprFilter, exprErr := filterExpr(filter.Exprs, filter.LogicalOperator, event)
 	if exprErr != nil {
-		return false, exprErr
+		if operator != v1alpha1.OrLogicalOperator {
+			return false, exprErr
+		}
+		errMessages = append(errMessages, exprErr.Error())
 	}
 
 	dataFilter, dataErr := filterData(filter.Data, filter.LogicalOperator, event)
 	if dataErr != nil {
-		return false, dataErr
+		if operator != v1alpha1.OrLogicalOperator {
+			return false, dataErr
+		}
+		errMessages = append(errMessages, dataErr.Error())
 	}
 
 	ctxFilter := filterContext(filter.Context, event.Context)
 
 	timeFilter, timeErr := filterTime(filter.Time, event.Context.Time.Time)
 	if timeErr != nil {
-		return false, timeErr
+		if operator != v1alpha1.OrLogicalOperator {
+			return false, timeErr
+		}
+		errMessages = append(errMessages, timeErr.Error())
 	}
 
-	if filtersLogicalOperator == v1alpha1.OrLogicalOperator {
+	if operator == v1alpha1.OrLogicalOperator {
+		if len(errMessages) > 0 {
+			return exprFilter || dataFilter || ctxFilter || timeFilter,
+				errors.New(strings.Join(errMessages, errMsgListSeparator))
+		}
 		return exprFilter || dataFilter || ctxFilter || timeFilter, nil
 	}
 	return exprFilter && dataFilter && ctxFilter && timeFilter, nil
@@ -85,7 +105,7 @@ func filterExpr(filters []v1alpha1.ExprFilter, operator v1alpha1.LogicalOperator
 		return true, nil
 	}
 	if event == nil {
-		return false, fmt.Errorf("nil event")
+		return false, fmt.Errorf(errMsgTemplate, "expr", "nil event")
 	}
 
 	payload := event.Data
@@ -96,14 +116,14 @@ func filterExpr(filters []v1alpha1.ExprFilter, operator v1alpha1.LogicalOperator
 	var rawMsg *json.RawMessage
 	payloadErr := json.Unmarshal(payload, &rawMsg)
 	if payloadErr != nil {
-		return false, payloadErr
+		return false, fmt.Errorf(errMsgTemplate, "expr", payloadErr.Error())
 	}
 
 	var rawMsgData []byte
 	var rawErr error
 	rawMsgData, rawErr = json.Marshal(rawMsg)
 	if rawErr != nil {
-		return false, rawErr
+		return false, fmt.Errorf(errMsgTemplate, "expr", rawErr.Error())
 	}
 
 	var errMessages []string
@@ -121,7 +141,7 @@ filterExpr:
 					errMessages = append(errMessages, fmt.Sprintf(errMsg, field.Path))
 					continue filterExpr
 				} else {
-					return false, fmt.Errorf(errMsg, field.Path)
+					return false, fmt.Errorf(errMsgTemplate, "expr", fmt.Sprintf(errMsg, field.Path))
 				}
 			}
 			parameters[field.Name] = pathResult.Value()
@@ -137,7 +157,7 @@ filterExpr:
 				errMessages = append(errMessages, exprErr.Error())
 				continue
 			} else {
-				return false, exprErr
+				return false, fmt.Errorf(errMsgTemplate, "expr", exprErr.Error())
 			}
 		}
 
@@ -147,7 +167,7 @@ filterExpr:
 				errMessages = append(errMessages, resErr.Error())
 				continue
 			} else {
-				return false, resErr
+				return false, fmt.Errorf(errMsgTemplate, "expr", resErr.Error())
 			}
 		}
 
@@ -164,7 +184,7 @@ filterExpr:
 
 	if operator == v1alpha1.OrLogicalOperator {
 		if len(errMessages) > 0 {
-			return false, errors.New(strings.Join(errMessages, errMsgListSeparator))
+			return false, fmt.Errorf(multiErrMsgTemplate, "expr", strings.Join(errMessages, errMsgListSeparator))
 		}
 		return false, nil
 	} else {
@@ -180,7 +200,7 @@ func filterData(filters []v1alpha1.DataFilter, operator v1alpha1.LogicalOperator
 		return true, nil
 	}
 	if event == nil {
-		return false, fmt.Errorf("nil Event")
+		return false, fmt.Errorf(errMsgTemplate, "data", "nil Event")
 	}
 
 	payload := event.Data
@@ -190,14 +210,14 @@ func filterData(filters []v1alpha1.DataFilter, operator v1alpha1.LogicalOperator
 	var rawMsg *json.RawMessage
 	payloadErr := json.Unmarshal(payload, &rawMsg)
 	if payloadErr != nil {
-		return false, payloadErr
+		return false, fmt.Errorf(errMsgTemplate, "data", payloadErr.Error())
 	}
 
 	var rawMsgData []byte
 	var rawErr error
 	rawMsgData, rawErr = json.Marshal(rawMsg)
 	if rawErr != nil {
-		return false, rawErr
+		return false, fmt.Errorf(errMsgTemplate, "data", rawErr.Error())
 	}
 
 	var errMessages []string
@@ -213,7 +233,7 @@ filterData:
 				errMessages = append(errMessages, fmt.Sprintf(errMsg, f.Path))
 				continue
 			} else {
-				return false, fmt.Errorf(errMsg, f.Path)
+				return false, fmt.Errorf(errMsgTemplate, "data", fmt.Sprintf(errMsg, f.Path))
 			}
 		}
 
@@ -223,7 +243,7 @@ filterData:
 				errMessages = append(errMessages, errMsg)
 				continue
 			} else {
-				return false, errors.New(errMsg)
+				return false, fmt.Errorf(errMsgTemplate, "data", errMsg)
 			}
 		}
 
@@ -234,7 +254,7 @@ filterData:
 					errMessages = append(errMessages, tplErr.Error())
 					continue
 				} else {
-					return false, tplErr
+					return false, fmt.Errorf(errMsgTemplate, "data", tplErr.Error())
 				}
 			}
 
@@ -247,7 +267,7 @@ filterData:
 					errMessages = append(errMessages, execErr.Error())
 					continue
 				} else {
-					return false, execErr
+					return false, fmt.Errorf(errMsgTemplate, "data", execErr.Error())
 				}
 			}
 
@@ -257,7 +277,8 @@ filterData:
 					errMessages = append(errMessages, fmt.Sprintf("template evaluated to empty string or no value: '%s'", f.Template))
 					continue
 				} else {
-					return false, fmt.Errorf("template evaluated to empty string or no value: %s", f.Template)
+					return false, fmt.Errorf(errMsgTemplate, "data",
+						fmt.Sprintf("template '%s' evaluated to empty string or no value", f.Template))
 				}
 			}
 
@@ -273,7 +294,7 @@ filterData:
 						errMessages = append(errMessages, err.Error())
 						continue filterData
 					} else {
-						return false, err
+						return false, fmt.Errorf(errMsgTemplate, "data", err.Error())
 					}
 				}
 
@@ -301,7 +322,7 @@ filterData:
 						errMessages = append(errMessages, err.Error())
 						continue filterData
 					} else {
-						return false, err
+						return false, fmt.Errorf(errMsgTemplate, "data", err.Error())
 					}
 				}
 
@@ -355,7 +376,7 @@ filterData:
 						errMessages = append(errMessages, err.Error())
 						continue filterData
 					} else {
-						return false, err
+						return false, fmt.Errorf(errMsgTemplate, "data", err.Error())
 					}
 				}
 
@@ -393,14 +414,14 @@ filterData:
 				errMessages = append(errMessages, fmt.Sprintf(errMsg, f.Type))
 				continue filterData
 			} else {
-				return false, fmt.Errorf(errMsg, f.Type)
+				return false, fmt.Errorf(errMsgTemplate, "data", fmt.Sprintf(errMsg, f.Type))
 			}
 		}
 	}
 
 	if operator == v1alpha1.OrLogicalOperator {
 		if len(errMessages) > 0 {
-			return false, errors.New(strings.Join(errMessages, errMsgListSeparator))
+			return false, fmt.Errorf(multiErrMsgTemplate, "data", strings.Join(errMessages, errMsgListSeparator))
 		}
 		return false, nil
 	} else {
@@ -463,11 +484,11 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 	// Parse start and stop
 	startTime, startErr := common.ParseTime(timeFilter.Start, eventTime)
 	if startErr != nil {
-		return false, startErr
+		return false, fmt.Errorf(errMsgTemplate, "time", startErr.Error())
 	}
 	stopTime, stopErr := common.ParseTime(timeFilter.Stop, eventTime)
 	if stopErr != nil {
-		return false, stopErr
+		return false, fmt.Errorf(errMsgTemplate, "time", stopErr.Error())
 	}
 
 	// Filtering logic

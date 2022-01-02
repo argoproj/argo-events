@@ -115,7 +115,7 @@ func TestFilter(t *testing.T) {
 
 		pass, err := filterEvent(filter, filtersLogicalOperator, event)
 
-		assert.NoError(t, err)
+		assert.Error(t, err)
 		assert.False(t, pass)
 	})
 
@@ -149,7 +149,7 @@ func TestFilter(t *testing.T) {
 		assert.False(t, pass)
 	})
 
-	t.Run("test empty filtersLogicalOperator", func(t *testing.T) {
+	t.Run("test 'empty' filtersLogicalOperator", func(t *testing.T) {
 		// ctx filter: true
 		// data filter: false
 		filter := &v1alpha1.EventDependencyFilter{
@@ -159,9 +159,9 @@ func TestFilter(t *testing.T) {
 			},
 			Data: []v1alpha1.DataFilter{
 				{
-					Path:  "z",
+					Path:  "k",
 					Type:  v1alpha1.JSONTypeString,
-					Value: []string{"v"},
+					Value: []string{"z"},
 				},
 			},
 		}
@@ -189,16 +189,16 @@ func TestFilter(t *testing.T) {
 	})
 
 	t.Run("test 'and' filtersLogicalOperator", func(t *testing.T) {
-		// ctx filter: true
-		// data filter: false
+		// ctx filter: false
+		// data filter: true
 		filter := &v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
 				Type:   "webhook",
-				Source: "webhook-gateway",
+				Source: "webhook-fake",
 			},
 			Data: []v1alpha1.DataFilter{
 				{
-					Path:  "z",
+					Path:  "k",
 					Type:  v1alpha1.JSONTypeString,
 					Value: []string{"v"},
 				},
@@ -262,7 +262,7 @@ func TestFilter(t *testing.T) {
 
 		pass, err := filterEvent(filter, filtersLogicalOperator, event)
 
-		assert.NoError(t, err)
+		assert.Error(t, err)
 		assert.True(t, pass)
 	})
 }
