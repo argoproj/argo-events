@@ -16,7 +16,7 @@ EventSource and Sensor work.
 
 The common practice is to create an EventBus named `default` in the namespace. If
 you want to use a different name, or you want to have multiple EventBus in one
-namespace, you need to specifiy `eventBusName` in the spec of EventSource and
+namespace, you need to specify `eventBusName` in the spec of EventSource and
 Sensor correspondingly, so that they can find the right one. See EventSource
 [spec](https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#eventsourcespec)
 and Sensor
@@ -104,6 +104,14 @@ for the full spec of `native`.
 
 - `maxAge` - Max Age of existing messages, i.e. `72h`, `4h35m`, defaults to
   `72h`.
+
+- `maxMsgs` - Max number of messages before expiring the oldest messages, 0 means unlimited. Defaults to 1000000.
+
+- `maxBytes` - Total size of messages before expiring the oldest messages, 0 means unlimited. Defaults to 1GB.
+
+- `maxSubs` - Maximum number of subscriptions, 0 means unlimited. Defaults to 1000.
+
+- `maxPayload` - Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB.
 
 - `imagePullSecrets` - Secrets used to pull images.
 

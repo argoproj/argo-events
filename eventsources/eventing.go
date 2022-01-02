@@ -19,6 +19,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
@@ -64,7 +65,7 @@ type EventingServer interface {
 	GetEventSourceType() apicommon.EventSourceType
 
 	// Function to start listening events.
-	StartListening(ctx context.Context, dispatch func([]byte) error) error
+	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
@@ -400,13 +401,19 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					Jitter:   &jitter,
 				}
 				if err = common.Connect(&backoff, func() error {
-					return s.StartListening(ctx, func(data []byte) error {
+					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Options) error {
 						event := cloudevents.NewEvent()
 						event.SetID(fmt.Sprintf("%x", uuid.New()))
 						event.SetType(string(s.GetEventSourceType()))
 						event.SetSource(s.GetEventSourceName())
 						event.SetSubject(s.GetEventName())
 						event.SetTime(time.Now())
+						for _, opt := range opts {
+							err := opt(&event)
+							if err != nil {
+								return err
+							}
+						}
 						err := event.SetData(cloudevents.ApplicationJSON, data)
 						if err != nil {
 							return err

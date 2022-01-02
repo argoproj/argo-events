@@ -54,6 +54,9 @@ func main() {
 			oneOf = append(oneOf, obj{"$ref": "#/definitions/" + definitionKey})
 		}
 
+		transformInt64OrStringDefinition(definitions.(obj))
+		transformK8sIntOrStringDefinitions(definitions.(obj))
+
 		schema := obj{
 			"$id":         "http://events.argoproj.io/events.json",
 			"$schema":     "http://json-schema.org/schema#",
@@ -77,5 +80,37 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+	}
+}
+
+func transformInt64OrStringDefinition(definitions obj) {
+	int64OrStringDefinition := definitions["io.argoproj.common.Int64OrString"].(obj)
+	int64OrStringDefinition["type"] = []string{
+		"integer",
+		"string",
+	}
+}
+
+func transformK8sIntOrStringDefinitions(definitions obj) {
+	for _, d := range definitions {
+		transformK8sIntOrStringTypesInObject(d.(obj))
+	}
+}
+
+func transformK8sIntOrStringTypesInObject(object obj) {
+	props, ok := object["properties"].(obj)
+	if !ok {
+		format, ok := object["format"].(string)
+		if ok && format == "int-or-string" {
+			object["type"] = []string{
+				"integer",
+				"string",
+			}
+		}
+		return
+	}
+
+	for _, prop := range props {
+		transformK8sIntOrStringTypesInObject(prop.(obj))
 	}
 }

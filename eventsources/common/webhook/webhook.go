@@ -27,6 +27,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
@@ -177,7 +178,7 @@ func activateRoute(router Router, controller *Controller) {
 }
 
 // manageRouteChannels consumes data from route's data channel and stops the processing when the event source is stopped/removed
-func manageRouteChannels(router Router, dispatch func([]byte) error) {
+func manageRouteChannels(router Router, dispatch func([]byte, ...eventsourcecommon.Options) error) {
 	route := router.GetRoute()
 	logger := route.Logger
 	for {
@@ -198,7 +199,7 @@ func manageRouteChannels(router Router, dispatch func([]byte) error) {
 }
 
 // ManagerRoute manages the lifecycle of a route
-func ManageRoute(ctx context.Context, router Router, controller *Controller, dispatch func([]byte) error) error {
+func ManageRoute(ctx context.Context, router Router, controller *Controller, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	route := router.GetRoute()
 
 	logger := route.Logger
