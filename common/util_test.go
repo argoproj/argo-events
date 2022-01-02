@@ -265,4 +265,3 @@ func TestSliceEqual(t *testing.T) {
 	assert.False(t, SliceEqual([]string{"hello", "hello"}, []string{"world", "world"}))
 	assert.True(t, SliceEqual([]string{"*", "hello", "*"}, []string{"*", "world", "hello", "world"}))
 }
-

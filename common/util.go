@@ -443,4 +443,3 @@ func SliceEqual(first []string, second []string) bool {
 	}
 	return true
 }
-
