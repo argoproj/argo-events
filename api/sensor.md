@@ -1798,7 +1798,9 @@ context and data of an event
 
 <td>
 
-<code>transform</code></br> <em> string </em>
+<code>transform</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventDependencyTransformer">
+EventDependencyTransformer </a> </em>
 
 </td>
 
@@ -1943,6 +1945,101 @@ Data filter constraints with escalation
 
 Exprs contains the list of expressions evaluated against the event
 payload.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.EventDependencyTransformer">
+
+EventDependencyTransformer
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependency">EventDependency</a>)
+
+</p>
+
+<p>
+
+<p>
+
+EventDependencyTransformer transforms the event
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>jq</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JQ holds the jq command applied for transformation
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>script</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Script refers to a Lua script used to transform the event
 
 </p>
 

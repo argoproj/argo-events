@@ -18,7 +18,6 @@ package sensors
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -40,7 +39,6 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron/v3"
-	"github.com/yuin/gopher-lua"
 	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -172,29 +170,10 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				if !ok {
 					return nil, fmt.Errorf("dependency %s not found", dep.Name)
 				}
-				if dep.Transform == "" {
+				if dep.Transform == nil {
 					return &event, nil
 				}
-				l := lua.NewState()
-				defer l.Close()
-				content, err := json.Marshal(&event)
-				if err != nil {
-					return nil, err
-				}
-				l.SetGlobal("event", lua.LString(string(content)))
-				if err = l.DoString(dep.Transform); err != nil {
-					return nil, err
-				}
-				lv := l.Get(-1)
-				str, ok := lv.(lua.LString)
-				if !ok {
-					return nil, fmt.Errorf("transformation result type is not of string")
-				}
-				var result *cloudevents.Event
-				if err = json.Unmarshal([]byte(str), &result); err != nil {
-					return nil, err
-				}
-				return result, nil
+				return sensordependencies.ApplyTransform(&event, dep.Transform)
 			}
 
 			filterFunc := func(depName string, event cloudevents.Event) bool {

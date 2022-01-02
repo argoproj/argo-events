@@ -2684,8 +2684,8 @@
           "type": "string"
         },
         "transform": {
-          "description": "Transform refers to a Lua script used to transform the event",
-          "type": "string"
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyTransformer",
+          "description": "Transform refers to a Lua script used to transform the event"
         }
       },
       "required": [
@@ -2719,6 +2719,20 @@
         "time": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter",
           "description": "Time filter on the event with escalation"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.sensor.v1alpha1.EventDependencyTransformer": {
+      "description": "EventDependencyTransformer transforms the event",
+      "properties": {
+        "jq": {
+          "description": "JQ holds the jq command applied for transformation",
+          "type": "string"
+        },
+        "script": {
+          "description": "Script refers to a Lua script used to transform the event",
+          "type": "string"
         }
       },
       "type": "object"
