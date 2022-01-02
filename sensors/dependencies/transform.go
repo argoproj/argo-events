@@ -121,22 +121,22 @@ func applyScriptTransform(event *cloudevents.Event, script string) (*cloudevents
 func mapToTable(m map[string]interface{}) *lua.LTable {
 	resultTable := &lua.LTable{}
 	for key, element := range m {
-		switch element.(type) {
+		switch t := element.(type) {
 		case float64:
-			resultTable.RawSetString(key, lua.LNumber(element.(float64)))
+			resultTable.RawSetString(key, lua.LNumber(t))
 		case int64:
-			resultTable.RawSetString(key, lua.LNumber(element.(int64)))
+			resultTable.RawSetString(key, lua.LNumber(t))
 		case string:
-			resultTable.RawSetString(key, lua.LString(element.(string)))
+			resultTable.RawSetString(key, lua.LString(t))
 		case bool:
-			resultTable.RawSetString(key, lua.LBool(element.(bool)))
+			resultTable.RawSetString(key, lua.LBool(t))
 		case []byte:
-			resultTable.RawSetString(key, lua.LString(string(element.([]byte))))
+			resultTable.RawSetString(key, lua.LString(string(t)))
 		case map[string]interface{}:
 			table := mapToTable(element.(map[string]interface{}))
 			resultTable.RawSetString(key, table)
 		case time.Time:
-			resultTable.RawSetString(key, lua.LNumber(element.(time.Time).Unix()))
+			resultTable.RawSetString(key, lua.LNumber(t.Unix()))
 		case []map[string]interface{}:
 			sliceTable := &lua.LTable{}
 			for _, s := range element.([]map[string]interface{}) {
@@ -147,19 +147,20 @@ func mapToTable(m map[string]interface{}) *lua.LTable {
 		case []interface{}:
 			sliceTable := &lua.LTable{}
 			for _, s := range element.([]interface{}) {
-				switch s.(type) {
+				switch tt := s.(type) {
 				case map[string]interface{}:
 					t := mapToTable(s.(map[string]interface{}))
 					sliceTable.Append(t)
 				case float64:
-					sliceTable.Append(lua.LNumber(s.(float64)))
+					sliceTable.Append(lua.LNumber(tt))
 				case string:
-					sliceTable.Append(lua.LString(s.(string)))
+					sliceTable.Append(lua.LString(tt))
 				case bool:
-					sliceTable.Append(lua.LBool(s.(bool)))
+					sliceTable.Append(lua.LBool(tt))
 				}
 			}
 			resultTable.RawSetString(key, sliceTable)
+		default:
 		}
 	}
 	return resultTable

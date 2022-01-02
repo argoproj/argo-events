@@ -114,7 +114,6 @@ return "hello"
 		} else {
 			assert.Nil(t, err)
 			assert.Equal(t, tt.result.Data(), result.Data())
-
 		}
 	}
 }
