@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -125,7 +126,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
 	defer sources.Recover(el.GetEventName())
 
 	bitbucketEventSource := &el.BitbucketEventSource
