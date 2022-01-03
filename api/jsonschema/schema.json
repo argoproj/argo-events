@@ -2685,7 +2685,7 @@
         },
         "transform": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyTransformer",
-          "description": "Transform refers to a Lua script used to transform the event"
+          "description": "Transform transforms the event data"
         }
       },
       "required": [

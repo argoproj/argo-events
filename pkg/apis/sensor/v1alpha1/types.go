@@ -186,7 +186,7 @@ type EventDependency struct {
 	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
 	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
-	// Transform refers to a Lua script used to transform the event
+	// Transform transforms the event data
 	Transform *EventDependencyTransformer `json:"transform,omitempty" protobuf:"bytes,5,opt,name=transform"`
 }
 

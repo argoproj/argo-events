@@ -1808,7 +1808,7 @@ EventDependencyTransformer </a> </em>
 
 <p>
 
-Transform refers to a Lua script used to transform the event
+Transform transforms the event data
 
 </p>
 

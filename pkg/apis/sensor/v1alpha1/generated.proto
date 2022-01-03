@@ -1,5 +1,5 @@
 /*
-Copyright 2020 BlackRock, Inc.
+Copyright 2021 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -250,7 +250,7 @@ message EventDependency {
   // Filters and rules governing toleration of success and constraints on the context and data of an event
   optional EventDependencyFilter filters = 4;
 
-  // Transform refers to a Lua script used to transform the event
+  // Transform transforms the event data
   optional EventDependencyTransformer transform = 5;
 }
 
