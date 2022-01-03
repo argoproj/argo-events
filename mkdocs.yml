@@ -82,6 +82,7 @@ nav:
           - 'sensors/triggers/pulsar-trigger.md'
           - 'sensors/triggers/build-your-own-trigger.md'
       - 'sensors/trigger-conditions.md'
+      - 'sensors/transform.md'
       - 'sensors/ha.md'
       - More Information: 'sensors/more-about-sensors-and-triggers.md'
   - 'eventbus.md'

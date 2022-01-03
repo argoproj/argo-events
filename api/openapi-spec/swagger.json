@@ -2671,6 +2671,10 @@
         "name": {
           "description": "Name is a unique name of this dependency",
           "type": "string"
+        },
+        "transform": {
+          "description": "Transform transforms the event data",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyTransformer"
         }
       }
     },
@@ -2699,6 +2703,20 @@
         "time": {
           "description": "Time filter on the event with escalation",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.EventDependencyTransformer": {
+      "description": "EventDependencyTransformer transforms the event",
+      "type": "object",
+      "properties": {
+        "jq": {
+          "description": "JQ holds the jq command applied for transformation",
+          "type": "string"
+        },
+        "script": {
+          "description": "Script refers to a Lua script used to transform the event",
+          "type": "string"
         }
       }
     },
