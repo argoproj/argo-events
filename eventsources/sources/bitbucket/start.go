@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -32,6 +31,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	"github.com/argoproj/argo-events/pkg/apis/events"
@@ -219,14 +219,18 @@ func (router *Router) saveBitbucketWebhook() error {
 
 	logger.Info("checking if webhook already exists...")
 	existingHookSubscription, isFound := router.findWebhook(hooks, formattedWebhookURL)
-	if isFound && router.shouldUpdateWebhook(existingHookSubscription) {
-		logger.Info("webhook already exists but requires an update...")
-		if _, err = router.updateWebhook(existingHookSubscription); err != nil {
-			logger.Errorw("failed to update existing webhook", zap.Error(err))
-			return errors.Wrap(err, "failed to update existing webhook")
+	if isFound {
+		logger.Info("webhook already exists")
+		if router.shouldUpdateWebhook(existingHookSubscription) {
+			logger.Info("webhook requires an update")
+			if _, err = router.updateWebhook(existingHookSubscription); err != nil {
+				logger.Errorw("failed to update webhook", zap.Error(err))
+				return errors.Wrap(err, "failed to update existing webhook")
+			}
+
+			logger.Info("successfully updated the webhook")
 		}
 
-		logger.Info("successfully updated the existing webhook")
 		return nil
 	}
 
@@ -292,7 +296,6 @@ func (router *Router) listWebhooks() ([]WebhookSubscription, error) {
 	hooksResponse, err := router.client.Repositories.Webhooks.Gets(&bitbucketv2.WebhooksOptions{
 		Owner:    es.Owner,
 		RepoSlug: es.RepositorySlug,
-		Active:   true,
 	})
 	if err != nil {
 		return nil, err
@@ -340,5 +343,5 @@ func (router *Router) shouldUpdateWebhook(existingHookSubscription *WebhookSubsc
 	oldEvents := existingHookSubscription.Events
 	newEvents := router.bitbucketEventSource.Events
 
-	return !common.AreSlicesEqual(oldEvents, newEvents)
+	return !common.ElementsMatch(oldEvents, newEvents)
 }

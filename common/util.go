@@ -405,8 +405,9 @@ func uniqueVolumeMounts(mounts []v1.VolumeMount) []v1.VolumeMount {
 	return rMounts
 }
 
-// AreSlicesEqual returns true if the two provided string slices are equal.
-func AreSlicesEqual(first []string, second []string) bool {
+// ElementsMatch returns true if the two provided string slices contain the same elements while avoiding duplications.
+// WARN: this method avoids duplications.
+func ElementsMatch(first []string, second []string) bool {
 	if len(first) == 0 && len(second) == 0 {
 		return true
 	}
@@ -414,22 +415,20 @@ func AreSlicesEqual(first []string, second []string) bool {
 		return false
 	}
 
-	tmp := make(map[string]int)
+	diff := make(map[string]int)
 	for _, str := range first {
-		tmp[str] = 1
+		diff[str] = 1
 	}
 
 	for _, str := range second {
-		v, ok := tmp[str]
-		if !ok || v == -1 {
-			tmp[str] = -1
+		if _, ok := diff[str]; !ok {
+			return false
 		} else {
-			tmp[str] = 2
+			diff[str] = 2
 		}
 	}
 
-	for _, v := range tmp {
-		// -1: only exists in second
+	for _, v := range diff {
 		// 1: only exists in first
 		// 2: exists in both
 		if v < 2 {

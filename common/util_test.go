@@ -240,27 +240,27 @@ func TestGetTLSConfig(t *testing.T) {
 	})
 }
 
-func TestAreSlicesEqual(t *testing.T) {
-	assert.True(t, AreSlicesEqual(nil, nil))
-	assert.True(t, AreSlicesEqual([]string{"hello"}, []string{"hello"}))
-	assert.True(t, AreSlicesEqual([]string{"hello", "world"}, []string{"hello", "world"}))
-	assert.True(t, AreSlicesEqual([]string{}, []string{}))
+func TestElementsMatch(t *testing.T) {
+	assert.True(t, ElementsMatch(nil, nil))
+	assert.True(t, ElementsMatch([]string{"hello"}, []string{"hello"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "world"}))
+	assert.True(t, ElementsMatch([]string{}, []string{}))
 
-	assert.False(t, AreSlicesEqual([]string{"hello"}, nil))
-	assert.False(t, AreSlicesEqual([]string{"hello"}, []string{}))
-	assert.False(t, AreSlicesEqual([]string{}, []string{"hello"}))
-	assert.False(t, AreSlicesEqual([]string{"hello"}, []string{"hello", "world"}))
-	assert.False(t, AreSlicesEqual([]string{"hello", "world"}, []string{"hello"}))
-	assert.False(t, AreSlicesEqual([]string{"hello", "world"}, []string{"hello", "moon"}))
-	assert.True(t, AreSlicesEqual([]string{"hello", "world"}, []string{"world", "hello"}))
-	assert.True(t, AreSlicesEqual([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, AreSlicesEqual([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, AreSlicesEqual([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
-	assert.False(t, AreSlicesEqual([]string{"hello"}, []string{"*", "hello"}))
-	assert.False(t, AreSlicesEqual([]string{"hello", "*"}, []string{"hello"}))
-	assert.False(t, AreSlicesEqual([]string{"*", "hello", "*"}, []string{"hello"}))
-	assert.False(t, AreSlicesEqual([]string{"hello"}, []string{"world", "world"}))
-	assert.False(t, AreSlicesEqual([]string{"hello", "hello"}, []string{"world", "world"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, nil))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{}))
+	assert.False(t, ElementsMatch([]string{}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"hello", "world"}))
+	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "moon"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"world", "hello"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, ElementsMatch([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, ElementsMatch([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"*", "hello"}))
+	assert.False(t, ElementsMatch([]string{"hello", "*"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"*", "hello", "*"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"world", "world"}))
+	assert.False(t, ElementsMatch([]string{"hello", "hello"}, []string{"world", "world"}))
 }
 
 func TestSliceContains(t *testing.T) {

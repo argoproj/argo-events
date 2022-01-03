@@ -61,17 +61,17 @@ type Router struct {
 
 type WebhookSubscription struct {
 	// Uuid holds the webhook's ID
-	Uuid string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The Url events get delivered to.
-	Url string `json:"url,omitempty"`
+	Url string `json:"url"`
 	// Description holds a user-defined description of the webhook.
 	Description string `json:"description,omitempty"`
 	// Subject holds metadata about the subject of the webhook (repository, etc.)
-	Subject *interface{} `json:"subject,omitempty"`
+	Subject map[string]interface{} `json:"subject,omitempty"`
 	// Active refers to status of the webhook for event deliveries.
 	Active bool `json:"active,omitempty"`
 	// The Events this webhook is subscribed to.
-	Events []string `json:"events,omitempty"`
+	Events []string `json:"events"`
 }
 
 // AuthStrategy is implemented by the different Bitbucket auth strategies that are supported

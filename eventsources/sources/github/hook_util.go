@@ -18,7 +18,7 @@ func compareHook(hook *gh.Hook, url string, events []string) bool {
 
 	// Webhook events are equal if both old events slice and new events slice
 	// contain the same events, or if both have "*" event.
-	return common.AreSlicesEqual(hook.Events, events) ||
+	return common.ElementsMatch(hook.Events, events) ||
 		(common.SliceContains(hook.Events, "*") && common.SliceContains(events, "*"))
 }
 
