@@ -23,6 +23,7 @@ import (
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -237,5 +238,24 @@ func TestGetTLSConfig(t *testing.T) {
 		_, err := GetTLSConfig(c)
 		assert.NotNil(t, err)
 		assert.True(t, strings.Contains(err.Error(), "failed to read ca cert file"))
+	})
+}
+
+func TestCopyStringMap(t *testing.T) {
+	m1 := map[string]string{
+		"a": "aaa",
+		"b": "bbb",
+	}
+	m2 := CopyStringMap(m1)
+
+	m1["a"] = "zzz"
+	delete(m1, "b")
+
+	require.Equal(t, m1, map[string]string{
+		"a": "zzz",
+	})
+	require.Equal(t, m2, map[string]string{
+		"a": "aaa",
+		"b": "bbb",
 	})
 }

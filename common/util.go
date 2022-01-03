@@ -426,3 +426,12 @@ func uniqueVolumeMounts(mounts []v1.VolumeMount) []v1.VolumeMount {
 	}
 	return rMounts
 }
+
+func CopyStringMap(originalMap map[string]string) map[string]string {
+	newMap := make(map[string]string)
+	for k, v := range originalMap {
+		newMap[k] = v
+	}
+
+	return newMap
+}

@@ -48,16 +48,17 @@ type ErrorContext struct {
 	metav1.TypeMeta
 }
 
-type objectUniqueness struct {
-	Group     string `json:"group"`
-	Version   string `json:"version"`
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
+type object struct {
+	Group     string            `json:"group"`
+	Version   string            `json:"version"`
+	Kind      string            `json:"kind"`
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace"`
+	Labels    map[string]string `json:"labels"`
 }
 
 type errorContext struct {
-	Object objectUniqueness `json:"object"`
+	Object object `json:"object"`
 }
 
 type errorPayload struct {
@@ -129,12 +130,13 @@ func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload 
 	return errorPayload{
 		ErrMsg: errMsg,
 		Context: errorContext{
-			Object: objectUniqueness{
+			Object: object{
 				Name:      errContext.Name,
 				Namespace: errContext.Namespace,
 				Group:     gvk.Group,
 				Version:   gvk.Version,
 				Kind:      gvk.Kind,
+				Labels:    errContext.Labels,
 			},
 		},
 	}

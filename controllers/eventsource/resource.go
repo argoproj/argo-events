@@ -174,6 +174,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: args.EventSource.Namespace,
 			Name:      args.EventSource.Name,
+			Labels:    common.CopyStringMap(args.EventSource.Labels),
 		},
 		Spec: args.EventSource.Spec,
 	}
