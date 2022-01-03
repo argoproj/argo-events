@@ -139,8 +139,9 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			APIVersion: sensor.APIVersion,
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: sensor.Namespace,
-			Name:      sensor.Name,
+			Namespace: sensor.Name,
+			Name:      sensor.Namespace,
+			Labels:    common.CopyStringMap(sensor.Labels),
 		},
 		Spec: sensor.Spec,
 	}
