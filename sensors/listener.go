@@ -27,13 +27,6 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/antonmedv/expr"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/pkg/errors"
-	cronlib "github.com/robfig/cron/v3"
-	"go.uber.org/ratelimit"
-	"go.uber.org/zap"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
@@ -43,6 +36,12 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/pkg/errors"
+	cronlib "github.com/robfig/cron/v3"
+	"go.uber.org/ratelimit"
+	"go.uber.org/zap"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var rateLimiters = make(map[string]ratelimit.Limiter)
@@ -166,6 +165,17 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 			defer conn.Close()
 
+			transformFunc := func(depName string, event cloudevents.Event) (*cloudevents.Event, error) {
+				dep, ok := depMapping[depName]
+				if !ok {
+					return nil, fmt.Errorf("dependency %s not found", dep.Name)
+				}
+				if dep.Transform == nil {
+					return &event, nil
+				}
+				return sensordependencies.ApplyTransform(&event, dep.Transform)
+			}
+
 			filterFunc := func(depName string, event cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
@@ -203,7 +213,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
 
-					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, depExpression, deps, filterFunc, actionFunc)
+					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, depExpression, deps, transformFunc, filterFunc, actionFunc)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
 						return
