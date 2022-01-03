@@ -1170,6 +1170,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1400,14 +1412,14 @@
 <li>
 <p>Create a secret called <code>azure-event-hubs-secret</code> as follows:</p>
 <p><strong>NOTE: <code>sharedAccessKey</code> refers to the <code>Primary Key</code> and <code>sharedAccessKeyName</code> refers to the Name of the Shared Access Policy.</strong></p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span>
-<span class="n">type</span><span class="o">:</span> <span class="n">Opaque</span>
-<span class="n">data</span><span class="o">:</span>
-  <span class="n">sharedAccessKey</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">shared</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
-  <span class="n">sharedAccessKeyName</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">shared</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
+<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span><span class="w"></span>
+<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
+<span class="n">data</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">sharedAccessKey</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">shared</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">  </span><span class="n">sharedAccessKeyName</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">shared</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span><span class="w"></span>
 </code></pre></div>
 
 </li>
@@ -1419,35 +1431,35 @@
 </li>
 <li>
 <p>Create the sensor with the following template. Replace the necessary values for <code>fqdn</code> and <code>hubName</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="p">:</span>
-  <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">hub</span>
-<span class="n">spec</span><span class="p">:</span>
-  <span class="n">dependencies</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">webhook</span>
-      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
-      <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">eventhubs</span><span class="o">-</span><span class="n">trigger</span>
-      <span class="n">azureEventHubs</span><span class="p">:</span>
-      <span class="c1"># FQDN of the EventsHub namespace you created</span>
-      <span class="c1"># More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string</span>
-        <span class="n">fqdn</span><span class="p">:</span> <span class="n">eventhubs_fqdn</span>
-        <span class="n">sharedAccessKeyName</span><span class="p">:</span>
-          <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span>
-          <span class="n">key</span><span class="p">:</span> <span class="n">sharedAccessKeyName</span>
-        <span class="n">sharedAccessKey</span><span class="p">:</span>
-          <span class="n">name</span><span class="p">:</span> <span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span>
-          <span class="n">key</span><span class="p">:</span> <span class="n">sharedAccessKey</span>
-        <span class="c1"># Event Hub path/name</span>
-        <span class="n">hubName</span><span class="p">:</span> <span class="n">hub_name</span>
-        <span class="n">payload</span><span class="p">:</span>
-          <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-              <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-              <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">message</span>
-            <span class="n">dest</span><span class="p">:</span> <span class="n">message</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="n">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
+<span class="n">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">hub</span><span class="w"></span>
+<span class="n">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventName</span><span class="p">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="w">  </span><span class="n">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">eventhubs</span><span class="o">-</span><span class="n">trigger</span><span class="w"></span>
+<span class="w">      </span><span class="n">azureEventHubs</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># FQDN of the EventsHub namespace you created</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string</span><span class="w"></span>
+<span class="w">        </span><span class="n">fqdn</span><span class="p">:</span><span class="w"> </span><span class="n">eventhubs_fqdn</span><span class="w"></span>
+<span class="w">        </span><span class="n">sharedAccessKeyName</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span><span class="w"></span>
+<span class="w">          </span><span class="n">key</span><span class="p">:</span><span class="w"> </span><span class="n">sharedAccessKeyName</span><span class="w"></span>
+<span class="w">        </span><span class="n">sharedAccessKey</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">hubs</span><span class="o">-</span><span class="n">secret</span><span class="w"></span>
+<span class="w">          </span><span class="n">key</span><span class="p">:</span><span class="w"> </span><span class="n">sharedAccessKey</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Event Hub path/name</span><span class="w"></span>
+<span class="w">        </span><span class="n">hubName</span><span class="p">:</span><span class="w"> </span><span class="n">hub_name</span><span class="w"></span>
+<span class="w">        </span><span class="n">payload</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">              </span><span class="n">dataKey</span><span class="p">:</span><span class="w"> </span><span class="n">body</span><span class="o">.</span><span class="n">message</span><span class="w"></span>
+<span class="w">            </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
 </code></pre></div>
 
 </li>

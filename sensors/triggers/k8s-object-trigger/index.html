@@ -1184,6 +1184,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1432,40 +1444,40 @@ set up event-driven pipelines for existing workloads.</p>
 </li>
 <li>
 <p>To trigger a pod, we need to create a sensor as defined below.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">template</span><span class="o">:</span>
-    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">create</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">sa</span> <span class="err">#</span> <span class="n">A</span> <span class="n">service</span> <span class="n">account</span> <span class="n">has</span> <span class="n">privileges</span> <span class="n">to</span> <span class="n">create</span> <span class="n">a</span> <span class="n">Pod</span>
-  <span class="n">dependencies</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="o">:</span> <span class="n">webhook</span>
-      <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
-        <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">k8s</span><span class="o">:</span>
-          <span class="n">operation</span><span class="o">:</span> <span class="n">create</span>
-          <span class="n">source</span><span class="o">:</span>
-            <span class="n">resource</span><span class="o">:</span>
-              <span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
-              <span class="n">kind</span><span class="o">:</span> <span class="n">Pod</span>
-              <span class="n">metadata</span><span class="o">:</span>
-                <span class="n">generateName</span><span class="o">:</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">-</span>
-              <span class="n">spec</span><span class="o">:</span>
-                <span class="n">containers</span><span class="o">:</span>
-                  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">hello</span><span class="o">-</span><span class="n">container</span>
-                    <span class="n">args</span><span class="o">:</span>
-                      <span class="o">-</span> <span class="s2">&quot;hello-world&quot;</span>
-                    <span class="n">command</span><span class="o">:</span>
-                      <span class="o">-</span> <span class="n">cowsay</span>
-                    <span class="n">image</span><span class="o">:</span> <span class="s2">&quot;docker/whalesay:latest&quot;</span>
-          <span class="n">parameters</span><span class="o">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">spec</span><span class="o">.</span><span class="na">containers</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="mi">0</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
+<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span><span class="w"></span>
+<span class="n">spec</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">template</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">serviceAccountName</span><span class="o">:</span><span class="w"> </span><span class="n">create</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">sa</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">privileges</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Pod</span><span class="w"></span>
+<span class="w">  </span><span class="n">dependencies</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventSourceName</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventName</span><span class="o">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="w">  </span><span class="n">triggers</span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">template</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">trigger</span><span class="w"></span>
+<span class="w">        </span><span class="n">k8s</span><span class="o">:</span><span class="w"></span>
+<span class="w">          </span><span class="n">operation</span><span class="o">:</span><span class="w"> </span><span class="n">create</span><span class="w"></span>
+<span class="w">          </span><span class="n">source</span><span class="o">:</span><span class="w"></span>
+<span class="w">            </span><span class="n">resource</span><span class="o">:</span><span class="w"></span>
+<span class="w">              </span><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
+<span class="w">              </span><span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Pod</span><span class="w"></span>
+<span class="w">              </span><span class="n">metadata</span><span class="o">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">generateName</span><span class="o">:</span><span class="w"> </span><span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">-</span><span class="w"></span>
+<span class="w">              </span><span class="n">spec</span><span class="o">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">containers</span><span class="o">:</span><span class="w"></span>
+<span class="w">                  </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">hello</span><span class="o">-</span><span class="n">container</span><span class="w"></span>
+<span class="w">                    </span><span class="n">args</span><span class="o">:</span><span class="w"></span>
+<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;hello-world&quot;</span><span class="w"></span>
+<span class="w">                    </span><span class="n">command</span><span class="o">:</span><span class="w"></span>
+<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="n">cowsay</span><span class="w"></span>
+<span class="w">                    </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;docker/whalesay:latest&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="n">parameters</span><span class="o">:</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="o">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">dependencyName</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">              </span><span class="n">dest</span><span class="o">:</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="na">containers</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="mi">0</span><span class="w"></span>
 </code></pre></div>
 
 </li>

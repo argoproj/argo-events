@@ -1184,6 +1184,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1411,21 +1423,21 @@
 http requests.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source to the sensor looks like following,</p>
-<div class="codehilite"><pre><span></span><code>    <span class="p">{</span>
-        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;specversion&quot;</span><span class="p">:</span> <span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">&quot;header&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">/*</span> <span class="n">the</span> <span class="n">headers</span> <span class="n">from</span> <span class="n">the</span> <span class="n">request</span> <span class="n">received</span> <span class="n">by</span> <span class="n">the</span> <span class="n">event</span><span class="o">-</span><span class="n">source</span> <span class="n">from</span> <span class="n">the</span> <span class="n">external</span> <span class="n">entity</span> <span class="o">*/</span><span class="p">},</span>
-          <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">/*</span> <span class="n">the</span> <span class="n">payload</span> <span class="n">of</span> <span class="n">the</span> <span class="n">request</span> <span class="n">received</span> <span class="n">by</span> <span class="n">the</span> <span class="n">event</span><span class="o">-</span><span class="n">source</span> <span class="n">from</span> <span class="n">the</span> <span class="n">external</span> <span class="n">entity</span> <span class="o">*/</span><span class="p">},</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="o">/*</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">headers</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="n">received</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">event</span><span class="o">-</span><span class="n">source</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="n">entity</span><span class="w"> </span><span class="o">*/</span><span class="p">},</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">/*</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="n">received</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">event</span><span class="o">-</span><span class="n">source</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="n">entity</span><span class="w"> </span><span class="o">*/</span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>

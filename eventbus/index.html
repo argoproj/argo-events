@@ -1121,6 +1121,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1479,13 +1491,13 @@ and Sensor
 Streaming service with <code>exotic</code> NATS EventBus.</p>
 <h3 id="native">Native<a class="headerlink" href="#native" title="Permanent link">&para;</a></h3>
 <p>A simplest <code>native</code> NATS EventBus example:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">nats</span><span class="p">:</span>
-    <span class="nt">native</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">native</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w"></span>
 </code></pre></div>
 
 <p>The example above brings up a NATS Streaming
@@ -1493,19 +1505,19 @@ Streaming service with <code>exotic</code> NATS EventBus.</p>
 with 3 replicas in the namespace.</p>
 <p>The following example shows an EventBus with <code>token</code> auth strategy and
 persistent volumes.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">nats</span><span class="p">:</span>
-    <span class="nt">native</span><span class="p">:</span>
-      <span class="nt">replicas</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span> <span class="c1"># optional, defaults to 3, and requires minimal 3</span>
-      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span> <span class="c1"># optional, default to none</span>
-      <span class="nt">persistence</span><span class="p">:</span> <span class="c1"># optional</span>
-        <span class="nt">storageClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">standard</span>
-        <span class="nt">accessMode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
-        <span class="nt">volumeSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10Gi</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">native</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"> </span><span class="c1"># optional, defaults to 3, and requires minimal 3</span><span class="w"></span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"> </span><span class="c1"># optional, default to none</span><span class="w"></span>
+<span class="w">      </span><span class="nt">persistence</span><span class="p">:</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
+<span class="w">        </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard</span><span class="w"></span>
+<span class="w">        </span><span class="nt">accessMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span><span class="w"></span>
+<span class="w">        </span><span class="nt">volumeSize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10Gi</span><span class="w"></span>
 </code></pre></div>
 
 <h4 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h4>
@@ -1596,28 +1608,28 @@ for the full spec of <code>native</code>.</p>
   below, if you want to do AZ (Availablity Zone) anti-affinity, change the value
   of <code>topologyKey</code> from <code>kubernetes.io/hostname</code> to
   <code>topology.kubernetes.io/zone</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># Best effort</span>
-<span class="nt">affinity</span><span class="p">:</span>
-  <span class="nt">podAntiAffinity</span><span class="p">:</span>
-    <span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="nt">podAffinityTerm</span><span class="p">:</span>
-          <span class="nt">labelSelector</span><span class="p">:</span>
-            <span class="nt">matchLabels</span><span class="p">:</span>
-              <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
-              <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-          <span class="nt">topologyKey</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
-        <span class="nt">weight</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Best effort</span><span class="w"></span>
+<span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podAffinityTerm</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
+<span class="w">              </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">          </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
+<span class="w">        </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
 </code></pre></div>
 
-<div class="codehilite"><pre><span></span><code><span class="c1"># Hard requirement</span>
-<span class="nt">affinity</span><span class="p">:</span>
-  <span class="nt">podAntiAffinity</span><span class="p">:</span>
-    <span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="nt">labelSelector</span><span class="p">:</span>
-          <span class="nt">matchLabels</span><span class="p">:</span>
-            <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
-            <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-        <span class="nt">topologyKey</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Hard requirement</span><span class="w"></span>
+<span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
+<span class="w">            </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">        </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
 </code></pre></div>
 
 <h4 id="more-about-native-nats-eventbus">More About Native NATS EventBus<a class="headerlink" href="#more-about-native-nats-eventbus" title="Permanent link">&para;</a></h4>
@@ -1642,19 +1654,19 @@ for the full spec of <code>native</code>.</p>
 </ul>
 <h3 id="exotic">Exotic<a class="headerlink" href="#exotic" title="Permanent link">&para;</a></h3>
 <p>To use an existing NATS Streaming service, follow the example below.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">nats</span><span class="p">:</span>
-    <span class="nt">exotic</span><span class="p">:</span>
-      <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nats://xxxxx:xxx</span>
-      <span class="nt">clusterID</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cluster-id</span>
-      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span>
-      <span class="nt">accessSecret</span><span class="p">:</span>
-        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my-secret-name</span>
-        <span class="nt">key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">secret-key</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">exotic</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nats://xxxxx:xxx</span><span class="w"></span>
+<span class="w">      </span><span class="nt">clusterID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster-id</span><span class="w"></span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"></span>
+<span class="w">      </span><span class="nt">accessSecret</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-secret-name</span><span class="w"></span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-key</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="more-information">More Information<a class="headerlink" href="#more-information" title="Permanent link">&para;</a></h2>
@@ -1665,17 +1677,17 @@ for the full spec of <code>native</code>.</p>
 </code></pre></div>
 
 <p>A sample result:</p>
-<div class="codehilite"><pre><span></span><code><span class="p">{</span>
-  <span class="nt">&quot;nats&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;accessSecret&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nt">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;client-auth&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;eventbus-default-client&quot;</span>
-    <span class="p">},</span>
-    <span class="nt">&quot;auth&quot;</span><span class="p">:</span> <span class="s2">&quot;token&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;clusterID&quot;</span><span class="p">:</span> <span class="s2">&quot;eventbus-default&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;nats://eventbus-default-stan-svc:4222&quot;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nats&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;accessSecret&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client-auth&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eventbus-default-client&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;clusterID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eventbus-default&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nats://eventbus-default-stan-svc:4222&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
 <ul>

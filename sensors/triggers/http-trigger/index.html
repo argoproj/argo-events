@@ -1211,6 +1211,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1553,18 +1565,18 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 <p>In order to construct a request payload based on the event data, sensor offers 
 <code>payload</code> field as a part of the HTTP trigger.</p>
 <p>Let's examine a HTTP trigger,</p>
-<div class="codehilite"><pre><span></span><code>    <span class="n">http</span><span class="p">:</span>
-      <span class="n">url</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">http</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">8090</span><span class="o">/</span><span class="n">hello</span>
-      <span class="n">payload</span><span class="p">:</span>
-        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-            <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span>
-          <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
-        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-            <span class="n">contextKey</span><span class="p">:</span> <span class="n">type</span>
-          <span class="n">dest</span><span class="p">:</span> <span class="n">type</span>
-      <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>  <span class="o">//</span> <span class="n">GET</span><span class="p">,</span> <span class="n">DELETE</span><span class="p">,</span> <span class="n">POST</span><span class="p">,</span> <span class="n">PUT</span><span class="p">,</span> <span class="n">HEAD</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">http</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">8090</span><span class="o">/</span><span class="n">hello</span><span class="w"></span>
+<span class="w">      </span><span class="n">payload</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">            </span><span class="n">dataKey</span><span class="p">:</span><span class="w"> </span><span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span><span class="w"></span>
+<span class="w">          </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">bucket</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">            </span><span class="n">contextKey</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="w"></span>
+<span class="w">          </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="w"></span>
+<span class="w">      </span><span class="n">method</span><span class="p">:</span><span class="w"> </span><span class="n">POST</span><span class="w">  </span><span class="o">//</span><span class="w"> </span><span class="n">GET</span><span class="p">,</span><span class="w"> </span><span class="n">DELETE</span><span class="p">,</span><span class="w"> </span><span class="n">POST</span><span class="p">,</span><span class="w"> </span><span class="n">PUT</span><span class="p">,</span><span class="w"> </span><span class="n">HEAD</span><span class="p">,</span><span class="w"> </span><span class="n">etc</span><span class="o">.</span><span class="w"></span>
 </code></pre></div>
 
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
@@ -1586,26 +1598,26 @@ you want to define a generic trigger template in the sensor and populate values 
 <p>Trigger policy helps you determine the status of the HTTP request and decide whether to stop or continue sensor. </p>
 <p>To determine whether the HTTP request was successful or not, the HTTP trigger provides a <code>Status</code> policy.
 The <code>Status</code> holds a list of response statuses that are considered valid.</p>
-<div class="codehilite"><pre><span></span><code>    <span class="n">http</span><span class="p">:</span>
-      <span class="n">url</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">http</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">8090</span><span class="o">/</span><span class="n">hello</span>
-      <span class="n">payload</span><span class="p">:</span>
-        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-            <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span>
-          <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
-        <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-            <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-            <span class="n">contextKey</span><span class="p">:</span> <span class="n">type</span>
-          <span class="n">dest</span><span class="p">:</span> <span class="n">type</span>
-      <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>  <span class="o">//</span> <span class="n">GET</span><span class="p">,</span> <span class="n">DELETE</span><span class="p">,</span> <span class="n">POST</span><span class="p">,</span> <span class="n">PUT</span><span class="p">,</span> <span class="n">HEAD</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span>
-  <span class="n">retryStrategy</span><span class="p">:</span>
-    <span class="n">steps</span><span class="p">:</span> <span class="mi">3</span>
-    <span class="n">duration</span><span class="p">:</span> <span class="mi">3</span><span class="n">s</span>
-  <span class="n">policy</span><span class="p">:</span>
-    <span class="n">status</span><span class="p">:</span>
-      <span class="n">allow</span><span class="p">:</span>
-        <span class="o">-</span> <span class="mi">200</span>
-        <span class="o">-</span> <span class="mi">201</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">http</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">8090</span><span class="o">/</span><span class="n">hello</span><span class="w"></span>
+<span class="w">      </span><span class="n">payload</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">            </span><span class="n">dataKey</span><span class="p">:</span><span class="w"> </span><span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span><span class="w"></span>
+<span class="w">          </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">bucket</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">            </span><span class="n">contextKey</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="w"></span>
+<span class="w">          </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="w"></span>
+<span class="w">      </span><span class="n">method</span><span class="p">:</span><span class="w"> </span><span class="n">POST</span><span class="w">  </span><span class="o">//</span><span class="w"> </span><span class="n">GET</span><span class="p">,</span><span class="w"> </span><span class="n">DELETE</span><span class="p">,</span><span class="w"> </span><span class="n">POST</span><span class="p">,</span><span class="w"> </span><span class="n">PUT</span><span class="p">,</span><span class="w"> </span><span class="n">HEAD</span><span class="p">,</span><span class="w"> </span><span class="n">etc</span><span class="o">.</span><span class="w"></span>
+<span class="w">  </span><span class="n">retryStrategy</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">steps</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="w">    </span><span class="n">duration</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="n">s</span><span class="w"></span>
+<span class="w">  </span><span class="n">policy</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">status</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="n">allow</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="mi">200</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="mi">201</span><span class="w"></span>
 </code></pre></div>
 
 <p>The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status. </p>
@@ -1644,25 +1656,25 @@ to invoke OpenFaas function.</p>
 </li>
 <li>
 <p>Let's create the sensor with OpenFaas trigger.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="p">:</span>
-  <span class="n">name</span><span class="p">:</span> <span class="n">redis</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="p">:</span>
-  <span class="n">dependencies</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">redis</span>
-      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">openfaas</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">http</span><span class="p">:</span>
-          <span class="n">url</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">gateway</span><span class="o">.</span><span class="n">openfaas</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span><span class="n">function</span><span class="o">/</span><span class="n">gohash</span>
-          <span class="n">payload</span><span class="p">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-              <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
-          <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="n">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
+<span class="n">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">redis</span><span class="o">-</span><span class="n">sensor</span><span class="w"></span>
+<span class="n">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="n">redis</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventName</span><span class="p">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="w">  </span><span class="n">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">openfaas</span><span class="o">-</span><span class="n">trigger</span><span class="w"></span>
+<span class="w">        </span><span class="n">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">gateway</span><span class="o">.</span><span class="n">openfaas</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span><span class="n">function</span><span class="o">/</span><span class="n">gohash</span><span class="w"></span>
+<span class="w">          </span><span class="n">payload</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">              </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">bucket</span><span class="w"></span>
+<span class="w">          </span><span class="n">method</span><span class="p">:</span><span class="w"> </span><span class="n">POST</span><span class="w"></span>
 </code></pre></div>
 
 </li>
@@ -1702,30 +1714,30 @@ to invoke OpenFaas function.</p>
 </li>
 <li>
 <p>Let's create NATS sensor with HTTP trigger.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="p">:</span>
-  <span class="n">name</span><span class="p">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="p">:</span>
-  <span class="n">dependencies</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">nats</span>
-      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">kubeless</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">http</span><span class="p">:</span>
-          <span class="n">serverURL</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hello</span><span class="o">.</span><span class="n">kubeless</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="mi">8080</span>
-          <span class="n">payload</span><span class="p">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">first_name</span>
-              <span class="n">dest</span><span class="p">:</span> <span class="n">first_name</span>
-            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">last_name</span>
-              <span class="n">dest</span><span class="p">:</span> <span class="n">last_name</span>
-          <span class="n">method</span><span class="p">:</span> <span class="n">POST</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="n">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
+<span class="n">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">nats</span><span class="o">-</span><span class="n">sensor</span><span class="w"></span>
+<span class="n">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="n">nats</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventName</span><span class="p">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="w">  </span><span class="n">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">kubeless</span><span class="o">-</span><span class="n">trigger</span><span class="w"></span>
+<span class="w">        </span><span class="n">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="n">serverURL</span><span class="p">:</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hello</span><span class="o">.</span><span class="n">kubeless</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="mi">8080</span><span class="w"></span>
+<span class="w">          </span><span class="n">payload</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">                </span><span class="n">dataKey</span><span class="p">:</span><span class="w"> </span><span class="n">body</span><span class="o">.</span><span class="n">first_name</span><span class="w"></span>
+<span class="w">              </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">first_name</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">                </span><span class="n">dataKey</span><span class="p">:</span><span class="w"> </span><span class="n">body</span><span class="o">.</span><span class="n">last_name</span><span class="w"></span>
+<span class="w">              </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">last_name</span><span class="w"></span>
+<span class="w">          </span><span class="n">method</span><span class="p">:</span><span class="w"> </span><span class="n">POST</span><span class="w"></span>
 </code></pre></div>
 
 </li>

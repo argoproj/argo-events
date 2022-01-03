@@ -1121,6 +1121,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1569,14 +1581,14 @@
                 <h1 id="hadr-recommendations">HA/DR Recommendations<a class="headerlink" href="#hadr-recommendations" title="Permanent link">&para;</a></h1>
 <h2 id="eventbus">EventBus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h2>
 <p>A simple EventBus used for non-prod deployment or testing purpose could be:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventBus</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">nats</span><span class="p">:</span>
-    <span class="nt">native</span><span class="p">:</span>
-      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">native</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"></span>
 </code></pre></div>
 
 <p>However this is not good enough to run your production deployment, following
@@ -1587,49 +1599,49 @@ availability.</p>
 persistent volumes are still recommended to be used to avoid any events data
 lost when the PODs crash.</p>
 <p>An EventBus with persistent volumes looks like below:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">nats</span><span class="p">:</span>
-    <span class="nt">native</span><span class="p">:</span>
-      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span>
-      <span class="nt">persistence</span><span class="p">:</span>
-        <span class="nt">storageClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">standard</span>
-        <span class="nt">accessMode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
-        <span class="nt">volumeSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20Gi</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">native</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"></span>
+<span class="w">      </span><span class="nt">persistence</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard</span><span class="w"></span>
+<span class="w">        </span><span class="nt">accessMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span><span class="w"></span>
+<span class="w">        </span><span class="nt">volumeSize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20Gi</span><span class="w"></span>
 </code></pre></div>
 
 <h3 id="anti-affinity">Anti-Affinity<a class="headerlink" href="#anti-affinity" title="Permanent link">&para;</a></h3>
 <p>You can run the EventBus PODs with anti-affinity, to avoid the situation that
 all PODs are gone when a disaster happens.</p>
 <p>An EventBus with best effort node anti-affinity:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">nats</span><span class="p">:</span>
-    <span class="nt">native</span><span class="p">:</span>
-      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span>
-      <span class="nt">affinity</span><span class="p">:</span>
-        <span class="nt">podAntiAffinity</span><span class="p">:</span>
-          <span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
-            <span class="p p-Indicator">-</span> <span class="nt">podAffinityTerm</span><span class="p">:</span>
-                <span class="nt">labelSelector</span><span class="p">:</span>
-                  <span class="nt">matchLabels</span><span class="p">:</span>
-                    <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
-                    <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-                <span class="nt">topologyKey</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
-              <span class="nt">weight</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">native</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"></span>
+<span class="w">      </span><span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podAffinityTerm</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">                </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
+<span class="w">              </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
 </code></pre></div>
 
 <p>An EventBus with hard requirement node anti-affinity:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">nats</span><span class="p">:</span>
-    <span class="nt">native</span><span class="p">:</span>
-      <span class="nt">auth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">token</span>
-      <span class="nt">affinity</span><span class="p">:</span>
-        <span class="nt">podAntiAffinity</span><span class="p">:</span>
-          <span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
-            <span class="p p-Indicator">-</span> <span class="nt">labelSelector</span><span class="p">:</span>
-                <span class="nt">matchLabels</span><span class="p">:</span>
-                  <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
-                  <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
-              <span class="nt">topologyKey</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">native</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"></span>
+<span class="w">      </span><span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">              </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
 </code></pre></div>
 
 <p>To do AZ (Availablity Zone) anti-affinity, change the value of <code>topologyKey</code>
@@ -1649,16 +1661,16 @@ could reduce the chance of PODs being evicted.</p>
 <h3 id="pdb">PDB<a class="headerlink" href="#pdb" title="Permanent link">&para;</a></h3>
 <p>EventBus service is essential to EventSource and Sensor Pods, it would be better to have a <code>PodDisruptionBudget</code> to prevent it from <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Pod Disruptions</a>. The following PDB object states <code>maxUnavailable</code> is 1, which is suitable for a 3 replica EventBus object.</p>
 <p>If your EventBus has a name other than <code>default</code>, change it accordingly in the yaml.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">policy/v1beta1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">PodDisruptionBudget</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-default-pdb</span>
-<span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">maxUnavailable</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-  <span class="nt">selector</span><span class="p">:</span>
-    <span class="nt">matchLabels</span><span class="p">:</span>
-      <span class="nt">controller</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
-      <span class="nt">eventbus-name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policy/v1beta1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PodDisruptionBudget</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-default-pdb</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">maxUnavailable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="eventsources">EventSources<a class="headerlink" href="#eventsources" title="Permanent link">&para;</a></h2>

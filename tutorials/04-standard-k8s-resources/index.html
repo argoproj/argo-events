@@ -1175,6 +1175,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1403,23 +1415,23 @@ provides an avenue to set up pipelines for existing workloads.</p>
     permissions to create the Kubernetes resource of your choice. We use
     <code>k8s-resource-sa</code> for below examples, it should be bound to a Role like
     following.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">rbac</span><span class="o">.</span><span class="na">authorization</span><span class="o">.</span><span class="na">k8s</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Role</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">create</span><span class="o">-</span><span class="n">deploy</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">role</span>
-<span class="n">rules</span><span class="o">:</span>
-  <span class="o">-</span> <span class="n">apiGroups</span><span class="o">:</span>
-      <span class="o">-</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">resources</span><span class="o">:</span>
-      <span class="o">-</span> <span class="n">pods</span>
-    <span class="n">verbs</span><span class="o">:</span>
-      <span class="o">-</span> <span class="n">create</span>
-  <span class="o">-</span> <span class="n">apiGroups</span><span class="o">:</span>
-      <span class="o">-</span> <span class="n">apps</span>
-    <span class="n">resources</span><span class="o">:</span>
-      <span class="o">-</span> <span class="n">deployments</span>
-    <span class="n">verbs</span><span class="o">:</span>
-      <span class="o">-</span> <span class="n">create</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">rbac</span><span class="o">.</span><span class="na">authorization</span><span class="o">.</span><span class="na">k8s</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1</span><span class="w"></span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Role</span><span class="w"></span>
+<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">create</span><span class="o">-</span><span class="n">deploy</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">role</span><span class="w"></span>
+<span class="n">rules</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">apiGroups</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="n">resources</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="n">pods</span><span class="w"></span>
+<span class="w">    </span><span class="n">verbs</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="n">create</span><span class="w"></span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">apiGroups</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="n">apps</span><span class="w"></span>
+<span class="w">    </span><span class="n">resources</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="n">deployments</span><span class="w"></span>
+<span class="w">    </span><span class="n">verbs</span><span class="o">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="n">create</span><span class="w"></span>
 </code></pre></div>
 
 </li>

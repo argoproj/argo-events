@@ -1170,6 +1170,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1393,34 +1405,34 @@
 </li>
 <li>
 <p>Lets create the sensor.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="p">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="p">:</span>
-  <span class="n">name</span><span class="p">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="p">:</span>
-  <span class="n">dependencies</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">eventSourceName</span><span class="p">:</span> <span class="n">minio</span>
-      <span class="n">eventName</span><span class="p">:</span> <span class="n">example</span>
-  <span class="n">triggers</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="p">:</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">kafka</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">kafka</span><span class="p">:</span>
-          <span class="c1"># Kafka URL</span>
-          <span class="n">url</span><span class="p">:</span> <span class="n">kafka</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">9092</span>
-          <span class="c1"># Name of the topic</span>
-          <span class="n">topic</span><span class="p">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">events</span>
-          <span class="c1"># partition id</span>
-          <span class="n">partition</span><span class="p">:</span> <span class="mi">0</span>
-          <span class="n">payload</span><span class="p">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">key</span>
-              <span class="n">dest</span><span class="p">:</span> <span class="n">fileName</span>
-            <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-                <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="p">:</span> <span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span>
-              <span class="n">dest</span><span class="p">:</span> <span class="n">bucket</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="n">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
+<span class="n">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">minio</span><span class="o">-</span><span class="n">sensor</span><span class="w"></span>
+<span class="n">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="n">minio</span><span class="w"></span>
+<span class="w">      </span><span class="n">eventName</span><span class="p">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="w">  </span><span class="n">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">kafka</span><span class="o">-</span><span class="n">trigger</span><span class="w"></span>
+<span class="w">        </span><span class="n">kafka</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># Kafka URL</span><span class="w"></span>
+<span class="w">          </span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="n">kafka</span><span class="o">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">9092</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># Name of the topic</span><span class="w"></span>
+<span class="w">          </span><span class="n">topic</span><span class="p">:</span><span class="w"> </span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># partition id</span><span class="w"></span>
+<span class="w">          </span><span class="n">partition</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">          </span><span class="n">payload</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">                </span><span class="n">dataKey</span><span class="p">:</span><span class="w"> </span><span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">key</span><span class="w"></span>
+<span class="w">              </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">fileName</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">                </span><span class="n">dataKey</span><span class="p">:</span><span class="w"> </span><span class="n">notification</span><span class="o">.</span><span class="mf">0.</span><span class="n">s3</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">name</span><span class="w"></span>
+<span class="w">              </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">bucket</span><span class="w"></span>
 </code></pre></div>
 
 </li>

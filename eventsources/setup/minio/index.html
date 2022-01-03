@@ -1177,6 +1177,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1437,16 +1449,16 @@ please set up the AWS SNS event-source.</p>
 </li>
 <li>
 <p>Create a K8s secret that holds the access and secret key. This secret will be referred in the minio event source definition that we are going to install in a later step.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
-<span class="n">data</span><span class="o">:</span>
-  <span class="err">#</span> <span class="n">base64</span> <span class="n">of</span> <span class="n">minio</span>
-  <span class="n">accesskey</span><span class="o">:</span> <span class="n">bWluaW8</span><span class="o">=</span>
-  <span class="err">#</span> <span class="n">base64</span> <span class="n">of</span> <span class="n">minio123</span>
-  <span class="n">secretkey</span><span class="o">:</span> <span class="n">bWluaW8xMjM</span><span class="o">=</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Secret</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">artifacts</span><span class="o">-</span><span class="n">minio</span>
-  <span class="kd">namespace</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
+<span class="n">data</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">base64</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">minio</span><span class="w"></span>
+<span class="w">  </span><span class="n">accesskey</span><span class="o">:</span><span class="w"> </span><span class="n">bWluaW8</span><span class="o">=</span><span class="w"></span>
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">base64</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">minio123</span><span class="w"></span>
+<span class="w">  </span><span class="n">secretkey</span><span class="o">:</span><span class="w"> </span><span class="n">bWluaW8xMjM</span><span class="o">=</span><span class="w"></span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
+<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">artifacts</span><span class="o">-</span><span class="n">minio</span><span class="w"></span>
+<span class="w">  </span><span class="kd">namespace</span><span class="o">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
 </code></pre></div>
 
 </li>

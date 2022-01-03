@@ -1123,6 +1123,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1450,28 +1462,28 @@ be referenced twice in one <code>Sensor</code> object. For example, following de
 definitions are not allowed. However, it can be referenced unlimited times in
 different <code>Sensor</code> objects, so if you do have similar requirements, use 2
 <code>Sensor</code> objects instead.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">dependencies</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep01</span>
-      <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook</span>
-      <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
-      <span class="nt">filters</span><span class="p">:</span>
-        <span class="nt">data</span><span class="p">:</span>
-          <span class="p p-Indicator">-</span> <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">body.value</span>
-            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">number</span>
-            <span class="nt">comparator</span><span class="p">:</span> <span class="s">&quot;&lt;&quot;</span>
-            <span class="nt">value</span><span class="p">:</span>
-              <span class="p p-Indicator">-</span> <span class="s">&quot;20.0&quot;</span>
-    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep02</span>
-      <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook</span>
-      <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
-      <span class="nt">filters</span><span class="p">:</span>
-        <span class="nt">data</span><span class="p">:</span>
-          <span class="p p-Indicator">-</span> <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">body.value</span>
-            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">number</span>
-            <span class="nt">comparator</span><span class="p">:</span> <span class="s">&quot;&gt;&quot;</span>
-            <span class="nt">value</span><span class="p">:</span>
-              <span class="p p-Indicator">-</span> <span class="s">&quot;50.0&quot;</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dep01</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filters</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">data</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">body.value</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">number</span><span class="w"></span>
+<span class="w">            </span><span class="nt">comparator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;20.0&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dep02</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filters</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">data</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">body.value</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">number</span><span class="w"></span>
+<span class="w">            </span><span class="nt">comparator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&gt;&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;50.0&quot;</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="events-delivery-order">Events Delivery Order<a class="headerlink" href="#events-delivery-order" title="Permanent link">&para;</a></h2>
@@ -1491,49 +1503,49 @@ events delivered.</p>
 fact that <code>Sensor</code> has no idea if failure retry would bring any unexpected
 results.</p>
 <p>If you prefer to have retry for the <code>trigger</code>, add <code>retryStrategy</code> to the spec.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">triggers</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
-        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http-trigger</span>
-        <span class="nt">http</span><span class="p">:</span>
-          <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">https://xxxxx.com/</span>
-          <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GET</span>
-      <span class="nt">retryStrategy</span><span class="p">:</span>
-        <span class="c1"># Give up after this many times</span>
-        <span class="nt">steps</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http-trigger</span><span class="w"></span>
+<span class="w">        </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://xxxxx.com/</span><span class="w"></span>
+<span class="w">          </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span><span class="w"></span>
+<span class="w">      </span><span class="nt">retryStrategy</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Give up after this many times</span><span class="w"></span>
+<span class="w">        </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
 </code></pre></div>
 
 <p>Or if you want more control on the retries:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">triggers</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">retryStrategy</span><span class="p">:</span>
-        <span class="c1"># Give up after this many times</span>
-        <span class="nt">steps</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
-        <span class="c1"># The initial duration, use strings like &quot;2s&quot;, &quot;1m&quot;</span>
-        <span class="nt">duration</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2s</span>
-        <span class="c1"># Duration is multiplied by factor each retry, if factor is not zero</span>
-        <span class="c1"># and steps limit has not been reached.</span>
-        <span class="c1"># Should not be negative</span>
-        <span class="c1">#</span>
-        <span class="c1"># Defaults to &quot;1.0&quot;</span>
-        <span class="nt">factor</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2.0</span>
-        <span class="c1"># The sleep between each retry is the duration plus an additional</span>
-        <span class="c1"># amount chosen uniformly at random from the interval between</span>
-        <span class="c1"># zero and `jitter * duration`.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Defaults to &quot;1&quot;</span>
-        <span class="nt">jitter</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">retryStrategy</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Give up after this many times</span><span class="w"></span>
+<span class="w">        </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># The initial duration, use strings like &quot;2s&quot;, &quot;1m&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2s</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Duration is multiplied by factor each retry, if factor is not zero</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># and steps limit has not been reached.</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Should not be negative</span><span class="w"></span>
+<span class="w">        </span><span class="c1">#</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Defaults to &quot;1.0&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># The sleep between each retry is the duration plus an additional</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># amount chosen uniformly at random from the interval between</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># zero and `jitter * duration`.</span><span class="w"></span>
+<span class="w">        </span><span class="c1">#</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Defaults to &quot;1&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">jitter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="trigger-rate-limit">Trigger Rate Limit<a class="headerlink" href="#trigger-rate-limit" title="Permanent link">&para;</a></h2>
 <p>There's no rate limit for a trigger unless you configure the spec as following:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">triggers</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">rateLimit</span><span class="p">:</span>
-        <span class="c1"># Second, Minute or Hour, defaults to Second</span>
-        <span class="nt">unit</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Second</span>
-        <span class="c1"># Requests per unit</span>
-        <span class="nt">requestsPerUnit</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">rateLimit</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Second, Minute or Hour, defaults to Second</span><span class="w"></span>
+<span class="w">        </span><span class="nt">unit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Second</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Requests per unit</span><span class="w"></span>
+<span class="w">        </span><span class="nt">requestsPerUnit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w"></span>
 </code></pre></div>
                 
                   

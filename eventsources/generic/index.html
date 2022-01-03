@@ -1182,6 +1182,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1411,30 +1423,30 @@ implementation.</p>
 <h2 id="contract">Contract<a class="headerlink" href="#contract" title="Permanent link">&para;</a></h2>
 <p>In order to qualify as generic eventsource, the eventsource server needs to
 implement following gRPC contract.</p>
-<div class="codehilite"><pre><span></span><code>    <span class="n">syntax</span> <span class="o">=</span> <span class="s2">&quot;proto3&quot;</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">syntax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;proto3&quot;</span><span class="p">;</span><span class="w"></span>
 
-    <span class="n">package</span> <span class="n">generic</span><span class="p">;</span>
+<span class="w">    </span><span class="n">package</span><span class="w"> </span><span class="n">generic</span><span class="p">;</span><span class="w"></span>
 
-    <span class="n">service</span> <span class="n">Eventing</span> <span class="p">{</span>
-        <span class="n">rpc</span> <span class="n">StartEventSource</span><span class="p">(</span><span class="n">EventSource</span><span class="p">)</span> <span class="n">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">Event</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="n">service</span><span class="w"> </span><span class="n">Eventing</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">rpc</span><span class="w"> </span><span class="n">StartEventSource</span><span class="p">(</span><span class="n">EventSource</span><span class="p">)</span><span class="w"> </span><span class="n">returns</span><span class="w"> </span><span class="p">(</span><span class="n">stream</span><span class="w"> </span><span class="n">Event</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="n">message</span> <span class="n">EventSource</span> <span class="p">{</span>
-        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">source</span> <span class="n">name</span><span class="o">.</span>
-        <span class="n">string</span> <span class="n">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">source</span> <span class="n">configuration</span> <span class="n">value</span><span class="o">.</span>
-        <span class="n">bytes</span> <span class="n">config</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="n">message</span><span class="w"> </span><span class="n">EventSource</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="n">name</span><span class="o">.</span><span class="w"></span>
+<span class="w">        </span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="n">value</span><span class="o">.</span><span class="w"></span>
+<span class="w">        </span><span class="n">bytes</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="o">/**</span>
-    <span class="o">*</span> <span class="n">Represents</span> <span class="n">an</span> <span class="n">event</span>
-    <span class="o">*/</span>
-    <span class="n">message</span> <span class="n">Event</span> <span class="p">{</span>
-        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">source</span> <span class="n">name</span><span class="o">.</span>
-        <span class="n">string</span> <span class="n">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-        <span class="o">//</span> <span class="n">The</span> <span class="n">event</span> <span class="n">payload</span><span class="o">.</span>
-        <span class="n">bytes</span> <span class="n">payload</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="o">/**</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="w"> </span><span class="n">Represents</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">event</span><span class="w"></span>
+<span class="w">    </span><span class="o">*/</span><span class="w"></span>
+<span class="w">    </span><span class="n">message</span><span class="w"> </span><span class="n">Event</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="n">name</span><span class="o">.</span><span class="w"></span>
+<span class="w">        </span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">payload</span><span class="o">.</span><span class="w"></span>
+<span class="w">        </span><span class="n">bytes</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
 <p>The proto file is available <a href="https://github.com/argoproj/argo-events/blob/master/eventsources/sources/generic/generic.proto">here</a>.</p>

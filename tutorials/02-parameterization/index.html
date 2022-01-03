@@ -1223,6 +1223,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1671,23 +1683,23 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 context and event data before it gets applied to the trigger via <code>parameters</code>.</p>
 <p>Take a look at the example defined <a href="https://github.com/argoproj/argo-events/blob/stable/examples/sensors/trigger-with-template.yaml">here</a>, it contains the parameters
 as follows,</p>
-<div class="codehilite"><pre><span></span><code>    <span class="n">parameters</span><span class="p">:</span>
-    <span class="c1"># Retrieve the &#39;message&#39; key from the payload</span>
-    <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-        <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-        <span class="n">dataTemplate</span><span class="p">:</span> <span class="s2">&quot;{{ .Input.body.message | title }}&quot;</span>
-      <span class="n">dest</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">0.</span><span class="n">value</span>
-    <span class="c1"># Title case the context subject</span>
-    <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-        <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-        <span class="n">contextTemplate</span><span class="p">:</span> <span class="s2">&quot;{{ .Input.subject | title }}&quot;</span>
-      <span class="n">dest</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">1.</span><span class="n">value</span>
-    <span class="c1"># Retrieve the &#39;name&#39; key from the payload, remove all whitespace and lowercase it.</span>
-    <span class="o">-</span> <span class="n">src</span><span class="p">:</span>
-        <span class="n">dependencyName</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-        <span class="n">dataTemplate</span><span class="p">:</span> <span class="s2">&quot;{{ .Input.body.name | nospace | lower }}-&quot;</span>
-      <span class="n">dest</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">generateName</span>
-      <span class="n">operation</span><span class="p">:</span> <span class="n">append</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">parameters</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Retrieve the &#39;message&#39; key from the payload</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">        </span><span class="n">dataTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ .Input.body.message | title }}&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">0.</span><span class="n">value</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Title case the context subject</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">        </span><span class="n">contextTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ .Input.subject | title }}&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">1.</span><span class="n">value</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Retrieve the &#39;name&#39; key from the payload, remove all whitespace and lowercase it.</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">        </span><span class="n">dataTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ .Input.body.name | nospace | lower }}-&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">metadata</span><span class="o">.</span><span class="n">generateName</span><span class="w"></span>
+<span class="w">      </span><span class="n">operation</span><span class="p">:</span><span class="w"> </span><span class="n">append</span><span class="w"></span>
 </code></pre></div>
 
 <p>Consider the event the sensor received has format like,</p>

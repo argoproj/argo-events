@@ -1184,6 +1184,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1410,21 +1422,21 @@
 <p>NATS event-source listens to NATS subject notifications and helps sensor trigger the workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code>    <span class="p">{</span>
-        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;specversion&quot;</span><span class="p">:</span> <span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span> <span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="s2">&quot;name_of_the_nats_subject&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="s2">&quot;message_payload&quot;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_nats_subject&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;message_payload&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>

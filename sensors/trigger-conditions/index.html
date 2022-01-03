@@ -1168,6 +1168,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1382,40 +1394,40 @@
 </blockquote>
 <p>Triggers can be executed based on different dependency <code>conditions</code>.</p>
 <p>An example with <code>conditions</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Sensor</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
-<span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">dependencies</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep01</span>
-      <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-a</span>
-      <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example01</span>
-    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep02</span>
-      <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-a</span>
-      <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example02</span>
-  <span class=" -Error"> </span><span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dep03</span>
-     <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-b</span>
-     <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example03</span>
-  <span class="nt">triggers</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
-        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;dep02&quot;</span>
-        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger01</span>
-        <span class="nt">http</span><span class="p">:</span>
-          <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello1</span>
-          <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GET</span>
-    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
-        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;dep02</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span>
-        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger02</span>
-        <span class="nt">http</span><span class="p">:</span>
-          <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello2</span>
-          <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GET</span>
-    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
-        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;(dep01</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">dep02)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span>
-        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger03</span>
-        <span class="nt">http</span><span class="p">:</span>
-          <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello3</span>
-          <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GET</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dep01</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-a</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example01</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dep02</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-a</span><span class="w"></span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example02</span><span class="w"></span>
+<span class="w">  </span><span class="w w-Error"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dep03</span><span class="w"></span>
+<span class="w">     </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-b</span><span class="w"></span>
+<span class="w">     </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example03</span><span class="w"></span>
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dep02&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger01</span><span class="w"></span>
+<span class="w">        </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dep02</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger02</span><span class="w"></span>
+<span class="w">        </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello2</span><span class="w"></span>
+<span class="w">          </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(dep01</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">dep02)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger03</span><span class="w"></span>
+<span class="w">        </span><span class="nt">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello3</span><span class="w"></span>
+<span class="w">          </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span><span class="w"></span>
 </code></pre></div>
 
 <p><code>Conditions</code> is a boolean expression contains dependency names, the trigger
@@ -1431,18 +1443,18 @@ won't be executed until the expression resolves to true. The operators in
 <h2 id="conditions-reset">Conditions Reset<a class="headerlink" href="#conditions-reset" title="Permanent link">&para;</a></h2>
 <p>When multiple dependencies are defined for a trigger, the trigger won't be executed until the condition expression is resolved to <code>true</code>. Sometimes you might want to reset all the stakeholders of the conditions, <code>conditions reset</code> is the way to do it.</p>
 <p>For example, your trigger has a condtion as <code>A &amp;&amp; B</code>, both <code>A</code> and <code>B</code> are expected to have an event everyday. One day for some reason, <code>A</code> gets an event but <code>B</code> does't, then it ends up with today's <code>A</code> and tomorrow's <code>B</code> triggering an action, which might not be something you want. To avoid that, you can reset the conditons as following:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">triggers</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="nt">template</span><span class="p">:</span>
-        <span class="nt">conditions</span><span class="p">:</span> <span class="s">&quot;dep01</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep02&quot;</span>
-        <span class="nt">conditionsReset</span><span class="p">:</span>
-          <span class="p p-Indicator">-</span> <span class="nt">byTime</span><span class="p">:</span>
-              <span class="c1"># Reset conditions at 23:59</span>
-              <span class="nt">cron</span><span class="p">:</span> <span class="s">&quot;59</span><span class="nv"> </span><span class="s">23</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
-              <span class="c1"># Optional, defaults to UTC</span>
-              <span class="c1"># More info for timezone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</span>
-              <span class="nt">timezone</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">America/Los_Angeles</span>
-        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">trigger01</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dep01</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep02&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">conditionsReset</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">byTime</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="c1"># Reset conditions at 23:59</span><span class="w"></span>
+<span class="w">              </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;59</span><span class="nv"> </span><span class="s">23</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w"></span>
+<span class="w">              </span><span class="c1"># Optional, defaults to UTC</span><span class="w"></span>
+<span class="w">              </span><span class="c1"># More info for timezone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</span><span class="w"></span>
+<span class="w">              </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">America/Los_Angeles</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger01</span><span class="w"></span>
 </code></pre></div>
                 
                   
@@ -1479,13 +1491,13 @@ won't be executed until the expression resolves to true. The operators in
           </a>
         
         
-          <a href="../ha/" title="Sensor High Availability" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../transform/" title="Event Transformation" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Sensor High Availability
+                Event Transformation
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

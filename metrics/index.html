@@ -1121,6 +1121,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1590,40 +1602,40 @@
 for its metrics, which include things like how many events were generated, how
 many actions were triggered, and so on. To let your Prometheus server discover
 those user metrics, add following to your configuration.</p>
-<div class="codehilite"><pre><span></span><code>    <span class="o">-</span> <span class="nl">job_name:</span> <span class="p">&#39;</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="p">&#39;</span>
-      <span class="nl">kubernetes_sd_configs:</span>
-      <span class="o">-</span> <span class="nl">role:</span> <span class="n">pod</span>
-        <span class="nl">selectors:</span>
-        <span class="o">-</span> <span class="nl">role:</span> <span class="n">pod</span>
-          <span class="nl">label:</span> <span class="p">&#39;</span><span class="n">controller</span> <span class="n">in</span> <span class="p">(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)&#39;</span>
-      <span class="nl">relabel_configs:</span>
-      <span class="o">-</span> <span class="nl">source_labels:</span> <span class="p">[</span><span class="n">__meta_kubernetes_pod_label_eventbus_name</span><span class="p">,</span> <span class="n">__meta_kubernetes_pod_label_controller</span><span class="p">]</span>
-        <span class="nl">action:</span> <span class="n">replace</span>
-        <span class="nl">regex:</span> <span class="p">(.</span><span class="o">+</span><span class="p">);</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span>
-        <span class="nl">replacement:</span> <span class="err">$</span><span class="mh">1</span>
-        <span class="nl">target_label:</span> <span class="p">&#39;</span><span class="n">eventbus_name</span><span class="p">&#39;</span>
-      <span class="o">-</span> <span class="nl">source_labels:</span> <span class="p">[</span><span class="n">__meta_kubernetes_namespace</span><span class="p">,</span> <span class="n">__meta_kubernetes_pod_label_controller</span><span class="p">]</span>
-        <span class="nl">action:</span> <span class="n">replace</span>
-        <span class="nl">regex:</span> <span class="p">(.</span><span class="o">+</span><span class="p">);</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span>
-        <span class="nl">replacement:</span> <span class="err">$</span><span class="mh">1</span>
-        <span class="nl">target_label:</span> <span class="p">&#39;</span><span class="n">namespace</span><span class="p">&#39;</span>
-      <span class="o">-</span> <span class="nl">source_labels:</span> <span class="p">[</span><span class="n">__address__</span><span class="p">,</span> <span class="n">__meta_kubernetes_pod_label_controller</span><span class="p">]</span>
-        <span class="nl">action:</span> <span class="n">drop</span>
-        <span class="nl">regex:</span> <span class="p">(.</span><span class="o">+</span><span class="p">)</span><span class="o">:</span><span class="p">(</span><span class="n">\d222);eventbus-controller</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nl">job_name:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="p">&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nl">kubernetes_sd_configs:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">role:</span><span class="w"> </span><span class="n">pod</span><span class="w"></span>
+<span class="w">        </span><span class="nl">selectors:</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nl">role:</span><span class="w"> </span><span class="n">pod</span><span class="w"></span>
+<span class="w">          </span><span class="nl">label:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">controller</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nl">relabel_configs:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels:</span><span class="w"> </span><span class="p">[</span><span class="n">__meta_kubernetes_pod_label_eventbus_name</span><span class="p">,</span><span class="w"> </span><span class="n">__meta_kubernetes_pod_label_controller</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="nl">action:</span><span class="w"> </span><span class="n">replace</span><span class="w"></span>
+<span class="w">        </span><span class="nl">regex:</span><span class="w"> </span><span class="p">(.</span><span class="o">+</span><span class="p">);</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="w"></span>
+<span class="w">        </span><span class="nl">replacement:</span><span class="w"> </span><span class="err">$</span><span class="mh">1</span><span class="w"></span>
+<span class="w">        </span><span class="nl">target_label:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">eventbus_name</span><span class="p">&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels:</span><span class="w"> </span><span class="p">[</span><span class="n">__meta_kubernetes_namespace</span><span class="p">,</span><span class="w"> </span><span class="n">__meta_kubernetes_pod_label_controller</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="nl">action:</span><span class="w"> </span><span class="n">replace</span><span class="w"></span>
+<span class="w">        </span><span class="nl">regex:</span><span class="w"> </span><span class="p">(.</span><span class="o">+</span><span class="p">);</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="w"></span>
+<span class="w">        </span><span class="nl">replacement:</span><span class="w"> </span><span class="err">$</span><span class="mh">1</span><span class="w"></span>
+<span class="w">        </span><span class="nl">target_label:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">namespace</span><span class="p">&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels:</span><span class="w"> </span><span class="p">[</span><span class="n">__address__</span><span class="p">,</span><span class="w"> </span><span class="n">__meta_kubernetes_pod_label_controller</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="nl">action:</span><span class="w"> </span><span class="n">drop</span><span class="w"></span>
+<span class="w">        </span><span class="nl">regex:</span><span class="w"> </span><span class="p">(.</span><span class="o">+</span><span class="p">)</span><span class="o">:</span><span class="p">(</span><span class="n">\d222);eventbus-controller</span><span class="w"></span>
 </code></pre></div>
 
 <p>Also please make sure your Prometheus Service Account has the permission to do
 POD discovery. A sample <code>ClusterRole</code> like below needs to be added or merged,
 and grant it to your Service Account.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">pod-discovery</span>
-<span class="nt">rules</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">apiGroups</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
-    <span class="nt">resources</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pods</span>
-    <span class="nt">verbs</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;list&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;watch&quot;</span><span class="p p-Indicator">]</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pod-discovery</span><span class="w"></span>
+<span class="nt">rules</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pods</span><span class="w"></span>
+<span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
 </code></pre></div>
 
 <h3 id="eventsource">EventSource<a class="headerlink" href="#eventsource" title="Permanent link">&para;</a></h3>
@@ -1653,23 +1665,23 @@ explanation.</p>
 <h2 id="controller-metrics">Controller Metrics<a class="headerlink" href="#controller-metrics" title="Permanent link">&para;</a></h2>
 <p>If you are interested in Argo Events controller metrics, add following to your
 Prometheus configuration.</p>
-<div class="codehilite"><pre><span></span><code>    <span class="o">-</span> <span class="nl">job_name:</span> <span class="p">&#39;</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">controllers</span><span class="p">&#39;</span>
-      <span class="nl">kubernetes_sd_configs:</span>
-      <span class="o">-</span> <span class="nl">role:</span> <span class="n">pod</span>
-        <span class="nl">selectors:</span>
-        <span class="o">-</span> <span class="nl">role:</span> <span class="n">pod</span>
-          <span class="nl">label:</span> <span class="p">&#39;</span><span class="n">app</span> <span class="n">in</span> <span class="p">(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)&#39;</span>
-      <span class="nl">relabel_configs:</span>
-      <span class="o">-</span> <span class="nl">source_labels:</span> <span class="p">[</span><span class="n">__address__</span><span class="p">,</span> <span class="n">__meta_kubernetes_pod_label_app</span><span class="p">]</span>
-        <span class="nl">action:</span> <span class="n">replace</span>
-        <span class="nl">regex:</span> <span class="p">(.</span><span class="o">+</span><span class="p">);(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)</span>
-        <span class="nl">replacement:</span> <span class="err">$</span><span class="mh">1</span><span class="o">:</span><span class="mh">7777</span>
-        <span class="nl">target_label:</span> <span class="p">&#39;</span><span class="n">__address__</span><span class="p">&#39;</span>
-      <span class="o">-</span> <span class="nl">source_labels:</span> <span class="p">[</span><span class="n">__meta_kubernetes_namespace</span><span class="p">,</span> <span class="n">__meta_kubernetes_pod_label_app</span><span class="p">]</span>
-        <span class="nl">action:</span> <span class="n">replace</span>
-        <span class="nl">regex:</span> <span class="p">(.</span><span class="o">+</span><span class="p">);(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)</span>
-        <span class="nl">replacement:</span> <span class="err">$</span><span class="mh">1</span>
-        <span class="nl">target_label:</span> <span class="p">&#39;</span><span class="n">namespace</span><span class="p">&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nl">job_name:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">controllers</span><span class="p">&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nl">kubernetes_sd_configs:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">role:</span><span class="w"> </span><span class="n">pod</span><span class="w"></span>
+<span class="w">        </span><span class="nl">selectors:</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nl">role:</span><span class="w"> </span><span class="n">pod</span><span class="w"></span>
+<span class="w">          </span><span class="nl">label:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">app</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="p">,</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nl">relabel_configs:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels:</span><span class="w"> </span><span class="p">[</span><span class="n">__address__</span><span class="p">,</span><span class="w"> </span><span class="n">__meta_kubernetes_pod_label_app</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="nl">action:</span><span class="w"> </span><span class="n">replace</span><span class="w"></span>
+<span class="w">        </span><span class="nl">regex:</span><span class="w"> </span><span class="p">(.</span><span class="o">+</span><span class="p">);(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nl">replacement:</span><span class="w"> </span><span class="err">$</span><span class="mh">1</span><span class="o">:</span><span class="mh">7777</span><span class="w"></span>
+<span class="w">        </span><span class="nl">target_label:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">__address__</span><span class="p">&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels:</span><span class="w"> </span><span class="p">[</span><span class="n">__meta_kubernetes_namespace</span><span class="p">,</span><span class="w"> </span><span class="n">__meta_kubernetes_pod_label_app</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="nl">action:</span><span class="w"> </span><span class="n">replace</span><span class="w"></span>
+<span class="w">        </span><span class="nl">regex:</span><span class="w"> </span><span class="p">(.</span><span class="o">+</span><span class="p">);(</span><span class="n">eventsource</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">|</span><span class="n">eventbus</span><span class="o">-</span><span class="n">controller</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nl">replacement:</span><span class="w"> </span><span class="err">$</span><span class="mh">1</span><span class="w"></span>
+<span class="w">        </span><span class="nl">target_label:</span><span class="w"> </span><span class="p">&#39;</span><span class="n">namespace</span><span class="p">&#39;</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="golden-signals">Golden Signals<a class="headerlink" href="#golden-signals" title="Permanent link">&para;</a></h2>

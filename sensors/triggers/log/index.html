@@ -1170,6 +1170,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1380,17 +1392,17 @@
                 
                 <h1 id="log">Log<a class="headerlink" href="#log" title="Permanent link">&para;</a></h1>
 <p>Log trigger is for debugging -  it just logs events it receives as JSON:</p>
-<div class="codehilite"><pre><span></span><code><span class="p">{</span>
-  <span class="nt">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;ts&quot;</span><span class="p">:</span> <span class="mf">1604783266.973979</span><span class="p">,</span>
-  <span class="nt">&quot;logger&quot;</span><span class="p">:</span> <span class="s2">&quot;argo-events.sensor&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;caller&quot;</span><span class="p">:</span> <span class="s2">&quot;log/log.go:35&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;msg&quot;</span><span class="p">:</span> <span class="s2">&quot;{\&quot;eventTime\&quot;:\&quot;2020-11-07 21:07:46.9658533 +0000 UTC m=+20468.986115001\&quot;}&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;sensorName&quot;</span><span class="p">:</span> <span class="s2">&quot;log&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;triggerName&quot;</span><span class="p">:</span> <span class="s2">&quot;log-trigger&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;dependencyName&quot;</span><span class="p">:</span> <span class="s2">&quot;test-dep&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;eventContext&quot;</span><span class="p">:</span> <span class="s2">&quot;{\&quot;id\&quot;:\&quot;37363664356662642d616364322d343563332d396362622d353037653361343637393237\&quot;,\&quot;source\&quot;:\&quot;calendar\&quot;,\&quot;specversion\&quot;:\&quot;1.0\&quot;,\&quot;type\&quot;:\&quot;calendar\&quot;,\&quot;datacontenttype\&quot;:\&quot;application/json\&quot;,\&quot;subject\&quot;:\&quot;example-with-interval\&quot;,\&quot;time\&quot;:\&quot;2020-11-07T21:07:46Z\&quot;}&quot;</span>
-<span class="p">}</span>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;info&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;ts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1604783266.973979</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;logger&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;argo-events.sensor&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;caller&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log/log.go:35&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{\&quot;eventTime\&quot;:\&quot;2020-11-07 21:07:46.9658533 +0000 UTC m=+20468.986115001\&quot;}&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sensorName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;triggerName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log-trigger&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencyName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test-dep&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;eventContext&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{\&quot;id\&quot;:\&quot;37363664356662642d616364322d343563332d396362622d353037653361343637393237\&quot;,\&quot;source\&quot;:\&quot;calendar\&quot;,\&quot;specversion\&quot;:\&quot;1.0\&quot;,\&quot;type\&quot;:\&quot;calendar\&quot;,\&quot;datacontenttype\&quot;:\&quot;application/json\&quot;,\&quot;subject\&quot;:\&quot;example-with-interval\&quot;,\&quot;time\&quot;:\&quot;2020-11-07T21:07:46Z\&quot;}&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>

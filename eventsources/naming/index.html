@@ -1168,6 +1168,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../../sensors/transform/" title="Event Transformation" class="md-nav__link">
+      Event Transformation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../../sensors/ha/" title="Sensor High Availability" class="md-nav__link">
       Sensor High Availability
     </a>
@@ -1378,29 +1390,29 @@
                 
                 <h1 id="eventsource-names">EventSource Names<a class="headerlink" href="#eventsource-names" title="Permanent link">&para;</a></h1>
 <p>In a Sensor object, a <code>dependency</code> is defined as:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">dependencies</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test-dep</span>
-    <span class="nt">eventSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-example</span>
-    <span class="nt">eventName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">example</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span><span class="w"></span>
+<span class="w">    </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-example</span><span class="w"></span>
+<span class="w">    </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w"></span>
 </code></pre></div>
 
 <p>The <code>eventSourceName</code> and <code>eventName</code> might be confusing. Take the following
 EventSource example, the <code>eventSourceName</code> and <code>eventName</code> are described as
 below.</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EventSource</span>
-<span class="nt">metadata</span><span class="p">:</span>
-  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">webhook-example</span> <span class="c1"># eventSourceName</span>
-<span class="nt">spec</span><span class="p">:</span>
-  <span class="nt">webhook</span><span class="p">:</span>
-    <span class="nt">example</span><span class="p">:</span> <span class="c1"># eventName</span>
-      <span class="nt">port</span><span class="p">:</span> <span class="s">&quot;12000&quot;</span>
-      <span class="nt">endpoint</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/example</span>
-      <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
-    <span class="nt">example-foo</span><span class="p">:</span> <span class="c1"># eventName</span>
-      <span class="nt">port</span><span class="p">:</span> <span class="s">&quot;13000&quot;</span>
-      <span class="nt">endpoint</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/example2</span>
-      <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">POST</span>
+<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventSource</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-example</span><span class="w"> </span><span class="c1"># eventSourceName</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">webhook</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">example</span><span class="p">:</span><span class="w"> </span><span class="c1"># eventName</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12000&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/example</span><span class="w"></span>
+<span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span><span class="w"></span>
+<span class="w">    </span><span class="nt">example-foo</span><span class="p">:</span><span class="w"> </span><span class="c1"># eventName</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;13000&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/example2</span><span class="w"></span>
+<span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span><span class="w"></span>
 </code></pre></div>
 
 <h2 id="eventsourcename">EventSourceName<a class="headerlink" href="#eventsourcename" title="Permanent link">&para;</a></h2>
