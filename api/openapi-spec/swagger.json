@@ -1432,7 +1432,6 @@
       "description": "GitlabEventSource refers to event-source related to Gitlab events",
       "type": "object",
       "required": [
-        "projectID",
         "events",
         "gitlabBaseURL"
       ],
