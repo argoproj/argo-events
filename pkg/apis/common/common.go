@@ -50,6 +50,7 @@ var (
 	PulsarEvent          EventSourceType = "pulsar"
 	GenericEvent         EventSourceType = "generic"
 	BitbucketServerEvent EventSourceType = "bitbucketserver"
+	BitbucketEvent       EventSourceType = "bitbucket"
 )
 
 var (

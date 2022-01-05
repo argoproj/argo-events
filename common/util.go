@@ -154,8 +154,8 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get secret value of name: %s, key: %s", selector.Name, selector.Key)
 	}
-	// Secrets edied by tools like "vim" always have an extra invisible "\n" in the end,
-	// and it's often negleted, but it makes differences for some of the applications.
+	// Secrets edited by tools like "vim" always have an extra invisible "\n" in the end,
+	// and it's often neglected, but it makes differences for some of the applications.
 	return strings.TrimSuffix(string(data), "\n"), nil
 }
 
@@ -403,4 +403,47 @@ func uniqueVolumeMounts(mounts []v1.VolumeMount) []v1.VolumeMount {
 		}
 	}
 	return rMounts
+}
+
+// ElementsMatch returns true if the two provided string slices contain the same elements while avoiding duplications.
+// WARN: this method avoids duplications.
+func ElementsMatch(first []string, second []string) bool {
+	if len(first) == 0 && len(second) == 0 {
+		return true
+	}
+	if len(first) == 0 || len(second) == 0 {
+		return false
+	}
+
+	diff := make(map[string]int)
+	for _, str := range first {
+		diff[str] = 1
+	}
+
+	for _, str := range second {
+		if _, ok := diff[str]; !ok {
+			return false
+		} else {
+			diff[str] = 2
+		}
+	}
+
+	for _, v := range diff {
+		// 1: only exists in first
+		// 2: exists in both
+		if v < 2 {
+			return false
+		}
+	}
+	return true
+}
+
+// SliceContains checks if a string slice contains a specific string
+func SliceContains(strSlice []string, targetStr string) bool {
+	for _, curr := range strSlice {
+		if curr == targetStr {
+			return true
+		}
+	}
+	return false
 }

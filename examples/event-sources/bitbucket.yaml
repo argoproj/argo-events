@@ -1,0 +1,88 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: bitbucket
+spec:
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
+  bitbucket:
+    # bitbucket eventsource example with basic auth strategy
+    example-basic-auth:
+      # key of the project
+      projectKey: "PROJECTKEY"
+      # owner of the repository
+      owner: "name-of-repo-owner"
+      # repository slug
+      repositorySlug: "name-of-repository"
+      # Bitbucket will send events to following port and endpoint
+      webhook:
+        # endpoint to listen to events on
+        endpoint: /push
+        # port to run internal HTTP server on
+        port: "12000"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: POST
+        # url the event-source will use to register in Bitbucket.
+        # This url must be reachable from outside the cluster.
+        # The name for the service is in `<event-source-name>-eventsource-svc` format.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket.
+        url: http://url-that-is-reachable-from-bitbucket
+      # events to listen to
+      # Visit https://support.atlassian.com/bitbucket-cloud/docs/manage-webhooks/
+      events:
+        - repo:push
+      auth:
+        # basic refers to Basic Auth strategy
+        basic:
+          # username refers to K8s secret that stores the bitbucket username
+          username:
+            # Name of the K8s secret that contains the access token
+            name: bitbucket-access
+            # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
+            key: token
+          # password refers to K8s secret that stores the bitbucket password (including App passwords)
+          password:
+            # Name of the K8s secret that contains the access token
+            name: bitbucket-access
+            # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
+            key: token
+      # Delete the webhook when the eventsource is deleted
+      deleteHookOnFinish: true
+
+    # bitbucket eventsource example with oauth bearer token auth strategy
+    example-oauth-token:
+      # key of the project
+      projectKey: "PROJECTKEY"
+      # owner of the repository
+      owner: "name-of-repo-owner"
+      # repository slug
+      repositorySlug: "name-of-repo"
+      # Bitbucket will send events to following port and endpoint
+      webhook:
+        # endpoint to listen to events on
+        endpoint: /push
+        # port to run internal HTTP server on
+        port: "12000"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: POST
+        # url the event-source will use to register in Bitbucket.
+        # This url must be reachable from outside the cluster.
+        # The name for the service is in `<event-source-name>-eventsource-svc` format.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket.
+        url: http://url-that-is-reachable-from-bitbucket
+      # events to listen to
+      # Visit https://support.atlassian.com/bitbucket-cloud/docs/manage-webhooks/
+      events:
+        - repo:push
+      auth:
+        # oauthToken refers to K8s secret that stores the bitbucket oauth bearer token
+        # Visit https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/
+        oauthToken:
+          # Name of the K8s secret that contains the access token
+          name: bitbucket-access
+          # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
+          key: token
+      # Delete the webhook when the eventsource is deleted
+      deleteHookOnFinish: true

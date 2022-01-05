@@ -239,3 +239,34 @@ func TestGetTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "failed to read ca cert file"))
 	})
 }
+
+func TestElementsMatch(t *testing.T) {
+	assert.True(t, ElementsMatch(nil, nil))
+	assert.True(t, ElementsMatch([]string{"hello"}, []string{"hello"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "world"}))
+	assert.True(t, ElementsMatch([]string{}, []string{}))
+
+	assert.False(t, ElementsMatch([]string{"hello"}, nil))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{}))
+	assert.False(t, ElementsMatch([]string{}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"hello", "world"}))
+	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "moon"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"world", "hello"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, ElementsMatch([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, ElementsMatch([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"*", "hello"}))
+	assert.False(t, ElementsMatch([]string{"hello", "*"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"*", "hello", "*"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"world", "world"}))
+	assert.False(t, ElementsMatch([]string{"hello", "hello"}, []string{"world", "world"}))
+}
+
+func TestSliceContains(t *testing.T) {
+	assert.True(t, SliceContains([]string{"hello", "*"}, "*"))
+	assert.True(t, SliceContains([]string{"*", "world"}, "*"))
+	assert.True(t, SliceContains([]string{"*", "world"}, "world"))
+	assert.True(t, SliceContains([]string{"*", "hello", "*"}, "*"))
+	assert.False(t, SliceContains([]string{"hello", "world"}, "*"))
+}
