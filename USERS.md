@@ -16,6 +16,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [DevSamurai](https://www.devsamurai.com/)
 1. [Fairwinds](https://fairwinds.com/)
 1. [GHGSat](https://www.ghgsat.com/)
+1. [Gllue](https://gllue.com/)
 1. [Greenhouse Software](https://www.greenhouse.io/)
 1. [Helio](https://helio.exchange)
 1. [InsideBoard](https://www.insideboard.com)
