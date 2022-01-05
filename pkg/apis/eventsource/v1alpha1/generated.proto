@@ -618,6 +618,7 @@ message GitlabEventSource {
 
   // DeprecatedProjectID is the id of project for which integration needs to setup
   // Deprecated: use Projects instead. Will be unsupported in v 1.7
+  // +optional
   optional string projectID = 2;
 
   // Events are gitlab event to listen to.

@@ -1801,7 +1801,6 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					"projectID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeprecatedProjectID is the id of project for which integration needs to setup Deprecated: use Projects instead. Will be unsupported in v 1.7",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1887,7 +1886,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"projectID", "events", "gitlabBaseURL"},
+				Required: []string{"events", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{
