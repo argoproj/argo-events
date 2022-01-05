@@ -194,10 +194,22 @@ type EventDependency struct {
 	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing toleration of success and constraints on the context and data of an event
 	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
+	// Transform transforms the event data
+	Transform *EventDependencyTransformer `json:"transform,omitempty" protobuf:"bytes,5,opt,name=transform"`
 	// FiltersLogicalOperator defines how different filters are evaluated together.
 	// Available values: and (&&), or (||)
 	// Is optional and if left blank treated as and (&&).
-	FiltersLogicalOperator LogicalOperator `json:"filtersLogicalOperator,omitempty" protobuf:"bytes,5,opt,name=filtersLogicalOperator,casttype=LogicalOperator"`
+	FiltersLogicalOperator LogicalOperator `json:"filtersLogicalOperator,omitempty" protobuf:"bytes,6,opt,name=filtersLogicalOperator,casttype=LogicalOperator"`
+}
+
+// EventDependencyTransformer transforms the event
+type EventDependencyTransformer struct {
+	// JQ holds the jq command applied for transformation
+	// +optional
+	JQ string `json:"jq,omitempty" protobuf:"bytes,1,opt,name=jq"`
+	// Script refers to a Lua script used to transform the event
+	// +optional
+	Script string `json:"script,omitempty" protobuf:"bytes,2,opt,name=script"`
 }
 
 // EventDependencyFilter defines filters and constraints for a event.

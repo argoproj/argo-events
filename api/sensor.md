@@ -950,15 +950,27 @@ context and data of an event
 </tr>
 <tr>
 <td>
+<code>transform</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventDependencyTransformer">
+EventDependencyTransformer </a> </em>
+</td>
+<td>
+<p>
+Transform transforms the event data
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>filtersLogicalOperator</code></br> <em>
 <a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
 </em>
 </td>
 <td>
 <p>
-FiltersLogicalOperator defines how filters are evaluated together.
-Available values: and (&&, default), or (\|\|) Is optional, and if left
-blank treated as and “&&”.
+FiltersLogicalOperator defines how different filters are evaluated
+together. Available values: and (&&), or (\|\|) Is optional and if left
+blank treated as and (&&).
 </p>
 </td>
 </tr>
@@ -1041,9 +1053,57 @@ payload.
 </td>
 <td>
 <p>
-LogicalOperator defines how multiple Data and/or Exprs filters are
-evaluated together. Available values: and (&&, default), or (\|\|) Is
-optional, and if left blank treated as and “&&”.
+LogicalOperator defines how multiple Data filters (if defined) or Exprs
+filters (if defined) are evaluated together. Available values: and (&&),
+or (\|\|) Is optional and if left blank treated as and (&&).
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.EventDependencyTransformer">
+EventDependencyTransformer
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependency">EventDependency</a>)
+</p>
+<p>
+<p>
+EventDependencyTransformer transforms the event
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>jq</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JQ holds the jq command applied for transformation
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>script</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Script refers to a Lua script used to transform the event
 </p>
 </td>
 </tr>

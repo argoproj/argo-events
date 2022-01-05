@@ -392,7 +392,6 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 // Function can be passed as Option to generate unique id for kafka event
 // eventSourceName:eventName:kafka-url:topic:partition:offset
 func genUniqueID(eventSourceName, eventName, kafkaURL, topic string, partition int32, offset int64) string {
-
 	kafkaID := fmt.Sprintf("%s:%s:%s:%s:%d:%d", eventSourceName, eventName, strings.Split(kafkaURL, ",")[0], topic, partition, offset)
 
 	return kafkaID
