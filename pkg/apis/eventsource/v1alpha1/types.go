@@ -417,6 +417,9 @@ type AMQPQueueDeclareConfig struct {
 	// NowWait when true, the queue assumes to be declared on the server
 	// +optional
 	NoWait bool `json:"noWait,omitempty" protobuf:"varint,5,opt,name=noWait"`
+	// Arguments of a queue (also known as "x-arguments") used for optional features and plugins
+	// +optional
+	Arguments []byte `json:"arguments,omitempty" protobuf:"bytes,6,rep,name=arguments"`
 }
 
 // AMQPQueueBindConfig holds the configuration that binds an exchange to a queue so that publishings to the

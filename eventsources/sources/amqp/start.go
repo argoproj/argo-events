@@ -248,13 +248,24 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		return nil, errors.Errorf("failed to declare exchange with name %s and type %s. err: %+v", eventSource.ExchangeName, eventSource.ExchangeType, err)
 	}
 
+	var optionalArguments amqplib.Table
+	if eventSource.QueueDeclare.Arguments != nil {
+		err := json.Unmarshal(eventSource.QueueDeclare.Arguments, &optionalArguments)
+		if err != nil {
+			return nil, errors.Errorf(
+				"optional arguments for queue are an invalid Table type. Args: %x. Err: %s",
+				eventSource.QueueDeclare.Arguments,
+				err,
+			)
+		}
+	}
 	q, err := ch.QueueDeclare(
 		eventSource.QueueDeclare.Name,
 		eventSource.QueueDeclare.Durable,
 		eventSource.QueueDeclare.AutoDelete,
 		eventSource.QueueDeclare.Exclusive,
 		eventSource.QueueDeclare.NoWait,
-		nil,
+		optionalArguments,
 	)
 	if err != nil {
 		return nil, errors.Errorf("failed to declare queue: %s", err)

@@ -171,6 +171,10 @@ message AMQPQueueDeclareConfig {
   // NowWait when true, the queue assumes to be declared on the server
   // +optional
   optional bool noWait = 5;
+
+  // Arguments of a queue (also known as "x-arguments") used for optional features and plugins
+  // +optional
+  optional bytes arguments = 6;
 }
 
 // AzureEventsHubEventSource describes the event source for azure events hub

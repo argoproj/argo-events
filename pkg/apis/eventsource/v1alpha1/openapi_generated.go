@@ -350,6 +350,13 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPQueueDeclareConfig(ref common.Refe
 							Format:      "",
 						},
 					},
+					"arguments": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Arguments of a queue (also known as \"x-arguments\") used for optional features and plugins",
+							Type:        []string{"string"},
+							Format:      "byte",
+						},
+					},
 				},
 			},
 		},

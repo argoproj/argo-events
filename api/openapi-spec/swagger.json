@@ -656,6 +656,11 @@
       "description": "AMQPQueueDeclareConfig holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters",
       "type": "object",
       "properties": {
+        "arguments": {
+          "description": "Arguments of a queue (also known as \"x-arguments\") used for optional features and plugins",
+          "type": "string",
+          "format": "byte"
+        },
         "autoDelete": {
           "description": "AutoDelete removes the queue when no consumers are active",
           "type": "boolean"
