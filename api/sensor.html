@@ -988,7 +988,7 @@ EventContext
 </tr>
 <tr>
 <td>
-<code>logicalOperator</code></br>
+<code>dataLogicalOperator</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.LogicalOperator">
 LogicalOperator
@@ -996,7 +996,22 @@ LogicalOperator
 </em>
 </td>
 <td>
-<p>LogicalOperator defines how multiple Data filters (if defined) or Exprs filters (if defined) are evaluated together.
+<p>DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together.
+Available values: and (&amp;&amp;), or (||)
+Is optional and if left blank treated as and (&amp;&amp;).</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exprLogicalOperator</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator">
+LogicalOperator
+</a>
+</em>
+</td>
+<td>
+<p>ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together.
 Available values: and (&amp;&amp;), or (||)
 Is optional and if left blank treated as and (&amp;&amp;).</p>
 </td>

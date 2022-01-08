@@ -1047,15 +1047,29 @@ payload.
 </tr>
 <tr>
 <td>
-<code>logicalOperator</code></br> <em>
+<code>dataLogicalOperator</code></br> <em>
 <a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
 </em>
 </td>
 <td>
 <p>
-LogicalOperator defines how multiple Data filters (if defined) or Exprs
-filters (if defined) are evaluated together. Available values: and (&&),
-or (\|\|) Is optional and if left blank treated as and (&&).
+DataLogicalOperator defines how multiple Data filters (if defined) are
+evaluated together. Available values: and (&&), or (\|\|) Is optional
+and if left blank treated as and (&&).
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exprLogicalOperator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
+</em>
+</td>
+<td>
+<p>
+ExprLogicalOperator defines how multiple Exprs filters (if defined) are
+evaluated together. Available values: and (&&), or (\|\|) Is optional
+and if left blank treated as and (&&).
 </p>
 </td>
 </tr>

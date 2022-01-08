@@ -222,10 +222,14 @@ type EventDependencyFilter struct {
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 	// Exprs contains the list of expressions evaluated against the event payload.
 	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,4,rep,name=exprs"`
-	// LogicalOperator defines how multiple Data filters (if defined) or Exprs filters (if defined) are evaluated together.
+	// DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together.
 	// Available values: and (&&), or (||)
 	// Is optional and if left blank treated as and (&&).
-	LogicalOperator LogicalOperator `json:"logicalOperator,omitempty" protobuf:"bytes,5,opt,name=logicalOperator,casttype=LogicalOperator"`
+	DataLogicalOperator LogicalOperator `json:"dataLogicalOperator,omitempty" protobuf:"bytes,5,opt,name=dataLogicalOperator,casttype=DataLogicalOperator"`
+	// ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together.
+	// Available values: and (&&), or (||)
+	// Is optional and if left blank treated as and (&&).
+	ExprLogicalOperator LogicalOperator `json:"exprLogicalOperator,omitempty" protobuf:"bytes,6,opt,name=exprLogicalOperator,casttype=ExprLogicalOperator"`
 }
 
 type ExprFilter struct {

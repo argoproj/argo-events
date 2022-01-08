@@ -66,6 +66,7 @@ require (
 	github.com/tidwall/gjson v1.10.2
 	github.com/tidwall/sjson v1.1.1
 	github.com/xanzy/go-gitlab v0.50.2
+	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871
@@ -82,8 +83,6 @@ require (
 	sigs.k8s.io/controller-tools v0.7.0
 	sigs.k8s.io/yaml v1.2.0
 )
-
-require github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 
 require (
 	github.com/Azure/azure-amqp-common-go/v3 v3.1.0 // indirect

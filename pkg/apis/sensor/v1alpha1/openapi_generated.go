@@ -730,9 +730,16 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 							},
 						},
 					},
-					"logicalOperator": {
+					"dataLogicalOperator": {
 						SchemaProps: spec.SchemaProps{
-							Description: "LogicalOperator defines how multiple Data filters (if defined) or Exprs filters (if defined) are evaluated together. Available values: and (&&), or (||) Is optional and if left blank treated as and (&&).",
+							Description: "DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together. Available values: and (&&), or (||) Is optional and if left blank treated as and (&&).",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"exprLogicalOperator": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together. Available values: and (&&), or (||) Is optional and if left blank treated as and (&&).",
 							Type:        []string{"string"},
 							Format:      "",
 						},

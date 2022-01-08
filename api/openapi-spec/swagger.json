@@ -2788,16 +2788,20 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
           }
         },
+        "dataLogicalOperator": {
+          "description": "DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
+        },
+        "exprLogicalOperator": {
+          "description": "ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
+        },
         "exprs": {
           "description": "Exprs contains the list of expressions evaluated against the event payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ExprFilter"
           }
-        },
-        "logicalOperator": {
-          "description": "LogicalOperator defines how multiple Data filters (if defined) or Exprs filters (if defined) are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
-          "type": "string"
         },
         "time": {
           "description": "Time filter on the event with escalation",

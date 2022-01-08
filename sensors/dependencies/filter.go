@@ -61,7 +61,7 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, operator v1alpha1.Logic
 		errMessages = make([]string, 0)
 	}
 
-	exprFilter, exprErr := filterExpr(filter.Exprs, filter.LogicalOperator, event)
+	exprFilter, exprErr := filterExpr(filter.Exprs, filter.ExprLogicalOperator, event)
 	if exprErr != nil {
 		if operator != v1alpha1.OrLogicalOperator {
 			return false, exprErr
@@ -69,7 +69,7 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, operator v1alpha1.Logic
 		errMessages = append(errMessages, exprErr.Error())
 	}
 
-	dataFilter, dataErr := filterData(filter.Data, filter.LogicalOperator, event)
+	dataFilter, dataErr := filterData(filter.Data, filter.DataLogicalOperator, event)
 	if dataErr != nil {
 		if operator != v1alpha1.OrLogicalOperator {
 			return false, dataErr

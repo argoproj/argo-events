@@ -273,10 +273,15 @@ message EventDependencyFilter {
   // Exprs contains the list of expressions evaluated against the event payload.
   repeated ExprFilter exprs = 4;
 
-  // LogicalOperator defines how multiple Data filters (if defined) or Exprs filters (if defined) are evaluated together.
+  // DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together.
   // Available values: and (&&), or (||)
   // Is optional and if left blank treated as and (&&).
-  optional string logicalOperator = 5;
+  optional string dataLogicalOperator = 5;
+
+  // ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together.
+  // Available values: and (&&), or (||)
+  // Is optional and if left blank treated as and (&&).
+  optional string exprLogicalOperator = 6;
 }
 
 // EventDependencyTransformer transforms the event
