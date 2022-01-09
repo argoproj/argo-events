@@ -30,6 +30,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
+	lua "github.com/yuin/gopher-lua"
 )
 
 // Filter filters the event with dependency's defined filters
@@ -59,8 +60,12 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) 
 	if err != nil {
 		return false, err
 	}
+	scriptFilter, err := filterScript(filter.Script, event)
+	if err != nil {
+		return false, err
+	}
 
-	return timeFilter && ctxFilter && dataFilter && exprFilter, nil
+	return timeFilter && ctxFilter && dataFilter && exprFilter && scriptFilter, nil
 }
 
 // filterTime checks the eventTime falls into time range specified by the timeFilter.
@@ -305,4 +310,39 @@ func filterExpr(filters []v1alpha1.ExprFilter, event *v1alpha1.Event) (bool, err
 	}
 
 	return false, nil
+}
+
+func filterScript(script string, event *v1alpha1.Event) (bool, error) {
+	if script == "" {
+		return true, nil
+	}
+	if event == nil {
+		return false, fmt.Errorf("nil event")
+	}
+	payload := event.Data
+	if payload == nil {
+		return true, nil
+	}
+	var js *json.RawMessage
+	if err := json.Unmarshal(payload, &js); err != nil {
+		return false, err
+	}
+	var jsData []byte
+	jsData, err := json.Marshal(js)
+	if err != nil {
+		return false, err
+	}
+	l := lua.NewState()
+	defer l.Close()
+	var payloadJson map[string]interface{}
+	if err = json.Unmarshal(jsData, &payloadJson); err != nil {
+		return false, err
+	}
+	lEvent := mapToTable(payloadJson)
+	l.SetGlobal("event", lEvent)
+	if err = l.DoString(script); err != nil {
+		return false, err
+	}
+	lv := l.Get(-1)
+	return lv == lua.LTrue, nil
 }

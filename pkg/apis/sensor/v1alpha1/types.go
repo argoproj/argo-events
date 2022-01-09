@@ -210,6 +210,8 @@ type EventDependencyFilter struct {
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 	// Exprs contains the list of expressions evaluated against the event payload.
 	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,4,rep,name=exprs"`
+	// Script refers to a Lua script evaluated to determine the validity of an event.
+	Script string `json:"script,omitempty" protobuf:"bytes,5,opt,name=script"`
 }
 
 type ExprFilter struct {

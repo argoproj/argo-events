@@ -2790,6 +2790,10 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ExprFilter"
           }
         },
+        "script": {
+          "description": "Script refers to a Lua script evaluated to determine the validity of an event.",
+          "type": "string"
+        },
         "time": {
           "description": "Time filter on the event with escalation",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter"

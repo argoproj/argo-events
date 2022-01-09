@@ -267,6 +267,9 @@ message EventDependencyFilter {
 
   // Exprs contains the list of expressions evaluated against the event payload.
   repeated ExprFilter exprs = 4;
+
+  // Script refers to a Lua script evaluated to determine the validity of an event.
+  optional string script = 5;
 }
 
 // EventDependencyTransformer transforms the event

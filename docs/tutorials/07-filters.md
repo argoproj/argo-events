@@ -181,3 +181,79 @@ An example of time filter is available under `examples/sensors`.
          ┃           stop        start       ┃       stop            start       ┃
         ─┸───────────○───────────●───────────┸───────────○───────────●───────────┸─
         ─── OK ──────╯           ╰───────── OK ──────────╯           ╰────── OK ───
+
+## Script Filter
+
+Script filter evaluates a Lua script to determine the validity of the event.
+
+> Available after v1.5.5
+
+The Lua script must return a boolean result for the filter to work. A `true` value means the event is valid
+else invalid.
+
+### Note
+
+* Only the event data is available for the transformation and not the context.
+
+
+* The event data is set in the Lua script via a global variable called `event`.
+
+
+```yaml
+# Event Payload
+#
+#  {
+#    "a": "b",
+#    "c": 10,
+#    "d": {
+#      "e": "z"
+#    }
+#  }
+#
+
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: with-script-filter
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+      filters:
+        script: |-
+          if event.a == "b" and event.d.e == "z" then return true else return false end
+  triggers:
+    - template:
+        name: workflow
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: workflow-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # value will get overridden by the event payload
+                      value: hello world
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: name
+              dest: spec.arguments.parameters.0.value
+
+```
