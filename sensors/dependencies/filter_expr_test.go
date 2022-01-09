@@ -33,6 +33,72 @@ func TestFilterExpr(t *testing.T) {
 		expectedErrMsg string
 	}{
 		{
+			name:  "nil event",
+			event: nil,
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `a == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a",
+							Name: "a",
+						},
+					},
+				},
+			},
+			expectedResult: false,
+			expectedErrMsg: "expr filter error (nil event)",
+		},
+		{
+			name:  "unsupported content type",
+			event: &v1alpha1.Event{Data: []byte("a")},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `a == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a",
+							Name: "a",
+						},
+					},
+				},
+			},
+			expectedResult: false,
+			expectedErrMsg: "expr filter error (event data not valid JSON)",
+		},
+		{
+			name: "empty data",
+			event: &v1alpha1.Event{
+				Context: &v1alpha1.EventContext{
+					DataContentType: "application/json",
+				},
+			},
+			filters: []v1alpha1.ExprFilter{
+				{
+					Expr: `a == "b"`,
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a",
+							Name: "a",
+						},
+					},
+				},
+			},
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
+			name: "nil filters",
+			event: &v1alpha1.Event{
+				Context: &v1alpha1.EventContext{
+					DataContentType: "application/json",
+				},
+			},
+			filters:        nil,
+			expectedResult: true,
+			expectedErrMsg: "",
+		},
+		{
 			name: "simple string equal",
 			event: &v1alpha1.Event{
 				Data: []byte(`{"a": "b"}`),

@@ -38,27 +38,45 @@ func TestFilterData(t *testing.T) {
 		{
 			name: "nil event",
 			args: args{
-				data:     nil,
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"v"},
+					},
+				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event:    nil,
 			},
-			expectedResult: true,
-			expectErr:      false,
+			expectedResult: false,
+			expectErr:      true,
 		},
 		{
 			name: "unsupported content type",
 			args: args{
-				data:     nil,
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"v"},
+					},
+				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event:    &v1alpha1.Event{Data: []byte("a")},
 			},
-			expectedResult: true,
-			expectErr:      false,
+			expectedResult: false,
+			expectErr:      true,
 		},
 		{
 			name: "empty data",
 			args: args{
-				data:     nil,
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"v"},
+					},
+				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{

@@ -18,7 +18,6 @@ package dependencies
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -31,6 +30,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/pkg/json"
 	"github.com/tidwall/gjson"
 )
 
@@ -107,23 +107,12 @@ func filterExpr(filters []v1alpha1.ExprFilter, operator v1alpha1.LogicalOperator
 	if event == nil {
 		return false, fmt.Errorf(errMsgTemplate, "expr", "nil event")
 	}
-
 	payload := event.Data
 	if payload == nil {
 		return true, nil
 	}
-
-	var rawMsg *json.RawMessage
-	payloadErr := json.Unmarshal(payload, &rawMsg)
-	if payloadErr != nil {
-		return false, fmt.Errorf(errMsgTemplate, "expr", payloadErr.Error())
-	}
-
-	var rawMsgData []byte
-	var rawErr error
-	rawMsgData, rawErr = json.Marshal(rawMsg)
-	if rawErr != nil {
-		return false, fmt.Errorf(errMsgTemplate, "expr", rawErr.Error())
+	if !json.IsJSON(payload) {
+		return false, fmt.Errorf(errMsgTemplate, "expr", "event data not valid JSON")
 	}
 
 	var errMessages []string
@@ -134,7 +123,7 @@ filterExpr:
 	for _, filter := range filters {
 		parameters := map[string]interface{}{}
 		for _, field := range filter.Fields {
-			pathResult := gjson.GetBytes(rawMsgData, field.Path)
+			pathResult := gjson.GetBytes(payload, field.Path)
 			if !pathResult.Exists() {
 				errMsg := "path '%s' does not exist"
 				if operator == v1alpha1.OrLogicalOperator {
@@ -202,22 +191,12 @@ func filterData(filters []v1alpha1.DataFilter, operator v1alpha1.LogicalOperator
 	if event == nil {
 		return false, fmt.Errorf(errMsgTemplate, "data", "nil Event")
 	}
-
 	payload := event.Data
 	if payload == nil {
 		return true, nil
 	}
-	var rawMsg *json.RawMessage
-	payloadErr := json.Unmarshal(payload, &rawMsg)
-	if payloadErr != nil {
-		return false, fmt.Errorf(errMsgTemplate, "data", payloadErr.Error())
-	}
-
-	var rawMsgData []byte
-	var rawErr error
-	rawMsgData, rawErr = json.Marshal(rawMsg)
-	if rawErr != nil {
-		return false, fmt.Errorf(errMsgTemplate, "data", rawErr.Error())
+	if !json.IsJSON(payload) {
+		return false, fmt.Errorf(errMsgTemplate, "data", "event data not valid JSON")
 	}
 
 	var errMessages []string
@@ -226,7 +205,7 @@ func filterData(filters []v1alpha1.DataFilter, operator v1alpha1.LogicalOperator
 	}
 filterData:
 	for _, f := range filters {
-		pathResult := gjson.GetBytes(rawMsgData, f.Path)
+		pathResult := gjson.GetBytes(payload, f.Path)
 		if !pathResult.Exists() {
 			errMsg := "path '%s' does not exist"
 			if operator == v1alpha1.OrLogicalOperator {
