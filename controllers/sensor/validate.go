@@ -485,7 +485,11 @@ func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
 		return nil
 	}
 
-	if err := validateLogicalOperator(filter.LogicalOperator); err != nil {
+	if err := validateLogicalOperator(filter.ExprLogicalOperator); err != nil {
+		return err
+	}
+
+	if err := validateLogicalOperator(filter.DataLogicalOperator); err != nil {
 		return err
 	}
 

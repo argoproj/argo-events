@@ -144,7 +144,7 @@ func TestValidateEventFilter(t *testing.T) {
 
 	t.Run("test valid, all", func(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
-			LogicalOperator: v1alpha1.OrLogicalOperator,
+			ExprLogicalOperator: v1alpha1.OrLogicalOperator,
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					Expr: "fake-expr",
@@ -156,6 +156,7 @@ func TestValidateEventFilter(t *testing.T) {
 					},
 				},
 			},
+			DataLogicalOperator: v1alpha1.OrLogicalOperator,
 			Data: []v1alpha1.DataFilter{
 				{
 					Path: "fake-path",
@@ -250,7 +251,7 @@ func TestValidateEventFilter(t *testing.T) {
 
 	t.Run("test not valid, wrong logical operator", func(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
-			LogicalOperator: "fake",
+			DataLogicalOperator: "fake",
 		}
 
 		err := validateEventFilter(filter)
