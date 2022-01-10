@@ -2769,6 +2769,10 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyFilter",
           "description": "Filters and rules governing toleration of success and constraints on the context and data of an event"
         },
+        "filtersLogicalOperator": {
+          "description": "FiltersLogicalOperator defines how different filters are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
+        },
         "name": {
           "description": "Name is a unique name of this dependency",
           "type": "string"
@@ -2798,6 +2802,14 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
           },
           "type": "array"
+        },
+        "dataLogicalOperator": {
+          "description": "DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
+        },
+        "exprLogicalOperator": {
+          "description": "ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
         },
         "exprs": {
           "description": "Exprs contains the list of expressions evaluated against the event payload.",

@@ -176,6 +176,14 @@ type Template struct {
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,11,opt,name=affinity"`
 }
 
+type LogicalOperator string
+
+const (
+	AndLogicalOperator   LogicalOperator = "and" // Equal to &&
+	OrLogicalOperator    LogicalOperator = "or"  // Equal to ||
+	EmptyLogicalOperator LogicalOperator = ""    // Empty will default to AND (&&)
+)
+
 // EventDependency describes a dependency
 type EventDependency struct {
 	// Name is a unique name of this dependency
@@ -188,6 +196,10 @@ type EventDependency struct {
 	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
 	// Transform transforms the event data
 	Transform *EventDependencyTransformer `json:"transform,omitempty" protobuf:"bytes,5,opt,name=transform"`
+	// FiltersLogicalOperator defines how different filters are evaluated together.
+	// Available values: and (&&), or (||)
+	// Is optional and if left blank treated as and (&&).
+	FiltersLogicalOperator LogicalOperator `json:"filtersLogicalOperator,omitempty" protobuf:"bytes,6,opt,name=filtersLogicalOperator,casttype=LogicalOperator"`
 }
 
 // EventDependencyTransformer transforms the event
@@ -210,6 +222,14 @@ type EventDependencyFilter struct {
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 	// Exprs contains the list of expressions evaluated against the event payload.
 	Exprs []ExprFilter `json:"exprs,omitempty" protobuf:"bytes,4,rep,name=exprs"`
+	// DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together.
+	// Available values: and (&&), or (||)
+	// Is optional and if left blank treated as and (&&).
+	DataLogicalOperator LogicalOperator `json:"dataLogicalOperator,omitempty" protobuf:"bytes,5,opt,name=dataLogicalOperator,casttype=DataLogicalOperator"`
+	// ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together.
+	// Available values: and (&&), or (||)
+	// Is optional and if left blank treated as and (&&).
+	ExprLogicalOperator LogicalOperator `json:"exprLogicalOperator,omitempty" protobuf:"bytes,6,opt,name=exprLogicalOperator,casttype=ExprLogicalOperator"`
 }
 
 type ExprFilter struct {

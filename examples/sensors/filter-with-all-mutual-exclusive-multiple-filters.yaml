@@ -18,9 +18,12 @@ spec:
     - name: test-dep
       eventSourceName: webhook
       eventName: example
-      filters:
-        # If event payload passes ALL following expr filters, the event is considered a valid event.
-        exprs:   # result: EVENT PASS
+      # If event payload passes either one of the following filters, the event is considered a valid event.
+      filtersLogicalOperator: "or"
+      filters:   # global filters result: EVENT PASS
+        # If event payload passes either one of the following filters, the event is considered a valid event.
+        logicalOperator: "or"
+        exprs:   # expr filter result: EVENT PASS
           - expr: a == "b" || c == 10   # true
             fields:
               - name: a
@@ -31,6 +34,20 @@ spec:
             fields:
               - name: e
                 path: d.e
+        data:   # data filter result: EVENT PASS
+          - path: "a"   # true
+            type: "string"
+            value:
+              - "b"
+          - path: "c"   # FALSE
+            type: "number"
+            comparator: ">"
+            value:
+              - "20"
+          - path: "d.e"   # true
+            type: "bool"
+            value:
+              - "false"
   triggers:
     - template:
         name: workflow
