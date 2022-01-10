@@ -960,6 +960,20 @@ Transform transforms the event data
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filtersLogicalOperator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
+</em>
+</td>
+<td>
+<p>
+FiltersLogicalOperator defines how different filters are evaluated
+together. Available values: and (&&), or (\|\|) Is optional and if left
+blank treated as and (&&).
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventDependencyFilter">
@@ -1028,6 +1042,34 @@ Data filter constraints with escalation
 <p>
 Exprs contains the list of expressions evaluated against the event
 payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dataLogicalOperator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
+</em>
+</td>
+<td>
+<p>
+DataLogicalOperator defines how multiple Data filters (if defined) are
+evaluated together. Available values: and (&&), or (\|\|) Is optional
+and if left blank treated as and (&&).
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exprLogicalOperator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator"> LogicalOperator </a>
+</em>
+</td>
+<td>
+<p>
+ExprLogicalOperator defines how multiple Exprs filters (if defined) are
+evaluated together. Available values: and (&&), or (\|\|) Is optional
+and if left blank treated as and (&&).
 </p>
 </td>
 </tr>
@@ -1799,6 +1841,17 @@ data for busy events.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.LogicalOperator">
+LogicalOperator (<code>string</code> alias)
+</p>
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependency">EventDependency</a>,
+<a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
+</p>
+<p>
+</p>
 <h3 id="argoproj.io/v1alpha1.NATSTrigger">
 NATSTrigger
 </h3>
