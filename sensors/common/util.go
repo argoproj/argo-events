@@ -26,11 +26,15 @@ func ApplyEventLabels(labels map[string]string, events map[string]*v1alpha1.Even
 	return nil
 }
 
-func ApplySensorUniquenessLabels(labels map[string]string, sensor *v1alpha1.Sensor) {
+func ApplySensorLabels(labels map[string]string, sensor *v1alpha1.Sensor) {
 	sensorGVK := sensor.GroupVersionKind()
 	labels["events.argoproj.io/sensor-group"] = sensorGVK.Group
 	labels["events.argoproj.io/sensor-version"] = sensorGVK.Version
 	labels["events.argoproj.io/sensor-kind"] = sensorGVK.Kind
 	labels["events.argoproj.io/sensor-namespace"] = sensor.Namespace
 	labels["events.argoproj.io/sensor"] = sensor.Name
+
+	if sensor.Labels != nil && sensor.Labels["app.kubernetes.io/instance"] != "" {
+		labels["events.argoproj.io/sensor-app-name"] = sensor.Labels["app.kubernetes.io/instance"]
+	}
 }

@@ -165,7 +165,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 		}
 		labels["events.argoproj.io/trigger"] = trigger.Template.Name
 		labels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
-		common.ApplySensorUniquenessLabels(labels, k8sTrigger.Sensor)
+		common.ApplySensorLabels(labels, k8sTrigger.Sensor)
 
 		if obj.GetKind() == "Workflow" {
 			err := common.ApplyEventLabels(labels, events)
