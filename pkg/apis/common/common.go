@@ -73,7 +73,7 @@ var (
 		HDFSEvent,
 		FileEvent,
 		GenericEvent,
-		SNSEvent
+		SNSEvent,
 	}
 )
 
