@@ -166,6 +166,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	var eventPayload []byte
 	var key string
 	var tmplt string
+	var resultValue string
 
 	event, eventExists := events[src.DependencyName]
 	switch {
@@ -188,7 +189,8 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		}
 	case src.Value != nil:
 		// Use the default value set by the user in case the event is missing
-		return src.Value, nil
+		resultValue = *src.Value
+		return &resultValue, nil
 	default:
 		// The parameter doesn't have a default value and is referencing a dependency that is
 		// missing in the received events. This is not an error and may happen with || conditions.
@@ -198,32 +200,34 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	if err != nil {
 		if src.Value != nil {
 			fmt.Printf("failed to parse the event data, using default value. err: %+v\n", err)
-			return src.Value, nil
+			resultValue = *src.Value
+			return &resultValue, nil
 		}
 		return nil, err
 	}
 	// Get the value corresponding to specified key within JSON object
 	if eventPayload != nil {
 		if tmplt != "" {
-			out, err := getValueWithTemplate(eventPayload, tmplt)
+			resultValue, err = getValueWithTemplate(eventPayload, tmplt)
 			if err == nil {
-				return &out, nil
+				return &resultValue, nil
 			}
 			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
 		}
 		if key != "" {
-			res, err := getValueByKey(eventPayload, key)
+			resultValue, err = getValueByKey(eventPayload, key)
 			if err == nil {
-				return &res, nil
+				return &resultValue, nil
 			}
 			fmt.Printf("Failed to get value by key: %+v\n", err)
 		}
 		if src.Value != nil {
-			return src.Value, nil
+			resultValue = *src.Value
+			return &resultValue, nil
 		}
 
-		strPayload := string(eventPayload)
-		return &strPayload, nil
+		resultValue = string(eventPayload)
+		return &resultValue, nil
 	}
 
 	return nil, fmt.Errorf("unable to resolve '%s' parameter value", src.DependencyName)
