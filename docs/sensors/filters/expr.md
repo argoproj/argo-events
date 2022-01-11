@@ -88,9 +88,36 @@ The `expr` field is evaluated using [govaluate](https://github.com/Knetic/govalu
 
 `TODO`
 
-## ??? example
+## Partical example
 
-`TODO`
+1. Create a webhook event-source
+
+  ```bash
+  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+  ```
+
+1. Create a webhook sensor with expr filter
+
+  ```bash
+  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-expressions.yaml
+  ```
+
+1. Send an HTTP request to event-source
+
+  ```bash
+  curl -d '{ "a": "b", "c": 11, "d": { "e": true } }' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+  ```
+
+1. You will notice in sensor logs that the event is invalid as the sensor expects `e == false`
+
+1. Send another HTTP request to event-source
+
+  ```bash
+  curl -d '{ "a": "b", "c": 11, "d": { "e": false } }' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+  ```
+
+1. Look for a workflow with name starting with `expr-workflow-`
+
 
 ## Further examples
 

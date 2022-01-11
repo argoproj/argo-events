@@ -7,10 +7,6 @@ If filters determine an event is valid, this will trigger the action defined by 
 
 If filters determine an event is not valid, this won't trigger any action.
 
-## Prerequisite
-
-A webhook event-source must be set up.
-
 ## Types
 
 Argo Events offers 4 types of filters:

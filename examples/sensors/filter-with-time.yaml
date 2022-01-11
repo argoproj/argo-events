@@ -11,8 +11,8 @@ spec:
       eventName: example
       filters:
         time:
-          start: "09:09:09"
-          stop: "19:19:19"
+          start: "02:30:00"
+          stop: "04:30:00"
   triggers:
     - template:
         name: done-workflow

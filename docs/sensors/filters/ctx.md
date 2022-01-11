@@ -54,27 +54,30 @@ spec:
       eventName: example
       filters:
         context:
-          source: webhook
+          source: custom-webhook
 ```
 
 ## Practical example
 
-Change the subscriber in the webhook event-source to point it to `context-filter` sensor's URL.
+1. Create a webhook event-source
 
-1. Lets create a webhook sensor with context filter.
+  ```bash
+  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+  ```
+
+1. Create a webhook sensor with context filter
 
   ```bash
   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-context.yaml
   ```
 
-1. Send a HTTP request to event-source.
+1. Send an HTTP request to event-source
 
   ```bash
   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
   ```
 
-1. You will notice that the sensor logs prints the event is invalid as the sensor expects for
-   either `custom-webhook` as the value of the `source`.
+1. You will notice in sensor logs that the event is invalid as the sensor expects `custom-webhook` as the value of the `source`
 
 ## Further examples
 

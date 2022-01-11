@@ -41,7 +41,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: workflow-
+                generateName: expr-workflow-
               spec:
                 entrypoint: whalesay
                 arguments:

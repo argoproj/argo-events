@@ -11,7 +11,7 @@ spec:
       eventName: example
       filters:
         context:
-          source: webhook
+          source: custom-webhook
   triggers:
     - template:
         name: done-workflow
