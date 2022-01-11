@@ -1,3 +1,4 @@
+
 # Introducation
 
 Filters provide a powerful mechanism to apply constraints on the events in order to determine a validity.
@@ -5,6 +6,10 @@ Filters provide a powerful mechanism to apply constraints on the events in order
 If filters determine an event is valid, this will trigger the action defined by the Sensor.
 
 If filters determine an event is not valid, this won't trigger any action.
+
+## Prerequisite
+
+A webhook event-source must be set up.
 
 ## Types
 
@@ -17,13 +22,37 @@ Argo Events offers 4 types of filters:
 
 > ⚠️ `PLEASE NOTE` this is the order in which Sensor evaluates filter types: expr, data, context, time.
 
-## Logical operators
+## Logical operator
 
-`TODO`
+Filters types can be evaluated together in 2 ways:
 
-## Prerequisite
+- `AND`, meaning that all filters returning `true` are required for an event to be valid
+- `OR`, meaning that only one filter returning `true` is enough for an event to be valid
 
-A webhook event-source must be set up.
+Any kind of filter error is considered as `false` (e.g. path not existing in event body).
+
+Such behaviour can be configured with `filtersLogicalOperator` field in a Sensor dependency, e.g.
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: multiple-filters-example
+spec:
+  dependencies:
+    - name: sample-dependency
+      eventSourceName: webhook
+      eventName: sample-event
+      filtersLogicalOperator: "or"
+      filters:
+        # ...
+```
+
+Available values:
+
+- `empty`, defaulting to `and`
+- `and`, default behaviour
+- `or`
 
 ## Examples
 

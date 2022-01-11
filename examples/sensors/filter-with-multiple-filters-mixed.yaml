@@ -12,7 +12,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: with-expression-filters
+  name: with-mixed-multiple-filters
 spec:
   dependencies:
     - name: test-dep
@@ -21,8 +21,7 @@ spec:
       # If event payload passes either one of the following filters, the event is considered a valid event.
       filtersLogicalOperator: "or"
       filters:   # global filters result: EVENT PASS
-        # If event payload passes either one of the following filters, the event is considered a valid event.
-        logicalOperator: "or"
+        # default "exprLogicalOperator" = "and"
         exprs:   # expr filter result: EVENT PASS
           - expr: a == "b" || c == 10   # true
             fields:
@@ -34,7 +33,8 @@ spec:
             fields:
               - name: e
                 path: d.e
-        data:   # data filter result: EVENT PASS
+        # default "dataLogicalOperator" = "and"
+        data:   # data filter result: EVENT DOES NOT PASS
           - path: "a"   # true
             type: "string"
             value:

@@ -12,7 +12,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: with-data-filters
+  name: with-advanced-data-filters
 spec:
   dependencies:
     - name: test-dep

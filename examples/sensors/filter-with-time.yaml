@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook
+  name: with-time-filter
 spec:
   template:
     serviceAccountName: operate-workflow-sa
@@ -10,15 +10,12 @@ spec:
       eventSourceName: webhook
       eventName: example
       filters:
-        data:
-          - path: body.value
-            type: number
-            comparator: ">"
-            value:
-              - "50.0"
+        time:
+          start: "09:09:09"
+          stop: "19:19:19"
   triggers:
     - template:
-        name: data-workflow
+        name: done-workflow
         k8s:
           operation: create
           source:
@@ -46,5 +43,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                dataKey: body.value
+                dataKey: body.message
               dest: spec.arguments.parameters.0.value
