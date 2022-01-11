@@ -118,7 +118,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 	if op == v1alpha1.Submit {
 		submittedWFLabels["events.argoproj.io/trigger"] = trigger.Template.Name
 		submittedWFLabels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
-		common.ApplySensorUniquenessLabels(submittedWFLabels, t.Sensor)
+		common.ApplySensorLabels(submittedWFLabels, t.Sensor)
 		err := common.ApplyEventLabels(submittedWFLabels, events)
 		if err != nil {
 			t.Logger.Info("failed to apply event labels, skipping...")
