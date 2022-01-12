@@ -28,26 +28,29 @@ spec:
         factor: 2
         jitter: 0.2
       # optional exchange settings
-      # if not povided, default values will be used
+      # if not provided, default values will be used
       exchangeDeclare:
         durable: true
         autoDelete: false
         internal: false
         noWait: false
       # optional queue settings
-      # if not povided, default values will be used      
+      # if not provided, default values will be used
       queueDeclare:
         name: "my-queue-name"
         durable: false
         autoDelete: false
         exclusive: true
         noWait: false
+        # example argument to use quorum queues
+        # arguments: |-
+          # x-queue-type: quorum
       # optional queue binding settings
-      # if not povided, default values will be used        
+      # if not provided, default values will be used
       queueBind:
         noWait: false
       # optional consume settings
-      # if not povided, default values will be used        
+      # if not provided, default values will be used
       consume:
         consumerTag: "my-consumer-tag"
         autoAck: true
