@@ -440,7 +440,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							e.cfAPI.ReportError(
-								errors.Wrapf(err, "failed to publish an event [ %s: %s, %s: %s ]",
+								errors.Wrapf(err, "failed to publish an event { %s: %s, %s: %s }",
 									logging.LabelEventName, s.GetEventName(), logging.LabelEventSourceType, s.GetEventSourceType()),
 								codefresh.ErrorContext{
 									ObjectMeta: e.eventSource.ObjectMeta,
