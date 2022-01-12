@@ -19,6 +19,7 @@ package amqp
 import (
 	"context"
 	"encoding/json"
+	"github.com/ghodss/yaml"
 	"time"
 
 	"github.com/pkg/errors"
@@ -250,7 +251,7 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 
 	var optionalArguments amqplib.Table
 	if eventSource.QueueDeclare.Arguments != nil {
-		err := json.Unmarshal(eventSource.QueueDeclare.Arguments, &optionalArguments)
+		err := yaml.Unmarshal(eventSource.QueueDeclare.Arguments, &optionalArguments)
 		if err != nil {
 			return nil, errors.Errorf(
 				"optional arguments for queue are an invalid Table type. Args: %x. Err: %s",
