@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.5.6 (2022-01-11)
+
+ * [8a5db8d0](https://github.com/argoproj/argo-events/commit/8a5db8d0732e98c8b4a60adaca81e47100096f77) Update manifests to v1.5.6
+ * [64621a5d](https://github.com/argoproj/argo-events/commit/64621a5da4b3dac58f439839a65e22791d4a7432) fix: let the service restart after leader switched (#1513)
+ * [57bdb37a](https://github.com/argoproj/argo-events/commit/57bdb37a23f5cd305b29297fc59da2034e012313) feat: Add GitHub App creds support (#1438)
+ * [b1dc32c9](https://github.com/argoproj/argo-events/commit/b1dc32c93153c9bb80866613fba733cd5820614b) fix: Sensor triggers an Argo Workflow with wrong name (#1511)
+
+### Contributors
+
+ * Daniel
+ * Derek Wang
+
 ## v1.5.5 (2021-12-18)
 
  * [3bfd7f9f](https://github.com/argoproj/argo-events/commit/3bfd7f9fd58152fc86b4533fef6912289e4ef39e) Update manifests to v1.5.5
