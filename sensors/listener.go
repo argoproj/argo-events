@@ -81,7 +81,7 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 			}
 		},
 		OnStoppedLeading: func() {
-			log.Infof("leader lost: %s", sensorCtx.hostname)
+			log.Fatalf("leader lost: %s", sensorCtx.hostname)
 		},
 	})
 	return nil
