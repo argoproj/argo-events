@@ -314,7 +314,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 			}
 		},
 		OnStoppedLeading: func() {
-			log.Infof("leader lost: %s", e.hostname)
+			log.Fatalf("leader lost: %s", e.hostname)
 		},
 	})
 
