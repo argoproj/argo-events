@@ -52,6 +52,11 @@ func (in *BusConfig) DeepCopy() *BusConfig {
 func (in *ContainerTemplate) DeepCopyInto(out *ContainerTemplate) {
 	*out = *in
 	in.Resources.DeepCopyInto(&out.Resources)
+	if in.SecurityContext != nil {
+		in, out := &in.SecurityContext, &out.SecurityContext
+		*out = new(v1.SecurityContext)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
