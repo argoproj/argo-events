@@ -174,7 +174,7 @@ message AMQPQueueDeclareConfig {
 
   // Arguments of a queue (also known as "x-arguments") used for optional features and plugins
   // +optional
-  optional bytes arguments = 6;
+  optional string arguments = 6;
 }
 
 // AzureEventsHubEventSource describes the event source for azure events hub

@@ -665,7 +665,6 @@
       "properties": {
         "arguments": {
           "description": "Arguments of a queue (also known as \"x-arguments\") used for optional features and plugins",
-          "format": "byte",
           "type": "string"
         },
         "autoDelete": {

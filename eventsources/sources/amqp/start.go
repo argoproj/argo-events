@@ -250,8 +250,9 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 	}
 
 	var optionalArguments amqplib.Table
-	if eventSource.QueueDeclare.Arguments != nil {
-		err := yaml.Unmarshal(eventSource.QueueDeclare.Arguments, &optionalArguments)
+	if eventSource.QueueDeclare.Arguments != "" {
+		args := []byte(eventSource.QueueDeclare.Arguments)
+		err := yaml.Unmarshal(args, &optionalArguments)
 		if err != nil {
 			return nil, errors.Errorf(
 				"optional arguments for queue are an invalid Table type. Args: %x. Err: %s",

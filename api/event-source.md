@@ -502,7 +502,7 @@ NowWait when true, the queue assumes to be declared on the server
 </tr>
 <tr>
 <td>
-<code>arguments</code></br> <em> \[\]byte </em>
+<code>arguments</code></br> <em> string </em>
 </td>
 <td>
 <em>(Optional)</em>

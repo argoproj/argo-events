@@ -658,8 +658,7 @@
       "properties": {
         "arguments": {
           "description": "Arguments of a queue (also known as \"x-arguments\") used for optional features and plugins",
-          "type": "string",
-          "format": "byte"
+          "type": "string"
         },
         "autoDelete": {
           "description": "AutoDelete removes the queue when no consumers are active",
