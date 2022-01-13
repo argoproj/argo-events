@@ -373,6 +373,14 @@ func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor
 		log.Errorw("failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
 			zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
+		sensorCtx.cfAPI.ReportError(
+			errors.Wrapf(err, "failed to execute a trigger { %s: %s, %s: %+q, %s: %+q }",
+				logging.LabelTriggerName, trigger.Template.Name, "triggeredBy", depNames, "triggeredByEvents", eventIDs),
+			codefresh.ErrorContext{
+				ObjectMeta: sensor.ObjectMeta,
+				TypeMeta:   sensor.TypeMeta,
+			},
+		)
 	} else {
 		sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
 	}
