@@ -61,7 +61,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/tidwall/gjson v1.10.2
+	github.com/tidwall/gjson v1.13.0
 	github.com/tidwall/sjson v1.1.1
 	github.com/xanzy/go-gitlab v0.50.2
 	go.uber.org/ratelimit v0.2.0
