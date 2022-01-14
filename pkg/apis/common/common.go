@@ -132,7 +132,7 @@ type TLSConfig struct {
 	ClientCertSecret *corev1.SecretKeySelector `json:"clientCertSecret,omitempty" protobuf:"bytes,2,opt,name=clientCertSecret"`
 	// ClientKeySecret refers to the secret that contains the client key
 	ClientKeySecret *corev1.SecretKeySelector `json:"clientKeySecret,omitempty" protobuf:"bytes,3,opt,name=clientKeySecret"`
-	// If true, skips creation of TLSConfig with certs and creates an empty TLSConfig
+	// If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. Optional default is false
 	InsecureSkipVerify bool `json:"insecureSkipVerify,omitempty" protobuf:"varint,4,opt,name=insecureSkipVerify"`
 }
 

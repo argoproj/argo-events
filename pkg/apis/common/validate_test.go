@@ -11,29 +11,28 @@ import (
 func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *TLSConfig {
 	t.Helper()
 	if insecureSkipVerify == true {
-	    return TLSConfig{
-	        InsecureSkipVerify: true,
-        }
-    } else {
-	return &TLSConfig{
-		CACertSecret: &corev1.SecretKeySelector{
-			Key: "fake-key1",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name1",
+		return &TLSConfig{InsecureSkipVerify: true}
+	} else {
+		return &TLSConfig{
+			CACertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key1",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name1",
+				},
 			},
-		},
-		ClientCertSecret: &corev1.SecretKeySelector{
-			Key: "fake-key2",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name2",
+			ClientCertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key2",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name2",
+				},
 			},
-		},
-		ClientKeySecret: &corev1.SecretKeySelector{
-			Key: "fake-key3",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name3",
+			ClientKeySecret: &corev1.SecretKeySelector{
+				Key: "fake-key3",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name3",
+				},
 			},
-		},
+		}
 	}
 }
 
@@ -66,11 +65,11 @@ func TestValidateTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test insecureSkipVerify is false and no certs", func(t *testing.T) {
-        c := &TLSConfig{InsecureSkipVerify: false,}
-        err := ValidateTLSConfig(c, false)
-        assert.NotNil(t, err)
-        assert.True(t, strings.Contains(err.Error(), "insecureSkipVerify is set to false, please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both"))
-    })
+		c := &TLSConfig{InsecureSkipVerify: false}
+		err := ValidateTLSConfig(c)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "insecureSkipVerify is set to false, please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both"))
+	})
 
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
 		c := fakeTLSConfig(t, false)

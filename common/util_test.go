@@ -177,31 +177,30 @@ func TestVolumesFromSecretsOrConfigMaps(t *testing.T) {
 func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *apicommon.TLSConfig {
 	t.Helper()
 	if insecureSkipVerify == true {
-	   return &apicommon.TLSConfig{
-	                    InsecureSkipVerify: true,
-                   		ClientAuth: 0,
-	  }
+		return &apicommon.TLSConfig{
+			InsecureSkipVerify: true,
+		}
 	} else {
-        return &apicommon.TLSConfig{
-            CACertSecret: &corev1.SecretKeySelector{
-                Key: "fake-key1",
-                LocalObjectReference: corev1.LocalObjectReference{
-                    Name: "fake-name1",
-                },
-            },
-            ClientCertSecret: &corev1.SecretKeySelector{
-                Key: "fake-key2",
-                LocalObjectReference: corev1.LocalObjectReference{
-                    Name: "fake-name2",
-                },
-            },
-            ClientKeySecret: &corev1.SecretKeySelector{
-                Key: "fake-key3",
-                LocalObjectReference: corev1.LocalObjectReference{
-                    Name: "fake-name3",
-                },
-            },
-        }
+		return &apicommon.TLSConfig{
+			CACertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key1",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name1",
+				},
+			},
+			ClientCertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key2",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name2",
+				},
+			},
+			ClientKeySecret: &corev1.SecretKeySelector{
+				Key: "fake-key3",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name3",
+				},
+			},
+		}
 	}
 }
 
@@ -214,11 +213,11 @@ func TestGetTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test insecureSkipVerify is false and no certs", func(t *testing.T) {
-    	c := &apicommon.TLSConfig{InsecureSkipVerify: false,}
-        _, err := GetTLSConfig(c)
-        assert.NotNil(t, err)
-        assert.True(t, strings.Contains(err.Error(), "InsecureSkipVerify is false and neither of caCertSecret, clientCertSecret and clientKeySecret is configured"))
-    })
+		c := &apicommon.TLSConfig{InsecureSkipVerify: false}
+		_, err := GetTLSConfig(c)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "InsecureSkipVerify is false and neither of caCertSecret, clientCertSecret and clientKeySecret is configured"))
+	})
 
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
 		c := fakeTLSConfig(t, false)
