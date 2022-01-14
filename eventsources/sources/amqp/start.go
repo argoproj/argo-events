@@ -19,7 +19,7 @@ package amqp
 import (
 	"context"
 	"encoding/json"
-	"github.com/ghodss/yaml"
+	"sigs.k8s.io/yaml"
 	"time"
 
 	"github.com/pkg/errors"
