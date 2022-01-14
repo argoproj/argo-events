@@ -624,6 +624,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		replicas = 3
 	}
 	var stanContainerPullPolicy, metricsContainerPullPolicy corev1.PullPolicy
+	var stanContainerSecurityContext, metricsContainerSecurityContext *corev1.SecurityContext
 	stanContainerResources := corev1.ResourceRequirements{
 		Requests: corev1.ResourceList{
 			corev1.ResourceCPU: apiresource.MustParse("0"),
@@ -633,12 +634,16 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 	if containerTmpl != nil {
 		stanContainerResources = containerTmpl.Resources
 		stanContainerPullPolicy = containerTmpl.ImagePullPolicy
+		stanContainerSecurityContext = containerTmpl.SecurityContext
 	}
 	metricsContainerResources := corev1.ResourceRequirements{}
-	if i.eventBus.Spec.NATS.Native.MetricsContainerTemplate != nil {
-		metricsContainerResources = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.Resources
-		metricsContainerPullPolicy = i.eventBus.Spec.NATS.Native.MetricsContainerTemplate.ImagePullPolicy
+	metricsContainerTmpl := i.eventBus.Spec.NATS.Native.MetricsContainerTemplate
+	if metricsContainerTmpl != nil {
+		metricsContainerResources = metricsContainerTmpl.Resources
+		metricsContainerPullPolicy = metricsContainerTmpl.ImagePullPolicy
+		metricsContainerSecurityContext = metricsContainerTmpl.SecurityContext
 	}
+
 	podTemplateLabels := make(map[string]string)
 	if i.eventBus.Spec.NATS.Native.Metadata != nil &&
 		len(i.eventBus.Spec.NATS.Native.Metadata.Labels) > 0 {
@@ -724,7 +729,8 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/stan-config"},
 						},
-						Resources: stanContainerResources,
+						Resources:       stanContainerResources,
+						SecurityContext: stanContainerSecurityContext,
 						LivenessProbe: &corev1.Probe{
 							Handler: corev1.Handler{
 								HTTPGet: &corev1.HTTPGetAction{
@@ -743,8 +749,9 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						Ports: []corev1.ContainerPort{
 							{Name: "metrics", ContainerPort: common.EventBusMetricsPort},
 						},
-						Args:      []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(monitorPort)))},
-						Resources: metricsContainerResources,
+						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(monitorPort)))},
+						Resources:       metricsContainerResources,
+						SecurityContext: metricsContainerSecurityContext,
 					},
 				},
 			},
