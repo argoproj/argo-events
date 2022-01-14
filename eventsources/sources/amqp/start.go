@@ -248,19 +248,14 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 	if err != nil {
 		return nil, errors.Errorf("failed to declare exchange with name %s and type %s. err: %+v", eventSource.ExchangeName, eventSource.ExchangeType, err)
 	}
-
-	var optionalArguments amqplib.Table
-	if eventSource.QueueDeclare.Arguments != "" {
-		args := []byte(eventSource.QueueDeclare.Arguments)
-		err := yaml.Unmarshal(args, &optionalArguments)
-		if err != nil {
-			return nil, errors.Errorf(
-				"optional arguments for queue are an invalid Table type. Args: %x. Err: %s",
-				eventSource.QueueDeclare.Arguments,
-				err,
-			)
-		}
+	optionalArguments, err := parseYamlTable(eventSource.QueueDeclare.Arguments)
+	if err != nil {
+		return nil, errors.Errorf(
+			"failed to parse optional queue declare table arguments from Yaml string: %s",
+			err,
+		)
 	}
+
 	q, err := ch.QueueDeclare(
 		eventSource.QueueDeclare.Name,
 		eventSource.QueueDeclare.Durable,
@@ -297,4 +292,17 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		return nil, errors.Errorf("failed to begin consuming messages: %s", err)
 	}
 	return delivery, nil
+}
+
+func parseYamlTable(argString string) (amqplib.Table, error) {
+	if argString == "" {
+		return nil, nil
+	}
+	var table amqplib.Table
+	args := []byte(argString)
+	err := yaml.Unmarshal(args, &table)
+	if err != nil {
+		return nil, errors.Errorf("unmarshalling Yaml to Table type. Args: %s. Err: %+v", argString, err)
+	}
+	return table, nil
 }
