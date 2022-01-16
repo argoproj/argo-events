@@ -215,7 +215,7 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 		return nil, errors.New("TLSConfig is nil")
 	}
 
-	if config.InsecureSkipVerify == true {
+	if config.InsecureSkipVerify {
 		tlsConfig := &tls.Config{
 			InsecureSkipVerify: true,
 			ClientAuth:         0,
@@ -246,7 +246,7 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 		}
 	}
 
-	if config.InsecureSkipVerify == false && len(caCertPath)+len(clientCertPath)+len(clientKeyPath) == 0 {
+	if !config.InsecureSkipVerify && len(caCertPath)+len(clientCertPath)+len(clientKeyPath) == 0 {
 		// None of 3 is configured and InsecureSkipVerify is false
 		return nil, errors.New("invalid tls config, InsecureSkipVerify is false and neither of caCertSecret, clientCertSecret and clientKeySecret is configured")
 	}
