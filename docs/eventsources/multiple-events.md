@@ -29,10 +29,7 @@ spec:
 ```
 
 For the example above, there are 2 events configured in the EventSource named
-`webhook`. Please use different `port` numbers for different events, this is the
-limitation for multiple events configured in a `webhook` EventSource, this
-limitation also applies to `webhook` extended event source types such as
-`github`, `sns`.
+`webhook`.
 
 ## Mixed EventSource Types
 
