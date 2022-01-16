@@ -500,6 +500,18 @@ NowWait when true, the queue assumes to be declared on the server
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>arguments</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Arguments of a queue (also known as “x-arguments”) used for optional
+features and plugins
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AzureEventsHubEventSource">
