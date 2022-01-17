@@ -16,10 +16,12 @@ package argo_workflow
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -173,10 +175,11 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		return nil, errors.Errorf("unknown operation type %s", string(op))
 	}
 
+	var errBuff strings.Builder
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuff)
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s", string(op), name)
+		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s: %s", string(op), name, errBuff.String())
 	}
 
 	t.namespableDynamicClient = t.DynamicClient.Resource(schema.GroupVersionResource{
