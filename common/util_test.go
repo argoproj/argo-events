@@ -212,13 +212,6 @@ func TestGetTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "neither of caCertSecret, clientCertSecret and clientKeySecret is configured"))
 	})
 
-	t.Run("test insecureSkipVerify is false and no certs", func(t *testing.T) {
-		c := &apicommon.TLSConfig{InsecureSkipVerify: false}
-		_, err := GetTLSConfig(c)
-		assert.NotNil(t, err)
-		assert.True(t, strings.Contains(err.Error(), "InsecureSkipVerify is false and neither of caCertSecret, clientCertSecret and clientKeySecret is configured"))
-	})
-
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
 		c := fakeTLSConfig(t, false)
 		c.CACertSecret = nil
