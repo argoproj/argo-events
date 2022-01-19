@@ -806,8 +806,6 @@
       "description": "BitbucketServerEventSource refers to event-source related to Bitbucket Server events",
       "type": "object",
       "required": [
-        "projectKey",
-        "repositorySlug",
         "events",
         "bitbucketserverBaseURL"
       ],
@@ -842,6 +840,13 @@
           "description": "ProjectKey is the key of project for which integration needs to setup",
           "type": "string"
         },
+        "repositories": {
+          "description": "Repositories holds a list of repositories for which integration needs to setup",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketServerRepository"
+          }
+        },
         "repositorySlug": {
           "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
           "type": "string"
@@ -853,6 +858,23 @@
         "webhookSecret": {
           "description": "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.BitbucketServerRepository": {
+      "type": "object",
+      "required": [
+        "projectKey",
+        "repositorySlug"
+      ],
+      "properties": {
+        "projectKey": {
+          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "type": "string"
+        },
+        "repositorySlug": {
+          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "type": "string"
         }
       }
     },

@@ -271,7 +271,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		if hook.Url == formattedURL {
 			isAlreadyExists = true
 			existingHook = hook
-			router.hookIDs[repo.ProjectKey + "," + repo.RepositorySlug] = hook.ID
+			router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug] = hook.ID
 			break
 		}
 	}
@@ -308,7 +308,7 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 			return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
 		}
 
-		router.hookIDs[repo.ProjectKey + "," + repo.RepositorySlug] = createdHook.ID
+		router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug] = createdHook.ID
 
 		logger.With("hook-id", createdHook.ID).Info("hook successfully registered")
 

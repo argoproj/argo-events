@@ -905,7 +905,7 @@ func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []Bitbucket
 	if b.ProjectKey != "" && b.RepositorySlug != "" {
 		return []BitbucketServerRepository{
 			{
-				ProjectKey: b.ProjectKey,
+				ProjectKey:     b.ProjectKey,
 				RepositorySlug: b.RepositorySlug,
 			},
 		}
@@ -913,7 +913,6 @@ func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []Bitbucket
 
 	return nil
 }
-
 
 // HDFSEventSource refers to event-source for HDFS related events
 type HDFSEventSource struct {

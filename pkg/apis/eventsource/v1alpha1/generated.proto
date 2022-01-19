@@ -253,20 +253,26 @@ message BitbucketServerEventSource {
   optional WebhookContext webhook = 1;
 
   // ProjectKey is the key of project for which integration needs to setup
+  // +optional
   optional string projectKey = 2;
 
   // RepositorySlug is the slug of the repository for which integration needs to setup
+  // +optional
   optional string repositorySlug = 3;
+
+  // Repositories holds a list of repositories for which integration needs to setup
+  // +optional
+  repeated BitbucketServerRepository repositories = 4;
 
   // Events are bitbucket event to listen to.
   // Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
-  repeated string events = 4;
+  repeated string events = 5;
 
   // AccessToken is reference to K8s secret which holds the bitbucket api access information
-  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 5;
+  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 6;
 
   // WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
-  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 6;
+  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 7;
 
   // BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
   optional string bitbucketserverBaseURL = 8;
@@ -278,6 +284,14 @@ message BitbucketServerEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 10;
+}
+
+message BitbucketServerRepository {
+  // ProjectKey is the key of project for which integration needs to setup
+  optional string projectKey = 1;
+
+  // RepositorySlug is the slug of the repository for which integration needs to setup
+  optional string repositorySlug = 2;
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.

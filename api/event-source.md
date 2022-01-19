@@ -861,6 +861,7 @@ Webhook holds configuration to run a http server
 <code>projectKey</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 ProjectKey is the key of project for which integration needs to setup
 </p>
@@ -871,9 +872,24 @@ ProjectKey is the key of project for which integration needs to setup
 <code>repositorySlug</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 RepositorySlug is the slug of the repository for which integration needs
 to setup
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerRepository">
+\[\]BitbucketServerRepository </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Repositories holds a list of repositories for which integration needs to
+setup
 </p>
 </td>
 </tr>
@@ -946,6 +962,50 @@ hook for the project once the event source is stopped.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.BitbucketServerRepository">
+BitbucketServerRepository
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>projectKey</code></br> <em> string </em>
+</td>
+<td>
+<p>
+ProjectKey is the key of project for which integration needs to setup
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositorySlug</code></br> <em> string </em>
+</td>
+<td>
+<p>
+RepositorySlug is the slug of the repository for which integration needs
+to setup
 </p>
 </td>
 </tr>

@@ -40,6 +40,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketBasicAuth":         schema_pkg_apis_eventsource_v1alpha1_BitbucketBasicAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource":       schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource": schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerRepository":  schema_pkg_apis_eventsource_v1alpha1_BitbucketServerRepository(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource":        schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CatchupConfiguration":       schema_pkg_apis_eventsource_v1alpha1_CatchupConfiguration(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ConfigMapPersistence":       schema_pkg_apis_eventsource_v1alpha1_ConfigMapPersistence(ref),
@@ -584,7 +585,6 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ProjectKey is the key of project for which integration needs to setup",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -592,9 +592,22 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 					"repositorySlug": {
 						SchemaProps: spec.SchemaProps{
 							Description: "RepositorySlug is the slug of the repository for which integration needs to setup",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"repositories": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Repositories holds a list of repositories for which integration needs to setup",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerRepository"),
+									},
+								},
+							},
 						},
 					},
 					"events": {
@@ -656,11 +669,40 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 						},
 					},
 				},
-				Required: []string{"projectKey", "repositorySlug", "events", "bitbucketserverBaseURL"},
+				Required: []string{"events", "bitbucketserverBaseURL"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerRepository", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerRepository(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"projectKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ProjectKey is the key of project for which integration needs to setup",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"repositorySlug": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RepositorySlug is the slug of the repository for which integration needs to setup",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"projectKey", "repositorySlug"},
+			},
+		},
 	}
 }
 
