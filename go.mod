@@ -64,7 +64,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go v70.15.0+incompatible
 	github.com/tidwall/gjson v1.13.0
-	github.com/tidwall/sjson v1.1.1
+	github.com/tidwall/sjson v1.2.4
 	github.com/xanzy/go-gitlab v0.50.2
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 	go.uber.org/ratelimit v0.2.0
