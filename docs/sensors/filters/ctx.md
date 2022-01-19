@@ -29,12 +29,18 @@ Context filter has following fields:
 filters:
   context:
     type: event_type
-    subject: event_type
+    subject: event_subject
     source: event_source
-    datacontenttype: event_type
+    datacontenttype: event_data_content_type
 ```
 
-You can also specify id, specversion and time fields in the YAML manifest, but they are ignored.
+You can also specify id, specversion and time fields in the YAML manifest, but they are ignored in filtering.
+
+**Note** It could be useless to build a context filter based on `datacontenttype`, `source` and `subject` as currently they come fixed from event-source:
+
+- `datacontenttype` is always `application/json`
+- `source` corresponds to `eventSourceName` specified in the Sensor YAML manifest
+- `subject` corresponds to `eventName` specified in the Sensor YAML manifest
 
 ## How it works
 

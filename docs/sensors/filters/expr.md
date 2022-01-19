@@ -25,7 +25,7 @@ Expr filters are applied on `data` within the payload.
 
 ## Fields
 
-A data filter has following fields:
+An expr filter has following fields:
 
 ```yaml
 filters:
@@ -34,7 +34,7 @@ filters:
     - expr: expression_to_evalute
       fields:
         - name: parameter_name
-        - path: path_to_parameter_value
+          path: path_to_parameter_value
 ```
 
 > ⚠️ `PLEASE NOTE` order in which expr filters are declared corresponds to the order in which the Sensor will evaluate them.
@@ -84,9 +84,22 @@ Available values:
 
 ## How it works
 
-The `expr` field is evaluated using [govaluate](https://github.com/Knetic/govaluate).
+The `expr` field defines the expression to be evaluated. The `fields` stanza defines `name` and `path` of each parameter used in the expression.
 
-`TODO`
+`name` is arbitrary and used in the `expr`, `path` defines how to find the value in the data payload then to be assigned to a parameter.
+
+The expr filter evaluates the expression contained in `expr` using [govaluate](https://github.com/Knetic/govaluate). This library leverages an incredible flexibility and power.
+
+With govaluate we are able to define complex combination of arithmetic (`-`, `*`, `/`, `**`, `%`), negation (`-`), inversion (`!`), bitwise not (`~`), logical (`&&`, `||`), ternary conditional (`?`, `:`) operators, 
+together with comparators (`>`, `<`, `>=`, `<=`), comma-separated arrays and custom functions.
+
+Here some examples:
+
+- `action =~ "start"`
+- `action == "end" && started == true`
+- `action =~ "start" || (started == true && instances == 2)`
+
+To discover all options offered by govaluate, take a look at its [manual](https://github.com/Knetic/govaluate/blob/master/MANUAL.md).
 
 ## Partical example
 

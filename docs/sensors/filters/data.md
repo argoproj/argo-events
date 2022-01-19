@@ -110,7 +110,10 @@ filters:
         - "50.0"
 ```
 
-**Note**: If data type is a `string`, then you can pass either an exact value or a regex. If data types is `bool` or `float`, then you need to pass the exact value.
+**Note**:
+
+- If data type is `string`, you can pass either an exact value or a regex. In any case that value will be evaluated as a regex.
+- If data types is `bool` or `float`, you have to pass an exact value.
 
 ### Multiple paths
 
