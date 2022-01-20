@@ -43,8 +43,8 @@ filters:
 
 Expr filters can be evaluated together in 2 ways:
 
-- `AND`, meaning that all expr filters returning `true` are required for an event to be valid
-- `OR`, meaning that only one expr filter returning `true` is enough for an event to be valid
+- `and`, meaning that all expr filters returning `true` are required for an event to be valid
+- `or`, meaning that only one expr filter returning `true` is enough for an event to be valid
 
 Any kind of error is considered as `false` (e.g. path not existing in event body).
 
@@ -78,9 +78,11 @@ spec:
 
 Available values:
 
-- `empty`, defaulting to `and`
+- `""` (empty), defaulting to `and`
 - `and`, default behaviour
 - `or`
+
+> ⚠️ `PLEASE NOTE` Expr logical operator values must be `lower case`.
 
 ## How it works
 
