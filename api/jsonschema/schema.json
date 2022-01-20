@@ -238,6 +238,10 @@
         "clientKeySecret": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "ClientKeySecret refers to the secret that contains the client key"
+        },
+        "insecureSkipVerify": {
+          "description": "If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)",
+          "type": "boolean"
         }
       },
       "type": "object"
