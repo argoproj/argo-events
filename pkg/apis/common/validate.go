@@ -23,6 +23,10 @@ func ValidateTLSConfig(tlsConfig *TLSConfig) error {
 		clientKeySet = true
 	}
 
+	if tlsConfig.InsecureSkipVerify {
+		return fmt.Errorf("insecureSkipVerify is set to true, A TLS will be created regardless if all/some/none of the certs are provided")
+	}
+
 	if !caCertSet && !clientCertSet && !clientKeySet && !tlsConfig.InsecureSkipVerify {
 		return fmt.Errorf("invalid tls config, insecureSkipVerify is set to false, please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both")
 	}
