@@ -49,10 +49,11 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 type Router struct {
 	// route contains information about a API endpoint
 	route *webhook.Route
-	// hookID is bitbucket Webhook ID
+	// hookIDs is a map of webhook IDs
+	// (projectKey + "," + repoSlug) -> hook ID
 	// Bitbucket Server API docs:
 	// https://developer.atlassian.com/server/bitbucket/reference/rest-api/
-	hookID int
+	hookIDs map[string]int
 	// bitbucketserverEventSource is the event source that contains configuration necessary to consume events from Bitbucket Server
 	bitbucketserverEventSource *v1alpha1.BitbucketServerEventSource
 }
