@@ -808,7 +808,9 @@ string
 </em>
 </td>
 <td>
-<p>ProjectKey is the key of project for which integration needs to setup</p>
+<em>(Optional)</em>
+<p>DeprecatedProjectKey is the key of project for which integration needs to setup
+Deprecated: use Repositories instead. Will be unsupported in v1.8</p>
 </td>
 </tr>
 <tr>
@@ -819,7 +821,23 @@ string
 </em>
 </td>
 <td>
-<p>RepositorySlug is the slug of the repository for which integration needs to setup</p>
+<em>(Optional)</em>
+<p>DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup
+Deprecated: use Repositories instead. Will be unsupported in v1.8</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerRepository">
+[]BitbucketServerRepository
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Repositories holds a list of repositories for which integration needs to setup</p>
 </td>
 </tr>
 <tr>
@@ -893,6 +911,46 @@ map[string]string
 <td>
 <em>(Optional)</em>
 <p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.BitbucketServerRepository">BitbucketServerRepository
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>projectKey</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>ProjectKey is the key of project for which integration needs to setup</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositorySlug</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>RepositorySlug is the slug of the repository for which integration needs to setup</p>
 </td>
 </tr>
 </tbody>
