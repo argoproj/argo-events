@@ -864,12 +864,14 @@ type BitbucketBasicAuth struct {
 type BitbucketServerEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// ProjectKey is the key of project for which integration needs to setup
+	// DeprecatedProjectKey is the key of project for which integration needs to setup
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8
 	// +optional
-	ProjectKey string `json:"projectKey,omitempty" protobuf:"bytes,2,opt,name=projectKey"`
-	// RepositorySlug is the slug of the repository for which integration needs to setup
+	DeprecatedProjectKey string `json:"projectKey,omitempty" protobuf:"bytes,2,opt,name=projectKey"`
+	// DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8
 	// +optional
-	RepositorySlug string `json:"repositorySlug,omitempty" protobuf:"bytes,3,opt,name=repositorySlug"`
+	DeprecatedRepositorySlug string `json:"repositorySlug,omitempty" protobuf:"bytes,3,opt,name=repositorySlug"`
 	// Repositories holds a list of repositories for which integration needs to setup
 	// +optional
 	Repositories []BitbucketServerRepository `json:"repositories,omitempty" protobuf:"bytes,4,rep,name=repositories"`
@@ -902,11 +904,11 @@ func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []Bitbucket
 		return b.Repositories
 	}
 
-	if b.ProjectKey != "" && b.RepositorySlug != "" {
+	if b.DeprecatedProjectKey != "" && b.DeprecatedRepositorySlug != "" {
 		return []BitbucketServerRepository{
 			{
-				ProjectKey:     b.ProjectKey,
-				RepositorySlug: b.RepositorySlug,
+				ProjectKey:     b.DeprecatedProjectKey,
+				RepositorySlug: b.DeprecatedRepositorySlug,
 			},
 		}
 	}
