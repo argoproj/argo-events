@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: data-filter
+  name: with-ctx-filter
 spec:
   template:
     serviceAccountName: operate-workflow-sa
@@ -10,15 +10,11 @@ spec:
       eventSourceName: webhook
       eventName: example
       filters:
-        data:
-          - path: body.message
-            type: string
-            value:
-              - "hello"
-              - "hey"
+        context:
+          source: custom-webhook
   triggers:
     - template:
-        name: data-workflow
+        name: done-workflow
         k8s:
           operation: create
           source:
