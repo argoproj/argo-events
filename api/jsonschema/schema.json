@@ -840,7 +840,7 @@
           "type": "object"
         },
         "projectKey": {
-          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "description": "DeprecatedProjectKey is the key of project for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
           "type": "string"
         },
         "repositories": {
@@ -851,7 +851,7 @@
           "type": "array"
         },
         "repositorySlug": {
-          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "description": "DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
           "type": "string"
         },
         "webhook": {

@@ -863,7 +863,9 @@ Webhook holds configuration to run a http server
 <td>
 <em>(Optional)</em>
 <p>
-ProjectKey is the key of project for which integration needs to setup
+DeprecatedProjectKey is the key of project for which integration needs
+to setup Deprecated: use Repositories instead. Will be unsupported in
+v1.8
 </p>
 </td>
 </tr>
@@ -874,8 +876,9 @@ ProjectKey is the key of project for which integration needs to setup
 <td>
 <em>(Optional)</em>
 <p>
-RepositorySlug is the slug of the repository for which integration needs
-to setup
+DeprecatedRepositorySlug is the slug of the repository for which
+integration needs to setup Deprecated: use Repositories instead. Will be
+unsupported in v1.8
 </p>
 </td>
 </tr>

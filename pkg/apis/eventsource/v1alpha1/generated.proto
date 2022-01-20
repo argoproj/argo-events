@@ -252,11 +252,13 @@ message BitbucketServerEventSource {
   // Webhook holds configuration to run a http server
   optional WebhookContext webhook = 1;
 
-  // ProjectKey is the key of project for which integration needs to setup
+  // DeprecatedProjectKey is the key of project for which integration needs to setup
+  // Deprecated: use Repositories instead. Will be unsupported in v1.8
   // +optional
   optional string projectKey = 2;
 
-  // RepositorySlug is the slug of the repository for which integration needs to setup
+  // DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup
+  // Deprecated: use Repositories instead. Will be unsupported in v1.8
   // +optional
   optional string repositorySlug = 3;
 

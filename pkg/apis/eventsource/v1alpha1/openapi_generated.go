@@ -584,14 +584,14 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 					},
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ProjectKey is the key of project for which integration needs to setup",
+							Description: "DeprecatedProjectKey is the key of project for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"repositorySlug": {
 						SchemaProps: spec.SchemaProps{
-							Description: "RepositorySlug is the slug of the repository for which integration needs to setup",
+							Description: "DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
 							Type:        []string{"string"},
 							Format:      "",
 						},
