@@ -35,6 +35,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // controller controls the webhook operations
@@ -45,6 +46,10 @@ var (
 // set up the activation and inactivation channels to control the state of routes.
 func init() {
 	go webhook.ProcessRouteStatus(controller)
+}
+
+func (el *EventListener) GetEventFilter() *v1alpha1.EventSourceFilter {
+	return nil
 }
 
 // GetEventSourceName returns name of event source

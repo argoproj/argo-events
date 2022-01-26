@@ -66,6 +66,8 @@ type EventingServer interface {
 
 	// Function to start listening events.
 	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error
+
+	GetEventFilter() *v1alpha1.EventSourceFilter
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers

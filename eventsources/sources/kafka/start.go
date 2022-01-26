@@ -47,6 +47,10 @@ type EventListener struct {
 	Metrics          *metrics.Metrics
 }
 
+func (el *EventListener) GetEventFilter() *v1alpha1.EventSourceFilter {
+	return el.KafkaEventSource.Filter
+}
+
 // GetEventSourceName returns name of event source
 func (el *EventListener) GetEventSourceName() string {
 	return el.EventSourceName

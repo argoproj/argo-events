@@ -19,8 +19,9 @@ package amqp
 import (
 	"context"
 	"encoding/json"
-	"sigs.k8s.io/yaml"
 	"time"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/pkg/errors"
 	amqplib "github.com/streadway/amqp"
@@ -42,6 +43,10 @@ type EventListener struct {
 	EventName       string
 	AMQPEventSource v1alpha1.AMQPEventSource
 	Metrics         *metrics.Metrics
+}
+
+func (el *EventListener) GetEventFilter() *v1alpha1.EventSourceFilter {
+	return nil
 }
 
 // GetEventSourceName returns name of event source

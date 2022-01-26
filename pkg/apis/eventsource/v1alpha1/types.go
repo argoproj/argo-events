@@ -46,6 +46,10 @@ type EventSourceList struct {
 	Items []EventSource `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
+type EventSourceFilter struct {
+	Expression string `json:"expression,omitempty" protobuf:"bytes,1,opt,name=expression"`
+}
+
 // EventSourceSpec refers to specification of event-source resource
 type EventSourceSpec struct {
 	// EventBusName references to a EventBus name. By default the value is "default"
@@ -225,6 +229,11 @@ type CalendarEventSource struct {
 	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,6,opt,name=persistence"`
 }
 
+//
+type S3Artifact struct {
+	apicommon.S3Artifact
+}
+
 type EventPersistence struct {
 	// Catchup enables to triggered the missed schedule when eventsource restarts
 	Catchup *CatchupConfiguration `json:"catchup,omitempty" protobuf:"bytes,1,opt,name=catchup"`
@@ -331,6 +340,7 @@ type Selector struct {
 
 // AMQPEventSource refers to an event-source for AMQP stream events
 type AMQPEventSource struct {
+
 	// URL for rabbitmq service
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// ExchangeName is the exchange name
@@ -487,6 +497,10 @@ type KafkaEventSource struct {
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,11,opt,name=sasl"`
+
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
 }
 
 type KafkaConsumerGroup struct {

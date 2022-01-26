@@ -34,6 +34,7 @@ import (
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // EventListener implements Eventing for minio event sources
@@ -42,6 +43,10 @@ type EventListener struct {
 	EventName        string
 	MinioEventSource apicommon.S3Artifact
 	Metrics          *metrics.Metrics
+}
+
+func (el *EventListener) GetEventFilter() *v1alpha1.EventSourceFilter {
+	return nil
 }
 
 // GetEventSourceName returns name of event source

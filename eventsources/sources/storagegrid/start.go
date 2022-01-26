@@ -96,6 +96,10 @@ func filterName(notification *events.StorageGridNotification, eventSource *v1alp
 	return true
 }
 
+func (el *EventListener) GetEventFilter() *v1alpha1.EventSourceFilter {
+	return nil
+}
+
 // GetEventSourceName returns name of event source
 func (el *EventListener) GetEventSourceName() string {
 	return el.EventSourceName
