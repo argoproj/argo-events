@@ -21,7 +21,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
@@ -249,13 +248,9 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 
 func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	replicas := args.Sensor.Spec.GetReplicas()
-	imgPullPolicy := corev1.PullAlways
-	if x := os.Getenv(common.EnvImagePullPolicy); x != "" {
-		imgPullPolicy = corev1.PullPolicy(x)
-	}
 	sensorContainer := corev1.Container{
 		Image:           args.Image,
-		ImagePullPolicy: imgPullPolicy,
+		ImagePullPolicy: common.GetImagePullPolicy(),
 		Args:            []string{"sensor-service"},
 		Ports: []corev1.ContainerPort{
 			{Name: "metrics", ContainerPort: common.SensorMetricsPort},

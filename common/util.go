@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -446,4 +447,12 @@ func SliceContains(strSlice []string, targetStr string) bool {
 		}
 	}
 	return false
+}
+
+func GetImagePullPolicy() corev1.PullPolicy {
+	imgPullPolicy := corev1.PullAlways
+	if x := os.Getenv(EnvImagePullPolicy); x != "" {
+		imgPullPolicy = corev1.PullPolicy(x)
+	}
+	return imgPullPolicy
 }

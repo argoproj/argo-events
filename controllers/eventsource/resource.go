@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
@@ -282,13 +281,9 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 }
 
 func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
-	imgPullPolicy := corev1.PullAlways
-	if x := os.Getenv(common.EnvImagePullPolicy); x != "" {
-		imgPullPolicy = corev1.PullPolicy(x)
-	}
 	eventSourceContainer := corev1.Container{
 		Image:           args.Image,
-		ImagePullPolicy: imgPullPolicy,
+		ImagePullPolicy: common.GetImagePullPolicy(),
 		Args:            []string{"eventsource-service"},
 		Ports: []corev1.ContainerPort{
 			{Name: "metrics", ContainerPort: common.EventSourceMetricsPort},
