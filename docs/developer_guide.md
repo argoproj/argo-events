@@ -8,7 +8,7 @@ another cluster you can ignore the Minikube specific step 3.
 
 ### Requirements
 
-- Golang 1.15
+- Golang 1.17
 - Docker
 
 ### Installation & Setup
@@ -30,7 +30,7 @@ eval $(minikube docker-env)
 #### 3. Build the project.
 
 ```
-make all
+make build
 ```
 
 ### Changing Types
