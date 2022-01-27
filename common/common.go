@@ -29,6 +29,8 @@ const (
 	EnvVarKubeConfig = "KUBECONFIG"
 	// EnvVarDebugLog is the env var to turn on the debug mode for logging
 	EnvVarDebugLog = "DEBUG_LOG"
+	// EnvImagePullPolicy is the env var to set container's ImagePullPolicy
+	EnvImagePullPolicy = "IMAGE_PULL_POLICY"
 )
 
 // EventBus related

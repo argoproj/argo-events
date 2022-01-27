@@ -283,7 +283,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	eventSourceContainer := corev1.Container{
 		Image:           args.Image,
-		ImagePullPolicy: corev1.PullAlways,
+		ImagePullPolicy: common.GetImagePullPolicy(),
 		Args:            []string{"eventsource-service"},
 		Ports: []corev1.ContainerPort{
 			{Name: "metrics", ContainerPort: common.EventSourceMetricsPort},
