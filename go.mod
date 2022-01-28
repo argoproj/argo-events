@@ -31,7 +31,7 @@ require (
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-openapi/spec v0.20.4
 	github.com/go-redis/redis v6.15.8+incompatible
-	github.com/go-resty/resty/v2 v2.3.0
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-swagger/go-swagger v0.25.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
 	github.com/gogo/protobuf v1.3.2
@@ -50,7 +50,7 @@ require (
 	github.com/nats-io/go-nats v1.7.2
 	github.com/nats-io/graft v0.0.0-20200605173148-348798afea05
 	github.com/nats-io/nats.go v1.13.0
-	github.com/nats-io/stan.go v0.6.0
+	github.com/nats-io/stan.go v0.10.2
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
