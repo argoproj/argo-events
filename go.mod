@@ -50,7 +50,7 @@ require (
 	github.com/nats-io/go-nats v1.7.2
 	github.com/nats-io/graft v0.0.0-20200605173148-348798afea05
 	github.com/nats-io/nats.go v1.13.0
-	github.com/nats-io/stan.go v0.10.2
+	github.com/nats-io/stan.go v0.6.0
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
