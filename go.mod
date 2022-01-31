@@ -68,7 +68,7 @@ require (
 	github.com/xanzy/go-gitlab v0.50.2
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 	go.uber.org/ratelimit v0.2.0
-	go.uber.org/zap v1.19.0
+	go.uber.org/zap v1.20.0
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871
 	google.golang.org/api v0.65.0
 	google.golang.org/grpc v1.42.0
@@ -111,6 +111,7 @@ require (
 	github.com/ardielle/ardielle-go v1.5.2 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 	github.com/awalterschulze/gographviz v0.0.0-20200901124122-0eecad45bd71 // indirect
+	github.com/benbjohnson/clock v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
