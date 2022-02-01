@@ -51,7 +51,6 @@ import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	argoexpr "github.com/argoproj/argo-events/util/expr/argoexpr"
-	"github.com/argoproj/argo-events/util/expr/env"
 )
 
 // EventingServer is the server API for Eventing service.
@@ -427,7 +426,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							return err
 						}
 
-						if (s.GetEventFilter() != nil) && (len(s.GetEventFilter().Expression) > 0) {
+						if (s.GetEventFilter() != nil) && (s.GetEventFilter().Expression != "") {
 							dataMap := make(map[string]interface{})
 							json.Unmarshal(data, &dataMap)
 							proceed, err := shouldDispatch(s.GetEventFilter().Expression, dataMap)
@@ -435,6 +434,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 								return err
 							}
 							if !proceed {
+								logger.Error("failed to publish event, filter condition not met")
 								return nil
 							}
 						}
@@ -493,11 +493,11 @@ func generateClientID(hostname string) string {
 }
 
 func shouldDispatch(expression string, data map[string]interface{}) (bool, error) {
+
 	params := make(map[string]interface{})
 	for key, value := range data {
 		params[strings.Replace(key, "-", "_", -1)] = value
 	}
-	env := env.GetFuncMap(params)
-
+	env := argoexpr.GetFuncMap(params)
 	return argoexpr.EvalBool(strings.Replace(expression, "-", "_", -1), env)
 }
