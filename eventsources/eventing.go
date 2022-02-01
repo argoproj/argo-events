@@ -428,7 +428,10 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 
 						if (s.GetEventFilter() != nil) && (s.GetEventFilter().Expression != "") {
 							dataMap := make(map[string]interface{})
-							json.Unmarshal(data, &dataMap)
+							err := json.Unmarshal(data, &dataMap)
+							if err != nil {
+								return err
+							}
 							proceed, err := shouldDispatch(s.GetEventFilter().Expression, dataMap)
 							if err != nil {
 								return err
@@ -496,8 +499,8 @@ func shouldDispatch(expression string, data map[string]interface{}) (bool, error
 
 	params := make(map[string]interface{})
 	for key, value := range data {
-		params[strings.Replace(key, "-", "_", -1)] = value
+		params[strings.ReplaceAll(key, "-", "_")] = value
 	}
 	env := argoexpr.GetFuncMap(params)
-	return argoexpr.EvalBool(strings.Replace(expression, "-", "_", -1), env)
+	return argoexpr.EvalBool(strings.ReplaceAll(expression, "-", "_"), env)
 }
