@@ -134,9 +134,9 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, reset TimeBasedReset, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	log := n.logger.With("clientID", n.clientID)
-	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies)
+	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies, reset)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 					return true
 				})
 				log.Debugf("finished evicting %v cached IDs, time cost: %v ms", num, (time.Now().UnixNano()-now)/1000/1000)
-			case <-resetConditionsCh:
+			case <-reset.channel:
 				log.Info("reset conditions")
 				msgHolder.setLastResetTime(time.Now().Unix())
 			}
@@ -229,6 +229,8 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		return
 	}
 
+	log.Debugf("New incoming Event Source Message, dependency name=%s", depName)
+
 	if depName == "" {
 		_ = m.Ack()
 		return
@@ -256,9 +258,20 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	}
 
 	// Clean up old messages before starting a new round
+	/*if msgHolder.resetTimeOccurred(m) {
+		// this can happen either if a message was sent prior to ConditionReset or under normal circumstances if the dependency filter
+		// was met and triggered but we haven't yet acknowledged all of the dependencies
+		if depName != "" {
+			msgHolder.reset(depName)
+		}
+		msgHolder.ackAndCache(m, event.ID())
+		return
+
+	}*/
+
 	if msgHolder.getLastResetTime() > 0 {
 		// ACK all the old messages after conditions meet
-		if m.Timestamp <= msgHolder.latestGoodMsgTimestamp {
+		if m.Timestamp <= msgHolder.latestGoodMsgTimestamp || m.Timestamp <= msgHolder.getLastResetTime() {
 			if depName != "" {
 				msgHolder.reset(depName)
 			}
@@ -354,7 +367,8 @@ type eventSourceMessage struct {
 type eventSourceMessageHolder struct {
 	// time that resets conditions, usually the time all conditions meet,
 	// or the time getting an external signal to reset.
-	lastResetTime int64
+	lastResetTime  int64 // TODO: incorporate this into the TimeBasedReset struct below? also consider not having that struct?
+	timeBasedReset TimeBasedReset
 	// timestamp of last msg
 	latestGoodMsgTimestamp int64
 	expr                   *govaluate.EvaluableExpression
@@ -368,7 +382,7 @@ type eventSourceMessageHolder struct {
 	lock sync.RWMutex
 }
 
-func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependency) (*eventSourceMessageHolder, error) {
+func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependency, reset TimeBasedReset) (*eventSourceMessageHolder, error) {
 	dependencyExpr = strings.ReplaceAll(dependencyExpr, "-", "\\-")
 	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
 	if err != nil {
@@ -393,6 +407,7 @@ func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependenc
 
 	return &eventSourceMessageHolder{
 		lastResetTime:          int64(0),
+		timeBasedReset:         reset,
 		latestGoodMsgTimestamp: int64(0),
 		expr:                   expression,
 		depNames:               deps,
@@ -462,6 +477,13 @@ func (mh *eventSourceMessageHolder) isCleanedUp() bool {
 		}
 	}
 	return len(mh.msgs) == 0
+}
+
+func (mh *eventSourceMessageHolder) resetTimeOccurred(m *stan.Msg) bool {
+
+	// go through all triggers
+
+	return m.Timestamp <= mh.latestGoodMsgTimestamp //|| ???
 }
 
 func unique(stringSlice []string) []string {
