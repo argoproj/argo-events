@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/argoproj/argo-events/common"
@@ -123,7 +124,7 @@ func (el *EventListener) connect() (Eventing_StartEventSourceClient, error) {
 	var opt []grpc.DialOption
 	opt = append(opt, grpc.WithBlock())
 	if el.GenericEventSource.Insecure {
-		opt = append(opt, grpc.WithInsecure())
+		opt = append(opt, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 	conn, err := grpc.DialContext(context.Background(), el.GenericEventSource.URL, opt...)
 	if err != nil {
