@@ -19,8 +19,9 @@ package amqp
 import (
 	"context"
 	"encoding/json"
-	"sigs.k8s.io/yaml"
 	"time"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/pkg/errors"
 	amqplib "github.com/streadway/amqp"
