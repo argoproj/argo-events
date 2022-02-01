@@ -261,7 +261,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	}
 }
 
-func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) { //nolint:interfacer
+func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) {
 	config := sarama.NewConfig()
 
 	if kafkaEventSource.Version == "" {

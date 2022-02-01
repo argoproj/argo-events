@@ -922,5 +922,4 @@ func TestFilter(t *testing.T) {
 		assert.Error(t, err)
 		assert.False(t, pass)
 	})
-
 }
