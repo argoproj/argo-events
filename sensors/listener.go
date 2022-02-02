@@ -213,27 +213,8 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			wg1 := &sync.WaitGroup{}
 			closeSubCh := make(chan struct{})
 
-			conditionReset := CreateConditionReset(ctx, trigger.Template.ConditionsReset)
-
-			subscribeFunc := func() {
-				wg1.Add(1)
-				go func() {
-					defer wg1.Done()
-					// release the lock when goroutine exits
-					defer atomic.StoreUint32(&subLock, 0)
-
-					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
-
-					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, conditionReset.channel, depExpression, deps, transformFunc, filterFunc, actionFunc)
-					if err != nil {
-						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
-						return
-					}
-				}()
-			}
-
-			subscribeOnce(&subLock, subscribeFunc)
-
+			resetConditionsCh := make(chan struct{})
+			var lastResetTime time.Time
 			if len(trigger.Template.ConditionsReset) > 0 {
 				for _, c := range trigger.Template.ConditionsReset {
 
@@ -244,6 +225,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						cronlib.WithParser(cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)),
 						cronlib.WithChain(cronlib.Recover(cronlib.DefaultLogger)),
 					}
+					nowTime := time.Now()
 					if c.ByTime.Timezone != "" {
 						location, err := time.LoadLocation(c.ByTime.Timezone)
 						if err != nil {
@@ -251,12 +233,11 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 							continue
 						}
 						opts = append(opts, cronlib.WithLocation(location))
+						nowTime = nowTime.In(location)
 					}
 					cr := cronlib.New(opts...)
 					_, err = cr.AddFunc(c.ByTime.Cron, func() {
-						conditionReset.channel <- struct{}{}
-						firstEntry := cr.Entry(1)
-						logger.Debugf("entry: %+v", firstEntry)
+						resetConditionsCh <- struct{}{}
 					})
 					if err != nil {
 						logger.Errorw("failed to add cron schedule", zap.Error(err))
@@ -265,12 +246,43 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					cr.Start()
 
 					logger.Debugf("just started cron job; entries=%v", cr.Entries())
+
+					// set lastResetTime (the last time this would've been triggered)
 					if len(cr.Entries()) > 0 {
-						firstEntry := cr.Entry(1)
-						logger.Debugf("entry: %+v", firstEntry)
+						/*firstEntry := cr.Entry(1)
+						specSchedule, castOk := firstEntry.Schedule.(*cronlib.SpecSchedule)
+						if !castOk {
+							logger.Errorw("failed to cast cronlib.Schedule to *SpecSchedule")
+							continue
+						}
+						prevTriggerTime := specSchedule.Prev(time.Now().UTC())*/
+						prevTriggerTime := common.PrevCronTime(c.ByTime.Cron, nowTime)
+						logger.Infof("previous trigger time: %v", prevTriggerTime)
+						if prevTriggerTime.After(lastResetTime) {
+							lastResetTime = prevTriggerTime
+						}
 					}
 				}
 			}
+
+			subscribeFunc := func() {
+				wg1.Add(1)
+				go func() {
+					defer wg1.Done()
+					// release the lock when goroutine exits
+					defer atomic.StoreUint32(&subLock, 0)
+
+					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
+
+					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
+					if err != nil {
+						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+						return
+					}
+				}()
+			}
+
+			subscribeOnce(&subLock, subscribeFunc)
 
 			logger.Infof("starting eventbus connection daemon for client %s...", clientID)
 			ticker := time.NewTicker(5 * time.Second)
@@ -496,68 +508,4 @@ func unique(stringSlice []string) []string {
 		}
 	}
 	return list
-}
-
-type ConditionReset struct { // TODO: determine where we should put this struct
-	preStartupTriggerTimes []time.Time
-	channel                chan struct{}
-}
-
-func CreateConditionReset(ctx context.Context, criteria []v1alpha1.ConditionsResetCriteria) ConditionReset { // TODO: pointer or no pointer?
-	logger := logging.FromContext(ctx)
-
-	conditionReset := ConditionReset{
-		preStartupTriggerTimes: make([]time.Time, len(criteria)),
-		channel:                make(chan struct{}),
-	}
-
-	// go through each cron-defined trigger time
-	// for each:
-	// 1. set up a cron job to fire
-	// 2. store previous time cron job would have fired so we can verify no dependencies that NATS is sending were from before that time
-
-	for cIndex, c := range criteria {
-
-		// set up Cron job to handle the next time this will fire
-		if c.ByTime == nil {
-			continue
-		}
-		opts := []cronlib.Option{
-			cronlib.WithParser(cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)),
-			cronlib.WithChain(cronlib.Recover(cronlib.DefaultLogger)),
-		}
-		if c.ByTime.Timezone != "" {
-			location, err := time.LoadLocation(c.ByTime.Timezone)
-			if err != nil {
-				logger.Errorw("failed to load timezone", zap.Error(err))
-				continue
-			}
-			opts = append(opts, cronlib.WithLocation(location))
-		}
-		cr := cronlib.New(opts...)
-		_, err := cr.AddFunc(c.ByTime.Cron, func() {
-			conditionReset.channel <- struct{}{}
-			//firstEntry := cr.Entry(1)
-			//logger.Debugf("entry: %+v", firstEntry)
-		})
-		if err != nil {
-			logger.Errorw("failed to add cron schedule", zap.Error(err))
-			continue
-		}
-		cr.Start()
-
-		logger.Debugf("just started cron job for ConditionsReset; entries=%v", cr.Entries())
-		if len(cr.Entries()) > 0 {
-			firstEntry := cr.Entry(1) // there should only be one
-			specSchedule, castOk := firstEntry.Schedule.(*cronlib.SpecSchedule)
-			if !castOk {
-				// TODO
-			} else {
-				conditionReset.preStartupTriggerTimes[cIndex] = specSchedule.prev(time.Now())
-			}
-
-		}
-	}
-
-	return conditionReset
 }

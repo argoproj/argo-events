@@ -2,6 +2,7 @@ package driver
 
 import (
 	"context"
+	"time"
 
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -21,7 +22,7 @@ type Driver interface {
 	// Parameter - dependencies, array of dependencies information
 	// Parameter - filter, a function used to filter the message
 	// Parameter - action, a function to be triggered after all conditions meet
-	SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, reset TimeBasedReset, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
+	SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
 
 	// Publish a message
 	Publish(conn Connection, message []byte) error
