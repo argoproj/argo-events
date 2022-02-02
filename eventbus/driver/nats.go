@@ -264,12 +264,13 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		// ACK all the old messages after conditions are met
 		//if m.Timestamp <= msgHolder.latestGoodMsgTimestamp || m.Timestamp/1e9 <= msgHolder.getLastResetTime() {
 		if m.Timestamp/1e9 <= msgHolder.getLastResetTime() {
+			log.Debugf("About to reset and ack dependency=%s due to condition reset, m.Timestamp=%d, msgHolder.getLastResetTime()=%d",
+				depName, m.Timestamp, msgHolder.getLastResetTime())
+
 			if depName != "" {
 				msgHolder.reset(depName)
 			}
 			msgHolder.ackAndCache(m, event.ID())
-			log.Debugf("Reset and acked dependency=%s due to condition reset, m.Timestamp=%d, msgHolder.getLastResetTime()=%d",
-				depName, m.Timestamp, msgHolder.getLastResetTime())
 			return
 		}
 
