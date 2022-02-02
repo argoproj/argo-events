@@ -185,6 +185,7 @@ func (ac *AdmissionController) register(
 		return errors.Wrapf(err, "failed to fetch webhook deployment")
 	}
 	deploymentRef := metav1.NewControllerRef(deployment, appsv1.SchemeGroupVersion.WithKind("Deployment"))
+	deploymentRef.BlockOwnerDeletion = newFalse()
 	webhook.OwnerReferences = append(webhook.OwnerReferences, *deploymentRef)
 
 	_, err = client.Create(ctx, webhook, metav1.CreateOptions{})
@@ -399,4 +400,9 @@ func makeTLSConfig(serverCert, serverKey, caCert []byte, clientAuthType tls.Clie
 		ClientCAs:    caCertPool,
 		ClientAuth:   clientAuthType,
 	}, nil
+}
+
+func newFalse() *bool {
+	b := false
+	return &b
 }
