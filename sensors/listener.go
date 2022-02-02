@@ -250,13 +250,6 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					// set lastResetTime (the last time this would've been triggered)
 					if len(cr.Entries()) > 0 {
-						/*firstEntry := cr.Entry(1)
-						specSchedule, castOk := firstEntry.Schedule.(*cronlib.SpecSchedule)
-						if !castOk {
-							logger.Errorw("failed to cast cronlib.Schedule to *SpecSchedule")
-							continue
-						}
-						prevTriggerTime := specSchedule.Prev(time.Now().UTC())*/
 						prevTriggerTime, err := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
 						if err != nil {
 							logger.Errorw("couldn't get previous cron trigger time", zap.Error(err))
