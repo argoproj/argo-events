@@ -718,9 +718,9 @@ strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 </td>
 <td>
 <p>
-Comparator compares the event data with a user given value. Can be “>=”,
-“>”, “=”, “!=”, “\<”, or “\<=”. Is optional, and if left blank treated
-as equality “=”.
+Comparator compares the event data with a user given value. Can be
+“\>=”, “\>”, “=”, “!=”, “\<”, or “\<=”. Is optional, and if left blank
+treated as equality “=”.
 </p>
 </td>
 </tr>

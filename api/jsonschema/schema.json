@@ -588,6 +588,10 @@
           "description": "ExchangeType is rabbitmq exchange type",
           "type": "string"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -696,6 +700,10 @@
     "io.argoproj.eventsource.v1alpha1.AzureEventsHubEventSource": {
       "description": "AzureEventsHubEventSource describes the event source for azure events hub More info at https://docs.microsoft.com/en-us/azure/event-hubs/",
       "properties": {
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "fqdn": {
           "description": "FQDN of the EventHubs namespace you created More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string",
           "type": "string"
@@ -776,6 +784,10 @@
           },
           "type": "array"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -832,6 +844,10 @@
           },
           "type": "array"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -873,6 +889,10 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "interval": {
           "description": "Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...",
@@ -944,6 +964,10 @@
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.common.Backoff",
           "description": "Backoff holds parameters applied to connection."
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -1024,6 +1048,14 @@
           "version": "v1alpha1"
         }
       ]
+    },
+    "io.argoproj.eventsource.v1alpha1.EventSourceFilter": {
+      "properties": {
+        "expression": {
+          "type": "string"
+        }
+      },
+      "type": "object"
     },
     "io.argoproj.eventsource.v1alpha1.EventSourceList": {
       "description": "EventSourceList is the list of eventsource resources",
@@ -1279,6 +1311,10 @@
           "description": "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
           "type": "string"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -1311,6 +1347,10 @@
         "config": {
           "description": "Config is the event source configuration",
           "type": "string"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "insecure": {
           "description": "Insecure determines the type of connection.",
@@ -1387,6 +1427,10 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "githubApp": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.GithubAppCreds",
@@ -1474,6 +1518,10 @@
           },
           "type": "array"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "gitlabBaseURL": {
           "description": "GitlabBaseURL is the base URL for API requests to a custom endpoint",
           "type": "string"
@@ -1527,6 +1575,10 @@
         "directory": {
           "description": "Directory to watch for events",
           "type": "string"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "hdfsUser": {
           "description": "HDFSUser is the user to access HDFS file system. It is ignored if either ccache or keytab is used.",
@@ -1614,6 +1666,10 @@
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.KafkaConsumerGroup",
           "description": "Consumer group for kafka client"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -1672,6 +1728,10 @@
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.common.Backoff",
           "description": "ConnectionBackoff holds backoff applied to connection."
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -1737,6 +1797,10 @@
           "$ref": "#/definitions/io.argoproj.common.Backoff",
           "description": "ConnectionBackoff holds backoff applied to connection."
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -1777,6 +1841,10 @@
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.common.Backoff",
           "description": "Backoff holds parameters applied to connection."
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "hostAddress": {
           "description": "HostAddress is the address of the host for NSQ lookup",
@@ -1836,6 +1904,10 @@
           "description": "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
           "type": "boolean"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -1876,6 +1948,10 @@
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.common.Backoff",
           "description": "Backoff holds parameters applied to connection."
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -1939,6 +2015,10 @@
           "description": "DB to use. If not specified, default DB 0 will be used.",
           "format": "int32",
           "type": "integer"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "hostAddress": {
           "description": "HostAddress refers to the address of the Redis host/server",
@@ -2053,6 +2133,10 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "AccessKey refers K8s secret containing aws access key"
         },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -2101,6 +2185,10 @@
         "dlq": {
           "description": "DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully. If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue. The default value is false.",
           "type": "boolean"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -2195,6 +2283,10 @@
     "io.argoproj.eventsource.v1alpha1.SlackEventSource": {
       "description": "SlackEventSource refers to event-source for Slack related events",
       "properties": {
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
