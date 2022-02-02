@@ -130,6 +130,7 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - group, queue group name
 // Parameter - closeCh, channel to indicate to close the subscription
 // Parameter - resetConditionsCh, channel to indicate to reset trigger conditions
+// Parameter - lastResetTime, the last time reset would have occurred, if any
 // Parameter - dependencyExpr, example: "(dep1 || dep2) && dep3"
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
@@ -393,7 +394,7 @@ func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr strin
 
 	return &eventSourceMessageHolder{
 		lastResetTime:           lastResetTime.Unix(),
-		fullResetOccurrenceTime: lastResetTime.Unix(), // the logic in fullResetTimeout() requires setting it like this at the beginning
+		fullResetOccurrenceTime: lastResetTime.Unix(), // a little kludgey, but this is needed in order to prevent fullResetTimeout() from returning true at startup
 		expr:                    expression,
 		depNames:                deps,
 		sourceDepMap:            srcDepMap,
@@ -415,16 +416,6 @@ func (mh *eventSourceMessageHolder) setLastResetTime(t int64) {
 	mh.lock.Lock()
 	defer mh.lock.Unlock()
 	mh.lastResetTime = t
-
-	// make sure everything is cleaned up within 60 seconds
-	/*if !mh.isCleanedUp() {
-		cleanupTimer := time.NewTimer(60 * time.Second)
-		go func() {
-			<-cleanupTimer.C
-			mh.resetAll()
-			mh.logger.Debug("Failsafe: making sure all dependencies have been cleared from memory within 60 seconds of reset...")
-		}()
-	}*/
 }
 
 func (mh *eventSourceMessageHolder) fullResetTimeout() bool {
