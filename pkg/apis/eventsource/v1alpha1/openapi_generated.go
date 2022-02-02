@@ -46,7 +46,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource":         schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence":           schema_pkg_apis_eventsource_v1alpha1_EventPersistence(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSource":                schema_pkg_apis_eventsource_v1alpha1_EventSource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter":          schema_pkg_apis_eventsource_v1alpha1_EventSourceFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceList":            schema_pkg_apis_eventsource_v1alpha1_EventSourceList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceSpec":            schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceStatus":          schema_pkg_apis_eventsource_v1alpha1_EventSourceStatus(ref),
@@ -239,18 +238,12 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"exchangeName", "exchangeType", "routingKey"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPConsumeConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPExchangeDeclareConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueBindConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueDeclareConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPConsumeConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPExchangeDeclareConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueBindConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueDeclareConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -421,18 +414,12 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"fqdn", "hubName"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -572,18 +559,12 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref common.Refere
 							Format:      "",
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"webhook", "auth", "events", "owner", "projectKey", "repositorySlug"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketAuth", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketAuth", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"},
 	}
 }
 
@@ -674,18 +655,12 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"projectKey", "repositorySlug", "events", "bitbucketserverBaseURL"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -756,17 +731,11 @@ func schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref common.Referen
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventPersistence"},
 	}
 }
 
@@ -900,18 +869,12 @@ func schema_pkg_apis_eventsource_v1alpha1_EmitterEventSource(ref common.Referenc
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"broker", "channelKey", "channelName"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -986,24 +949,6 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSource(ref common.ReferenceCallba
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceSpec", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
-	}
-}
-
-func schema_pkg_apis_eventsource_v1alpha1_EventSourceFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"expression": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-			},
-		},
 	}
 }
 
@@ -1567,18 +1512,12 @@ func schema_pkg_apis_eventsource_v1alpha1_FileEventSource(ref common.ReferenceCa
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"eventType", "watchPathConfig"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig"},
 	}
 }
 
@@ -1641,18 +1580,12 @@ func schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref common.Referenc
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"url", "config"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1850,18 +1783,12 @@ func schema_pkg_apis_eventsource_v1alpha1_GithubEventSource(ref common.Reference
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubAppCreds"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"events"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubAppCreds", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubAppCreds", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1965,18 +1892,12 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"events", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2100,18 +2021,12 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"directory", "type", "addresses"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.ConfigMapKeySelector", "k8s.io/api/core/v1.SecretKeySelector"},
+			"k8s.io/api/core/v1.ConfigMapKeySelector", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2244,18 +2159,12 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"url", "partition", "topic"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaConsumerGroup"},
 	}
 }
 
@@ -2325,18 +2234,12 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"url", "topic", "clientId"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
 	}
 }
 
@@ -2443,18 +2346,12 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSAuth"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"url", "subject"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSAuth"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSAuth"},
 	}
 }
 
@@ -2524,18 +2421,12 @@ func schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref common.ReferenceCal
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"hostAddress", "topic", "channel"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"},
 	}
 }
 
@@ -2648,17 +2539,11 @@ func schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref common.Reference
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2760,18 +2645,12 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"topics", "url"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2846,18 +2725,12 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"hostAddress", "channels"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -3078,18 +2951,12 @@ func schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref common.ReferenceCal
 							Format:      "",
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"topicArn", "region"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -3180,18 +3047,12 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 							Format:      "",
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 				Required: []string{"region", "queue", "waitTimeSeconds"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -3320,17 +3181,11 @@ func schema_pkg_apis_eventsource_v1alpha1_SlackEventSource(ref common.ReferenceC
 							},
 						},
 					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filter",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
-						},
-					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
