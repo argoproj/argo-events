@@ -257,7 +257,11 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 							continue
 						}
 						prevTriggerTime := specSchedule.Prev(time.Now().UTC())*/
-						prevTriggerTime := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
+						prevTriggerTime, err := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
+						if err != nil {
+							logger.Errorw("couldn't get previous cron trigger time", zap.Error(err))
+							continue
+						}
 						logger.Infof("previous trigger time: %v", prevTriggerTime)
 						if prevTriggerTime.After(lastResetTime) {
 							lastResetTime = prevTriggerTime

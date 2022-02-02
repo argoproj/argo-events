@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"time"
 
 	cronlib "github.com/robfig/cron/v3"
@@ -13,15 +14,15 @@ const (
 
 // For a given cron specification, return the previous activation time
 // If no time can be found to satisfy the schedule, return the zero time.
-func PrevCronTime(cronSpec string, parser cronlib.Parser, t time.Time) time.Time {
-
+func PrevCronTime(cronSpec string, parser cronlib.Parser, t time.Time) (time.Time, error) {
+	var tm time.Time
 	sched, err := parser.Parse(cronSpec)
 	if err != nil {
-		// TBD
+		return tm, fmt.Errorf("can't derive previous Cron time for cron spec %s; couldn't parse; err=%v", cronSpec, err)
 	}
 	s, castOk := sched.(*cronlib.SpecSchedule)
 	if !castOk {
-		// TBD
+		return tm, fmt.Errorf("can't derive previous Cron time for cron spec %s: unexpected type for %v", cronSpec, sched)
 	}
 
 	// General approach is based on approach to SpecSchedule.Next() implementation
@@ -43,7 +44,7 @@ func PrevCronTime(cronSpec string, parser cronlib.Parser, t time.Time) time.Time
 
 WRAP:
 	if t.Year() < yearLimit {
-		return time.Time{}
+		return tm, fmt.Errorf("can't derive previous Cron time for cron spec %s: no time found within %d years", cronSpec, yearLimit)
 	}
 
 	// Find the first applicable month.
@@ -116,7 +117,7 @@ WRAP:
 		}
 	}
 
-	return t.In(origLocation)
+	return t.In(origLocation), nil
 }
 
 // dayMatches returns true if the schedule's day-of-week and day-of-month
