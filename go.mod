@@ -5,7 +5,7 @@ go 1.17
 retract v1.15.0 // Published accidentally.
 
 require (
-	cloud.google.com/go/compute v0.1.0
+	cloud.google.com/go/compute v1.1.0
 	cloud.google.com/go/pubsub v1.3.1
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.7
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
