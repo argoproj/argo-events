@@ -221,8 +221,9 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					if c.ByTime == nil {
 						continue
 					}
+					cronParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
 					opts := []cronlib.Option{
-						cronlib.WithParser(cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)),
+						cronlib.WithParser(cronParser),
 						cronlib.WithChain(cronlib.Recover(cronlib.DefaultLogger)),
 					}
 					nowTime := time.Now()
@@ -256,7 +257,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 							continue
 						}
 						prevTriggerTime := specSchedule.Prev(time.Now().UTC())*/
-						prevTriggerTime := common.PrevCronTime(c.ByTime.Cron, nowTime)
+						prevTriggerTime := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
 						logger.Infof("previous trigger time: %v", prevTriggerTime)
 						if prevTriggerTime.After(lastResetTime) {
 							lastResetTime = prevTriggerTime

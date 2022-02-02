@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	cronlib "github.com/robfig/cron/v3"
 )
 
 func TestPrevCronTime(t *testing.T) {
@@ -50,8 +52,10 @@ func TestPrevCronTime(t *testing.T) {
 		{"TZ=America/New_York 2012-12-03T00:00:00-0500", "0 0 3 3 * ?", "2012-11-03T03:00:00-0400"},
 	}
 
+	parser := cronlib.NewParser(cronlib.Second | cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.DowOptional | cronlib.Descriptor)
+
 	for _, c := range runs {
-		actual := PrevCronTime(c.spec, getTime(c.time))
+		actual := PrevCronTime(c.spec, parser, getTime(c.time))
 		expected := getTime(c.expected)
 		if !actual.Equal(expected) {
 			t.Errorf("%s, \"%s\": (expected) %v != %v (actual)", c.time, c.spec, expected, actual)

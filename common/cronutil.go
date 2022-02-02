@@ -13,9 +13,8 @@ const (
 
 // For a given cron specification, return the previous activation time
 // If no time can be found to satisfy the schedule, return the zero time.
-func PrevCronTime(cronSpec string, t time.Time) time.Time {
+func PrevCronTime(cronSpec string, parser cronlib.Parser, t time.Time) time.Time {
 
-	parser := cronlib.NewParser(cronlib.Second | cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.DowOptional | cronlib.Descriptor)
 	sched, err := parser.Parse(cronSpec)
 	if err != nil {
 		// TBD
