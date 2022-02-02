@@ -136,7 +136,7 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - action, a function to be triggered after all conditions meet
 func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	log := n.logger.With("clientID", n.clientID)
-	msgHolder, err := newEventSourceMessageHolder(dependencyExpr, dependencies, lastResetTime)
+	msgHolder, err := newEventSourceMessageHolder(log, dependencyExpr, dependencies, lastResetTime)
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		return
 	}
 
-	// Acknowledge any old messages that occurred either before the last reset
+	// Acknowledge any old messages that occurred before the last reset (standard reset after trigger or conditional reset)
 	if m.Timestamp/1e9 <= msgHolder.getLastResetTime() {
 		log.Debugf("About to reset and ack dependency=%s due to message time occurred before reset, m.Timestamp=%d, msgHolder.getLastResetTime()=%d",
 			depName, m.Timestamp, msgHolder.getLastResetTime())
@@ -268,6 +268,11 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		}
 		msgHolder.ackAndCache(m, event.ID())
 		return
+	}
+	// make sure that everything has been cleared within a certain amount of time
+	if msgHolder.fullResetTimeout() {
+		log.Infof("ATTENTION: Resetting the flags because they didn't get cleared before the timeout: msgHolder=%+v", msgHolder)
+		msgHolder.resetAll()
 	}
 
 	now := time.Now().Unix()
@@ -348,8 +353,10 @@ type eventSourceMessageHolder struct {
 	// time that resets conditions, usually the time all conditions meet,
 	// or the time getting an external signal to reset.
 	lastResetTime int64
-	expr          *govaluate.EvaluableExpression
-	depNames      []string
+	// after lastResetTime is set, this represents the time that a reset of all dependencies actually occurred
+	fullResetOccurrenceTime int64
+	expr                    *govaluate.EvaluableExpression
+	depNames                []string
 	// Mapping of [eventSourceName + eventName]dependencyName
 	sourceDepMap map[string]string
 	parameters   map[string]interface{}
@@ -357,9 +364,11 @@ type eventSourceMessageHolder struct {
 	// A sync map used to cache the message IDs, it is used to guarantee Exact Once triggering
 	smap *sync.Map
 	lock sync.RWMutex
+
+	logger *zap.SugaredLogger
 }
 
-func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependency, lastResetTime time.Time) (*eventSourceMessageHolder, error) {
+func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr string, dependencies []Dependency, lastResetTime time.Time) (*eventSourceMessageHolder, error) {
 	dependencyExpr = strings.ReplaceAll(dependencyExpr, "-", "\\-")
 	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
 	if err != nil {
@@ -383,14 +392,16 @@ func newEventSourceMessageHolder(dependencyExpr string, dependencies []Dependenc
 	}
 
 	return &eventSourceMessageHolder{
-		lastResetTime: lastResetTime.Unix(),
-		expr:          expression,
-		depNames:      deps,
-		sourceDepMap:  srcDepMap,
-		parameters:    parameters,
-		msgs:          msgs,
-		smap:          new(sync.Map),
-		lock:          sync.RWMutex{},
+		lastResetTime:           lastResetTime.Unix(),
+		fullResetOccurrenceTime: lastResetTime.Unix(), // the logic in fullResetTimeout() requires setting it like this at the beginning
+		expr:                    expression,
+		depNames:                deps,
+		sourceDepMap:            srcDepMap,
+		parameters:              parameters,
+		msgs:                    msgs,
+		smap:                    new(sync.Map),
+		lock:                    sync.RWMutex{},
+		logger:                  logger,
 	}, nil
 }
 
@@ -404,6 +415,20 @@ func (mh *eventSourceMessageHolder) setLastResetTime(t int64) {
 	mh.lock.Lock()
 	defer mh.lock.Unlock()
 	mh.lastResetTime = t
+
+	// make sure everything is cleaned up within 60 seconds
+	/*if !mh.isCleanedUp() {
+		cleanupTimer := time.NewTimer(60 * time.Second)
+		go func() {
+			<-cleanupTimer.C
+			mh.resetAll()
+			mh.logger.Debug("Failsafe: making sure all dependencies have been cleared from memory within 60 seconds of reset...")
+		}()
+	}*/
+}
+
+func (mh *eventSourceMessageHolder) fullResetTimeout() bool {
+	return mh.getLastResetTime() != 0 && time.Now().Unix()-mh.getLastResetTime() > 60 && mh.fullResetOccurrenceTime < mh.lastResetTime
 }
 
 func (mh *eventSourceMessageHolder) getDependencyName(eventSourceName, eventName string) (string, error) {
@@ -429,6 +454,10 @@ func (mh *eventSourceMessageHolder) ackAndCache(m *stan.Msg, id string) {
 func (mh *eventSourceMessageHolder) reset(depName string) {
 	mh.parameters[depName] = false
 	delete(mh.msgs, depName)
+
+	if mh.isCleanedUp() {
+		mh.fullResetOccurrenceTime = time.Now().Unix()
+	}
 }
 
 func (mh *eventSourceMessageHolder) resetAll() {
@@ -438,6 +467,7 @@ func (mh *eventSourceMessageHolder) resetAll() {
 	for k := range mh.parameters {
 		mh.parameters[k] = false
 	}
+	mh.fullResetOccurrenceTime = time.Now().Unix()
 }
 
 // Check if all the parameters and messages have been cleaned up
