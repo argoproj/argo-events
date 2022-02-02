@@ -418,6 +418,7 @@ func (mh *eventSourceMessageHolder) setLastResetTime(t int64) {
 	mh.lastResetTime = t
 }
 
+// failsafe condition: determine if we for some reason we haven't acknowledged all dependencies within 60 seconds of the lastResetTime
 func (mh *eventSourceMessageHolder) fullResetTimeout() bool {
 	return mh.getLastResetTime() != 0 && time.Now().Unix()-mh.getLastResetTime() > 60 && mh.fullResetOccurrenceTime < mh.lastResetTime
 }
