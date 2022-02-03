@@ -65,10 +65,10 @@ func TestValidateTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test insecureSkipVerify true", func(t *testing.T) {
-    		c := &TLSConfig{InsecureSkipVerify: true}
-    		err := ValidateTLSConfig(c)
-    		assert.Nil(t, err)
-    	})
+		c := &TLSConfig{InsecureSkipVerify: true}
+		err := ValidateTLSConfig(c)
+		assert.Nil(t, err)
+	})
 
 	t.Run("test insecureSkipVerify is false and no certs", func(t *testing.T) {
 		c := &TLSConfig{InsecureSkipVerify: false}
