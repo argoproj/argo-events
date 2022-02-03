@@ -468,13 +468,9 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 				if err = common.Connect(&backoff, func() error {
 					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Options) error {
 						if filter, ok := filters[s.GetEventName()]; ok {
-							proceed, marshalErr, filterErr := filterEvent(data, filter)
-							if marshalErr != nil {
-								logger.Warnf("Failed to unmarshal data, error: %s", err.Error())
-								return nil
-							}
-							if filterErr != nil {
-								logger.Errorw("Failed to parse the filter", zap.Error(err))
+							proceed, err := filterEvent(data, filter)
+							if err != nil {
+								logger.Errorw("Failed to filter event", zap.Error(err))
 								return nil
 							}
 							if !proceed {
@@ -557,12 +553,12 @@ func generateClientID(hostname string) string {
 	return clientID
 }
 
-func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error, error) {
+func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) {
 
 	dataMap := make(map[string]interface{})
 	err := json.Unmarshal(data, &dataMap)
 	if err != nil {
-		return false, err, nil
+		return false, fmt.Errorf("failed to unmarshal data, %w", err)
 	}
 
 	params := make(map[string]interface{})
@@ -570,7 +566,5 @@ func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error, 
 		params[strings.ReplaceAll(key, "-", "_")] = value
 	}
 	env := expr.GetFuncMap(params)
-	result, err := expr.EvalBool(strings.ReplaceAll(filter.Expression, "-", "_"), env)
-	return result, nil, err
-
+	return expr.EvalBool(strings.ReplaceAll(filter.Expression, "-", "_"), env)
 }
