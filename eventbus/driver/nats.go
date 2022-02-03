@@ -363,8 +363,9 @@ type eventSourceMessageHolder struct {
 	parameters   map[string]interface{}
 	msgs         map[string]*eventSourceMessage
 	// A sync map used to cache the message IDs, it is used to guarantee Exact Once triggering
-	smap *sync.Map
-	lock sync.RWMutex
+	smap        *sync.Map
+	lock        sync.RWMutex
+	timeoutLock sync.RWMutex
 
 	logger *zap.SugaredLogger
 }
@@ -412,15 +413,30 @@ func (mh *eventSourceMessageHolder) getLastResetTime() int64 {
 }
 
 func (mh *eventSourceMessageHolder) setLastResetTime(t int64) {
-	mh.lock.Lock()
-	defer mh.lock.Unlock()
-	mh.lastResetTime = t
-	mh.resetTimeout = t + 60 // failsafe condition: determine if we for some reason we haven't acknowledged all dependencies within 60 seconds of the lastResetTime
+	{
+		mh.lock.Lock() // since this can be called asyncronously as part of a ConditionReset, we neeed to lock this code
+		defer mh.lock.Unlock()
+		mh.lastResetTime = t
+	}
+	mh.setResetTimeout(t + 60) // failsafe condition: determine if we for some reason we haven't acknowledged all dependencies within 60 seconds of the lastResetTime
+}
+
+func (mh *eventSourceMessageHolder) setResetTimeout(t int64) {
+	mh.timeoutLock.Lock() // since this can be called asyncronously as part of a ConditionReset, we neeed to lock this code
+	defer mh.timeoutLock.Unlock()
+	mh.resetTimeout = t
+}
+
+func (mh *eventSourceMessageHolder) getResetTimeout() int64 {
+	mh.timeoutLock.RLock()
+	defer mh.timeoutLock.RUnlock()
+	return mh.resetTimeout
 }
 
 // failsafe condition after lastResetTime
 func (mh *eventSourceMessageHolder) fullResetTimeout() bool {
-	return mh.resetTimeout != 0 && time.Now().Unix() > mh.resetTimeout
+	resetTimeout := mh.getResetTimeout()
+	return resetTimeout != 0 && time.Now().Unix() > resetTimeout
 }
 
 func (mh *eventSourceMessageHolder) getDependencyName(eventSourceName, eventName string) (string, error) {
@@ -448,7 +464,7 @@ func (mh *eventSourceMessageHolder) reset(depName string) {
 	delete(mh.msgs, depName)
 
 	if mh.isCleanedUp() {
-		mh.resetTimeout = 0
+		mh.setResetTimeout(0)
 	}
 }
 
@@ -459,7 +475,7 @@ func (mh *eventSourceMessageHolder) resetAll() {
 	for k := range mh.parameters {
 		mh.parameters[k] = false
 	}
-	mh.resetTimeout = 0
+	mh.setResetTimeout(0)
 }
 
 // Check if all the parameters and messages have been cleaned up
