@@ -471,11 +471,12 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							dataMap := make(map[string]interface{})
 							err := json.Unmarshal(data, &dataMap)
 							if err != nil {
-								logger.Warn("unable to unmarshal data")
+								logger.Warn("unable to json unmarshal data")
 								return nil
 							}
 							proceed, err := shouldDispatch(filter.Expression, dataMap)
 							if err != nil {
+								logger.Warn("failed to publish event, filter condition not met")
 								return nil
 							}
 							if !proceed {
