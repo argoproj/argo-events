@@ -6,8 +6,12 @@ metadata:
 spec:
   service:
     ports:
-      - port: 12000
+      - name: example
+        port: 12000
         targetPort: 12000
+      - name: example-without-api-credentials
+        port: 13000
+        targetPort: 13000
   github:
     example:
       repositories:
