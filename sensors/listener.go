@@ -212,36 +212,21 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			var subLock uint32
 			wg1 := &sync.WaitGroup{}
 			closeSubCh := make(chan struct{})
+
 			resetConditionsCh := make(chan struct{})
-
-			subscribeFunc := func() {
-				wg1.Add(1)
-				go func() {
-					defer wg1.Done()
-					// release the lock when goroutine exits
-					defer atomic.StoreUint32(&subLock, 0)
-
-					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
-
-					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, depExpression, deps, transformFunc, filterFunc, actionFunc)
-					if err != nil {
-						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
-						return
-					}
-				}()
-			}
-
-			subscribeOnce(&subLock, subscribeFunc)
-
+			var lastResetTime time.Time
 			if len(trigger.Template.ConditionsReset) > 0 {
 				for _, c := range trigger.Template.ConditionsReset {
+
 					if c.ByTime == nil {
 						continue
 					}
+					cronParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
 					opts := []cronlib.Option{
-						cronlib.WithParser(cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)),
+						cronlib.WithParser(cronParser),
 						cronlib.WithChain(cronlib.Recover(cronlib.DefaultLogger)),
 					}
+					nowTime := time.Now()
 					if c.ByTime.Timezone != "" {
 						location, err := time.LoadLocation(c.ByTime.Timezone)
 						if err != nil {
@@ -249,6 +234,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 							continue
 						}
 						opts = append(opts, cronlib.WithLocation(location))
+						nowTime = nowTime.In(location)
 					}
 					cr := cronlib.New(opts...)
 					_, err = cr.AddFunc(c.ByTime.Cron, func() {
@@ -259,8 +245,42 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						continue
 					}
 					cr.Start()
+
+					logger.Debugf("just started cron job; entries=%v", cr.Entries())
+
+					// set lastResetTime (the last time this would've been triggered)
+					if len(cr.Entries()) > 0 {
+						prevTriggerTime, err := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
+						if err != nil {
+							logger.Errorw("couldn't get previous cron trigger time", zap.Error(err))
+							continue
+						}
+						logger.Infof("previous trigger time: %v", prevTriggerTime)
+						if prevTriggerTime.After(lastResetTime) {
+							lastResetTime = prevTriggerTime
+						}
+					}
 				}
 			}
+
+			subscribeFunc := func() {
+				wg1.Add(1)
+				go func() {
+					defer wg1.Done()
+					// release the lock when goroutine exits
+					defer atomic.StoreUint32(&subLock, 0)
+
+					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
+
+					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
+					if err != nil {
+						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+						return
+					}
+				}()
+			}
+
+			subscribeOnce(&subLock, subscribeFunc)
 
 			logger.Infof("starting eventbus connection daemon for client %s...", clientID)
 			ticker := time.NewTicker(5 * time.Second)
