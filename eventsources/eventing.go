@@ -15,6 +15,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/expr"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
@@ -50,7 +51,6 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	argoexpr "github.com/argoproj/argo-events/util/expr/argoexpr"
 )
 
 // EventingServer is the server API for Eventing service.
@@ -70,13 +70,15 @@ type EventingServer interface {
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
-func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcemetrics.Metrics) (map[apicommon.EventSourceType][]EventingServer, map[string]v1alpha1.EventSourceFilter) {
+func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcemetrics.Metrics) (map[apicommon.EventSourceType][]EventingServer, map[string]*v1alpha1.EventSourceFilter) {
 	result := make(map[apicommon.EventSourceType][]EventingServer)
-	filters := make(map[string]v1alpha1.EventSourceFilter)
+	filters := make(map[string]*v1alpha1.EventSourceFilter)
 	if len(eventSource.Spec.AMQP) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AMQP {
-			filters[getFilterKey(apicommon.AMQPEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.AMQPEvent, k)] = v.Filter
+			}
 			servers = append(servers, &amqp.EventListener{EventSourceName: eventSource.Name, EventName: k, AMQPEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AMQPEvent] = servers
@@ -84,7 +86,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.AzureEventsHub) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AzureEventsHub {
-			filters[getFilterKey(apicommon.AzureEventsHub, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.AzureEventsHub, k)] = v.Filter
+			}
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AzureEventsHub] = servers
@@ -92,7 +96,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Bitbucket) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Bitbucket {
-			filters[getFilterKey(apicommon.BitbucketEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.BitbucketEvent, k)] = v.Filter
+			}
 			servers = append(servers, &bitbucket.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.BitbucketEvent] = servers
@@ -100,7 +106,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.BitbucketServer) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.BitbucketServer {
-			filters[getFilterKey(apicommon.BitbucketServerEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.BitbucketServerEvent, k)] = v.Filter
+			}
 			servers = append(servers, &bitbucketserver.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketServerEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.BitbucketServerEvent] = servers
@@ -108,7 +116,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Calendar {
-			filters[getFilterKey(apicommon.CalendarEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.CalendarEvent, k)] = v.Filter
+			}
 			servers = append(servers, &calendar.EventListener{EventSourceName: eventSource.Name, EventName: k, CalendarEventSource: v, Namespace: eventSource.Namespace, Metrics: metrics})
 		}
 		result[apicommon.CalendarEvent] = servers
@@ -116,7 +126,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Emitter) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Emitter {
-			filters[getFilterKey(apicommon.EmitterEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.EmitterEvent, k)] = v.Filter
+			}
 			servers = append(servers, &emitter.EventListener{EventSourceName: eventSource.Name, EventName: k, EmitterEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.EmitterEvent] = servers
@@ -124,7 +136,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.File) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.File {
-			filters[getFilterKey(apicommon.FileEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.FileEvent, k)] = v.Filter
+			}
 			servers = append(servers, &file.EventListener{EventSourceName: eventSource.Name, EventName: k, FileEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.FileEvent] = servers
@@ -132,7 +146,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Github) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Github {
-			filters[getFilterKey(apicommon.GithubEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.GithubEvent, k)] = v.Filter
+			}
 			servers = append(servers, &github.EventListener{EventSourceName: eventSource.Name, EventName: k, GithubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.GithubEvent] = servers
@@ -140,7 +156,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Gitlab) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Gitlab {
-			filters[getFilterKey(apicommon.GitlabEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.GitlabEvent, k)] = v.Filter
+			}
 			servers = append(servers, &gitlab.EventListener{EventSourceName: eventSource.Name, EventName: k, GitlabEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.GitlabEvent] = servers
@@ -148,7 +166,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.HDFS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.HDFS {
-			filters[getFilterKey(apicommon.HDFSEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.HDFSEvent, k)] = v.Filter
+			}
 			servers = append(servers, &hdfs.EventListener{EventSourceName: eventSource.Name, EventName: k, HDFSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.HDFSEvent] = servers
@@ -156,7 +176,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Kafka) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Kafka {
-			filters[getFilterKey(apicommon.KafkaEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.KafkaEvent, k)] = v.Filter
+			}
 			servers = append(servers, &kafka.EventListener{EventSourceName: eventSource.Name, EventName: k, KafkaEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.KafkaEvent] = servers
@@ -164,7 +186,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.MQTT) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.MQTT {
-			filters[getFilterKey(apicommon.MQTTEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.MQTTEvent, k)] = v.Filter
+			}
 			servers = append(servers, &mqtt.EventListener{EventSourceName: eventSource.Name, EventName: k, MQTTEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.MQTTEvent] = servers
@@ -179,7 +203,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.NATS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.NATS {
-			filters[getFilterKey(apicommon.NATSEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.NATSEvent, k)] = v.Filter
+			}
 			servers = append(servers, &nats.EventListener{EventSourceName: eventSource.Name, EventName: k, NATSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.NATSEvent] = servers
@@ -187,7 +213,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.NSQ) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.NSQ {
-			filters[getFilterKey(apicommon.NSQEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.NSQEvent, k)] = v.Filter
+			}
 			servers = append(servers, &nsq.EventListener{EventSourceName: eventSource.Name, EventName: k, NSQEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.NSQEvent] = servers
@@ -195,7 +223,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.PubSub) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.PubSub {
-			filters[getFilterKey(apicommon.PubSubEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.PubSubEvent, k)] = v.Filter
+			}
 			servers = append(servers, &gcppubsub.EventListener{EventSourceName: eventSource.Name, EventName: k, PubSubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.PubSubEvent] = servers
@@ -203,7 +233,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Redis) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Redis {
-			filters[getFilterKey(apicommon.RedisEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.RedisEvent, k)] = v.Filter
+			}
 			servers = append(servers, &redis.EventListener{EventSourceName: eventSource.Name, EventName: k, RedisEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.RedisEvent] = servers
@@ -211,7 +243,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.SNS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SNS {
-			filters[getFilterKey(apicommon.SNSEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.SNSEvent, k)] = v.Filter
+			}
 			servers = append(servers, &awssns.EventListener{EventSourceName: eventSource.Name, EventName: k, SNSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SNSEvent] = servers
@@ -219,7 +253,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.SQS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SQS {
-			filters[getFilterKey(apicommon.SQSEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.SQSEvent, k)] = v.Filter
+			}
 			servers = append(servers, &awssqs.EventListener{EventSourceName: eventSource.Name, EventName: k, SQSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SQSEvent] = servers
@@ -227,7 +263,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Slack) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Slack {
-			filters[getFilterKey(apicommon.SlackEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.SlackEvent, k)] = v.Filter
+			}
 			servers = append(servers, &slack.EventListener{EventSourceName: eventSource.Name, EventName: k, SlackEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SlackEvent] = servers
@@ -263,7 +301,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Pulsar) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Pulsar {
-			filters[getFilterKey(apicommon.PulsarEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.PulsarEvent, k)] = v.Filter
+			}
 			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.PulsarEvent] = servers
@@ -271,7 +311,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Generic) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Generic {
-			filters[getFilterKey(apicommon.GenericEvent, k)] = *v.Filter
+			if v.Filter != nil {
+				filters[getFilterKey(apicommon.GenericEvent, k)] = v.Filter
+			}
 			servers = append(servers, &generic.EventListener{EventSourceName: eventSource.Name, EventName: k, GenericEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.GenericEvent] = servers
@@ -344,7 +386,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	return nil
 }
 
-func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer, filters map[string]v1alpha1.EventSourceFilter) error {
+func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer, filters map[string]*v1alpha1.EventSourceFilter) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
 	clientID := generateClientID(e.hostname)
@@ -425,6 +467,22 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 				}
 				if err = common.Connect(&backoff, func() error {
 					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Options) error {
+						if filter, ok := filters[getFilterKey(s.GetEventSourceType(), s.GetEventName())]; ok {
+							dataMap := make(map[string]interface{})
+							err := json.Unmarshal(data, &dataMap)
+							if err != nil {
+								logger.Warn("unable to unmarshal data")
+								return nil
+							}
+							proceed, err := shouldDispatch(filter.Expression, dataMap)
+							if err != nil {
+								return nil
+							}
+							if !proceed {
+								logger.Debug("failed to publish event, filter condition not met")
+								return nil
+							}
+						}
 						event := cloudevents.NewEvent()
 						event.SetID(fmt.Sprintf("%x", uuid.New()))
 						event.SetType(string(s.GetEventSourceType()))
@@ -444,22 +502,6 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						eventBody, err := json.Marshal(event)
 						if err != nil {
 							return err
-						}
-
-						if filter, ok := filters[getFilterKey(s.GetEventSourceType(), s.GetEventName())]; ok {
-							dataMap := make(map[string]interface{})
-							err := json.Unmarshal(data, &dataMap)
-							if err != nil {
-								return err
-							}
-							proceed, err := shouldDispatch(filter.Expression, dataMap)
-							if err != nil {
-								return err
-							}
-							if !proceed {
-								logger.Error("failed to publish event, filter condition not met")
-								return nil
-							}
 						}
 
 						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
@@ -516,13 +558,12 @@ func generateClientID(hostname string) string {
 }
 
 func shouldDispatch(expression string, data map[string]interface{}) (bool, error) {
-
 	params := make(map[string]interface{})
 	for key, value := range data {
 		params[strings.ReplaceAll(key, "-", "_")] = value
 	}
-	env := argoexpr.GetFuncMap(params)
-	return argoexpr.EvalBool(strings.ReplaceAll(expression, "-", "_"), env)
+	env := expr.GetFuncMap(params)
+	return expr.EvalBool(strings.ReplaceAll(expression, "-", "_"), env)
 }
 
 func getFilterKey(eventType apicommon.EventSourceType, eventName string) string {

@@ -1,4 +1,4 @@
-package argoexpr
+package expr
 
 import (
 	"fmt"
@@ -47,7 +47,7 @@ func GetFuncMap(m map[string]interface{}) map[string]interface{} {
 func toJson(v interface{}) string {
 	output, err := json.Marshal(v)
 	if err != nil {
-		panic(err)
+		return ""
 	}
 	return string(output)
 }
