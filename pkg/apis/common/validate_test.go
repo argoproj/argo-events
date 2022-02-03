@@ -64,6 +64,12 @@ func TestValidateTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both"))
 	})
 
+	t.Run("test insecureSkipVerify true", func(t *testing.T) {
+    		c := &TLSConfig{InsecureSkipVerify: true}
+    		err := ValidateTLSConfig(c)
+    		assert.Nil(t, err)
+    	})
+
 	t.Run("test insecureSkipVerify is false and no certs", func(t *testing.T) {
 		c := &TLSConfig{InsecureSkipVerify: false}
 		err := ValidateTLSConfig(c)
