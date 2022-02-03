@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Argo Events",
-    "version": "v1.5.5-cap-CR-8810"
+    "version": "v1.5.5-cap-CR-8983"
   },
   "paths": {},
   "definitions": {
