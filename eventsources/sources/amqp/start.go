@@ -85,13 +85,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if amqpEventSource.Auth != nil {
 			username, err := common.GetSecretFromVolume(amqpEventSource.Auth.Username)
 			if err != nil {
-				return errors.Wrap(err, "username not founnd")
+				return errors.Wrap(err, "username not found")
 			}
 			password, err := common.GetSecretFromVolume(amqpEventSource.Auth.Password)
 			if err != nil {
-				return errors.Wrap(err, "password not founnd")
+				return errors.Wrap(err, "password not found")
 			}
-			c.SASL = []amqplib.Authentication{&amqplib.AMQPlainAuth{
+			c.SASL = []amqplib.Authentication{&amqplib.PlainAuth{
 				Username: username,
 				Password: password,
 			}}
