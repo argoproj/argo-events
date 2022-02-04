@@ -30,7 +30,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-openapi/spec v0.20.4
-	github.com/go-redis/redis v6.15.8+incompatible
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-swagger/go-swagger v0.25.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
