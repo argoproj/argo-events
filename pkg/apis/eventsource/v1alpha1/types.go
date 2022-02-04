@@ -906,17 +906,24 @@ type BitbucketBasicAuth struct {
 type BitbucketServerEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// ProjectKey is the key of project for which integration needs to setup
-	ProjectKey string `json:"projectKey" protobuf:"bytes,2,opt,name=projectKey"`
-	// RepositorySlug is the slug of the repository for which integration needs to setup
-	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,3,opt,name=repositorySlug"`
+	// DeprecatedProjectKey is the key of project for which integration needs to setup
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8
+	// +optional
+	DeprecatedProjectKey string `json:"projectKey,omitempty" protobuf:"bytes,2,opt,name=projectKey"`
+	// DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8
+	// +optional
+	DeprecatedRepositorySlug string `json:"repositorySlug,omitempty" protobuf:"bytes,3,opt,name=repositorySlug"`
+	// Repositories holds a list of repositories for which integration needs to setup
+	// +optional
+	Repositories []BitbucketServerRepository `json:"repositories,omitempty" protobuf:"bytes,4,rep,name=repositories"`
 	// Events are bitbucket event to listen to.
 	// Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
-	Events []string `json:"events" protobuf:"bytes,4,opt,name=events"`
+	Events []string `json:"events" protobuf:"bytes,5,opt,name=events"`
 	// AccessToken is reference to K8s secret which holds the bitbucket api access information
-	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,5,opt,name=accessToken"`
+	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,6,opt,name=accessToken"`
 	// WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
-	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,6,opt,name=webhookSecret"`
+	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,7,opt,name=webhookSecret"`
 	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
 	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,8,opt,name=bitbucketserverBaseURL"`
 	// DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
@@ -928,6 +935,30 @@ type BitbucketServerEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
+}
+
+type BitbucketServerRepository struct {
+	// ProjectKey is the key of project for which integration needs to setup
+	ProjectKey string `json:"projectKey" protobuf:"bytes,1,opt,name=projectKey"`
+	// RepositorySlug is the slug of the repository for which integration needs to setup
+	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,2,rep,name=repositorySlug"`
+}
+
+func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []BitbucketServerRepository {
+	if len(b.Repositories) > 0 {
+		return b.Repositories
+	}
+
+	if b.DeprecatedProjectKey != "" && b.DeprecatedRepositorySlug != "" {
+		return []BitbucketServerRepository{
+			{
+				ProjectKey:     b.DeprecatedProjectKey,
+				RepositorySlug: b.DeprecatedRepositorySlug,
+			},
+		}
+	}
+
+	return nil
 }
 
 // HDFSEventSource refers to event-source for HDFS related events

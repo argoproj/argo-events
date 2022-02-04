@@ -856,11 +856,18 @@
           "type": "object"
         },
         "projectKey": {
-          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "description": "DeprecatedProjectKey is the key of project for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
           "type": "string"
         },
+        "repositories": {
+          "description": "Repositories holds a list of repositories for which integration needs to setup",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketServerRepository"
+          },
+          "type": "array"
+        },
         "repositorySlug": {
-          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "description": "DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
           "type": "string"
         },
         "webhook": {
@@ -873,10 +880,25 @@
         }
       },
       "required": [
-        "projectKey",
-        "repositorySlug",
         "events",
         "bitbucketserverBaseURL"
+      ],
+      "type": "object"
+    },
+    "io.argoproj.eventsource.v1alpha1.BitbucketServerRepository": {
+      "properties": {
+        "projectKey": {
+          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "type": "string"
+        },
+        "repositorySlug": {
+          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectKey",
+        "repositorySlug"
       ],
       "type": "object"
     },

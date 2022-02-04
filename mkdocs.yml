@@ -36,8 +36,7 @@ nav:
       - 'tutorials/04-standard-k8s-resources.md'
       - 'tutorials/05-trigger-custom-resources.md'
       - 'tutorials/06-trigger-conditions.md'
-      - 'tutorials/07-filters.md'
-      - 'tutorials/08-policy.md'
+      - 'tutorials/07-policy.md'
   - EventSources:
       - Setup:
           - 'eventsources/setup/amqp.md'
@@ -84,6 +83,12 @@ nav:
       - 'sensors/trigger-conditions.md'
       - 'sensors/transform.md'
       - 'sensors/ha.md'
+      - Filters:
+        - 'sensors/filters/intro.md'
+        - 'sensors/filters/expr.md'
+        - 'sensors/filters/data.md'
+        - 'sensors/filters/ctx.md'
+        - 'sensors/filters/time.md'
       - More Information: 'sensors/more-about-sensors-and-triggers.md'
   - 'eventbus.md'
   - 'service-accounts.md'
