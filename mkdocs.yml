@@ -92,6 +92,7 @@ nav:
       - More Information: 'sensors/more-about-sensors-and-triggers.md'
   - 'eventbus.md'
   - 'service-accounts.md'
+  - 'security.md'
   - Operator Guide:
       - 'metrics.md'
       - HA/DR Recommendations: 'dr_ha_recommendations.md'
