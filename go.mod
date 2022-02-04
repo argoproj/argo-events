@@ -15,7 +15,7 @@ require (
 	github.com/antonmedv/expr v1.8.8
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.1.1
-	github.com/argoproj/pkg v0.10.1
+	github.com/argoproj/pkg v0.11.0
 	github.com/aws/aws-sdk-go v1.35.24
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.3
@@ -84,6 +84,8 @@ require (
 	sigs.k8s.io/yaml v1.2.0
 )
 
+require github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
+
 require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/iam v0.1.1 // indirect
@@ -117,6 +119,7 @@ require (
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/devigned/tab v0.1.1 // indirect
+	github.com/doublerebel/bellows v0.0.0-20160303004610-f177d92a03d3
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
