@@ -1,13 +1,18 @@
 name: Snyk
-on: push
+on:
+  schedule:
+    - cron: "30 2 * * *"
 jobs:
-  security:
+  # we do not scan images here, they're scanned here: https://app.snyk.io/org/argoproj/projects
+
+  golang:
+    if: github.repository == 'argoproj/argo-events'
     runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
       - uses: actions/checkout@master
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/golang@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
