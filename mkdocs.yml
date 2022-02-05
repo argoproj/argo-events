@@ -61,6 +61,7 @@ nav:
       - 'eventsources/naming.md'
       - 'eventsources/services.md'
       - 'eventsources/ha.md'
+      - 'eventsources/filtering.md'
       - 'eventsources/webhook-authentication.md'
       - 'eventsources/webhook-health-check.md'
       - 'eventsources/calendar-catch-up.md'

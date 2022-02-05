@@ -2,7 +2,10 @@ module github.com/argoproj/argo-events
 
 go 1.17
 
-retract v1.15.0 // Published accidentally.
+retract (
+	v1.15.1 // Contains retractions only.
+	v1.15.0 // Published accidentally.
+)
 
 require (
 	cloud.google.com/go/compute v1.1.0
