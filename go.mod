@@ -21,7 +21,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.3
 	github.com/cloudevents/sdk-go/v2 v2.1.0
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
-	github.com/eclipse/paho.mqtt.golang v1.2.0
+	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gavv/httpexpect/v2 v2.2.0
