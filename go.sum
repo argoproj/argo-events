@@ -154,8 +154,8 @@ github.com/UnnoTed/fileb0x v1.1.4/go.mod h1:X59xXT18tdNk/D6j+KZySratBsuKJauMtVuJ
 github.com/acomagu/bufpipe v1.0.3 h1:fxAGrHZTgQ9w5QqVItgzwj235/uYZYgbXitB+dLupOk=
 github.com/acomagu/bufpipe v1.0.3/go.mod h1:mxdxdup/WdsKVreO5GpW4+M/1CE2sMG4jeGJ2sYmHc4=
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
-github.com/ahmetb/gen-crd-api-reference-docs v0.2.0 h1:YI/cAcRdNAHArfhGKcmCY5qMa32k/UyCZagLgabC5JY=
-github.com/ahmetb/gen-crd-api-reference-docs v0.2.0/go.mod h1:P/XzJ+c2+khJKNKABcm2biRwk2QAuwbLf8DlXuaL7WM=
+github.com/ahmetb/gen-crd-api-reference-docs v0.3.0 h1:+XfOU14S4bGuwyvCijJwhhBIjYN+YXS18jrCY2EzJaY=
+github.com/ahmetb/gen-crd-api-reference-docs v0.3.0/go.mod h1:TdjdkYhlOifCQWPs1UdTma97kQQMozf5h26hTuG70u8=
 github.com/ajg/form v1.5.1 h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
@@ -1573,7 +1573,6 @@ golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGm
 golang.org/x/tools v0.0.0-20181030221726-6c7e314b6563/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190114222345-bf090417da8b/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190125232054-d66bd3c5d5a6/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
-golang.org/x/tools v0.0.0-20190213192042-740235f6c0d8/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190226205152-f727befe758c/go.mod h1:9Yl7xja0Znq3iFh3HoIrodX9oNMXvdceNzlUR8zjMvY=
 golang.org/x/tools v0.0.0-20190311212946-11955173bddd/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
 golang.org/x/tools v0.0.0-20190312151545-0bb0c0a6e846/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
@@ -1892,8 +1891,8 @@ k8s.io/code-generator v0.21.7-rc.0 h1:Fk7MODNaWzxvNKLmj+seTaRLAYtEavJlMJWJ7RLtnF
 k8s.io/code-generator v0.21.7-rc.0/go.mod h1:1rjClMZOJxt64EX39Cxs1M60KWy6l9D716HBuy5eWfg=
 k8s.io/component-base v0.21.6 h1:esAu6VrGuhTToaj8S+qlhopiggDBKgBzbDU6qu1qYh0=
 k8s.io/component-base v0.21.6/go.mod h1:OT/tu5Zz0PdWInjIgXOEKLKxIgbkTFg6R2ncrGQks1M=
-k8s.io/gengo v0.0.0-20190128074634-0689ccc1d7d6/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8IAqLxYwwyPxAX1Pzy0ii0=
 k8s.io/gengo v0.0.0-20200413195148-3a45101e95ac/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8IAqLxYwwyPxAX1Pzy0ii0=
+k8s.io/gengo v0.0.0-20201203183100-97869a43a9d9/go.mod h1:FiNAH4ZV3gBg2Kwh89tzAEV2be7d5xI0vBa/VySYy3E=
 k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027/go.mod h1:FiNAH4ZV3gBg2Kwh89tzAEV2be7d5xI0vBa/VySYy3E=
 k8s.io/gengo v0.0.0-20211115164449-b448ea381d54 h1:LTfmarWsAxo+qlLq6d4FunAM9ZQSq8i6QI+/btzVk+U=
 k8s.io/gengo v0.0.0-20211115164449-b448ea381d54/go.mod h1:FiNAH4ZV3gBg2Kwh89tzAEV2be7d5xI0vBa/VySYy3E=

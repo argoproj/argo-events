@@ -11,7 +11,7 @@ require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/sprig/v3 v3.2.0
 	github.com/Shopify/sarama v1.31.1
-	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
+	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
 	github.com/antonmedv/expr v1.8.8
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.1.1
