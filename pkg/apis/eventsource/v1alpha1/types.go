@@ -936,31 +936,6 @@ type BitbucketServerEventSource struct {
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
 }
-
-type BitbucketServerRepository struct {
-	// ProjectKey is the key of project for which integration needs to setup
-	ProjectKey string `json:"projectKey" protobuf:"bytes,1,opt,name=projectKey"`
-	// RepositorySlug is the slug of the repository for which integration needs to setup
-	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,2,rep,name=repositorySlug"`
-}
-
-func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []BitbucketServerRepository {
-	if len(b.Repositories) > 0 {
-		return b.Repositories
-	}
-
-	if b.DeprecatedProjectKey != "" && b.DeprecatedRepositorySlug != "" {
-		return []BitbucketServerRepository{
-			{
-				ProjectKey:     b.DeprecatedProjectKey,
-				RepositorySlug: b.DeprecatedRepositorySlug,
-			},
-		}
-	}
-
-	return nil
-}
-
 type BitbucketServerRepository struct {
 	// ProjectKey is the key of project for which integration needs to setup
 	ProjectKey string `json:"projectKey" protobuf:"bytes,1,opt,name=projectKey"`

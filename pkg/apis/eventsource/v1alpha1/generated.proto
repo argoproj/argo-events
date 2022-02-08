@@ -312,14 +312,6 @@ message BitbucketServerRepository {
   optional string repositorySlug = 2;
 }
 
-message BitbucketServerRepository {
-  // ProjectKey is the key of project for which integration needs to setup
-  optional string projectKey = 1;
-
-  // RepositorySlug is the slug of the repository for which integration needs to setup
-  optional string repositorySlug = 2;
-}
-
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 message CalendarEventSource {
