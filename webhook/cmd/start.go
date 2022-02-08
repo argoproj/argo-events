@@ -43,13 +43,14 @@ func Start() {
 	}
 
 	options := webhook.Options{
-		ServiceName:    "events-webhook",
-		DeploymentName: "events-webhook",
-		Namespace:      namespace,
-		Port:           443,
-		SecretName:     "events-webhook-certs",
-		WebhookName:    "webhook.argo-events.argoproj.io",
-		ClientAuth:     tls.VerifyClientCertIfGiven,
+		ServiceName:     "events-webhook",
+		DeploymentName:  "events-webhook",
+		ClusterRoleName: "argo-events-webhook",
+		Namespace:       namespace,
+		Port:            443,
+		SecretName:      "events-webhook-certs",
+		WebhookName:     "webhook.argo-events.argoproj.io",
+		ClientAuth:      tls.VerifyClientCertIfGiven,
 	}
 	controller := webhook.AdmissionController{
 		Client:            kubeClient,
