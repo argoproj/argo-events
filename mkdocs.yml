@@ -61,6 +61,7 @@ nav:
       - 'eventsources/naming.md'
       - 'eventsources/services.md'
       - 'eventsources/ha.md'
+      - 'eventsources/filtering.md'
       - 'eventsources/webhook-authentication.md'
       - 'eventsources/webhook-health-check.md'
       - 'eventsources/calendar-catch-up.md'
@@ -92,6 +93,7 @@ nav:
       - More Information: 'sensors/more-about-sensors-and-triggers.md'
   - 'eventbus.md'
   - 'service-accounts.md'
+  - 'security.md'
   - Operator Guide:
       - 'metrics.md'
       - HA/DR Recommendations: 'dr_ha_recommendations.md'
