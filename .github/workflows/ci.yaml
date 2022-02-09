@@ -20,7 +20,7 @@ jobs:
           path: ~/.cache/go-build
           key: ${{ runner.os }}-go-build-v1-${{ hashFiles('**/go.mod') }}
       - name: Setup Golang
-        uses: actions/setup-go@v2.1.5
+        uses: actions/setup-go@v2.2.0
         with:
           go-version: "1.17.1"
       - name: Add bins to PATH
@@ -64,7 +64,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Set up Go 1.x
-        uses: actions/setup-go@v2.1.5
+        uses: actions/setup-go@v2.2.0
         with:
           go-version: "1.17.1"
         id: go
@@ -93,7 +93,7 @@ jobs:
           path: ~/.cache/go-build
           key: ${{ runner.os }}-go-build-v2-${{ hashFiles('**/go.mod') }}
       - name: Setup Golang
-        uses: actions/setup-go@v2.1.5
+        uses: actions/setup-go@v2.2.0
         with:
           go-version: "1.17.1"
       - name: Add bins to PATH
