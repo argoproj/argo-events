@@ -59,7 +59,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/slack-go/slack v0.7.4
+	github.com/slack-go/slack v0.10.1
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
