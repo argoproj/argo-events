@@ -8,27 +8,31 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func fakeTLSConfig(t *testing.T) *TLSConfig {
+func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *TLSConfig {
 	t.Helper()
-	return &TLSConfig{
-		CACertSecret: &corev1.SecretKeySelector{
-			Key: "fake-key1",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name1",
+	if insecureSkipVerify == true {
+		return &TLSConfig{InsecureSkipVerify: true}
+	} else {
+		return &TLSConfig{
+			CACertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key1",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name1",
+				},
 			},
-		},
-		ClientCertSecret: &corev1.SecretKeySelector{
-			Key: "fake-key2",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name2",
+			ClientCertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key2",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name2",
+				},
 			},
-		},
-		ClientKeySecret: &corev1.SecretKeySelector{
-			Key: "fake-key3",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name3",
+			ClientKeySecret: &corev1.SecretKeySelector{
+				Key: "fake-key3",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name3",
+				},
 			},
-		},
+		}
 	}
 }
 
@@ -60,8 +64,14 @@ func TestValidateTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both"))
 	})
 
+	t.Run("test insecureSkipVerify true", func(t *testing.T) {
+		c := &TLSConfig{InsecureSkipVerify: true}
+		err := ValidateTLSConfig(c)
+		assert.Nil(t, err)
+	})
+
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		c.CACertSecret = nil
 		c.ClientCertSecret = nil
 		err := ValidateTLSConfig(c)
@@ -70,7 +80,7 @@ func TestValidateTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test only caCertSecret is set", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		c.ClientCertSecret = nil
 		c.ClientKeySecret = nil
 		err := ValidateTLSConfig(c)
@@ -78,14 +88,14 @@ func TestValidateTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test clientCertSecret and clientKeySecret are set", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		c.CACertSecret = nil
 		err := ValidateTLSConfig(c)
 		assert.Nil(t, err)
 	})
 
 	t.Run("test all of 3 are set", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		err := ValidateTLSConfig(c)
 		assert.Nil(t, err)
 	})

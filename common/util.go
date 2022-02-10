@@ -210,10 +210,18 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 	}
 }
 
-// GetTLSConfig returns a tls configuration for given cert and key.
+// GetTLSConfig returns a tls configuration for given cert and key or skips the certs if InsecureSkipVerify is true.
 func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 	if config == nil {
 		return nil, errors.New("TLSConfig is nil")
+	}
+
+	if config.InsecureSkipVerify {
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: true,
+			ClientAuth:         0,
+		}
+		return tlsConfig, nil
 	}
 
 	var caCertPath, clientCertPath, clientKeyPath string
