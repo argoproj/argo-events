@@ -9,6 +9,11 @@ func ValidateTLSConfig(tlsConfig *TLSConfig) error {
 	if tlsConfig == nil {
 		return nil
 	}
+
+	if tlsConfig.InsecureSkipVerify {
+		return nil
+	}
+
 	var caCertSet, clientCertSet, clientKeySet bool
 
 	if tlsConfig.CACertSecret != nil {

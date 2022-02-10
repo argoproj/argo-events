@@ -936,7 +936,6 @@ type BitbucketServerEventSource struct {
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
 }
-
 type BitbucketServerRepository struct {
 	// ProjectKey is the key of project for which integration needs to setup
 	ProjectKey string `json:"projectKey" protobuf:"bytes,1,opt,name=projectKey"`
