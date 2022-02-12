@@ -21,20 +21,20 @@ spec:
               metadata:
                 generateName: aws-sns-worfklow-
               spec:
-                entrypoint: whalesay
+                entrypoint: echo
                 arguments:
                   parameters:
                   - name: message
                     # value will be overridden by the event payload
                     value: hello world
                 templates:
-                - name: whalesay
+                - name: echo
                   inputs:
                     parameters:
                     - name: message
                   container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
+                    image: jreinhart/echo
+                    command: [echo]
                     args: ["{{inputs.parameters.message}}"]
           parameters:
             - src:
