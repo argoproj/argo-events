@@ -52,7 +52,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/nats-io/go-nats v1.7.2
 	github.com/nats-io/graft v0.0.0-20200605173148-348798afea05
-	github.com/nats-io/nats.go v1.13.0
+	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
 	github.com/nats-io/stan.go v0.10.2
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
@@ -89,6 +89,7 @@ require (
 
 require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
+	github.com/hashicorp/go-hclog v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -207,8 +208,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
-	github.com/nats-io/nats-server/v2 v2.6.2 // indirect
-	github.com/nats-io/nats-streaming-server v0.17.0 // indirect
+	github.com/nats-io/nats-server/v2 v2.7.2 // indirect
+	github.com/nats-io/nats-streaming-server v0.24.1 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
@@ -258,7 +259,7 @@ require (
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
+	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	golang.org/x/tools v0.1.8 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
