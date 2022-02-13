@@ -21,6 +21,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Helio](https://helio.exchange)
 1. [InsideBoard](https://www.insideboard.com)
 1. [Intuit](https://www.intuit.com/)
+1. [Loam](https://www.getloam.com/)
 1. [Mobimeo GmbH](https://mobimeo.com/en/home/)
 1. [OneCause](https://www.onecause.com/)
 1. [Produvar](https://www.produvar.com/)
