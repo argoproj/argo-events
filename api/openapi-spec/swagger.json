@@ -2201,6 +2201,10 @@
           "description": "DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully. If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue. The default value is false.",
           "type": "boolean"
         },
+        "endpoint": {
+          "description": "Endpoint configures connection to a specific SQS endpoint instead of Amazons servers",
+          "type": "string"
+        },
         "filter": {
           "description": "Filter",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
