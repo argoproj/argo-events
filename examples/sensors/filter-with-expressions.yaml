@@ -19,15 +19,15 @@ spec:
       eventSourceName: webhook
       eventName: example
       filters:
-      # If event payload passes either one of the following filters, the event is considered a valid event.
-        exprs:
-          - expr: a == "b" || c == 10
+        # If event payload passes ALL following expr filters, the event is considered a valid event.
+        exprs:   # result: EVENT PASS
+          - expr: a == "b" || c == 10   # true
             fields:
               - name: a
                 path: a
               - name: c
                 path: c
-          - expr: e == false
+          - expr: e == false   # true
             fields:
               - name: e
                 path: d.e
@@ -41,7 +41,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: workflow-
+                generateName: expr-workflow-
               spec:
                 entrypoint: whalesay
                 arguments:

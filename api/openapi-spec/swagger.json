@@ -240,6 +240,10 @@
         "clientKeySecret": {
           "description": "ClientKeySecret refers to the secret that contains the client key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "insecureSkipVerify": {
+          "description": "If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)",
+          "type": "boolean"
         }
       }
     },
@@ -273,6 +277,9 @@
         },
         "resources": {
           "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements"
+        },
+        "securityContext": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext"
         }
       }
     },
@@ -583,6 +590,10 @@
           "description": "ExchangeType is rabbitmq exchange type",
           "type": "string"
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -656,6 +667,10 @@
       "description": "AMQPQueueDeclareConfig holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters",
       "type": "object",
       "properties": {
+        "arguments": {
+          "description": "Arguments of a queue (also known as \"x-arguments\") used for optional features and plugins",
+          "type": "string"
+        },
         "autoDelete": {
           "description": "AutoDelete removes the queue when no consumers are active",
           "type": "boolean"
@@ -686,6 +701,10 @@
         "hubName"
       ],
       "properties": {
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "fqdn": {
           "description": "FQDN of the EventHubs namespace you created More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string",
           "type": "string"
@@ -770,6 +789,10 @@
             "type": "string"
           }
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will be passed along the event payload.",
           "type": "object",
@@ -799,8 +822,6 @@
       "description": "BitbucketServerEventSource refers to event-source related to Bitbucket Server events",
       "type": "object",
       "required": [
-        "projectKey",
-        "repositorySlug",
         "events",
         "bitbucketserverBaseURL"
       ],
@@ -824,6 +845,10 @@
             "type": "string"
           }
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
@@ -832,11 +857,18 @@
           }
         },
         "projectKey": {
-          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "description": "DeprecatedProjectKey is the key of project for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
           "type": "string"
         },
+        "repositories": {
+          "description": "Repositories holds a list of repositories for which integration needs to setup",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketServerRepository"
+          }
+        },
         "repositorySlug": {
-          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "description": "DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
           "type": "string"
         },
         "webhook": {
@@ -846,6 +878,23 @@
         "webhookSecret": {
           "description": "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.BitbucketServerRepository": {
+      "type": "object",
+      "required": [
+        "projectKey",
+        "repositorySlug"
+      ],
+      "properties": {
+        "projectKey": {
+          "description": "ProjectKey is the key of project for which integration needs to setup",
+          "type": "string"
+        },
+        "repositorySlug": {
+          "description": "RepositorySlug is the slug of the repository for which integration needs to setup",
+          "type": "string"
         }
       }
     },
@@ -859,6 +908,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "interval": {
           "description": "Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...",
@@ -936,6 +989,10 @@
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -998,6 +1055,14 @@
         },
         "status": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceStatus"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.EventSourceFilter": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "type": "string"
         }
       }
     },
@@ -1260,6 +1325,10 @@
           "description": "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
           "type": "string"
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
@@ -1292,6 +1361,10 @@
         "config": {
           "description": "Config is the event source configuration",
           "type": "string"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "insecure": {
           "description": "Insecure determines the type of connection.",
@@ -1367,6 +1440,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "githubApp": {
           "description": "GitHubApp holds the GitHub app credentials",
@@ -1455,6 +1532,10 @@
             "type": "string"
           }
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "gitlabBaseURL": {
           "description": "GitlabBaseURL is the base URL for API requests to a custom endpoint",
           "type": "string"
@@ -1509,6 +1590,10 @@
         "directory": {
           "description": "Directory to watch for events",
           "type": "string"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "hdfsUser": {
           "description": "HDFSUser is the user to access HDFS file system. It is ignored if either ccache or keytab is used.",
@@ -1596,6 +1681,10 @@
           "description": "Consumer group for kafka client",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.KafkaConsumerGroup"
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -1654,6 +1743,10 @@
         "connectionBackoff": {
           "description": "ConnectionBackoff holds backoff applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -1718,6 +1811,10 @@
           "description": "ConnectionBackoff holds backoff applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -1759,6 +1856,10 @@
         "connectionBackoff": {
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "hostAddress": {
           "description": "HostAddress is the address of the host for NSQ lookup",
@@ -1813,6 +1914,10 @@
           "description": "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
           "type": "boolean"
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
@@ -1857,6 +1962,10 @@
         "connectionBackoff": {
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.common.Backoff"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -1920,6 +2029,10 @@
           "description": "DB to use. If not specified, default DB 0 will be used.",
           "type": "integer",
           "format": "int32"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "hostAddress": {
           "description": "HostAddress refers to the address of the Redis host/server",
@@ -2034,6 +2147,10 @@
           "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
@@ -2083,6 +2200,10 @@
         "dlq": {
           "description": "DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully. If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue. The default value is false.",
           "type": "boolean"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -2172,6 +2293,10 @@
       "description": "SlackEventSource refers to event-source for Slack related events",
       "type": "object",
       "properties": {
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
@@ -2758,6 +2883,10 @@
           "description": "Filters and rules governing toleration of success and constraints on the context and data of an event",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyFilter"
         },
+        "filtersLogicalOperator": {
+          "description": "FiltersLogicalOperator defines how different filters are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
+        },
         "name": {
           "description": "Name is a unique name of this dependency",
           "type": "string"
@@ -2782,6 +2911,14 @@
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
           }
+        },
+        "dataLogicalOperator": {
+          "description": "DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
+        },
+        "exprLogicalOperator": {
+          "description": "ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together. Available values: and (\u0026\u0026), or (||) Is optional and if left blank treated as and (\u0026\u0026).",
+          "type": "string"
         },
         "exprs": {
           "description": "Exprs contains the list of expressions evaluated against the event payload.",
@@ -5354,6 +5491,127 @@
         "optional": {
           "description": "Specify whether the Secret or its key must be defined",
           "type": "boolean"
+        }
+      }
+    },
+    "io.k8s.api.core.v1.SecurityContext": {
+      "description": "SecurityContext holds security configuration that will be applied to a container. Some fields are present in both SecurityContext and PodSecurityContext.  When both are set, the values in SecurityContext take precedence.",
+      "type": "object",
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "description": "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN",
+          "type": "boolean"
+        },
+        "capabilities": {
+          "description": "Adds and removes POSIX capabilities from running containers.",
+          "type": "object",
+          "properties": {
+            "add": {
+              "description": "Added capabilities",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "drop": {
+              "description": "Removed capabilities",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "privileged": {
+          "description": "Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host. Defaults to false.",
+          "type": "boolean"
+        },
+        "procMount": {
+          "description": "procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled.",
+          "type": "string"
+        },
+        "readOnlyRootFilesystem": {
+          "description": "Whether this container has a read-only root filesystem. Default is false.",
+          "type": "boolean"
+        },
+        "runAsGroup": {
+          "description": "The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "runAsNonRoot": {
+          "description": "Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If unset or false, no such validation will be performed. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+          "type": "boolean"
+        },
+        "runAsUser": {
+          "description": "The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if unspecified. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "seLinuxOptions": {
+          "description": "SELinuxOptions are the labels to be applied to the container",
+          "type": "object",
+          "properties": {
+            "level": {
+              "description": "Level is SELinux level label that applies to the container.",
+              "type": "string"
+            },
+            "role": {
+              "description": "Role is a SELinux role label that applies to the container.",
+              "type": "string"
+            },
+            "type": {
+              "description": "Type is a SELinux type label that applies to the container.",
+              "type": "string"
+            },
+            "user": {
+              "description": "User is a SELinux user label that applies to the container.",
+              "type": "string"
+            }
+          }
+        },
+        "seccompProfile": {
+          "description": "SeccompProfile defines a pod/container's seccomp profile settings. Only one profile source may be set.",
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "localhostProfile": {
+              "description": "localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is \"Localhost\".",
+              "type": "string"
+            },
+            "type": {
+              "description": "type indicates which kind of seccomp profile will be applied. Valid options are:\n\nLocalhost - a profile defined in a file on the node should be used. RuntimeDefault - the container runtime default profile should be used. Unconfined - no profile should be applied.",
+              "type": "string"
+            }
+          },
+          "x-kubernetes-unions": [
+            {
+              "discriminator": "type",
+              "fields-to-discriminateBy": {
+                "localhostProfile": "LocalhostProfile"
+              }
+            }
+          ]
+        },
+        "windowsOptions": {
+          "description": "WindowsSecurityContextOptions contain Windows-specific options and credentials.",
+          "type": "object",
+          "properties": {
+            "gmsaCredentialSpec": {
+              "description": "GMSACredentialSpec is where the GMSA admission webhook (https://github.com/kubernetes-sigs/windows-gmsa) inlines the contents of the GMSA credential spec named by the GMSACredentialSpecName field.",
+              "type": "string"
+            },
+            "gmsaCredentialSpecName": {
+              "description": "GMSACredentialSpecName is the name of the GMSA credential spec to use.",
+              "type": "string"
+            },
+            "runAsUserName": {
+              "description": "The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+              "type": "string"
+            }
+          }
         }
       }
     },

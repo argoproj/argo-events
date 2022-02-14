@@ -277,23 +277,10 @@ func (o *options) runTesting(ctx context.Context, eventSourceName, sensorName st
 		return fmt.Errorf("no pod found for sensor %s", sensorName)
 	}
 
-	successActionReg, err := regexp.Compile(logTriggerActionSuccessful)
-	if err != nil {
-		return fmt.Errorf("failed to compile regex for sensor success pattern: %v", err)
-	}
-	failureActionReg, err := regexp.Compile(logTriggerActionFailed)
-	if err != nil {
-		return fmt.Errorf("failed to compile regex for sensor failure pattern: %v", err)
-	}
-
-	successEventReg, err := regexp.Compile(logEventSuccessful)
-	if err != nil {
-		return fmt.Errorf("failed to compile regex for event source success pattern: %v", err)
-	}
-	failureEventReg, err := regexp.Compile(logEventFailed)
-	if err != nil {
-		return fmt.Errorf("failed to compile regex for event source failure pattern: %v", err)
-	}
+	successActionReg := regexp.MustCompile(logTriggerActionSuccessful)
+	failureActionReg := regexp.MustCompile(logTriggerActionFailed)
+	successEventReg := regexp.MustCompile(logEventSuccessful)
+	failureEventReg := regexp.MustCompile(logEventFailed)
 
 	fmt.Printf(`
 *********************************************************

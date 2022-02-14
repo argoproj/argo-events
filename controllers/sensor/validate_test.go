@@ -25,24 +25,32 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidateSensor(t *testing.T) {
 	dir := "../../examples/sensors"
-	files, err := ioutil.ReadDir(dir)
-	assert.Nil(t, err)
+	files, dirErr := ioutil.ReadDir(dir)
+	require.NoError(t, dirErr)
+
 	for _, file := range files {
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
-		assert.Nil(t, err)
-		var sensor *v1alpha1.Sensor
-		err = yaml.Unmarshal(content, &sensor)
-		assert.Nil(t, err)
-		err = ValidateSensor(sensor)
-		assert.Nil(t, err)
+		t.Run(
+			fmt.Sprintf("test example load: %s/%s", dir, file.Name()),
+			func(t *testing.T) {
+				content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
+				assert.NoError(t, err)
+
+				var sensor *v1alpha1.Sensor
+				err = yaml.Unmarshal(content, &sensor)
+				assert.NoError(t, err)
+
+				err = ValidateSensor(sensor)
+				assert.NoError(t, err)
+			})
 	}
 }
 
-func TestValidDepencies(t *testing.T) {
+func TestValidDependencies(t *testing.T) {
 	t.Run("test duplicate deps", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()
 		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
@@ -86,6 +94,335 @@ func TestValidDepencies(t *testing.T) {
 		err := ValidateSensor(sObj)
 		assert.NotNil(t, err)
 		assert.Equal(t, true, strings.Contains(err.Error(), "must define a name"))
+	})
+}
+
+func TestValidateLogicalOperator(t *testing.T) {
+	t.Run("test valid", func(t *testing.T) {
+		logOp := v1alpha1.OrLogicalOperator
+
+		err := validateLogicalOperator(logOp)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test not valid", func(t *testing.T) {
+		logOp := v1alpha1.LogicalOperator("fake")
+
+		err := validateLogicalOperator(logOp)
+
+		assert.Error(t, err)
+	})
+}
+
+func TestValidateComparator(t *testing.T) {
+	t.Run("test valid", func(t *testing.T) {
+		comp := v1alpha1.NotEqualTo
+
+		err := validateComparator(comp)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test not valid", func(t *testing.T) {
+		comp := v1alpha1.Comparator("fake")
+
+		err := validateComparator(comp)
+
+		assert.Error(t, err)
+	})
+}
+
+func TestValidateEventFilter(t *testing.T) {
+	t.Run("test empty", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{}
+
+		err := validateEventFilter(filter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test valid, all", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			ExprLogicalOperator: v1alpha1.OrLogicalOperator,
+			Exprs: []v1alpha1.ExprFilter{
+				{
+					Expr: "fake-expr",
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "fake-path",
+							Name: "fake-name",
+						},
+					},
+				},
+			},
+			DataLogicalOperator: v1alpha1.OrLogicalOperator,
+			Data: []v1alpha1.DataFilter{
+				{
+					Path: "fake-path",
+					Type: "fake-type",
+					Value: []string{
+						"fake-value",
+					},
+				},
+			},
+			Context: &v1alpha1.EventContext{
+				Type:            "type",
+				Subject:         "subject",
+				Source:          "source",
+				DataContentType: "fake-content-type",
+			},
+			Time: &v1alpha1.TimeFilter{
+				Start: "00:00:00",
+				Stop:  "06:00:00",
+			},
+		}
+
+		err := validateEventFilter(filter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test valid, expr only", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			Exprs: []v1alpha1.ExprFilter{
+				{
+					Expr: "fake-expr",
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "fake-path",
+							Name: "fake-name",
+						},
+					},
+				},
+			},
+		}
+
+		err := validateEventFilter(filter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test valid, data only", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			Data: []v1alpha1.DataFilter{
+				{
+					Path: "fake-path",
+					Type: "fake-type",
+					Value: []string{
+						"fake-value",
+					},
+				},
+			},
+		}
+
+		err := validateEventFilter(filter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test valid, ctx only", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			Context: &v1alpha1.EventContext{
+				Type:            "type",
+				Subject:         "subject",
+				Source:          "source",
+				DataContentType: "fake-content-type",
+			},
+		}
+
+		err := validateEventFilter(filter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test valid, time only", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			Time: &v1alpha1.TimeFilter{
+				Start: "00:00:00",
+				Stop:  "06:00:00",
+			},
+		}
+
+		err := validateEventFilter(filter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test not valid, wrong logical operator", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			DataLogicalOperator: "fake",
+		}
+
+		err := validateEventFilter(filter)
+
+		assert.Error(t, err)
+	})
+}
+
+func TestValidateEventExprFilter(t *testing.T) {
+	t.Run("test valid", func(t *testing.T) {
+		exprFilter := &v1alpha1.ExprFilter{
+			Expr: "fake-expr",
+			Fields: []v1alpha1.PayloadField{
+				{
+					Path: "fake-path",
+					Name: "fake-name",
+				},
+			},
+		}
+
+		err := validateEventExprFilter(exprFilter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test not valid, no expr", func(t *testing.T) {
+		exprFilter := &v1alpha1.ExprFilter{
+			Fields: []v1alpha1.PayloadField{
+				{
+					Path: "fake-path",
+					Name: "fake-name",
+				},
+			},
+		}
+
+		err := validateEventExprFilter(exprFilter)
+
+		assert.Error(t, err)
+	})
+
+	t.Run("test not valid, no field name", func(t *testing.T) {
+		exprFilter := &v1alpha1.ExprFilter{
+			Expr: "fake-expr",
+			Fields: []v1alpha1.PayloadField{
+				{
+					Path: "fake-path",
+				},
+			},
+		}
+
+		err := validateEventExprFilter(exprFilter)
+
+		assert.Error(t, err)
+	})
+}
+
+func TestValidateEventDataFilter(t *testing.T) {
+	t.Run("test valid", func(t *testing.T) {
+		dataFilter := &v1alpha1.DataFilter{
+			Path:  "body.value",
+			Type:  "number",
+			Value: []string{"50.0"},
+		}
+
+		err := validateEventDataFilter(dataFilter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test not valid, no path", func(t *testing.T) {
+		dataFilter := &v1alpha1.DataFilter{
+			Type:  "number",
+			Value: []string{"50.0"},
+		}
+
+		err := validateEventDataFilter(dataFilter)
+
+		assert.Error(t, err)
+	})
+
+	t.Run("test not valid, empty value", func(t *testing.T) {
+		dataFilter := &v1alpha1.DataFilter{
+			Path:  "body.value",
+			Type:  "string",
+			Value: []string{""},
+		}
+
+		err := validateEventDataFilter(dataFilter)
+
+		assert.Error(t, err)
+	})
+
+	t.Run("test not valid, wrong comparator", func(t *testing.T) {
+		dataFilter := &v1alpha1.DataFilter{
+			Comparator: "fake",
+			Path:       "body.value",
+			Type:       "string",
+			Value:      []string{""},
+		}
+
+		err := validateEventDataFilter(dataFilter)
+
+		assert.Error(t, err)
+	})
+}
+
+func TestValidateEventCtxFilter(t *testing.T) {
+	t.Run("test all fields", func(t *testing.T) {
+		ctxFilter := &v1alpha1.EventContext{
+			Type:            "fake-type",
+			Subject:         "fake-subject",
+			Source:          "fake-source",
+			DataContentType: "fake-content-type",
+		}
+
+		err := validateEventCtxFilter(ctxFilter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test single field", func(t *testing.T) {
+		ctxFilter := &v1alpha1.EventContext{
+			Type: "fake-type",
+		}
+
+		err := validateEventCtxFilter(ctxFilter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test no fields", func(t *testing.T) {
+		ctxFilter := &v1alpha1.EventContext{}
+
+		err := validateEventCtxFilter(ctxFilter)
+
+		assert.Error(t, err)
+	})
+}
+
+func TestValidateEventTimeFilter(t *testing.T) {
+	t.Run("test start < stop", func(t *testing.T) {
+		timeFilter := &v1alpha1.TimeFilter{
+			Start: "00:00:00",
+			Stop:  "06:00:00",
+		}
+
+		err := validateEventTimeFilter(timeFilter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test stop < start", func(t *testing.T) {
+		timeFilter := &v1alpha1.TimeFilter{
+			Start: "06:00:00",
+			Stop:  "00:00:00",
+		}
+
+		err := validateEventTimeFilter(timeFilter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test start = stop", func(t *testing.T) {
+		timeFilter := &v1alpha1.TimeFilter{
+			Start: "00:00:00",
+			Stop:  "00:00:00",
+		}
+
+		err := validateEventTimeFilter(timeFilter)
+
+		assert.Error(t, err)
 	})
 }
 

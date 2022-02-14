@@ -1,0 +1,81 @@
+# Event Payload
+#
+#  {
+#    "a": "b",
+#    "c": 10,
+#    "d": {
+#      "e": false
+#    }
+#  }
+#
+
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: with-multiple-filters
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+      # If event payload passes ALL following filters, the event is considered a valid event.
+      # default "filtersLogicalOperator" = "and"
+      filters:   # global filters result: EVENT PASS
+        # default "exprLogicalOperator" = "and"
+        exprs:   # expr filter result: EVENT PASS
+          - expr: a == "b" || c == 10   # true
+            fields:
+              - name: a
+                path: a
+              - name: c
+                path: c
+          - expr: e == false   # true
+            fields:
+              - name: e
+                path: d.e
+        # default "dataLogicalOperator" = "and"
+        data:   # data filter result: EVENT PASS
+          - path: "a"   # true
+            type: "string"
+            value:
+              - "b"
+          - path: "c"   # true
+            type: "number"
+            value:
+              - "10"
+          - path: "d.e"   # true
+            type: "bool"
+            value:
+              - "false"
+  triggers:
+    - template:
+        name: workflow
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: workflow-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # value will get overridden by the event payload
+                      value: hello world
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: name
+              dest: spec.arguments.parameters.0.value

@@ -667,6 +667,13 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyTransformer"),
 						},
 					},
+					"filtersLogicalOperator": {
+						SchemaProps: spec.SchemaProps{
+							Description: "FiltersLogicalOperator defines how different filters are evaluated together. Available values: and (&&), or (||) Is optional and if left blank treated as and (&&).",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"name", "eventSourceName", "eventName"},
 			},
@@ -723,9 +730,16 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 							},
 						},
 					},
-					"script": {
+					"dataLogicalOperator": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Script refers to a Lua script evaluated to determine the validity of an event.",
+							Description: "DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together. Available values: and (&&), or (||) Is optional and if left blank treated as and (&&).",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"exprLogicalOperator": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together. Available values: and (&&), or (||) Is optional and if left blank treated as and (&&).",
 							Type:        []string{"string"},
 							Format:      "",
 						},

@@ -1,6 +1,9 @@
 owners:
 - VaibhavPage
 
+reviewers:
+- daniel-codefresh
+
 approvers:
 - dtaniwaki
 - edlee2121

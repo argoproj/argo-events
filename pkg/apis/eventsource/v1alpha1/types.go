@@ -46,6 +46,10 @@ type EventSourceList struct {
 	Items []EventSource `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
+type EventSourceFilter struct {
+	Expression string `json:"expression,omitempty" protobuf:"bytes,1,opt,name=expression"`
+}
+
 // EventSourceSpec refers to specification of event-source resource
 type EventSourceSpec struct {
 	// EventBusName references to a EventBus name. By default the value is "default"
@@ -223,6 +227,9 @@ type CalendarEventSource struct {
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
 	// Persistence hold the configuration for event persistence
 	Persistence *EventPersistence `json:"persistence,omitempty" protobuf:"bytes,6,opt,name=persistence"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
 type EventPersistence struct {
@@ -262,6 +269,9 @@ type FileEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,4,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,5,opt,name=filter"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation
@@ -331,6 +341,7 @@ type Selector struct {
 
 // AMQPEventSource refers to an event-source for AMQP stream events
 type AMQPEventSource struct {
+
 	// URL for rabbitmq service
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// ExchangeName is the exchange name
@@ -377,6 +388,9 @@ type AMQPEventSource struct {
 	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,13,opt,name=auth"`
 	// URLSecret is secret reference for rabbitmq service URL
 	URLSecret *corev1.SecretKeySelector `json:"urlSecret,omitempty" protobuf:"bytes,14,opt,name=urlSecret"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,15,opt,name=filter"`
 }
 
 // AMQPExchangeDeclareConfig holds the configuration for the exchange on the server
@@ -417,6 +431,9 @@ type AMQPQueueDeclareConfig struct {
 	// NowWait when true, the queue assumes to be declared on the server
 	// +optional
 	NoWait bool `json:"noWait,omitempty" protobuf:"varint,5,opt,name=noWait"`
+	// Arguments of a queue (also known as "x-arguments") used for optional features and plugins
+	// +optional
+	Arguments string `json:"arguments,omitempty" protobuf:"bytes,6,opt,name=arguments"`
 }
 
 // AMQPQueueBindConfig holds the configuration that binds an exchange to a queue so that publishings to the
@@ -484,6 +501,10 @@ type KafkaEventSource struct {
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,11,opt,name=sasl"`
+
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
 }
 
 type KafkaConsumerGroup struct {
@@ -517,6 +538,9 @@ type MQTTEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
 // NATSEventsSource refers to event-source for NATS related events
@@ -540,6 +564,9 @@ type NATSEventsSource struct {
 	// Auth information
 	// +optional
 	Auth *NATSAuth `json:"auth,omitempty" protobuf:"bytes,7,opt,name=auth"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
 // NATSAuth refers to the auth info for NATS EventSource
@@ -579,6 +606,9 @@ type SNSEventSource struct {
 	// ValidateSignature is boolean that can be set to true for SNS signature verification
 	// +optional
 	ValidateSignature bool `json:"validateSignature,omitempty" protobuf:"varint,8,opt,name=validateSignature"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -612,6 +642,9 @@ type SQSEventSource struct {
 	// The default value is false.
 	// +optional
 	DLQ bool `json:"dlq,omitempty" protobuf:"varint,10,opt,name=dlq"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
@@ -652,6 +685,9 @@ type PubSubEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
 }
 
 type OwnedRepositories struct {
@@ -723,6 +759,9 @@ type GithubEventSource struct {
 	// GitHubApp holds the GitHub app credentials
 	// +optional
 	GithubApp *GithubAppCreds `json:"githubApp,omitempty" protobuf:"bytes,17,opt,name=githubApp"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,18,opt,name=filter"`
 }
 
 func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {
@@ -785,6 +824,9 @@ type GitlabEventSource struct {
 	Projects []string `json:"projects,omitempty" protobuf:"bytes,10,rep,name=projects"`
 	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
 	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,11,opt,name=secretToken"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
 }
 
 func (g GitlabEventSource) GetProjects() []string {
@@ -821,6 +863,9 @@ type BitbucketEventSource struct {
 	ProjectKey string `json:"projectKey" protobuf:"bytes,7,opt,name=projectKey"`
 	// RepositorySlug is a URL-friendly version of a repository name, automatically generated by Bitbucket for use in the URL.
 	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,8,name=repositorySlug"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
 }
 
 func (b BitbucketEventSource) HasBitbucketBasicAuth() bool {
@@ -861,17 +906,24 @@ type BitbucketBasicAuth struct {
 type BitbucketServerEventSource struct {
 	// Webhook holds configuration to run a http server
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// ProjectKey is the key of project for which integration needs to setup
-	ProjectKey string `json:"projectKey" protobuf:"bytes,2,opt,name=projectKey"`
-	// RepositorySlug is the slug of the repository for which integration needs to setup
-	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,3,opt,name=repositorySlug"`
+	// DeprecatedProjectKey is the key of project for which integration needs to setup
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8
+	// +optional
+	DeprecatedProjectKey string `json:"projectKey,omitempty" protobuf:"bytes,2,opt,name=projectKey"`
+	// DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8
+	// +optional
+	DeprecatedRepositorySlug string `json:"repositorySlug,omitempty" protobuf:"bytes,3,opt,name=repositorySlug"`
+	// Repositories holds a list of repositories for which integration needs to setup
+	// +optional
+	Repositories []BitbucketServerRepository `json:"repositories,omitempty" protobuf:"bytes,4,rep,name=repositories"`
 	// Events are bitbucket event to listen to.
 	// Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
-	Events []string `json:"events" protobuf:"bytes,4,opt,name=events"`
+	Events []string `json:"events" protobuf:"bytes,5,opt,name=events"`
 	// AccessToken is reference to K8s secret which holds the bitbucket api access information
-	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,5,opt,name=accessToken"`
+	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,6,opt,name=accessToken"`
 	// WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
-	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,6,opt,name=webhookSecret"`
+	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,7,opt,name=webhookSecret"`
 	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
 	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,8,opt,name=bitbucketserverBaseURL"`
 	// DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
@@ -880,6 +932,32 @@ type BitbucketServerEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
+}
+type BitbucketServerRepository struct {
+	// ProjectKey is the key of project for which integration needs to setup
+	ProjectKey string `json:"projectKey" protobuf:"bytes,1,opt,name=projectKey"`
+	// RepositorySlug is the slug of the repository for which integration needs to setup
+	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,2,rep,name=repositorySlug"`
+}
+
+func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []BitbucketServerRepository {
+	if len(b.Repositories) > 0 {
+		return b.Repositories
+	}
+
+	if b.DeprecatedProjectKey != "" && b.DeprecatedRepositorySlug != "" {
+		return []BitbucketServerRepository{
+			{
+				ProjectKey:     b.DeprecatedProjectKey,
+				RepositorySlug: b.DeprecatedRepositorySlug,
+			},
+		}
+	}
+
+	return nil
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
@@ -916,6 +994,9 @@ type HDFSEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,12,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,13,opt,name=filter"`
 }
 
 // SlackEventSource refers to event-source for Slack related events
@@ -929,6 +1010,9 @@ type SlackEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,4,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,5,opt,name=filter"`
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
@@ -981,6 +1065,9 @@ type AzureEventsHubEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,6,opt,name=filter"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications
@@ -1031,6 +1118,9 @@ type EmitterEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,10,opt,name=filter"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -1056,6 +1146,9 @@ type RedisEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
@@ -1080,6 +1173,9 @@ type NSQEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
 // PulsarEventSource describes the event source for Apache Pulsar
@@ -1120,6 +1216,9 @@ type PulsarEventSource struct {
 	// Authentication token for the pulsar client.
 	// +optional
 	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,11,opt,name=authTokenSecret"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
@@ -1140,6 +1239,9 @@ type GenericEventSource struct {
 	// AuthSecret holds a secret selector that contains a bearer token for authentication
 	// +optional
 	AuthSecret *corev1.SecretKeySelector `json:"authSecret,omitempty" protobuf:"bytes,6,opt,name=authSecret"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
 }
 
 const (

@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -209,10 +210,18 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 	}
 }
 
-// GetTLSConfig returns a tls configuration for given cert and key.
+// GetTLSConfig returns a tls configuration for given cert and key or skips the certs if InsecureSkipVerify is true.
 func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 	if config == nil {
 		return nil, errors.New("TLSConfig is nil")
+	}
+
+	if config.InsecureSkipVerify {
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: true,
+			ClientAuth:         0,
+		}
+		return tlsConfig, nil
 	}
 
 	var caCertPath, clientCertPath, clientKeyPath string
@@ -446,4 +455,12 @@ func SliceContains(strSlice []string, targetStr string) bool {
 		}
 	}
 	return false
+}
+
+func GetImagePullPolicy() corev1.PullPolicy {
+	imgPullPolicy := corev1.PullAlways
+	if x := os.Getenv(EnvImagePullPolicy); x != "" {
+		imgPullPolicy = corev1.PullPolicy(x)
+	}
+	return imgPullPolicy
 }

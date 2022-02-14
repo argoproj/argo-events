@@ -81,7 +81,7 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 			}
 		},
 		OnStoppedLeading: func() {
-			log.Infof("leader lost: %s", sensorCtx.hostname)
+			log.Fatalf("leader lost: %s", sensorCtx.hostname)
 		},
 	})
 	return nil
@@ -176,7 +176,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				return sensordependencies.ApplyTransform(&event, dep.Transform)
 			}
 
-			filterFunc := func(depName string, event cloudevents.Event) bool {
+			filterFunc := func(depName string, cloudEvent cloudevents.Event) bool {
 				dep, ok := depMapping[depName]
 				if !ok {
 					return false
@@ -184,11 +184,21 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				if dep.Filters == nil {
 					return true
 				}
-				e := convertEvent(event)
-				result, err := sensordependencies.Filter(e, dep.Filters)
+				argoEvent := convertEvent(cloudEvent)
+
+				result, err := sensordependencies.Filter(argoEvent, dep.Filters, dep.FiltersLogicalOperator)
 				if err != nil {
-					logger.Errorw("failed to apply filters", zap.Error(err))
-					return false
+					if !result {
+						logger.Warnf("Event [%s] discarded due to filtering error: %s",
+							eventToString(argoEvent), err.Error())
+					} else {
+						logger.Warnf("Event [%s] passed but with filtering error: %s",
+							eventToString(argoEvent), err.Error())
+					}
+				} else {
+					if !result {
+						logger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
+					}
 				}
 				return result
 			}
@@ -202,36 +212,21 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			var subLock uint32
 			wg1 := &sync.WaitGroup{}
 			closeSubCh := make(chan struct{})
+
 			resetConditionsCh := make(chan struct{})
-
-			subscribeFunc := func() {
-				wg1.Add(1)
-				go func() {
-					defer wg1.Done()
-					// release the lock when goroutine exits
-					defer atomic.StoreUint32(&subLock, 0)
-
-					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
-
-					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, depExpression, deps, transformFunc, filterFunc, actionFunc)
-					if err != nil {
-						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
-						return
-					}
-				}()
-			}
-
-			subscribeOnce(&subLock, subscribeFunc)
-
+			var lastResetTime time.Time
 			if len(trigger.Template.ConditionsReset) > 0 {
 				for _, c := range trigger.Template.ConditionsReset {
+
 					if c.ByTime == nil {
 						continue
 					}
+					cronParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
 					opts := []cronlib.Option{
-						cronlib.WithParser(cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)),
+						cronlib.WithParser(cronParser),
 						cronlib.WithChain(cronlib.Recover(cronlib.DefaultLogger)),
 					}
+					nowTime := time.Now()
 					if c.ByTime.Timezone != "" {
 						location, err := time.LoadLocation(c.ByTime.Timezone)
 						if err != nil {
@@ -239,6 +234,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 							continue
 						}
 						opts = append(opts, cronlib.WithLocation(location))
+						nowTime = nowTime.In(location)
 					}
 					cr := cronlib.New(opts...)
 					_, err = cr.AddFunc(c.ByTime.Cron, func() {
@@ -249,8 +245,42 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						continue
 					}
 					cr.Start()
+
+					logger.Debugf("just started cron job; entries=%v", cr.Entries())
+
+					// set lastResetTime (the last time this would've been triggered)
+					if len(cr.Entries()) > 0 {
+						prevTriggerTime, err := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
+						if err != nil {
+							logger.Errorw("couldn't get previous cron trigger time", zap.Error(err))
+							continue
+						}
+						logger.Infof("previous trigger time: %v", prevTriggerTime)
+						if prevTriggerTime.After(lastResetTime) {
+							lastResetTime = prevTriggerTime
+						}
+					}
 				}
 			}
+
+			subscribeFunc := func() {
+				wg1.Add(1)
+				go func() {
+					defer wg1.Done()
+					// release the lock when goroutine exits
+					defer atomic.StoreUint32(&subLock, 0)
+
+					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
+
+					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
+					if err != nil {
+						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+						return
+					}
+				}()
+			}
+
+			subscribeOnce(&subLock, subscribeFunc)
 
 			logger.Infof("starting eventbus connection daemon for client %s...", clientID)
 			ticker := time.NewTicker(5 * time.Second)
@@ -441,6 +471,11 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 	}
 	logger.Infof("Dependency expression for trigger %s: %s", trigger.Template.Name, depExpression)
 	return depExpression, nil
+}
+
+func eventToString(event *v1alpha1.Event) string {
+	return fmt.Sprintf("ID '%s', Source '%s', Time '%s', Data '%s'",
+		event.Context.ID, event.Context.Source, event.Context.Time.Time.Format(time.RFC3339), string(event.Data))
 }
 
 func convertEvent(event cloudevents.Event) *v1alpha1.Event {

@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"sigs.k8s.io/yaml"
+
 	"github.com/pkg/errors"
 	amqplib "github.com/streadway/amqp"
 	"go.uber.org/zap"
@@ -83,13 +85,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if amqpEventSource.Auth != nil {
 			username, err := common.GetSecretFromVolume(amqpEventSource.Auth.Username)
 			if err != nil {
-				return errors.Wrap(err, "username not founnd")
+				return errors.Wrap(err, "username not found")
 			}
 			password, err := common.GetSecretFromVolume(amqpEventSource.Auth.Password)
 			if err != nil {
-				return errors.Wrap(err, "password not founnd")
+				return errors.Wrap(err, "password not found")
 			}
-			c.SASL = []amqplib.Authentication{&amqplib.AMQPlainAuth{
+			c.SASL = []amqplib.Authentication{&amqplib.PlainAuth{
 				Username: username,
 				Password: password,
 			}}
@@ -247,6 +249,13 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 	if err != nil {
 		return nil, errors.Errorf("failed to declare exchange with name %s and type %s. err: %+v", eventSource.ExchangeName, eventSource.ExchangeType, err)
 	}
+	optionalArguments, err := parseYamlTable(eventSource.QueueDeclare.Arguments)
+	if err != nil {
+		return nil, errors.Errorf(
+			"failed to parse optional queue declare table arguments from Yaml string: %s",
+			err,
+		)
+	}
 
 	q, err := ch.QueueDeclare(
 		eventSource.QueueDeclare.Name,
@@ -254,7 +263,7 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		eventSource.QueueDeclare.AutoDelete,
 		eventSource.QueueDeclare.Exclusive,
 		eventSource.QueueDeclare.NoWait,
-		nil,
+		optionalArguments,
 	)
 	if err != nil {
 		return nil, errors.Errorf("failed to declare queue: %s", err)
@@ -284,4 +293,17 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		return nil, errors.Errorf("failed to begin consuming messages: %s", err)
 	}
 	return delivery, nil
+}
+
+func parseYamlTable(argString string) (amqplib.Table, error) {
+	if argString == "" {
+		return nil, nil
+	}
+	var table amqplib.Table
+	args := []byte(argString)
+	err := yaml.Unmarshal(args, &table)
+	if err != nil {
+		return nil, errors.Errorf("unmarshalling Yaml to Table type. Args: %s. Err: %+v", argString, err)
+	}
+	return table, nil
 }

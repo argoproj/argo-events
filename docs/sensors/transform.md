@@ -1,6 +1,6 @@
 # Event Transformation
 
-> Available after v1.5.5
+> Available after v1.6.0
 
 1. Lua Script: Executes user-defined Lua script to transform the event.
 
@@ -143,4 +143,3 @@ return the event.
 
 2. The output of the transformation must be a valid JSON object.
 
- 

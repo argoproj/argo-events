@@ -250,7 +250,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	replicas := args.Sensor.Spec.GetReplicas()
 	sensorContainer := corev1.Container{
 		Image:           args.Image,
-		ImagePullPolicy: corev1.PullAlways,
+		ImagePullPolicy: common.GetImagePullPolicy(),
 		Args:            []string{"sensor-service"},
 		Ports: []corev1.ContainerPort{
 			{Name: "metrics", ContainerPort: common.SensorMetricsPort},

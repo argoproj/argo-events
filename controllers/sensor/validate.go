@@ -442,10 +442,40 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 			return errors.Errorf("%s and %s are referenced more than once in this Sensor object", dep.EventSourceName, dep.EventName)
 		}
 		comboKeys[comboKey] = true
+
 		if err := validateEventFilter(dep.Filters); err != nil {
 			return err
 		}
+
+		if err := validateLogicalOperator(dep.FiltersLogicalOperator); err != nil {
+			return err
+		}
 	}
+	return nil
+}
+
+// validateLogicalOperator verifies that the logical operator in input is equal to a supported value
+func validateLogicalOperator(logOp v1alpha1.LogicalOperator) error {
+	if logOp != v1alpha1.AndLogicalOperator &&
+		logOp != v1alpha1.OrLogicalOperator &&
+		logOp != v1alpha1.EmptyLogicalOperator {
+		return errors.Errorf("logical operator %s not supported", logOp)
+	}
+	return nil
+}
+
+// validateComparator verifies that the comparator in input is equal to a supported value
+func validateComparator(comp v1alpha1.Comparator) error {
+	if comp != v1alpha1.GreaterThanOrEqualTo &&
+		comp != v1alpha1.GreaterThan &&
+		comp != v1alpha1.EqualTo &&
+		comp != v1alpha1.NotEqualTo &&
+		comp != v1alpha1.LessThan &&
+		comp != v1alpha1.LessThanOrEqualTo &&
+		comp != v1alpha1.EmptyComparator {
+		return errors.Errorf("comparator %s not supported", comp)
+	}
+
 	return nil
 }
 
@@ -454,6 +484,37 @@ func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
 	if filter == nil {
 		return nil
 	}
+
+	if err := validateLogicalOperator(filter.ExprLogicalOperator); err != nil {
+		return err
+	}
+
+	if err := validateLogicalOperator(filter.DataLogicalOperator); err != nil {
+		return err
+	}
+
+	if filter.Exprs != nil {
+		for _, expr := range filter.Exprs {
+			if err := validateEventExprFilter(&expr); err != nil {
+				return err
+			}
+		}
+	}
+
+	if filter.Data != nil {
+		for _, data := range filter.Data {
+			if err := validateEventDataFilter(&data); err != nil {
+				return err
+			}
+		}
+	}
+
+	if filter.Context != nil {
+		if err := validateEventCtxFilter(filter.Context); err != nil {
+			return err
+		}
+	}
+
 	if filter.Time != nil {
 		if err := validateEventTimeFilter(filter.Time); err != nil {
 			return err
@@ -462,21 +523,72 @@ func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
 	return nil
 }
 
-// validateEventTimeFilter validates time filter
-func validateEventTimeFilter(tFilter *v1alpha1.TimeFilter) error {
-	now := time.Now().UTC()
-	// Parse start and stop
-	startTime, err := common.ParseTime(tFilter.Start, now)
-	if err != nil {
-		return err
+// validateEventExprFilter validates context filter
+func validateEventExprFilter(exprFilter *v1alpha1.ExprFilter) error {
+	if exprFilter.Expr == "" ||
+		len(exprFilter.Fields) == 0 {
+		return errors.New("one of expr filters is not valid (expr and fields must be not empty)")
 	}
-	stopTime, err := common.ParseTime(tFilter.Stop, now)
-	if err != nil {
-		return err
+
+	for _, fld := range exprFilter.Fields {
+		if fld.Path == "" || fld.Name == "" {
+			return errors.New("one of expr filters is not valid (path and name in a field must be not empty)")
+		}
+	}
+
+	return nil
+}
+
+// validateEventDataFilter validates context filter
+func validateEventDataFilter(dataFilter *v1alpha1.DataFilter) error {
+	if dataFilter.Comparator != v1alpha1.EmptyComparator {
+		if err := validateComparator(dataFilter.Comparator); err != nil {
+			return err
+		}
+	}
+
+	if dataFilter.Path == "" ||
+		dataFilter.Type == "" ||
+		len(dataFilter.Value) == 0 {
+		return errors.New("one of data filters is not valid (type, path and value must be not empty)")
+	}
+
+	for _, val := range dataFilter.Value {
+		if val == "" {
+			return errors.New("one of data filters is not valid (value must be not empty)")
+		}
+	}
+
+	return nil
+}
+
+// validateEventCtxFilter validates context filter
+func validateEventCtxFilter(ctxFilter *v1alpha1.EventContext) error {
+	if ctxFilter.Type == "" &&
+		ctxFilter.Subject == "" &&
+		ctxFilter.Source == "" &&
+		ctxFilter.DataContentType == "" {
+		return errors.New("no fields specified in ctx filter (aka all events will be discarded)")
+	}
+	return nil
+}
+
+// validateEventTimeFilter validates time filter
+func validateEventTimeFilter(timeFilter *v1alpha1.TimeFilter) error {
+	now := time.Now().UTC()
+
+	// Parse start and stop
+	startTime, startErr := common.ParseTime(timeFilter.Start, now)
+	if startErr != nil {
+		return startErr
+	}
+	stopTime, stopErr := common.ParseTime(timeFilter.Stop, now)
+	if stopErr != nil {
+		return stopErr
 	}
 
 	if stopTime.Equal(startTime) {
-		return errors.Errorf("invalid event time filter: stop '%s' is equal to start '%s", tFilter.Stop, tFilter.Start)
+		return errors.Errorf("invalid event time filter: stop '%s' is equal to start '%s", timeFilter.Stop, timeFilter.Start)
 	}
 	return nil
 }
