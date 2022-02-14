@@ -1,5 +1,104 @@
 # Changelog
 
+## v1.6.0 (2022-02-12)
+
+ * [f81754da](https://github.com/argoproj/argo-events/commit/f81754da2b8df1dd628117be7bc8d2d5cf5f14c1) Update manifests to v1.6.0
+ * [b2936c19](https://github.com/argoproj/argo-events/commit/b2936c19fc9dd766acdd0a5b1d38d571e427aa37) fix: make sns-sensor example work (#1629)
+ * [f55c1748](https://github.com/argoproj/argo-events/commit/f55c1748e7dbcb2bb124e2ec43127f8ae18bb972) chore(deps): bump github.com/prometheus/client_golang (#1621)
+ * [6e976052](https://github.com/argoproj/argo-events/commit/6e97605216d15948dedb628cae4f6db1e62c33e7) chore(deps): bump github.com/aws/aws-sdk-go from 1.35.24 to 1.42.50 (#1617)
+ * [ea5b5a5b](https://github.com/argoproj/argo-events/commit/ea5b5a5b12176b1adc0caccf40c1800f9beb7e3f) feat (kafa-es): Implements SCRAM functionality and enables  SCRAM-SHA512/256 SASL
+ * [097e87d8](https://github.com/argoproj/argo-events/commit/097e87d8c7e6db7e1036f0159041230fe15bb834) chore(deps): bump actions/setup-go from 2.1.5 to 2.2.0 (#1609)
+ * [8bea0754](https://github.com/argoproj/argo-events/commit/8bea07540a4541fd51979efe351997fde5c57887) fix: Garabge collection of the ValidatingWebhookConfiguration (#1603)
+ * [54fb550a](https://github.com/argoproj/argo-events/commit/54fb550a080c6ecba73a8bf3ea3b851de6e535b7) chore(deps): bump github.com/eclipse/paho.mqtt.golang (#1570)
+ * [968bddf7](https://github.com/argoproj/argo-events/commit/968bddf77ecba154bb9187a176eb6b35294c9500) chore(deps): bump github.com/go-swagger/go-swagger from 0.25.0 to 0.29.0 (#1555)
+ * [993fb2d1](https://github.com/argoproj/argo-events/commit/993fb2d12e2c69d709d4d33e850768e5ae6ef4a4) username, password authentication doesn't work when AMQPLAIN authentication mechanism is used; instead using PLAIN mechanism: apparently the former is non-standard according to https://www.rabbitmq.com/access-control.html (#1600)
+ * [b5f75ca8](https://github.com/argoproj/argo-events/commit/b5f75ca85be6289abe6ca24b4e4c269487be32cf) chore(deps): bump github.com/go-redis/redis (#1583)
+ * [dc9ca54b](https://github.com/argoproj/argo-events/commit/dc9ca54b1d3016e3cb3478b8e0d239267184408f) chore(deps): bump actions/setup-python from 2.3.1 to 2.3.2 (#1591)
+ * [5d25d7e5](https://github.com/argoproj/argo-events/commit/5d25d7e586bce8770cf7b9d737d157919f61e28c) feat: added filtering feature for EventSource (#1582)
+ * [9606aed2](https://github.com/argoproj/argo-events/commit/9606aed21f899c53f7d0678a9f3b3a2a01ce8a42) fix: conditions reset does not work if the service is down at the triggering time (#1585)
+ * [c0a28a6e](https://github.com/argoproj/argo-events/commit/c0a28a6e46510ed495b2be96cd3c07df7afd9ab8) fix: Update Github EventSource Example to include port name (#1590)
+ * [0b64436c](https://github.com/argoproj/argo-events/commit/0b64436cb813c98664a7758f99164c0ca6fe4719) chore(deps): bump github.com/xanzy/go-gitlab from 0.50.2 to 0.54.4 (#1586)
+ * [fb75dcac](https://github.com/argoproj/argo-events/commit/fb75dcacc247bc3459ab1a9129ec3023bcb8ae8a) chore(deps): bump github.com/Shopify/sarama from 1.26.1 to 1.31.1 (#1584)
+ * [00f2ca47](https://github.com/argoproj/argo-events/commit/00f2ca47e293ce9ddb4318d493eeefe3676bd91e) chore(deps): bump github.com/spf13/viper from 1.10.0 to 1.10.1 (#1575)
+ * [7998befd](https://github.com/argoproj/argo-events/commit/7998befdab0b1a6f52f9e3460c104b4bc265694b) chore(deps): bump cloud.google.com/go/compute from 0.1.0 to 1.1.0 (#1580)
+ * [4cbce311](https://github.com/argoproj/argo-events/commit/4cbce31101739d9c5e33a25ee62bae9dd4655e76) fix: e2e test not recognizing .kube/config  (#1581)
+ * [12d311d9](https://github.com/argoproj/argo-events/commit/12d311d926eb188b62d0fb522a8c81db0a142950) chore(deps): bump github.com/go-resty/resty/v2 from 2.3.0 to 2.7.0 (#1574)
+ * [7dd098dc](https://github.com/argoproj/argo-events/commit/7dd098dce50574817ae3b0f82628923c98534e57) chore(deps): bump google.golang.org/grpc from v1.42.0 to v1.43.0 (#1579)
+ * [455f4ab5](https://github.com/argoproj/argo-events/commit/455f4ab5a4f366f1821479f5c060a5ed6bccd14b) chore(deps): bump go.uber.org/zap from 1.19.0 to 1.20.0 (#1573)
+ * [e61e0539](https://github.com/argoproj/argo-events/commit/e61e0539c6c5c36e7eecbebc4cfec0a686d8bfe2) chore(deps): bump github.com/nats-io/stan.go from 0.6.0 to 0.10.2 (#1559)
+ * [c49d6969](https://github.com/argoproj/argo-events/commit/c49d696932af0873c7cfbd4680618fc1e856432a) chore(deps): bump github.com/nsqio/go-nsq from 1.0.8 to 1.1.0 (#1569)
+ * [725d8cee](https://github.com/argoproj/argo-events/commit/725d8cee5f88f0bf3b599747786e7a5050dc3c94) chore(deps): bump github.com/mitchellh/mapstructure from 1.4.1 to 1.4.3 (#1560)
+ * [6e57f135](https://github.com/argoproj/argo-events/commit/6e57f135e28f9003821f9e7028fd423a0d7248ac) chore(deps): bump github.com/spf13/cobra from 1.2.1 to 1.3.0 (#1562)
+ * [c73c85ca](https://github.com/argoproj/argo-events/commit/c73c85cac16e6f957ffba1efcddbd0df4ab48154) chore(deps): bump github.com/go-openapi/spec from 0.20.2 to 0.20.4 (#1558)
+ * [bc90c77d](https://github.com/argoproj/argo-events/commit/bc90c77d704e1e2188cdcc7f658cf540e61efbb3) chore(deps): bump google.golang.org/api from 0.44.0 to 0.65.0 (#1557)
+ * [f2234fb9](https://github.com/argoproj/argo-events/commit/f2234fb99f81d23b7e15663451cb3beb580a76e1) chore(deps): bump github.com/google/go-cmp from 0.5.6 to 0.5.7 (#1556)
+ * [bef51660](https://github.com/argoproj/argo-events/commit/bef51660bfcee6d204005c7c98da4396e7bbb39d) chore(deps): bump github.com/smartystreets/goconvey from 1.6.4 to 1.7.2 (#1554)
+ * [b08ac6b1](https://github.com/argoproj/argo-events/commit/b08ac6b1bcf72da85ab4ae0abab115e9de306597) chore(deps): bump actions/stale from 3 to 4.1.0 (#1553)
+ * [dda87394](https://github.com/argoproj/argo-events/commit/dda87394aee1365f715264db09ab89c0e44c4ae7) chore(deps): bump actions/setup-python from 1 to 2.3.1 (#1552)
+ * [82989838](https://github.com/argoproj/argo-events/commit/82989838a1a7c9dd3d4d9696c9ca54700cca81de) chore(deps): bump actions/cache from 1 to 2.1.7 (#1551)
+ * [9ebe4eec](https://github.com/argoproj/argo-events/commit/9ebe4eec54208c4640239e4cac15908e0fd04613) chore(deps): bump actions/setup-go from 1 to 2.1.5 (#1550)
+ * [b963de56](https://github.com/argoproj/argo-events/commit/b963de5607466a94bdc631d4f470d92913882178) feat: overall improve filtering documentation (#1508)
+ * [aca3c692](https://github.com/argoproj/argo-events/commit/aca3c692fd1475c5491a30e883cccb94e1addd32) Support multiple repos bitbucketserver (#1540)
+ * [d7034743](https://github.com/argoproj/argo-events/commit/d703474329954b0439a42e6fd50b5febe58b229e) fix: removed "limitation" from outdated doc (#1535)
+ * [85af547f](https://github.com/argoproj/argo-events/commit/85af547f8d80ec4ddbf4113e16d42cd73e7d9c9e) feat(eventsource): add optional arguments for amqp eventsource (#1501)
+ * [8cfbe2af](https://github.com/argoproj/argo-events/commit/8cfbe2afffd07582b5ffd54df61cb65386811054) feat: Add optional security context for event bus container template (#1519)
+ * [18ca4a13](https://github.com/argoproj/argo-events/commit/18ca4a1316886f7f984bfc13e1cced412aca197a) fix(docs): about event transform release date (#1529)
+ * [fb5c2572](https://github.com/argoproj/argo-events/commit/fb5c25724e51096bb041fe533be9eedbb77cea9b) fix: conditions reset honors the latest timestamp of all unacked msgs (#1523)
+ * [4153c388](https://github.com/argoproj/argo-events/commit/4153c388f6c4839e0f0fb26b5f0109f871d589aa) fix: upgrade dependencies for security alert (#1518)
+ * [15bc1b6c](https://github.com/argoproj/argo-events/commit/15bc1b6c043646aec62ba8774ee4cb122fd5536b) fix: let the service restart after leader switched (#1513)
+ * [fe62b2f2](https://github.com/argoproj/argo-events/commit/fe62b2f29f4314e6f0ba9f16ad1b149b48b3c25e) fix: Sensor triggers an Argo Workflow with wrong name (#1511)
+ * [f91e0590](https://github.com/argoproj/argo-events/commit/f91e05905ae55094912ff1153b80fd3736db7727) feat: Improved Sensors filtering feature (aka Sensors filtering v2) (#1490)
+ * [faa69c73](https://github.com/argoproj/argo-events/commit/faa69c73ac370c16226270fcf81b39a97472d48c) Modified deprecated projectID field of Gitlab Eventsource to be optional (#1500)
+ * [849a9ffb](https://github.com/argoproj/argo-events/commit/849a9ffb74cc402d20dedf0b57380bda4f09bb71) Bitbucket Cloud Eventsource (#1493)
+ * [cd54e79b](https://github.com/argoproj/argo-events/commit/cd54e79b4db924ff577c9227260d5889b991222e) Update parameters in minio example (#1414)
+ * [5f235819](https://github.com/argoproj/argo-events/commit/5f235819c938f2d17aff636d7ec3a460dcca07eb) feat: added event transform (#1492)
+ * [8f3fdf08](https://github.com/argoproj/argo-events/commit/8f3fdf08a10c88cf48134528e8c9a9edd3dd8afb) fix: int-or-string k8s type in jsonschema (#1466)
+ * [3626aec5](https://github.com/argoproj/argo-events/commit/3626aec505d3279414c56ad35180f87c63cf9a5b) fix: changed method call in event-sources/sources/kafka/start.go (#1457)
+ * [cdab1e35](https://github.com/argoproj/argo-events/commit/cdab1e353c19cff6406498d72aa5362f108c3be1) fix: Ack handled messages in pulsar eventsource (#1455)
+ * [b4c3b5ce](https://github.com/argoproj/argo-events/commit/b4c3b5ce8c00c0541f831ff2c5e5492f0ef71fdf) feat: Adding support to propagate unique ID to message for Kafka EventSource messages (#1453)
+ * [7cecd3cf](https://github.com/argoproj/argo-events/commit/7cecd3cf6a345dbc1e84f1beb9c5c206574a8239) feat: Add GitHub App creds support (#1438)
+ * [2168576a](https://github.com/argoproj/argo-events/commit/2168576add93e789966ee0de091042af231a2af5) fix: Added plural exception for eventbus resource for k8s trigger (#1440)
+ * [5b9a0db6](https://github.com/argoproj/argo-events/commit/5b9a0db69b44cfe34b2564759c514d34fe3d607e) Update USERS.md (#1437)
+ * [7ad60278](https://github.com/argoproj/argo-events/commit/7ad602783e590898909ac4c6682c5a66c6b21f0e) fix: Creation of ingress resource with k8s trigger (#1434)
+ * [5c50e1b7](https://github.com/argoproj/argo-events/commit/5c50e1b7de2aefa32731d2abdfb3fc0ade3d326b) fix: Eval of params with missing src dep and no default value (#1433)
+ * [6d5be342](https://github.com/argoproj/argo-events/commit/6d5be34281cd3fca0b9f66b59829c5c44589829c) fix: Don't wait for context when listening fails (#1428)
+ * [878c8d18](https://github.com/argoproj/argo-events/commit/878c8d18c86c3534d08518f30760cfbead0514e7) fix: Marked optional fields in github and calendar eventsources (#1421)
+ * [45abcb99](https://github.com/argoproj/argo-events/commit/45abcb99aab8013e5154ce698db5a764ca4a47a4) feat: Added org level webhook support for github es (#1412)
+ * [49166c4b](https://github.com/argoproj/argo-events/commit/49166c4b7dfc8b3ac601ea1fcd39b57c8f57919d) fix: Update minio-go to v7 (#1411)
+ * [fcc236eb](https://github.com/argoproj/argo-events/commit/fcc236eb7ca36bf183f910fa22fde9a8800fe230) fix: fatal the services if starting failed (#1405)
+ * [aff2726d](https://github.com/argoproj/argo-events/commit/aff2726d6a5229f74773cc5b977a9f8123bfaf01) fix: resource eventsource duplicate update events. Fixes #760 (#1025) (#1404)
+ * [4a1bf22d](https://github.com/argoproj/argo-events/commit/4a1bf22d82cdedb8c4b4f12e819244587a5ae432) feat: Added dlq option to aws-sqs eventsource spec (#1403)
+ * [73bafd4e](https://github.com/argoproj/argo-events/commit/73bafd4ebb544fb0955a58ff7a847a1e12e422d7) feat: Added support for maxPayload, raftHeartbeatTimeout, raftElectionTimeout, raftLeaseTimeout, raftCommitTimeout native nats settings (#1402)
+ * [5212bad9](https://github.com/argoproj/argo-events/commit/5212bad9b32dc4a6f4aace4030acc44c430a4ba9) feat: Added json schema generation (#1398)
+ * [e472dae7](https://github.com/argoproj/argo-events/commit/e472dae7b1514b141457365153e65a163d52e5f4) feat: Sensor/AWSLambdaTrigger: allow using AWS IAM Role specified in Service Account (#1394)
+ * [65c49d1d](https://github.com/argoproj/argo-events/commit/65c49d1d031ab9ef9c7edaf4d9f0618273cb733f) feat: trigger conditions reset. Closes #1381 (#1392)
+ * [a67558ea](https://github.com/argoproj/argo-events/commit/a67558eac349ed4fd47533c998c1160986382299) fix typo (#1385)
+ * [79c472de](https://github.com/argoproj/argo-events/commit/79c472ded3b11a7c5cf6b10e5d5ffd934f3b8175) fix: sensor controller validate sensor (#1378)
+
+### Contributors
+
+ * Arnar
+ * Capable-Disk4147
+ * Christopher Cutajar
+ * Daniel
+ * Daniel Habib
+ * Daniel Maizel
+ * Derek Wang
+ * Dillen Padhiar
+ * Julie Vogelman
+ * Krzysztof Romanowski
+ * Luca Iachini
+ * Matteo Baiguini
+ * Michael Seiwald
+ * Muhammad Hamza Zaib
+ * Nguyen Duy Tho
+ * Vaibhav
+ * William Van Hevelingen
+ * dependabot[bot]
+ * dubeau
+ * sharon-codefresh
+ * usamaB
+
 ## v1.5.6 (2022-01-11)
 
  * [8a5db8d0](https://github.com/argoproj/argo-events/commit/8a5db8d0732e98c8b4a60adaca81e47100096f77) Update manifests to v1.5.6
