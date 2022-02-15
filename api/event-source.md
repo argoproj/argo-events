@@ -4812,6 +4812,18 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>endpoint</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Endpoint configures connection to a specific SQS endpoint instead of
+Amazons servers
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.Selector">

@@ -1216,6 +1216,10 @@ message SQSEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 11;
+
+  // Endpoint configures connection to a specific SQS endpoint instead of Amazons servers
+  // +optional
+  optional string endpoint = 12;
 }
 
 // Selector represents conditional operation to select K8s objects.
