@@ -3,6 +3,7 @@ module github.com/argoproj/argo-events
 go 1.17
 
 retract v1.15.1 // Contains retractions only.
+
 retract v1.15.0 // Published accidentally.
 
 require (
