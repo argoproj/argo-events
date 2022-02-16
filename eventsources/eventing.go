@@ -554,7 +554,6 @@ func generateClientID(hostname string) string {
 }
 
 func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) {
-
 	dataMap := make(map[string]interface{})
 	err := json.Unmarshal(data, &dataMap)
 	if err != nil {
