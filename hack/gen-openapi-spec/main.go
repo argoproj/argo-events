@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-openapi/spec"
 	"k8s.io/kube-openapi/pkg/common"
+	"k8s.io/kube-openapi/pkg/validation/spec"
 
 	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
 	ebv1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -25,6 +25,7 @@ func main() {
 	if len(os.Args) <= 3 {
 		log.Fatal("Supply a version")
 	}
+	log.Println(os.Args)
 	version := os.Args[1]
 	kubeSwaggerPath := os.Args[2]
 	output := os.Args[3]
@@ -63,6 +64,9 @@ func main() {
 			defs[d] = kd
 		}
 	}
+	for d, s := range k8sDefinitions {
+		defs[d] = s
+	}
 
 	swagger := &spec.Swagger{
 		SwaggerProps: spec.SwaggerProps{
@@ -77,6 +81,7 @@ func main() {
 			},
 		},
 	}
+
 	jsonBytes, err := json.MarshalIndent(swagger, "", "  ")
 	if err != nil {
 		log.Fatal(err.Error())
@@ -159,10 +164,6 @@ func getKubernetesSwagger(kubeSwaggerPath string) spec.Definitions {
 	}
 	swagger := &spec.Swagger{}
 	err = json.Unmarshal(data, swagger)
-	if err != nil {
-		panic(err)
-	}
-	err = spec.ExpandSpec(swagger, &spec.ExpandOptions{})
 	if err != nil {
 		panic(err)
 	}
