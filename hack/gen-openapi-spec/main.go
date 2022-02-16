@@ -7,13 +7,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-openapi/spec"
 	"k8s.io/kube-openapi/pkg/common"
+	"k8s.io/kube-openapi/pkg/validation/spec"
 
 	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
 	ebv1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	esv1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	oldspec "github.com/argoproj/argo-events/third_party/go-openapi/spec"
 )
 
 type (
@@ -162,7 +163,7 @@ func getKubernetesSwagger(kubeSwaggerPath string) spec.Definitions {
 	if err != nil {
 		panic(err)
 	}
-	err = spec.ExpandSpec(swagger, &spec.ExpandOptions{})
+	err = oldspec.ExpandSpec(swagger, &oldspec.ExpandOptions{})
 	if err != nil {
 		panic(err)
 	}
