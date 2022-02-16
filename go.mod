@@ -32,7 +32,6 @@ require (
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-openapi/inflect v0.19.0
-	github.com/go-openapi/spec v0.20.4
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-swagger/go-swagger v0.29.0
@@ -89,6 +88,7 @@ require (
 
 require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
+	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/hashicorp/go-hclog v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
