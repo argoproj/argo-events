@@ -75,7 +75,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
 	}
 
-	sqsClient := sqslib.New(awsSession)
+	var sqsClient *sqslib.SQS
+
+	if sqsEventSource.Endpoint == "" {
+		sqsClient = sqslib.New(awsSession)
+	} else {
+		sqsClient = sqslib.New(awsSession, &aws.Config{Endpoint: &sqsEventSource.Endpoint, Region: &sqsEventSource.Region})
+	}
 
 	log.Info("fetching queue url...")
 	getQueueURLInput := &sqslib.GetQueueUrlInput{

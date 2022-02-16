@@ -92,7 +92,7 @@ Description
 <tr>
 <td>
 <code>resources</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#resourcerequirements-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements </a> </em>
 </td>
 <td>
@@ -101,7 +101,7 @@ Kubernetes core/v1.ResourceRequirements </a> </em>
 <tr>
 <td>
 <code>imagePullPolicy</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#pullpolicy-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy </a> </em>
 </td>
 <td>
@@ -110,7 +110,7 @@ Kubernetes core/v1.PullPolicy </a> </em>
 <tr>
 <td>
 <code>securityContext</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#securitycontext-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#securitycontext-v1-core">
 Kubernetes core/v1.SecurityContext </a> </em>
 </td>
 <td>
@@ -141,7 +141,7 @@ Description
 <tr>
 <td>
 <code>metadata</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta </a> </em>
 </td>
 <td>
@@ -377,7 +377,7 @@ Auth strategy, default to AuthStrategyNone
 <tr>
 <td>
 <code>accessSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -484,7 +484,7 @@ scheduled on that node. More info:
 <tr>
 <td>
 <code>tolerations</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#toleration-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
 \[\]Kubernetes core/v1.Toleration </a> </em>
 </td>
 <td>
@@ -508,7 +508,7 @@ Metadata sets the pods’s metadata, i.e. annotations and labels
 <tr>
 <td>
 <code>securityContext</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
 Kubernetes core/v1.PodSecurityContext </a> </em>
 </td>
 <td>
@@ -534,7 +534,7 @@ Max Age of existing messages, i.e. “72h”, “4h35m”
 <tr>
 <td>
 <code>imagePullSecrets</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#localobjectreference-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
 \[\]Kubernetes core/v1.LocalObjectReference </a> </em>
 </td>
 <td>
@@ -596,7 +596,7 @@ value, the higher the priority. More info:
 <tr>
 <td>
 <code>affinity</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
 Kubernetes core/v1.Affinity </a> </em>
 </td>
 <td>
@@ -737,7 +737,7 @@ Name of the StorageClass required by the claim. More info:
 <tr>
 <td>
 <code>accessMode</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#persistentvolumeaccessmode-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#persistentvolumeaccessmode-v1-core">
 Kubernetes core/v1.PersistentVolumeAccessMode </a> </em>
 </td>
 <td>
