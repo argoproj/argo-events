@@ -24,6 +24,6 @@ curl -Ls https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.20/ap
 
 go run ./hack/gen-openapi-spec/main.go ${VERSION} ${k8s_swagger} ${kubeified_swagger}
 
-swagger flatten --with-flatten minimal --with-flatten remove-unused ${kubeified_swagger} -o ${output}
+swagger flatten --with-flatten minimal ${kubeified_swagger} -o ${output}
 
 swagger validate ${output}
