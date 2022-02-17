@@ -732,7 +732,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						Resources:       stanContainerResources,
 						SecurityContext: stanContainerSecurityContext,
 						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: &corev1.HTTPGetAction{
 									Path: "/",
 									Port: intstr.FromInt(int(monitorPort)),

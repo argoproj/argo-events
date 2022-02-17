@@ -105,7 +105,7 @@ func (c *FakeSensors) Update(ctx context.Context, sensor *v1alpha1.Sensor, opts 
 // Delete takes name of the sensor and deletes it. Returns an error if one occurs.
 func (c *FakeSensors) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(sensorsResource, c.ns, name), &v1alpha1.Sensor{})
+		Invokes(testing.NewDeleteActionWithOptions(sensorsResource, c.ns, name, opts), &v1alpha1.Sensor{})
 
 	return err
 }
