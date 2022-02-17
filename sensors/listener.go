@@ -217,7 +217,6 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			var lastResetTime time.Time
 			if len(trigger.Template.ConditionsReset) > 0 {
 				for _, c := range trigger.Template.ConditionsReset {
-
 					if c.ByTime == nil {
 						continue
 					}

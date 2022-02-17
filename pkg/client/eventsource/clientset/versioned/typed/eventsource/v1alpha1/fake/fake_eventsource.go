@@ -117,7 +117,7 @@ func (c *FakeEventSources) UpdateStatus(ctx context.Context, eventSource *v1alph
 // Delete takes name of the eventSource and deletes it. Returns an error if one occurs.
 func (c *FakeEventSources) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(eventsourcesResource, c.ns, name), &v1alpha1.EventSource{})
+		Invokes(testing.NewDeleteActionWithOptions(eventsourcesResource, c.ns, name, opts), &v1alpha1.EventSource{})
 
 	return err
 }
