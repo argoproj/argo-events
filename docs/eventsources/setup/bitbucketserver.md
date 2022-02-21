@@ -56,9 +56,9 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
    You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket Server.
    You can find more information on Ingress or Route online.
 
-1. Create the event source by running the following command. Make sure to replace the `url` field.
+1. Create the event source by running the following command. You can use the example event-source yaml file from [here](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucketserver.yaml) but make sure to replace the `url` field and to modify the `repositories` list with your own repos.
    
-        kubectl apply -n argo-events -f <event-source-file-updated-in-previous-step>
+        kubectl apply -n argo-events -f <event-source-file>
 
 1. Go to `Webhooks` under your project settings on Bitbucket Server and verify the webhook is registered. You can also do the same by looking at the event-source pod logs.
 
