@@ -178,7 +178,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	}
 
 	switch trigger.Operation {
-	case v1alpha1.Submit, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit, v1alpha1.Terminate:
+	case v1alpha1.Submit, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit, v1alpha1.Terminate, v1alpha1.Stop:
 	default:
 		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
