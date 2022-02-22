@@ -11,7 +11,7 @@ require (
 	cloud.google.com/go/pubsub v1.3.1
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.17
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
-	github.com/Masterminds/sprig/v3 v3.2.0
+	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/Shopify/sarama v1.31.1
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
 	github.com/antonmedv/expr v1.8.8
@@ -111,7 +111,7 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
-	github.com/Masterminds/goutils v1.1.0 // indirect
+	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
