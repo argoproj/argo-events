@@ -51,6 +51,7 @@ const (
 	Retry     ArgoWorkflowOperation = "retry"     // retry a workflow
 	Resume    ArgoWorkflowOperation = "resume"    // resume a workflow
 	Terminate ArgoWorkflowOperation = "terminate" // terminate a workflow
+	Stop      ArgoWorkflowOperation = "stop"      // stop a workflow
 )
 
 // Comparator refers to the comparator operator for a data filter

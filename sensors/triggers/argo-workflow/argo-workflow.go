@@ -166,6 +166,8 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		cmd = exec.Command("argo", "-n", namespace, "suspend", name)
 	case v1alpha1.Terminate:
 		cmd = exec.Command("argo", "-n", namespace, "terminate", name)
+	case v1alpha1.Stop:
+		cmd = exec.Command("argo", "-n", namespace, "stop", name)
 	default:
 		return nil, errors.Errorf("unknown operation type %s", string(op))
 	}
