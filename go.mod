@@ -9,7 +9,7 @@ retract v1.15.0 // Published accidentally.
 require (
 	cloud.google.com/go/compute v1.2.0
 	cloud.google.com/go/pubsub v1.3.1
-	github.com/Azure/azure-event-hubs-go/v3 v3.3.7
+	github.com/Azure/azure-event-hubs-go/v3 v3.3.17
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/sprig/v3 v3.2.0
 	github.com/Shopify/sarama v1.31.1
@@ -100,9 +100,9 @@ require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/iam v0.1.1 // indirect
 	cloud.google.com/go/kms v1.1.0 // indirect
-	github.com/Azure/azure-amqp-common-go/v3 v3.1.0 // indirect
+	github.com/Azure/azure-amqp-common-go/v3 v3.2.3 // indirect
 	github.com/Azure/azure-sdk-for-go v52.6.0+incompatible // indirect
-	github.com/Azure/go-amqp v0.13.6 // indirect
+	github.com/Azure/go-amqp v0.17.0 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.18 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.13 // indirect
