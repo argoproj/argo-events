@@ -7,14 +7,14 @@ retract v1.15.1 // Contains retractions only.
 retract v1.15.0 // Published accidentally.
 
 require (
-	cloud.google.com/go/compute v1.2.0
+	cloud.google.com/go/compute v1.3.0
 	cloud.google.com/go/pubsub v1.3.1
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.17
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/sprig/v3 v3.2.0
 	github.com/Shopify/sarama v1.31.1
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
-	github.com/antonmedv/expr v1.8.8
+	github.com/antonmedv/expr v1.9.0
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.1.1
 	github.com/argoproj/pkg v0.11.0
@@ -71,7 +71,7 @@ require (
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.20.0
 	golang.org/x/crypto v0.0.0-20220128200615-198e4374d7ed
-	google.golang.org/api v0.69.0
+	google.golang.org/api v0.70.0
 	google.golang.org/grpc v1.44.0
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.23.3
@@ -262,7 +262,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220211171837-173942840c17 // indirect
+	google.golang.org/genproto v0.0.0-20220218161850-94dd64e39d7c // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.66.3 // indirect
