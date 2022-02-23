@@ -122,7 +122,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		Logger:   logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger),
 	}
 
-	//must read from the Errors() channel or the producer will deadlock.
+	//must read from the Errors() channel or the async producer will deadlock.
 	go func() {
 		for err := range producer.Errors() {
 			kafkaTrigger.Logger.Errorf("Error happened in kafka producer", err)
