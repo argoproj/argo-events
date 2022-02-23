@@ -69,7 +69,7 @@ require (
 	github.com/xanzy/go-gitlab v0.55.1
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 	go.uber.org/ratelimit v0.2.0
-	go.uber.org/zap v1.20.0
+	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220128200615-198e4374d7ed
 	google.golang.org/api v0.69.0
 	google.golang.org/grpc v1.44.0
