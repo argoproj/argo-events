@@ -14,13 +14,13 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.0
 	github.com/Shopify/sarama v1.31.1
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
-	github.com/antonmedv/expr v1.8.8
+	github.com/antonmedv/expr v1.9.0
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.1.1
 	github.com/argoproj/pkg v0.11.0
 	github.com/aws/aws-sdk-go v1.42.50
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
-	github.com/bradleyfalzon/ghinstallation/v2 v2.0.3
+	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
 	github.com/cloudevents/sdk-go/v2 v2.8.0
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/eclipse/paho.mqtt.golang v1.3.5
@@ -88,6 +88,7 @@ require (
 require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
+	github.com/google/go-github/v41 v41.0.0 // indirect
 	github.com/hashicorp/go-hclog v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
@@ -158,7 +159,6 @@ require (
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/go-github/v39 v39.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
