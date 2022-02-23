@@ -115,12 +115,21 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		kafkaProducers[trigger.Template.Name] = producer
 	}
 
-	return &KafkaTrigger{
+	kafkaTrigger := &KafkaTrigger{
 		Sensor:   sensor,
 		Trigger:  trigger,
 		Producer: producer,
 		Logger:   logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger),
-	}, nil
+	}
+
+	//must read from the Errors() channel or the producer will deadlock.
+	go func() {
+		for err := range producer.Errors() {
+			kafkaTrigger.Logger.Errorf("Error happened in kafka producer", err)
+		}
+	}()
+
+	return kafkaTrigger, nil
 }
 
 // GetTriggerType returns the type of the trigger
