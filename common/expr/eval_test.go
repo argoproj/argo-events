@@ -41,6 +41,7 @@ func TestEvalBool(t *testing.T) {
 		"email":      "johndoe@intuit.com",
 		"gender":     "Male",
 		"dept":       "devp",
+		"uuid":       "test-case-hyphen",
 	}
 
 	pass, err := EvalBool("(id == 1) && (last_name == 'Doe')", env)
@@ -54,4 +55,9 @@ func TestEvalBool(t *testing.T) {
 	pass, err = EvalBool("invalidexpression", env)
 	assert.Error(t, err)
 	assert.False(t, pass)
+
+	// expr with '-' evaluate the same as others
+	pass, err = EvalBool("(uuid == 'test-case-hyphen')", env)
+	assert.NoError(t, err)
+	assert.True(t, pass)
 }
