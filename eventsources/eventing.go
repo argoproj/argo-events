@@ -566,5 +566,5 @@ func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) 
 		params[strings.ReplaceAll(key, "-", "_")] = value
 	}
 	env := expr.GetFuncMap(params)
-	return expr.EvalBool(strings.ReplaceAll(filter.Expression, "-", "_"), env)
+	return expr.EvalBool(filter.Expression, env)
 }
