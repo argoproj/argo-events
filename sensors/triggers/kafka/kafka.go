@@ -123,14 +123,12 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		kafkaProducers[trigger.Template.Name] = producer
 	}
 
-	kafkaTrigger := &KafkaTrigger{
+	return &KafkaTrigger{
 		Sensor:   sensor,
 		Trigger:  trigger,
 		Producer: producer,
 		Logger:   triggerLogger,
-	}
-
-	return kafkaTrigger, nil
+	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
