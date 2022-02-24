@@ -47,6 +47,7 @@ type KafkaTrigger struct {
 // NewKafkaTrigger returns a new kafka trigger context.
 func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
+	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
 
 	producer, ok := kafkaProducers[trigger.Template.Name]
 	if !ok {
@@ -112,6 +113,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 			return nil, err
 		}
 
+		//must read from the Errors() channel or the async producer will deadlock.
+		go func() {
+			for err := range producer.Errors() {
+				triggerLogger.Errorf("Error happened in kafka producer", err)
+			}
+		}()
+
 		kafkaProducers[trigger.Template.Name] = producer
 	}
 
@@ -119,7 +127,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		Sensor:   sensor,
 		Trigger:  trigger,
 		Producer: producer,
-		Logger:   logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger),
+		Logger:   triggerLogger,
 	}, nil
 }
 
