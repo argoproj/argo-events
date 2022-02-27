@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.6.1 (2022-02-27)
+
+ * [6f1aff65](https://github.com/argoproj/argo-events/commit/6f1aff6558b779f919a4c8dbe553d1eac9f8486a) Update manifests to v1.6.1
+ * [3113eb89](https://github.com/argoproj/argo-events/commit/3113eb898caf8ac78ed81187c469d0e6c34a9053) fix: read kafka error channel. Fixes #1656 (#1664)
+ * [54c2ef07](https://github.com/argoproj/argo-events/commit/54c2ef07affa1539d4107277ae72ea569929e1a2) fix: remove string replacement on expressions for event filtering (#1670)
+ * [ba5d2c42](https://github.com/argoproj/argo-events/commit/ba5d2c422541d4baa978b0281191215918072333) feat: Adds argo stop as a supported operation for argoWorkflow triggers. (#1648)
+ * [1780d833](https://github.com/argoproj/argo-events/commit/1780d833c8717801a8a950c54212033552b2b7ae) chore(deps): bump github.com/xanzy/go-gitlab from 0.54.4 to 0.55.1 (#1642)
+ * [6d95f54b](https://github.com/argoproj/argo-events/commit/6d95f54b51978bd9594522505ddba15e93ab2850) fix: adds SigningCertURL validation for SNS messages (#1637)
+ * [40b2df63](https://github.com/argoproj/argo-events/commit/40b2df6368b5459ebe0846c4ca37ec7b6c660744) Add SQS Custom endpoint support (#1632)
+ * [6b6788e1](https://github.com/argoproj/argo-events/commit/6b6788e168d44d92c502f85a08ad096b0e79ccc0) chore(deps): bump github.com/cloudevents/sdk-go/v2 from 2.1.0 to 2.8.0 (#1635)
+ * [056aaa66](https://github.com/argoproj/argo-events/commit/056aaa664c518371e02611cfff687ca1e265b82e) chore(deps): bump google.golang.org/api from 0.65.0 to 0.68.0 (#1634)
+
+### Contributors
+
+ * Aaron Weisberg
+ * Derek Wang
+ * Dillen Padhiar
+ * Lawrence Carvalho
+ * dependabot[bot]
+ * itamarom
+ * wangyi
+
 ## v1.6.0 (2022-02-12)
 
  * [f81754da](https://github.com/argoproj/argo-events/commit/f81754da2b8df1dd628117be7bc8d2d5cf5f14c1) Update manifests to v1.6.0
