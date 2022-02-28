@@ -52,3 +52,17 @@ rules:
       - eventbus
       - eventsources
       - sensors
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - apps
+    resources:
+      - deployments/finalizers
+      - clusterroles/finalizers
+    verbs:
+      - update
