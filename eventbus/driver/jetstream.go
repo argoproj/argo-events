@@ -1,7 +1,11 @@
 package driver
 
 import (
+	"context"
+	"time"
+
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	nats "github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -12,7 +16,6 @@ type jetstreamConnection struct {
 	jsContext nats.JetStreamContext
 
 	natsConnected bool
-	consumerInfo  *nats.ConsumerInfo
 }
 
 func (jsc *jetstreamConnection) Close() error {
@@ -32,27 +35,27 @@ func (jsc *jetstreamConnection) IsClosed() bool {
 
 func (jsc *jetstreamConnection) Publish(subject string, data []byte) error {
 	// todo: On the publishing side you can avoid duplicate message ingestion using the Message Deduplication feature.
-	pubAck, err := jsc.jsContext.Publish(subject, data)
+	_, err := jsc.jsContext.Publish(subject, data)
 	return err
 }
 
 type jetstream struct {
-	url       string
-	auth      *Auth
-	clusterID string
-	//subject   string
-	clientID string
+	url  string
+	auth *Auth
+	//clusterID string
+	//subject   string  todo: decide if we want some default subject for publishers
+	//clientID string   todo: seems like jetstream doesn't have this notion; if we want to identify it for ourselves we can
+	//durableName string // todo: not sure if we want this here; may not be necessary to store it and it also doesn't apply to publishers
+	jetstreamContext nats.JetStreamContext
 
 	logger *zap.SugaredLogger
 }
 
-func NewJetstream(url, clusterID, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
+func NewJetstream(url, auth *Auth, logger *zap.SugaredLogger) Driver {
 	return &jetstream{
-		url:       url,
-		clusterID: clusterID,
-		clientID:  clientID,
-		auth:      auth,
-		logger:    logger,
+		url:    url,
+		auth:   auth,
+		logger: logger,
 	}
 }
 
@@ -91,13 +94,14 @@ func (stream *jetstream) Connect() (Connection, error) {
 	conn.natsConnected = true
 
 	// Create JetStream Context
-	js, err := nc.JetStream()
+	stream.jetstreamContext, err = nc.JetStream()
 	if err != nil {
 		// tbd
 	}
+	conn.jsContext = stream.jetstreamContext
 
 	// add the Stream just in case nobody has yet
-	_, err = js.AddStream(&nats.StreamConfig{
+	_, err = stream.jetstreamContext.AddStream(&nats.StreamConfig{
 		Name:     "default", // todo: replace with a const
 		Subjects: []string{"default.*"},
 	})
@@ -105,19 +109,28 @@ func (stream *jetstream) Connect() (Connection, error) {
 		// tbd
 	}
 
-	// Create a Consumer
-	conn.consumerInfo, err = js.AddConsumer("default", &nats.ConsumerConfig{
-		Durable: "todo",
-	})
-	if err != nil {
-		// tbd
-	}
-
-	// todo: doesn't seem like there's any Lost Connection handler with Jetstream?
-
 	// todo: when we subscribe later we can specify durable name there (look at SubOpt in js.go)
 	// maybe also use AckAll()? need to look for all SubOpt
 
 	log.Info("Connected to NATS streaming server.")
 	return conn, nil
+}
+
+// todo: determine if we want the Publisher to be able to start up its connection with a default
+// subject
+func (stream *jetstream) Publish(conn Connection, subject string, message []byte) error {
+	return conn.Publish(subject, message)
+}
+
+func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connection, subject string, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+	log := stream.logger.With("clientID", stream.clientID)
+	//stream.durableName = group
+
+	// Create a Consumer
+	_, err := stream.jetstreamContext.AddConsumer("default", &nats.ConsumerConfig{
+		Durable: group,
+	})
+	if err != nil {
+		// tbd
+	}
 }
