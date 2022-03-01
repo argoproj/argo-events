@@ -33,6 +33,7 @@ import (
 	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
@@ -55,9 +56,14 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 	subscribe()
 }
 
-func (sensorCtx *SensorContext) getGroupAndClientID(triggerName, depExpression string) (string, string) {
+func (sensorCtx *SensorContext) getGroupAndClientID(eventBusConfig eventbusv1alpha1.BusConfig, triggerName, depExpression string) (string, string) {
 	// Generate clientID with hash code
-	hashKey := fmt.Sprintf("%s-%s-%s", sensorCtx.sensor.Name, triggerName, depExpression)
+	// todo: maybe we can do this some more elegant way
+	hashKey := fmt.Sprintf("%s-%s", sensorCtx.sensor.Name, triggerName)
+	if eventBusConfig.NATS != nil {
+		// for NATS Streaming we also include the dependency expression
+		hashKey = fmt.Sprintf("%s-%s-%s", sensorCtx.sensor.Name, triggerName, depExpression)
+	}
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	hashVal := common.Hasher(hashKey)
@@ -147,7 +153,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				}
 				deps = append(deps, d)
 			}
-			group, clientID := sensorCtx.getGroupAndClientID(trigger.Template.Name, depExpression)
+			group, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
 			ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
 			if err != nil {
 				logger.Errorw("failed to get eventbus driver", zap.Error(err))
@@ -271,7 +277,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
 
-					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
+					err = ebDriver.SubscribeEventSources(ctx, conn, sensorCtx.eventBusSubject, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
 						return
@@ -294,8 +300,8 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					if conn == nil || conn.IsClosed() {
 						logger.Info("NATS connection lost, reconnecting...")
 						// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
-						_, clientID := sensorCtx.getGroupAndClientID(trigger.Template.Name, depExpression)
-						ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
+						_, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
+						ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, clientID)
 						if err != nil {
 							logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 							continue
