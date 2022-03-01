@@ -54,8 +54,8 @@ type natsStreaming struct {
 	url       string
 	auth      *Auth
 	clusterID string
-	subject   string
-	clientID  string
+	//subject   string
+	clientID string
 
 	logger *zap.SugaredLogger
 }
@@ -65,10 +65,10 @@ func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logg
 	return &natsStreaming{
 		url:       url,
 		clusterID: clusterID,
-		subject:   subject,
-		clientID:  clientID,
-		auth:      auth,
-		logger:    logger,
+		//subject:   subject,
+		clientID: clientID,
+		auth:     auth,
+		logger:   logger,
 	}
 }
 
@@ -120,8 +120,8 @@ func (n *natsStreaming) Connect() (Connection, error) {
 	return conn, nil
 }
 
-func (n *natsStreaming) Publish(conn Connection, message []byte) error {
-	return conn.Publish(n.subject, message)
+func (n *natsStreaming) Publish(conn Connection, subject string, message []byte) error {
+	return conn.Publish(subject, message)
 }
 
 // SubscribeEventSources is used to subscribe multiple event source dependencies
@@ -135,7 +135,7 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, subject string, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	log := n.logger.With("clientID", n.clientID)
 	msgHolder, err := newEventSourceMessageHolder(log, dependencyExpr, dependencies, lastResetTime)
 	if err != nil {
@@ -147,7 +147,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	}
 	// use group name as durable name
 	durableName := group
-	sub, err := nsc.stanConn.QueueSubscribe(n.subject, group, func(m *stan.Msg) {
+	sub, err := nsc.stanConn.QueueSubscribe(subject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, transform, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
@@ -155,10 +155,10 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		stan.AckWait(1*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
-		log.Errorf("failed to subscribe to subject %s", n.subject)
+		log.Errorf("failed to subscribe to subject %s", subject)
 		return err
 	}
-	log.Infof("Subscribed to subject %s ...", n.subject)
+	log.Infof("Subscribed to subject %s ...", subject)
 
 	// Daemon to evict cache and reset trigger conditions
 	wg := &sync.WaitGroup{}
@@ -200,14 +200,14 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		case <-ctx.Done():
 			log.Info("existing, unsubscribing and closing connection...")
 			_ = sub.Close()
-			log.Infof("subscription on subject %s closed", n.subject)
+			log.Infof("subscription on subject %s closed", subject)
 			daemonStopCh <- struct{}{}
 			wg.Wait()
 			return nil
 		case <-closeCh:
 			log.Info("closing subscription...")
 			_ = sub.Close()
-			log.Infof("subscription on subject %s closed", n.subject)
+			log.Infof("subscription on subject %s closed", subject)
 			daemonStopCh <- struct{}{}
 			wg.Wait()
 			return nil
