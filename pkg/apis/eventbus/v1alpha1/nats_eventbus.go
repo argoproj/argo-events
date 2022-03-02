@@ -1,48 +1,9 @@
 package v1alpha1
 
 import (
-	corev1 "k8s.io/api/core/v1"
-	apiresource "k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/argoproj/argo-events/pkg/apis/common"
+	corev1 "k8s.io/api/core/v1"
 )
-
-// EventBus is the definition of a eventbus resource
-// +genclient
-// +kubebuilder:resource:singular=eventbus,shortName=eb
-// +kubebuilder:subresource:status
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +k8s:openapi-gen=true
-type EventBus struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Spec              EventBusSpec `json:"spec" protobuf:"bytes,2,opt,name=spec"`
-	// +optional
-	Status EventBusStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
-}
-
-// EventBusList is the list of eventbus resources
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type EventBusList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-
-	Items []EventBus `json:"items" protobuf:"bytes,2,rep,name=items"`
-}
-
-// EventBusSpec refers to specification of eventbus resource
-type EventBusSpec struct {
-	// NATS eventbus
-	NATS *NATSBus `json:"nats,omitempty" protobuf:"bytes,1,opt,name=nats"`
-}
-
-// EventBusStatus holds the status of the eventbus resource
-type EventBusStatus struct {
-	common.Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
-	// Config holds the fininalized configuration of EventBus
-	Config BusConfig `json:"config,omitempty" protobuf:"bytes,2,opt,name=config"`
-}
 
 // NATSBus holds the NATS eventbus information
 type NATSBus struct {
@@ -141,35 +102,9 @@ type NativeStrategy struct {
 	RaftCommitTimeout *string `json:"raftCommitTimeout,omitempty" protobuf:"bytes,23,opt,name=raftCommitTimeout"`
 }
 
-// ContainerTemplate defines customized spec for a container
-type ContainerTemplate struct {
-	Resources       corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
-	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy,omitempty" protobuf:"bytes,2,opt,name=imagePullPolicy,casttype=PullPolicy"`
-	SecurityContext *corev1.SecurityContext     `json:"securityContext,omitempty" protobuf:"bytes,3,opt,name=securityContext"`
-}
-
 // GetReplicas return the replicas of statefulset
 func (in *NativeStrategy) GetReplicas() int {
 	return int(in.Replicas)
-}
-
-// PersistenceStrategy defines the strategy of persistence
-type PersistenceStrategy struct {
-	// Name of the StorageClass required by the claim.
-	// More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
-	// +optional
-	StorageClassName *string `json:"storageClassName,omitempty" protobuf:"bytes,1,opt,name=storageClassName"`
-	// Available access modes such as ReadWriteOnce, ReadWriteMany
-	// https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
-	// +optional
-	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode,casttype=k8s.io/api/core/v1.PersistentVolumeAccessMode"`
-	// Volume size, e.g. 10Gi
-	VolumeSize *apiresource.Quantity `json:"volumeSize,omitempty" protobuf:"bytes,3,opt,name=volumeSize"`
-}
-
-// BusConfig has the finalized configuration for EventBus
-type BusConfig struct {
-	NATS *NATSConfig `json:"nats,omitempty" protobuf:"bytes,1,opt,name=nats"`
 }
 
 // NATSConfig holds the config of NATS
@@ -184,43 +119,4 @@ type NATSConfig struct {
 	// Secret for auth
 	// +optional
 	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,4,opt,name=accessSecret"`
-}
-
-const (
-	// EventBusConditionDeployed has the status True when the EventBus
-	// has its RestfulSet/Deployment ans service created.
-	EventBusConditionDeployed common.ConditionType = "Deployed"
-	// EventBusConditionConfigured has the status True when the EventBus
-	// has its configuration ready.
-	EventBusConditionConfigured common.ConditionType = "Configured"
-)
-
-// InitConditions sets conditions to Unknown state.
-func (s *EventBusStatus) InitConditions() {
-	s.InitializeConditions(EventBusConditionDeployed, EventBusConditionConfigured)
-}
-
-// MarkDeployed set the bus has been deployed.
-func (s *EventBusStatus) MarkDeployed(reason, message string) {
-	s.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
-}
-
-// MarkDeploying set the bus is deploying
-func (s *EventBusStatus) MarkDeploying(reason, message string) {
-	s.MarkUnknown(EventBusConditionDeployed, reason, message)
-}
-
-// MarkDeployFailed set the bus deploy failed
-func (s *EventBusStatus) MarkDeployFailed(reason, message string) {
-	s.MarkFalse(EventBusConditionDeployed, reason, message)
-}
-
-// MarkConfigured set the bus configuration has been done.
-func (s *EventBusStatus) MarkConfigured() {
-	s.MarkTrue(EventBusConditionConfigured)
-}
-
-// MarkNotConfigured set the bus status not configured.
-func (s *EventBusStatus) MarkNotConfigured(reason, message string) {
-	s.MarkFalse(EventBusConditionConfigured, reason, message)
 }

@@ -27,10 +27,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: NATS_STREAMING_IMAGE
-              value: nats-streaming:0.22.1
-            - name: NATS_METRICS_EXPORTER_IMAGE
-              value: natsio/prometheus-nats-exporter:0.8.0
+          volumeMounts:
+            - mountPath: /etc/argo-events
+              name: controller-config-volume
           livenessProbe:
             httpGet:
               path: /healthz
@@ -43,5 +42,7 @@ spec:
               port: 8081
             initialDelaySeconds: 3
             periodSeconds: 3
-
-
+      volumes:
+        - name: controller-config-volume
+          configMap:
+            name: argo-events-controller-config

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
@@ -18,6 +17,7 @@ import (
 	argoevents "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
@@ -31,13 +31,11 @@ const (
 
 func Start(namespaced bool, managedNamespace string) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
-	natsStreamingImage, defined := os.LookupEnv(natsStreamingEnvVar)
-	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", natsStreamingEnvVar)
-	}
-	natsMetricsImage, defined := os.LookupEnv(natsMetricsExporterEnvVar)
-	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", natsMetricsExporterEnvVar)
+	config, err := controllers.LoadConfig(func(err error) {
+		logger.Errorf("Failed to reload global configuration file", zap.Error(err))
+	})
+	if err != nil {
+		logger.Fatalw("Failed to load global configuration file", zap.Error(err))
 	}
 	opts := ctrl.Options{
 		MetricsBindAddress:     fmt.Sprintf(":%d", common.ControllerMetricsPort),
@@ -75,7 +73,7 @@ func Start(namespaced bool, managedNamespace string) {
 
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), config, logger),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up individual controller", zap.Error(err))

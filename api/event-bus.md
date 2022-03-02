@@ -61,6 +61,17 @@ Description
 NATSConfig </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
+</td>
+</tr>
+<tr>
+<td>
+<code>jetstream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamConfig"> JetStreamConfig </a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
 </td>
 </tr>
 </tbody>
@@ -70,6 +81,7 @@ ContainerTemplate
 </h3>
 <p>
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.JetStreamBus">JetStreamBus</a>,
 <a href="#argoproj.io/v1alpha1.NativeStrategy">NativeStrategy</a>)
 </p>
 <p>
@@ -163,9 +175,19 @@ Refer to the Kubernetes API documentation for the fields of the
 NATSBus </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 NATS eventbus
 </p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jetstream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamBus"> JetStreamBus </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
 </td>
 </tr>
 </table>
@@ -213,9 +235,19 @@ Description
 NATSBus </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 NATS eventbus
 </p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jetstream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamBus"> JetStreamBus </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
 </td>
 </tr>
 </tbody>
@@ -264,6 +296,309 @@ BusConfig </a> </em>
 <p>
 Config holds the fininalized configuration of EventBus
 </p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.JetStreamAuth">
+JetStreamAuth
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.JetStreamConfig">JetStreamConfig</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>token</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Secret for auth token
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.JetStreamBus">
+JetStreamBus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventBusSpec">EventBusSpec</a>)
+</p>
+<p>
+<p>
+JetStreamBus holds the JetStream EventBus information
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>version</code></br> <em> string </em>
+</td>
+<td>
+<p>
+JetStream version, such as “2.7.3”
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code></br> <em> int32 </em>
+</td>
+<td>
+<p>
+Redis StatefulSet size
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>containerTemplate</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ContainerTemplate contains customized spec for Nats JetStream container
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metricsContainerTemplate</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MetricsContainerTemplate contains customized spec for metrics container
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>persistence</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PersistenceStrategy"> PersistenceStrategy
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Metadata </em>
+</td>
+<td>
+<p>
+Metadata sets the pods’s metadata, i.e. annotations and labels
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nodeSelector</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+NodeSelector is a selector which must be true for the pod to fit on a
+node. Selector which must match a node’s labels for the pod to be
+scheduled on that node. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">https://kubernetes.io/docs/concepts/configuration/assign-pod-node/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tolerations</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
+\[\]Kubernetes core/v1.Toleration </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+If specified, the pod’s tolerations.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>securityContext</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
+Kubernetes core/v1.PodSecurityContext </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SecurityContext holds pod-level security attributes and common container
+settings. Optional: Defaults to empty. See type description for default
+values of each field.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>imagePullSecrets</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
+\[\]Kubernetes core/v1.LocalObjectReference </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ImagePullSecrets is an optional list of references to secrets in the
+same namespace to use for pulling any of the images used by this
+PodSpec. If specified, these secrets will be passed to individual puller
+implementations for them to use. For example, in the case of docker,
+only DockerConfig type secrets are honored. More info:
+<a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>priorityClassName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+If specified, indicates the Redis pod’s priority. “system-node-critical”
+and “system-cluster-critical” are two special keywords which indicate
+the highest priorities with the former being the highest priority. Any
+other name must be defined by creating a PriorityClass object with that
+name. If not specified, the pod priority will be default or zero if
+there is no default. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>priority</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+The priority value. Various system components use this field to find the
+priority of the Redis pod. When Priority Admission Controller is
+enabled, it prevents users from setting this field. The admission
+controller populates this field from PriorityClassName. The higher the
+value, the higher the priority. More info:
+<a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>affinity</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
+Kubernetes core/v1.Affinity </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+The pod’s scheduling constraints More info:
+<a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/">https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>serviceAccountName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ServiceAccountName to apply to the StatefulSet
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>settings</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JetStream configuration, if not specified, global settings in
+controller-config will be used. See
+<a href="https://docs.nats.io/running-a-nats-service/configuration#jetstream">https://docs.nats.io/running-a-nats-service/configuration#jetstream</a>.
+Only configure “max_memory_store” or “max_file_store”, do not set
+“store_dir” as it has been hardcoded.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.JetStreamConfig">
+JetStreamConfig
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BusConfig">BusConfig</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>url</code></br> <em> string </em>
+</td>
+<td>
+<p>
+JetStream (Nats) URL
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>auth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamAuth"> JetStreamAuth </a> </em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
@@ -703,6 +1038,7 @@ PersistenceStrategy
 </h3>
 <p>
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.JetStreamBus">JetStreamBus</a>,
 <a href="#argoproj.io/v1alpha1.NativeStrategy">NativeStrategy</a>)
 </p>
 <p>

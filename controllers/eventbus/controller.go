@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -27,14 +28,13 @@ type reconciler struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	natsStreamingImage string
-	natsMetricsImage   string
-	logger             *zap.SugaredLogger
+	config *controllers.GlobalConfig
+	logger *zap.SugaredLogger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, natsMetricsImage: natsMetricsImage, logger: logger}
+func NewReconciler(client client.Client, scheme *runtime.Scheme, config *controllers.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, config: config, logger: logger}
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -71,7 +71,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 		log.Info("deleting eventbus")
 		if controllerutil.ContainsFinalizer(eventBus, finalizerName) {
 			// Finalizer logic should be added here.
-			if err := installer.Uninstall(ctx, eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log); err != nil {
+			if err := installer.Uninstall(ctx, eventBus, r.client, r.config, log); err != nil {
 				log.Errorw("failed to uninstall", zap.Error(err))
 				return err
 			}
@@ -87,7 +87,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 		eventBus.Status.MarkDeployFailed("InvalidSpec", err.Error())
 		return err
 	}
-	return installer.Install(ctx, eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
+	return installer.Install(ctx, eventBus, r.client, r.config, log)
 }
 
 func (r *reconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {
