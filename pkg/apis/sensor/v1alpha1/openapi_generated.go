@@ -195,6 +195,21 @@ func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCal
 							},
 						},
 					},
+					"args": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Args is the list of arguments to pass to the argo CLI",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

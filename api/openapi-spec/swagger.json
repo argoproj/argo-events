@@ -2610,6 +2610,13 @@
       "description": "ArgoWorkflowTrigger is the trigger for the Argo Workflow",
       "type": "object",
       "properties": {
+        "args": {
+          "description": "Args is the list of arguments to pass to the argo CLI",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "operation": {
           "description": "Operation refers to the type of operation performed on the argo workflow resource. Default value is Submit.",
           "type": "string"

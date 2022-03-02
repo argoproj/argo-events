@@ -2626,6 +2626,13 @@
     "io.argoproj.sensor.v1alpha1.ArgoWorkflowTrigger": {
       "description": "ArgoWorkflowTrigger is the trigger for the Argo Workflow",
       "properties": {
+        "args": {
+          "description": "Args is the list of arguments to pass to the argo CLI",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "operation": {
           "description": "Operation refers to the type of operation performed on the argo workflow resource. Default value is Submit.",
           "type": "string"
