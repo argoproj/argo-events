@@ -51,7 +51,7 @@ type jetstream struct {
 	logger *zap.SugaredLogger
 }
 
-func NewJetstream(url, auth *Auth, logger *zap.SugaredLogger) Driver {
+func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) Driver {
 	return &jetstream{
 		url:    url,
 		auth:   auth,
@@ -89,14 +89,15 @@ func (stream *jetstream) Connect() (Connection, error) {
 		log.Errorw("Failed to connect to NATS server", zap.Error(err))
 		return nil, err
 	}
-	log.Info("Connected to NATS server.")
+	log.Info("Connected to NATS Jetstream server.")
 	conn.natsConn = nc
 	conn.natsConnected = true
 
 	// Create JetStream Context
 	stream.jetstreamContext, err = nc.JetStream()
 	if err != nil {
-		// tbd
+		log.Errorw("Failed to get Jetstream context", zap.Error(err))
+		return nil, err
 	}
 	conn.jsContext = stream.jetstreamContext
 
@@ -106,7 +107,8 @@ func (stream *jetstream) Connect() (Connection, error) {
 		Subjects: []string{"default.*"},
 	})
 	if err != nil {
-		// tbd
+		log.Errorw("Failed to add Jetstream stream 'default'", zap.Error(err))
+		return nil, err
 	}
 
 	// todo: when we subscribe later we can specify durable name there (look at SubOpt in js.go)
