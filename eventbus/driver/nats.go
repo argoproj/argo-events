@@ -472,6 +472,7 @@ func (mh *eventSourceMessageHolder) resetAll() {
 	for k := range mh.msgs {
 		delete(mh.msgs, k)
 	}
+
 	for k := range mh.parameters {
 		mh.parameters[k] = false
 	}
