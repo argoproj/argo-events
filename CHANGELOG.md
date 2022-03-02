@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.6.2 (2022-03-01)
+
+ * [b5e2bcb1](https://github.com/argoproj/argo-events/commit/b5e2bcb143131beb336613fabaef2d89364c0697) Update manifests to v1.6.2
+ * [1c6a5d42](https://github.com/argoproj/argo-events/commit/1c6a5d4286bc3d9ae422eda961da0cda60b2cc09) fix: changing lastResetTime to a time.Time from int64 seconds so time comparison can occur at a finer granularity (#1695)
+
+### Contributors
+
+ * Derek Wang
+ * Julie Vogelman
+
 ## v1.6.1 (2022-02-27)
 
  * [6f1aff65](https://github.com/argoproj/argo-events/commit/6f1aff6558b779f919a4c8dbe553d1eac9f8486a) Update manifests to v1.6.1
