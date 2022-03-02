@@ -238,6 +238,16 @@ object
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>args</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Args is the list of arguments to pass to the argo CLI
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ArtifactLocation">

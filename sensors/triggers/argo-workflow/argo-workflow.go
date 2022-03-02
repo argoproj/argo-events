@@ -55,6 +55,7 @@ type ArgoWorkflowTrigger struct {
 	Logger *zap.SugaredLogger
 
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
+	cmdRunner               func(cmd *exec.Cmd) error
 }
 
 // NewArgoWorkflowTrigger returns a new Argo workflow trigger
@@ -65,6 +66,9 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 		Sensor:        sensor,
 		Trigger:       trigger,
 		Logger:        logger.With(logging.LabelTriggerType, apicommon.ArgoWorkflowTrigger),
+		cmdRunner: func(cmd *exec.Cmd) error {
+			return cmd.Run()
+		},
 	}
 }
 
@@ -174,7 +178,8 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	cmd.Args = append(cmd.Args, trigger.Template.ArgoWorkflow.Args...)
+	if err := t.cmdRunner(cmd); err != nil {
 		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s", string(op), name)
 	}
 
