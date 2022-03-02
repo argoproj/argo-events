@@ -61,7 +61,7 @@ type natsStreaming struct {
 }
 
 // NewNATSStreaming returns a nats streaming driver
-func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
+func NewNATSStreaming(url, clusterID, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
 	return &natsStreaming{
 		url:       url,
 		clusterID: clusterID,
