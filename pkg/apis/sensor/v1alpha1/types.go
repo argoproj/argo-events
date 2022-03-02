@@ -437,6 +437,8 @@ type ArgoWorkflowTrigger struct {
 	Operation ArgoWorkflowOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation,casttype=ArgoWorkflowOperation"`
 	// Parameters is the list of parameters to pass to resolved Argo Workflow object
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
+	// Args is the list of arguments to pass to the argo CLI
+	Args []string `json:"args,omitempty" protobuf:"bytes,4,rep,name=args"`
 }
 
 // HTTPTrigger is the trigger for the HTTP request
