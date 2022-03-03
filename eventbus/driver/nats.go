@@ -267,7 +267,7 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		msgHolder.ackAndCache(m, event.ID())
 
 		log.Debugf("reset and acked dependency=%s due to message time occurred before reset, m.Timestamp=%d, msgHolder.getLastResetTime()=%d",
-			depName, m.Timestamp, msgHolder.getLastResetTime())
+			depName, m.Timestamp, msgHolder.getLastResetTime().UnixNano())
 		return
 	}
 	// make sure that everything has been cleared within a certain amount of time
@@ -326,7 +326,8 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 		log.Infow("trigger conditions not met", zap.Any("meetDependencies", meetDeps), zap.Any("meetEvents", meetMsgIds))
 		return
 	}
-	msgHolder.setLastResetTime(time.Now())
+
+	msgHolder.setLastResetTime(time.Unix(m.Timestamp/1e9, m.Timestamp%1e9))
 	// Trigger actions
 	messages := make(map[string]cloudevents.Event)
 	for k, v := range msgHolder.msgs {
