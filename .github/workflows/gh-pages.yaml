@@ -10,7 +10,7 @@ jobs:
     if: github.repository == 'argoproj/argo-events'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
         uses: actions/setup-python@v3.0.0
         with:
