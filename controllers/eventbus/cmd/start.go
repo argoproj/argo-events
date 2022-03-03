@@ -24,11 +24,6 @@ import (
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-const (
-	natsStreamingEnvVar       = "NATS_STREAMING_IMAGE"
-	natsMetricsExporterEnvVar = "NATS_METRICS_EXPORTER_IMAGE"
-)
-
 func Start(namespaced bool, managedNamespace string) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
 	config, err := controllers.LoadConfig(func(err error) {

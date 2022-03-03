@@ -19,10 +19,9 @@ import (
 )
 
 const (
-	testBusName        = "test-bus"
-	testStreamingImage = "test-steaming-image"
-	testNamespace      = "testNamespace"
-	testURL            = "http://test"
+	testBusName   = "test-bus"
+	testNamespace = "testNamespace"
+	testURL       = "http://test"
 )
 
 var (

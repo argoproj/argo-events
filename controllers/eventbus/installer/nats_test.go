@@ -21,10 +21,8 @@ import (
 )
 
 const (
-	testNamespace      = "test-ns"
-	testName           = "test-name"
-	testStreamingImage = "test-s-image"
-	testMetricsImage   = "test-m-image"
+	testNamespace = "test-ns"
+	testName      = "test-name"
 )
 
 var (
