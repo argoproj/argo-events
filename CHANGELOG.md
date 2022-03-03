@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.6.3 (2022-03-03)
+
+ * [6f7f9500](https://github.com/argoproj/argo-events/commit/6f7f95006e040af30ed2cf40a3910891d2c50a4d) Update manifests to v1.6.3
+ * [55f1fd02](https://github.com/argoproj/argo-events/commit/55f1fd0265f6a973330cd4d5c02c75121deb5256) fix: Quick fix for Issue #1694 (#1701)
+ * [707be7b0](https://github.com/argoproj/argo-events/commit/707be7b0651bcb9c51e2f1f07d89e3f8c5746272) Support configuring argo CLI args when using argo workflow trigger. (#1655)
+
+### Contributors
+
+ * Derek Wang
+ * Julie Vogelman
+ * Lawrence Carvalho
+
 ## v1.6.2 (2022-03-01)
 
  * [b5e2bcb1](https://github.com/argoproj/argo-events/commit/b5e2bcb143131beb336613fabaef2d89364c0697) Update manifests to v1.6.2
