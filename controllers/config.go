@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -38,28 +39,56 @@ type JetStreamVersion struct {
 	StartCommand         string `json:"startCommand"`
 }
 
+func (g *GlobalConfig) supportedNatsStreamingVersions() []string {
+	result := []string{}
+	if g.EventBus == nil || g.EventBus.NATS == nil {
+		return result
+	}
+	for _, v := range g.EventBus.NATS.Versions {
+		result = append(result, v.Version)
+	}
+	return result
+}
+
+func (g *GlobalConfig) supportedJetStreamVersions() []string {
+	result := []string{}
+	if g.EventBus == nil || g.EventBus.JetStream == nil {
+		return result
+	}
+	for _, v := range g.EventBus.JetStream.Versions {
+		result = append(result, v.Version)
+	}
+	return result
+}
+
 func (g *GlobalConfig) GetNatsStreamingVersion(version string) (*NatsStreamingVersion, error) {
-	if g.EventBus.NATS == nil || len(g.EventBus.NATS.Versions) == 0 {
-		return nil, fmt.Errorf("nats streaming configuration not found")
+	if g.EventBus == nil || g.EventBus.NATS == nil {
+		return nil, fmt.Errorf("\"eventBus.nats\" not found in the configuration")
+	}
+	if len(g.EventBus.NATS.Versions) == 0 {
+		return nil, fmt.Errorf("nats streaming version configuration not found")
 	}
 	for _, r := range g.EventBus.NATS.Versions {
 		if r.Version == version {
 			return &r, nil
 		}
 	}
-	return nil, fmt.Errorf("no nats streaming configuration found for %q", version)
+	return nil, fmt.Errorf("unsupported version %q, supported versions: %q", version, strings.Join(g.supportedNatsStreamingVersions(), ","))
 }
 
 func (g *GlobalConfig) GetJetStreamVersion(version string) (*JetStreamVersion, error) {
-	if g.EventBus.JetStream == nil || len(g.EventBus.JetStream.Versions) == 0 {
-		return nil, fmt.Errorf("jetstream configuration not found")
+	if g.EventBus == nil || g.EventBus.JetStream == nil {
+		return nil, fmt.Errorf("\"eventBus.jetstream\" not found in the configuration")
+	}
+	if len(g.EventBus.JetStream.Versions) == 0 {
+		return nil, fmt.Errorf("jetstream version configuration not found")
 	}
 	for _, r := range g.EventBus.JetStream.Versions {
 		if r.Version == version {
 			return &r, nil
 		}
 	}
-	return nil, fmt.Errorf("no jetstream configuration found for %q", version)
+	return nil, fmt.Errorf("unsupported version %q, supported versions: %q", version, strings.Join(g.supportedJetStreamVersions(), ","))
 }
 
 func LoadConfig(onErrorReloading func(error)) (*GlobalConfig, error) {
