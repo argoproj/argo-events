@@ -45,18 +45,19 @@ type jetstream struct {
 	auth *Auth
 	//clusterID string
 	//subject   string  todo: decide if we want some default subject for publishers
-	//clientID string   todo: seems like jetstream doesn't have this notion; if we want to identify it for ourselves we can
+	clientID string // seems like jetstream doesn't have this notion; we can just have this to uniquely identify ourselves in the log
 	//durableName string // todo: not sure if we want this here; may not be necessary to store it and it also doesn't apply to publishers
 	jetstreamContext nats.JetStreamContext
 
 	logger *zap.SugaredLogger
 }
 
-func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) Driver {
+func NewJetstream(url string, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
 	return &jetstream{
-		url:    url,
-		auth:   auth,
-		logger: logger,
+		url:      url,
+		auth:     auth,
+		clientID: clientID,
+		logger:   logger,
 	}
 }
 
@@ -124,8 +125,7 @@ func (stream *jetstream) Publish(conn Connection, message []byte, event Event) e
 }
 
 func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
-	//log := stream.logger //.With("clientID", stream.clientID)
-	//stream.durableName = group
+	log := stream.logger //.With("clientID", stream.clientID)
 
 	// Create a Consumer
 	_, err := stream.jetstreamContext.AddConsumer("default", &nats.ConsumerConfig{
