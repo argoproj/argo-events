@@ -61,7 +61,7 @@ func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) Driver {
 }
 
 func (stream *jetstream) Connect() (Connection, error) {
-	log := stream.logger.With("clientID", stream.clientID)
+	log := stream.logger //.With("clientID", stream.clientID)
 	conn := &jetstreamConnection{}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{
@@ -119,14 +119,12 @@ func (stream *jetstream) Connect() (Connection, error) {
 	return conn, nil
 }
 
-// todo: determine if we want the Publisher to be able to start up its connection with a default
-// subject
-func (stream *jetstream) Publish(conn Connection, subject string, message []byte) error {
-	return conn.Publish(subject, message)
+func (stream *jetstream) Publish(conn Connection, message []byte, event Event) error {
+	return conn.Publish(fmt.Sprintf("default.%s.%s", event.EventSourceName, event.EventName), message)
 }
 
 func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
-	log := stream.logger.With("clientID", stream.clientID)
+	//log := stream.logger //.With("clientID", stream.clientID)
 	//stream.durableName = group
 
 	// Create a Consumer
@@ -142,4 +140,6 @@ func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connect
 	for _, dep := range dependencies {
 		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = struct{}{}
 	}
+
+	return nil
 }

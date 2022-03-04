@@ -34,7 +34,7 @@ type Connection interface {
 
 	IsClosed() bool
 
-	Publish(subject string, data []byte, event Event) error
+	Publish(subject string, data []byte) error
 }
 
 // Auth contains the auth infor for event bus
