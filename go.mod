@@ -93,7 +93,7 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/stringprep v1.0.2 // indirect
+	github.com/xdg-go/stringprep v1.0.3 // indirect
 	sigs.k8s.io/json v0.0.0-20211208200746-9f7c6b3444d2 // indirect
 )
 
@@ -237,7 +237,7 @@ require (
 	github.com/valyala/fasthttp v1.9.0 // indirect
 	github.com/valyala/gozstd v1.7.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
-	github.com/xdg-go/scram v1.1.0
+	github.com/xdg-go/scram v1.1.1
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0 // indirect
