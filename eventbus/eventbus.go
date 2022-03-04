@@ -16,7 +16,7 @@ import (
 )
 
 // GetDriver returns a Driver implementation
-func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, clientID string) (driver.Driver, error) {
+func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, subject, clientID string) (driver.Driver, error) {
 	logger := logging.FromContext(ctx)
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
@@ -66,7 +66,7 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, c
 	var dvr driver.Driver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
-		dvr = driver.NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, clientID, auth, logger)
+		dvr = driver.NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, subject, clientID, auth, logger)
 	case apicommon.EventBusJetstream:
 		dvr = driver.NewJetstream(eventBusConfig.Jetstream.URL, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 	default:

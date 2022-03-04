@@ -22,10 +22,10 @@ type Driver interface {
 	// Parameter - dependencies, array of dependencies information
 	// Parameter - filter, a function used to filter the message
 	// Parameter - action, a function to be triggered after all conditions meet
-	SubscribeEventSources(ctx context.Context, conn Connection, subject string, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
+	SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error
 
-	// Publish a message
-	Publish(conn Connection, subject string, message []byte) error
+	// Publish a message related to an event
+	Publish(conn Connection, message []byte, event Event) error
 }
 
 // Connection is an interface of event bus driver
@@ -34,7 +34,7 @@ type Connection interface {
 
 	IsClosed() bool
 
-	Publish(subject string, data []byte) error
+	Publish(subject string, data []byte, event Event) error
 }
 
 // Auth contains the auth infor for event bus
@@ -48,6 +48,11 @@ type AuthCredential struct {
 	Token    string
 	Username string
 	Password string
+}
+
+type Event struct {
+	EventSourceName string
+	EventName       string
 }
 
 // Dependency is a struct for dependency info of a sensor

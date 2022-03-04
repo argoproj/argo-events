@@ -277,7 +277,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
 
-					err = ebDriver.SubscribeEventSources(ctx, conn, sensorCtx.eventBusSubject, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
+					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
 						return
