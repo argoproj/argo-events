@@ -301,7 +301,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						logger.Info("NATS connection lost, reconnecting...")
 						// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 						_, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
-						ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, clientID)
+						ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
 						if err != nil {
 							logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 							continue
