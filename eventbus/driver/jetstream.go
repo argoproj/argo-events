@@ -2,6 +2,7 @@ package driver
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -124,7 +125,7 @@ func (stream *jetstream) Publish(conn Connection, subject string, message []byte
 	return conn.Publish(subject, message)
 }
 
-func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connection, subject string, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
+func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
 	log := stream.logger.With("clientID", stream.clientID)
 	//stream.durableName = group
 
@@ -134,5 +135,11 @@ func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connect
 	})
 	if err != nil {
 		// tbd
+	}
+
+	// derive subjects that we'll subscribe with using the dependencies passed in
+	subjects := make(map[string]struct{}) // essentially a set
+	for _, dep := range dependencies {
+		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = struct{}{}
 	}
 }
