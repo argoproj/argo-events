@@ -1,10 +1,15 @@
-package driver
+package sensoreventbus
 
-type natsStreamingTriggerConn struct {
-	natsStreamingConnection
+type NATSStreamingTriggerConn struct {
+	*eventbusdriver.NATSStreamingConnection
 
 	sensorName string
 	triggerName string
+}
+
+
+func (conn *NATSStreamingTriggerConn) ClientID() {
+	return conn.clientID
 }
 
 // Subscribe is used to subscribe to multiple event source dependencies
@@ -18,16 +23,11 @@ type natsStreamingTriggerConn struct {
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (conn *natsStreamingTriggerConn) Subscribe(
+func (conn *NATSStreamingTriggerConn) Subscribe(
 	ctx context.Context,
-	group string,
-	//sensorName string,
-	//triggerName string,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
 	lastResetTime time.Time,
-	dependencyExpr string,
-	dependencies []Dependency,
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event)) error
@@ -42,6 +42,7 @@ func (conn *natsStreamingTriggerConn) Subscribe(
 		return errors.New("not a NATS streaming connection")
 	}
 	// use group name as durable name
+	group := ??? // todo: take clientID and remove last part
 	durableName := group
 	sub, err := nsc.stanConn.QueueSubscribe(n.subject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, transform, filter, action, log)

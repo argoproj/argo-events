@@ -17,7 +17,7 @@ type SourceEBDriver interface {
 }
 
 type SensorEBDriver interface {
-	Connect(sensorName string, triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error)
+	Connect(triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error)
 }
 
 // Connection is an interface of event bus driver

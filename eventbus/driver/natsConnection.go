@@ -5,22 +5,18 @@ import (
 	"github.com/nats-io/stan.go"
 )
 
-type natsStreamingConnection struct {
+type NATSStreamingConnection struct {
 	natsConn *nats.Conn
 	stanConn stan.Conn
 
 	natsConnected bool
 	stanConnected bool
 
-	subject  string
+	//subject  string
 	clientID string
 }
 
-type natsStreamingSourceConn struct {
-	*natsStreamingConnection
-}
-
-func (nsc *natsStreamingConnection) Close() error {
+func (nsc *NATSStreamingConnection) Close() error {
 	if nsc.stanConn != nil {
 		err := nsc.stanConn.Close()
 		if err != nil {
@@ -33,13 +29,13 @@ func (nsc *natsStreamingConnection) Close() error {
 	return nil
 }
 
-func (nsc *natsStreamingConnection) IsClosed() bool {
+func (nsc *NATSStreamingConnection) IsClosed() bool {
 	if nsc.natsConn == nil || nsc.stanConn == nil || !nsc.natsConnected || !nsc.stanConnected || nsc.natsConn.IsClosed() {
 		return true
 	}
 	return false
 }
 
-func (nsc *natsStreamingConnection) Publish(subject string, data []byte) error {
+func (nsc *NATSStreamingConnection) Publish(subject string, data []byte) error {
 	return nsc.stanConn.Publish(subject, data)
 }
