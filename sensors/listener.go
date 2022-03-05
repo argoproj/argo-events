@@ -120,6 +120,14 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	// todo: since the SensorDriver itself won't be able to log the Trigger name, need to set up the logger for the individual Conns to do so
+	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger /*.With(logging.LabelTriggerName, trigger.Template.Name)*/),
+		*sensorCtx.eventBusConfig, sensorCtx.eventBusSubject /*, clientID*/)
+	if err != nil {
+		return err
+	}
+
 	wg := &sync.WaitGroup{}
 	for _, t := range sensor.Spec.Triggers {
 		initRateLimiter(t)
@@ -131,7 +139,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				logger.Errorw("failed to get dependency expression", zap.Error(err))
 				return
 			}
-			// Calculate dependencies of each of the trigger.
+			// Calculate dependencies of each of the triggers.
 			de := strings.ReplaceAll(depExpression, "-", "\\-")
 			expr, err := govaluate.NewEvaluableExpression(de)
 			if err != nil {
@@ -153,16 +161,12 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				}
 				deps = append(deps, d)
 			}
-			group, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
-			ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
-			if err != nil {
-				logger.Errorw("failed to get eventbus driver", zap.Error(err))
-				return
-			}
-			var conn eventbusdriver.Connection
+			//group, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
+
+			var conn eventbusdriver.TriggerConnection
 			err = common.Connect(&common.DefaultBackoff, func() error {
 				var err error
-				conn, err = ebDriver.Connect()
+				conn, err = ebDriver.Connect(sensorCtx.sensor.Name, trigger.Template.Name, depExpression, deps)
 				return err
 			})
 			if err != nil {
@@ -275,11 +279,11 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					// release the lock when goroutine exits
 					defer atomic.StoreUint32(&subLock, 0)
 
-					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, clientID)
+					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, conn.ClientID())
 
-					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
+					err = conn.Subscribe(ctx, closeSubCh, resetConditionsCh, lastResetTime, transformFunc, filterFunc, actionFunc)
 					if err != nil {
-						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))
 						return
 					}
 				}()
@@ -287,31 +291,31 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 			subscribeOnce(&subLock, subscribeFunc)
 
-			logger.Infof("starting eventbus connection daemon for client %s...", clientID)
+			logger.Infof("starting eventbus connection daemon for client %s...", conn.ClientID())
 			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
 			for {
 				select {
 				case <-ctx.Done():
-					logger.Infof("exiting eventbus connection daemon for client %s...", clientID)
+					logger.Infof("exiting eventbus connection daemon for client %s...", conn.ClientID())
 					wg1.Wait()
 					return
 				case <-ticker.C:
 					if conn == nil || conn.IsClosed() {
 						logger.Info("NATS connection lost, reconnecting...")
 						// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
-						_, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
+						/*_, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
 						ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
 						if err != nil {
 							logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 							continue
-						}
-						conn, err = ebDriver.Connect()
+						}*/
+						conn, err = ebDriver.Connect(sensorCtx.sensor.Name, trigger.Template.Name, depExpression, deps)
 						if err != nil {
-							logger.Errorw("failed to reconnect to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+							logger.Errorw("failed to reconnect to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))
 							continue
 						}
-						logger.Infow("reconnected to NATS streaming server.", zap.Any("clientID", clientID))
+						logger.Infow("reconnected to NATS streaming server.", zap.Any("clientID", conn.ClientID()))
 
 						if atomic.LoadUint32(&subLock) == 1 {
 							closeSubCh <- struct{}{}
