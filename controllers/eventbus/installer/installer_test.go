@@ -18,6 +18,7 @@ import (
 
 const (
 	testJetStreamImage         = "test-js-image"
+	testJSReloaderImage        = "test-nats-rl-image"
 	testJetStreamExporterImage = "test-js-e-image"
 )
 
@@ -38,6 +39,7 @@ var (
 					{
 						Version:              "2.7.3",
 						NatsImage:            testJetStreamImage,
+						ConfigReloaderImage:  testJSReloaderImage,
 						MetricsExporterImage: testJetStreamExporterImage,
 					},
 				},

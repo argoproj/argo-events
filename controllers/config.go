@@ -35,6 +35,7 @@ type JetStreamConfig struct {
 type JetStreamVersion struct {
 	Version              string `json:"version"`
 	NatsImage            string `json:"natsImage"`
+	ConfigReloaderImage  string `json:"configReloaderImage"`
 	MetricsExporterImage string `json:"metricsExporterImage"`
 	StartCommand         string `json:"startCommand"`
 }

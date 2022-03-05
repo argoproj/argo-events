@@ -395,6 +395,20 @@ ContainerTemplate contains customized spec for Nats JetStream container
 </tr>
 <tr>
 <td>
+<code>reloaderContainerTemplate</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ReloaderContainerTemplate contains customized spec for config reloader
+container
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>metricsContainerTemplate</code></br> <em>
 <a href="#argoproj.io/v1alpha1.ContainerTemplate"> ContainerTemplate
 </a> </em>

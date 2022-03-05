@@ -22,9 +22,11 @@ data:
         versions:
         - version: 2.7.3
           natsImage: nats:2.7.3
+          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           startCommand: /nats-server
         - version: 2.7.3-alpine
           natsImage: nats:2.7.3-alpine
+          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           startCommand: nats-server

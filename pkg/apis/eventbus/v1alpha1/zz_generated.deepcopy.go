@@ -214,6 +214,11 @@ func (in *JetStreamBus) DeepCopyInto(out *JetStreamBus) {
 		*out = new(ContainerTemplate)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.ReloaderContainerTemplate != nil {
+		in, out := &in.ReloaderContainerTemplate, &out.ReloaderContainerTemplate
+		*out = new(ContainerTemplate)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.MetricsContainerTemplate != nil {
 		in, out := &in.MetricsContainerTemplate, &out.MetricsContainerTemplate
 		*out = new(ContainerTemplate)

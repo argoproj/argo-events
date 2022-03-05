@@ -86,6 +86,7 @@ var (
 					{
 						Version:              "testVersion",
 						NatsImage:            "testJSImage",
+						ConfigReloaderImage:  "test-nats-rl-image",
 						MetricsExporterImage: "testJSMetricsImage",
 					},
 				},

@@ -193,7 +193,7 @@ func (r *jetStreamInstaller) createStatefulSet(ctx context.Context) error {
 	return nil
 }
 
-func (r *jetStreamInstaller) buildStatefulSetSpec(jeVersion *controllers.JetStreamVersion) appv1.StatefulSetSpec {
+func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStreamVersion) appv1.StatefulSetSpec {
 	js := r.eventBus.Spec.JetStream
 	replicas := int32(js.GetReplicas())
 	podTemplateLabels := make(map[string]string)
@@ -206,11 +206,15 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jeVersion *controllers.JetStre
 	for k, v := range r.labels {
 		podTemplateLabels[k] = v
 	}
-	var jsContainerPullPolicy, metricsContainerPullPolicy corev1.PullPolicy
-	var jsContainerSecurityContext, metricsContainerSecurityContext *corev1.SecurityContext
+	var jsContainerPullPolicy, reloaderContainerPullPolicy, metricsContainerPullPolicy corev1.PullPolicy
+	var jsContainerSecurityContext, reloaderContainerSecurityContext, metricsContainerSecurityContext *corev1.SecurityContext
 	if js.ContainerTemplate != nil {
 		jsContainerPullPolicy = js.ContainerTemplate.ImagePullPolicy
 		jsContainerSecurityContext = js.ContainerTemplate.SecurityContext
+	}
+	if js.ReloaderContainerTemplate != nil {
+		reloaderContainerPullPolicy = js.ReloaderContainerTemplate.ImagePullPolicy
+		reloaderContainerSecurityContext = js.ReloaderContainerTemplate.SecurityContext
 	}
 	if js.MetricsContainerTemplate != nil {
 		metricsContainerPullPolicy = js.MetricsContainerTemplate.ImagePullPolicy
@@ -219,8 +223,9 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jeVersion *controllers.JetStre
 	shareProcessNamespace := true
 	terminationGracePeriodSeconds := int64(60)
 	spec := appv1.StatefulSetSpec{
-		Replicas:    &replicas,
-		ServiceName: generateJetStreamServiceName(r.eventBus),
+		PodManagementPolicy: appv1.ParallelPodManagement,
+		Replicas:            &replicas,
+		ServiceName:         generateJetStreamServiceName(r.eventBus),
 		Selector: &metav1.LabelSelector{
 			MatchLabels: r.labels,
 		},
@@ -280,16 +285,17 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jeVersion *controllers.JetStre
 				Containers: []corev1.Container{
 					{
 						Name:            "main",
-						Image:           jeVersion.NatsImage,
+						Image:           jsVersion.NatsImage,
 						ImagePullPolicy: jsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: jsClientPort},
 							{Name: "cluster", ContainerPort: jsClusterPort},
 							{Name: "monitor", ContainerPort: jsMonitorPort},
 						},
-						Command: []string{jeVersion.StartCommand, "--config", "/etc/nats-config/nats-js.conf"},
+						Command: []string{jsVersion.StartCommand, "--config", "/etc/nats-config/nats-js.conf"},
 						Env: []corev1.EnvVar{
 							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
+							{Name: "SERVER_NAME", Value: "$(POD_NAME)"},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
 							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc"},
 						},
@@ -311,14 +317,25 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jeVersion *controllers.JetStre
 						Lifecycle: &corev1.Lifecycle{
 							PreStop: &corev1.LifecycleHandler{
 								Exec: &corev1.ExecAction{
-									Command: []string{"/bin/bash", "-c", fmt.Sprintf("%s -sl=ldm=/var/run/nats/nats.pid && /bin/sleep 60", jeVersion.StartCommand)},
+									Command: []string{jsVersion.StartCommand, "-sl=ldm=/var/run/nats/nats.pid"},
 								},
 							},
 						},
 					},
 					{
+						Name:            "reloader",
+						Image:           jsVersion.ConfigReloaderImage,
+						ImagePullPolicy: reloaderContainerPullPolicy,
+						SecurityContext: reloaderContainerSecurityContext,
+						Command:         []string{"nats-server-config-reloader", "-pid", "/var/run/nats/nats.pid", "-config", "/etc/nats-config/nats-js.conf"},
+						VolumeMounts: []corev1.VolumeMount{
+							{Name: "config-volume", MountPath: "/etc/nats-config"},
+							{Name: "pid", MountPath: "/var/run/nats"},
+						},
+					},
+					{
 						Name:            "metrics",
-						Image:           jeVersion.MetricsExporterImage,
+						Image:           jsVersion.MetricsExporterImage,
 						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "metrics", ContainerPort: jsMetricsPort},
@@ -389,12 +406,15 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jeVersion *controllers.JetStre
 
 func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 	token := common.RandomString(24)
+	sysPassword := common.RandomString(24)
 	authTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/server-auth.conf"))
 	var authTplOutput bytes.Buffer
 	if err := authTpl.Execute(&authTplOutput, struct {
-		Token string
+		Token       string
+		SysPassword string
 	}{
-		Token: token,
+		Token:       token,
+		SysPassword: sysPassword,
 	}); err != nil {
 		return fmt.Errorf("failed to parse nats auth template, error: %w", err)
 	}
@@ -502,12 +522,14 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 		ClusterName string
 		MonitorPort string
 		ClusterPort string
+		ClientPort  string
 		Routes      string
 		Settings    string
 	}{
 		ClusterName: r.eventBus.Name,
 		MonitorPort: strconv.Itoa(int(jsMonitorPort)),
 		ClusterPort: strconv.Itoa(int(jsClusterPort)),
+		ClientPort:  strconv.Itoa(int(jsClientPort)),
 		Routes:      strings.Join(routes, ","),
 		Settings:    settings,
 	}); err != nil {

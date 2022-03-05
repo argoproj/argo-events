@@ -315,6 +315,12 @@ func schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref common.ReferenceCallback
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
 						},
 					},
+					"reloaderContainerTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReloaderContainerTemplate contains customized spec for config reloader container",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.ContainerTemplate"),
+						},
+					},
 					"metricsContainerTemplate": {
 						SchemaProps: spec.SchemaProps{
 							Description: "MetricsContainerTemplate contains customized spec for metrics container",
