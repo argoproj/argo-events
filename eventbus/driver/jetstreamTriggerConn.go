@@ -8,13 +8,13 @@ import (
 
 
 type JetstreamTriggerConn struct {
+	*JetstreamConnection
 	sensorName string
 	triggerName string
 	keyValueStore *nats.KeyValue
 }
 
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
-	conn Connection,
 	group string,
 	//sensorName string,
 	//triggerName string,
