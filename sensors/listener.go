@@ -19,7 +19,6 @@ package sensors
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -30,12 +29,11 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
+	"github.com/argoproj/argo-events/sensors/sensoreventbus"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
@@ -54,22 +52,6 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 	}
 
 	subscribe()
-}
-
-func (sensorCtx *SensorContext) getGroupAndClientID(eventBusConfig eventbusv1alpha1.BusConfig, triggerName, depExpression string) (string, string) {
-	// Generate clientID with hash code
-	// todo: maybe we can do this some more elegant way
-	hashKey := fmt.Sprintf("%s-%s", sensorCtx.sensor.Name, triggerName)
-	if eventBusConfig.NATS != nil {
-		// for NATS Streaming we also include the dependency expression
-		hashKey = fmt.Sprintf("%s-%s-%s", sensorCtx.sensor.Name, triggerName, depExpression)
-	}
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	hashVal := common.Hasher(hashKey)
-	group := fmt.Sprintf("client-%v", hashVal)
-	clientID := fmt.Sprintf("client-%v-%v", hashVal, r1.Intn(100))
-	return group, clientID
 }
 
 func (sensorCtx *SensorContext) Start(ctx context.Context) error {
@@ -122,8 +104,8 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	defer cancel()
 
 	// todo: since the SensorDriver itself won't be able to log the Trigger name, need to set up the logger for the individual Conns to do so
-	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger /*.With(logging.LabelTriggerName, trigger.Template.Name)*/),
-		*sensorCtx.eventBusConfig, sensorCtx.eventBusSubject /*, clientID*/)
+	ebDriver, err := sensoreventbus.GetSensorDriver(logging.WithLogger(ctx, logger /*.With(logging.LabelTriggerName, trigger.Template.Name)*/),
+		*sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, sensorCtx.sensor.Name /*, clientID*/)
 	if err != nil {
 		return err
 	}
@@ -166,7 +148,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			var conn eventbusdriver.TriggerConnection
 			err = common.Connect(&common.DefaultBackoff, func() error {
 				var err error
-				conn, err = ebDriver.Connect(sensorCtx.sensor.Name, trigger.Template.Name, depExpression, deps)
+				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 				return err
 			})
 			if err != nil {
@@ -310,7 +292,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 							logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 							continue
 						}*/
-						conn, err = ebDriver.Connect(sensorCtx.sensor.Name, trigger.Template.Name, depExpression, deps)
+						conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 						if err != nil {
 							logger.Errorw("failed to reconnect to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))
 							continue
