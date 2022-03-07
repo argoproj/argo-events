@@ -1,24 +1,8 @@
 package driver
 
 import (
-	"context"
-	"time"
-
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
-
-// Driver is an interface for event bus
-type SourceEBDriver interface {
-	Connect(eventSourceName string /*, clientID? */) (SourceConnection, error)
-
-	// Publish a message related to an event (not sure if we need this or not)
-	//Publish(conn Connection, message []byte, event Event) error
-}
-
-type SensorEBDriver interface {
-	Connect(triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error)
-}
 
 // Connection is an interface of event bus driver
 type Connection interface {
@@ -29,22 +13,6 @@ type Connection interface {
 	Publish(subject string, data []byte) error
 
 	ClientID() string
-}
-
-type SourceConnection interface {
-	Connection
-}
-
-type TriggerConnection interface {
-	Connection
-
-	Subscribe(ctx context.Context,
-		closeCh <-chan struct{},
-		resetConditionsCh <-chan struct{},
-		lastResetTime time.Time,
-		transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
-		filter func(string, cloudevents.Event) bool,
-		action func(map[string]cloudevents.Event)) error
 }
 
 // Auth contains the auth infor for event bus
@@ -61,13 +29,6 @@ type AuthCredential struct {
 }
 
 type Event struct {
-	EventSourceName string
-	EventName       string
-}
-
-// Dependency is a struct for dependency info of a sensor
-type Dependency struct {
-	Name            string
 	EventSourceName string
 	EventName       string
 }

@@ -39,3 +39,7 @@ func (nsc *NATSStreamingConnection) IsClosed() bool {
 func (nsc *NATSStreamingConnection) Publish(subject string, data []byte) error {
 	return nsc.stanConn.Publish(subject, data)
 }
+
+func (nsc *NATSStreamingConnection) ClientID() string {
+	return nsc.clientID
+}

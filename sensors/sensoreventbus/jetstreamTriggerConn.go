@@ -1,14 +1,15 @@
-package driver
+package sensoreventbus
 
 
 import (
 
 	nats "github.com/nats-io/nats.go"
+	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 )
 
 
 type JetstreamTriggerConn struct {
-	*JetstreamConnection
+	*eventbusdriver.JetstreamConnection
 	sensorName string
 	triggerName string
 	keyValueStore *nats.KeyValue

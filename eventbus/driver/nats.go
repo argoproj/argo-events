@@ -16,18 +16,8 @@ type NATStreaming struct {
 	logger *zap.SugaredLogger
 }
 
-type NATSStreamingConnection struct {
-	natsConn *nats.Conn
-	stanConn stan.Conn
-
-	natsConnected bool
-	stanConnected bool
-
-	clientID string
-}
-
 // NewNATSStreaming returns a nats streaming driver
-func NewNATSStreaming(url, clusterID, auth *Auth, logger *zap.SugaredLogger) *NATStreaming {
+func NewNATSStreaming(url string, clusterID string, auth *Auth, logger *zap.SugaredLogger) *NATStreaming {
 	return &NATStreaming{
 		url:       url,
 		clusterID: clusterID,
@@ -36,7 +26,7 @@ func NewNATSStreaming(url, clusterID, auth *Auth, logger *zap.SugaredLogger) *NA
 	}
 }
 
-func (n *NATStreaming) Connect(clientID string) (*NATSStreamingConnection, error) {
+func (n *NATStreaming) MakeConnection(clientID string) (*NATSStreamingConnection, error) {
 	log := n.logger.With("clientID", clientID)
 	conn := &NATSStreamingConnection{clientID: clientID}
 	opts := []nats.Option{

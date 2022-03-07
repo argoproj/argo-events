@@ -7,6 +7,7 @@ type JetstreamConnection struct {
 	jsContext nats.JetStreamContext
 
 	natsConnected bool
+	clientID      string
 }
 
 type JetstreamSourceConnection struct {
@@ -32,4 +33,8 @@ func (jsc *JetstreamConnection) Publish(subject string, data []byte) error {
 	// todo: On the publishing side you can avoid duplicate message ingestion using the Message Deduplication feature.
 	_, err := jsc.jsContext.Publish(subject, data)
 	return err
+}
+
+func (jsc *JetstreamConnection) ClientID() string {
+	return jsc.clientID
 }
