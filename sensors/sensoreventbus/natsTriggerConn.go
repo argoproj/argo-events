@@ -7,11 +7,6 @@ type NATSStreamingTriggerConn struct {
 	triggerName string
 }
 
-
-func (conn *NATSStreamingTriggerConn) ClientID() {
-	return conn.clientID
-}
-
 // Subscribe is used to subscribe to multiple event source dependencies
 // Parameter - ctx, context
 // Parameter - conn, eventbus connection

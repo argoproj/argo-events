@@ -2,17 +2,43 @@ package sensoreventbus
 
 import (
 	"context"
+	"time"
 
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/eventbus"
 	"github.com/argoproj/argo-events/eventbus/driver"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
 )
 
+type Driver interface {
+	Connect(triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error)
+}
+
+type TriggerConnection interface {
+	eventbusdriver.Connection
+
+	Subscribe(ctx context.Context,
+		closeCh <-chan struct{},
+		resetConditionsCh <-chan struct{},
+		lastResetTime time.Time,
+		transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
+		filter func(string, cloudevents.Event) bool,
+		action func(map[string]cloudevents.Event)) error
+}
+
+// Dependency is a struct for dependency info of a sensor
+type Dependency struct {
+	Name            string
+	EventSourceName string
+	EventName       string
+}
+
 func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorName string, defaultSubject string) (driver.SensorEBDriver, error) {
-	auth, err := eventbusdriver.GetAuth(ctx, eventBusConfig)
+	auth, err := eventbus.GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +53,7 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 		return nil, errors.New("invalid event bus")
 	}
 
-	var dvr driver.SensorEBDriver
+	var dvr Driver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
 		dvr = NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, sensorName, auth, logger)

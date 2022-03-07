@@ -22,7 +22,7 @@ func NewNATSStreaming(url, clusterID, sensorName string, auth *eventbusdriver.Au
 	}
 }
 
-func (n *NATSStreaming) Connect(triggerName string, dependencyExpression string, deps []eventbusdriver.Dependency) (eventbusdriver.TriggerConnection, error) {
+func (n *NATSStreaming) Connect(triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error) {
 	// Generate clientID with hash code
 	hashKey := fmt.Sprintf("%s-%s-%s", n.sensorName, triggerName, dependencyExpression)
 

@@ -1,51 +1,17 @@
 package driver
 
 import (
-	"context"
-	"fmt"
-	"time"
-
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	nats "github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
-type jetstreamConnection struct {
-	natsConn  *nats.Conn
-	jsContext nats.JetStreamContext
-
-	natsConnected bool
-}
-
-func (jsc *jetstreamConnection) Close() error {
-
-	if jsc.natsConn != nil && jsc.natsConn.IsConnected() {
-		jsc.natsConn.Close()
-	}
-	return nil
-}
-
-func (jsc *jetstreamConnection) IsClosed() bool {
-	if jsc.natsConn == nil || !jsc.natsConnected || jsc.natsConn.IsClosed() {
-		return true
-	}
-	return false
-}
-
-func (jsc *jetstreamConnection) Publish(subject string, data []byte) error {
-	// todo: On the publishing side you can avoid duplicate message ingestion using the Message Deduplication feature.
-	_, err := jsc.jsContext.Publish(subject, data)
-	return err
-}
-
-type jetstream struct {
-	url  string
-	auth *Auth
-	//clusterID string
-	//subject   string  todo: decide if we want some default subject for publishers
+type Jetstream struct {
+	url      string
 	clientID string // seems like jetstream doesn't have this notion; we can just have this to uniquely identify ourselves in the log
+	auth     *Auth
+	//clusterID string
 	//durableName string // todo: not sure if we want this here; may not be necessary to store it and it also doesn't apply to publishers
 	jetstreamContext nats.JetStreamContext
 
@@ -53,17 +19,17 @@ type jetstream struct {
 }
 
 func NewJetstream(url string, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
-	return &jetstream{
+	return &Jetstream{
 		url:      url,
-		auth:     auth,
 		clientID: clientID,
+		auth:     auth,
 		logger:   logger,
 	}
 }
 
-func (stream *jetstream) Connect() (Connection, error) {
+func (stream *Jetstream) MakeConnection(clientID string) (Connection, error) {
 	log := stream.logger //.With("clientID", stream.clientID)
-	conn := &jetstreamConnection{}
+	conn := &JetstreamConnection{clientID: clientID}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
@@ -113,33 +79,12 @@ func (stream *jetstream) Connect() (Connection, error) {
 		return nil, err
 	}
 
-	// todo: when we subscribe later we can specify durable name there (look at SubOpt in js.go)
-	// maybe also use AckAll()? need to look for all SubOpt
-
 	log.Info("Connected to NATS streaming server.")
 	return conn, nil
 }
 
-func (stream *jetstream) Publish(conn Connection, message []byte, event Event) error {
+/*
+func (stream *Jetstream) Publish(conn Connection, message []byte, event Event) error {
 	return conn.Publish(fmt.Sprintf("default.%s.%s", event.EventSourceName, event.EventName), message)
 }
-
-func (stream *jetstream) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
-	log := stream.logger //.With("clientID", stream.clientID)
-
-	// Create a Consumer
-	_, err := stream.jetstreamContext.AddConsumer("default", &nats.ConsumerConfig{
-		Durable: group,
-	})
-	if err != nil {
-		// tbd
-	}
-
-	// derive subjects that we'll subscribe with using the dependencies passed in
-	subjects := make(map[string]struct{}) // essentially a set
-	for _, dep := range dependencies {
-		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = struct{}{}
-	}
-
-	return nil
-}
+*/

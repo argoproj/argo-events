@@ -11,19 +11,15 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus/driver"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
 func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*driver.Auth, error) {
 	logger := logging.FromContext(ctx)
-	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
 	if eventBusConfig.NATS != nil {
-		eventBusType = apicommon.EventBusNATS
 		eventBusAuth = eventBusConfig.NATS.Auth
 	} else if eventBusConfig.Jetstream != nil {
-		eventBusType = apicommon.EventBusJetstream
 		eventBusAuth = eventBusConfig.Jetstream.Auth
 	} else {
 		return nil, errors.New("invalid event bus")
