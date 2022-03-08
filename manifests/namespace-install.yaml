@@ -196,6 +196,40 @@ subjects:
   name: argo-events-sa
   namespace: argo-events
 ---
+apiVersion: v1
+data:
+  controller-config.yaml: |
+    eventBus:
+      nats:
+        versions:
+        - version: 0.22.1
+          natsStreamingImage: nats-streaming:0.22.1
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.8.0
+      jetstream:
+        # Default JetStream settings, could be overridden by EventBus JetStream specs
+        settings: |
+          # https://docs.nats.io/running-a-nats-service/configuration#jetstream
+          # Only configure "max_memory_store" or "max_file_store", do not set "store_dir" as it has been hardcoded.
+          # e.g. 1G. -1 means no limit, up to 75% of available memory
+          max_memory_store: -1
+          # e.g. 20G. -1 means no limit, Up to 1TB if available
+          max_file_store: 1TB
+        versions:
+        - version: 2.7.3
+          natsImage: nats:2.7.3
+          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
+          startCommand: /nats-server
+        - version: 2.7.3-alpine
+          natsImage: nats:2.7.3-alpine
+          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
+          startCommand: nats-server
+kind: ConfigMap
+metadata:
+  name: argo-events-controller-config
+  namespace: argo-events
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -220,10 +254,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: NATS_STREAMING_IMAGE
-          value: nats-streaming:0.22.1
-        - name: NATS_METRICS_EXPORTER_IMAGE
-          value: natsio/prometheus-nats-exporter:0.8.0
         image: quay.io/argoproj/argo-events:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -239,10 +269,17 @@ spec:
             port: 8081
           initialDelaySeconds: 3
           periodSeconds: 3
+        volumeMounts:
+        - mountPath: /etc/argo-events
+          name: controller-config-volume
       securityContext:
         runAsNonRoot: true
         runAsUser: 9731
       serviceAccountName: argo-events-sa
+      volumes:
+      - configMap:
+          name: argo-events-controller-config
+        name: controller-config-volume
 ---
 apiVersion: apps/v1
 kind: Deployment
