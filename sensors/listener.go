@@ -29,7 +29,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
@@ -129,14 +128,14 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				return
 			}
 			depNames := unique(expr.Vars())
-			deps := []eventbusdriver.Dependency{}
+			deps := []sensoreventbus.Dependency{}
 			for _, depName := range depNames {
 				dep, ok := depMapping[depName]
 				if !ok {
 					logger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
 					return
 				}
-				d := eventbusdriver.Dependency{
+				d := sensoreventbus.Dependency{
 					Name:            dep.Name,
 					EventSourceName: dep.EventSourceName,
 					EventName:       dep.EventName,
@@ -145,7 +144,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 			//group, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
 
-			var conn eventbusdriver.TriggerConnection
+			var conn sensoreventbus.TriggerConnection
 			err = common.Connect(&common.DefaultBackoff, func() error {
 				var err error
 				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
@@ -263,7 +262,8 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, conn.ClientID())
 
-					err = conn.Subscribe(ctx, closeSubCh, resetConditionsCh, lastResetTime, transformFunc, filterFunc, actionFunc, sensorCtx.eventBusSubject)
+					subject := &sensorCtx.eventBusSubject
+					err = conn.Subscribe(ctx, closeSubCh, resetConditionsCh, lastResetTime, transformFunc, filterFunc, actionFunc, subject)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))
 						return
