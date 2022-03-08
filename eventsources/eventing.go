@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"strings"
 	"sync"
 	"time"
@@ -18,9 +17,9 @@ import (
 	"github.com/argoproj/argo-events/common/expr"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/eventbus"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
+	"github.com/argoproj/argo-events/eventsources/sourceeventbus"
 	"github.com/argoproj/argo-events/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
@@ -328,7 +327,7 @@ type EventSourceAdaptor struct {
 	eventBusSubject string
 	hostname        string
 
-	eventBusConn eventbusdriver.Connection
+	eventBusConn sourceeventbus.SourceConnection
 
 	metrics *eventsourcemetrics.Metrics
 }
@@ -389,8 +388,8 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer, filters map[string]*v1alpha1.EventSourceFilter) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
-	clientID := generateClientID(e.hostname)
-	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
+	//clientID := generateClientID(e.hostname)
+	driver, err := sourceeventbus.GetSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
 	if err != nil {
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
@@ -423,8 +422,8 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 				if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
-					clientID := generateClientID(e.hostname)
-					driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
+					//clientID := generateClientID(e.hostname)
+					driver, err := sourceeventbus.GetSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
 					if err != nil {
 						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
@@ -504,7 +503,8 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 
-						if err = driver.Publish(e.eventBusConn, eventBody, eventbusdriver.Event{server.GetEventSourceName(), server.GetEventName()}); err != nil {
+						subject := &e.eventBusSubject
+						if err = e.eventBusConn.PublishEvent(ctx, eventbusdriver.Event{server.GetEventSourceName(), server.GetEventName()}, eventBody, subject); err != nil {
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
@@ -547,12 +547,13 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	}
 }
 
+/*
 func generateClientID(hostname string) string {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(hostname, ".", "_"), r1.Intn(1000))
 	return clientID
-}
+}*/
 
 func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) {
 	dataMap := make(map[string]interface{})

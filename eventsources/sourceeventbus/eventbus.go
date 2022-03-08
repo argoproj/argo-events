@@ -21,10 +21,11 @@ type SourceConnection interface {
 
 	PublishEvent(ctx context.Context,
 		evt eventbusdriver.Event,
-		message []byte) error
+		message []byte,
+		defaultSubject *string) error
 }
 
-func GetSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string) (Driver, error) {
+func GetSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string, hostname string) (Driver, error) {
 	auth, err := eventbus.GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
@@ -43,7 +44,7 @@ func GetSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	var dvr Driver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
-		dvr = NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, eventSourceName, auth, logger)
+		dvr = NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, eventSourceName, hostname, defaultSubject, auth, logger)
 	case apicommon.EventBusJetstream:
 		dvr = NewJetstream(eventBusConfig.Jetstream.URL, eventSourceName, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 	default:
