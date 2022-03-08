@@ -1,10 +1,30 @@
 package sensoreventbus
 
+import (
+	"context"
+	"encoding/json"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/Knetic/govaluate"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/gobwas/glob"
+	"github.com/nats-io/stan.go"
+	"github.com/nats-io/stan.go/pb"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
+	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+)
+
 type NATSStreamingTriggerConn struct {
 	*eventbusdriver.NATSStreamingConnection
 
-	sensorName string
-	triggerName string
+	sensorName           string
+	triggerName          string
+	dependencyExpression string
+	deps                 []Dependency
 }
 
 // Subscribe is used to subscribe to multiple event source dependencies
@@ -18,28 +38,23 @@ type NATSStreamingTriggerConn struct {
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (conn *NATSStreamingTriggerConn) Subscribe(
+func (n *NATSStreamingTriggerConn) Subscribe(
 	ctx context.Context,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
 	lastResetTime time.Time,
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
-	action func(map[string]cloudevents.Event)) error
-{
-	log := n.logger.With("clientID", n.clientID)
-	msgHolder, err := newEventSourceMessageHolder(log, dependencyExpr, dependencies, lastResetTime)
+	action func(map[string]cloudevents.Event)) error {
+	log := n.logger.With("clientID", n.ClientID())
+	msgHolder, err := newEventSourceMessageHolder(log, n.dependencyExpression, n.deps, lastResetTime)
 	if err != nil {
 		return err
 	}
-	nsc, ok := conn.(*natsStreamingConnection)
-	if !ok {
-		return errors.New("not a NATS streaming connection")
-	}
 	// use group name as durable name
-	group := ??? // todo: take clientID and remove last part
+	group := n.getGroupNameFromClientID()
 	durableName := group
-	sub, err := nsc.stanConn.QueueSubscribe(n.subject, group, func(m *stan.Msg) {
+	sub, err := n.stanConn.QueueSubscribe(n.subject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, transform, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
@@ -107,7 +122,7 @@ func (conn *NATSStreamingTriggerConn) Subscribe(
 	}
 }
 
-func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *zap.SugaredLogger) {
+func (n *NATSStreamingTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *zap.SugaredLogger) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
 		log.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)

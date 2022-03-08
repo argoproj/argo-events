@@ -3,6 +3,7 @@ package driver
 import (
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
+	"go.uber.org/zap"
 )
 
 type NATSStreamingConnection struct {
@@ -14,6 +15,8 @@ type NATSStreamingConnection struct {
 
 	//subject  string
 	clientID string
+
+	logger *zap.SugaredLogger
 }
 
 func (nsc *NATSStreamingConnection) Close() error {

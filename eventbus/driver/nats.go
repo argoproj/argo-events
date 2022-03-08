@@ -28,7 +28,7 @@ func NewNATSStreaming(url string, clusterID string, auth *Auth, logger *zap.Suga
 
 func (n *NATStreaming) MakeConnection(clientID string) (*NATSStreamingConnection, error) {
 	log := n.logger.With("clientID", clientID)
-	conn := &NATSStreamingConnection{clientID: clientID}
+	conn := &NATSStreamingConnection{clientID: clientID, logger: n.logger}
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
 		nats.NoReconnect(),

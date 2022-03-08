@@ -2,7 +2,7 @@ package sensoreventbus
 
 import (
 	"fmt"
-	"rand"
+	"math/rand"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -36,5 +36,5 @@ func (n *NATSStreaming) Connect(triggerName string, dependencyExpression string,
 		return nil, err
 	}
 
-	return &NATSStreamingTriggerConn{conn, n.sensorName, triggerName}, nil
+	return &NATSStreamingTriggerConn{conn, n.sensorName, triggerName, dependencyExpression, deps}, nil
 }

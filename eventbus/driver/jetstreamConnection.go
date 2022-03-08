@@ -1,17 +1,18 @@
 package driver
 
-import nats "github.com/nats-io/nats.go"
+import (
+	nats "github.com/nats-io/nats.go"
+	"go.uber.org/zap"
+)
 
 type JetstreamConnection struct {
 	natsConn  *nats.Conn
 	jsContext nats.JetStreamContext
 
 	natsConnected bool
-	clientID      string
-}
+	clientID      string // seems like jetstream doesn't have this notion; we can just have this to uniquely identify ourselves in the log
 
-type JetstreamSourceConnection struct {
-	*JetstreamConnection
+	logger *zap.SugaredLogger
 }
 
 func (jsc *JetstreamConnection) Close() error {

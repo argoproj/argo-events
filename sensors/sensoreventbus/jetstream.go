@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"rand"
+	"math/rand"
 
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	nats "github.com/nats-io/nats.go"
@@ -20,9 +20,9 @@ type Jetstream struct {
 	keyValueStore *nats.KeyValue
 }
 
-func NewJetstream(url string, clientID string, sensorName string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) Driver {
+func NewJetstream(url string, sensorName string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) Driver {
 	return &Jetstream{
-		eventbusdriver.NewJetstream(url, clientID, auth, logger),
+		eventbusdriver.NewJetstream(url, auth, logger),
 		sensorName,
 		nil,
 	}
@@ -42,7 +42,7 @@ func (stream *Jetstream) Connect(triggerName string, dependencyExpression string
 		return nil, err
 	}
 
-	return &JetstreamTriggerConn{conn, stream.sensorName, triggerName}, nil
+	return &JetstreamTriggerConn{conn, stream.sensorName, triggerName, nil}, nil
 
 }
 
