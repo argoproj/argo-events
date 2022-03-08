@@ -263,7 +263,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, conn.ClientID())
 
-					err = conn.Subscribe(ctx, closeSubCh, resetConditionsCh, lastResetTime, transformFunc, filterFunc, actionFunc)
+					err = conn.Subscribe(ctx, closeSubCh, resetConditionsCh, lastResetTime, transformFunc, filterFunc, actionFunc, sensorCtx.eventBusSubject)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))
 						return
