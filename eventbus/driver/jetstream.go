@@ -8,9 +8,8 @@ import (
 )
 
 type Jetstream struct {
-	url      string
-	clientID string // seems like jetstream doesn't have this notion; we can just have this to uniquely identify ourselves in the log
-	auth     *Auth
+	url  string
+	auth *Auth
 	//clusterID string
 	//durableName string // todo: not sure if we want this here; may not be necessary to store it and it also doesn't apply to publishers
 	jetstreamContext nats.JetStreamContext
@@ -18,18 +17,17 @@ type Jetstream struct {
 	logger *zap.SugaredLogger
 }
 
-func NewJetstream(url string, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
+func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) *Jetstream {
 	return &Jetstream{
-		url:      url,
-		clientID: clientID,
-		auth:     auth,
-		logger:   logger,
+		url:    url,
+		auth:   auth,
+		logger: logger,
 	}
 }
 
-func (stream *Jetstream) MakeConnection(clientID string) (Connection, error) {
+func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, error) {
 	log := stream.logger //.With("clientID", stream.clientID)
-	conn := &JetstreamConnection{clientID: clientID}
+	conn := &JetstreamConnection{clientID: clientID, logger: stream.logger}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside

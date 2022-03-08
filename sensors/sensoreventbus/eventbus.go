@@ -6,7 +6,6 @@ import (
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
-	"github.com/argoproj/argo-events/eventbus/driver"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -37,7 +36,7 @@ type Dependency struct {
 	EventName       string
 }
 
-func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorName string, defaultSubject string) (driver.SensorEBDriver, error) {
+func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorName string, defaultSubject string) (Driver, error) {
 	auth, err := eventbus.GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
