@@ -59,8 +59,16 @@ const (
 	NATSStreamingRaftLeaseTimeout = "1s"
 	// Default NATS Streaming RAFT commit timeout
 	NATSStreamingRaftCommitTimeout = "100ms"
+
 	// Default EventBus name
 	DefaultEventBusName = "default"
+
+	// key of server auth secret
+	JetStreamServerAuthSecretKey = "auth"
+	// key of client auth secret
+	JetStreamClientAuthSecretKey = "client-auth"
+	// key of nats-js.conf in the configmap
+	JetStreamConfigMapKey = "nats-js"
 )
 
 // Sensor constants
