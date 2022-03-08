@@ -32,6 +32,9 @@ func ValidateEventBus(eb *v1alpha1.EventBus) error {
 		if x.Version == "" {
 			return fmt.Errorf("invalid spec: a version for jetstream needs to be specified")
 		}
+		if x.Replicas != nil && *x.Replicas < 3 {
+			return fmt.Errorf("invalid spec: a jetstream eventbus requires at least 3 replicas")
+		}
 	}
 	return nil
 }
