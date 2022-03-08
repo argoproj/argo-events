@@ -6,25 +6,25 @@ import (
 )
 
 type JetstreamConnection struct {
-	natsConn  *nats.Conn
-	jsContext nats.JetStreamContext
+	NATSConn  *nats.Conn
+	JSContext nats.JetStreamContext
 
-	natsConnected bool
+	NATSConnected bool
 	clientID      string // seems like jetstream doesn't have this notion; we can just have this to uniquely identify ourselves in the log
 
-	logger *zap.SugaredLogger
+	Logger *zap.SugaredLogger
 }
 
 func (jsc *JetstreamConnection) Close() error {
 
-	if jsc.natsConn != nil && jsc.natsConn.IsConnected() {
-		jsc.natsConn.Close()
+	if jsc.NATSConn != nil && jsc.NATSConn.IsConnected() {
+		jsc.NATSConn.Close()
 	}
 	return nil
 }
 
 func (jsc *JetstreamConnection) IsClosed() bool {
-	if jsc.natsConn == nil || !jsc.natsConnected || jsc.natsConn.IsClosed() {
+	if jsc.NATSConn == nil || !jsc.NATSConnected || jsc.NATSConn.IsClosed() {
 		return true
 	}
 	return false
@@ -32,7 +32,7 @@ func (jsc *JetstreamConnection) IsClosed() bool {
 
 func (jsc *JetstreamConnection) Publish(subject string, data []byte) error {
 	// todo: On the publishing side you can avoid duplicate message ingestion using the Message Deduplication feature.
-	_, err := jsc.jsContext.Publish(subject, data)
+	_, err := jsc.JSContext.Publish(subject, data)
 	return err
 }
 

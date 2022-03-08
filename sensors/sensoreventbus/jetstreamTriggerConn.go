@@ -13,27 +13,26 @@ import (
 
 type JetstreamTriggerConn struct {
 	*eventbusdriver.JetstreamConnection
-	sensorName    string
-	triggerName   string
-	keyValueStore *nats.KeyValue
+	sensorName           string
+	triggerName          string
+	keyValueStore        *nats.KeyValue
+	dependencyExpression string
+	deps                 []Dependency
 }
 
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
-	group string,
-	//sensorName string,
-	//triggerName string,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
 	lastResetTime time.Time,
-	dependencyExpr string,
-	dependencies []Dependency,
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event)) error {
-	log := conn.logger //.With("clientID", stream.clientID)
+	log := conn.Logger //.With("clientID", stream.clientID)
+
+	group := ?
 
 	// Create a Consumer
-	_, err := conn.jetstreamContext.AddConsumer("default", &nats.ConsumerConfig{
+	_, err := conn.JSContext.AddConsumer("default", &nats.ConsumerConfig{
 		Durable: group,
 	})
 	if err != nil {

@@ -28,16 +28,16 @@ func NewNATSStreaming(url string, clusterID string, auth *Auth, logger *zap.Suga
 
 func (n *NATStreaming) MakeConnection(clientID string) (*NATSStreamingConnection, error) {
 	log := n.logger.With("clientID", clientID)
-	conn := &NATSStreamingConnection{clientID: clientID, logger: n.logger}
+	conn := &NATSStreamingConnection{clientID: clientID, Logger: n.logger}
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
 		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
-			conn.natsConnected = false
+			conn.NATSConnected = false
 			log.Errorw("NATS connection lost", zap.Error(err))
 		}),
 		nats.ReconnectHandler(func(nnc *nats.Conn) {
-			conn.natsConnected = true
+			conn.NATSConnected = true
 			log.Info("Reconnected to NATS server")
 		}),
 	}
@@ -56,12 +56,12 @@ func (n *NATStreaming) MakeConnection(clientID string) (*NATSStreamingConnection
 		return nil, err
 	}
 	log.Info("Connected to NATS server.")
-	conn.natsConn = nc
-	conn.natsConnected = true
+	conn.NATSConn = nc
+	conn.NATSConnected = true
 
 	sc, err := stan.Connect(n.clusterID, clientID, stan.NatsConn(nc), stan.Pings(5, 60),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
-			conn.stanConnected = false
+			conn.STANConnected = false
 			log.Errorw("NATS streaming connection lost", zap.Error(err))
 		}))
 	if err != nil {
@@ -69,8 +69,8 @@ func (n *NATStreaming) MakeConnection(clientID string) (*NATSStreamingConnection
 		return nil, err
 	}
 	log.Info("Connected to NATS streaming server.")
-	conn.stanConn = sc
-	conn.stanConnected = true
+	conn.STANConn = sc
+	conn.STANConnected = true
 	return conn, nil
 }
 
