@@ -42,7 +42,7 @@ func (stream *Jetstream) Connect(triggerName string, dependencyExpression string
 		return nil, err
 	}
 
-	return &JetstreamTriggerConn{conn, stream.sensorName, triggerName, nil}, nil
+	return &JetstreamTriggerConn{conn, stream.sensorName, triggerName, nil, dependencyExpression, deps}, nil
 
 }
 

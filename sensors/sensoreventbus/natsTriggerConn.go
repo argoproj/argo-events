@@ -45,8 +45,14 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 	lastResetTime time.Time,
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
-	action func(map[string]cloudevents.Event)) error {
-	log := n.logger.With("clientID", n.ClientID())
+	action func(map[string]cloudevents.Event),
+	defaultSubject *string) error {
+	log := n.Logger.With("clientID", n.ClientID())
+
+	if defaultSubject == nil {
+		log.Error("can't subscribe over NATS streaming: defaultSubject not set")
+	}
+
 	msgHolder, err := newEventSourceMessageHolder(log, n.dependencyExpression, n.deps, lastResetTime)
 	if err != nil {
 		return err
@@ -54,7 +60,7 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 	// use group name as durable name
 	group := n.getGroupNameFromClientID()
 	durableName := group
-	sub, err := n.stanConn.QueueSubscribe(n.subject, group, func(m *stan.Msg) {
+	sub, err := n.STANConn.QueueSubscribe(*defaultSubject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, transform, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
@@ -62,10 +68,10 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 		stan.AckWait(1*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
-		log.Errorf("failed to subscribe to subject %s", n.subject)
+		log.Errorf("failed to subscribe to subject %s", *defaultSubject)
 		return err
 	}
-	log.Infof("Subscribed to subject %s ...", n.subject)
+	log.Infof("Subscribed to subject %s ...", *defaultSubject)
 
 	// Daemon to evict cache and reset trigger conditions
 	wg := &sync.WaitGroup{}
@@ -107,14 +113,14 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 		case <-ctx.Done():
 			log.Info("existing, unsubscribing and closing connection...")
 			_ = sub.Close()
-			log.Infof("subscription on subject %s closed", n.subject)
+			log.Infof("subscription on subject %s closed", *defaultSubject)
 			daemonStopCh <- struct{}{}
 			wg.Wait()
 			return nil
 		case <-closeCh:
 			log.Info("closing subscription...")
 			_ = sub.Close()
-			log.Infof("subscription on subject %s closed", n.subject)
+			log.Infof("subscription on subject %s closed", *defaultSubject)
 			daemonStopCh <- struct{}{}
 			wg.Wait()
 			return nil
@@ -240,7 +246,7 @@ func (n *NATSStreamingTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder 
 	for k, v := range msgHolder.msgs {
 		messages[k] = *v.event
 	}
-	log.Debugf("Triggering actions for client %s", n.clientID)
+	log.Debugf("Triggering actions for client %s", n.ClientID())
 
 	action(messages)
 

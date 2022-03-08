@@ -27,17 +27,17 @@ func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) *Jetstream 
 
 func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, error) {
 	log := stream.logger //.With("clientID", stream.clientID)
-	conn := &JetstreamConnection{clientID: clientID, logger: stream.logger}
+	conn := &JetstreamConnection{clientID: clientID, Logger: stream.logger}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
 		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
-			conn.natsConnected = false
+			conn.NATSConnected = false
 			log.Errorw("NATS connection lost", zap.Error(err))
 		}),
 		nats.ReconnectHandler(func(nnc *nats.Conn) {
-			conn.natsConnected = true
+			conn.NATSConnected = true
 			log.Info("Reconnected to NATS server")
 		}),
 	}
@@ -56,8 +56,8 @@ func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, 
 		return nil, err
 	}
 	log.Info("Connected to NATS Jetstream server.")
-	conn.natsConn = nc
-	conn.natsConnected = true
+	conn.NATSConn = nc
+	conn.NATSConnected = true
 
 	// Create JetStream Context
 	stream.jetstreamContext, err = nc.JetStream()
@@ -65,7 +65,7 @@ func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, 
 		log.Errorw("Failed to get Jetstream context", zap.Error(err))
 		return nil, err
 	}
-	conn.jsContext = stream.jetstreamContext
+	conn.JSContext = stream.jetstreamContext
 
 	// add the Stream just in case nobody has yet
 	_, err = stream.jetstreamContext.AddStream(&nats.StreamConfig{
