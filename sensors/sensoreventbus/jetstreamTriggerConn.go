@@ -30,7 +30,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
-	log := conn.Logger //.With("clientID", stream.clientID)
+	log := conn.Logger.With("clientID", conn.ClientID())
 
 	group, err := conn.getGroupNameFromClientID(conn.ClientID())
 	if err != nil {
