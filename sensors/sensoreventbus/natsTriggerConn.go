@@ -58,7 +58,10 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 		return err
 	}
 	// use group name as durable name
-	group := n.getGroupNameFromClientID()
+	group, err := n.getGroupNameFromClientID(n.ClientID())
+	if err != nil {
+		return err
+	}
 	durableName := group
 	sub, err := n.STANConn.QueueSubscribe(*defaultSubject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, transform, filter, action, log)
@@ -252,6 +255,18 @@ func (n *NATSStreamingTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder 
 
 	msgHolder.reset(depName)
 	msgHolder.ackAndCache(m, event.ID())
+}
+
+func (n *NATSStreamingTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
+	log := n.Logger.With("clientID", n.ClientID())
+	// take off the last part: clientID should have a dash at the end and we can remove that part
+	strs := strings.Split(clientID, "-")
+	if len(strs) < 2 {
+		err := errors.Errorf("Expected client ID to contain dash: %s", clientID)
+		log.Error(err)
+		return "", err
+	}
+	return strings.Join(strs[:len(strs)-1], "-"), nil
 }
 
 // eventSourceMessage is used by messageHolder to hold the latest message

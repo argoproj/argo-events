@@ -26,7 +26,8 @@ type TriggerConnection interface {
 		lastResetTime time.Time,
 		transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 		filter func(string, cloudevents.Event) bool,
-		action func(map[string]cloudevents.Event)) error
+		action func(map[string]cloudevents.Event),
+		defaultSubject *string) error
 }
 
 // Dependency is a struct for dependency info of a sensor
