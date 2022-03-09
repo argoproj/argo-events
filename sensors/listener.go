@@ -103,7 +103,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	defer cancel()
 
 	// todo: since the SensorDriver itself won't be able to log the Trigger name, need to set up the logger for the individual Conns to do so
-	ebDriver, err := sensoreventbus.GetSensorDriver(logging.WithLogger(ctx, logger /*.With(logging.LabelTriggerName, trigger.Template.Name)*/),
+	ebDriver, err := sensoreventbus.GetDriver(logging.WithLogger(ctx, logger /*.With(logging.LabelTriggerName, trigger.Template.Name)*/),
 		*sensorCtx.eventBusConfig, sensorCtx.sensor /*, clientID*/)
 	if err != nil {
 		return err

@@ -14,6 +14,7 @@ type NATSStreaming struct {
 	*eventbusdriver.NATStreaming
 	eventSourceName string
 	hostname        string
+	subject         string
 }
 
 func NewNATSStreaming(url, clusterID, eventSourceName string, hostname string, subject string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) *NATSStreaming {
@@ -21,6 +22,7 @@ func NewNATSStreaming(url, clusterID, eventSourceName string, hostname string, s
 		eventbusdriver.NewNATSStreaming(url, clusterID, auth, logger),
 		eventSourceName,
 		hostname,
+		subject,
 	}
 }
 
@@ -34,5 +36,5 @@ func (n *NATSStreaming) Connect() (SourceConnection, error) {
 		return nil, err
 	}
 
-	return &NATSStreamingSourceConn{conn, n.eventSourceName}, nil
+	return &NATSStreamingSourceConn{conn, n.eventSourceName, n.subject}, nil
 }
