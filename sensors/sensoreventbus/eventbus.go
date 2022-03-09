@@ -38,7 +38,7 @@ type Dependency struct {
 	EventName       string
 }
 
-func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorSpec *v1alpha1.Sensor) (Driver, error) {
+func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorSpec *v1alpha1.Sensor) (Driver, error) {
 	auth, err := eventbus.GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err

@@ -389,7 +389,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
 	//clientID := generateClientID(e.hostname)
-	driver, err := sourceeventbus.GetSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
+	driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
 	if err != nil {
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
@@ -423,7 +423,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 					//clientID := generateClientID(e.hostname)
-					driver, err := sourceeventbus.GetSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
+					driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
 					if err != nil {
 						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
@@ -503,8 +503,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 
-						subject := &e.eventBusSubject
-						if err = e.eventBusConn.PublishEvent(ctx, eventbusdriver.Event{server.GetEventSourceName(), server.GetEventName()}, eventBody, subject); err != nil {
+						if err = e.eventBusConn.PublishEvent(ctx, eventbusdriver.Event{server.GetEventSourceName(), server.GetEventName()}, eventBody); err != nil {
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())

@@ -21,11 +21,10 @@ type SourceConnection interface {
 
 	PublishEvent(ctx context.Context,
 		evt eventbusdriver.Event,
-		message []byte,
-		defaultSubject *string) error
+		message []byte) error
 }
 
-func GetSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string, hostname string) (Driver, error) {
+func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string, hostname string) (Driver, error) {
 	auth, err := eventbus.GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
