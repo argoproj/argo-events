@@ -7,6 +7,7 @@ import (
 	"math/rand"
 
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	nats "github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 
@@ -20,10 +21,14 @@ type Jetstream struct {
 	keyValueStore *nats.KeyValue
 }
 
-func NewJetstream(url string, sensorName string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) Driver {
+func NewJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) Driver {
+
+	// TODO: Here we can take the sensor specification and clean up the K/V store so as to remove any old
+	// Triggers for this Sensor that no longer exist and any old Dependencies
+
 	return &Jetstream{
 		eventbusdriver.NewJetstream(url, auth, logger),
-		sensorName,
+		sensorSpec.Name,
 		nil,
 	}
 }
