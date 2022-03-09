@@ -2,7 +2,6 @@ package sensoreventbus
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -30,7 +29,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
-	log := conn.Logger.With("clientID", conn.ClientID())
+	/*log := conn.Logger.With("clientID", conn.ClientID())
 
 	group, err := conn.getGroupNameFromClientID(conn.ClientID())
 	if err != nil {
@@ -53,7 +52,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 
 	conn.SetupKeyValueStore()
 
-	err = conn.CleanUpOnStart(group)
+	err = conn.CleanUpOnStart(group)*/
 
 	return nil
 }
@@ -75,4 +74,5 @@ func (conn *JetstreamTriggerConn) CleanUpOnStart(group string) error {
 
 	// for each
 
+	return nil
 }
