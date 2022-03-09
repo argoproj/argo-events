@@ -74,7 +74,7 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 		log.Errorf("failed to subscribe to subject %s", *defaultSubject)
 		return err
 	}
-	log.Infof("Subscribed to subject %s ...", *defaultSubject)
+	log.Infof("Subscribed to subject %s using durable name %s", *defaultSubject, durableName)
 
 	// Daemon to evict cache and reset trigger conditions
 	wg := &sync.WaitGroup{}
