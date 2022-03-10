@@ -12,3 +12,4 @@ For example:
         - --managed-namespace
         - default
 ```
+
