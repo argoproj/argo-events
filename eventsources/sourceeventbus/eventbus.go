@@ -24,11 +24,15 @@ type SourceConnection interface {
 		message []byte) error
 }
 
-func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string, hostname string) (Driver, error) {
+func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string) (Driver, error) {
 	auth, err := eventbus.GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
 	}
+	if eventSourceName == "" {
+		return nil, errors.New("eventSourceName must be specified to create eventbus driver")
+	}
+
 	logger := logging.FromContext(ctx)
 
 	var eventBusType apicommon.EventBusType
@@ -43,6 +47,9 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, e
 	var dvr Driver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
+		if defaultSubject == "" {
+			return nil, errors.New("subject must be specified to create NATS Streaming driver")
+		}
 		dvr = NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, eventSourceName, defaultSubject, auth, logger)
 	//case apicommon.EventBusJetStream:
 	//	dvr = NewJetstream(eventBusConfig.JetStream.URL, eventSourceName, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies

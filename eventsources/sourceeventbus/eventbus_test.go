@@ -10,10 +10,8 @@ import (
 )
 
 const (
-	testSubject  = "subject"
-	testClientID = "client-xxxxx"
+	testSubject         = "subject"
 	testEventSourceName = "eventsource-xxxxx"
-	testHostname = 
 )
 
 var (
@@ -31,13 +29,23 @@ var (
 
 func TestGetDriver(t *testing.T) {
 	t.Run("get driver without eventbus", func(t *testing.T) {
-		_, err := GetDriver(context.Background(), testBadBusConfig, testEventSourceName, testSubject, testClientID)
+		_, err := GetDriver(context.Background(), testBadBusConfig, testEventSourceName, testSubject)
 		assert.Error(t, err)
 	})
 
 	t.Run("get driver with none auth eventbus", func(t *testing.T) {
-		driver, err := GetDriver(context.Background(), testBusConfig, testSubject, testClientID)
+		driver, err := GetDriver(context.Background(), testBusConfig, testEventSourceName, testSubject)
 		assert.NoError(t, err)
 		assert.NotNil(t, driver)
+	})
+
+	t.Run("get driver without eventSourceName", func(t *testing.T) {
+		_, err := GetDriver(context.Background(), testBusConfig, "", testSubject)
+		assert.Error(t, err)
+	})
+
+	t.Run("get NATS Streaming driver without subject", func(t *testing.T) {
+		_, err := GetDriver(context.Background(), testBusConfig, testEventSourceName, "")
+		assert.Error(t, err)
 	})
 }
