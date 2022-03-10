@@ -43,6 +43,13 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, s
 	if err != nil {
 		return nil, err
 	}
+
+	if sensorSpec == nil {
+		return nil, errors.New("sensorSpec required for getting eventbus driver")
+	}
+	if sensorSpec.Name == "" {
+		return nil, errors.New("sensorSpec name must be set for getting eventbus driver")
+	}
 	logger := logging.FromContext(ctx)
 
 	var eventBusType apicommon.EventBusType

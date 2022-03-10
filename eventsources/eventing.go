@@ -390,7 +390,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
 	clientID := generateClientID(e.hostname)
-	driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
+	driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
 	if err != nil {
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
@@ -424,7 +424,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 					clientID := generateClientID(e.hostname)
-					driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
+					driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
 					if err != nil {
 						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
