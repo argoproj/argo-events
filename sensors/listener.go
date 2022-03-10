@@ -102,9 +102,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// todo: since the SensorDriver itself won't be able to log the Trigger name, need to set up the logger for the individual Conns to do so
-	ebDriver, err := sensoreventbus.GetDriver(logging.WithLogger(ctx, logger /*.With(logging.LabelTriggerName, trigger.Template.Name)*/),
-		*sensorCtx.eventBusConfig, sensorCtx.sensor /*, clientID*/)
+	ebDriver, err := sensoreventbus.GetDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor)
 	if err != nil {
 		return err
 	}
@@ -142,7 +140,6 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				}
 				deps = append(deps, d)
 			}
-			//group, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
 
 			var conn sensoreventbus.TriggerConnection
 			err = common.Connect(&common.DefaultBackoff, func() error {
@@ -285,13 +282,6 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				case <-ticker.C:
 					if conn == nil || conn.IsClosed() {
 						logger.Info("NATS connection lost, reconnecting...")
-						// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
-						/*_, clientID := sensorCtx.getGroupAndClientID(*sensorCtx.eventBusConfig, trigger.Template.Name, depExpression)
-						ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
-						if err != nil {
-							logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
-							continue
-						}*/
 						conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 						if err != nil {
 							logger.Errorw("failed to reconnect to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))

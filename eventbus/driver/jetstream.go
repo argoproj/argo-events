@@ -11,7 +11,6 @@ type Jetstream struct {
 	url  string
 	auth *Auth
 	//clusterID string
-	//durableName string // todo: not sure if we want this here; may not be necessary to store it and it also doesn't apply to publishers
 	jetstreamContext nats.JetStreamContext
 
 	logger *zap.SugaredLogger

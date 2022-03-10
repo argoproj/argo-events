@@ -27,6 +27,12 @@ type NATSStreamingTriggerConn struct {
 	deps                 []Dependency
 }
 
+func NewNATSStreamingTriggerConn(conn *eventbusdriver.NATSStreamingConnection, sensorName string, triggerName string, dependencyExpression string, deps []Dependency) *NATSStreamingTriggerConn {
+	n := &NATSStreamingTriggerConn{conn, sensorName, triggerName, dependencyExpression, deps}
+	n.Logger = n.Logger.With("triggerName", n.triggerName).With("clientID", n.ClientID())
+	return n
+}
+
 // Subscribe is used to subscribe to multiple event source dependencies
 // Parameter - ctx, context
 // Parameter - conn, eventbus connection
@@ -47,7 +53,7 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
-	log := n.Logger.With("clientID", n.ClientID())
+	log := n.Logger
 
 	if defaultSubject == nil {
 		log.Error("can't subscribe over NATS streaming: defaultSubject not set")

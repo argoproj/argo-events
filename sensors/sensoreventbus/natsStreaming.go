@@ -36,5 +36,5 @@ func (n *NATSStreaming) Connect(triggerName string, dependencyExpression string,
 		return nil, err
 	}
 
-	return &NATSStreamingTriggerConn{conn, n.sensorName, triggerName, dependencyExpression, deps}, nil
+	return NewNATSStreamingTriggerConn(conn, n.sensorName, triggerName, dependencyExpression, deps), nil
 }
