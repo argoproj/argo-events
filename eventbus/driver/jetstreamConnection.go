@@ -16,7 +16,6 @@ type JetstreamConnection struct {
 }
 
 func (jsc *JetstreamConnection) Close() error {
-
 	if jsc.NATSConn != nil && jsc.NATSConn.IsConnected() {
 		jsc.NATSConn.Close()
 	}

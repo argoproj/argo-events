@@ -22,7 +22,6 @@ type Jetstream struct {
 }
 
 func NewJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) Driver {
-
 	// todo: Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies
 
@@ -48,5 +47,4 @@ func (stream *Jetstream) Connect(triggerName string, dependencyExpression string
 	}
 
 	return NewJetstreamTriggerConn(conn, stream.sensorName, triggerName, nil, dependencyExpression, deps), nil
-
 }

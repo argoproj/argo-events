@@ -2,11 +2,9 @@ package sensoreventbus
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/pkg/errors"
 
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	nats "github.com/nats-io/nats.go"
@@ -27,7 +25,6 @@ func NewJetstreamTriggerConn(conn *eventbusdriver.JetstreamConnection,
 	keyValueStore *nats.KeyValue,
 	dependencyExpression string,
 	deps []Dependency) *JetstreamTriggerConn {
-
 	connection := &JetstreamTriggerConn{conn, sensorName, triggerName, keyValueStore, dependencyExpression, deps}
 	connection.Logger = connection.Logger.With("triggerName", connection.triggerName).With("clientID", connection.ClientID())
 	return connection
@@ -74,6 +71,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	return nil
 }
 
+/*
 func (n *JetstreamTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
 	log := n.Logger.With("clientID", n.ClientID())
 	// take off the last part: clientID should have a dash at the end and we can remove that part
@@ -84,7 +82,7 @@ func (n *JetstreamTriggerConn) getGroupNameFromClientID(clientID string) (string
 		return "", err
 	}
 	return strings.Join(strs[:len(strs)-1], "-"), nil
-}
+}*/
 
 func (conn *JetstreamTriggerConn) CleanUpOnStart(group string) error {
 	// first look in K/V store for old Triggers that no longer exist

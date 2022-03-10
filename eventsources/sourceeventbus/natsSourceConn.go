@@ -15,7 +15,5 @@ type NATSStreamingSourceConn struct {
 func (n *NATSStreamingSourceConn) PublishEvent(ctx context.Context,
 	evt eventbusdriver.Event,
 	message []byte) error {
-	n.Publish(n.subject, message)
-
-	return nil
+	return n.Publish(n.subject, message)
 }
