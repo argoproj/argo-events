@@ -1,11 +1,6 @@
 package sourceeventbus
 
 import (
-	"fmt"
-	"math/rand"
-	"strings"
-	"time"
-
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	"go.uber.org/zap"
 )
@@ -25,11 +20,7 @@ func NewJetstream(url, clusterID, eventSourceName string, hostname string, auth 
 
 }
 
-func (n *Jetstream) Connect() (SourceConnection, error) {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(n.hostname, ".", "_"), r1.Intn(1000))
-
+func (n *Jetstream) Connect(clientID string) (SourceConnection, error) {
 	conn, err := n.MakeConnection(clientID)
 	if err != nil {
 		return nil, err
