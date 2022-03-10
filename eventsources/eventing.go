@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"strings"
 	"sync"
 	"time"
@@ -388,14 +389,14 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer, filters map[string]*v1alpha1.EventSourceFilter) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
-	//clientID := generateClientID(e.hostname)
+	clientID := generateClientID(e.hostname)
 	driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
 	if err != nil {
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
 	}
 	if err = common.Connect(&common.DefaultBackoff, func() error {
-		e.eventBusConn, err = driver.Connect()
+		e.eventBusConn, err = driver.Connect(clientID)
 		return err
 	}); err != nil {
 		logger.Errorw("failed to connect to eventbus", zap.Error(err))
@@ -422,13 +423,13 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 				if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
-					//clientID := generateClientID(e.hostname)
+					clientID := generateClientID(e.hostname)
 					driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject, e.hostname)
 					if err != nil {
 						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
 					}
-					e.eventBusConn, err = driver.Connect()
+					e.eventBusConn, err = driver.Connect(clientID)
 					if err != nil {
 						logger.Errorw("failed to reconnect to eventbus", zap.Error(err))
 						continue
@@ -546,13 +547,12 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	}
 }
 
-/*
 func generateClientID(hostname string) string {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(hostname, ".", "_"), r1.Intn(1000))
 	return clientID
-}*/
+}
 
 func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) {
 	dataMap := make(map[string]interface{})
