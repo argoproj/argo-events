@@ -13,7 +13,7 @@ type NATSStreamingConnection struct {
 	NATSConnected bool
 	STANConnected bool
 
-	//defaultSubject  string
+	// defaultSubject  string
 	clientID string
 
 	Logger *zap.SugaredLogger

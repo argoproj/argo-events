@@ -504,7 +504,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 
-						if err = e.eventBusConn.PublishEvent(ctx, eventbusdriver.Event{server.GetEventSourceName(), server.GetEventName()}, eventBody); err != nil {
+						if err = e.eventBusConn.PublishEvent(ctx, eventbusdriver.Event{EventSourceName: s.GetEventSourceName(), EventName: s.GetEventName()}, eventBody); err != nil {
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())

@@ -15,10 +15,7 @@ type JetstreamSourceConn struct {
 func (n *JetstreamSourceConn) PublishEvent(ctx context.Context,
 	evt eventbusdriver.Event,
 	message []byte) error {
-
 	// derive subject from event source name and event name
 	subject := fmt.Sprintf("default-%s-%s", evt.EventSourceName, evt.EventName)
-	n.Publish(subject, message)
-
-	return nil
+	return n.Publish(subject, message)
 }

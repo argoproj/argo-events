@@ -53,11 +53,14 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, s
 	logger := logging.FromContext(ctx)
 
 	var eventBusType apicommon.EventBusType
-	if eventBusConfig.NATS != nil {
+	switch {
+	case eventBusConfig.NATS != nil && eventBusConfig.JetStream != nil:
+		return nil, errors.New("invalid event bus, NATS and Jetstream shouldn't both be specified")
+	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
-	} else if eventBusConfig.JetStream != nil {
+	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
-	} else {
+	default:
 		return nil, errors.New("invalid event bus")
 	}
 
@@ -65,7 +68,7 @@ func GetDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, s
 	switch eventBusType {
 	case apicommon.EventBusNATS:
 		dvr = NewNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, sensorSpec.Name, auth, logger)
-	//case apicommon.EventBusJetstream:
+	// case apicommon.EventBusJetstream:
 	//	dvr = NewJetstream(eventBusConfig.Jetstream.URL, sensorSpec, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 	default:
 		return nil, errors.New("invalid eventbus type")

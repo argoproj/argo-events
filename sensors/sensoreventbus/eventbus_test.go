@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	testSubject    = "subject"
 	testSensorName = "sensor-xxxxx"
 )
 
@@ -20,17 +19,17 @@ var (
 	testBadBusConfig = eventbusv1alpha1.BusConfig{}
 
 	testValidSensorSpec = &v1alpha1.Sensor{
-		metav1.TypeMeta{},
-		metav1.ObjectMeta{Name: testSensorName},
-		v1alpha1.SensorSpec{},
-		v1alpha1.SensorStatus{},
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{Name: testSensorName},
+		Spec:       v1alpha1.SensorSpec{},
+		Status:     v1alpha1.SensorStatus{},
 	}
 
 	testNoNameSensorSpec = &v1alpha1.Sensor{
-		metav1.TypeMeta{},
-		metav1.ObjectMeta{},
-		v1alpha1.SensorSpec{},
-		v1alpha1.SensorStatus{},
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Spec:       v1alpha1.SensorSpec{},
+		Status:     v1alpha1.SensorStatus{},
 	}
 
 	testClusterID = "test"
@@ -64,5 +63,4 @@ func TestGetDriver(t *testing.T) {
 		_, err := GetDriver(context.Background(), testBusConfig, nil)
 		assert.Error(t, err)
 	})
-
 }

@@ -10,7 +10,7 @@ import (
 type Jetstream struct {
 	url  string
 	auth *Auth
-	//clusterID string
+	// clusterID string
 	jetstreamContext nats.JetStreamContext
 
 	logger *zap.SugaredLogger
@@ -25,7 +25,7 @@ func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) *Jetstream 
 }
 
 func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, error) {
-	log := stream.logger //.With("clientID", stream.clientID)
+	log := stream.logger // .With("clientID", stream.clientID)
 	conn := &JetstreamConnection{clientID: clientID, Logger: stream.logger}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{

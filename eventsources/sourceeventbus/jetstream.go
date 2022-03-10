@@ -17,7 +17,6 @@ func NewJetstream(url, clusterID, eventSourceName string, hostname string, auth 
 		eventSourceName,
 		hostname,
 	}
-
 }
 
 func (n *Jetstream) Connect(clientID string) (SourceConnection, error) {
