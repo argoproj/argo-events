@@ -23,7 +23,7 @@ type Jetstream struct {
 
 func NewJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) Driver {
 
-	// TODO: Here we can take the sensor specification and clean up the K/V store so as to remove any old
+	// todo: Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies
 
 	return &Jetstream{
@@ -47,9 +47,6 @@ func (stream *Jetstream) Connect(triggerName string, dependencyExpression string
 		return nil, err
 	}
 
-	return &JetstreamTriggerConn{conn, stream.sensorName, triggerName, nil, dependencyExpression, deps}, nil
+	return NewJetstreamTriggerConn(conn, stream.sensorName, triggerName, nil, dependencyExpression, deps), nil
 
 }
-
-// todo: when we subscribe later we can specify durable name there (look at SubOpt in js.go)
-// maybe also use AckAll()? need to look for all SubOpt

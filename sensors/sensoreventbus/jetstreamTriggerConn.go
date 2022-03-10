@@ -21,6 +21,18 @@ type JetstreamTriggerConn struct {
 	deps                 []Dependency
 }
 
+func NewJetstreamTriggerConn(conn *eventbusdriver.JetstreamConnection,
+	sensorName string,
+	triggerName string,
+	keyValueStore *nats.KeyValue,
+	dependencyExpression string,
+	deps []Dependency) *JetstreamTriggerConn {
+
+	connection := &JetstreamTriggerConn{conn, sensorName, triggerName, keyValueStore, dependencyExpression, deps}
+	connection.Logger = connection.Logger.With("triggerName", connection.triggerName).With("clientID", connection.ClientID())
+	return connection
+}
+
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
@@ -49,6 +61,11 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	for _, dep := range conn.deps {
 		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = struct{}{}
 	}
+
+
+
+	// todo: specify durable name there in the subscription (look at SubOpt in js.go)
+	// maybe also use AckAll()? need to look for all SubOpt
 
 	conn.SetupKeyValueStore()
 
