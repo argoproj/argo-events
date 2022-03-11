@@ -73,8 +73,3 @@ func (n *NATStreaming) MakeConnection(clientID string) (*NATSStreamingConnection
 	conn.STANConnected = true
 	return conn, nil
 }
-
-/*
-func (n *natsStreaming) Publish(conn Connection, message []byte, event Event) error {
-	return conn.Publish(n.subject, message)
-}*/
