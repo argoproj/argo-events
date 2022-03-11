@@ -11,12 +11,17 @@ type Jetstream struct {
 	hostname        string
 }
 
-func NewJetstream(url, clusterID, eventSourceName string, hostname string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) *Jetstream {
+func NewJetstream(url, clusterID, eventSourceName string, hostname string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
+	baseJetstream, err := eventbusdriver.NewJetstream(url, auth, logger)
+	if err != nil {
+		return nil, err
+	}
 	return &Jetstream{
-		eventbusdriver.NewJetstream(url, auth, logger),
+		baseJetstream,
 		eventSourceName,
 		hostname,
-	}
+	}, nil
+
 }
 
 func (n *Jetstream) Connect(clientID string) (SourceConnection, error) {

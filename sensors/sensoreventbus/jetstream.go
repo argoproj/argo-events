@@ -21,15 +21,20 @@ type Jetstream struct {
 	keyValueStore *nats.KeyValue
 }
 
-func NewJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) Driver {
+func NewJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
 	// todo: Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies
 
+	baseJetstream, err := eventbusdriver.NewJetstream(url, auth, logger)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Jetstream{
-		eventbusdriver.NewJetstream(url, auth, logger),
+		baseJetstream,
 		sensorSpec.Name,
 		nil,
-	}
+	}, nil
 }
 
 func (stream *Jetstream) Connect(triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error) {
