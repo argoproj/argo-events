@@ -120,7 +120,7 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 	for {
 		select {
 		case <-ctx.Done():
-			log.Info("existing, unsubscribing and closing connection...")
+			log.Info("exiting, unsubscribing and closing connection...")
 			_ = sub.Close()
 			log.Infof("subscription on subject %s closed", *defaultSubject)
 			daemonStopCh <- struct{}{}

@@ -2,9 +2,12 @@ package sensoreventbus
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/pkg/errors"
 
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	nats "github.com/nats-io/nats.go"
@@ -38,7 +41,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
-	/*log := conn.Logger.With("clientID", conn.ClientID())
+	log := conn.Logger
 
 	group, err := conn.getGroupNameFromClientID(conn.ClientID())
 	if err != nil {
@@ -59,21 +62,41 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = struct{}{}
 	}
 
+	err = conn.CleanUpOnStart(group)
 
-
-	// todo: specify durable name there in the subscription (look at SubOpt in js.go)
-	// maybe also use AckAll()? need to look for all SubOpt
-
-	conn.SetupKeyValueStore()
-
-	err = conn.CleanUpOnStart(group)*/
+	// create a goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
+	// one goroutine and we don't need to worry about race conditions
+	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
+	for subject, _ := range subjects {
+		subscription, err := conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckAll()) // todo: what other subscription options here?
+	}
+	go conn.processMsgs(ch, closeCh)
 
 	return nil
 }
 
-/*
-func (n *JetstreamTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
-	log := n.Logger.With("clientID", n.ClientID())
+func (conn *JetstreamTriggerConn) processMsgs(receiveChannel <-chan *nats.Msg, closeCh <-chan struct{}) {
+
+	for {
+		select {
+		case msg <- receiveChannel:
+			conn.processMsg(msg)
+		case <-ctx.Done():
+			// todo
+			return
+		case <-closeCh:
+			// todo
+			return
+		}
+	}
+}
+
+func (conn *JetstreamTriggerConn) processMsg(msg *nats.Msg) {
+
+}
+
+func (conn *JetstreamTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
+	log := conn.Logger.With("clientID", conn.ClientID())
 	// take off the last part: clientID should have a dash at the end and we can remove that part
 	strs := strings.Split(clientID, "-")
 	if len(strs) < 2 {
@@ -82,12 +105,14 @@ func (n *JetstreamTriggerConn) getGroupNameFromClientID(clientID string) (string
 		return "", err
 	}
 	return strings.Join(strs[:len(strs)-1], "-"), nil
-}*/
+}
 
 func (conn *JetstreamTriggerConn) CleanUpOnStart(group string) error {
-	// first look in K/V store for old Triggers that no longer exist
+	// look in K/V store for Trigger expressions that have changed
 
-	// for each
+	// for each Trigger that no longer exists, need to handle:
+	// - messages sent for that Trigger that are in the K/V store
+	// - messages sent to that Trigger that never reached it and are waiting in the eventbus
 
 	return nil
 }
