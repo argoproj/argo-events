@@ -11,21 +11,34 @@ type Jetstream struct {
 	url  string
 	auth *Auth
 	// clusterID string
-	jetstreamContext nats.JetStreamContext
+	//jetstreamContext nats.JetStreamContext
+	mgmtConnection JetstreamConnection
+
+	streamSettings string
 
 	logger *zap.SugaredLogger
 }
 
-func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) *Jetstream {
-	return &Jetstream{
-		url:    url,
-		auth:   auth,
-		logger: logger,
+func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
+
+	// todo: need to pass streamSettings into this function
+	streamSettings := ""
+	js := &Jetstream{
+		url:            url,
+		auth:           auth,
+		logger:         logger,
+		streamSettings: streamSettings,
 	}
+
+	mgmtClientID := "tbd" // todo: add this
+	mgmtConnection, err := js.MakeConnection(mgmtClientID)
+	js.mgmtConnection = *mgmtConnection
+
+	return js, err
 }
 
 func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, error) {
-	log := stream.logger // .With("clientID", stream.clientID)
+	log := stream.logger.With("clientID", clientID)
 	conn := &JetstreamConnection{clientID: clientID, Logger: stream.logger}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{
@@ -59,25 +72,38 @@ func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, 
 	conn.NATSConnected = true
 
 	// Create JetStream Context
-	stream.jetstreamContext, err = nc.JetStream()
+	conn.JSContext, err = nc.JetStream()
 	if err != nil {
 		log.Errorw("Failed to get Jetstream context", zap.Error(err))
 		return nil, err
 	}
-	conn.JSContext = stream.jetstreamContext
 
-	// add the Stream just in case nobody has yet
-	_, err = stream.jetstreamContext.AddStream(&nats.StreamConfig{
-		Name:     "default", // todo: replace with a const
-		Subjects: []string{"default.*"},
-	})
+	err = stream.CreateStream(conn)
 	if err != nil {
-		log.Errorw("Failed to add Jetstream stream 'default'", zap.Error(err))
+		log.Errorw("Failed to create Stream", zap.Error(err))
 		return nil, err
 	}
 
 	log.Info("Connected to NATS streaming server.")
 	return conn, nil
+}
+
+func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
+	if conn == nil {
+		return errors.New("Can't create Stream on nil connection")
+	}
+	var err error
+	_, err = conn.JSContext.AddStream(&nats.StreamConfig{
+		Name:     "default", // todo: replace with a const
+		Subjects: []string{"default.*"},
+	})
+	if err != nil {
+		return errors.Errorf("Failed to add Jetstream stream 'default': %v", err)
+	}
+
+	// todo: apply streamSettings to the Stream
+
+	return nil
 }
 
 /*
