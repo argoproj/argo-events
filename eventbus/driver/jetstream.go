@@ -93,21 +93,17 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return errors.New("Can't create Stream on nil connection")
 	}
 	var err error
+
+	options := make([]nats.JSOpt, 0)
+	// todo: create a JSOpt for each setting that the user specifies
+
 	_, err = conn.JSContext.AddStream(&nats.StreamConfig{
 		Name:     "default", // todo: replace with a const
 		Subjects: []string{"default.*"},
-	})
+	}, options...)
 	if err != nil {
 		return errors.Errorf("Failed to add Jetstream stream 'default': %v", err)
 	}
 
-	// todo: apply streamSettings to the Stream
-
 	return nil
 }
-
-/*
-func (stream *Jetstream) Publish(conn Connection, message []byte, event Event) error {
-	return conn.Publish(fmt.Sprintf("default.%s.%s", event.EventSourceName, event.EventName), message)
-}
-*/
