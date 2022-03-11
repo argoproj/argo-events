@@ -30,8 +30,7 @@ func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) (*Jetstream
 		streamSettings: streamSettings,
 	}
 
-	mgmtClientID := "tbd" // todo: add this
-	mgmtConnection, err := js.MakeConnection(mgmtClientID)
+	mgmtConnection, err := js.MakeConnection("mgmt")
 	js.mgmtConnection = *mgmtConnection
 
 	return js, err
