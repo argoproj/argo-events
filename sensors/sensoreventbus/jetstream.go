@@ -23,7 +23,7 @@ type Jetstream struct {
 
 func NewJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
 	// todo: Here we can take the sensor specification and clean up the K/V store so as to remove any old
-	// Triggers for this Sensor that no longer exist and any old Dependencies
+	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)
 
 	baseJetstream, err := eventbusdriver.NewJetstream(url, auth, logger)
 	if err != nil {
