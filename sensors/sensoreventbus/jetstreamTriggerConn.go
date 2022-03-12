@@ -68,18 +68,21 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	// one goroutine and we don't need to worry about race conditions
 	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
 	for subject, _ := range subjects {
-		subscription, err := conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckAll()) // todo: what other subscription options here?
+		_, err = conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckAll()) // todo: what other subscription options here?; also, do we need the Subscription returned by this call?
+		if err != nil {
+			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, group, err)
+		}
 	}
-	go conn.processMsgs(ch, closeCh)
+	go conn.processMsgs(ctx, ch, closeCh)
 
 	return nil
 }
 
-func (conn *JetstreamTriggerConn) processMsgs(receiveChannel <-chan *nats.Msg, closeCh <-chan struct{}) {
+func (conn *JetstreamTriggerConn) processMsgs(ctx context.Context, receiveChannel <-chan *nats.Msg, closeCh <-chan struct{}) {
 
 	for {
 		select {
-		case msg <- receiveChannel:
+		case msg := <-receiveChannel:
 			conn.processMsg(msg)
 		case <-ctx.Done():
 			// todo
@@ -92,7 +95,7 @@ func (conn *JetstreamTriggerConn) processMsgs(receiveChannel <-chan *nats.Msg, c
 }
 
 func (conn *JetstreamTriggerConn) processMsg(msg *nats.Msg) {
-
+	conn.Logger.Errorf("received new message: %+v", msg)
 }
 
 func (conn *JetstreamTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
@@ -112,7 +115,7 @@ func (conn *JetstreamTriggerConn) CleanUpOnStart(group string) error {
 
 	// for each Trigger that no longer exists, need to handle:
 	// - messages sent for that Trigger that are in the K/V store
-	// - messages sent to that Trigger that never reached it and are waiting in the eventbus
+	// - messages sent to that Trigger that never reached it and are waiting in the eventbus (need to make a new connection and Drain())
 
 	return nil
 }
