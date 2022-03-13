@@ -44,7 +44,6 @@ func TestInstallationExotic(t *testing.T) {
 		assert.NotNil(t, conf.NATS)
 		assert.Equal(t, conf.NATS.URL, testExoticURL)
 	})
-
 }
 
 func TestUninstallationExotic(t *testing.T) {
