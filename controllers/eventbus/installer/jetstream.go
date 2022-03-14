@@ -103,9 +103,10 @@ func (r *jetStreamInstaller) buildJetStreamServiceSpec() corev1.ServiceSpec {
 			{Name: "metrics", Port: jsMetricsPort},
 			{Name: "monitor", Port: jsMonitorPort},
 		},
-		Type:      corev1.ServiceTypeClusterIP,
-		ClusterIP: corev1.ClusterIPNone,
-		Selector:  r.labels,
+		Type:                     corev1.ServiceTypeClusterIP,
+		ClusterIP:                corev1.ClusterIPNone,
+		PublishNotReadyAddresses: true,
+		Selector:                 r.labels,
 	}
 }
 
@@ -297,13 +298,24 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
 							{Name: "SERVER_NAME", Value: "$(POD_NAME)"},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
-							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc"},
+							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc.cluster.local"},
 						},
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/nats-config"},
 							{Name: "pid", MountPath: "/var/run/nats"},
 						},
 						SecurityContext: jsContainerSecurityContext,
+						StartupProbe: &corev1.Probe{
+							ProbeHandler: corev1.ProbeHandler{
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/healthz",
+									Port: intstr.FromInt(int(jsMonitorPort)),
+								},
+							},
+							FailureThreshold:    30,
+							InitialDelaySeconds: 10,
+							TimeoutSeconds:      5,
+						},
 						LivenessProbe: &corev1.Probe{
 							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: &corev1.HTTPGetAction{
@@ -312,6 +324,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 								},
 							},
 							InitialDelaySeconds: 10,
+							PeriodSeconds:       30,
 							TimeoutSeconds:      5,
 						},
 						Lifecycle: &corev1.Lifecycle{
@@ -340,7 +353,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 						Ports: []corev1.ContainerPort{
 							{Name: "metrics", ContainerPort: jsMetricsPort},
 						},
-						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(jsMonitorPort)))},
+						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-prefix=nats", "-use_internal_server_id", "-jsz=all", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(jsMonitorPort)))},
 						SecurityContext: metricsContainerSecurityContext,
 					},
 				},
@@ -509,7 +522,7 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	}
 	routes := []string{}
 	for j := 0; j < replicas; j++ {
-		routes = append(routes, fmt.Sprintf("nats://%s-%s.%s.%s.svc:%s", ssName, strconv.Itoa(j), svcName, r.eventBus.Namespace, strconv.Itoa(int(jsClusterPort))))
+		routes = append(routes, fmt.Sprintf("nats://%s-%s.%s.%s.svc.cluster.local:%s", ssName, strconv.Itoa(j), svcName, r.eventBus.Namespace, strconv.Itoa(int(jsClusterPort))))
 	}
 	settings := r.config.EventBus.JetStream.Settings
 	if x := r.eventBus.Spec.JetStream.Settings; x != nil {
