@@ -79,6 +79,7 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 		return nil, err
 	}
 	r.eventBus.Status.MarkDeployed("Succeeded", "JetStream is deployed")
+	r.eventBus.Status.MarkConfigured()
 	return &v1alpha1.BusConfig{
 		JetStream: &v1alpha1.JetStreamConfig{
 			URL: fmt.Sprintf("nats://%s.%s.svc.cluster.local:%s", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace, strconv.Itoa(int(jsClientPort))),
@@ -459,7 +460,7 @@ func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			common.JetStreamClientAuthSecretKey: []byte(token),
+			common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("token: \"%s\"", token)),
 		},
 	}
 
