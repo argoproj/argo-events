@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -76,20 +77,51 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	// create a goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
 	// one goroutine and we don't need to worry about race conditions
 	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
+	subscriptions := make([]*nats.Subscription, len(subjects))
+	subscriptionIndex := 0
 	for subject, _ := range subjects {
 		log.Infof("Subscribing to subject %s with durable name %s", subject, group)
-		_, err = conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckExplicit(), nats.Durable(group)) // todo: what other subscription options here?; also, do we need the Subscription returned by this call?
+		subscriptions[subscriptionIndex], err = conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckExplicit(), nats.Durable(group)) // todo: what other subscription options here?; also, do we need the Subscription returned by this call?
 		if err != nil {
 			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, group, err)
 		}
+		subscriptionIndex++
 	}
 
-	go conn.processMsgs(ctx, ch, closeCh)
+	wg := sync.WaitGroup{}
+	processMsgsCloseCh := make(chan struct{})
+	// this method will process the incoming messages
+	go conn.processMsgs(ctx, ch, processMsgsCloseCh, transform, filter, action, wg)
+	wg.Add(1)
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info("exiting, unsubscribing and closing connection...")
+			processMsgsCloseCh <- struct{}{}
+			wg.Wait()
+			return nil
+		case <-closeCh:
+			log.Info("closing subscription...")
+			processMsgsCloseCh <- struct{}{}
+			wg.Wait()
+			return nil
+		}
+	}
 
 	return nil
 }
 
-func (conn *JetstreamTriggerConn) processMsgs(ctx context.Context, receiveChannel <-chan *nats.Msg, closeCh <-chan struct{}) {
+func (conn *JetstreamTriggerConn) processMsgs(
+	ctx context.Context,
+	receiveChannel <-chan *nats.Msg,
+	closeCh <-chan struct{},
+	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
+	filter func(string, cloudevents.Event) bool,
+	action func(map[string]cloudevents.Event),
+	wg sync.WaitGroup) {
+
+	defer wg.Done()
 
 	for {
 		select {
