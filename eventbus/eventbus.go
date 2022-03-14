@@ -16,11 +16,12 @@ import (
 
 func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*driver.Auth, error) {
 	logger := logging.FromContext(ctx)
+
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
 	if eventBusConfig.NATS != nil {
 		eventBusAuth = eventBusConfig.NATS.Auth
-		/*} else if eventBusConfig.JetStream != nil {
-		eventBusAuth = eventBusConfig.JetStream.Auth*/
+	} else if eventBusConfig.JetStream != nil {
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
 	} else {
 		return nil, errors.New("invalid event bus")
 	}
@@ -56,6 +57,7 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*d
 			Strategy:    *eventBusAuth,
 			Crendential: cred,
 		}
+
 	}
 
 	return auth, nil
