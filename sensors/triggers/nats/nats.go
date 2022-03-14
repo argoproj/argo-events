@@ -19,7 +19,7 @@ import (
 	"context"
 	"encoding/json"
 
-	natslib "github.com/nats-io/go-nats"
+	natslib "github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
