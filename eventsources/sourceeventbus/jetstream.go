@@ -8,10 +8,9 @@ import (
 type Jetstream struct {
 	*eventbusdriver.Jetstream
 	eventSourceName string
-	hostname        string
 }
 
-func NewJetstream(url, clusterID, eventSourceName string, hostname string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
+func NewJetstream(url, eventSourceName string, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
 	baseJetstream, err := eventbusdriver.NewJetstream(url, auth, logger)
 	if err != nil {
 		return nil, err
@@ -19,7 +18,6 @@ func NewJetstream(url, clusterID, eventSourceName string, hostname string, auth 
 	return &Jetstream{
 		baseJetstream,
 		eventSourceName,
-		hostname,
 	}, nil
 
 }
