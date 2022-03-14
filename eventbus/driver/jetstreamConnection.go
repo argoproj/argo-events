@@ -31,6 +31,7 @@ func (jsc *JetstreamConnection) IsClosed() bool {
 
 func (jsc *JetstreamConnection) Publish(subject string, data []byte) error {
 	// todo: On the publishing side you can avoid duplicate message ingestion using the Message Deduplication feature.
+	jsc.Logger.Debugf("publishing to subject %s using JSContext: %+v", subject, jsc.JSContext)
 	_, err := jsc.JSContext.Publish(subject, data)
 	return err
 }
