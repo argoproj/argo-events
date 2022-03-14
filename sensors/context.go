@@ -25,7 +25,7 @@ import (
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/aws/aws-sdk-go/service/lambda"
-	natslib "github.com/nats-io/go-nats"
+	natslib "github.com/nats-io/nats.go"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
