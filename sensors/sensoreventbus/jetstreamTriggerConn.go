@@ -49,12 +49,18 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	}
 
 	// Create a Consumer
-	_, err = conn.JSContext.AddConsumer("default", &nats.ConsumerConfig{
-		Durable: group,
-	})
+	streamName := "default"
+	_, err = conn.JSContext.AddConsumer(streamName, &nats.ConsumerConfig{
+		Durable:        group,
+		DeliverGroup:   group,
+		DeliverSubject: conn.ClientID(), // todo: what should this be??
+		AckPolicy:      nats.AckExplicitPolicy},
+	)
 	if err != nil {
-		// tbd
+		log.Errorf("Failed to add consumer %s: %v", group, err)
+		return err
 	}
+	log.Infof("added Consumer of durable name %s to stream %s", group, streamName)
 
 	// derive subjects that we'll subscribe with using the dependencies passed in
 	subjects := make(map[string]struct{}) // essentially a set
@@ -63,16 +69,21 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	}
 
 	err = conn.CleanUpOnStart(group)
+	if err != nil {
+		return err
+	}
 
 	// create a goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
 	// one goroutine and we don't need to worry about race conditions
 	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
 	for subject, _ := range subjects {
-		_, err = conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckAll()) // todo: what other subscription options here?; also, do we need the Subscription returned by this call?
+		log.Infof("Subscribing to subject %s with durable name %s", subject, group)
+		_, err = conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckExplicit(), nats.Durable(group)) // todo: what other subscription options here?; also, do we need the Subscription returned by this call?
 		if err != nil {
 			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, group, err)
 		}
 	}
+
 	go conn.processMsgs(ctx, ch, closeCh)
 
 	return nil
