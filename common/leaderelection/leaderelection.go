@@ -33,6 +33,9 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 	if eventBusConfig.NATS != nil {
 		eventBusType = apicommon.EventBusNATS
 		eventBusAuth = eventBusConfig.NATS.Auth
+	} else if eventBusConfig.JetStream != nil {
+		eventBusType = apicommon.EventBusJetStream
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
 	} else {
 		return nil, errors.New("invalid event bus")
 	}
@@ -76,6 +79,13 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 			clusterName: clusterName,
 			size:        clusterSize,
 			url:         eventBusConfig.NATS.URL,
+			auth:        auth,
+		}
+	case apicommon.EventBusJetStream:
+		elector = &natsEventBusElector{
+			clusterName: clusterName,
+			size:        clusterSize,
+			url:         eventBusConfig.JetStream.URL,
 			auth:        auth,
 		}
 	default:

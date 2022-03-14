@@ -72,6 +72,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName, "error", err)
 		return errors.New("eventbus not ready")
 	}
+
 	expectedDeploy, err := buildDeployment(args, eventBus)
 	if err != nil {
 		sensor.Status.MarkDeployFailed("BuildDeploymentSpecFailed", "Failed to build Deployment spec.")
@@ -165,6 +166,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	}
 	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
+
 	if eventBus.Status.Config.NATS != nil {
 		volumes := deploymentSpec.Template.Spec.Volumes
 		volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
@@ -176,7 +178,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 
 		natsConf := eventBus.Status.Config.NATS
 		if natsConf.Auth != nil && natsConf.AccessSecret != nil {
-			// Mount the secret as volume instead of using evnFrom to gain the ability
+			// Mount the secret as volume instead of using envFrom to gain the ability
 			// for the sensor deployment to auto reload when the secret changes
 			volumes = append(volumes, corev1.Volume{
 				Name: "auth-volume",
@@ -186,6 +188,38 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 						Items: []corev1.KeyToPath{
 							{
 								Key:  natsConf.AccessSecret.Key,
+								Path: "auth.yaml",
+							},
+						},
+					},
+				},
+			})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
+		}
+		deploymentSpec.Template.Spec.Volumes = volumes
+		deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
+	} else if eventBus.Status.Config.JetStream != nil {
+		// todo: if we keep this code then address the duplication with above
+		volumes := deploymentSpec.Template.Spec.Volumes
+		volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
+		emptyDirVolName := "tmp"
+		volumes = append(volumes, corev1.Volume{
+			Name: emptyDirVolName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
+
+		jsConf := eventBus.Status.Config.JetStream
+		if jsConf.Auth != nil && jsConf.Auth.Token != nil {
+			// Mount the secret as volume instead of using envFrom to gain the ability
+			// for the sensor deployment to auto reload when the secret changes
+			volumes = append(volumes, corev1.Volume{
+				Name: "auth-volume",
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: jsConf.Auth.Token.Name,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  jsConf.Auth.Token.Key,
 								Path: "auth.yaml",
 							},
 						},
