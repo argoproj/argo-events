@@ -66,7 +66,6 @@ func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, 
 		log.Errorw("Failed to connect to NATS server", zap.Error(err))
 		return nil, err
 	}
-	log.Info("Connected to NATS Jetstream server.")
 	conn.NATSConn = nc
 	conn.NATSConnected = true
 
@@ -83,7 +82,7 @@ func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, 
 		return nil, err
 	}
 
-	log.Info("Connected to NATS streaming server.")
+	log.Info("Connected to NATS Jetstream server.")
 	return conn, nil
 }
 
@@ -96,13 +95,16 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	options := make([]nats.JSOpt, 0)
 	// todo: create a JSOpt for each setting that the user specifies
 
+	streamName := "default"
 	_, err = conn.JSContext.AddStream(&nats.StreamConfig{
-		Name:     "default", // todo: replace with a const
-		Subjects: []string{"default.*"},
+		Name: streamName, // todo: replace with a const
+		//Subjects: []string{"default.*"},
+		Subjects: []string{"default.*.*"},
 	}, options...)
 	if err != nil {
-		return errors.Errorf("Failed to add Jetstream stream 'default': %v", err)
+		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", streamName, err, conn)
 	}
 
+	stream.logger.Infof("Created Jetstream stream '%s' for connection %+v", streamName, conn)
 	return nil
 }
