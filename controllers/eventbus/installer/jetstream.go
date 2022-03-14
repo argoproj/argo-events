@@ -81,7 +81,7 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 	r.eventBus.Status.MarkDeployed("Succeeded", "JetStream is deployed")
 	return &v1alpha1.BusConfig{
 		JetStream: &v1alpha1.JetStreamConfig{
-			URL: fmt.Sprintf("nats://%s:%s", generateJetStreamServiceName(r.eventBus), strconv.Itoa(int(jsClientPort))),
+			URL: fmt.Sprintf("nats://%s.%s.svc.cluster.local:%s", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace, strconv.Itoa(int(jsClientPort))),
 			Auth: &v1alpha1.JetStreamAuth{
 				Token: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
