@@ -9,6 +9,8 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
 
+	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	nats "github.com/nats-io/nats.go"
@@ -21,6 +23,7 @@ type JetstreamTriggerConn struct {
 	keyValueStore        *nats.KeyValue
 	dependencyExpression string
 	deps                 []Dependency
+	sourceDepMap         map[string][]string // maps EventSource and EventName to dependency name
 }
 
 func NewJetstreamTriggerConn(conn *eventbusdriver.JetstreamConnection,
@@ -29,7 +32,17 @@ func NewJetstreamTriggerConn(conn *eventbusdriver.JetstreamConnection,
 	keyValueStore *nats.KeyValue,
 	dependencyExpression string,
 	deps []Dependency) *JetstreamTriggerConn {
-	connection := &JetstreamTriggerConn{conn, sensorName, triggerName, keyValueStore, dependencyExpression, deps}
+
+	srcDepMap := make(map[string][]string)
+	for _, d := range deps {
+		key := d.EventSourceName + "__" + d.EventName
+		_, found := srcDepMap[key]
+		if !found {
+			srcDepMap[key] = make([]string, 0)
+		}
+		srcDepMap[key] = append(srcDepMap[key], d.Name)
+	}
+	connection := &JetstreamTriggerConn{conn, sensorName, triggerName, keyValueStore, dependencyExpression, deps, srcDepMap}
 	connection.Logger = connection.Logger.With("triggerName", connection.triggerName).With("clientID", connection.ClientID())
 	return connection
 }
@@ -102,7 +115,6 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		}
 	}
 
-	return nil
 }
 
 func (conn *JetstreamTriggerConn) pullSubscribe(
@@ -153,9 +165,42 @@ func (conn *JetstreamTriggerConn) processMsgs(
 	}
 }
 
-func (conn *JetstreamTriggerConn) processMsg(msg *nats.Msg) {
-	defer msg.Ack()
-	conn.Logger.Infof("received new message: %+v", msg)
+func (conn *JetstreamTriggerConn) processMsg(m *nats.Msg) {
+	defer m.Ack()
+	log := conn.Logger
+	//conn.Logger.Infof("received new message: %+v", msg)
+
+	var event *cloudevents.Event
+	if err := json.Unmarshal(m.Data, &event); err != nil {
+		log.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
+		_ = m.Ack()
+		return
+	}
+
+	// get the dependency name from the event source name and event name
+	depNames, err := conn.getDependencyNames(event.Source(), event.Subject())
+	if err != nil {
+		log.Errorf("Failed to get the dependency names, discarding it... err: %v", err)
+		_ = m.Ack()
+		return
+	}
+
+	log.Debugf("New incoming Event Source Message, dependency names=%s", depNames)
+
+	// get all dependencies for this Trigger that match
+
+}
+
+func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName string) ([]string, error) {
+	deps, found := conn.sourceDepMap[eventSourceName+"__"+eventName]
+	if !found {
+		errStr := fmt.Sprintf("incoming event source and event not associated with any dependencies, event source=%s, event=%s",
+			eventSourceName, eventName)
+		conn.Logger.Error(errStr)
+		return nil, errors.New(errStr)
+	}
+
+	return deps, nil
 }
 
 func (conn *JetstreamTriggerConn) CleanUpOnStart() error {
