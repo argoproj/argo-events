@@ -12,7 +12,7 @@ type Jetstream struct {
 	auth *Auth
 	// clusterID string
 	//jetstreamContext nats.JetStreamContext
-	mgmtConnection JetstreamConnection
+	MgmtConnection JetstreamConnection
 
 	streamSettings string
 
@@ -30,8 +30,8 @@ func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) (*Jetstream
 		streamSettings: streamSettings,
 	}
 
-	mgmtConnection, err := js.MakeConnection("mgmt")
-	js.mgmtConnection = *mgmtConnection
+	MgmtConnection, err := js.MakeConnection("mgmt")
+	js.MgmtConnection = *MgmtConnection
 
 	return js, err
 }

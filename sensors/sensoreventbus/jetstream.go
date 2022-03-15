@@ -18,22 +18,32 @@ type Jetstream struct {
 	*eventbusdriver.Jetstream
 
 	sensorName    string
-	keyValueStore *nats.KeyValue
+	keyValueStore nats.KeyValue
 }
 
 func NewJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusdriver.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
-	// todo: Here we can take the sensor specification and clean up the K/V store so as to remove any old
-	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)
 
 	baseJetstream, err := eventbusdriver.NewJetstream(url, auth, logger)
 	if err != nil {
 		return nil, err
 	}
 
+	// todo: determine if we can also call this if it already exists
+	kvStore, err := baseJetstream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: sensorSpec.Name})
+	if err != nil {
+		errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", sensorSpec.Name, err)
+		logger.Error(errStr)
+		return nil, err
+	}
+	logger.Infof("successfully created K/V store for sensor %s (if it doesn't already exist)", sensorSpec.Name)
+
+	// todo: Here we can take the sensor specification and clean up the K/V store so as to remove any old
+	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)
+
 	return &Jetstream{
 		baseJetstream,
 		sensorSpec.Name,
-		nil,
+		kvStore,
 	}, nil
 }
 
@@ -51,5 +61,9 @@ func (stream *Jetstream) Connect(triggerName string, dependencyExpression string
 		return nil, err
 	}
 
-	return NewJetstreamTriggerConn(conn, stream.sensorName, triggerName, nil, dependencyExpression, deps), nil
+	return NewJetstreamTriggerConn(conn, stream.sensorName, triggerName, dependencyExpression, deps)
+}
+
+func getDependencyKey(triggerName string, depName string) string {
+	return fmt.Sprintf("%s/%s", triggerName, depName)
 }
