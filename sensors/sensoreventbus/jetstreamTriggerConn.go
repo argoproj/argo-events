@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
 
@@ -21,9 +22,10 @@ type JetstreamTriggerConn struct {
 	*eventbusdriver.JetstreamConnection
 	sensorName           string
 	triggerName          string
-	keyValueStore        *nats.KeyValue
+	keyValueStore        nats.KeyValue
 	dependencyExpression string
 	requiresANDLogic     bool
+	evaluableExpression  *govaluate.EvaluableExpression
 	deps                 []Dependency
 	sourceDepMap         map[string][]string // maps EventSource and EventName to dependency name
 }
@@ -31,9 +33,9 @@ type JetstreamTriggerConn struct {
 func NewJetstreamTriggerConn(conn *eventbusdriver.JetstreamConnection,
 	sensorName string,
 	triggerName string,
-	keyValueStore *nats.KeyValue,
 	dependencyExpression string,
-	deps []Dependency) *JetstreamTriggerConn {
+	deps []Dependency) (*JetstreamTriggerConn, error) {
+	var err error
 
 	sourceDepMap := make(map[string][]string)
 	for _, d := range deps {
@@ -44,17 +46,34 @@ func NewJetstreamTriggerConn(conn *eventbusdriver.JetstreamConnection,
 		}
 		sourceDepMap[key] = append(sourceDepMap[key], d.Name)
 	}
+
 	connection := &JetstreamTriggerConn{
 		JetstreamConnection:  conn,
 		sensorName:           sensorName,
 		triggerName:          triggerName,
-		keyValueStore:        keyValueStore,
 		dependencyExpression: dependencyExpression,
 		requiresANDLogic:     strings.Contains(dependencyExpression, "&"),
 		deps:                 deps,
 		sourceDepMap:         sourceDepMap}
 	connection.Logger = connection.Logger.With("triggerName", connection.triggerName).With("clientID", connection.ClientID())
-	return connection
+
+	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
+	if err != nil {
+		return nil, err
+		errStr := fmt.Sprintf("failed to evaluate expression %s: %v", dependencyExpression, err)
+		connection.Logger.Error(errStr)
+		return nil, errors.New(errStr)
+	}
+
+	connection.keyValueStore, err = conn.JSContext.KeyValue(sensorName)
+	if err != nil {
+		errStr := fmt.Sprintf("failed to get K/V store for sensor %s: %v", sensorName, err)
+		connection.Logger.Error(errStr)
+		return nil, errors.New(errStr)
+	}
+
+	connection.Logger.Infof("Successfully located K/V store for sensor %s", sensorName)
+	return connection, nil
 }
 
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
@@ -238,19 +257,74 @@ func (conn *JetstreamTriggerConn) processDependency(
 	} else {
 		// check Dependency expression (need to retrieve previous dependencies from Key/Value store)
 
-		parameters := make(map[string]bool, len(conn.deps))
-		//messages := conn.getSavedDependencies()
-		// derive parameters from messages
+		messages := conn.getSavedDependencies()
 
+		// populate 'parameters' map to indicate which dependencies have been received and which haven't
+		parameters := make(map[string]interface{}, len(conn.deps))
+		for _, dep := range conn.deps {
+			parameters[dep.Name] = false
+		}
+		for prevDep, _ := range messages {
+			parameters[prevDep] = true
+		}
 		parameters[depName] = true
+		log.Debugf("Current state of dependencies: %v", parameters)
+
+		// evaluate the filter expression
+		result, err := conn.evaluableExpression.Evaluate(parameters)
+		if err != nil {
+			errStr := fmt.Sprintf("failed to evaluate dependency expression: %v", err)
+			log.Error(errStr)
+			return
+		}
 
 		// if expression is true, trigger and clear the K/V store
 		// else save the new message in the K/V store
+		if result == true {
+			log.Debugf("dependency expression successfully evaluated to true: %s", conn.dependencyExpression)
+		} else {
+			log.Debugf("dependency expression false: %s", conn.dependencyExpression)
+			msgMetadata, err := m.Metadata()
+			if err != nil {
+				errStr := fmt.Sprintf("message %+v is not a jetstream message???: %v", m, err)
+				log.Error(errStr)
+				return
+			}
+			err = conn.saveDependency(depName,
+				MsgInfo{
+					streamSeq:   msgMetadata.Sequence.Stream,
+					consumerSeq: msgMetadata.Sequence.Consumer,
+					timestamp:   msgMetadata.Timestamp,
+					event:       event})
+		}
+
 	}
 }
 
-func (conn *JetstreamTriggerConn) getSavedDependencies() map[string]cloudevents.Event {
+func (conn *JetstreamTriggerConn) getSavedDependencies() map[string]MsgInfo {
+	// dependencies are formatted "<Sensor>/<Trigger>/<Dependency>""
+	prevMsgs := make(map[string]MsgInfo)
+	return prevMsgs
+}
+
+func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo) error {
+	log := conn.Logger
+	jsonEncodedMsg, err := json.Marshal(msgInfo)
+	if err != nil {
+		errorStr := fmt.Sprintf("failed to convert msgInfo struct into JSON: %+v", msgInfo)
+		log.Error(errorStr)
+		return errors.New(errorStr)
+	}
+	key := getDependencyKey(conn.triggerName, depName)
+	_, err = conn.keyValueStore.Put(key, jsonEncodedMsg)
+	if err != nil {
+		errorStr := fmt.Sprintf("failed to store dependency under key %s, value:%s: %+v", key, jsonEncodedMsg, err)
+		log.Error(errorStr)
+		return errors.New(errorStr)
+	}
+
 	return nil
+
 }
 
 func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName string) ([]string, error) {
@@ -275,10 +349,11 @@ func (conn *JetstreamTriggerConn) CleanUpOnStart() error {
 	return nil
 }
 
-type msgInfo struct {
-	seq       uint64
-	timestamp int64
-	event     *cloudevents.Event
-	// timestamp of last delivered
-	lastDeliveredTime int64
+// this is what we'll store in our K/V store for each dependency (JSON encoded)
+// key: "<Sensor>/<Trigger>/<Dependency>""
+type MsgInfo struct {
+	streamSeq   uint64
+	consumerSeq uint64
+	timestamp   time.Time
+	event       *cloudevents.Event
 }
