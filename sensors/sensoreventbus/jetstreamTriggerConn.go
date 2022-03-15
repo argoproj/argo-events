@@ -82,22 +82,22 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	}
 
 	// this method will process the incoming messages
-	go conn.processMsgs(ctx, ch, processMsgsCloseCh, transform, filter, action, wg)
+	go conn.processMsgs(ch, processMsgsCloseCh, transform, filter, action, wg)
 	wg.Add(1)
 
 	for {
 		select {
 		case <-ctx.Done():
 			log.Info("exiting, closing connection...")
-			conn.NATSConn.Close() // todo: should this go here?
 			processMsgsCloseCh <- struct{}{}
 			wg.Wait()
+			conn.NATSConn.Close()
 			return nil
 		case <-closeCh:
 			log.Info("closing connection...")
-			conn.NATSConn.Close()
 			processMsgsCloseCh <- struct{}{}
 			wg.Wait()
+			conn.NATSConn.Close()
 			return nil
 		}
 	}
@@ -132,7 +132,6 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 }
 
 func (conn *JetstreamTriggerConn) processMsgs(
-	ctx context.Context,
 	receiveChannel <-chan *nats.Msg,
 	closeCh <-chan struct{},
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
@@ -146,11 +145,9 @@ func (conn *JetstreamTriggerConn) processMsgs(
 		select {
 		case msg := <-receiveChannel:
 			conn.processMsg(msg)
-		case <-ctx.Done():
-			// todo
-			return
 		case <-closeCh:
-			// todo
+			conn.Logger.Info("shutting down processMsgs routine")
+			wg.Done()
 			return
 		}
 	}
