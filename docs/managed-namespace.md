@@ -13,3 +13,4 @@ For example:
         - default
 ```
 
+In cluster scope installation, don't include `--namespaced` or `--managed-namespace`.

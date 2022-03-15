@@ -1,8 +1,13 @@
 # Getting Started
 
-We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon a HTTP Post request.
+We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon an HTTP Post request.
 
-Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-workflows/) installed to make this work.
+Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-workflows/) installed to make this work. 
+The Argo Workflow controller will need to be configured to listen for Workflow objects created in `argo-events` namespace. 
+  (See [this](https://github.com/argoproj/argo-workflows/blob/master/docs/managed-namespace.md) link.) 
+  The Workflow Controller will need to be installed either in a cluster-scope configuration (i.e. no "--namespaced" argument) so that it has visiblity to all namespaces, or with "--managed-namespace" set to define "argo-events" as a namespace it has visibility to. To deploy Argo Workflows with a cluster-scope configuration you can use this installation yaml file:
+
+        kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml
 
 1. Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus.
 
