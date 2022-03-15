@@ -48,6 +48,7 @@ nav:
           - 'eventsources/setup/gcp-pub-sub.md'
           - 'eventsources/setup/github.md'
           - 'eventsources/setup/gitlab.md'
+          - 'eventsources/setup/bitbucket.md'
           - 'eventsources/setup/bitbucketserver.md'
           - 'eventsources/setup/kafka.md'
           - 'eventsources/setup/minio.md'
