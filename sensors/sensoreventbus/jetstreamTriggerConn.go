@@ -3,13 +3,13 @@ package sensoreventbus
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
 
+	"github.com/argoproj/argo-events/common"
 	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
 	nats "github.com/nats-io/nats.go"
 )
@@ -43,53 +43,44 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
 	log := conn.Logger
-
-	group, err := conn.getGroupNameFromClientID(conn.ClientID())
-	if err != nil {
-		return err
-	}
-
-	// Create a Consumer
-	streamName := "default"
-	_, err = conn.JSContext.AddConsumer(streamName, &nats.ConsumerConfig{
-		Durable:        group,
-		DeliverGroup:   group,
-		DeliverSubject: conn.ClientID(), // todo: what should this be??
-		AckPolicy:      nats.AckExplicitPolicy},
-	)
-	if err != nil {
-		log.Errorf("Failed to add consumer %s: %v", group, err)
-		return err
-	}
-	log.Infof("added Consumer of durable name %s to stream %s", group, streamName)
-
 	// derive subjects that we'll subscribe with using the dependencies passed in
-	subjects := make(map[string]struct{}) // essentially a set
+	subjects := make(map[string]Dependency)
 	for _, dep := range conn.deps {
-		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = struct{}{}
+		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = dep
 	}
 
-	err = conn.CleanUpOnStart(group)
+	err := conn.CleanUpOnStart()
 	if err != nil {
 		return err
 	}
+
+	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
+	wg := sync.WaitGroup{}
+	processMsgsCloseCh := make(chan struct{})
 
 	// create a goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
 	// one goroutine and we don't need to worry about race conditions
-	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
 	subscriptions := make([]*nats.Subscription, len(subjects))
 	subscriptionIndex := 0
-	for subject, _ := range subjects {
-		log.Infof("Subscribing to subject %s with durable name %s", subject, group)
-		subscriptions[subscriptionIndex], err = conn.JSContext.ChanQueueSubscribe(subject, group, ch, nats.AckExplicit(), nats.Durable(group)) // todo: what other subscription options here?; also, do we need the Subscription returned by this call?
+
+	for subject, dependency := range subjects {
+		// set durable name separately for each subscription
+		hashKey := fmt.Sprintf("%s-%s-%s-%s", conn.sensorName, conn.triggerName, dependency.EventSourceName, dependency.EventName)
+		hashVal := common.Hasher(hashKey)
+		durableName := fmt.Sprintf("group-%s", hashVal)
+
+		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
+		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit()) // todo: what other subscription options here?
 		if err != nil {
-			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, group, err)
+			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
+			continue
 		}
+		go conn.pullSubscribe(subscriptions[subscriptionIndex], ch, processMsgsCloseCh, wg)
+		wg.Add(1)
+
 		subscriptionIndex++
 	}
 
-	wg := sync.WaitGroup{}
-	processMsgsCloseCh := make(chan struct{})
 	// this method will process the incoming messages
 	go conn.processMsgs(ctx, ch, processMsgsCloseCh, transform, filter, action, wg)
 	wg.Add(1)
@@ -97,12 +88,14 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	for {
 		select {
 		case <-ctx.Done():
-			log.Info("exiting, unsubscribing and closing connection...")
+			log.Info("exiting, closing connection...")
+			conn.NATSConn.Close() // todo: should this go here?
 			processMsgsCloseCh <- struct{}{}
 			wg.Wait()
 			return nil
 		case <-closeCh:
-			log.Info("closing subscription...")
+			log.Info("closing connection...")
+			conn.NATSConn.Close()
 			processMsgsCloseCh <- struct{}{}
 			wg.Wait()
 			return nil
@@ -110,6 +103,32 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	}
 
 	return nil
+}
+
+func (conn *JetstreamTriggerConn) pullSubscribe(
+	subscription *nats.Subscription,
+	msgChannel chan<- *nats.Msg,
+	closeCh <-chan struct{},
+	wg sync.WaitGroup) {
+	for {
+		// call Fetch with timeout
+		msgs, err := subscription.Fetch(1, nats.MaxWait(time.Second*1))
+		if err != nil && !errors.Is(err, nats.ErrTimeout) {
+			conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v", subscription, err)
+		}
+
+		// then check to see if closeCh has anything; if so, wg.Done() and exit
+		if len(closeCh) != 0 {
+			wg.Done()
+			conn.Logger.Infof("exiting pullSubscribe() for subscription %+v", subscription)
+			return
+		}
+
+		// then push the msgs to the channel which will consume them
+		for _, msg := range msgs {
+			msgChannel <- msg
+		}
+	}
 }
 
 func (conn *JetstreamTriggerConn) processMsgs(
@@ -138,22 +157,11 @@ func (conn *JetstreamTriggerConn) processMsgs(
 }
 
 func (conn *JetstreamTriggerConn) processMsg(msg *nats.Msg) {
-	conn.Logger.Errorf("received new message: %+v", msg)
+	defer msg.Ack()
+	conn.Logger.Infof("received new message: %+v", msg)
 }
 
-func (conn *JetstreamTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
-	log := conn.Logger.With("clientID", conn.ClientID())
-	// take off the last part: clientID should have a dash at the end and we can remove that part
-	strs := strings.Split(clientID, "-")
-	if len(strs) < 2 {
-		err := errors.Errorf("Expected client ID to contain dash: %s", clientID)
-		log.Error(err)
-		return "", err
-	}
-	return strings.Join(strs[:len(strs)-1], "-"), nil
-}
-
-func (conn *JetstreamTriggerConn) CleanUpOnStart(group string) error {
+func (conn *JetstreamTriggerConn) CleanUpOnStart() error {
 	// look in K/V store for Trigger expressions that have changed
 
 	// for each Trigger that no longer exists, need to handle:
