@@ -894,7 +894,7 @@ type BitbucketAuth struct {
 	Basic *BitbucketBasicAuth `json:"basic,omitempty" protobuf:"bytes,1,opt,name=basic"`
 	// OAuthToken refers to the K8s secret that holds the OAuth Bearer token.
 	// +optional
-	OAuthToken *corev1.SecretKeySelector `json:"oauthToken,omitempty" protobuf:"bytes,2,opt,name=token"`
+	OAuthToken *corev1.SecretKeySelector `json:"oauthToken,omitempty" protobuf:"bytes,2,opt,name=oauthToken"`
 }
 
 // BasicAuth holds the information required to authenticate user via basic auth mechanism

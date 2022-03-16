@@ -214,7 +214,7 @@ message BitbucketAuth {
 
   // OAuthToken refers to the K8s secret that holds the OAuth Bearer token.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector token = 2;
+  optional k8s.io.api.core.v1.SecretKeySelector oauthToken = 2;
 }
 
 // BasicAuth holds the information required to authenticate user via basic auth mechanism
