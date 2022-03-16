@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	testSensorName = "sensor-xxxxx"
+	testSensorName      = "sensor-xxxxx"
+	testEventSourceName = "es-xxxxx"
+	testSubject         = "subj-xxxxx"
 )
 
 var (
@@ -42,25 +44,48 @@ var (
 	}
 )
 
-func TestGetDriver(t *testing.T) {
+func TestGetSensorDriver(t *testing.T) {
 	t.Run("get driver without eventbus", func(t *testing.T) {
-		_, err := GetDriver(context.Background(), testBadBusConfig, testValidSensorSpec)
+		_, err := GetSensorDriver(context.Background(), testBadBusConfig, testValidSensorSpec)
 		assert.Error(t, err)
 	})
 
 	t.Run("get driver with none auth eventbus", func(t *testing.T) {
-		driver, err := GetDriver(context.Background(), testBusConfig, testValidSensorSpec)
+		driver, err := GetSensorDriver(context.Background(), testBusConfig, testValidSensorSpec)
 		assert.NoError(t, err)
 		assert.NotNil(t, driver)
 	})
 
 	t.Run("get driver with invalid sensor spec", func(t *testing.T) {
-		_, err := GetDriver(context.Background(), testBusConfig, testNoNameSensorSpec)
+		_, err := GetSensorDriver(context.Background(), testBusConfig, testNoNameSensorSpec)
 		assert.Error(t, err)
 	})
 
 	t.Run("get driver with nil sensor spec", func(t *testing.T) {
-		_, err := GetDriver(context.Background(), testBusConfig, nil)
+		_, err := GetSensorDriver(context.Background(), testBusConfig, nil)
+		assert.Error(t, err)
+	})
+}
+
+func TestGetSourceDriver(t *testing.T) {
+	t.Run("get driver without eventbus", func(t *testing.T) {
+		_, err := GetEventSourceDriver(context.Background(), testBadBusConfig, testEventSourceName, testSubject)
+		assert.Error(t, err)
+	})
+
+	t.Run("get driver with none auth eventbus", func(t *testing.T) {
+		driver, err := GetEventSourceDriver(context.Background(), testBusConfig, testEventSourceName, testSubject)
+		assert.NoError(t, err)
+		assert.NotNil(t, driver)
+	})
+
+	t.Run("get driver without eventSourceName", func(t *testing.T) {
+		_, err := GetEventSourceDriver(context.Background(), testBusConfig, "", testSubject)
+		assert.Error(t, err)
+	})
+
+	t.Run("get NATS Streaming driver without subject", func(t *testing.T) {
+		_, err := GetEventSourceDriver(context.Background(), testBusConfig, testEventSourceName, "")
 		assert.Error(t, err)
 	})
 }

@@ -12,15 +12,13 @@ type Connection interface {
 
 	IsClosed() bool
 
-	//Publish(subject string, data []byte) error
-
 	ClientID() string
 }
 
 type EventSourceConnection interface {
 	Connection
 
-	Publish(subject string, data []byte) error
+	Publish(ctx context.Context, evt Event, message []byte) error
 }
 
 type TriggerConnection interface {
@@ -37,9 +35,9 @@ type TriggerConnection interface {
 }
 
 type EventSourceDriver interface {
-	Connect(clientID string) EventSourceConnection
+	Connect(clientID string) (EventSourceConnection, error)
 }
 
 type SensorDriver interface {
-	Connect(triggerName string, dependencyExpression string, deps []Dependency) TriggerConnection
+	Connect(triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error)
 }

@@ -424,7 +424,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 					clientID := generateClientID(e.hostname)
-					driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
+					driver, err := eventbus.GetEventSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
 					if err != nil {
 						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
@@ -504,7 +504,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 
-						if err = e.eventBusConn.PublishEvent(ctx, eventbuscommon.Event{EventSourceName: s.GetEventSourceName(), EventName: s.GetEventName()}, eventBody); err != nil {
+						if err = e.eventBusConn.Publish(ctx, eventbuscommon.Event{EventSourceName: s.GetEventSourceName(), EventName: s.GetEventName()}, eventBody); err != nil {
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())

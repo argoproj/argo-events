@@ -51,7 +51,7 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 		if defaultSubject == "" {
 			return nil, errors.New("subject must be specified to create NATS Streaming driver")
 		}
-		dvr = stansource.NewSourceNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, eventSourceName, defaultSubject, auth, logger)
+		dvr = stansource.NewSourceSTAN(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, eventSourceName, defaultSubject, auth, logger)
 	case apicommon.EventBusJetStream:
 		dvr, err = jetstreamsource.NewSourceJetstream(eventBusConfig.JetStream.URL, eventSourceName, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 		if err != nil {
@@ -92,7 +92,7 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	var dvr eventbuscommon.SensorDriver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
-		dvr = stansensor.NewSensorNATSStreaming(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, sensorSpec.Name, auth, logger)
+		dvr = stansensor.NewSensorSTAN(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, sensorSpec.Name, auth, logger)
 	case apicommon.EventBusJetStream:
 		dvr, err = jetstreamsensor.NewSensorJetstream(eventBusConfig.JetStream.URL, sensorSpec, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 	default:
@@ -101,7 +101,7 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	return dvr, nil
 }
 
-func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*Auth, error) {
+func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*eventbuscommon.Auth, error) {
 	logger := logging.FromContext(ctx)
 
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy

@@ -39,10 +39,6 @@ func (nsc *STANConnection) IsClosed() bool {
 	return false
 }
 
-func (nsc *STANConnection) Publish(subject string, data []byte) error {
-	return nsc.STANConn.Publish(subject, data)
-}
-
 func (nsc *STANConnection) ClientID() string {
 	return nsc.clientID
 }
