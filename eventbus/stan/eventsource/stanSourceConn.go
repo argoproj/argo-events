@@ -13,8 +13,8 @@ type STANSourceConn struct {
 	subject         string
 }
 
-func (n *STANSourceConn) PublishEvent(ctx context.Context,
+func (n *STANSourceConn) Publish(ctx context.Context,
 	evt eventbuscommon.Event,
 	message []byte) error {
-	return n.Publish(n.subject, message)
+	return n.STANConn.Publish(n.subject, message)
 }

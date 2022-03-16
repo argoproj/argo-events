@@ -13,10 +13,13 @@ type JetstreamSourceConn struct {
 	eventSourceName string
 }
 
-func (n *JetstreamSourceConn) PublishEvent(ctx context.Context,
+func (jsc *JetstreamSourceConn) Publish(ctx context.Context,
 	evt eventbuscommon.Event,
 	message []byte) error {
+	// todo: On the publishing side you can avoid duplicate message ingestion using the Message Deduplication feature.
+
 	// derive subject from event source name and event name
 	subject := fmt.Sprintf("default.%s.%s", evt.EventSourceName, evt.EventName)
-	return n.Publish(subject, message)
+	_, err := jsc.JSContext.Publish(subject, message)
+	return err
 }
