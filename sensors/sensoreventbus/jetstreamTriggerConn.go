@@ -257,7 +257,10 @@ func (conn *JetstreamTriggerConn) processDependency(
 	} else {
 		// check Dependency expression (need to retrieve previous dependencies from Key/Value store)
 
-		messages := conn.getSavedDependencies()
+		messages, err := conn.getSavedDependencies()
+		if err != nil {
+			return
+		}
 
 		// populate 'parameters' map to indicate which dependencies have been received and which haven't
 		parameters := make(map[string]interface{}, len(conn.deps))
@@ -292,19 +295,39 @@ func (conn *JetstreamTriggerConn) processDependency(
 			}
 			err = conn.saveDependency(depName,
 				MsgInfo{
-					streamSeq:   msgMetadata.Sequence.Stream,
-					consumerSeq: msgMetadata.Sequence.Consumer,
-					timestamp:   msgMetadata.Timestamp,
-					event:       event})
+					StreamSeq:   msgMetadata.Sequence.Stream,
+					ConsumerSeq: msgMetadata.Sequence.Consumer,
+					Timestamp:   msgMetadata.Timestamp,
+					Event:       event})
 		}
 
 	}
 }
 
-func (conn *JetstreamTriggerConn) getSavedDependencies() map[string]MsgInfo {
+func (conn *JetstreamTriggerConn) getSavedDependencies() (map[string]MsgInfo, error) {
 	// dependencies are formatted "<Sensor>/<Trigger>/<Dependency>""
 	prevMsgs := make(map[string]MsgInfo)
-	return prevMsgs
+
+	// for each dependency that's in our dependency expression, look for it:
+	for _, dep := range conn.deps {
+		key := getDependencyKey(conn.triggerName, dep.Name)
+		entry, err := conn.keyValueStore.Get(key)
+		if err != nil && err != nats.ErrKeyNotFound {
+			return prevMsgs, err
+		} else if entry != nil && err == nil {
+			var msgInfo MsgInfo
+			err := json.Unmarshal(entry.Value(), &msgInfo)
+			if err != nil {
+				errStr := fmt.Sprintf("error unmarshalling value %s for key %s: %v", string(entry.Value()), key, err)
+				conn.Logger.Error(errStr)
+				return nil, errors.New(errStr)
+			}
+			prevMsgs[dep.Name] = msgInfo
+		}
+
+	}
+
+	return prevMsgs, nil
 }
 
 func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo) error {
@@ -316,6 +339,7 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 		return errors.New(errorStr)
 	}
 	key := getDependencyKey(conn.triggerName, depName)
+	log.Debugf("marshalled %+v into string %s to store under key %s", msgInfo, jsonEncodedMsg, key)
 	_, err = conn.keyValueStore.Put(key, jsonEncodedMsg)
 	if err != nil {
 		errorStr := fmt.Sprintf("failed to store dependency under key %s, value:%s: %+v", key, jsonEncodedMsg, err)
@@ -324,6 +348,10 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 	}
 
 	return nil
+
+}
+
+func (conn *JetstreamTriggerConn) clearAllDependencies() error {
 
 }
 
@@ -352,8 +380,8 @@ func (conn *JetstreamTriggerConn) CleanUpOnStart() error {
 // this is what we'll store in our K/V store for each dependency (JSON encoded)
 // key: "<Sensor>/<Trigger>/<Dependency>""
 type MsgInfo struct {
-	streamSeq   uint64
-	consumerSeq uint64
-	timestamp   time.Time
-	event       *cloudevents.Event
+	StreamSeq   uint64
+	ConsumerSeq uint64
+	Timestamp   time.Time
+	Event       *cloudevents.Event
 }
