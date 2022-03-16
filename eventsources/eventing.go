@@ -18,9 +18,9 @@ import (
 	"github.com/argoproj/argo-events/common/expr"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	"github.com/argoproj/argo-events/eventbus"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
-	"github.com/argoproj/argo-events/eventsources/sourceeventbus"
 	"github.com/argoproj/argo-events/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
@@ -328,7 +328,7 @@ type EventSourceAdaptor struct {
 	eventBusSubject string
 	hostname        string
 
-	eventBusConn sourceeventbus.SourceConnection
+	eventBusConn eventbuscommon.EventSourceConnection
 
 	metrics *eventsourcemetrics.Metrics
 }
@@ -390,7 +390,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
 	clientID := generateClientID(e.hostname)
-	driver, err := sourceeventbus.GetDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
+	driver, err := eventbus.GetEventSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
 	if err != nil {
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
@@ -504,7 +504,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 
-						if err = e.eventBusConn.PublishEvent(ctx, eventbusdriver.Event{EventSourceName: s.GetEventSourceName(), EventName: s.GetEventName()}, eventBody); err != nil {
+						if err = e.eventBusConn.PublishEvent(ctx, eventbuscommon.Event{EventSourceName: s.GetEventSourceName(), EventName: s.GetEventName()}, eventBody); err != nil {
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())

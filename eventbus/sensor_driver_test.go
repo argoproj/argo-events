@@ -1,4 +1,4 @@
-package sensoreventbus
+package eventbus
 
 import (
 	"context"

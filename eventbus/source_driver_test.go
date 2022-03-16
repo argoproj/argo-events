@@ -1,4 +1,4 @@
-package sourceeventbus
+package eventbus
 
 import (
 	"context"

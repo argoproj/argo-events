@@ -1,19 +1,8 @@
-package driver
+package common
 
 import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
-
-// Connection is an interface of event bus driver
-type Connection interface {
-	Close() error
-
-	IsClosed() bool
-
-	Publish(subject string, data []byte) error
-
-	ClientID() string
-}
 
 // Auth contains the auth infor for event bus
 type Auth struct {
@@ -29,6 +18,13 @@ type AuthCredential struct {
 }
 
 type Event struct {
+	EventSourceName string
+	EventName       string
+}
+
+// Dependency is a struct for dependency info of a sensor
+type Dependency struct {
+	Name            string
 	EventSourceName string
 	EventName       string
 }

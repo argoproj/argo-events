@@ -1,4 +1,4 @@
-package sensoreventbus
+package sensor
 
 import (
 	"context"
@@ -15,20 +15,22 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
+
+	stanbase "github.com/argoproj/argo-events/eventbus/stan/base"
 )
 
-type NATSStreamingTriggerConn struct {
-	*eventbusdriver.NATSStreamingConnection
+type STANTriggerConn struct {
+	*stanbase.STANConnection
 
 	sensorName           string
 	triggerName          string
 	dependencyExpression string
-	deps                 []Dependency
+	deps                 []eventbuscommon.Dependency
 }
 
-func NewNATSStreamingTriggerConn(conn *eventbusdriver.NATSStreamingConnection, sensorName string, triggerName string, dependencyExpression string, deps []Dependency) *NATSStreamingTriggerConn {
-	n := &NATSStreamingTriggerConn{conn, sensorName, triggerName, dependencyExpression, deps}
+func NewSTANTriggerConn(conn *stanbase.STANConnection, sensorName string, triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) *STANTriggerConn {
+	n := &STANTriggerConn{conn, sensorName, triggerName, dependencyExpression, deps}
 	n.Logger = n.Logger.With("triggerName", n.triggerName).With("clientID", n.ClientID())
 	return n
 }
@@ -44,7 +46,7 @@ func NewNATSStreamingTriggerConn(conn *eventbusdriver.NATSStreamingConnection, s
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *NATSStreamingTriggerConn) Subscribe(
+func (n *STANTriggerConn) Subscribe(
 	ctx context.Context,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
@@ -137,7 +139,7 @@ func (n *NATSStreamingTriggerConn) Subscribe(
 	}
 }
 
-func (n *NATSStreamingTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *zap.SugaredLogger) {
+func (n *STANTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *zap.SugaredLogger) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
 		log.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
@@ -263,7 +265,7 @@ func (n *NATSStreamingTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder 
 	msgHolder.ackAndCache(m, event.ID())
 }
 
-func (n *NATSStreamingTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
+func (n *STANTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
 	log := n.Logger.With("clientID", n.ClientID())
 	// take off the last part: clientID should have a dash at the end and we can remove that part
 	strs := strings.Split(clientID, "-")
@@ -305,7 +307,7 @@ type eventSourceMessageHolder struct {
 	logger *zap.SugaredLogger
 }
 
-func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr string, dependencies []Dependency, lastResetTime time.Time) (*eventSourceMessageHolder, error) {
+func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr string, dependencies []eventbuscommon.Dependency, lastResetTime time.Time) (*eventSourceMessageHolder, error) {
 	dependencyExpr = strings.ReplaceAll(dependencyExpr, "-", "\\-")
 	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
 	if err != nil {

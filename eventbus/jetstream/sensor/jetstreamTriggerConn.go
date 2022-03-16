@@ -1,4 +1,4 @@
-package sensoreventbus
+package sensor
 
 import (
 	"context"
@@ -14,27 +14,28 @@ import (
 	"encoding/json"
 
 	"github.com/argoproj/argo-events/common"
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
+	jetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
 	nats "github.com/nats-io/nats.go"
 )
 
 type JetstreamTriggerConn struct {
-	*eventbusdriver.JetstreamConnection
+	*jetstreambase.JetstreamConnection
 	sensorName           string
 	triggerName          string
 	keyValueStore        nats.KeyValue
 	dependencyExpression string
 	requiresANDLogic     bool
 	evaluableExpression  *govaluate.EvaluableExpression
-	deps                 []Dependency
+	deps                 []eventbuscommon.Dependency
 	sourceDepMap         map[string][]string // maps EventSource and EventName to dependency name
 }
 
-func NewJetstreamTriggerConn(conn *eventbusdriver.JetstreamConnection,
+func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 	sensorName string,
 	triggerName string,
 	dependencyExpression string,
-	deps []Dependency) (*JetstreamTriggerConn, error) {
+	deps []eventbuscommon.Dependency) (*JetstreamTriggerConn, error) {
 	var err error
 
 	sourceDepMap := make(map[string][]string)
@@ -86,7 +87,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	defaultSubject *string) error {
 	log := conn.Logger
 	// derive subjects that we'll subscribe with using the dependencies passed in
-	subjects := make(map[string]Dependency)
+	subjects := make(map[string]eventbuscommon.Dependency)
 	for _, dep := range conn.deps {
 		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = dep
 	}

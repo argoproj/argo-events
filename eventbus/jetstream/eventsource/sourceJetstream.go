@@ -1,0 +1,33 @@
+package eventsource
+
+import (
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
+	jetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
+	"go.uber.org/zap"
+)
+
+type SourceJetstream struct {
+	*jetstreambase.Jetstream
+	eventSourceName string
+}
+
+func NewSourceJetstream(url, eventSourceName string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*SourceJetstream, error) {
+	baseJetstream, err := jetstreambase.NewJetstream(url, auth, logger)
+	if err != nil {
+		return nil, err
+	}
+	return &SourceJetstream{
+		baseJetstream,
+		eventSourceName,
+	}, nil
+
+}
+
+func (n *SourceJetstream) Connect(clientID string) (eventbuscommon.EventSourceConnection, error) {
+	conn, err := n.MakeConnection(clientID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &JetstreamSourceConn{conn, n.eventSourceName}, nil
+}
