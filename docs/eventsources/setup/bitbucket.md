@@ -32,7 +32,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 > **_NOTE:_** In this setup, we will use the basic auth strategy together with [App password](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) (there is also support for [OAuth](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/)). 
 
 1. Create an App password if you don't have one. Follow [instructions](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) to create a new Bitbucket App password.
-   Grant it the `Webhooks - Read and Write` permissions. 
+   Grant it the `Webhooks - Read and Write` permissions as well as any permissions that applies to the events that the webhook subscribes to (e.g. if you're using the [example event-source yaml file](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml) which subscribes to `repo:push` then you would also need to grant the `Repositories - Read` permission). 
 
 1. Base64 encode your App password and your Bitbucket username.
 
@@ -59,7 +59,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
    You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket.
    You can find more information on Ingress or Route online.
 
-1. Create the event source by running the following command. You can use the example event-source yaml file from [here](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml) but make sure to replace the `url` field and to modify the `owner`, `repositorySlug` and `projectKey` with your own repo.
+1. Create the event source by running the following command. You can use the [example event-source yaml file](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml) but make sure to replace the `url` field and to modify `owner`, `repositorySlug` and `projectKey` fields with your own repo.
    
         kubectl apply -n argo-events -f <event-source-file>
 
