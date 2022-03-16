@@ -29,10 +29,11 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/eventbus"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
-	"github.com/argoproj/argo-events/sensors/sensoreventbus"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/pkg/errors"
@@ -102,7 +103,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	ebDriver, err := sensoreventbus.GetDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor)
+	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor)
 	if err != nil {
 		return err
 	}
@@ -126,14 +127,14 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				return
 			}
 			depNames := unique(expr.Vars())
-			deps := []sensoreventbus.Dependency{}
+			deps := []eventbuscommon.Dependency{}
 			for _, depName := range depNames {
 				dep, ok := depMapping[depName]
 				if !ok {
 					logger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
 					return
 				}
-				d := sensoreventbus.Dependency{
+				d := eventbuscommon.Dependency{
 					Name:            dep.Name,
 					EventSourceName: dep.EventSourceName,
 					EventName:       dep.EventName,
@@ -141,7 +142,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				deps = append(deps, d)
 			}
 
-			var conn sensoreventbus.TriggerConnection
+			var conn eventbuscommon.TriggerConnection
 			err = common.Connect(&common.DefaultBackoff, func() error {
 				var err error
 				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)

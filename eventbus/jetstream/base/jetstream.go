@@ -1,6 +1,7 @@
-package driver
+package base
 
 import (
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	nats "github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
@@ -9,7 +10,7 @@ import (
 
 type Jetstream struct {
 	url  string
-	auth *Auth
+	auth *eventbuscommon.Auth
 	// clusterID string
 	//jetstreamContext nats.JetStreamContext
 	MgmtConnection JetstreamConnection
@@ -19,7 +20,7 @@ type Jetstream struct {
 	logger *zap.SugaredLogger
 }
 
-func NewJetstream(url string, auth *Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
+func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
 
 	// todo: need to pass streamSettings into this function
 	streamSettings := ""

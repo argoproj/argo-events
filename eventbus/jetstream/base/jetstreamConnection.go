@@ -1,4 +1,4 @@
-package driver
+package base
 
 import (
 	nats "github.com/nats-io/nats.go"

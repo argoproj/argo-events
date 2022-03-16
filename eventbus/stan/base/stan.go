@@ -1,6 +1,7 @@
-package driver
+package base
 
 import (
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
@@ -8,17 +9,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type NATStreaming struct {
+type STAN struct {
 	url       string
-	auth      *Auth
+	auth      *eventbuscommon.Auth
 	clusterID string
 
 	logger *zap.SugaredLogger
 }
 
-// NewNATSStreaming returns a nats streaming driver
-func NewNATSStreaming(url string, clusterID string, auth *Auth, logger *zap.SugaredLogger) *NATStreaming {
-	return &NATStreaming{
+// NewSTAN returns a nats streaming driver
+func NewSTAN(url string, clusterID string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) *STAN {
+	return &STAN{
 		url:       url,
 		clusterID: clusterID,
 		auth:      auth,
@@ -26,9 +27,9 @@ func NewNATSStreaming(url string, clusterID string, auth *Auth, logger *zap.Suga
 	}
 }
 
-func (n *NATStreaming) MakeConnection(clientID string) (*NATSStreamingConnection, error) {
+func (n *STAN) MakeConnection(clientID string) (*STANConnection, error) {
 	log := n.logger.With("clientID", clientID)
-	conn := &NATSStreamingConnection{clientID: clientID, Logger: n.logger}
+	conn := &STANConnection{clientID: clientID, Logger: n.logger}
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
 		nats.NoReconnect(),

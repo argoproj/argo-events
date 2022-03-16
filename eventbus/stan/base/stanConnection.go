@@ -1,4 +1,4 @@
-package driver
+package base
 
 import (
 	nats "github.com/nats-io/nats.go"
@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type NATSStreamingConnection struct {
+type STANConnection struct {
 	NATSConn *nats.Conn
 	STANConn stan.Conn
 
@@ -19,7 +19,7 @@ type NATSStreamingConnection struct {
 	Logger *zap.SugaredLogger
 }
 
-func (nsc *NATSStreamingConnection) Close() error {
+func (nsc *STANConnection) Close() error {
 	if nsc.STANConn != nil {
 		err := nsc.STANConn.Close()
 		if err != nil {
@@ -32,17 +32,17 @@ func (nsc *NATSStreamingConnection) Close() error {
 	return nil
 }
 
-func (nsc *NATSStreamingConnection) IsClosed() bool {
+func (nsc *STANConnection) IsClosed() bool {
 	if nsc.NATSConn == nil || nsc.STANConn == nil || !nsc.NATSConnected || !nsc.STANConnected || nsc.NATSConn.IsClosed() {
 		return true
 	}
 	return false
 }
 
-func (nsc *NATSStreamingConnection) Publish(subject string, data []byte) error {
+func (nsc *STANConnection) Publish(subject string, data []byte) error {
 	return nsc.STANConn.Publish(subject, data)
 }
 
-func (nsc *NATSStreamingConnection) ClientID() string {
+func (nsc *STANConnection) ClientID() string {
 	return nsc.clientID
 }

@@ -12,7 +12,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -39,10 +39,10 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 	} else {
 		return nil, errors.New("invalid event bus")
 	}
-	var auth *eventbusdriver.Auth
-	cred := &eventbusdriver.AuthCredential{}
+	var auth *eventbuscommon.Auth
+	cred := &eventbuscommon.AuthCredential{}
 	if eventBusAuth == nil || *eventBusAuth == eventbusv1alpha1.AuthStrategyNone {
-		auth = &eventbusdriver.Auth{
+		auth = &eventbuscommon.Auth{
 			Strategy: eventbusv1alpha1.AuthStrategyNone,
 		}
 	} else {
@@ -67,7 +67,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 				logger.Errorw("failed to unmarshal auth.yaml after reloading", zap.Error(err))
 			}
 		})
-		auth = &eventbusdriver.Auth{
+		auth = &eventbuscommon.Auth{
 			Strategy:    *eventBusAuth,
 			Crendential: cred,
 		}
@@ -98,7 +98,7 @@ type natsEventBusElector struct {
 	clusterName string
 	size        int
 	url         string
-	auth        *eventbusdriver.Auth
+	auth        *eventbuscommon.Auth
 }
 
 func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCallbacks) {

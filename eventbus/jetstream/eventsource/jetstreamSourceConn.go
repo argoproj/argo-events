@@ -1,19 +1,20 @@
-package sourceeventbus
+package eventsource
 
 import (
 	"context"
 	"fmt"
 
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
+	jetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
 )
 
 type JetstreamSourceConn struct {
-	*eventbusdriver.JetstreamConnection
+	*jetstreambase.JetstreamConnection
 	eventSourceName string
 }
 
 func (n *JetstreamSourceConn) PublishEvent(ctx context.Context,
-	evt eventbusdriver.Event,
+	evt eventbuscommon.Event,
 	message []byte) error {
 	// derive subject from event source name and event name
 	subject := fmt.Sprintf("default.%s.%s", evt.EventSourceName, evt.EventName)
