@@ -257,7 +257,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 	} else {
 		// check Dependency expression (need to retrieve previous dependencies from Key/Value store)
 
-		messages, err := conn.getSavedDependencies()
+		prevMsgs, err := conn.getSavedDependencies()
 		if err != nil {
 			return
 		}
@@ -267,7 +267,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 		for _, dep := range conn.deps {
 			parameters[dep.Name] = false
 		}
-		for prevDep, _ := range messages {
+		for prevDep, _ := range prevMsgs {
 			parameters[prevDep] = true
 		}
 		parameters[depName] = true
@@ -285,6 +285,20 @@ func (conn *JetstreamTriggerConn) processDependency(
 		// else save the new message in the K/V store
 		if result == true {
 			log.Debugf("dependency expression successfully evaluated to true: %s", conn.dependencyExpression)
+
+			messages := make(map[string]cloudevents.Event, len(prevMsgs)+1)
+			for prevDep, msgInfo := range prevMsgs {
+				messages[prevDep] = *msgInfo.Event
+			}
+			messages[depName] = *event
+			log.Infof("Triggering actions after receiving dependency %s", depName)
+
+			action(messages)
+
+			err = conn.clearAllDependencies()
+			if err != nil {
+				return
+			}
 		} else {
 			log.Debugf("dependency expression false: %s", conn.dependencyExpression)
 			msgMetadata, err := m.Metadata()
@@ -352,7 +366,23 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 }
 
 func (conn *JetstreamTriggerConn) clearAllDependencies() error {
+	for _, dep := range conn.deps {
+		err := conn.clearKeyIfExists(getDependencyKey(conn.triggerName, dep.Name))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
+func (conn *JetstreamTriggerConn) clearKeyIfExists(key string) error {
+	conn.Logger.Debugf("clearing key %s from the K/V store", key)
+	err := conn.keyValueStore.Delete(key)
+	if err != nil && err != nats.ErrKeyNotFound {
+		conn.Logger.Error(err)
+		return err
+	}
+	return nil
 }
 
 func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName string) ([]string, error) {
