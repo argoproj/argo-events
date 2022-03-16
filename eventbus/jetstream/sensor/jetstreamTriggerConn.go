@@ -97,15 +97,18 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		return err
 	}
 
+	if !lastResetTime.IsZero() {
+		conn.clearAllDependencies(&lastResetTime)
+	}
+
 	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
 	wg := sync.WaitGroup{}
 	processMsgsCloseCh := make(chan struct{})
 
-	// create a goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
-	// one goroutine and we don't need to worry about race conditions
 	subscriptions := make([]*nats.Subscription, len(subjects))
 	subscriptionIndex := 0
 
+	// start the goroutines that will listen to the individual subscriptions
 	for subject, dependency := range subjects {
 		// set durable name separately for each subscription
 		hashKey := fmt.Sprintf("%s-%s-%s-%s", conn.sensorName, conn.triggerName, dependency.EventSourceName, dependency.EventName)
@@ -124,8 +127,9 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		subscriptionIndex++
 	}
 
-	// this method will process the incoming messages
-	go conn.processMsgs(ch, processMsgsCloseCh, transform, filter, action, wg)
+	// create a single goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
+	// one goroutine and we don't need to worry about race conditions
+	go conn.processMsgs(ch, processMsgsCloseCh, resetConditionsCh, transform, filter, action, wg)
 	wg.Add(1)
 
 	for {
@@ -176,6 +180,7 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 func (conn *JetstreamTriggerConn) processMsgs(
 	receiveChannel <-chan *nats.Msg,
 	closeCh <-chan struct{},
+	resetConditionsCh <-chan struct{},
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
@@ -187,6 +192,9 @@ func (conn *JetstreamTriggerConn) processMsgs(
 		select {
 		case msg := <-receiveChannel:
 			conn.processMsg(msg, transform, filter, action)
+		case <-resetConditionsCh:
+			conn.Logger.Info("reset conditions")
+			conn.clearAllDependencies(nil)
 		case <-closeCh:
 			conn.Logger.Info("shutting down processMsgs routine")
 			wg.Done()
@@ -296,7 +304,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 
 			action(messages)
 
-			err = conn.clearAllDependencies()
+			err = conn.clearAllDependencies(nil)
 			if err != nil {
 				return
 			}
@@ -325,24 +333,37 @@ func (conn *JetstreamTriggerConn) getSavedDependencies() (map[string]MsgInfo, er
 
 	// for each dependency that's in our dependency expression, look for it:
 	for _, dep := range conn.deps {
-		key := getDependencyKey(conn.triggerName, dep.Name)
-		entry, err := conn.keyValueStore.Get(key)
-		if err != nil && err != nats.ErrKeyNotFound {
+		msgInfo, found, err := conn.getSavedDependency(dep.Name)
+		if err != nil {
 			return prevMsgs, err
-		} else if entry != nil && err == nil {
+		}
+		if found {
+			prevMsgs[dep.Name] = msgInfo
+		}
+	}
+
+	return prevMsgs, nil
+}
+
+func (conn *JetstreamTriggerConn) getSavedDependency(depName string) (msg MsgInfo, found bool, err error) {
+	key := getDependencyKey(conn.triggerName, depName)
+	entry, err := conn.keyValueStore.Get(key)
+	if err == nil {
+		if entry != nil {
 			var msgInfo MsgInfo
 			err := json.Unmarshal(entry.Value(), &msgInfo)
 			if err != nil {
 				errStr := fmt.Sprintf("error unmarshalling value %s for key %s: %v", string(entry.Value()), key, err)
 				conn.Logger.Error(errStr)
-				return nil, errors.New(errStr)
+				return MsgInfo{}, true, errors.New(errStr)
 			}
-			prevMsgs[dep.Name] = msgInfo
+			return msgInfo, true, nil
 		}
-
+	} else if err != nats.ErrKeyNotFound {
+		return MsgInfo{}, false, err
 	}
 
-	return prevMsgs, nil
+	return MsgInfo{}, false, nil
 }
 
 func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo) error {
@@ -354,7 +375,7 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 		return errors.New(errorStr)
 	}
 	key := getDependencyKey(conn.triggerName, depName)
-	log.Debugf("marshalled %+v into string %s to store under key %s", msgInfo, jsonEncodedMsg, key)
+
 	_, err = conn.keyValueStore.Put(key, jsonEncodedMsg)
 	if err != nil {
 		errorStr := fmt.Sprintf("failed to store dependency under key %s, value:%s: %+v", key, jsonEncodedMsg, err)
@@ -366,17 +387,49 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 
 }
 
-func (conn *JetstreamTriggerConn) clearAllDependencies() error {
+func (conn *JetstreamTriggerConn) clearAllDependencies(beforeTimeOpt *time.Time) error {
 	for _, dep := range conn.deps {
-		err := conn.clearKeyIfExists(getDependencyKey(conn.triggerName, dep.Name))
-		if err != nil {
-			return err
+		if beforeTimeOpt != nil && !beforeTimeOpt.IsZero() {
+			err := conn.clearDependencyIfExistsBeforeTime(dep.Name, *beforeTimeOpt)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := conn.clearDependencyIfExists(dep.Name)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func (conn *JetstreamTriggerConn) clearKeyIfExists(key string) error {
+func (conn *JetstreamTriggerConn) clearDependencyIfExistsBeforeTime(depName string, beforeTime time.Time) error {
+	key := getDependencyKey(conn.triggerName, depName)
+
+	// first get the value (if it exists) to determine if it occurred before or after the time in question
+	msgInfo, found, err := conn.getSavedDependency(depName)
+	if err != nil {
+		return err
+	}
+	if found {
+		// determine if the dependency is from before the time in question
+		if msgInfo.Timestamp.Before(beforeTime) {
+			conn.Logger.Debugf("clearing key %s from the K/V store since its message time %+v occurred before %+v; MsgInfo:%+v",
+				key, msgInfo.Timestamp.Local(), beforeTime.Local(), msgInfo)
+			err := conn.keyValueStore.Delete(key)
+			if err != nil && err != nats.ErrKeyNotFound {
+				conn.Logger.Error(err)
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (conn *JetstreamTriggerConn) clearDependencyIfExists(depName string) error {
+	key := getDependencyKey(conn.triggerName, depName)
 	conn.Logger.Debugf("clearing key %s from the K/V store", key)
 	err := conn.keyValueStore.Delete(key)
 	if err != nil && err != nats.ErrKeyNotFound {
