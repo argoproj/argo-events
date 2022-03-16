@@ -574,6 +574,20 @@ Only configure “max_memory_store” or “max_file_store”, do not set
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>startArgs</code></br> <em> \[\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Optional arguments to start nats-server. For example, “-D” to enable
+debugging output, “-DV” to enable debugging and tracing. Check
+<a href="https://docs.nats.io/">https://docs.nats.io/</a> for all the
+available arguments.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.JetStreamConfig">

@@ -294,6 +294,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 							{Name: "monitor", ContainerPort: jsMonitorPort},
 						},
 						Command: []string{jsVersion.StartCommand, "--config", "/etc/nats-config/nats-js.conf"},
+						Args:    js.StartArgs,
 						Env: []corev1.EnvVar{
 							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
 							{Name: "SERVER_NAME", Value: "$(POD_NAME)"},

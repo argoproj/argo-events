@@ -273,6 +273,11 @@ func (in *JetStreamBus) DeepCopyInto(out *JetStreamBus) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.StartArgs != nil {
+		in, out := &in.StartArgs, &out.StartArgs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 
