@@ -1569,7 +1569,7 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 <ol>
 <li>
 <p>Create an App password if you don't have one. Follow <a href="https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/">instructions</a> to create a new Bitbucket App password.
-   Grant it the <code>Webhooks - Read and Write</code> permissions. </p>
+   Grant it the <code>Webhooks - Read and Write</code> permissions as well as any permissions that applies to the events that the webhook subscribes to (e.g. if you're using the <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml">example event-source yaml file</a> which subscribes to <code>repo:push</code> event then you would also need to grant the <code>Repositories - Read</code> permission). </p>
 </li>
 <li>
 <p>Base64 encode your App password and your Bitbucket username.</p>
@@ -1604,7 +1604,7 @@ echo -n &lt;password&gt; | base64
    You can find more information on Ingress or Route online.</p>
 </li>
 <li>
-<p>Create the event source by running the following command. You can use the example event-source yaml file from <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml">here</a> but make sure to replace the <code>url</code> field and to modify the <code>owner</code>, <code>repositorySlug</code> and <code>projectKey</code> with your own repo.</p>
+<p>Create the event source by running the following command. You can use the <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml">example event-source yaml file</a> but make sure to replace the <code>url</code> field and to modify <code>owner</code>, <code>repositorySlug</code> and <code>projectKey</code> fields with your own repo.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f &lt;event-source-file&gt;
 </code></pre></div>
 
