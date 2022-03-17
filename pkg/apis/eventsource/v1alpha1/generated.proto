@@ -528,6 +528,9 @@ message EventSourceSpec {
 
   // Bitbucket event sources
   map<string, BitbucketEventSource> bitbucket = 30;
+
+  // Redis stream source
+  map<string, RedisStreamEventSource> redisStream = 31;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -1086,6 +1089,47 @@ message RedisEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 8;
+}
+
+// RedisStreamEventSource describes an event source for
+// Redis streams (https://redis.io/topics/streams-intro)
+message RedisStreamEventSource {
+  // HostAddress refers to the address of the Redis host/server (master instance)
+  optional string hostAddress = 1;
+
+  // Password required for authentication if any.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+
+  // DB to use. If not specified, default DB 0 will be used.
+  // +optional
+  optional int32 db = 3;
+
+  // Streams to look for entries. XREADGROUP is used on all streams using a single consumer group.
+  repeated string streams = 4;
+
+  // MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP of all streams
+  // Example: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a total of 20 messages.
+  // Same as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro). Defaults to 10
+  // +optional
+  optional int32 maxMsgCountPerRead = 5;
+
+  // ConsumerGroup refers to the Redis stream consumer group that will be
+  // created on all redis streams. Messages are read through this group. Defaults to 'argo-events-cg'
+  // +optional
+  optional string consumerGroup = 6;
+
+  // TLS configuration for the redis client.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 7;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 8;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 9;
 }
 
 // ResourceEventSource refers to a event-source for K8s resource related events.
