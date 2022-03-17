@@ -17,6 +17,9 @@ package bitbucketserver
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"math/rand"
@@ -80,7 +83,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	body, err := ioutil.ReadAll(request.Body)
+	body, err := router.parseAndValidateBitbucketServerRequest(request)
 	if err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
@@ -386,4 +389,28 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 	}
 
 	return requestBody, nil
+}
+
+func (router *Router) parseAndValidateBitbucketServerRequest(request *http.Request) ([]byte, error) {
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse request body")
+	}
+
+	if len(router.hookSecret) != 0 {
+		signature := request.Header.Get("X-Hub-Signature")
+		if len(signature) == 0 {
+			return nil, errors.New("missing signature header")
+		}
+
+		mac := hmac.New(sha256.New, []byte(router.hookSecret))
+		_, _ = mac.Write(body)
+		expectedMAC := hex.EncodeToString(mac.Sum(nil))
+
+		if !hmac.Equal([]byte(signature[7:]), []byte(expectedMAC)) {
+			return nil, errors.New("hmac verification failed")
+		}
+	}
+
+	return body, nil
 }
