@@ -456,12 +456,3 @@ func (conn *JetstreamTriggerConn) CleanUpOnStart() error {
 
 	return nil
 }
-
-// this is what we'll store in our K/V store for each dependency (JSON encoded)
-// key: "<Sensor>/<Trigger>/<Dependency>""
-type MsgInfo struct {
-	StreamSeq   uint64
-	ConsumerSeq uint64
-	Timestamp   time.Time
-	Event       *cloudevents.Event
-}

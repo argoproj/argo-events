@@ -17,7 +17,7 @@ type Jetstream struct {
 
 	streamSettings string
 
-	logger *zap.SugaredLogger
+	Logger *zap.SugaredLogger
 }
 
 func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
@@ -27,7 +27,7 @@ func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogg
 	js := &Jetstream{
 		url:            url,
 		auth:           auth,
-		logger:         logger,
+		Logger:         logger,
 		streamSettings: streamSettings,
 	}
 
@@ -38,8 +38,8 @@ func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogg
 }
 
 func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, error) {
-	log := stream.logger.With("clientID", clientID)
-	conn := &JetstreamConnection{clientID: clientID, Logger: stream.logger}
+	log := stream.Logger.With("clientID", clientID)
+	conn := &JetstreamConnection{clientID: clientID, Logger: stream.Logger}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
@@ -106,6 +106,6 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", streamName, err, conn)
 	}
 
-	stream.logger.Infof("Created Jetstream stream '%s' for connection %+v", streamName, conn)
+	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", streamName, conn)
 	return nil
 }
