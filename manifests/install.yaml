@@ -278,7 +278,7 @@ subjects:
 ---
 apiVersion: v1
 data:
-  controller-config.yaml: |
+  controller-config.yaml: |+
     eventBus:
       nats:
         versions:
@@ -295,16 +295,17 @@ data:
           # e.g. 20G. -1 means no limit, Up to 1TB if available
           max_file_store: 1TB
         versions:
-        - version: 2.7.3
-          natsImage: nats:2.7.3
-          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
+        - version: 2.7.4
+          natsImage: nats:2.7.4
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
+          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
           startCommand: /nats-server
-        - version: 2.7.3-alpine
-          natsImage: nats:2.7.3-alpine
-          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
+        - version: 2.7.4-alpine
+          natsImage: nats:2.7.4-alpine
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
+          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
           startCommand: nats-server
+
 kind: ConfigMap
 metadata:
   name: argo-events-controller-config

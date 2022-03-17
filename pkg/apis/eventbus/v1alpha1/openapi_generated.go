@@ -428,6 +428,21 @@ func schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref common.ReferenceCallback
 							Format:      "",
 						},
 					},
+					"startArgs": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Optional arguments to start nats-server. For example, \"-D\" to enable debugging output, \"-DV\" to enable debugging and tracing. Check https://docs.nats.io/ for all the available arguments.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

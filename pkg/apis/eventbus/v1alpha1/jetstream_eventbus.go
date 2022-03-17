@@ -74,6 +74,10 @@ type JetStreamBus struct {
 	// Only configure "max_memory_store" or "max_file_store", do not set "store_dir" as it has been hardcoded.
 	// +optional
 	Settings *string `json:"settings,omitempty" protobuf:"bytes,16,opt,name=settings"`
+	// Optional arguments to start nats-server. For example, "-D" to enable debugging output, "-DV" to enable debugging and tracing.
+	// Check https://docs.nats.io/ for all the available arguments.
+	// +optional
+	StartArgs []string `json:"startArgs,omitempty" protobuf:"bytes,17,rep,name=startArgs"`
 }
 
 func (j JetStreamBus) GetReplicas() int {

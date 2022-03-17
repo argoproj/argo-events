@@ -450,6 +450,13 @@
           "description": "JetStream configuration, if not specified, global settings in controller-config will be used. See https://docs.nats.io/running-a-nats-service/configuration#jetstream. Only configure \"max_memory_store\" or \"max_file_store\", do not set \"store_dir\" as it has been hardcoded.",
           "type": "string"
         },
+        "startArgs": {
+          "description": "Optional arguments to start nats-server. For example, \"-D\" to enable debugging output, \"-DV\" to enable debugging and tracing. Check https://docs.nats.io/ for all the available arguments.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "tolerations": {
           "description": "If specified, the pod's tolerations.",
           "type": "array",
