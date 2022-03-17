@@ -13,7 +13,6 @@ import (
 
 	"encoding/json"
 
-	"github.com/argoproj/argo-events/common"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	jetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
 	nats "github.com/nats-io/nats.go"
@@ -111,9 +110,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	// start the goroutines that will listen to the individual subscriptions
 	for subject, dependency := range subjects {
 		// set durable name separately for each subscription
-		hashKey := fmt.Sprintf("%s-%s-%s-%s", conn.sensorName, conn.triggerName, dependency.EventSourceName, dependency.EventName)
-		hashVal := common.Hasher(hashKey)
-		durableName := fmt.Sprintf("group-%s", hashVal)
+		durableName := getDurableName(conn.sensorName, conn.triggerName, dependency.Name)
 
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
 		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit()) // todo: what other subscription options here?
@@ -197,7 +194,6 @@ func (conn *JetstreamTriggerConn) processMsgs(
 			conn.clearAllDependencies(nil)
 		case <-closeCh:
 			conn.Logger.Info("shutting down processMsgs routine")
-			wg.Done()
 			return
 		}
 	}
