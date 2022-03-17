@@ -17,6 +17,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	hashstructure "github.com/mitchellh/hashstructure/v2"
 )
 
 type SensorJetstream struct {
@@ -91,25 +92,32 @@ func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error
 		stream.Logger.Error(errStr)
 		return errors.New(errStr)
 	}
+	/*
+		changedDeps, removedDeps, _, err := stream.getChangedDeps(sensorSpec)
+		if err != nil {
+			return err
+		}
+		changedTriggers, removedTriggers, validTriggers := stream.getChangedTriggers(sensorSpec)
 
-	changedDeps, removedDeps, validDeps, err := stream.getChangedDeps(sensorSpec)
-	changedTriggers, removedTriggers, validTriggers := stream.getChangedTriggers(sensorSpec)
+		// for all valid triggers, determine if changedDeps or removedDeps requires them to be deleted
+		for _, triggerName := range validTriggers {
+			stream.purgeSelectedDepsForTrigger(triggerName, changedDeps, removedDeps)
+		}
 
-	// for all valid triggers, determine if changedDeps or removedDeps requires them to be deleted
-	for _, triggerName := range validTriggers {
-		stream.purgeSelectedDepsForTrigger(triggerName, changedDeps, removedDeps)
-	}
-
-	// for all changedTriggers (which includes modified and deleted), purge their dependencies
-	for _, triggerName := range changedTriggers {
-		stream.purgeAllDepsForTrigger(triggerName)
-	}
-	for _, triggerName := range removedTriggers {
-		stream.purgeAllDepsForTrigger(triggerName)
-	}
-
+		// for all changedTriggers (which includes modified and deleted), purge their dependencies
+		for _, triggerName := range changedTriggers {
+			stream.purgeAllDepsForTrigger(triggerName)
+		}
+		for _, triggerName := range removedTriggers {
+			stream.purgeAllDepsForTrigger(triggerName)
+		}
+	*/
 	// save new spec
-	stream.saveSpec(sensorSpec, removedTriggers)
+	removedTriggers := make([]string, 0) // temporary, just so I can test this!!!
+	err := stream.saveSpec(sensorSpec, removedTriggers)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -126,8 +134,60 @@ func (stream *SensorJetstream) purgeDependency(triggerName string, depName strin
 	}
 
 	// then delete consumer
-	durableName := getDurableName(stream.sensorName, triggerName, depName)
+	//durableName := getDurableName(stream.sensorName, triggerName, depName)
 
+	return nil
+}
+
+func (stream *SensorJetstream) saveSpec(sensorSpec *v1alpha1.Sensor, removedTriggers []string) error {
+	// remove the old triggers from the K/V store
+	for _, trigger := range removedTriggers {
+		key := getTriggerExpressionKey(trigger)
+		err := stream.keyValueStore.Delete(key)
+		if err != nil {
+			errStr := fmt.Sprintf("error deleting key %s: %v", key, err)
+			stream.Logger.Error(errStr)
+			return errors.New(errStr)
+		}
+		stream.Logger.Debugf("successfully removed Trigger expression at key %s", key)
+	}
+
+	// save the dependency definitions
+	depMap := make(DependencyDefinitionValue)
+	for _, dep := range sensorSpec.Spec.Dependencies {
+		hash, err := hashstructure.Hash(dep, hashstructure.FormatV2, nil)
+		if err != nil {
+			errStr := fmt.Sprintf("failed to hash dependency %+v", dep)
+			stream.Logger.Errorf(errStr)
+			err = errors.New(errStr)
+			return err
+		}
+		depMap[dep.Name] = hash
+	}
+	err := stream.storeDependencyDefinitions(depMap)
+	if err != nil {
+		return err
+	}
+
+	// save the list of Triggers
+	triggerList := make(TriggerValue, len(sensorSpec.Spec.Triggers))
+	for i, trigger := range sensorSpec.Spec.Triggers {
+		triggerList[i] = trigger.Template.Name
+	}
+	err = stream.storeTriggerList(triggerList)
+	if err != nil {
+		return err
+	}
+
+	// for each trigger, save its expression
+	for _, trigger := range sensorSpec.Spec.Triggers {
+		err := stream.storeTriggerExpression(trigger.Template.Name, trigger.Template.Conditions)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (changedDeps []string, removedDeps []string, validDeps []string, err error) {
@@ -139,8 +199,36 @@ func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (chan
 	}
 
 	specDependencies := sensorSpec.Spec.Dependencies
-	storedDependencies := stream.getDependencyDefinitions()
+	mappedSpecDependencies := make(map[string]v1alpha1.EventDependency, len(specDependencies))
+	for _, dep := range specDependencies {
+		mappedSpecDependencies[dep.Name] = dep
+	}
+	storedDependencies, err := stream.getDependencyDefinitions()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	for depName, hashedDep := range storedDependencies {
+		currDep, found := mappedSpecDependencies[depName]
+		if !found {
+			removedDeps = append(removedDeps, depName)
+		} else {
+			// is the dependency definition the same or different?
+			hash, err := hashstructure.Hash(currDep, hashstructure.FormatV2, nil)
+			if err != nil {
+				errStr := fmt.Sprintf("failed to hash dependency %+v", currDep)
+				stream.Logger.Errorf(errStr)
+				err = errors.New(errStr)
+				return nil, nil, nil, err
+			}
+			if hash == hashedDep {
+				validDeps = append(validDeps, depName)
+			} else {
+				changedDeps = append(changedDeps, depName)
+			}
+		}
+	}
 
+	return
 }
 
 func (stream *SensorJetstream) getDependencyDefinitions() (DependencyDefinitionValue, error) {
@@ -164,7 +252,50 @@ func (stream *SensorJetstream) getDependencyDefinitions() (DependencyDefinitionV
 }
 
 func (stream *SensorJetstream) storeDependencyDefinitions(depDef DependencyDefinitionValue) error {
+	bytes, err := json.Marshal(depDef)
+	if err != nil {
+		errStr := fmt.Sprintf("error marshalling %+v: %v", depDef, err)
+		stream.Logger.Error(errStr)
+		return errors.New(errStr)
+	}
+	_, err = stream.keyValueStore.Put(DependencyDefsKey, bytes)
+	if err != nil {
+		errStr := fmt.Sprintf("error storing %s under key %s: %v", string(bytes), DependencyDefsKey, err)
+		stream.Logger.Error(errStr)
+		return errors.New(errStr)
+	}
+	stream.Logger.Debugf("successfully stored dependency definition under key %s: %s", DependencyDefsKey, string(bytes))
+	return nil
+}
 
+func (stream *SensorJetstream) storeTriggerList(triggerList TriggerValue) error {
+	bytes, err := json.Marshal(triggerList)
+	if err != nil {
+		errStr := fmt.Sprintf("error marshalling %+v: %v", triggerList, err)
+		stream.Logger.Error(errStr)
+		return errors.New(errStr)
+	}
+	_, err = stream.keyValueStore.Put(TriggersKey, bytes)
+	if err != nil {
+		errStr := fmt.Sprintf("error storing %s under key %s: %v", string(bytes), TriggersKey, err)
+		stream.Logger.Error(errStr)
+		return errors.New(errStr)
+	}
+	stream.Logger.Debugf("successfully stored trigger list under key %s: %s", TriggersKey, string(bytes))
+	return nil
+
+}
+
+func (stream *SensorJetstream) storeTriggerExpression(triggerName string, conditionExpression string) error {
+	key := getTriggerExpressionKey(triggerName)
+	_, err := stream.keyValueStore.PutString(key, conditionExpression)
+	if err != nil {
+		errStr := fmt.Sprintf("error storing %s under key %s: %v", conditionExpression, key, err)
+		stream.Logger.Error(errStr)
+		return errors.New(errStr)
+	}
+	stream.Logger.Debugf("successfully stored trigger expression under key %s: %s", key, conditionExpression)
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
