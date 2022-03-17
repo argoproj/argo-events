@@ -93,7 +93,6 @@ func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error
 		return nil, err
 	}
 	i.eventBus.Status.MarkDeployed("Succeeded", "NATS is deployed")
-	i.eventBus.Status.MarkConfigured()
 	clusterID := generateClusterID(i.eventBus)
 	busConfig := &v1alpha1.BusConfig{
 		NATS: &v1alpha1.NATSConfig{

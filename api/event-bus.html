@@ -570,6 +570,19 @@ See <a href="https://docs.nats.io/running-a-nats-service/configuration#jetstream
 Only configure &ldquo;max_memory_store&rdquo; or &ldquo;max_file_store&rdquo;, do not set &ldquo;store_dir&rdquo; as it has been hardcoded.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>startArgs</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Optional arguments to start nats-server. For example, &ldquo;-D&rdquo; to enable debugging output, &ldquo;-DV&rdquo; to enable debugging and tracing.
+Check <a href="https://docs.nats.io/">https://docs.nats.io/</a> for all the available arguments.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.JetStreamConfig">JetStreamConfig

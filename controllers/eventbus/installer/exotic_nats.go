@@ -30,7 +30,6 @@ func (i *exoticNATSInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig,
 		return nil, errors.New("invalid request")
 	}
 	i.eventBus.Status.MarkDeployed("Skipped", "Skip deployment because of using exotic config.")
-	i.eventBus.Status.MarkConfigured()
 	i.logger.Info("use exotic config")
 	busConfig := &v1alpha1.BusConfig{
 		NATS: natsObj.Exotic,
