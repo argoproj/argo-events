@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
-	"reflect"
 	"time"
 
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
@@ -187,6 +186,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Errorf("failed to get bitbucketserver token. err: %+v", err)
 	}
 
+	if bitbucketserverEventSource.WebhookSecret != nil {
+		logger.Info("retrieving the webhook secret...")
+		webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
+		if err != nil {
+			return errors.Errorf("failed to get bitbucketserver webhook secret. err: %+v", err)
+		}
+
+		router.hookSecret = webhookSecret
+	}
+
 	logger.Info("setting up the client to connect to Bitbucket Server...")
 	bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
 	bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
@@ -199,7 +208,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	createWebhooks := func() {
 		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
-			if err = router.CreateBitbucketWebhook(ctx, bitbucketConfig, repo); err != nil {
+			if err = router.saveBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
 				logger.Errorw("failed to create/update Bitbucket webhook",
 					zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
 				continue
@@ -237,7 +246,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	return webhook.ManageRoute(ctx, router, controller, dispatch)
 }
 
-func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration, repo v1alpha1.BitbucketServerRepository) error {
+// saveBitbucketServerWebhook creates or updates the configured webhook in Bitbucket
+func (router *Router) saveBitbucketServerWebhook(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration, repo v1alpha1.BitbucketServerRepository) error {
 	bitbucketserverEventSource := router.bitbucketserverEventSource
 	route := router.route
 
@@ -251,17 +261,11 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 	)
 
 	bitbucketClient := bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
-
 	formattedURL := common.FormattedURL(bitbucketserverEventSource.Webhook.URL, bitbucketserverEventSource.Webhook.Endpoint)
 
-	apiResponse, err := bitbucketClient.DefaultApi.FindWebhooks(repo.ProjectKey, repo.RepositorySlug, nil)
+	hooks, err := router.listWebhooks(bitbucketClient, repo)
 	if err != nil {
 		return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for repository %s/%s", repo.ProjectKey, repo.RepositorySlug)
-	}
-
-	hooks, err := bitbucketv1.GetWebhooksResponse(apiResponse)
-	if err != nil {
-		return errors.Wrapf(err, "failed to convert the list of webhooks for repository %s/%s", repo.ProjectKey, repo.RepositorySlug)
 	}
 
 	var existingHook bitbucketv1.Webhook
@@ -276,56 +280,110 @@ func (router *Router) CreateBitbucketWebhook(ctx context.Context, bitbucketConfi
 		}
 	}
 
-	logger.Info("retrieving the webhook secret...")
-	webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
-	if err != nil {
-		return errors.Errorf("failed to get bitbucketserver webhook secret. err: %+v", err)
-	}
-
 	newHook := bitbucketv1.Webhook{
 		Name:          "Argo Events",
 		Url:           formattedURL,
 		Active:        true,
 		Events:        bitbucketserverEventSource.Events,
-		Configuration: bitbucketv1.WebhookConfiguration{Secret: webhookSecret},
+		Configuration: bitbucketv1.WebhookConfiguration{Secret: router.hookSecret},
 	}
 
-	localVarPostBody, err := json.Marshal(newHook)
+	requestBody, err := router.createRequestBodyFromWebhook(newHook)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marshal new webhook to JSON")
+		return errors.Wrapf(err, "failed to create request body from webhook")
 	}
 
-	// Create the webhook when it doesn't exist yet
-	if !isAlreadyExists {
-		apiResponse, err = bitbucketClient.DefaultApi.CreateWebhook(repo.ProjectKey, repo.RepositorySlug, localVarPostBody, []string{"application/json"})
-		if err != nil {
-			return errors.Errorf("failed to add webhook. err: %+v", err)
+	// Update the webhook when it does exist and the events/configuration have changed
+	if isAlreadyExists {
+		logger.Info("webhook already exists")
+		if router.shouldUpdateWebhook(existingHook, newHook) {
+			logger.Info("webhook requires an update")
+			err = router.updateWebhook(bitbucketClient, existingHook.ID, requestBody, repo)
+			if err != nil {
+				return errors.Errorf("failed to update webhook. err: %+v", err)
+			}
+
+			logger.With("hook-id", existingHook.ID).Info("hook successfully updated")
 		}
-
-		var createdHook *bitbucketv1.Webhook
-		err = mapstructure.Decode(apiResponse.Values, &createdHook)
-		if err != nil {
-			return errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
-		}
-
-		router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug] = createdHook.ID
-
-		logger.With("hook-id", createdHook.ID).Info("hook successfully registered")
 
 		return nil
 	}
 
-	// Update the webhook when it does exist and the configuration has changed
-	if isAlreadyExists && (!reflect.DeepEqual(existingHook.Events, newHook.Events) || !reflect.DeepEqual(existingHook.Configuration, newHook.Configuration)) {
-		logger.Info("webhook already exists and configuration has changed. Updating webhook.")
-
-		_, err = bitbucketClient.DefaultApi.UpdateWebhook(repo.ProjectKey, repo.RepositorySlug, int32(existingHook.ID), localVarPostBody, []string{"application/json"})
-		if err != nil {
-			return errors.Errorf("failed to update webhook. err: %+v", err)
-		}
-
-		logger.With("hook-id", existingHook.ID).Info("hook successfully updated")
+	// Create the webhook when it doesn't exist yet
+	createdHook, err := router.createWebhook(bitbucketClient, requestBody, repo)
+	if err != nil {
+		return errors.Errorf("failed to create webhook. err: %+v", err)
 	}
 
+	router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug] = createdHook.ID
+
+	logger.With("hook-id", createdHook.ID).Info("hook successfully registered")
+
 	return nil
+}
+
+func (router *Router) listWebhooks(bitbucketClient *bitbucketv1.APIClient, repo v1alpha1.BitbucketServerRepository) ([]bitbucketv1.Webhook, error) {
+	apiResponse, err := bitbucketClient.DefaultApi.FindWebhooks(repo.ProjectKey, repo.RepositorySlug, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to list existing hooks to check for duplicates for repository %s/%s", repo.ProjectKey, repo.RepositorySlug)
+	}
+
+	hooks, err := bitbucketv1.GetWebhooksResponse(apiResponse)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to convert the list of webhooks for repository %s/%s", repo.ProjectKey, repo.RepositorySlug)
+	}
+
+	return hooks, nil
+}
+
+func (router *Router) createWebhook(bitbucketClient *bitbucketv1.APIClient, requestBody []byte, repo v1alpha1.BitbucketServerRepository) (*bitbucketv1.Webhook, error) {
+	apiResponse, err := bitbucketClient.DefaultApi.CreateWebhook(repo.ProjectKey, repo.RepositorySlug, requestBody, []string{"application/json"})
+	if err != nil {
+		return nil, errors.Errorf("failed to add webhook. err: %+v", err)
+	}
+
+	var createdHook *bitbucketv1.Webhook
+	err = mapstructure.Decode(apiResponse.Values, &createdHook)
+	if err != nil {
+		return nil, errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
+	}
+
+	return createdHook, nil
+}
+
+func (router *Router) updateWebhook(bitbucketClient *bitbucketv1.APIClient, hookID int, requestBody []byte, repo v1alpha1.BitbucketServerRepository) error {
+	_, err := bitbucketClient.DefaultApi.UpdateWebhook(repo.ProjectKey, repo.RepositorySlug, int32(hookID), requestBody, []string{"application/json"})
+
+	return err
+}
+
+func (router *Router) shouldUpdateWebhook(existingHook bitbucketv1.Webhook, newHook bitbucketv1.Webhook) bool {
+	return !common.ElementsMatch(existingHook.Events, newHook.Events) ||
+		existingHook.Configuration.Secret != newHook.Configuration.Secret
+}
+
+func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]byte, error) {
+	var err error
+	var finalHook interface{} = hook
+
+	// if the hook doesn't have a secret, the configuration field must be removed in order for the request to succeed,
+	// otherwise Bitbucket Server sends 500 response because of empty string value in the hook.Configuration.Secret field
+	if hook.Configuration.Secret == "" {
+		hookMap := make(map[string]interface{})
+		err = common.StructToMap(hook, hookMap)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to convert webhook to map")
+		}
+
+		delete(hookMap, "configuration")
+
+		finalHook = hookMap
+	}
+
+	requestBody, err := json.Marshal(finalHook)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to marshal new webhook to JSON")
+	}
+
+	return requestBody, nil
 }
