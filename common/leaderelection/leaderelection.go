@@ -59,7 +59,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		v.WatchConfig()
 		v.OnConfigChange(func(e fsnotify.Event) {
 			// Auth file changed, let it restart.
-			logger.Fatal("Eventbus auth config file changed, exiting to restart..")
+			logger.Fatal("Eventbus auth config file changed, exiting..")
 		})
 		auth = &eventbusdriver.Auth{
 			Strategy:    *eventBusAuth,
