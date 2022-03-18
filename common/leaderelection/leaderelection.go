@@ -95,6 +95,8 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	log := logging.FromContext(ctx)
 	ci := graft.ClusterInfo{Name: e.clusterName, Size: e.size}
 	opts := &nats.DefaultOptions
+	// Will never give up
+	opts.MaxReconnect = -1
 	opts.Url = e.url
 	if e.auth.Strategy == eventbusv1alpha1.AuthStrategyToken {
 		opts.Token = e.auth.Crendential.Token
