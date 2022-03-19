@@ -17,7 +17,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 9731
       containers:
-        - name: main
+        - name: controller-manager
           image: quay.io/argoproj/argo-events:latest
           imagePullPolicy: Always
           args:

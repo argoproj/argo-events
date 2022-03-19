@@ -265,7 +265,7 @@ spec:
             port: 8081
           initialDelaySeconds: 3
           periodSeconds: 3
-        name: main
+        name: controller-manager
         readinessProbe:
           httpGet:
             path: /readyz
