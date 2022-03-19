@@ -29,7 +29,7 @@ type SensorJetstream struct {
 
 func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*SensorJetstream, error) {
 	if sensorSpec == nil {
-		errStr := fmt.Sprintf("sensorSpec == nil??")
+		errStr := "sensorSpec == nil??"
 		logger.Errorf(errStr)
 		return nil, errors.New(errStr)
 	}
@@ -87,17 +87,28 @@ func (stream *SensorJetstream) Connect(triggerName string, dependencyExpression 
 //    the dependency definition has changed, or the trigger expression has changed
 // 3. for each dependency purged, delete the associated consumer so no new data is sent there
 func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error {
+	log := stream.Logger
 	if sensorSpec == nil {
-		errStr := fmt.Sprintf("sensorSpec == nil??")
-		stream.Logger.Error(errStr)
+		errStr := "sensorSpec == nil??"
+		log.Error(errStr)
 		return errors.New(errStr)
 	}
+
+	log.Infof("Comparing previous Spec stored in k/v store for sensor %s to new Spec", sensorSpec.Name)
+
+	changedDeps, removedDeps, validDeps, err := stream.getChangedDeps(sensorSpec)
+	if err != nil {
+		return err
+	}
+	log.Infof("Comparison of previous dependencies definitions to current: changed=%v, removed=%d, still valid=%v", changedDeps, removedDeps, validDeps)
+
+	changedTriggers, removedTriggers, validTriggers, err := stream.getChangedTriggers(sensorSpec) // this looks at the list of triggers as well as the dependency expression for each trigger
+	if err != nil {
+		return err
+	}
+	log.Infof("Comparison of previous trigger list to current: changed=%v, removed=%d, still valid=%v", changedTriggers, removedTriggers, validTriggers)
+
 	/*
-		changedDeps, removedDeps, _, err := stream.getChangedDeps(sensorSpec)
-		if err != nil {
-			return err
-		}
-		changedTriggers, removedTriggers, validTriggers := stream.getChangedTriggers(sensorSpec)
 
 		// for all valid triggers, determine if changedDeps or removedDeps requires them to be deleted
 		for _, triggerName := range validTriggers {
@@ -110,11 +121,11 @@ func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error
 		}
 		for _, triggerName := range removedTriggers {
 			stream.purgeAllDepsForTrigger(triggerName)
-		}
-	*/
+		}*/
+
 	// save new spec
-	removedTriggers := make([]string, 0) // temporary, just so I can test this!!!
-	err := stream.saveSpec(sensorSpec, removedTriggers)
+	//removedTriggers := make([]string, 0) // temporary, just so I can test this!!!
+	err = stream.saveSpec(sensorSpec, removedTriggers)
 	if err != nil {
 		return err
 	}
@@ -190,9 +201,45 @@ func (stream *SensorJetstream) saveSpec(sensorSpec *v1alpha1.Sensor, removedTrig
 	return nil
 }
 
+func (stream *SensorJetstream) getChangedTriggers(sensorSpec *v1alpha1.Sensor) (changedTriggers []string, removedTriggers []string, validTriggers []string, err error) {
+	if sensorSpec == nil {
+		errStr := "sensorSpec == nil??"
+		stream.Logger.Errorf(errStr)
+		err = errors.New(errStr)
+		return
+	}
+
+	mappedSpecTriggers := make(map[string]v1alpha1.Trigger, len(sensorSpec.Spec.Triggers))
+	for _, trigger := range sensorSpec.Spec.Triggers {
+		mappedSpecTriggers[trigger.Template.Name] = trigger
+	}
+	storedTriggers, err := stream.getTriggerList()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	for _, triggerName := range storedTriggers {
+		currTrigger, found := mappedSpecTriggers[triggerName]
+		if !found {
+			removedTriggers = append(removedTriggers, triggerName)
+		} else {
+			// is the trigger expression the same or different?
+			storedExpression, err := stream.getTriggerExpression(triggerName)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			if storedExpression == currTrigger.Template.Conditions {
+				validTriggers = append(validTriggers, triggerName)
+			} else {
+				changedTriggers = append(changedTriggers, triggerName)
+			}
+		}
+	}
+	return
+}
+
 func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (changedDeps []string, removedDeps []string, validDeps []string, err error) {
 	if sensorSpec == nil {
-		errStr := fmt.Sprintf("sensorSpec == nil??")
+		errStr := "sensorSpec == nil??"
 		stream.Logger.Errorf(errStr)
 		err = errors.New(errStr)
 		return
@@ -268,6 +315,26 @@ func (stream *SensorJetstream) storeDependencyDefinitions(depDef DependencyDefin
 	return nil
 }
 
+func (stream *SensorJetstream) getTriggerList() (TriggerValue, error) {
+	triggerListJson, err := stream.keyValueStore.Get(TriggersKey)
+	if err != nil {
+		errStr := fmt.Sprintf("error getting key %s: %v", TriggersKey, err)
+		stream.Logger.Error(errStr)
+		return nil, errors.New(errStr)
+	}
+	stream.Logger.Debugf("Value of key %s: %s", TriggersKey, string(triggerListJson.Value()))
+
+	triggerList := TriggerValue{}
+	err = json.Unmarshal(triggerListJson.Value(), &triggerList)
+	if err != nil {
+		errStr := fmt.Sprintf("error unmarshalling value %s of key %s: %v", string(triggerListJson.Value()), TriggersKey, err)
+		stream.Logger.Error(errStr)
+		return nil, errors.New(errStr)
+	}
+
+	return triggerList, nil
+}
+
 func (stream *SensorJetstream) storeTriggerList(triggerList TriggerValue) error {
 	bytes, err := json.Marshal(triggerList)
 	if err != nil {
@@ -284,6 +351,19 @@ func (stream *SensorJetstream) storeTriggerList(triggerList TriggerValue) error 
 	stream.Logger.Debugf("successfully stored trigger list under key %s: %s", TriggersKey, string(bytes))
 	return nil
 
+}
+
+func (stream *SensorJetstream) getTriggerExpression(triggerName string) (string, error) {
+	key := getTriggerExpressionKey(triggerName)
+	expr, err := stream.keyValueStore.Get(key)
+	if err != nil {
+		errStr := fmt.Sprintf("error getting key %s: %v", key, err)
+		stream.Logger.Error(errStr)
+		return "", errors.New(errStr)
+	}
+	stream.Logger.Debugf("Value of key %s: %s", key, string(expr.Value()))
+
+	return string(expr.Value()), nil
 }
 
 func (stream *SensorJetstream) storeTriggerExpression(triggerName string, conditionExpression string) error {
