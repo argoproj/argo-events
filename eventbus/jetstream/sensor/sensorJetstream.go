@@ -2,6 +2,7 @@ package sensor
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"errors"
@@ -106,25 +107,21 @@ func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error
 	if err != nil {
 		return err
 	}
-	log.Infof("Comparison of previous trigger list to current: changed=%v, removed=%d, still valid=%v", changedTriggers, removedTriggers, validTriggers)
+	log.Infof("Comparison of previous trigger list to current: changed=%v, removed=%v, still valid=%v", changedTriggers, removedTriggers, validTriggers)
 
-	/*
+	// for all valid triggers, determine if changedDeps or removedDeps requires them to be deleted
+	changedPlusRemovedDeps := append(changedDeps, removedDeps...)
+	for _, triggerName := range validTriggers {
+		stream.purgeSelectedDepsForTrigger(triggerName, changedPlusRemovedDeps)
+	}
 
-		// for all valid triggers, determine if changedDeps or removedDeps requires them to be deleted
-		for _, triggerName := range validTriggers {
-			stream.purgeSelectedDepsForTrigger(triggerName, changedDeps, removedDeps)
-		}
-
-		// for all changedTriggers (which includes modified and deleted), purge their dependencies
-		for _, triggerName := range changedTriggers {
-			stream.purgeAllDepsForTrigger(triggerName)
-		}
-		for _, triggerName := range removedTriggers {
-			stream.purgeAllDepsForTrigger(triggerName)
-		}*/
+	// for all changedTriggers (which includes modified and deleted), purge their dependencies
+	changedPlusRemovedTriggers := append(changedTriggers, removedTriggers...)
+	for _, triggerName := range changedPlusRemovedTriggers {
+		stream.purgeAllDepsForTrigger(triggerName)
+	}
 
 	// save new spec
-	//removedTriggers := make([]string, 0) // temporary, just so I can test this!!!
 	err = stream.saveSpec(sensorSpec, removedTriggers)
 	if err != nil {
 		return err
@@ -137,7 +134,7 @@ func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error
 func (stream *SensorJetstream) purgeDependency(triggerName string, depName string) error {
 	// purge from Key/Value store first
 	key := getDependencyKey(triggerName, depName)
-	stream.Logger.Debugf("clearing key %s from the K/V store", key)
+	stream.Logger.Debugf("purging key %s from the K/V store", key)
 	err := stream.keyValueStore.Delete(key)
 	if err != nil && err != nats.ErrKeyNotFound {
 		stream.Logger.Error(err)
@@ -281,6 +278,9 @@ func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (chan
 func (stream *SensorJetstream) getDependencyDefinitions() (DependencyDefinitionValue, error) {
 	depDefs, err := stream.keyValueStore.Get(DependencyDefsKey)
 	if err != nil {
+		if err == nats.ErrKeyNotFound {
+			return make(DependencyDefinitionValue), nil
+		}
 		errStr := fmt.Sprintf("error getting key %s: %v", DependencyDefsKey, err)
 		stream.Logger.Error(errStr)
 		return nil, errors.New(errStr)
@@ -318,6 +318,9 @@ func (stream *SensorJetstream) storeDependencyDefinitions(depDef DependencyDefin
 func (stream *SensorJetstream) getTriggerList() (TriggerValue, error) {
 	triggerListJson, err := stream.keyValueStore.Get(TriggersKey)
 	if err != nil {
+		if err == nats.ErrKeyNotFound {
+			return make(TriggerValue, 0), nil
+		}
 		errStr := fmt.Sprintf("error getting key %s: %v", TriggersKey, err)
 		stream.Logger.Error(errStr)
 		return nil, errors.New(errStr)
@@ -357,6 +360,10 @@ func (stream *SensorJetstream) getTriggerExpression(triggerName string) (string,
 	key := getTriggerExpressionKey(triggerName)
 	expr, err := stream.keyValueStore.Get(key)
 	if err != nil {
+
+		if err == nats.ErrKeyNotFound {
+			return "", nil
+		}
 		errStr := fmt.Sprintf("error getting key %s: %v", key, err)
 		stream.Logger.Error(errStr)
 		return "", errors.New(errStr)
@@ -375,6 +382,39 @@ func (stream *SensorJetstream) storeTriggerExpression(triggerName string, condit
 		return errors.New(errStr)
 	}
 	stream.Logger.Debugf("successfully stored trigger expression under key %s: %s", key, conditionExpression)
+	return nil
+}
+
+func (stream *SensorJetstream) purgeSelectedDepsForTrigger(triggerName string, deps []string) error {
+	for _, dep := range deps {
+		err := stream.purgeDependency(triggerName, dep) // this will attempt a delete even if no such key exists for a particular trigger, but that's okay
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (stream *SensorJetstream) purgeAllDepsForTrigger(triggerName string) error {
+	// use the stored trigger expression to determine which dependencies need to be purged
+	storedExpression, err := stream.getTriggerExpression(triggerName)
+	if err != nil {
+		return err
+	}
+
+	// get the individual dependencies by removing the special characters
+	modExpr := strings.Replace(storedExpression, "&&", " ", -1)
+	modExpr = strings.Replace(modExpr, "||", " ", -1)
+	modExpr = strings.Replace(modExpr, "(", " ", -1)
+	modExpr = strings.Replace(modExpr, ")", " ", -1)
+	deps := strings.Split(modExpr, " ")
+
+	for _, dep := range deps {
+		err := stream.purgeDependency(triggerName, dep)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
