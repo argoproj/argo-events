@@ -3,21 +3,21 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	sensorcmd "github.com/argoproj/argo-events/controllers/sensor/cmd"
+	controllercmd "github.com/argoproj/argo-events/controllers/cmd"
 	envpkg "github.com/argoproj/pkg/env"
 )
 
-func NewSensorControllerCommand() *cobra.Command {
+func NewControllerCommand() *cobra.Command {
 	var (
 		namespaced       bool
 		managedNamespace string
 	)
 
 	command := &cobra.Command{
-		Use:   "sensor-controller",
-		Short: "Start a Sensor controller",
+		Use:   "controller",
+		Short: "Start the controller",
 		Run: func(cmd *cobra.Command, args []string) {
-			sensorcmd.Start(namespaced, managedNamespace)
+			controllercmd.Start(namespaced, managedNamespace)
 		},
 	}
 	command.Flags().BoolVar(&namespaced, "namespaced", false, "Whether to run in namespaced scope, defaults to false.")
