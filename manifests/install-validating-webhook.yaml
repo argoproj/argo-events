@@ -121,7 +121,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: quay.io/codefresh/argo-events:v1.5.5-cap-CR-8983
+        image: quay.io/codefresh/argo-events:v1.5.5-cap-CR-9720
         imagePullPolicy: Always
         name: webhook
       serviceAccountName: argo-events-webhook-sa
