@@ -287,6 +287,8 @@ type ResourceEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
+	// Cluster from which events will be listened to
+	Cluster string `json:"cluster" protobuf:"bytes,6,opt,name=cluster"`
 }
 
 // ResourceFilter contains K8s ObjectMeta information to further filter resource event objects
