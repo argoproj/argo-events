@@ -2154,6 +2154,10 @@
           "description": "HostAddress refers to the address of the Redis host/server",
           "type": "string"
         },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",

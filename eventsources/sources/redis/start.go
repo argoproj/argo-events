@@ -138,6 +138,11 @@ func (el *EventListener) handleOne(message *redis.Message, dispatch func([]byte,
 		Body:     message.Payload,
 		Metadata: el.RedisEventSource.Metadata,
 	}
+	if el.RedisEventSource.JSONBody {
+		body := []byte(message.Payload)
+		eventData.Body = (*json.RawMessage)(&body)
+	}
+
 	eventBody, err := json.Marshal(&eventData)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
