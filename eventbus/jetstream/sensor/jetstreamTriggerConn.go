@@ -112,6 +112,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		// set durable name separately for each subscription
 		durableName := getDurableName(conn.sensorName, conn.triggerName, dependency.Name)
 
+		conn.Logger.Debugf("durable name for sensor=%s, trigger=%s, dep=%s: %s", conn.sensorName, conn.triggerName, dependency.Name, durableName)
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
 		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit()) // todo: what other subscription options here?
 		if err != nil {
