@@ -3772,6 +3772,16 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>cluster</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Cluster from which events will be listened to
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ResourceEventType">

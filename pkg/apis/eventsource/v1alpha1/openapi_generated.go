@@ -2605,8 +2605,16 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref common.Referen
 							},
 						},
 					},
+					"cluster": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Cluster from which events will be listened to",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"namespace", "group", "version", "resource", "eventTypes"},
+				Required: []string{"namespace", "group", "version", "resource", "eventTypes", "cluster"},
 			},
 		},
 		Dependencies: []string{
