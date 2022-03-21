@@ -136,7 +136,8 @@ func (stream *SensorJetstream) purgeDependency(triggerName string, depName strin
 	key := getDependencyKey(triggerName, depName)
 	stream.Logger.Debugf("purging key %s from the K/V store", key)
 	err := stream.keyValueStore.Delete(key)
-	if err != nil && err != nats.ErrKeyNotFound {
+	if err != nil && err != nats.ErrKeyNotFound { // sometimes we call this on a trigger/dependency combination not sure if it actually exists or not, so
+		// don't need to worry about case of it not existing
 		stream.Logger.Error(err)
 		return err
 	}
@@ -144,7 +145,8 @@ func (stream *SensorJetstream) purgeDependency(triggerName string, depName strin
 	durableName := getDurableName(stream.sensorName, triggerName, depName)
 	stream.Logger.Debugf("durable name for sensor=%s, trigger=%s, dep=%s: %s", stream.sensorName, triggerName, depName, durableName)
 
-	_ = stream.MgmtConnection.JSContext.DeleteConsumer("default", durableName)
+	_ = stream.MgmtConnection.JSContext.DeleteConsumer("default", durableName) // sometimes we call this on a trigger/dependency combination not sure if it actually exists or not, so
+	// don't need to worry about case of it not existing
 
 	return nil
 }
