@@ -101,7 +101,7 @@ func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error
 	if err != nil {
 		return err
 	}
-	log.Infof("Comparison of previous dependencies definitions to current: changed=%v, removed=%d, still valid=%v", changedDeps, removedDeps, validDeps)
+	log.Infof("Comparison of previous dependencies definitions to current: changed=%v, removed=%v, still valid=%v", changedDeps, removedDeps, validDeps)
 
 	changedTriggers, removedTriggers, validTriggers, err := stream.getChangedTriggers(sensorSpec) // this looks at the list of triggers as well as the dependency expression for each trigger
 	if err != nil {
@@ -140,9 +140,11 @@ func (stream *SensorJetstream) purgeDependency(triggerName string, depName strin
 		stream.Logger.Error(err)
 		return err
 	}
-
 	// then delete consumer
-	//durableName := getDurableName(stream.sensorName, triggerName, depName)
+	durableName := getDurableName(stream.sensorName, triggerName, depName)
+	stream.Logger.Debugf("durable name for sensor=%s, trigger=%s, dep=%s: %s", stream.sensorName, triggerName, depName, durableName)
+
+	_ = stream.MgmtConnection.JSContext.DeleteConsumer("default", durableName)
 
 	return nil
 }
@@ -407,9 +409,10 @@ func (stream *SensorJetstream) purgeAllDepsForTrigger(triggerName string) error 
 	modExpr = strings.Replace(modExpr, "||", " ", -1)
 	modExpr = strings.Replace(modExpr, "(", " ", -1)
 	modExpr = strings.Replace(modExpr, ")", " ", -1)
-	deps := strings.Split(modExpr, " ")
+	deps := strings.FieldsFunc(modExpr, func(r rune) bool { return r == ' ' })
 
 	for _, dep := range deps {
+		stream.Logger.Debugf("purging dependency %s", dep)
 		err := stream.purgeDependency(triggerName, dep)
 		if err != nil {
 			return err
