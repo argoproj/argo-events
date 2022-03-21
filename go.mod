@@ -310,3 +310,9 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.20.4-rc.0
 replace k8s.io/controller-manager => k8s.io/controller-manager v0.20.4-rc.0
 
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20201113171705-d219536bb9fd
+
+replace github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
+
+replace k8s.io/klog/v2 => k8s.io/klog/v2 v2.5.0
+
+replace k8s.io/utils => k8s.io/utils v0.0.0-20201110183641-67b214c5f920
