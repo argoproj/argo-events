@@ -179,7 +179,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			Version:   resourceEventSource.Version,
 			Resource:  resourceEventSource.Resource,
 			Metadata:  resourceEventSource.Metadata,
-			Cluster: resourceEventSource.Cluster,
+			Cluster:   resourceEventSource.Cluster,
 		}
 
 		eventBody, err := json.Marshal(eventData)

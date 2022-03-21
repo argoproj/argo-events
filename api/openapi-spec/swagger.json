@@ -1827,9 +1827,14 @@
         "group",
         "version",
         "resource",
-        "eventTypes"
+        "eventTypes",
+        "cluster"
       ],
       "properties": {
+        "cluster": {
+          "description": "Cluster from which events will be listened to",
+          "type": "string"
+        },
         "eventTypes": {
           "description": "EventTypes is the list of event type to watch. Possible values are - ADD, UPDATE and DELETE.",
           "type": "array",

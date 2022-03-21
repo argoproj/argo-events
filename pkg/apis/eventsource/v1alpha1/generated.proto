@@ -946,6 +946,9 @@ message ResourceEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 5;
+
+  // Cluster from which events will be listened to
+  optional string cluster = 6;
 }
 
 // ResourceFilter contains K8s ObjectMeta information to further filter resource event objects

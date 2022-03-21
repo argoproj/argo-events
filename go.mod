@@ -28,7 +28,7 @@ require (
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/go-openapi/inflect v0.19.0
-	github.com/go-openapi/spec v0.20.2
+	github.com/go-openapi/spec v0.19.8
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/go-swagger/go-swagger v0.25.0
@@ -308,3 +308,5 @@ replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+inc
 replace k8s.io/code-generator => k8s.io/code-generator v0.20.4-rc.0
 
 replace k8s.io/controller-manager => k8s.io/controller-manager v0.20.4-rc.0
+
+replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20201113171705-d219536bb9fd
