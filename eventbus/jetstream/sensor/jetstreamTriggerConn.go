@@ -294,7 +294,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 		// if expression is true, trigger and clear the K/V store
 		// else save the new message in the K/V store
 		if result == true {
-			log.Debugf("dependency expression successfully evaluated to true: %s", conn.dependencyExpression)
+			log.Debugf("dependency expression successfully evaluated to true: '%s'", conn.dependencyExpression)
 
 			messages := make(map[string]cloudevents.Event, len(prevMsgs)+1)
 			for prevDep, msgInfo := range prevMsgs {
