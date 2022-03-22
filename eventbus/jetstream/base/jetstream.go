@@ -98,8 +98,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 
 	streamName := "default"
 	_, err = conn.JSContext.AddStream(&nats.StreamConfig{
-		Name: streamName, // todo: replace with a const
-		//Subjects: []string{"default.*"},
+		Name:     streamName, // todo: replace with a const
 		Subjects: []string{"default.*.*"},
 	}, options...)
 	if err != nil {

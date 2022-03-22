@@ -208,10 +208,8 @@ func (conn *JetstreamTriggerConn) processMsg(
 	}
 
 	defer func() {
-		m.Ack() // todo: how do we do Exactly once delivery?:
-		// Documentation says: "Consumers can be 100% sure a message was correctly processed by "
-		// requesting the server Acknowledge having received your acknowledgement by setting a reply
-		// subject on the Ack. If you receive this response you will never receive that message again."
+		m.AckSync() // this call does the acknowledgment and waits for an acknowledgment from the server (that it received the ack) too
+		m.Respond(nil)
 		conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
 
 	}()
