@@ -174,6 +174,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 				msgsToAcknowledge = append(msgsToAcknowledge, message.ID)
 			}
+
+			if len(msgsToAcknowledge) == 0 {
+				continue
+			}
+
 			// Even if acknowledging fails, since we handled the message, we are good to proceed.
 			if err := client.XAck(ctx, entry.Stream, consumersGroup, msgsToAcknowledge...).Err(); err != nil {
 				log.With("stream", entry.Stream, "message_ids", msgsToAcknowledge).Errorw("failed to acknowledge messages from the Redis stream", zap.Error(err))
