@@ -84,16 +84,12 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
+	var err error
 	log := conn.Logger
 	// derive subjects that we'll subscribe with using the dependencies passed in
 	subjects := make(map[string]eventbuscommon.Dependency)
 	for _, dep := range conn.deps {
 		subjects[fmt.Sprintf("default.%s.%s", dep.EventSourceName, dep.EventName)] = dep
-	}
-
-	err := conn.CleanUpOnStart()
-	if err != nil {
-		return err
 	}
 
 	if !lastResetTime.IsZero() {
@@ -112,9 +108,9 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		// set durable name separately for each subscription
 		durableName := getDurableName(conn.sensorName, conn.triggerName, dependency.Name)
 
-		conn.Logger.Debugf("durable name for sensor=%s, trigger=%s, dep=%s: %s", conn.sensorName, conn.triggerName, dependency.Name, durableName)
+		conn.Logger.Debugf("durable name for sensor='%s', trigger='%s', dep='%s': '%s'", conn.sensorName, conn.triggerName, dependency.Name, durableName)
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
-		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit()) // todo: what other subscription options here?
+		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew()) // todo: what other subscription options here?
 		if err != nil {
 			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
 			continue
@@ -206,10 +202,19 @@ func (conn *JetstreamTriggerConn) processMsg(
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event)) {
 
-	defer m.Ack() // todo: how do we do Exactly once delivery?:
-	// Documentation says: "Consumers can be 100% sure a message was correctly processed by "
-	// requesting the server Acknowledge having received your acknowledgement by setting a reply
-	// subject on the Ack. If you receive this response you will never receive that message again."
+	meta, err := m.Metadata()
+	if err != nil {
+		conn.Logger.Errorf("can't get Metadata() for message %+v??", m)
+	}
+
+	defer func() {
+		m.Ack() // todo: how do we do Exactly once delivery?:
+		// Documentation says: "Consumers can be 100% sure a message was correctly processed by "
+		// requesting the server Acknowledge having received your acknowledgement by setting a reply
+		// subject on the Ack. If you receive this response you will never receive that message again."
+		conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
+
+	}()
 	log := conn.Logger
 
 	var event *cloudevents.Event
@@ -225,7 +230,8 @@ func (conn *JetstreamTriggerConn) processMsg(
 		return
 	}
 
-	log.Debugf("New incoming Event Source Message, dependency names=%s", depNames)
+	log.Debugf("New incoming Event Source Message, dependency names=%s, Stream seq: %s:%d, Consumer seq: %s:%d",
+		depNames, meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
 
 	for _, depName := range depNames {
 		conn.processDependency(m, event, depName, transform, filter, action)
@@ -446,14 +452,4 @@ func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName 
 	}
 
 	return deps, nil
-}
-
-func (conn *JetstreamTriggerConn) CleanUpOnStart() error {
-	// look in K/V store for Trigger expressions that have changed
-
-	// for each Trigger that no longer exists, need to handle:
-	// - messages sent for that Trigger that are in the K/V store
-	// - messages sent to that Trigger that never reached it and are waiting in the eventbus (need to make a new connection and Drain())
-
-	return nil
 }
