@@ -23,7 +23,7 @@ type StanConfig struct {
 
 type StanVersion struct {
 	Version              string `json:"version"`
-	StanImage            string `json:"natsStreamingImage"`
+	NATSStreamingImage   string `json:"natsStreamingImage"`
 	MetricsExporterImage string `json:"metricsExporterImage"`
 }
 
