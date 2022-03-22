@@ -29,7 +29,7 @@ var (
 				Versions: []controllers.StanVersion{
 					{
 						Version:              "0.22.1",
-						StanImage:            "test-n-s-image",
+						NATSStreamingImage:   "test-n-s-image",
 						MetricsExporterImage: "test-n-s-m-image",
 					},
 				},
