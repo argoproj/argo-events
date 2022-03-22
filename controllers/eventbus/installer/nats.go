@@ -711,7 +711,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				Containers: []corev1.Container{
 					{
 						Name:            "stan",
-						Image:           stanVersion.StanImage,
+						Image:           stanVersion.NATSStreamingImage,
 						ImagePullPolicy: stanContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: clientPort},
