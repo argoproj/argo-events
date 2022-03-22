@@ -111,7 +111,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			if err.Error() != "BUSYGROUP Consumer Group name already exists" {
 				return errors.Wrapf(err, "creating consumer group %s for stream %s on host %s for event source %s", consumersGroup, stream, redisEventSource.HostAddress, el.GetEventName())
 			}
-			log.Infof("Consumer group %s already exists", stream)
+			log.Infof("Consumer group %q already exists in stream %q", consumersGroup, stream)
 		}
 	}
 
@@ -135,6 +135,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		msgCount = 10
 	}
 
+	var msgsToAcknowledge []string
 	for {
 		select {
 		case <-ctx.Done():
@@ -162,18 +163,23 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				// Completed consuming pending messages. Now start consuming new messages
 				streamToLastEntryMapping[entry.Stream] = ">"
 			}
+
+			msgsToAcknowledge = msgsToAcknowledge[:0]
+
 			for _, message := range entry.Messages {
 				if err := el.handleOne(entry.Stream, message, dispatch, log); err != nil {
 					log.With("stream", entry.Stream, "message_id", message.ID).Errorw("failed to process Redis stream message", zap.Error(err))
 					el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 					continue
 				}
-				if err := client.XAck(ctx, entry.Stream, consumersGroup, message.ID).Err(); err != nil {
-					log.With("stream", entry.Stream, "message_id", message.ID).Errorw("failed to acknowledge Redis stream message", zap.Error(err))
-				}
-				if streamToLastEntryMapping[entry.Stream] != ">" {
-					streamToLastEntryMapping[entry.Stream] = message.ID
-				}
+				msgsToAcknowledge = append(msgsToAcknowledge, message.ID)
+			}
+			// Even if acknowledging fails, since we handled the message, we are good to proceed.
+			if err := client.XAck(ctx, entry.Stream, consumersGroup, msgsToAcknowledge...).Err(); err != nil {
+				log.With("stream", entry.Stream, "message_ids", msgsToAcknowledge).Errorw("failed to acknowledge messages from the Redis stream", zap.Error(err))
+			}
+			if streamToLastEntryMapping[entry.Stream] != ">" {
+				streamToLastEntryMapping[entry.Stream] = msgsToAcknowledge[len(msgsToAcknowledge)-1]
 			}
 		}
 		updateReadGroupArgs()
