@@ -29,5 +29,5 @@ func (n *SourceJetstream) Connect(clientID string) (eventbuscommon.EventSourceCo
 		return nil, err
 	}
 
-	return &JetstreamSourceConn{conn, n.eventSourceName}, nil
+	return CreateJetstreamSourceConn(conn, n.eventSourceName), nil
 }

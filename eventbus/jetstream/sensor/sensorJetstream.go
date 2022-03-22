@@ -55,7 +55,7 @@ func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusc
 		kvStore,
 	}
 
-	// todo: Here we can take the sensor specification and clean up the K/V store so as to remove any old
+	// Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)
 	err = jetstream.setStateToSpec(sensorSpec)
 	if err != nil {
@@ -390,6 +390,7 @@ func (stream *SensorJetstream) storeTriggerExpression(triggerName string, condit
 }
 
 func (stream *SensorJetstream) purgeSelectedDepsForTrigger(triggerName string, deps []string) error {
+	stream.Logger.Debugf("purging selected dependencies %v for trigger %s", deps, triggerName)
 	for _, dep := range deps {
 		err := stream.purgeDependency(triggerName, dep) // this will attempt a delete even if no such key exists for a particular trigger, but that's okay
 		if err != nil {
@@ -400,6 +401,7 @@ func (stream *SensorJetstream) purgeSelectedDepsForTrigger(triggerName string, d
 }
 
 func (stream *SensorJetstream) purgeAllDepsForTrigger(triggerName string) error {
+	stream.Logger.Debugf("purging all dependencies for trigger %s", triggerName)
 	// use the stored trigger expression to determine which dependencies need to be purged
 	storedExpression, err := stream.getTriggerExpression(triggerName)
 	if err != nil {
@@ -414,7 +416,6 @@ func (stream *SensorJetstream) purgeAllDepsForTrigger(triggerName string) error 
 	deps := strings.FieldsFunc(modExpr, func(r rune) bool { return r == ' ' })
 
 	for _, dep := range deps {
-		stream.Logger.Debugf("purging dependency %s", dep)
 		err := stream.purgeDependency(triggerName, dep)
 		if err != nil {
 			return err
