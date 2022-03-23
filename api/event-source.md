@@ -1878,6 +1878,19 @@ Bitbucket event sources
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>redisStream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Redis stream source
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1916,6 +1929,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.PubSubEventSource">PubSubEventSource</a>,
 <a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>,
 <a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>,
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">RedisStreamEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SQSEventSource">SQSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>)
@@ -2346,6 +2360,19 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Bitbu
 <td>
 <p>
 Bitbucket event sources
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>redisStream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Redis stream source
 </p>
 </td>
 </tr>
@@ -4288,6 +4315,145 @@ DB to use. If not specified, default DB 0 will be used.
 <code>channels</code></br> <em> \[\]string </em>
 </td>
 <td>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the redis client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RedisStreamEventSource">
+RedisStreamEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+RedisStreamEventSource describes an event source for Redis streams
+(<a href="https://redis.io/topics/streams-intro">https://redis.io/topics/streams-intro</a>)
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>hostAddress</code></br> <em> string </em>
+</td>
+<td>
+<p>
+HostAddress refers to the address of the Redis host/server (master
+instance)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>password</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Password required for authentication if any.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>db</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DB to use. If not specified, default DB 0 will be used.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>streams</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Streams to look for entries. XREADGROUP is used on all streams using a
+single consumer group.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxMsgCountPerRead</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MaxMsgCountPerRead holds the maximum number of messages per stream that
+will be read in each XREADGROUP of all streams Example: if there are 2
+streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a
+total of 20 messages. Same as COUNT option in
+XREADGROUP(<a href="https://redis.io/topics/streams-intro">https://redis.io/topics/streams-intro</a>).
+Defaults to 10
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>consumerGroup</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ConsumerGroup refers to the Redis stream consumer group that will be
+created on all redis streams. Messages are read through this group.
+Defaults to ‘argo-events-cg’
+</p>
 </td>
 </tr>
 <tr>
