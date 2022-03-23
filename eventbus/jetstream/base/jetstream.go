@@ -1,6 +1,8 @@
 package base
 
 import (
+	"fmt"
+
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	nats "github.com/nats-io/nats.go"
@@ -32,6 +34,11 @@ func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogg
 	}
 
 	MgmtConnection, err := js.MakeConnection("mgmt")
+	if err != nil {
+		errStr := fmt.Sprintf("error creating Management Connection for Jetstream: %v", err)
+		logger.Error(errStr)
+		return nil, errors.New(errStr)
+	}
 	js.MgmtConnection = *MgmtConnection
 
 	return js, err
