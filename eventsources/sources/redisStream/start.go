@@ -19,7 +19,6 @@ package redisstream
 import (
 	"context"
 	"encoding/json"
-	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -155,7 +154,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			if err == redis.Nil {
 				continue
 			}
-			return errors.Wrapf(err, "reading streams %s using XREADGROUP", strings.Join(redisEventSource.Streams, ", "))
+			log.With("streams", redisEventSource.Streams).Errorw("reading streams using XREADGROUP", zap.Error(err))
 		}
 
 		for _, entry := range entries {
