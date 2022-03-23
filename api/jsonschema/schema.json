@@ -1366,6 +1366,13 @@
           "description": "Redis event source",
           "type": "object"
         },
+        "redisStream": {
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.RedisStreamEventSource"
+          },
+          "description": "Redis stream source",
+          "type": "object"
+        },
         "replicas": {
           "description": "Replicas is the event source deployment replicas",
           "format": "int32",
@@ -2189,6 +2196,60 @@
       "required": [
         "hostAddress",
         "channels"
+      ],
+      "type": "object"
+    },
+    "io.argoproj.eventsource.v1alpha1.RedisStreamEventSource": {
+      "description": "RedisStreamEventSource describes an event source for Redis streams (https://redis.io/topics/streams-intro)",
+      "properties": {
+        "consumerGroup": {
+          "description": "ConsumerGroup refers to the Redis stream consumer group that will be created on all redis streams. Messages are read through this group. Defaults to 'argo-events-cg'",
+          "type": "string"
+        },
+        "db": {
+          "description": "DB to use. If not specified, default DB 0 will be used.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
+        "hostAddress": {
+          "description": "HostAddress refers to the address of the Redis host/server (master instance)",
+          "type": "string"
+        },
+        "maxMsgCountPerRead": {
+          "description": "MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP of all streams Example: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a total of 20 messages. Same as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro). Defaults to 10",
+          "format": "int32",
+          "type": "integer"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object"
+        },
+        "password": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Password required for authentication if any."
+        },
+        "streams": {
+          "description": "Streams to look for entries. XREADGROUP is used on all streams using a single consumer group.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig",
+          "description": "TLS configuration for the redis client."
+        }
+      },
+      "required": [
+        "hostAddress",
+        "streams"
       ],
       "type": "object"
     },
