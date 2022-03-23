@@ -147,7 +147,7 @@ func (el *EventListener) handleOne(message *redis.Message, dispatch func([]byte,
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
 	}
-	log.With("channel", message.Channel).Info("dispatching th event on the data channel...")
+	log.With("channel", message.Channel).Info("dispatching the event on the data channel...")
 	if err = dispatch(eventBody); err != nil {
 		return errors.Wrap(err, "failed dispatch a Redis event")
 	}
