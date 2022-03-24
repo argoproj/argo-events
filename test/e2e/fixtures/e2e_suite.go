@@ -2,6 +2,7 @@ package fixtures
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -25,17 +26,20 @@ import (
 )
 
 const (
-	Namespace      = "argo-events"
-	Label          = "argo-events-e2e"
-	LabelValue     = "true"
-	EventBusName   = "argo-events-e2e"
-	defaultTimeout = 60 * time.Second
+	Namespace = "argo-events"
+	//Label     = "argo-events-stan-e2e"
+	//Label      = "argo-events-e2e"
+	LabelValue       = "true"
+	STANEventBusName = "argo-events-stan-e2e"
+	//STANEventBusName      = "argo-events-e2e"
+	JetstreamEventBusName = "argo-events-js-e2e"
+	defaultTimeout        = 60 * time.Second
 )
 
 var (
 	background = metav1.DeletePropagationBackground
 
-	e2eEventBus = `apiVersion: argoproj.io/v1alpha1
+	e2eEventBusSTAN = `apiVersion: argoproj.io/v1alpha1
 kind: EventBus
 metadata:
   name: default
@@ -43,6 +47,15 @@ spec:
   nats:
     native:
       auth: token`
+
+	e2eEventBusJS = `apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: jetstream
+spec:
+  jetstream:
+    version: 2.7.3
+    replicas: 3`
 )
 
 type E2ESuite struct {
@@ -81,30 +94,45 @@ func (s *E2ESuite) SetupSuite() {
 	}
 	s.deleteResources(resources)
 
-	s.Given().EventBus(e2eEventBus).
+	s.Given().EventBus(e2eEventBusSTAN, STANEventBusName).
 		When().
 		CreateEventBus().
 		WaitForEventBusReady()
-	s.T().Log("EventBus is ready")
+	s.T().Log("EventBus (STAN) is ready")
+
+	s.Given().EventBus(e2eEventBusJS, JetstreamEventBusName).
+		When().
+		CreateEventBus().
+		WaitForEventBusReady()
+	s.T().Log("EventBus (Jetstream) is ready")
+
+	time.Sleep(10 * time.Second)
 }
 
 func (s *E2ESuite) TearDownSuite() {
 	s.DeleteResources()
-	s.Given().EventBus(e2eEventBus).
+	s.Given().EventBus(e2eEventBusSTAN, STANEventBusName).
 		When().
 		DeleteEventBus().
 		Wait(3 * time.Second).
 		Then().
 		ExpectEventBusDeleted()
-	s.T().Log("EventBus is deleted")
+	s.T().Log("STAN EventBus is deleted")
+	s.Given().EventBus(e2eEventBusJS, JetstreamEventBusName).
+		When().
+		DeleteEventBus().
+		Wait(3 * time.Second).
+		Then().
+		ExpectEventBusDeleted()
+	s.T().Log("Jetstream EventBus is deleted")
 }
 
 func (s *E2ESuite) BeforeTest(string, string) {
 	s.DeleteResources()
 }
 
-func (s *E2ESuite) deleteResources(resources []schema.GroupVersionResource) {
-	hasTestLabel := metav1.ListOptions{LabelSelector: Label}
+func (s *E2ESuite) deleteResourcesOfLabel(resources []schema.GroupVersionResource, label string) {
+	hasTestLabel := metav1.ListOptions{LabelSelector: label}
 	ctx := context.Background()
 	for _, r := range resources {
 		err := s.dynamicFor(r).DeleteCollection(ctx, metav1.DeleteOptions{PropagationPolicy: &background}, hasTestLabel)
@@ -113,6 +141,7 @@ func (s *E2ESuite) deleteResources(resources []schema.GroupVersionResource) {
 
 	for _, r := range resources {
 		for {
+			fmt.Printf("checking for resource %+v with label %s\n", r, label)
 			list, err := s.dynamicFor(r).List(ctx, hasTestLabel)
 			s.CheckError(err)
 			if len(list.Items) == 0 {
@@ -121,7 +150,52 @@ func (s *E2ESuite) deleteResources(resources []schema.GroupVersionResource) {
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
+
 }
+
+func (s *E2ESuite) deleteResources(resources []schema.GroupVersionResource) {
+	s.deleteResourcesOfLabel(resources, STANEventBusName)
+	s.deleteResourcesOfLabel(resources, JetstreamEventBusName)
+}
+
+/*
+func (s *E2ESuite) deleteResources(resources []schema.GroupVersionResource) {
+	hasTestLabel := metav1.ListOptions{LabelSelector: STANEventBusName} //Label}
+	ctx := context.Background()
+	for _, r := range resources {
+		err := s.dynamicFor(r).DeleteCollection(ctx, metav1.DeleteOptions{PropagationPolicy: &background}, hasTestLabel)
+		s.CheckError(err)
+	}
+
+	for _, r := range resources {
+		for {
+			fmt.Printf("checking for resource %+v with label %s\n", r, STANEventBusName)
+			list, err := s.dynamicFor(r).List(ctx, hasTestLabel)
+			s.CheckError(err)
+			if len(list.Items) == 0 {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+	hasTestLabel = metav1.ListOptions{LabelSelector: JetstreamEventBusName} //Label}
+	for _, r := range resources {
+		err := s.dynamicFor(r).DeleteCollection(ctx, metav1.DeleteOptions{PropagationPolicy: &background}, hasTestLabel)
+		s.CheckError(err)
+	}
+
+	for _, r := range resources {
+		for {
+			fmt.Printf("checking for resource %+v with label %s\n", r, JetstreamEventBusName)
+			list, err := s.dynamicFor(r).List(ctx, hasTestLabel)
+			s.CheckError(err)
+			if len(list.Items) == 0 {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}*/
 
 func (s *E2ESuite) DeleteResources() {
 	resources := []schema.GroupVersionResource{
