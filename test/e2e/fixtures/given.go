@@ -35,7 +35,7 @@ type Given struct {
 //
 // 1. A file name if it starts with "@"
 // 2. Raw YAML.
-func (g *Given) EventBus(text string, name string) *Given {
+func (g *Given) EventBus(text string) *Given {
 	g.t.Helper()
 	g.eventBus = &eventbusv1alpha1.EventBus{}
 	g.readResource(text, g.eventBus)
@@ -43,10 +43,9 @@ func (g *Given) EventBus(text string, name string) *Given {
 	if l == nil {
 		l = map[string]string{}
 	}
-	//l[Label] = LabelValue
-	l[name] = LabelValue
+	l[Label] = LabelValue
 	g.eventBus.SetLabels(l)
-	g.eventBus.SetName(name)
+	g.eventBus.SetName(EventBusName)
 	return g
 }
 
@@ -54,7 +53,7 @@ func (g *Given) EventBus(text string, name string) *Given {
 //
 // 1. A file name if it starts with "@"
 // 2. Raw YAML.
-func (g *Given) EventSource(text string, eventBusName string) *Given {
+func (g *Given) EventSource(text string) *Given {
 	g.t.Helper()
 	g.eventSource = &eventsourcev1alpha1.EventSource{}
 	g.readResource(text, g.eventSource)
@@ -62,10 +61,9 @@ func (g *Given) EventSource(text string, eventBusName string) *Given {
 	if l == nil {
 		l = map[string]string{}
 	}
-	//l[Label] = LabelValue
-	l[eventBusName] = LabelValue
+	l[Label] = LabelValue
 	g.eventSource.SetLabels(l)
-	g.eventSource.Spec.EventBusName = eventBusName
+	g.eventSource.Spec.EventBusName = EventBusName
 	return g
 }
 
@@ -73,7 +71,7 @@ func (g *Given) EventSource(text string, eventBusName string) *Given {
 //
 // 1. A file name if it starts with "@"
 // 2. Raw YAML.
-func (g *Given) Sensor(text string, eventBusName string) *Given {
+func (g *Given) Sensor(text string) *Given {
 	g.t.Helper()
 	g.sensor = &sensorv1alpha1.Sensor{}
 	g.readResource(text, g.sensor)
@@ -81,10 +79,9 @@ func (g *Given) Sensor(text string, eventBusName string) *Given {
 	if l == nil {
 		l = map[string]string{}
 	}
-	//l[Label] = LabelValue
-	l[eventBusName] = LabelValue
+	l[Label] = LabelValue
 	g.sensor.SetLabels(l)
-	g.sensor.Spec.EventBusName = eventBusName
+	g.sensor.Spec.EventBusName = EventBusName
 	return g
 }
 
@@ -94,8 +91,7 @@ func (g *Given) readResource(text string, v metav1.Object) {
 	if strings.HasPrefix(text, "@") {
 		file = strings.TrimPrefix(text, "@")
 	} else {
-		//f, err := ioutil.TempFile("", "argo-events-e2e")
-		f, err := ioutil.TempFile("", "argo-events-stan-e2e")
+		f, err := ioutil.TempFile("", "argo-events-e2e")
 		if err != nil {
 			g.t.Fatal(err)
 		}
