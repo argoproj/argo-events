@@ -35,9 +35,11 @@ type TriggerConnection interface {
 }
 
 type EventSourceDriver interface {
+	Initialize() error
 	Connect(clientID string) (EventSourceConnection, error)
 }
 
 type SensorDriver interface {
+	Initialize() error
 	Connect(triggerName string, dependencyExpression string, deps []Dependency) (TriggerConnection, error)
 }

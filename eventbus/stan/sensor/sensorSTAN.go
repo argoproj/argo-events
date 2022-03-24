@@ -23,6 +23,10 @@ func NewSensorSTAN(url, clusterID, sensorName string, auth *eventbuscommon.Auth,
 	}
 }
 
+func (n *SensorSTAN) Initialize() error {
+	return nil
+}
+
 func (n *SensorSTAN) Connect(triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) (eventbuscommon.TriggerConnection, error) {
 	// Generate clientID with hash code
 	hashKey := fmt.Sprintf("%s-%s-%s", n.sensorName, triggerName, dependencyExpression)
