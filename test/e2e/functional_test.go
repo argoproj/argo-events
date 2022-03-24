@@ -5,6 +5,7 @@ package e2e
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -19,12 +20,15 @@ type FunctionalSuite struct {
 }
 
 const (
-	LogEventSourceStarted      = "Eventing server started."
-	LogSensorStarted           = "Sensor started."
-	LogPublishEventSuccessful  = "succeeded to publish an event"
-	LogTriggerActionSuccessful = "successfully processed the trigger"
-	LogTriggerActionFailed     = "failed to execute a trigger"
+	LogEventSourceStarted     = "Eventing server started."
+	LogSensorStarted          = "Sensor started."
+	LogPublishEventSuccessful = "succeeded to publish an event"
+	LogTriggerActionFailed    = "failed to execute a trigger"
 )
+
+func LogTriggerActionSuccessful(triggerName string) string {
+	return fmt.Sprintf("successfully processed trigger '%s'", triggerName)
+}
 
 func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
 	return httpexpect.
@@ -57,7 +61,7 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful)
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 }
 
 func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
@@ -75,7 +79,7 @@ func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
 		WaitForSensorReady().
 		Wait(3 * time.Second).
 		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful)
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 }
 
 func (s *FunctionalSuite) TestMetricsWithCalendar() {
@@ -110,7 +114,7 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 
 	defer t2.TerminateAllPodPortForwards()
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 
 	// Sensor POD metrics
 	s.e("http://localhost:7778").GET("/metrics").
@@ -165,7 +169,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Contains("argo_events_events_processing_failed_total")
 
 	// Expect to see 1 success and 1 failure
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful).
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger")).
 		ExpectSensorPodLogContains(LogTriggerActionFailed)
 
 	// Sensor POD metrics
@@ -199,7 +203,50 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+}
+
+func (s *FunctionalSuite) TestMultiDependencyConditions() {
+	t1 := s.Given().EventSource("@testdata/es-multi-event-webhook.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted).
+		EventSourcePodPortForward(13001, 13000).
+		EventSourcePodPortForward(12001, 12000).
+		EventSourcePodPortForward(14001, 14000).
+		EventSourcePodPortForward(7777, 7777)
+
+	defer t1.TerminateAllPodPortForwards()
+
+	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted).
+		SensorPodPortForward(7778, 7777)
+
+	defer t2.TerminateAllPodPortForwards()
+
+	// need to verify the conditional logic is working successfully
+	// If we trigger test-dep-1 (port 12000) we should see log-trigger-2 but not log-trigger-1
+	s.e("http://localhost:12001").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-2")).
+		ExpectSensorPodLogDoesNotContain(LogTriggerActionSuccessful("log-trigger-1"))
+
+	// Then if we trigger test-dep-2 we should see log-trigger-2
+
+	// Then we trigger test-dep-2 again and shouldn't see anything (don't have a way to check that)
+
+	// Finally trigger test-dep-3 and we should see log-trigger-1
+
 }
 
 func TestFunctionalSuite(t *testing.T) {
