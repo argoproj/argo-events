@@ -396,6 +396,10 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 		return err
 	}
 	if err = common.Connect(&common.DefaultBackoff, func() error {
+		err = driver.Initialize()
+		if err != nil {
+			return err
+		}
 		e.eventBusConn, err = driver.Connect(clientID)
 		return err
 	}); err != nil {

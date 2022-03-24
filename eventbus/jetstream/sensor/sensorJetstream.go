@@ -25,6 +25,7 @@ type SensorJetstream struct {
 	*eventbusjetstreambase.Jetstream
 
 	sensorName    string
+	sensorSpec    *v1alpha1.Sensor
 	keyValueStore nats.KeyValue
 }
 
@@ -39,30 +40,32 @@ func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusc
 	if err != nil {
 		return nil, err
 	}
-
-	// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
-	kvStore, err := baseJetstream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: sensorSpec.Name})
-	if err != nil {
-		errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", sensorSpec.Name, err)
-		logger.Error(errStr)
-		return nil, err
-	}
-	logger.Infof("successfully created K/V store for sensor %s (if it doesn't already exist)", sensorSpec.Name)
-
-	jetstream := &SensorJetstream{
+	return &SensorJetstream{
 		baseJetstream,
 		sensorSpec.Name,
-		kvStore,
+		sensorSpec,
+		nil}, nil
+
+}
+
+func (stream *SensorJetstream) Initialize() error {
+	err := stream.Init() // member of jetstreambase.Jetstream
+	if err != nil {
+		return err
 	}
+	// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
+	stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
+	if err != nil {
+		errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
+		stream.Logger.Error(errStr)
+		return err
+	}
+	stream.Logger.Infof("successfully created K/V store for sensor %s (if it doesn't already exist)", stream.sensorName)
 
 	// Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)
-	err = jetstream.setStateToSpec(sensorSpec)
-	if err != nil {
-		return jetstream, err
-	}
-
-	return jetstream, nil
+	err = stream.setStateToSpec(stream.sensorSpec)
+	return err
 }
 
 func (stream *SensorJetstream) Connect(triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) (eventbuscommon.TriggerConnection, error) {
