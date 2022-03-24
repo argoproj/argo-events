@@ -33,15 +33,18 @@ func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogg
 		streamSettings: streamSettings,
 	}
 
-	MgmtConnection, err := js.MakeConnection("mgmt")
-	if err != nil {
-		errStr := fmt.Sprintf("error creating Management Connection for Jetstream: %v", err)
-		logger.Error(errStr)
-		return nil, errors.New(errStr)
-	}
-	js.MgmtConnection = *MgmtConnection
+	return js, nil
+}
 
-	return js, err
+func (stream *Jetstream) Init() error {
+	mgmtConnection, err := stream.MakeConnection("mgmt")
+	if err != nil {
+		errStr := fmt.Sprintf("error creating Management Connection for Jetstream stream %+v: %v", stream, err)
+		stream.Logger.Error(errStr)
+		return errors.New(errStr)
+	}
+	stream.MgmtConnection = *mgmtConnection
+	return nil
 }
 
 func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, error) {

@@ -20,6 +20,10 @@ func NewSourceSTAN(url, clusterID, eventSourceName string, subject string, auth 
 	}
 }
 
+func (n *SourceSTAN) Initialize() error {
+	return nil
+}
+
 func (n *SourceSTAN) Connect(clientID string) (eventbuscommon.EventSourceConnection, error) {
 	conn, err := n.MakeConnection(clientID)
 	if err != nil {

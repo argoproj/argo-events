@@ -144,6 +144,10 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 			var conn eventbuscommon.TriggerConnection
 			err = common.Connect(&common.DefaultBackoff, func() error {
+				err = ebDriver.Initialize()
+				if err != nil {
+					return err
+				}
 				var err error
 				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 				return err
