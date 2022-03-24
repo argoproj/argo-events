@@ -45,14 +45,14 @@ func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
 }
 
 func (s *FunctionalSuite) TestCreateCalendarEventSource() {
-	s.Given().EventSource("@testdata/es-calendar.yaml").
+	s.Given().EventSource("@testdata/stan/es-calendar.yaml", fixtures.STANEventBusName).
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	s.Given().Sensor("@testdata/sensor-log.yaml").
+	s.Given().Sensor("@testdata/stan/sensor-log.yaml", fixtures.STANEventBusName).
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -61,7 +61,7 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 }
 
 func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
-	s.Given().EventSource("@testdata/es-calendar-ha.yaml").
+	s.Given().EventSource("@testdata/stan/es-calendar-ha.yaml", fixtures.STANEventBusName).
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -69,7 +69,7 @@ func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
 		Then().
 		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	s.Given().Sensor("@testdata/sensor-log-ha.yaml").
+	s.Given().Sensor("@testdata/stan/sensor-log-ha.yaml", fixtures.STANEventBusName).
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -79,7 +79,7 @@ func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
 }
 
 func (s *FunctionalSuite) TestMetricsWithCalendar() {
-	t1 := s.Given().EventSource("@testdata/es-calendar-metrics.yaml").
+	t1 := s.Given().EventSource("@testdata/stan/es-calendar-metrics.yaml", fixtures.STANEventBusName).
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -100,7 +100,7 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		Contains("argo_events_events_sent_total").
 		Contains("argo_events_event_processing_duration_milliseconds")
 
-	t2 := s.Given().Sensor("@testdata/sensor-log-metrics.yaml").
+	t2 := s.Given().Sensor("@testdata/stan/sensor-log-metrics.yaml", fixtures.STANEventBusName).
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -122,7 +122,7 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 }
 
 func (s *FunctionalSuite) TestMetricsWithWebhook() {
-	t1 := s.Given().EventSource("@testdata/es-test-metrics-webhook.yaml").
+	t1 := s.Given().EventSource("@testdata/stan/es-test-metrics-webhook.yaml", fixtures.STANEventBusName).
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -133,7 +133,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 
 	defer t1.TerminateAllPodPortForwards()
 
-	t2 := s.Given().Sensor("@testdata/sensor-test-metrics.yaml").
+	t2 := s.Given().Sensor("@testdata/stan/sensor-test-metrics.yaml", fixtures.STANEventBusName).
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -179,16 +179,17 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 }
 
 func (s *FunctionalSuite) TestResourceEventSource() {
-	w1 := s.Given().EventSource("@testdata/es-resource.yaml").
+	w1 := s.Given().EventSource("@testdata/stan/es-resource.yaml", fixtures.STANEventBusName).
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		Exec("kubectl", []string{"-n", fixtures.Namespace, "run", "test-pod", "--image", "hello-world", "-l", fixtures.Label + "=" + fixtures.LabelValue}, fixtures.OutputRegexp(`pod/.* created`))
+		//Exec("kubectl", []string{"-n", fixtures.Namespace, "run", "test-pod", "--image", "hello-world", "-l", fixtures.Label + "=" + fixtures.LabelValue}, fixtures.OutputRegexp(`pod/.* created`))
+		Exec("kubectl", []string{"-n", fixtures.Namespace, "run", "test-pod", "--image", "hello-world", "-l", fixtures.STANEventBusName + "=" + fixtures.LabelValue}, fixtures.OutputRegexp(`pod/.* created`))
 
 	t1 := w1.Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted)
 
-	t2 := s.Given().Sensor("@testdata/sensor-resource.yaml").
+	t2 := s.Given().Sensor("@testdata/stan/sensor-resource.yaml", fixtures.STANEventBusName).
 		When().
 		CreateSensor().
 		WaitForSensorReady().

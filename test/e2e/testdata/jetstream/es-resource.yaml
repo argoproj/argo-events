@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: test-resource-js
+spec:
+  eventBusName: jetstream
+  template:
+    serviceAccountName: argo-events-sa
+  resource:
+    example:
+      namespace: argo-events
+      group: ""
+      version: v1
+      resource: pods
+      eventTypes:
+        - DELETE
+      filter:
+        afterStart: true
+        fields:
+          - key: metadata.name
+            operation: ==
+            value: test-pod
