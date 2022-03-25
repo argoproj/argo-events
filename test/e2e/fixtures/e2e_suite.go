@@ -51,7 +51,7 @@ metadata:
   name: default
 spec:
   jetstream:
-    version: 2.7.3
+    version: 2.7.4
     replicas: 3`
 )
 
