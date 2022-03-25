@@ -18,7 +18,7 @@ require (
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.8.1
 	github.com/argoproj/pkg v0.11.0
-	github.com/aws/aws-sdk-go v1.43.22
+	github.com/aws/aws-sdk-go v1.43.24
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
 	github.com/cloudevents/sdk-go/v2 v2.8.0
@@ -32,6 +32,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-swagger/go-swagger v0.29.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
@@ -90,6 +91,7 @@ require (
 	github.com/DataDog/zstd v1.5.0 // indirect
 	github.com/apache/pulsar-client-go/oauth2 v0.0.0-20220120090717-25e59572242e // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect

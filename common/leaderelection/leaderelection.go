@@ -61,11 +61,8 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		}
 		v.WatchConfig()
 		v.OnConfigChange(func(e fsnotify.Event) {
-			logger.Info("eventbus auth config file changed.")
-			err = v.Unmarshal(cred)
-			if err != nil {
-				logger.Errorw("failed to unmarshal auth.yaml after reloading", zap.Error(err))
-			}
+			// Auth file changed, let it restart.
+			logger.Fatal("Eventbus auth config file changed, exiting..")
 		})
 		auth = &eventbuscommon.Auth{
 			Strategy:    *eventBusAuth,
@@ -105,6 +102,8 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	log := logging.FromContext(ctx)
 	ci := graft.ClusterInfo{Name: e.clusterName, Size: e.size}
 	opts := &nats.DefaultOptions
+	// Will never give up
+	opts.MaxReconnect = -1
 	opts.Url = e.url
 	if e.auth.Strategy == eventbusv1alpha1.AuthStrategyToken {
 		opts.Token = e.auth.Crendential.Token
