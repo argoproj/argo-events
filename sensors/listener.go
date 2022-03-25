@@ -102,11 +102,15 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-
 	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor)
 	if err != nil {
 		return err
 	}
+	err = common.Connect(&common.DefaultBackoff, func() error {
+		var err error
+		err = ebDriver.Initialize()
+		return err
+	})
 
 	wg := &sync.WaitGroup{}
 	for _, t := range sensor.Spec.Triggers {
@@ -144,10 +148,6 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 			var conn eventbuscommon.TriggerConnection
 			err = common.Connect(&common.DefaultBackoff, func() error {
-				err = ebDriver.Initialize()
-				if err != nil {
-					return err
-				}
 				var err error
 				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 				return err
