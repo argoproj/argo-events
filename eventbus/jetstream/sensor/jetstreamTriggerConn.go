@@ -281,7 +281,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 		for _, dep := range conn.deps {
 			parameters[dep.Name] = false
 		}
-		for prevDep, _ := range prevMsgs {
+		for prevDep := range prevMsgs {
 			parameters[prevDep] = true
 		}
 		parameters[depName] = true
