@@ -134,11 +134,8 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 		}
 		v.WatchConfig()
 		v.OnConfigChange(func(e fsnotify.Event) {
-			logger.Info("eventbus auth config file changed.")
-			err = v.Unmarshal(cred)
-			if err != nil {
-				logger.Errorw("failed to unmarshal auth.yaml after reloading", zap.Error(err))
-			}
+			// Auth file changed, let it restart
+			logger.Fatal("Eventbus auth config file changed, exiting..")
 		})
 		auth = &eventbuscommon.Auth{
 			Strategy:    *eventBusAuth,
