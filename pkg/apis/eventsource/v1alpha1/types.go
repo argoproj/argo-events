@@ -114,6 +114,8 @@ type EventSourceSpec struct {
 	BitbucketServer map[string]BitbucketServerEventSource `json:"bitbucketserver,omitempty" protobuf:"bytes,29,rep,name=bitbucketserver"`
 	// Bitbucket event sources
 	Bitbucket map[string]BitbucketEventSource `json:"bitbucket,omitempty" protobuf:"bytes,30,rep,name=bitbucket"`
+	// Redis stream source
+	RedisStream map[string]RedisStreamEventSource `json:"redisStream,omitempty" protobuf:"bytes,31,rep,name=redisStream"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -1152,6 +1154,39 @@ type RedisEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+}
+
+// RedisStreamEventSource describes an event source for
+// Redis streams (https://redis.io/topics/streams-intro)
+type RedisStreamEventSource struct {
+	// HostAddress refers to the address of the Redis host/server (master instance)
+	HostAddress string `json:"hostAddress" protobuf:"bytes,1,opt,name=hostAddress"`
+	// Password required for authentication if any.
+	// +optional
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
+	// DB to use. If not specified, default DB 0 will be used.
+	// +optional
+	DB int32 `json:"db,omitempty" protobuf:"varint,3,opt,name=db"`
+	// Streams to look for entries. XREADGROUP is used on all streams using a single consumer group.
+	Streams []string `json:"streams" protobuf:"bytes,4,rep,name=streams"`
+	// MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP of all streams
+	// Example: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a total of 20 messages.
+	// Same as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro). Defaults to 10
+	// +optional
+	MaxMsgCountPerRead int32 `json:"maxMsgCountPerRead,omitempty" protobuf:"varint,5,opt,name=maxMsgCountPerRead"`
+	// ConsumerGroup refers to the Redis stream consumer group that will be
+	// created on all redis streams. Messages are read through this group. Defaults to 'argo-events-cg'
+	// +optional
+	ConsumerGroup string `json:"consumerGroup,omitempty" protobuf:"bytes,6,opt,name=consumerGroup"`
+	// TLS configuration for the redis client.
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
