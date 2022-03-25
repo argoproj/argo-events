@@ -48,6 +48,7 @@ require (
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/ktrysmt/go-bitbucket v0.9.40
 	github.com/minio/minio-go/v7 v7.0.23
+	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/nats-io/graft v0.0.0-20220215174245-93d18541496f
 	github.com/nats-io/nats.go v1.13.1-0.20220308171302-2f2f6968e98d
@@ -103,7 +104,6 @@ require (
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/linkedin/goavro/v2 v2.9.8 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
-	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
