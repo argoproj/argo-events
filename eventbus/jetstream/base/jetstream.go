@@ -112,9 +112,9 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		Subjects: []string{common.JetStreamStreamName + ".*.*"},
 	}, options...)
 	if err != nil {
-		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", streamName, err, conn)
+		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", common.JetStreamStreamName, err, conn)
 	}
 
-	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", streamName, conn)
+	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", common.JetStreamStreamName, conn)
 	return nil
 }
