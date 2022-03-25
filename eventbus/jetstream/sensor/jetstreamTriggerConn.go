@@ -93,7 +93,11 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	}
 
 	if !lastResetTime.IsZero() {
-		conn.clearAllDependencies(&lastResetTime)
+		err = conn.clearAllDependencies(&lastResetTime)
+		if err != nil {
+			errStr := fmt.Sprintf("failed to clear all dependencies as a result of condition reset time; err=%v", err)
+			log.Error(errStr)
+		}
 	}
 
 	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
