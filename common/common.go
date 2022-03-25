@@ -69,6 +69,8 @@ const (
 	JetStreamClientAuthSecretKey = "client-auth"
 	// key of nats-js.conf in the configmap
 	JetStreamConfigMapKey = "nats-js"
+	// Jetstream Stream name
+	JetStreamStreamName = "default"
 )
 
 // Sensor constants
