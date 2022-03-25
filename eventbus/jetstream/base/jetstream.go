@@ -3,6 +3,7 @@ package base
 import (
 	"fmt"
 
+	"github.com/argoproj/argo-events/common"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	nats "github.com/nats-io/nats.go"
@@ -106,10 +107,9 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	options := make([]nats.JSOpt, 0)
 	// todo: create a JSOpt for each setting that the user specifies
 
-	streamName := "default"
 	_, err = conn.JSContext.AddStream(&nats.StreamConfig{
-		Name:     streamName, // todo: replace with a const
-		Subjects: []string{"default.*.*"},
+		Name:     common.JetStreamStreamName,
+		Subjects: []string{common.JetStreamStreamName + ".*.*"},
 	}, options...)
 	if err != nil {
 		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", streamName, err, conn)

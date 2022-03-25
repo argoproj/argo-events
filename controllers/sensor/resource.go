@@ -189,7 +189,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	})
 	volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
 
-	if authStrategy != nil && accessSecret != nil { // todo: shouldn't this test for AuthStrategyToken?
+	if authStrategy != nil && accessSecret != nil {
 		// Mount the secret as volume instead of using envFrom to gain the ability
 		// for the sensor deployment to auto reload when the secret changes
 		volumes = append(volumes, corev1.Volume{
