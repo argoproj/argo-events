@@ -30,13 +30,14 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 	logger := logging.FromContext(ctx)
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
-	if eventBusConfig.NATS != nil {
+	switch {
+	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
 		eventBusAuth = eventBusConfig.NATS.Auth
-	} else if eventBusConfig.JetStream != nil {
+	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
 		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
-	} else {
+	default:
 		return nil, errors.New("invalid event bus")
 	}
 	var auth *eventbuscommon.Auth

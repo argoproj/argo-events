@@ -93,23 +93,26 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	switch eventBusType {
 	case apicommon.EventBusNATS:
 		dvr = stansensor.NewSensorSTAN(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, sensorSpec.Name, auth, logger)
+		return dvr, nil
 	case apicommon.EventBusJetStream:
 		dvr, err = jetstreamsensor.NewSensorJetstream(eventBusConfig.JetStream.URL, sensorSpec, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
+		return dvr, err
 	default:
 		return nil, errors.New("invalid eventbus type")
 	}
-	return dvr, nil
+
 }
 
 func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*eventbuscommon.Auth, error) {
 	logger := logging.FromContext(ctx)
 
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
-	if eventBusConfig.NATS != nil {
+	switch {
+	case eventBusConfig.NATS != nil:
 		eventBusAuth = eventBusConfig.NATS.Auth
-	} else if eventBusConfig.JetStream != nil {
+	case eventBusConfig.JetStream != nil:
 		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
-	} else {
+	default:
 		return nil, errors.New("invalid event bus")
 	}
 	var auth *eventbuscommon.Auth
@@ -141,7 +144,6 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 			Strategy:    *eventBusAuth,
 			Crendential: cred,
 		}
-
 	}
 
 	return auth, nil

@@ -59,7 +59,6 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
 	if err != nil {
-		return nil, err
 		errStr := fmt.Sprintf("failed to evaluate expression %s: %v", dependencyExpression, err)
 		connection.Logger.Error(errStr)
 		return nil, errors.New(errStr)
@@ -146,7 +145,6 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 			return nil
 		}
 	}
-
 }
 
 func (conn *JetstreamTriggerConn) pullSubscribe(
@@ -183,7 +181,6 @@ func (conn *JetstreamTriggerConn) processMsgs(
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	wg sync.WaitGroup) {
-
 	defer wg.Done()
 
 	for {
@@ -192,7 +189,7 @@ func (conn *JetstreamTriggerConn) processMsgs(
 			conn.processMsg(msg, transform, filter, action)
 		case <-resetConditionsCh:
 			conn.Logger.Info("reset conditions")
-			conn.clearAllDependencies(nil)
+			_ = conn.clearAllDependencies(nil)
 		case <-closeCh:
 			conn.Logger.Info("shutting down processMsgs routine")
 			return
@@ -205,17 +202,18 @@ func (conn *JetstreamTriggerConn) processMsg(
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event)) {
-
 	meta, err := m.Metadata()
 	if err != nil {
 		conn.Logger.Errorf("can't get Metadata() for message %+v??", m)
 	}
 
 	defer func() {
-		m.AckSync() // this call does the acknowledgment and waits for an acknowledgment from the server (that it received the ack) too
-		m.Respond(nil)
+		err = m.AckSync() // this call does the acknowledgment and waits for an acknowledgment from the server (that it received the ack) too
+		if err != nil {
+			errStr := fmt.Sprintf("Error performing AckSync() on message: %v", err)
+			conn.Logger.Error(errStr)
+		}
 		conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
-
 	}()
 	log := conn.Logger
 
@@ -247,7 +245,6 @@ func (conn *JetstreamTriggerConn) processDependency(
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event)) {
-
 	log := conn.Logger
 	event, err := transform(depName, *event)
 	if err != nil {
@@ -328,7 +325,6 @@ func (conn *JetstreamTriggerConn) processDependency(
 					Timestamp:   msgMetadata.Timestamp,
 					Event:       event})
 		}
-
 	}
 }
 
@@ -389,7 +385,6 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 	}
 
 	return nil
-
 }
 
 func (conn *JetstreamTriggerConn) clearAllDependencies(beforeTimeOpt *time.Time) error {

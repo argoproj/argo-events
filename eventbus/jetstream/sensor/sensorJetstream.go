@@ -21,6 +21,10 @@ import (
 	hashstructure "github.com/mitchellh/hashstructure/v2"
 )
 
+const (
+	SensorNilError = "sensorSpec == nil??"
+)
+
 type SensorJetstream struct {
 	*eventbusjetstreambase.Jetstream
 
@@ -31,7 +35,7 @@ type SensorJetstream struct {
 
 func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*SensorJetstream, error) {
 	if sensorSpec == nil {
-		errStr := "sensorSpec == nil??"
+		errStr := SensorNilError
 		logger.Errorf(errStr)
 		return nil, errors.New(errStr)
 	}
@@ -45,7 +49,6 @@ func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbusc
 		sensorSpec.Name,
 		sensorSpec,
 		nil}, nil
-
 }
 
 func (stream *SensorJetstream) Initialize() error {
@@ -93,7 +96,7 @@ func (stream *SensorJetstream) Connect(triggerName string, dependencyExpression 
 func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error {
 	log := stream.Logger
 	if sensorSpec == nil {
-		errStr := "sensorSpec == nil??"
+		errStr := SensorNilError
 		log.Error(errStr)
 		return errors.New(errStr)
 	}
@@ -113,15 +116,19 @@ func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error
 	log.Infof("Comparison of previous trigger list to current: changed=%v, removed=%v, still valid=%v", changedTriggers, removedTriggers, validTriggers)
 
 	// for all valid triggers, determine if changedDeps or removedDeps requires them to be deleted
-	changedPlusRemovedDeps := append(changedDeps, removedDeps...)
+	changedPlusRemovedDeps := make([]string, 0, len(changedDeps)+len(removedDeps))
+	changedPlusRemovedDeps = append(changedPlusRemovedDeps, changedDeps...)
+	changedPlusRemovedDeps = append(changedPlusRemovedDeps, removedDeps...)
 	for _, triggerName := range validTriggers {
-		stream.purgeSelectedDepsForTrigger(triggerName, changedPlusRemovedDeps)
+		_ = stream.purgeSelectedDepsForTrigger(triggerName, changedPlusRemovedDeps)
 	}
 
 	// for all changedTriggers (which includes modified and deleted), purge their dependencies
-	changedPlusRemovedTriggers := append(changedTriggers, removedTriggers...)
+	changedPlusRemovedTriggers := make([]string, 0, len(changedTriggers)+len(removedTriggers))
+	changedPlusRemovedTriggers = append(changedPlusRemovedTriggers, changedTriggers...)
+	changedPlusRemovedTriggers = append(changedPlusRemovedTriggers, removedTriggers...)
 	for _, triggerName := range changedPlusRemovedTriggers {
-		stream.purgeAllDepsForTrigger(triggerName)
+		_ = stream.purgeAllDepsForTrigger(triggerName)
 	}
 
 	// save new spec
@@ -207,7 +214,7 @@ func (stream *SensorJetstream) saveSpec(sensorSpec *v1alpha1.Sensor, removedTrig
 
 func (stream *SensorJetstream) getChangedTriggers(sensorSpec *v1alpha1.Sensor) (changedTriggers []string, removedTriggers []string, validTriggers []string, err error) {
 	if sensorSpec == nil {
-		errStr := "sensorSpec == nil??"
+		errStr := SensorNilError
 		stream.Logger.Errorf(errStr)
 		err = errors.New(errStr)
 		return
@@ -238,12 +245,12 @@ func (stream *SensorJetstream) getChangedTriggers(sensorSpec *v1alpha1.Sensor) (
 			}
 		}
 	}
-	return
+	return changedTriggers, removedTriggers, validTriggers, nil
 }
 
 func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (changedDeps []string, removedDeps []string, validDeps []string, err error) {
 	if sensorSpec == nil {
-		errStr := "sensorSpec == nil??"
+		errStr := SensorNilError
 		stream.Logger.Errorf(errStr)
 		err = errors.New(errStr)
 		return
@@ -279,7 +286,7 @@ func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (chan
 		}
 	}
 
-	return
+	return changedDeps, removedDeps, validDeps, nil
 }
 
 func (stream *SensorJetstream) getDependencyDefinitions() (DependencyDefinitionValue, error) {
@@ -360,14 +367,12 @@ func (stream *SensorJetstream) storeTriggerList(triggerList TriggerValue) error 
 	}
 	stream.Logger.Debugf("successfully stored trigger list under key %s: %s", TriggersKey, string(bytes))
 	return nil
-
 }
 
 func (stream *SensorJetstream) getTriggerExpression(triggerName string) (string, error) {
 	key := getTriggerExpressionKey(triggerName)
 	expr, err := stream.keyValueStore.Get(key)
 	if err != nil {
-
 		if err == nats.ErrKeyNotFound {
 			return "", nil
 		}
@@ -412,10 +417,10 @@ func (stream *SensorJetstream) purgeAllDepsForTrigger(triggerName string) error 
 	}
 
 	// get the individual dependencies by removing the special characters
-	modExpr := strings.Replace(storedExpression, "&&", " ", -1)
-	modExpr = strings.Replace(modExpr, "||", " ", -1)
-	modExpr = strings.Replace(modExpr, "(", " ", -1)
-	modExpr = strings.Replace(modExpr, ")", " ", -1)
+	modExpr := strings.ReplaceAll(storedExpression, "&&", " ")
+	modExpr = strings.ReplaceAll(modExpr, "||", " ")
+	modExpr = strings.ReplaceAll(modExpr, "(", " ")
+	modExpr = strings.ReplaceAll(modExpr, ")", " ")
 	deps := strings.FieldsFunc(modExpr, func(r rune) bool { return r == ' ' })
 
 	for _, dep := range deps {

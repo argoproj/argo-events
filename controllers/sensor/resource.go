@@ -167,17 +167,18 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
 
-	authStrategy := &eventbusv1alpha1.AuthStrategyNone
+	var authStrategy *eventbusv1alpha1.AuthStrategy
 	var accessSecret *corev1.SecretKeySelector
-	if eventBus.Status.Config.NATS != nil {
+	switch {
+	case eventBus.Status.Config.NATS != nil:
 		natsConf := eventBus.Status.Config.NATS
 		authStrategy = natsConf.Auth
 		accessSecret = natsConf.AccessSecret
-	} else if eventBus.Status.Config.JetStream != nil {
+	case eventBus.Status.Config.JetStream != nil:
 		jsConf := eventBus.Status.Config.JetStream
 		authStrategy = &eventbusv1alpha1.AuthStrategyToken
 		accessSecret = jsConf.Auth.Token
-	} else {
+	default:
 		return nil, errors.New("unsupported event bus")
 	}
 
