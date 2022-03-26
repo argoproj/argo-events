@@ -100,7 +100,6 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	default:
 		return nil, errors.New("invalid eventbus type")
 	}
-
 }
 
 func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*eventbuscommon.Auth, error) {

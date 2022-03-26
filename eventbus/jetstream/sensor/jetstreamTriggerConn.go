@@ -118,7 +118,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
 			continue
 		}
-		go conn.pullSubscribe(subscriptions[subscriptionIndex], ch, processMsgsCloseCh, wg)
+		go conn.pullSubscribe(subscriptions[subscriptionIndex], ch, processMsgsCloseCh, &wg)
 		wg.Add(1)
 
 		subscriptionIndex++
@@ -126,7 +126,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 
 	// create a single goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
 	// one goroutine and we don't need to worry about race conditions
-	go conn.processMsgs(ch, processMsgsCloseCh, resetConditionsCh, transform, filter, action, wg)
+	go conn.processMsgs(ch, processMsgsCloseCh, resetConditionsCh, transform, filter, action, &wg)
 	wg.Add(1)
 
 	for {
@@ -151,7 +151,7 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 	subscription *nats.Subscription,
 	msgChannel chan<- *nats.Msg,
 	closeCh <-chan struct{},
-	wg sync.WaitGroup) {
+	wg *sync.WaitGroup) {
 	for {
 		// call Fetch with timeout
 		msgs, err := subscription.Fetch(1, nats.MaxWait(time.Second*1))
@@ -180,7 +180,7 @@ func (conn *JetstreamTriggerConn) processMsgs(
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
-	wg sync.WaitGroup) {
+	wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
@@ -306,10 +306,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 
 			action(messages)
 
-			err = conn.clearAllDependencies(nil)
-			if err != nil {
-				return
-			}
+			_ = conn.clearAllDependencies(nil)
 		} else {
 			log.Debugf("dependency expression false: %s", conn.dependencyExpression)
 			msgMetadata, err := m.Metadata()
@@ -318,7 +315,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 				log.Error(errStr)
 				return
 			}
-			err = conn.saveDependency(depName,
+			_ = conn.saveDependency(depName,
 				MsgInfo{
 					StreamSeq:   msgMetadata.Sequence.Stream,
 					ConsumerSeq: msgMetadata.Sequence.Consumer,
