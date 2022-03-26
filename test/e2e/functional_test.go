@@ -213,8 +213,8 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		WaitForEventSourceReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
-		EventSourcePodPortForward(13001, 13000).
 		EventSourcePodPortForward(12001, 12000).
+		EventSourcePodPortForward(13001, 13000).
 		EventSourcePodPortForward(14001, 14000).
 		EventSourcePodPortForward(7777, 7777)
 
@@ -242,10 +242,15 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		ExpectSensorPodLogDoesNotContain(LogTriggerActionSuccessful("log-trigger-1"))
 
 	// Then if we trigger test-dep-2 we should see log-trigger-2
+	s.e("http://localhost:13001").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
 
-	// Then we trigger test-dep-2 again and shouldn't see anything (don't have a way to check that)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"))
 
-	// Finally trigger test-dep-3 and we should see log-trigger-1
+	// Then we trigger test-dep-2 again and shouldn't see anything (don't have a way to check that) - actually, we could if we modify podLogContains to include a count
+
+	// Finally trigger test-dep-3 and we should see log-trigger-1..
 
 }
 
