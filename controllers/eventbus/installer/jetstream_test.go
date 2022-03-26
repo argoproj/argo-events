@@ -52,8 +52,8 @@ func TestJetStreamBadInstallation(t *testing.T) {
 func TestJetStreamGenerateNames(t *testing.T) {
 	n := generateJetStreamStatefulSetName(testJetStreamEventBus)
 	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js", n)
-	n = generateJetStreamServerAuthSecretName(testJetStreamEventBus)
-	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-server-auth", n)
+	n = generateJetStreamServerSecretName(testJetStreamEventBus)
+	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-server", n)
 	n = generateJetStreamClientAuthSecretName(testJetStreamEventBus)
 	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-client-auth", n)
 	n = generateJetStreamConfigMapName(testJetStreamEventBus)
@@ -89,6 +89,14 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		assert.Equal(t, testJSReloaderImage, sts.Spec.Template.Spec.Containers[1].Image)
 		assert.Equal(t, testJetStreamExporterImage, sts.Spec.Template.Spec.Containers[2].Image)
 		assert.True(t, len(sts.Spec.Template.Spec.Volumes) > 1)
+		envNames := []string{}
+		for _, e := range sts.Spec.Template.Spec.Containers[0].Env {
+			envNames = append(envNames, e.Name)
+		}
+		for _, e := range []string{"POD_NAME", "SERVER_NAME", "POD_NAMESPACE", "CLUSTER_ADVERTISE", "JS_KEY"} {
+			assert.Contains(t, envNames, e)
+		}
+
 	})
 
 	t.Run("test create svc", func(t *testing.T) {
@@ -106,13 +114,14 @@ func TestJetStreamCreateObjects(t *testing.T) {
 	t.Run("test create auth secrets", func(t *testing.T) {
 		testObj := testJetStreamEventBus.DeepCopy()
 		i.eventBus = testObj
-		err := i.createAuthSecrets(ctx)
+		err := i.createSecrets(ctx)
 		assert.NoError(t, err)
 		s := &corev1.Secret{}
-		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamServerAuthSecretName(testObj)}, s)
+		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamServerSecretName(testObj)}, s)
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(s.Data))
-		assert.Contains(t, s.Data, common.JetStreamServerAuthSecretKey)
+		assert.Equal(t, 2, len(s.Data))
+		assert.Contains(t, s.Data, common.JetStreamServerSecretAuthKey)
+		assert.Contains(t, s.Data, common.JetStreamServerSecretEncryptionKey)
 		s = &corev1.Secret{}
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamClientAuthSecretName(testObj)}, s)
 		assert.NoError(t, err)
