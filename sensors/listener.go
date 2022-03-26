@@ -109,6 +109,9 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	err = common.Connect(&common.DefaultBackoff, func() error {
 		return ebDriver.Initialize()
 	})
+	if err != nil {
+		return err
+	}
 
 	wg := &sync.WaitGroup{}
 	for _, t := range sensor.Spec.Triggers {
