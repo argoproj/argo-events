@@ -15,7 +15,7 @@ type Jetstream struct {
 	url  string
 	auth *eventbuscommon.Auth
 	// clusterID string
-	//jetstreamContext nats.JetStreamContext
+	// jetstreamContext nats.JetStreamContext
 	MgmtConnection JetstreamConnection
 
 	streamSettings string
@@ -24,7 +24,6 @@ type Jetstream struct {
 }
 
 func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
-
 	// todo: need to pass streamSettings into this function
 	streamSettings := ""
 	js := &Jetstream{

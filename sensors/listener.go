@@ -107,9 +107,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 		return err
 	}
 	err = common.Connect(&common.DefaultBackoff, func() error {
-		var err error
-		err = ebDriver.Initialize()
-		return err
+		return ebDriver.Initialize()
 	})
 
 	wg := &sync.WaitGroup{}

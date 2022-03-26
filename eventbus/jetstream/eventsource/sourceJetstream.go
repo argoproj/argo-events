@@ -20,7 +20,6 @@ func NewSourceJetstream(url, eventSourceName string, auth *eventbuscommon.Auth, 
 		baseJetstream,
 		eventSourceName,
 	}, nil
-
 }
 
 func (n *SourceJetstream) Initialize() error {
