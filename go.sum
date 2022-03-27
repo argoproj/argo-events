@@ -220,8 +220,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/cpuguy83/go-md2man/v2 v2.0.1/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/danielm-codefresh/argo-multi-cluster v0.0.0-20220320072530-54b93724ff05 h1:Wp6Vm95zOIJ4qTOgYvIULPo7zkdY3YqEEe4VuXHo79A=
-github.com/danielm-codefresh/argo-multi-cluster v0.0.0-20220320072530-54b93724ff05/go.mod h1:JQ0OpETZR6+qpI7pE/djefADPEPnQ4PMp7dDgE+iU6s=
+github.com/danielm-codefresh/argo-multi-cluster v0.0.0-20220327145759-1c387c8ebc5f h1:EMOFoOz97OTxqo1B2i2dQ4LGg1aca8n1nd9U/+DMmxo=
+github.com/danielm-codefresh/argo-multi-cluster v0.0.0-20220327145759-1c387c8ebc5f/go.mod h1:JQ0OpETZR6+qpI7pE/djefADPEPnQ4PMp7dDgE+iU6s=
 github.com/dave/jennifer v1.4.1/go.mod h1:7jEdnm+qBcxl8PC0zyp7vxcpSRnzXSt9r39tpTVGlwA=
 github.com/davecgh/go-spew v0.0.0-20161028175848-04cdfd42973b/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
