@@ -96,7 +96,6 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		for _, e := range []string{"POD_NAME", "SERVER_NAME", "POD_NAMESPACE", "CLUSTER_ADVERTISE", "JS_KEY"} {
 			assert.Contains(t, envNames, e)
 		}
-
 	})
 
 	t.Run("test create svc", func(t *testing.T) {
