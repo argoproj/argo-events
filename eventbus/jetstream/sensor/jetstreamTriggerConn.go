@@ -99,7 +99,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		}
 	}
 
-	ch := make(chan *nats.Msg, 64) // todo: 64 is random - make a constant? any concerns about it not being big enough?
+	ch := make(chan *nats.Msg) // channel with no buffer (I believe this should be okay - we will block writing messages to this channel while a message is still being processed but volume of messages shouldn't be so high as to cause a problem)
 	wg := sync.WaitGroup{}
 	processMsgsCloseCh := make(chan struct{})
 
@@ -113,7 +113,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 
 		conn.Logger.Debugf("durable name for sensor='%s', trigger='%s', dep='%s': '%s'", conn.sensorName, conn.triggerName, dependency.Name, durableName)
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
-		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew()) // todo: what other subscription options here?
+		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew())
 		if err != nil {
 			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
 			continue
