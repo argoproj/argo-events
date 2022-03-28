@@ -63,8 +63,10 @@ const (
 	// Default EventBus name
 	DefaultEventBusName = "default"
 
-	// key of server auth secret
-	JetStreamServerAuthSecretKey = "auth"
+	// key of auth server secret
+	JetStreamServerSecretAuthKey = "auth"
+	// key of encryption server secret
+	JetStreamServerSecretEncryptionKey = "encryption"
 	// key of client auth secret
 	JetStreamClientAuthSecretKey = "client-auth"
 	// key of nats-js.conf in the configmap

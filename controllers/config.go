@@ -28,8 +28,9 @@ type StanVersion struct {
 }
 
 type JetStreamConfig struct {
-	Settings string             `json:"settings"`
-	Versions []JetStreamVersion `json:"versions"`
+	Settings     string             `json:"settings"`
+	StreamConfig string             `json:"streamConfig"`
+	Versions     []JetStreamVersion `json:"versions"`
 }
 
 type JetStreamVersion struct {
