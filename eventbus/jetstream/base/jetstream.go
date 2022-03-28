@@ -26,7 +26,6 @@ type Jetstream struct {
 }
 
 func NewJetstream(url string, streamSettings string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
-
 	js := &Jetstream{
 		url:            url,
 		auth:           auth,
