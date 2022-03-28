@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"errors"
-	"math/rand"
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusjetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
@@ -72,15 +71,7 @@ func (stream *SensorJetstream) Initialize() error {
 }
 
 func (stream *SensorJetstream) Connect(triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) (eventbuscommon.TriggerConnection, error) {
-	// Generate clientID with hash code
-	hashKey := fmt.Sprintf("%s-%s", stream.sensorName, triggerName)
-
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	hashVal := common.Hasher(hashKey)
-	clientID := fmt.Sprintf("client-%v-%v", hashVal, r1.Intn(100))
-
-	conn, err := stream.MakeConnection(clientID)
+	conn, err := stream.MakeConnection()
 	if err != nil {
 		return nil, err
 	}

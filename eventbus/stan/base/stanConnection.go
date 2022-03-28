@@ -14,7 +14,7 @@ type STANConnection struct {
 	STANConnected bool
 
 	// defaultSubject  string
-	clientID string
+	ClientID string
 
 	Logger *zap.SugaredLogger
 }
@@ -37,8 +37,4 @@ func (nsc *STANConnection) IsClosed() bool {
 		return true
 	}
 	return false
-}
-
-func (nsc *STANConnection) ClientID() string {
-	return nsc.clientID
 }

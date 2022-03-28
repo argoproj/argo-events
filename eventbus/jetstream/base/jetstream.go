@@ -38,7 +38,7 @@ func NewJetstream(url string, streamSettings string, auth *eventbuscommon.Auth, 
 }
 
 func (stream *Jetstream) Init() error {
-	mgmtConnection, err := stream.MakeConnection("mgmt")
+	mgmtConnection, err := stream.MakeConnection()
 	if err != nil {
 		errStr := fmt.Sprintf("error creating Management Connection for Jetstream stream %+v: %v", stream, err)
 		stream.Logger.Error(errStr)
@@ -48,9 +48,9 @@ func (stream *Jetstream) Init() error {
 	return nil
 }
 
-func (stream *Jetstream) MakeConnection(clientID string) (*JetstreamConnection, error) {
-	log := stream.Logger.With("clientID", clientID)
-	conn := &JetstreamConnection{clientID: clientID, Logger: stream.Logger}
+func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
+	log := stream.Logger
+	conn := &JetstreamConnection{Logger: stream.Logger}
 	// todo: duplicate below - reduce?
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside

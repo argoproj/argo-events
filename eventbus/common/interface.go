@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -11,8 +12,6 @@ type Connection interface {
 	Close() error
 
 	IsClosed() bool
-
-	ClientID() string
 }
 
 type EventSourceConnection interface {
@@ -23,6 +22,8 @@ type EventSourceConnection interface {
 
 type TriggerConnection interface {
 	Connection
+
+	fmt.Stringer // need to implement String()
 
 	Subscribe(ctx context.Context,
 		closeCh <-chan struct{},

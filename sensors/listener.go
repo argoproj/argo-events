@@ -263,12 +263,12 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					// release the lock when goroutine exits
 					defer atomic.StoreUint32(&subLock, 0)
 
-					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, conn.ClientID())
+					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, conn)
 
 					subject := &sensorCtx.eventBusSubject
 					err = conn.Subscribe(ctx, closeSubCh, resetConditionsCh, lastResetTime, transformFunc, filterFunc, actionFunc, subject)
 					if err != nil {
-						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))
+						logger.Errorw("failed to subscribe to eventbus", zap.Any("connection", conn), zap.Error(err))
 						return
 					}
 				}()
@@ -276,13 +276,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 			subscribeOnce(&subLock, subscribeFunc)
 
-			logger.Infof("starting eventbus connection daemon for client %s...", conn.ClientID())
+			logger.Infof("starting eventbus connection daemon for client %s...", conn)
 			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
 			for {
 				select {
 				case <-ctx.Done():
-					logger.Infof("exiting eventbus connection daemon for client %s...", conn.ClientID())
+					logger.Infof("exiting eventbus connection daemon for client %s...", conn)
 					wg1.Wait()
 					return
 				case <-ticker.C:
@@ -290,10 +290,10 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						logger.Info("NATS connection lost, reconnecting...")
 						conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 						if err != nil {
-							logger.Errorw("failed to reconnect to eventbus", zap.Any("clientID", conn.ClientID()), zap.Error(err))
+							logger.Errorw("failed to reconnect to eventbus", zap.Any("connection", conn), zap.Error(err))
 							continue
 						}
-						logger.Infow("reconnected to NATS streaming server.", zap.Any("clientID", conn.ClientID()))
+						logger.Infow("reconnected to NATS streaming server.", zap.Any("connection", conn))
 
 						if atomic.LoadUint32(&subLock) == 1 {
 							closeSubCh <- struct{}{}

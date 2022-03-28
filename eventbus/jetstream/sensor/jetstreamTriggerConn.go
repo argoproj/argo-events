@@ -55,7 +55,7 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		requiresANDLogic:     strings.Contains(dependencyExpression, "&"),
 		deps:                 deps,
 		sourceDepMap:         sourceDepMap}
-	connection.Logger = connection.Logger.With("triggerName", connection.triggerName).With("clientID", connection.ClientID())
+	connection.Logger = connection.Logger.With("triggerName", connection.triggerName)
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
 	if err != nil {
@@ -73,6 +73,10 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 
 	connection.Logger.Infof("Successfully located K/V store for sensor %s", sensorName)
 	return connection, nil
+}
+
+func (conn *JetstreamTriggerConn) String() string {
+	return fmt.Sprintf("JetstreamTriggerConn{Sensor:%s,Trigger:%s}", conn.sensorName, conn.triggerName)
 }
 
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
