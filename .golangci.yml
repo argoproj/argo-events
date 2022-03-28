@@ -29,4 +29,3 @@ linters:
     - unused
     - varcheck
     - whitespace
-
