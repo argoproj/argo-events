@@ -588,6 +588,21 @@ available arguments.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>streamConfig</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Optional configuration for the streams to be created in this JetStream
+service, if specified, it will be merged with the default configuration
+in controller-config. It accepts a YAML format configuration, available
+fields include, “maxBytes”, “maxMsgs”, “maxAge” (e.g. 72h), “replicas”
+(1, 3, 5), “duplicates” (e.g. 5m).
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.JetStreamConfig">
@@ -627,6 +642,14 @@ JetStream (Nats) URL
 <a href="#argoproj.io/v1alpha1.JetStreamAuth"> JetStreamAuth </a> </em>
 </td>
 <td>
+</td>
+</tr>
+<tr>
+<td>
+<code>streamConfig</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
 </td>
 </tr>
 </tbody>
