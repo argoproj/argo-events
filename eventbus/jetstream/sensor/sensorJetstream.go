@@ -33,14 +33,14 @@ type SensorJetstream struct {
 	keyValueStore nats.KeyValue
 }
 
-func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*SensorJetstream, error) {
+func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, streamConfig string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*SensorJetstream, error) {
 	if sensorSpec == nil {
 		errStr := SensorNilError
 		logger.Errorf(errStr)
 		return nil, errors.New(errStr)
 	}
 
-	baseJetstream, err := eventbusjetstreambase.NewJetstream(url, auth, logger)
+	baseJetstream, err := eventbusjetstreambase.NewJetstream(url, streamConfig, auth, logger)
 	if err != nil {
 		return nil, err
 	}

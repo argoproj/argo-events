@@ -11,8 +11,8 @@ type SourceJetstream struct {
 	eventSourceName string
 }
 
-func NewSourceJetstream(url, eventSourceName string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*SourceJetstream, error) {
-	baseJetstream, err := jetstreambase.NewJetstream(url, auth, logger)
+func NewSourceJetstream(url, eventSourceName string, streamConfig string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*SourceJetstream, error) {
+	baseJetstream, err := jetstreambase.NewJetstream(url, streamConfig, auth, logger)
 	if err != nil {
 		return nil, err
 	}
