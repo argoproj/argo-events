@@ -27,7 +27,7 @@ func (n *SourceJetstream) Initialize() error {
 }
 
 func (n *SourceJetstream) Connect(clientID string) (eventbuscommon.EventSourceConnection, error) {
-	conn, err := n.MakeConnection(clientID)
+	conn, err := n.MakeConnection()
 	if err != nil {
 		return nil, err
 	}

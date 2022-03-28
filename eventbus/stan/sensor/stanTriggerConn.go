@@ -3,6 +3,7 @@ package sensor
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -31,8 +32,12 @@ type STANTriggerConn struct {
 
 func NewSTANTriggerConn(conn *stanbase.STANConnection, sensorName string, triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) *STANTriggerConn {
 	n := &STANTriggerConn{conn, sensorName, triggerName, dependencyExpression, deps}
-	n.Logger = n.Logger.With("triggerName", n.triggerName).With("clientID", n.ClientID())
+	n.Logger = n.Logger.With("triggerName", n.triggerName).With("clientID", n.ClientID)
 	return n
+}
+
+func (n *STANTriggerConn) String() string {
+	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.ClientID, n.sensorName, n.triggerName)
 }
 
 // Subscribe is used to subscribe to multiple event source dependencies
@@ -66,7 +71,7 @@ func (n *STANTriggerConn) Subscribe(
 		return err
 	}
 	// use group name as durable name
-	group, err := n.getGroupNameFromClientID(n.ClientID())
+	group, err := n.getGroupNameFromClientID(n.ClientID)
 	if err != nil {
 		return err
 	}
@@ -257,7 +262,7 @@ func (n *STANTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSou
 	for k, v := range msgHolder.msgs {
 		messages[k] = *v.event
 	}
-	log.Debugf("Triggering actions for client %s", n.ClientID())
+	log.Debugf("Triggering actions for client %s", n.ClientID)
 
 	action(messages)
 
@@ -266,7 +271,7 @@ func (n *STANTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSou
 }
 
 func (n *STANTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
-	log := n.Logger.With("clientID", n.ClientID())
+	log := n.Logger.With("clientID", n.ClientID)
 	// take off the last part: clientID should have a dash at the end and we can remove that part
 	strs := strings.Split(clientID, "-")
 	if len(strs) < 2 {

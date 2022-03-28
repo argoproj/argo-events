@@ -29,7 +29,7 @@ func NewSTAN(url string, clusterID string, auth *eventbuscommon.Auth, logger *za
 
 func (n *STAN) MakeConnection(clientID string) (*STANConnection, error) {
 	log := n.logger.With("clientID", clientID)
-	conn := &STANConnection{clientID: clientID, Logger: n.logger}
+	conn := &STANConnection{ClientID: clientID, Logger: n.logger}
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
 		nats.NoReconnect(),

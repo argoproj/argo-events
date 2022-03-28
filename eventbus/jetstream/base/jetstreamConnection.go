@@ -10,7 +10,6 @@ type JetstreamConnection struct {
 	JSContext nats.JetStreamContext
 
 	NATSConnected bool
-	clientID      string // seems like jetstream doesn't have this notion; we can just have this to uniquely identify ourselves in the log (todo: consider this further)
 
 	Logger *zap.SugaredLogger
 }
@@ -27,8 +26,4 @@ func (jsc *JetstreamConnection) IsClosed() bool {
 		return true
 	}
 	return false
-}
-
-func (jsc *JetstreamConnection) ClientID() string {
-	return jsc.clientID
 }
