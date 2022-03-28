@@ -51,7 +51,6 @@ func (stream *Jetstream) Init() error {
 func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	log := stream.Logger
 	conn := &JetstreamConnection{Logger: stream.Logger}
-	// todo: duplicate below - reduce?
 	opts := []nats.Option{
 		// Do not reconnect here but handle reconnction outside
 		nats.NoReconnect(),
