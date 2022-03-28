@@ -300,7 +300,7 @@ data:
           maxAge: 168h
           maxBytes: -1
           replicas: 3
-          duplicates: 60s
+          duplicates: 300s
         versions:
         - version: 2.7.4
           natsImage: nats:2.7.4
