@@ -1,6 +1,7 @@
 package base
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
@@ -8,6 +9,7 @@ import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	nats "github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -23,9 +25,8 @@ type Jetstream struct {
 	Logger *zap.SugaredLogger
 }
 
-func NewJetstream(url string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
-	// todo: need to pass streamSettings into this function
-	streamSettings := ""
+func NewJetstream(url string, streamSettings string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
+
 	js := &Jetstream{
 		url:            url,
 		auth:           auth,
@@ -103,13 +104,29 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	var err error
 
-	options := make([]nats.JSOpt, 0)
-	// todo: create a JSOpt for each setting that the user specifies
+	// unmarshal settings
+	v := viper.New()
+	v.SetConfigType("yaml")
+	if err := v.ReadConfig(bytes.NewBufferString(stream.streamSettings)); err != nil {
+		return err
+	}
 
-	_, err = conn.JSContext.AddStream(&nats.StreamConfig{
-		Name:     common.JetStreamStreamName,
-		Subjects: []string{common.JetStreamStreamName + ".*.*"},
-	}, options...)
+	streamConfig := nats.StreamConfig{
+		Name:       common.JetStreamStreamName,
+		Subjects:   []string{common.JetStreamStreamName + ".*.*"},
+		Retention:  nats.LimitsPolicy,
+		Discard:    nats.DiscardOld,
+		MaxMsgs:    v.GetInt64("maxMsgs"),
+		MaxAge:     v.GetDuration("maxAge"),
+		MaxBytes:   v.GetInt64("maxBytes"),
+		Storage:    nats.FileStorage,
+		Replicas:   v.GetInt("replicas"),
+		Duplicates: v.GetDuration("duplicates"),
+	}
+	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
+	options := make([]nats.JSOpt, 0)
+
+	_, err = conn.JSContext.AddStream(&streamConfig, options...)
 	if err != nil {
 		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", common.JetStreamStreamName, err, conn)
 	}
