@@ -58,7 +58,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening listens Pulsar events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Pulsar event source...")
@@ -172,7 +172,7 @@ consumeMessages:
 	return nil
 }
 
-func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte, ...eventsourcecommon.Options) error, log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())

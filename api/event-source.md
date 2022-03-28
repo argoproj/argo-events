@@ -4354,6 +4354,18 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.RedisStreamEventSource">
