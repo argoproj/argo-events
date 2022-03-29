@@ -67,7 +67,7 @@ type EventingServer interface {
 	GetEventSourceType() apicommon.EventSourceType
 
 	// Function to start listening events.
-	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error
+	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
@@ -481,7 +481,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					Jitter:   &jitter,
 				}
 				if err = common.Connect(&backoff, func() error {
-					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Options) error {
+					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) error {
 						if filter, ok := filters[s.GetEventName()]; ok {
 							proceed, err := filterEvent(data, filter)
 							if err != nil {
