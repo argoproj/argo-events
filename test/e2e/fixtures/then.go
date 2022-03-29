@@ -39,6 +39,7 @@ func (t *Then) ExpectEventBusDeleted() *Then {
 	if err == nil || !apierr.IsNotFound(err) {
 		t.t.Fatalf("expected event bus to be deleted: %v", err)
 	}
+
 	return t
 }
 
