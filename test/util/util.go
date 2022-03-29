@@ -20,7 +20,6 @@ import (
 	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 )
 
-
 func WaitForEventBusReady(ctx context.Context, eventBusClient eventbuspkg.EventBusInterface, eventBusName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + eventBusName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
