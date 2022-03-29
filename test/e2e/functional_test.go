@@ -147,6 +147,8 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 
 	defer t2.TerminateAllPodPortForwards()
 
+	time.Sleep(3 * time.Second)
+
 	s.e("http://localhost:12000").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
@@ -229,6 +231,8 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		SensorPodPortForward(7778, 7777)
 
 	defer t2.TerminateAllPodPortForwards()
+
+	time.Sleep(3 * time.Second)
 
 	// need to verify the conditional logic is working successfully
 	// If we trigger test-dep-1 (port 12000) we should see log-trigger-2 but not log-trigger-1
