@@ -251,11 +251,6 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		Status(200)
 
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"))
-
-	// Then we trigger test-dep-2 again and shouldn't see anything (don't have a way to check that) - actually, we could if we modify podLogContains to include a count
-
-	// Finally trigger test-dep-3 and we should see log-trigger-1..
-
 }
 
 func TestFunctionalSuite(t *testing.T) {
