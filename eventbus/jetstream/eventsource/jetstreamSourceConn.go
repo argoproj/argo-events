@@ -36,5 +36,6 @@ func (jsc *JetstreamSourceConn) Publish(ctx context.Context,
 	// derive subject from event source name and event name
 	subject := fmt.Sprintf("default.%s.%s", evt.EventSourceName, evt.EventName)
 	_, err := jsc.JSContext.Publish(subject, message, dedupKey)
+	jsc.Logger.Debugf("published message to subject %s", subject)
 	return err
 }
