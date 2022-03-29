@@ -139,6 +139,7 @@ func (t *Then) TerminateAllPodPortForwards() *Then {
 			close(v)
 		}
 	}
+
 	return t
 }
 
