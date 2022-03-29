@@ -12,7 +12,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -30,16 +30,20 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 	logger := logging.FromContext(ctx)
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
-	if eventBusConfig.NATS != nil {
+	switch {
+	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
 		eventBusAuth = eventBusConfig.NATS.Auth
-	} else {
+	case eventBusConfig.JetStream != nil:
+		eventBusType = apicommon.EventBusJetStream
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
+	default:
 		return nil, errors.New("invalid event bus")
 	}
-	var auth *eventbusdriver.Auth
-	cred := &eventbusdriver.AuthCredential{}
+	var auth *eventbuscommon.Auth
+	cred := &eventbuscommon.AuthCredential{}
 	if eventBusAuth == nil || *eventBusAuth == eventbusv1alpha1.AuthStrategyNone {
-		auth = &eventbusdriver.Auth{
+		auth = &eventbuscommon.Auth{
 			Strategy: eventbusv1alpha1.AuthStrategyNone,
 		}
 	} else {
@@ -61,7 +65,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 			// Auth file changed, let it restart.
 			logger.Fatal("Eventbus auth config file changed, exiting..")
 		})
-		auth = &eventbusdriver.Auth{
+		auth = &eventbuscommon.Auth{
 			Strategy:    *eventBusAuth,
 			Crendential: cred,
 		}
@@ -75,6 +79,13 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 			url:         eventBusConfig.NATS.URL,
 			auth:        auth,
 		}
+	case apicommon.EventBusJetStream:
+		elector = &natsEventBusElector{
+			clusterName: clusterName,
+			size:        clusterSize,
+			url:         eventBusConfig.JetStream.URL,
+			auth:        auth,
+		}
 	default:
 		return nil, errors.New("invalid eventbus type")
 	}
@@ -85,7 +96,7 @@ type natsEventBusElector struct {
 	clusterName string
 	size        int
 	url         string
-	auth        *eventbusdriver.Auth
+	auth        *eventbuscommon.Auth
 }
 
 func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCallbacks) {

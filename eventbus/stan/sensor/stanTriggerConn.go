@@ -1,130 +1,46 @@
-package driver
+package sensor
 
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/Knetic/govaluate"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/gobwas/glob"
-	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
+
+	stanbase "github.com/argoproj/argo-events/eventbus/stan/base"
 )
 
-type natsStreamingConnection struct {
-	natsConn *nats.Conn
-	stanConn stan.Conn
+type STANTriggerConn struct {
+	*stanbase.STANConnection
 
-	natsConnected bool
-	stanConnected bool
+	sensorName           string
+	triggerName          string
+	dependencyExpression string
+	deps                 []eventbuscommon.Dependency
 }
 
-func (nsc *natsStreamingConnection) Close() error {
-	if nsc.stanConn != nil {
-		err := nsc.stanConn.Close()
-		if err != nil {
-			return err
-		}
-	}
-	if nsc.natsConn != nil && nsc.natsConn.IsConnected() {
-		nsc.natsConn.Close()
-	}
-	return nil
+func NewSTANTriggerConn(conn *stanbase.STANConnection, sensorName string, triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) *STANTriggerConn {
+	n := &STANTriggerConn{conn, sensorName, triggerName, dependencyExpression, deps}
+	n.Logger = n.Logger.With("triggerName", n.triggerName).With("clientID", n.ClientID)
+	return n
 }
 
-func (nsc *natsStreamingConnection) IsClosed() bool {
-	if nsc.natsConn == nil || nsc.stanConn == nil || !nsc.natsConnected || !nsc.stanConnected || nsc.natsConn.IsClosed() {
-		return true
-	}
-	return false
+func (n *STANTriggerConn) String() string {
+	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.ClientID, n.sensorName, n.triggerName)
 }
 
-func (nsc *natsStreamingConnection) Publish(subject string, data []byte) error {
-	return nsc.stanConn.Publish(subject, data)
-}
-
-type natsStreaming struct {
-	url       string
-	auth      *Auth
-	clusterID string
-	subject   string
-	clientID  string
-
-	logger *zap.SugaredLogger
-}
-
-// NewNATSStreaming returns a nats streaming driver
-func NewNATSStreaming(url, clusterID, subject, clientID string, auth *Auth, logger *zap.SugaredLogger) Driver {
-	return &natsStreaming{
-		url:       url,
-		clusterID: clusterID,
-		subject:   subject,
-		clientID:  clientID,
-		auth:      auth,
-		logger:    logger,
-	}
-}
-
-func (n *natsStreaming) Connect() (Connection, error) {
-	log := n.logger.With("clientID", n.clientID)
-	conn := &natsStreamingConnection{}
-	opts := []nats.Option{
-		// Do not reconnect here but handle reconnction outside
-		nats.NoReconnect(),
-		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
-			conn.natsConnected = false
-			log.Errorw("NATS connection lost", zap.Error(err))
-		}),
-		nats.ReconnectHandler(func(nnc *nats.Conn) {
-			conn.natsConnected = true
-			log.Info("Reconnected to NATS server")
-		}),
-	}
-	switch n.auth.Strategy {
-	case eventbusv1alpha1.AuthStrategyToken:
-		log.Info("NATS auth strategy: Token")
-		opts = append(opts, nats.Token(n.auth.Crendential.Token))
-	case eventbusv1alpha1.AuthStrategyNone:
-		log.Info("NATS auth strategy: None")
-	default:
-		return nil, errors.New("unsupported auth strategy")
-	}
-	nc, err := nats.Connect(n.url, opts...)
-	if err != nil {
-		log.Errorw("Failed to connect to NATS server", zap.Error(err))
-		return nil, err
-	}
-	log.Info("Connected to NATS server.")
-	conn.natsConn = nc
-	conn.natsConnected = true
-
-	sc, err := stan.Connect(n.clusterID, n.clientID, stan.NatsConn(nc), stan.Pings(5, 60),
-		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
-			conn.stanConnected = false
-			log.Errorw("NATS streaming connection lost", zap.Error(err))
-		}))
-	if err != nil {
-		log.Errorw("Failed to connect to NATS streaming server", zap.Error(err))
-		return nil, err
-	}
-	log.Info("Connected to NATS streaming server.")
-	conn.stanConn = sc
-	conn.stanConnected = true
-	return conn, nil
-}
-
-func (n *natsStreaming) Publish(conn Connection, message []byte) error {
-	return conn.Publish(n.subject, message)
-}
-
-// SubscribeEventSources is used to subscribe multiple event source dependencies
+// Subscribe is used to subscribe to multiple event source dependencies
 // Parameter - ctx, context
 // Parameter - conn, eventbus connection
 // Parameter - group, queue group name
@@ -135,19 +51,32 @@ func (n *natsStreaming) Publish(conn Connection, message []byte) error {
 // Parameter - dependencies, array of dependencies information
 // Parameter - filter, a function used to filter the message
 // Parameter - action, a function to be triggered after all conditions meet
-func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connection, group string, closeCh <-chan struct{}, resetConditionsCh <-chan struct{}, lastResetTime time.Time, dependencyExpr string, dependencies []Dependency, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(string, cloudevents.Event) bool, action func(map[string]cloudevents.Event)) error {
-	log := n.logger.With("clientID", n.clientID)
-	msgHolder, err := newEventSourceMessageHolder(log, dependencyExpr, dependencies, lastResetTime)
+func (n *STANTriggerConn) Subscribe(
+	ctx context.Context,
+	closeCh <-chan struct{},
+	resetConditionsCh <-chan struct{},
+	lastResetTime time.Time,
+	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
+	filter func(string, cloudevents.Event) bool,
+	action func(map[string]cloudevents.Event),
+	defaultSubject *string) error {
+	log := n.Logger
+
+	if defaultSubject == nil {
+		log.Error("can't subscribe over NATS streaming: defaultSubject not set")
+	}
+
+	msgHolder, err := newEventSourceMessageHolder(log, n.dependencyExpression, n.deps, lastResetTime)
 	if err != nil {
 		return err
 	}
-	nsc, ok := conn.(*natsStreamingConnection)
-	if !ok {
-		return errors.New("not a NATS streaming connection")
-	}
 	// use group name as durable name
+	group, err := n.getGroupNameFromClientID(n.ClientID)
+	if err != nil {
+		return err
+	}
 	durableName := group
-	sub, err := nsc.stanConn.QueueSubscribe(n.subject, group, func(m *stan.Msg) {
+	sub, err := n.STANConn.QueueSubscribe(*defaultSubject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, transform, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
@@ -155,10 +84,10 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 		stan.AckWait(1*time.Second),
 		stan.MaxInflight(len(msgHolder.depNames)+2))
 	if err != nil {
-		log.Errorf("failed to subscribe to subject %s", n.subject)
+		log.Errorf("failed to subscribe to subject %s", *defaultSubject)
 		return err
 	}
-	log.Infof("Subscribed to subject %s ...", n.subject)
+	log.Infof("Subscribed to subject %s using durable name %s", *defaultSubject, durableName)
 
 	// Daemon to evict cache and reset trigger conditions
 	wg := &sync.WaitGroup{}
@@ -198,16 +127,16 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	for {
 		select {
 		case <-ctx.Done():
-			log.Info("existing, unsubscribing and closing connection...")
+			log.Info("exiting, unsubscribing and closing connection...")
 			_ = sub.Close()
-			log.Infof("subscription on subject %s closed", n.subject)
+			log.Infof("subscription on subject %s closed", *defaultSubject)
 			daemonStopCh <- struct{}{}
 			wg.Wait()
 			return nil
 		case <-closeCh:
 			log.Info("closing subscription...")
 			_ = sub.Close()
-			log.Infof("subscription on subject %s closed", n.subject)
+			log.Infof("subscription on subject %s closed", *defaultSubject)
 			daemonStopCh <- struct{}{}
 			wg.Wait()
 			return nil
@@ -215,7 +144,7 @@ func (n *natsStreaming) SubscribeEventSources(ctx context.Context, conn Connecti
 	}
 }
 
-func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *zap.SugaredLogger) {
+func (n *STANTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourceMessageHolder, transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error), filter func(dependencyName string, event cloudevents.Event) bool, action func(map[string]cloudevents.Event), log *zap.SugaredLogger) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
 		log.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
@@ -333,12 +262,24 @@ func (n *natsStreaming) processEventSourceMsg(m *stan.Msg, msgHolder *eventSourc
 	for k, v := range msgHolder.msgs {
 		messages[k] = *v.event
 	}
-	log.Debugf("Triggering actions for client %s", n.clientID)
+	log.Debugf("Triggering actions for client %s", n.ClientID)
 
 	action(messages)
 
 	msgHolder.reset(depName)
 	msgHolder.ackAndCache(m, event.ID())
+}
+
+func (n *STANTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
+	log := n.Logger.With("clientID", n.ClientID)
+	// take off the last part: clientID should have a dash at the end and we can remove that part
+	strs := strings.Split(clientID, "-")
+	if len(strs) < 2 {
+		err := errors.Errorf("Expected client ID to contain dash: %s", clientID)
+		log.Error(err)
+		return "", err
+	}
+	return strings.Join(strs[:len(strs)-1], "-"), nil
 }
 
 // eventSourceMessage is used by messageHolder to hold the latest message
@@ -371,7 +312,7 @@ type eventSourceMessageHolder struct {
 	logger *zap.SugaredLogger
 }
 
-func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr string, dependencies []Dependency, lastResetTime time.Time) (*eventSourceMessageHolder, error) {
+func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr string, dependencies []eventbuscommon.Dependency, lastResetTime time.Time) (*eventSourceMessageHolder, error) {
 	dependencyExpr = strings.ReplaceAll(dependencyExpr, "-", "\\-")
 	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
 	if err != nil {

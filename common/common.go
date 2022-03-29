@@ -42,33 +42,37 @@ const (
 	// volumeMount path for eventbus auth file
 	EventBusAuthFileMountPath = "/etc/eventbus/auth"
 	// Default NATS Streaming messages max age
-	NATSStreamingMaxAge = "72h"
+	STANMaxAge = "72h"
 	// Default NATS Streaming max messages per channel
-	NATSStreamingMaxMsgs = uint64(1000000)
+	STANMaxMsgs = uint64(1000000)
 	// Default NATS Streaming max subscriptions per channel
-	NATSStreamingMaxSubs = uint64(1000)
+	STANMaxSubs = uint64(1000)
 	// Default NATS Streaming max total size of messages per channel
-	NATSStreamingMaxBytes = "1GB"
+	STANMaxBytes = "1GB"
 	// Default NATS Streaming max size of message payload
-	NATSStreamingMaxPayload = "1MB"
+	STANMaxPayload = "1MB"
 	// Default NATS Streaming RAFT heartbeat timeout
-	NATSStreamingRaftHeartbeatTimeout = "2s"
+	STANRaftHeartbeatTimeout = "2s"
 	// Default NATS Streaming RAFT election timeout
-	NATSStreamingRaftElectionTimeout = "2s"
+	STANRaftElectionTimeout = "2s"
 	// Default NATS Streaming RAFT lease timeout
-	NATSStreamingRaftLeaseTimeout = "1s"
+	STANRaftLeaseTimeout = "1s"
 	// Default NATS Streaming RAFT commit timeout
-	NATSStreamingRaftCommitTimeout = "100ms"
+	STANRaftCommitTimeout = "100ms"
 
 	// Default EventBus name
 	DefaultEventBusName = "default"
 
-	// key of server auth secret
-	JetStreamServerAuthSecretKey = "auth"
+	// key of auth server secret
+	JetStreamServerSecretAuthKey = "auth"
+	// key of encryption server secret
+	JetStreamServerSecretEncryptionKey = "encryption"
 	// key of client auth secret
 	JetStreamClientAuthSecretKey = "client-auth"
 	// key of nats-js.conf in the configmap
 	JetStreamConfigMapKey = "nats-js"
+	// Jetstream Stream name
+	JetStreamStreamName = "default"
 )
 
 // Sensor constants

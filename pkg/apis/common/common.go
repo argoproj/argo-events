@@ -102,7 +102,8 @@ type EventBusType string
 
 // possible event bus types
 var (
-	EventBusNATS EventBusType = "nats"
+	EventBusNATS      EventBusType = "nats"
+	EventBusJetStream EventBusType = "jetstream"
 )
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password

@@ -237,7 +237,7 @@ type RedisEventData struct {
 	// Message pattern
 	Pattern string `json:"pattern"`
 	// Message body
-	Body interface{} `json:"body"`
+	Body string `json:"body"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
