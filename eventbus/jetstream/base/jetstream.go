@@ -16,8 +16,7 @@ import (
 type Jetstream struct {
 	url  string
 	auth *eventbuscommon.Auth
-	// clusterID string
-	// jetstreamContext nats.JetStreamContext
+
 	MgmtConnection JetstreamConnection
 
 	streamSettings string
