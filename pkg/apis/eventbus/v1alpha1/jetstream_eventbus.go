@@ -78,6 +78,10 @@ type JetStreamBus struct {
 	// Check https://docs.nats.io/ for all the available arguments.
 	// +optional
 	StartArgs []string `json:"startArgs,omitempty" protobuf:"bytes,17,rep,name=startArgs"`
+	// Optional configuration for the streams to be created in this JetStream service, if specified, it will be merged with the default configuration in controller-config.
+	// It accepts a YAML format configuration, available fields include, "maxBytes", "maxMsgs", "maxAge" (e.g. 72h), "replicas" (1, 3, 5), "duplicates" (e.g. 5m).
+	// +optional
+	StreamConfig *string `json:"streamConfig,omitempty" protobuf:"bytes,18,opt,name=streamConfig"`
 }
 
 func (j JetStreamBus) GetReplicas() int {
@@ -94,6 +98,8 @@ type JetStreamConfig struct {
 	// JetStream (Nats) URL
 	URL  string         `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	Auth *JetStreamAuth `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
+	// +optional
+	StreamConfig string `json:"streamConfig,omitempty" protobuf:"bytes,3,opt,name=streamConfig"`
 }
 
 type JetStreamAuth struct {
