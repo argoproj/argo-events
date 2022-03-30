@@ -42,7 +42,13 @@ func (stream *Jetstream) Init() error {
 		stream.Logger.Error(errStr)
 		return errors.New(errStr)
 	}
+	err = stream.CreateStream(mgmtConnection)
+	if err != nil {
+		stream.Logger.Errorw("Failed to create Stream", zap.Error(err))
+		return err
+	}
 	stream.MgmtConnection = *mgmtConnection
+
 	return nil
 }
 
@@ -82,12 +88,6 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	conn.JSContext, err = nc.JetStream()
 	if err != nil {
 		log.Errorw("Failed to get Jetstream context", zap.Error(err))
-		return nil, err
-	}
-
-	err = stream.CreateStream(conn)
-	if err != nil {
-		log.Errorw("Failed to create Stream", zap.Error(err))
 		return nil, err
 	}
 
