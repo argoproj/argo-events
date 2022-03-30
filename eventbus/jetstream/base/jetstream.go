@@ -50,7 +50,7 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	log := stream.Logger
 	conn := &JetstreamConnection{Logger: stream.Logger}
 	opts := []nats.Option{
-		// Do not reconnect here but handle reconnction outside
+		// todo: try out Jetstream's auto-reconnection capability
 		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
 			conn.NATSConnected = false
