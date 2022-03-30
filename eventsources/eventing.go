@@ -520,12 +520,12 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						}
 
 						msg := eventbuscommon.Message{
-							eventbuscommon.MsgHeader{
+							MsgHeader: eventbuscommon.MsgHeader{
 								EventSourceName: s.GetEventSourceName(),
 								EventName:       s.GetEventName(),
 								ID:              event.ID(),
 							},
-							eventBody,
+							Body: eventBody,
 						}
 
 						if err = e.eventBusConn.Publish(ctx, msg); err != nil {
