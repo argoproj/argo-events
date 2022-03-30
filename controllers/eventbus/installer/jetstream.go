@@ -97,7 +97,6 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 		return nil, err
 	}
 	r.eventBus.Status.MarkDeployed("Succeeded", "JetStream is deployed")
-	r.eventBus.Status.MarkConfigured()
 	return &v1alpha1.BusConfig{
 		JetStream: &v1alpha1.JetStreamConfig{
 			URL: fmt.Sprintf("nats://%s.%s.svc.cluster.local:%s", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace, strconv.Itoa(int(jsClientPort))),
