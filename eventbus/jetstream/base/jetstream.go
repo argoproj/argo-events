@@ -101,6 +101,16 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	var err error
 
+	// before we add the Stream first let's check to make sure it doesn't already exist
+	streamInfo, err := conn.JSContext.StreamInfo(common.JetStreamStreamName)
+	if streamInfo != nil && err == nil {
+		stream.Logger.Infof("No need to create Stream '%s' as it already exists", common.JetStreamStreamName)
+		return nil
+	}
+	if err != nil && err != nats.ErrStreamNotFound {
+		stream.Logger.Errorw("Error calling StreamInfo for Stream '%s': %v", common.JetStreamStreamName, err)
+	}
+
 	// unmarshal settings
 	v := viper.New()
 	v.SetConfigType("yaml")
@@ -121,6 +131,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		Duplicates: v.GetDuration("duplicates"),
 	}
 	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
+
 	options := make([]nats.JSOpt, 0)
 
 	_, err = conn.JSContext.AddStream(&streamConfig, options...)
