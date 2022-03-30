@@ -17,7 +17,7 @@ type Connection interface {
 type EventSourceConnection interface {
 	Connection
 
-	Publish(ctx context.Context, evt Event, message []byte) error
+	Publish(ctx context.Context, msg Message) error
 }
 
 type TriggerConnection interface {

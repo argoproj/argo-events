@@ -17,9 +17,15 @@ type AuthCredential struct {
 	Password string
 }
 
-type Event struct {
+type MsgHeader struct {
 	EventSourceName string
 	EventName       string
+	ID              string
+}
+
+type Message struct {
+	MsgHeader
+	Body []byte
 }
 
 // Dependency is a struct for dependency info of a sensor

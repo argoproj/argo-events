@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"strconv"
 	"time"
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
@@ -28,14 +27,13 @@ func CreateJetstreamSourceConn(conn *jetstreambase.JetstreamConnection, eventSou
 }
 
 func (jsc *JetstreamSourceConn) Publish(ctx context.Context,
-	evt eventbuscommon.Event,
-	message []byte) error {
+	msg eventbuscommon.Message) error {
 	// exactly once on the publishing side is done by assigning a "deduplication key" to the message
-	dedupKey := nats.MsgId(strconv.Itoa(jsc.randomGenerator.Intn(1000000)))
+	dedupKey := nats.MsgId(msg.ID)
 
 	// derive subject from event source name and event name
-	subject := fmt.Sprintf("default.%s.%s", evt.EventSourceName, evt.EventName)
-	_, err := jsc.JSContext.Publish(subject, message, dedupKey)
+	subject := fmt.Sprintf("default.%s.%s", msg.EventSourceName, msg.EventName)
+	_, err := jsc.JSContext.Publish(subject, msg.Body, dedupKey)
 	jsc.Logger.Debugf("published message to subject %s", subject)
 	return err
 }

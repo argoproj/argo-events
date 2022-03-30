@@ -14,7 +14,6 @@ type STANSourceConn struct {
 }
 
 func (n *STANSourceConn) Publish(ctx context.Context,
-	evt eventbuscommon.Event,
-	message []byte) error {
-	return n.STANConn.Publish(n.subject, message)
+	msg eventbuscommon.Message) error {
+	return n.STANConn.Publish(n.subject, msg.Body)
 }
