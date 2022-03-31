@@ -13,23 +13,24 @@ type GlobalConfig struct {
 }
 
 type EventBusConfig struct {
-	NATS      *NatsStreamingConfig `json:"nats"`
-	JetStream *JetStreamConfig     `json:"jetstream"`
+	NATS      *StanConfig      `json:"nats"`
+	JetStream *JetStreamConfig `json:"jetstream"`
 }
 
-type NatsStreamingConfig struct {
-	Versions []NatsStreamingVersion `json:"versions"`
+type StanConfig struct {
+	Versions []StanVersion `json:"versions"`
 }
 
-type NatsStreamingVersion struct {
+type StanVersion struct {
 	Version              string `json:"version"`
-	NatsStreamingImage   string `json:"natsStreamingImage"`
+	NATSStreamingImage   string `json:"natsStreamingImage"`
 	MetricsExporterImage string `json:"metricsExporterImage"`
 }
 
 type JetStreamConfig struct {
-	Settings string             `json:"settings"`
-	Versions []JetStreamVersion `json:"versions"`
+	Settings     string             `json:"settings"`
+	StreamConfig string             `json:"streamConfig"`
+	Versions     []JetStreamVersion `json:"versions"`
 }
 
 type JetStreamVersion struct {
@@ -40,7 +41,7 @@ type JetStreamVersion struct {
 	StartCommand         string `json:"startCommand"`
 }
 
-func (g *GlobalConfig) supportedNatsStreamingVersions() []string {
+func (g *GlobalConfig) supportedSTANVersions() []string {
 	result := []string{}
 	if g.EventBus == nil || g.EventBus.NATS == nil {
 		return result
@@ -62,7 +63,7 @@ func (g *GlobalConfig) supportedJetStreamVersions() []string {
 	return result
 }
 
-func (g *GlobalConfig) GetNatsStreamingVersion(version string) (*NatsStreamingVersion, error) {
+func (g *GlobalConfig) GetSTANVersion(version string) (*StanVersion, error) {
 	if g.EventBus == nil || g.EventBus.NATS == nil {
 		return nil, fmt.Errorf("\"eventBus.nats\" not found in the configuration")
 	}
@@ -74,7 +75,7 @@ func (g *GlobalConfig) GetNatsStreamingVersion(version string) (*NatsStreamingVe
 			return &r, nil
 		}
 	}
-	return nil, fmt.Errorf("unsupported version %q, supported versions: %q", version, strings.Join(g.supportedNatsStreamingVersions(), ","))
+	return nil, fmt.Errorf("unsupported version %q, supported versions: %q", version, strings.Join(g.supportedSTANVersions(), ","))
 }
 
 func (g *GlobalConfig) GetJetStreamVersion(version string) (*JetStreamVersion, error) {

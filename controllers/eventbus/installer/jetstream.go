@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,6 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/yaml"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers"
@@ -58,7 +60,23 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 	if js := r.eventBus.Spec.JetStream; js == nil {
 		return nil, fmt.Errorf("invalid jetstream eventbus spec")
 	}
-	if err := r.createAuthSecrets(ctx); err != nil {
+	// merge
+	v := viper.New()
+	v.SetConfigType("yaml")
+	if err := v.ReadConfig(bytes.NewBufferString(r.config.EventBus.JetStream.StreamConfig)); err != nil {
+		return nil, fmt.Errorf("invalid jetstream config in global configuration, %w", err)
+	}
+	if x := r.eventBus.Spec.JetStream.StreamConfig; x != nil {
+		if err := v.MergeConfig(bytes.NewBufferString(*x)); err != nil {
+			return nil, fmt.Errorf("failed to merge customized stream config, %w", err)
+		}
+	}
+	b, err := yaml.Marshal(v.AllSettings())
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal merged buffer config, %w", err)
+	}
+
+	if err := r.createSecrets(ctx); err != nil {
 		r.logger.Errorw("failed to create jetstream auth secrets", zap.Error(err))
 		r.eventBus.Status.MarkDeployFailed("JetStreamAuthSecretsFailed", err.Error())
 		return nil, err
@@ -90,6 +108,7 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 					Key: common.JetStreamClientAuthSecretKey,
 				},
 			},
+			StreamConfig: string(b),
 		},
 	}, nil
 }
@@ -268,11 +287,11 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 									{
 										Secret: &corev1.SecretProjection{
 											LocalObjectReference: corev1.LocalObjectReference{
-												Name: generateJetStreamServerAuthSecretName(r.eventBus),
+												Name: generateJetStreamServerSecretName(r.eventBus),
 											},
 											Items: []corev1.KeyToPath{
 												{
-													Key:  common.JetStreamServerAuthSecretKey,
+													Key:  common.JetStreamServerSecretAuthKey,
 													Path: "auth.conf",
 												},
 											},
@@ -300,6 +319,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 							{Name: "SERVER_NAME", Value: "$(POD_NAME)"},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
 							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc.cluster.local"},
+							{Name: "JS_KEY", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: generateJetStreamServerSecretName(r.eventBus)}, Key: common.JetStreamServerSecretEncryptionKey}}},
 						},
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/nats-config"},
@@ -418,7 +438,8 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 	return spec
 }
 
-func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
+func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
+	encryptionKey := common.RandomString(12)
 	token := common.RandomString(24)
 	sysPassword := common.RandomString(24)
 	authTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/server-auth.conf"))
@@ -433,10 +454,10 @@ func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 		return fmt.Errorf("failed to parse nats auth template, error: %w", err)
 	}
 
-	serverAuthObj := &corev1.Secret{
+	serverObj := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: r.eventBus.Namespace,
-			Name:      generateJetStreamServerAuthSecretName(r.eventBus),
+			Name:      generateJetStreamServerSecretName(r.eventBus),
 			Labels:    r.labels,
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
@@ -444,7 +465,8 @@ func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			common.JetStreamServerAuthSecretKey: authTplOutput.Bytes(),
+			common.JetStreamServerSecretAuthKey:       authTplOutput.Bytes(),
+			common.JetStreamServerSecretEncryptionKey: []byte(encryptionKey),
 		},
 	}
 
@@ -459,14 +481,14 @@ func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			common.JetStreamClientAuthSecretKey: []byte(token),
+			common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("token: \"%s\"", token)),
 		},
 	}
 
 	oldServerObjExisting, oldClientObjExisting := true, true
 
 	oldSObj := &corev1.Secret{}
-	if err := r.client.Get(ctx, client.ObjectKeyFromObject(serverAuthObj), oldSObj); err != nil {
+	if err := r.client.Get(ctx, client.ObjectKeyFromObject(serverObj), oldSObj); err != nil {
 		if apierrors.IsNotFound(err) {
 			oldServerObjExisting = false
 		} else {
@@ -501,7 +523,7 @@ func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 		r.logger.Infow("deleted malformed nats client auth secret successfully")
 	}
 
-	if err := r.client.Create(ctx, serverAuthObj); err != nil {
+	if err := r.client.Create(ctx, serverObj); err != nil {
 		return fmt.Errorf("failed to create nats server auth secret, err: %w", err)
 	}
 	r.logger.Infow("created nats server auth secret successfully")
@@ -626,8 +648,8 @@ func (r *jetStreamInstaller) getPVCs(ctx context.Context) ([]corev1.PersistentVo
 	return pvcl.Items, nil
 }
 
-func generateJetStreamServerAuthSecretName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-js-server-auth", eventBus.Name)
+func generateJetStreamServerSecretName(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("eventbus-%s-js-server", eventBus.Name)
 }
 
 func generateJetStreamClientAuthSecretName(eventBus *v1alpha1.EventBus) string {

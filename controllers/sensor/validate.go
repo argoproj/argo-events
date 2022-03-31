@@ -438,6 +438,7 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 		}
 		// EventSourceName + EventName can not be referenced more than once in one Sensor object.
 		comboKey := fmt.Sprintf("%s-$$$-%s", dep.EventSourceName, dep.EventName)
+		// todo: conditionally perform this check for STAN and not Jetstream (may need to reverse the order of calls in order to perform validation after getting the EventBus configuration (to know the type))
 		if _, existing := comboKeys[comboKey]; existing {
 			return errors.Errorf("%s and %s are referenced more than once in this Sensor object", dep.EventSourceName, dep.EventName)
 		}

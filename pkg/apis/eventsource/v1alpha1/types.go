@@ -1154,6 +1154,10 @@ type RedisEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,9,opt,name=jsonBody"`
 }
 
 // RedisStreamEventSource describes an event source for
