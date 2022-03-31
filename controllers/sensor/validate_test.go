@@ -51,7 +51,7 @@ func TestValidateSensor(t *testing.T) {
 }
 
 func TestValidDependencies(t *testing.T) {
-	t.Run("test duplicate deps", func(t *testing.T) {
+	/*t.Run("test duplicate deps", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()
 		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
 			Name:            "fake-dep2",
@@ -61,7 +61,7 @@ func TestValidDependencies(t *testing.T) {
 		err := ValidateSensor(sObj)
 		assert.NotNil(t, err)
 		assert.Equal(t, true, strings.Contains(err.Error(), "more than once"))
-	})
+	})*/
 
 	t.Run("test empty event source name", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()

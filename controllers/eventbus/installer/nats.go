@@ -40,7 +40,7 @@ const (
 	configMapKey = "stan-config"
 
 	// default nats streaming version to be installed
-	defaultNatsStreamingVersion = "0.22.1"
+	defaultSTANVersion = "0.22.1"
 )
 
 // natsInstaller is used create a NATS installation.
@@ -435,7 +435,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if replicas < 3 {
 		replicas = 3
 	}
-	maxAge := common.NATSStreamingMaxAge
+	maxAge := common.STANMaxAge
 	if i.eventBus.Spec.NATS.Native.MaxAge != nil {
 		maxAge = *i.eventBus.Spec.NATS.Native.MaxAge
 	}
@@ -443,23 +443,23 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	maxMsgs := common.NATSStreamingMaxMsgs
+	maxMsgs := common.STANMaxMsgs
 	if i.eventBus.Spec.NATS.Native.MaxMsgs != nil {
 		maxMsgs = *i.eventBus.Spec.NATS.Native.MaxMsgs
 	}
-	maxSubs := common.NATSStreamingMaxSubs
+	maxSubs := common.STANMaxSubs
 	if i.eventBus.Spec.NATS.Native.MaxSubs != nil {
 		maxSubs = *i.eventBus.Spec.NATS.Native.MaxSubs
 	}
-	maxBytes := common.NATSStreamingMaxBytes
+	maxBytes := common.STANMaxBytes
 	if i.eventBus.Spec.NATS.Native.MaxBytes != nil {
 		maxBytes = *i.eventBus.Spec.NATS.Native.MaxBytes
 	}
-	maxPayload := common.NATSStreamingMaxPayload
+	maxPayload := common.STANMaxPayload
 	if i.eventBus.Spec.NATS.Native.MaxPayload != nil {
 		maxPayload = *i.eventBus.Spec.NATS.Native.MaxPayload
 	}
-	raftHeartbeatTimeout := common.NATSStreamingRaftHeartbeatTimeout
+	raftHeartbeatTimeout := common.STANRaftHeartbeatTimeout
 	if i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout != nil {
 		raftHeartbeatTimeout = *i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout
 	}
@@ -467,7 +467,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftElectionTimeout := common.NATSStreamingRaftElectionTimeout
+	raftElectionTimeout := common.STANRaftElectionTimeout
 	if i.eventBus.Spec.NATS.Native.RaftElectionTimeout != nil {
 		raftElectionTimeout = *i.eventBus.Spec.NATS.Native.RaftElectionTimeout
 	}
@@ -475,7 +475,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftLeaseTimeout := common.NATSStreamingRaftLeaseTimeout
+	raftLeaseTimeout := common.STANRaftLeaseTimeout
 	if i.eventBus.Spec.NATS.Native.RaftLeaseTimeout != nil {
 		raftLeaseTimeout = *i.eventBus.Spec.NATS.Native.RaftLeaseTimeout
 	}
@@ -483,7 +483,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftCommitTimeout := common.NATSStreamingRaftCommitTimeout
+	raftCommitTimeout := common.STANRaftCommitTimeout
 	if i.eventBus.Spec.NATS.Native.RaftCommitTimeout != nil {
 		raftCommitTimeout = *i.eventBus.Spec.NATS.Native.RaftCommitTimeout
 	}
@@ -612,7 +612,7 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 }
 
 func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSecretName string) (*appv1.StatefulSetSpec, error) {
-	natsStreamingVersion, err := i.config.GetNatsStreamingVersion(defaultNatsStreamingVersion)
+	stanVersion, err := i.config.GetSTANVersion(defaultSTANVersion)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get nats streaming version, err: %w", err)
 	}
@@ -711,7 +711,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				Containers: []corev1.Container{
 					{
 						Name:            "stan",
-						Image:           natsStreamingVersion.NatsStreamingImage,
+						Image:           stanVersion.NATSStreamingImage,
 						ImagePullPolicy: stanContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: clientPort},
@@ -742,7 +742,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 					},
 					{
 						Name:            "metrics",
-						Image:           natsStreamingVersion.MetricsExporterImage,
+						Image:           stanVersion.MetricsExporterImage,
 						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "metrics", ContainerPort: common.EventBusMetricsPort},

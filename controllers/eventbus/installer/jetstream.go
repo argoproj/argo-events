@@ -481,7 +481,7 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			common.JetStreamClientAuthSecretKey: []byte(token),
+			common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("token: \"%s\"", token)),
 		},
 	}
 

@@ -25,11 +25,11 @@ const (
 var (
 	fakeConfig = &controllers.GlobalConfig{
 		EventBus: &controllers.EventBusConfig{
-			NATS: &controllers.NatsStreamingConfig{
-				Versions: []controllers.NatsStreamingVersion{
+			NATS: &controllers.StanConfig{
+				Versions: []controllers.StanVersion{
 					{
 						Version:              "0.22.1",
-						NatsStreamingImage:   "test-n-s-image",
+						NATSStreamingImage:   "test-n-s-image",
 						MetricsExporterImage: "test-n-s-m-image",
 					},
 				},
