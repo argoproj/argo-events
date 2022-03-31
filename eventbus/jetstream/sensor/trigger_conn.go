@@ -28,6 +28,13 @@ type JetstreamTriggerConn struct {
 	evaluableExpression  *govaluate.EvaluableExpression
 	deps                 []eventbuscommon.Dependency
 	sourceDepMap         map[string][]string // maps EventSource and EventName to dependency name
+	recentMsgsByID       map[string]*Msg     // prevent re-processing the same message as before (map of msg ID to time)
+	recentMsgsByTime     []*Msg
+}
+
+type Msg struct {
+	time  int64
+	msgID string
 }
 
 func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
@@ -54,7 +61,9 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		dependencyExpression: dependencyExpression,
 		requiresANDLogic:     strings.Contains(dependencyExpression, "&"),
 		deps:                 deps,
-		sourceDepMap:         sourceDepMap}
+		sourceDepMap:         sourceDepMap,
+		recentMsgsByID:       make(map[string]*Msg),
+		recentMsgsByTime:     make([]*Msg, 0)}
 	connection.Logger = connection.Logger.With("triggerName", connection.triggerName)
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
@@ -227,6 +236,14 @@ func (conn *JetstreamTriggerConn) processMsg(
 		return
 	}
 
+	// De-duplication
+	// In the off chance that we receive the same message twice, don't re-process
+	_, alreadyReceived := conn.recentMsgsByID[event.ID()]
+	if alreadyReceived {
+		log.Debugf("already received message of ID %d, ignore this", event.ID())
+		return
+	}
+
 	// get all dependencies for this Trigger that match
 	depNames, err := conn.getDependencyNames(event.Source(), event.Subject())
 	if err != nil || len(depNames) == 0 {
@@ -240,6 +257,10 @@ func (conn *JetstreamTriggerConn) processMsg(
 	for _, depName := range depNames {
 		conn.processDependency(m, event, depName, transform, filter, action)
 	}
+
+	// Save message for de-duplication purposes
+	conn.storeMessageID(event.ID())
+	conn.purgeOldMsgs()
 }
 
 func (conn *JetstreamTriggerConn) processDependency(
@@ -450,4 +471,28 @@ func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName 
 	}
 
 	return deps, nil
+}
+
+// save the message in our recent messages list (for de-duplication purposes)
+func (conn *JetstreamTriggerConn) storeMessageID(ID string) {
+	now := time.Now().UnixNano()
+	saveMsg := &Msg{msgID: ID, time: now}
+	conn.recentMsgsByID[ID] = saveMsg
+	conn.recentMsgsByTime = append(conn.recentMsgsByTime, saveMsg)
+}
+
+func (conn *JetstreamTriggerConn) purgeOldMsgs() {
+	now := time.Now().UnixNano()
+
+	// evict any old messages from our message cache
+	for _, msg := range conn.recentMsgsByTime {
+		if now-msg.time > 60*1000*1000*1000 { // older than 1 minute
+			conn.Logger.Debugf("deleting message %v from cache", *msg)
+			delete(conn.recentMsgsByID, msg.msgID)
+			conn.recentMsgsByTime = conn.recentMsgsByTime[1:]
+		} else {
+			break // these are ordered by time so we can break when we hit one that's still valid
+		}
+	}
+
 }
