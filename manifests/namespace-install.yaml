@@ -241,23 +241,25 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: eventbus-controller
+  name: controller-manager
   namespace: argo-events
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: eventbus-controller
+      app: controller-manager
   template:
     metadata:
       labels:
-        app: eventbus-controller
+        app: controller-manager
     spec:
       containers:
       - args:
-        - eventbus-controller
+        - controller
         - --namespaced
         env:
+        - name: ARGO_EVENTS_IMAGE
+          value: quay.io/argoproj/argo-events:latest
         - name: NAMESPACE
           valueFrom:
             fieldRef:
@@ -270,7 +272,7 @@ spec:
             port: 8081
           initialDelaySeconds: 3
           periodSeconds: 3
-        name: eventbus-controller
+        name: controller-manager
         readinessProbe:
           httpGet:
             path: /readyz
@@ -288,95 +290,3 @@ spec:
       - configMap:
           name: argo-events-controller-config
         name: controller-config-volume
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: eventsource-controller
-  namespace: argo-events
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: eventsource-controller
-  template:
-    metadata:
-      labels:
-        app: eventsource-controller
-    spec:
-      containers:
-      - args:
-        - eventsource-controller
-        - --namespaced
-        env:
-        - name: EVENTSOURCE_IMAGE
-          value: quay.io/argoproj/argo-events:latest
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        image: quay.io/argoproj/argo-events:latest
-        imagePullPolicy: Always
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8081
-          initialDelaySeconds: 3
-          periodSeconds: 3
-        name: eventsource-controller
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8081
-          initialDelaySeconds: 3
-          periodSeconds: 3
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 9731
-      serviceAccountName: argo-events-sa
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: sensor-controller
-  namespace: argo-events
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: sensor-controller
-  template:
-    metadata:
-      labels:
-        app: sensor-controller
-    spec:
-      containers:
-      - args:
-        - sensor-controller
-        - --namespaced
-        env:
-        - name: SENSOR_IMAGE
-          value: quay.io/argoproj/argo-events:latest
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        image: quay.io/argoproj/argo-events:latest
-        imagePullPolicy: Always
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8081
-          initialDelaySeconds: 3
-          periodSeconds: 3
-        name: sensor-controller
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8081
-          initialDelaySeconds: 3
-          periodSeconds: 3
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 9731
-      serviceAccountName: argo-events-sa
