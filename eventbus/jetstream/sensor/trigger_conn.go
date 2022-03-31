@@ -475,10 +475,10 @@ func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName 
 }
 
 // save the message in our recent messages list (for de-duplication purposes)
-func (conn *JetstreamTriggerConn) storeMessageID(ID string) {
+func (conn *JetstreamTriggerConn) storeMessageID(id string) {
 	now := time.Now().UnixNano()
-	saveMsg := &Msg{msgID: ID, time: now}
-	conn.recentMsgsByID[ID] = saveMsg
+	saveMsg := &Msg{msgID: id, time: now}
+	conn.recentMsgsByID[id] = saveMsg
 	conn.recentMsgsByTime = append(conn.recentMsgsByTime, saveMsg)
 }
 
@@ -495,5 +495,4 @@ func (conn *JetstreamTriggerConn) purgeOldMsgs() {
 			break // these are ordered by time so we can break when we hit one that's still valid
 		}
 	}
-
 }
