@@ -226,6 +226,7 @@ func (conn *JetstreamTriggerConn) processMsg(
 			errStr := fmt.Sprintf("Error performing AckSync() on message: %v", err)
 			conn.Logger.Error(errStr)
 		}
+
 		conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
 	}()
 	log := conn.Logger
