@@ -28,11 +28,11 @@ type JetstreamTriggerConn struct {
 	evaluableExpression  *govaluate.EvaluableExpression
 	deps                 []eventbuscommon.Dependency
 	sourceDepMap         map[string][]string // maps EventSource and EventName to dependency name
-	recentMsgsByID       map[string]*Msg     // prevent re-processing the same message as before (map of msg ID to time)
-	recentMsgsByTime     []*Msg
+	recentMsgsByID       map[string]*msg     // prevent re-processing the same message as before (map of msg ID to time)
+	recentMsgsByTime     []*msg
 }
 
-type Msg struct {
+type msg struct {
 	time  int64
 	msgID string
 }
@@ -62,8 +62,8 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		requiresANDLogic:     strings.Contains(dependencyExpression, "&"),
 		deps:                 deps,
 		sourceDepMap:         sourceDepMap,
-		recentMsgsByID:       make(map[string]*Msg),
-		recentMsgsByTime:     make([]*Msg, 0)}
+		recentMsgsByID:       make(map[string]*msg),
+		recentMsgsByTime:     make([]*msg, 0)}
 	connection.Logger = connection.Logger.With("triggerName", connection.triggerName)
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
@@ -477,7 +477,7 @@ func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName 
 // save the message in our recent messages list (for de-duplication purposes)
 func (conn *JetstreamTriggerConn) storeMessageID(id string) {
 	now := time.Now().UnixNano()
-	saveMsg := &Msg{msgID: id, time: now}
+	saveMsg := &msg{msgID: id, time: now}
 	conn.recentMsgsByID[id] = saveMsg
 	conn.recentMsgsByTime = append(conn.recentMsgsByTime, saveMsg)
 }
