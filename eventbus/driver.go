@@ -110,7 +110,7 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 	case eventBusConfig.NATS != nil:
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
-		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
 	default:
 		return nil, errors.New("invalid event bus")
 	}
