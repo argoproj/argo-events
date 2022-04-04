@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -17,11 +18,13 @@ import (
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/tls"
 	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -36,6 +39,14 @@ const (
 var (
 	//go:embed assets/jetstream/*
 	jetStremAssets embed.FS
+)
+
+const (
+	secretServerKey  = "server-key.pem"
+	secretServerCert = "server-cert.pem"
+	secretCACert     = "ca-cert.pem"
+
+	certOrg = "io.argoproj"
 )
 
 type jetStreamInstaller struct {
@@ -505,54 +516,125 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 		}
 	}
 
-	if oldClientObjExisting && oldServerObjExisting { // Both existing, do nothing
-		return nil
-	}
-
-	if oldClientObjExisting {
-		if err := r.client.Delete(ctx, oldSObj); err != nil {
-			return fmt.Errorf("failed to delete malformed nats server auth secret, err: %w", err)
+	if !oldClientObjExisting || !oldServerObjExisting {
+		if oldClientObjExisting {
+			if err := r.client.Delete(ctx, oldSObj); err != nil {
+				return fmt.Errorf("failed to delete malformed nats server auth secret, err: %w", err)
+			}
+			r.logger.Infow("deleted malformed nats server auth secret successfully")
 		}
-		r.logger.Infow("deleted malformed nats server auth secret successfully")
-	}
 
-	if oldServerObjExisting {
-		if err := r.client.Delete(ctx, oldCObj); err != nil {
-			return fmt.Errorf("failed to delete malformed nats client auth secret, err: %w", err)
+		if oldServerObjExisting {
+			if err := r.client.Delete(ctx, oldCObj); err != nil {
+				return fmt.Errorf("failed to delete malformed nats client auth secret, err: %w", err)
+			}
+			r.logger.Infow("deleted malformed nats client auth secret successfully")
 		}
-		r.logger.Infow("deleted malformed nats client auth secret successfully")
-	}
 
-	if err := r.client.Create(ctx, serverObj); err != nil {
-		return fmt.Errorf("failed to create nats server auth secret, err: %w", err)
-	}
-	r.logger.Infow("created nats server auth secret successfully")
+		if err := r.client.Create(ctx, serverObj); err != nil {
+			return fmt.Errorf("failed to create nats server auth secret, err: %w", err)
+		}
+		r.logger.Infow("created nats server auth secret successfully")
 
-	if err := r.client.Create(ctx, clientAuthObj); err != nil {
-		return fmt.Errorf("failed to create nats client auth secret, err: %w", err)
+		if err := r.client.Create(ctx, clientAuthObj); err != nil {
+			return fmt.Errorf("failed to create nats client auth secret, err: %w", err)
+		}
+		r.logger.Infow("created nats client auth secret successfully")
 	}
-	r.logger.Infow("created nats client auth secret successfully")
 
 	return r.createTLSCerts(ctx)
 }
 
+type secret struct {
+	existingSecret *corev1.Secret // if it already exists
+	name           string
+	keyName        string
+	data           []byte
+}
+
+// generate self-signed certificates as Secrets, which includes Secrets for:
+// 1. TLS private key
+// 2. TLS cert
+// 3. TLS CA cert
 func (r *jetStreamInstaller) createTLSCerts(ctx context.Context) error {
-	// first see if the Secrets already exist
-	privateKeyObj := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: r.eventBus.Namespace,
-			Name:      generateJetStreamServerSecretName(r.eventBus),
-			Labels:    r.labels,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
-			},
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			common.JetStreamServerSecretAuthKey:       authTplOutput.Bytes(),
-			common.JetStreamServerSecretEncryptionKey: []byte(encryptionKey),
-		},
+
+	privateKeySecretName := generateJetStreamServerPrivateKeySecretName(r.eventBus)
+	certSecretName := generateJetStreamServerCertSecretName(r.eventBus)
+	caCertSecretName := generateJetStreamServerCACertSecretName(r.eventBus)
+
+	secrets := map[string]*secret{
+		privateKeySecretName: &secret{name: privateKeySecretName, keyName: secretServerKey},
+		certSecretName:       &secret{name: certSecretName, keyName: secretServerCert},
+		caCertSecretName:     &secret{name: caCertSecretName, keyName: secretCACert},
 	}
+	// first check to see which of the Secrets already exists
+
+	atLeastOneMissing := false
+
+	for _, secret := range secrets {
+		objKeyName := apitypes.NamespacedName{Namespace: r.eventBus.Namespace, Name: secret.name}
+		existingSecret := &corev1.Secret{}
+		if err := r.client.Get(ctx, objKeyName, existingSecret); err != nil {
+			if apierrors.IsNotFound(err) {
+				atLeastOneMissing = true
+				r.logger.Infof("secret %+v not present", objKeyName)
+			} else {
+				return fmt.Errorf("failed to check if tls secret for Object Key %v is existing, err: %w", objKeyName, err)
+			}
+		} else {
+			r.logger.Infof("secret %+v is present", objKeyName)
+			secret.existingSecret = existingSecret
+		}
+	}
+
+	// if any are missing re-generate all
+	if atLeastOneMissing {
+		// first delete the ones that do exist
+		for _, secret := range secrets {
+			if secret.existingSecret != nil {
+				if err := r.client.Delete(ctx, secret.existingSecret); err != nil {
+					return fmt.Errorf("failed to delete tls secret for %s, err: %w", secret.name, err)
+				}
+				r.logger.Infof("deleted tls secret for %s successfully", secret.name)
+			}
+		}
+
+		// then create new Secrets
+		hosts := []string{}
+		hosts = append(hosts, fmt.Sprintf("%s.%s.svc.cluster.local", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
+		hosts = append(hosts, fmt.Sprintf("%s.%s.svc", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
+		serverKeyPEM, serverCertPEM, caCertPEM, err := tls.CreateCerts(certOrg, hosts, time.Now().Add(10*365*24*time.Hour)) // expires in 10 years
+		if err != nil {
+			return err
+		}
+		secrets[privateKeySecretName].data = serverKeyPEM
+		secrets[certSecretName].data = serverCertPEM
+		secrets[caCertSecretName].data = caCertPEM
+
+		for name, secret := range secrets {
+			secretObj := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: r.eventBus.Namespace,
+					Name:      name,
+					Labels:    r.labels,
+					OwnerReferences: []metav1.OwnerReference{
+						*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+					},
+				},
+				Type: corev1.SecretTypeOpaque,
+				Data: map[string][]byte{
+					secret.keyName: secret.data,
+				},
+			}
+
+			if err := r.client.Create(ctx, secretObj); err != nil {
+				return fmt.Errorf("failed to create secret %+v, err: %w", secret, err)
+			}
+			r.logger.Infof("created secret '%s' successfully", name)
+		}
+	}
+
+	return nil
 
 }
 
@@ -679,6 +761,14 @@ func generateJetStreamClientAuthSecretName(eventBus *v1alpha1.EventBus) string {
 
 func generateJetStreamServerPrivateKeySecretName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-js-private-key", eventBus.Name)
+}
+
+func generateJetStreamServerCertSecretName(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("eventbus-%s-js-cert", eventBus.Name)
+}
+
+func generateJetStreamServerCACertSecretName(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("eventbus-%s-js-ca-cert", eventBus.Name)
 }
 
 func generateJetStreamServiceName(eventBus *v1alpha1.EventBus) string {
