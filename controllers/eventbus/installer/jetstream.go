@@ -532,7 +532,28 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 		return fmt.Errorf("failed to create nats client auth secret, err: %w", err)
 	}
 	r.logger.Infow("created nats client auth secret successfully")
-	return nil
+
+	return r.createTLSCerts(ctx)
+}
+
+func (r *jetStreamInstaller) createTLSCerts(ctx context.Context) error {
+	// first see if the Secrets already exist
+	privateKeyObj := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: r.eventBus.Namespace,
+			Name:      generateJetStreamServerSecretName(r.eventBus),
+			Labels:    r.labels,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+			},
+		},
+		Type: corev1.SecretTypeOpaque,
+		Data: map[string][]byte{
+			common.JetStreamServerSecretAuthKey:       authTplOutput.Bytes(),
+			common.JetStreamServerSecretEncryptionKey: []byte(encryptionKey),
+		},
+	}
+
 }
 
 func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
@@ -654,6 +675,10 @@ func generateJetStreamServerSecretName(eventBus *v1alpha1.EventBus) string {
 
 func generateJetStreamClientAuthSecretName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-js-client-auth", eventBus.Name)
+}
+
+func generateJetStreamServerPrivateKeySecretName(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("eventbus-%s-js-private-key", eventBus.Name)
 }
 
 func generateJetStreamServiceName(eventBus *v1alpha1.EventBus) string {
