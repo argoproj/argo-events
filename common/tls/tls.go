@@ -81,7 +81,6 @@ func createCA(org string, hosts []string, notAfter time.Time) (*rsa.PrivateKey, 
 // if client==true, generate these for a client
 // can generate for both server and client but at least one must be specified
 func CreateCerts(org string, hosts []string, notAfter time.Time, server bool, client bool) (serverKey, serverCert, caCert []byte, err error) {
-
 	if !server && !client {
 		return nil, nil, nil, errors.Wrap(err, "CreateCerts() must specify either server or client")
 	}

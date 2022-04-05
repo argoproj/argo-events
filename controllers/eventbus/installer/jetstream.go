@@ -528,7 +528,7 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 
 		// Generate TLS self signed certificate for Jetstream cluster nodes: includes TLS private key, certificate, and CA certificate
 		clusterNodeHosts := []string{}
-		for i := 0; i < int(r.eventBus.Spec.JetStream.GetReplicas()); i++ {
+		for i := 0; i < r.eventBus.Spec.JetStream.GetReplicas(); i++ {
 			clusterNodeHosts = append(clusterNodeHosts, fmt.Sprintf("%s-%d.%s.%s.svc.cluster.local", generateJetStreamStatefulSetName(r.eventBus), i, generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
 		}
 		r.logger.Infof("cluster node hosts: %+v", clusterNodeHosts)
@@ -721,18 +721,6 @@ func generateJetStreamServerSecretName(eventBus *v1alpha1.EventBus) string {
 
 func generateJetStreamClientAuthSecretName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-js-client-auth", eventBus.Name)
-}
-
-func generateJetStreamServerPrivateKeySecretName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-js-private-key", eventBus.Name)
-}
-
-func generateJetStreamServerCertSecretName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-js-cert", eventBus.Name)
-}
-
-func generateJetStreamServerCACertSecretName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-js-ca-cert", eventBus.Name)
 }
 
 func generateJetStreamServiceName(eventBus *v1alpha1.EventBus) string {
