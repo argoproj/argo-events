@@ -42,9 +42,9 @@ var (
 )
 
 const (
-	secretServerKey  = "server-key.pem"
-	secretServerCert = "server-cert.pem"
-	secretCACert     = "ca-cert.pem"
+	secretServerKeyPEMFile  = "server-key.pem"
+	secretServerCertPEMFile = "server-cert.pem"
+	secretCACertPEMFile     = "ca-cert.pem"
 
 	certOrg = "io.argoproj"
 )
@@ -305,6 +305,18 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 													Key:  common.JetStreamServerSecretAuthKey,
 													Path: "auth.conf",
 												},
+												{
+													Key:  common.JetStreamServerPrivateKeyKey,
+													Path: secretServerKeyPEMFile,
+												},
+												{
+													Key:  common.JetStreamServerCertKey,
+													Path: secretServerCertPEMFile,
+												},
+												{
+													Key:  common.JetStreamServerCACertKey,
+													Path: secretCACertPEMFile,
+												},
 											},
 										},
 									},
@@ -450,6 +462,117 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 }
 
 func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
+	// first check to see if the secrets already exist
+	oldServerObjExisting, oldClientObjExisting := true, true
+
+	oldSObj := &corev1.Secret{}
+	if err := r.client.Get(ctx, apitypes.NamespacedName{Namespace: r.eventBus.Namespace, Name: generateJetStreamServerSecretName(r.eventBus)}, oldSObj); err != nil {
+		if apierrors.IsNotFound(err) {
+			oldServerObjExisting = false
+		} else {
+			return fmt.Errorf("failed to check if nats server auth secret is existing, err: %w", err)
+		}
+	}
+
+	oldCObj := &corev1.Secret{}
+	if err := r.client.Get(ctx, apitypes.NamespacedName{Namespace: r.eventBus.Namespace, Name: generateJetStreamClientAuthSecretName(r.eventBus)}, oldCObj); err != nil {
+		if apierrors.IsNotFound(err) {
+			oldClientObjExisting = false
+		} else {
+			return fmt.Errorf("failed to check if nats client auth secret is existing, err: %w", err)
+		}
+	}
+
+	if !oldClientObjExisting || !oldServerObjExisting {
+		// Generate server-auth.conf file
+		encryptionKey := common.RandomString(12)
+		token := common.RandomString(24)
+		sysPassword := common.RandomString(24)
+		authTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/server-auth.conf"))
+		var authTplOutput bytes.Buffer
+		if err := authTpl.Execute(&authTplOutput, struct {
+			Token       string
+			SysPassword string
+		}{
+			Token:       token,
+			SysPassword: sysPassword,
+		}); err != nil {
+			return fmt.Errorf("failed to parse nats auth template, error: %w", err)
+		}
+
+		// Generate TLS self signed certificate for Jetstream bus: includes TLS private key, certificate, and CA certificate
+		hosts := []string{}
+		hosts = append(hosts, fmt.Sprintf("%s.%s.svc.cluster.local", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
+		hosts = append(hosts, fmt.Sprintf("%s.%s.svc", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
+		serverKeyPEM, serverCertPEM, caCertPEM, err := tls.CreateCerts(certOrg, hosts, time.Now().Add(10*365*24*time.Hour)) // expires in 10 years
+		if err != nil {
+			return err
+		}
+
+		serverObj := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: r.eventBus.Namespace,
+				Name:      generateJetStreamServerSecretName(r.eventBus),
+				Labels:    r.labels,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+				},
+			},
+			Type: corev1.SecretTypeOpaque,
+			Data: map[string][]byte{
+				common.JetStreamServerSecretAuthKey:       authTplOutput.Bytes(),
+				common.JetStreamServerSecretEncryptionKey: []byte(encryptionKey),
+				common.JetStreamServerPrivateKeyKey:       serverKeyPEM,
+				common.JetStreamServerCertKey:             serverCertPEM,
+				common.JetStreamServerCACertKey:           caCertPEM,
+			},
+		}
+
+		clientAuthObj := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: r.eventBus.Namespace,
+				Name:      generateJetStreamClientAuthSecretName(r.eventBus),
+				Labels:    r.labels,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+				},
+			},
+			Type: corev1.SecretTypeOpaque,
+			Data: map[string][]byte{
+				common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("token: \"%s\"", token)),
+			},
+		}
+
+		if oldServerObjExisting {
+			if err := r.client.Delete(ctx, oldSObj); err != nil {
+				return fmt.Errorf("failed to delete malformed nats server auth secret, err: %w", err)
+			}
+			r.logger.Infow("deleted malformed nats server auth secret successfully")
+		}
+
+		if oldClientObjExisting {
+			if err := r.client.Delete(ctx, oldCObj); err != nil {
+				return fmt.Errorf("failed to delete malformed nats client auth secret, err: %w", err)
+			}
+			r.logger.Infow("deleted malformed nats client auth secret successfully")
+		}
+
+		if err := r.client.Create(ctx, serverObj); err != nil {
+			return fmt.Errorf("failed to create nats server auth secret, err: %w", err)
+		}
+		r.logger.Infow("created nats server auth secret successfully")
+
+		if err := r.client.Create(ctx, clientAuthObj); err != nil {
+			return fmt.Errorf("failed to create nats client auth secret, err: %w", err)
+		}
+		r.logger.Infow("created nats client auth secret successfully")
+	}
+
+	return nil
+}
+
+/*
+func (r *jetStreamInstaller) createSecretsOrig(ctx context.Context) error {
 	encryptionKey := common.RandomString(12)
 	token := common.RandomString(24)
 	sysPassword := common.RandomString(24)
@@ -636,7 +759,7 @@ func (r *jetStreamInstaller) createTLSCerts(ctx context.Context) error {
 
 	return nil
 
-}
+}*/
 
 func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	data := make(map[string]string)

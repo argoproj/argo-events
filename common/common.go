@@ -71,6 +71,10 @@ const (
 	JetStreamClientAuthSecretKey = "client-auth"
 	// key for server private key
 	JetStreamServerPrivateKeyKey = "private-key"
+	// key for server TLS certificate
+	JetStreamServerCertKey = "cert"
+	// key for server CA certificate
+	JetStreamServerCACertKey = "ca-cert"
 	// key of nats-js.conf in the configmap
 	JetStreamConfigMapKey = "nats-js"
 	// Jetstream Stream name
