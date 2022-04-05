@@ -46,6 +46,10 @@ const (
 	secretServerCertPEMFile = "server-cert.pem"
 	secretCACertPEMFile     = "ca-cert.pem"
 
+	secretClusterKeyPEMFile    = "cluster-server-key.pem"
+	secretClusterCertPEMFile   = "cluster-server-cert.pem"
+	secretClusterCACertPEMFile = "cluster-ca-cert.pem"
+
 	certOrg = "io.argoproj"
 )
 
@@ -317,6 +321,18 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 													Key:  common.JetStreamServerCACertKey,
 													Path: secretCACertPEMFile,
 												},
+												{
+													Key:  common.JetStreamClusterPrivateKeyKey,
+													Path: secretClusterKeyPEMFile,
+												},
+												{
+													Key:  common.JetStreamClusterCertKey,
+													Path: secretClusterCertPEMFile,
+												},
+												{
+													Key:  common.JetStreamClusterCACertKey,
+													Path: secretClusterCACertPEMFile,
+												},
 											},
 										},
 									},
@@ -504,7 +520,19 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 		hosts := []string{}
 		hosts = append(hosts, fmt.Sprintf("%s.%s.svc.cluster.local", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace)) // todo: get an error in the log file related to this: do we need it?
 		hosts = append(hosts, fmt.Sprintf("%s.%s.svc", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
-		serverKeyPEM, serverCertPEM, caCertPEM, err := tls.CreateCerts(certOrg, hosts, time.Now().Add(10*365*24*time.Hour)) // expires in 10 years
+
+		serverKeyPEM, serverCertPEM, caCertPEM, err := tls.CreateCerts(certOrg, hosts, time.Now().Add(10*365*24*time.Hour), true, false) // expires in 10 years
+		if err != nil {
+			return err
+		}
+
+		// Generate TLS self signed certificate for Jetstream cluster nodes: includes TLS private key, certificate, and CA certificate
+		clusterNodeHosts := []string{}
+		for i := 0; i < int(r.eventBus.Spec.JetStream.GetReplicas()); i++ {
+			clusterNodeHosts = append(clusterNodeHosts, fmt.Sprintf("%s-%d.%s.%s.svc.cluster.local", generateJetStreamStatefulSetName(r.eventBus), i, generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
+		}
+		r.logger.Infof("cluster node hosts: %+v", clusterNodeHosts)
+		clusterKeyPEM, clusterCertPEM, clusterCACertPEM, err := tls.CreateCerts(certOrg, clusterNodeHosts, time.Now().Add(10*365*24*time.Hour), true, true) // expires in 10 years
 		if err != nil {
 			return err
 		}
@@ -525,6 +553,9 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 				common.JetStreamServerPrivateKeyKey:       serverKeyPEM,
 				common.JetStreamServerCertKey:             serverCertPEM,
 				common.JetStreamServerCACertKey:           caCertPEM,
+				common.JetStreamClusterPrivateKeyKey:      clusterKeyPEM,
+				common.JetStreamClusterCertKey:            clusterCertPEM,
+				common.JetStreamClusterCACertKey:          clusterCACertPEM,
 			},
 		}
 

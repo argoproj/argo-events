@@ -42,16 +42,6 @@ func createCACertTemplate(org string, hosts []string, notAfter time.Time) (*x509
 	return rootCert, nil
 }
 
-func createServerCertTemplate(org string, hosts []string, notAfter time.Time) (*x509.Certificate, error) {
-	serverCert, err := certTemplate(org, hosts, notAfter)
-	if err != nil {
-		return nil, err
-	}
-	serverCert.KeyUsage = x509.KeyUsageDigitalSignature
-	serverCert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
-	return serverCert, err
-}
-
 // Sign the cert
 func createCert(template, parent *x509.Certificate, pub, parentPriv interface{}) (
 	cert *x509.Certificate, certPEM []byte, err error) {
@@ -86,9 +76,14 @@ func createCA(org string, hosts []string, notAfter time.Time) (*rsa.PrivateKey, 
 	return rootKey, rootCert, rootCertPEM, nil
 }
 
-// CreateCerts creates and returns a CA certificate and certificate and
-// key for the server
-func CreateCerts(org string, hosts []string, notAfter time.Time) (serverKey, serverCert, caCert []byte, err error) {
+// CreateCerts creates and returns a CA certificate and certificate and key
+// if forClient==true, generate these for a client; else a server
+func CreateCerts(org string, hosts []string, notAfter time.Time, server bool, client bool) (serverKey, serverCert, caCert []byte, err error) {
+
+	if !server && !client {
+		return nil, nil, nil, errors.Wrap(err, "CreateCerts() must specify either server or client")
+	}
+
 	// Create a CA certificate and private key
 	caKey, caCertificate, caCertificatePEM, err := createCA(org, hosts, notAfter)
 	if err != nil {
@@ -96,22 +91,31 @@ func CreateCerts(org string, hosts []string, notAfter time.Time) (serverKey, ser
 	}
 
 	// Create the private key
-	servKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, nil, nil, errors.Wrap(err, "failed to generate random key")
 	}
-	servCertTemplate, err := createServerCertTemplate(org, hosts, notAfter)
+	var cert *x509.Certificate
+
+	cert, err = certTemplate(org, hosts, notAfter)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to create server cert template")
+		return nil, nil, nil, err
+	}
+	cert.KeyUsage = x509.KeyUsageDigitalSignature
+	if server {
+		cert.ExtKeyUsage = append(cert.ExtKeyUsage, x509.ExtKeyUsageServerAuth)
+	}
+	if client {
+		cert.ExtKeyUsage = append(cert.ExtKeyUsage, x509.ExtKeyUsageClientAuth)
 	}
 
 	// create a certificate wrapping the public key, sign it with the CA private key
-	_, servCertPEM, err := createCert(servCertTemplate, caCertificate, &servKey.PublicKey, caKey)
+	_, certPEM, err := createCert(cert, caCertificate, &privateKey.PublicKey, caKey)
 	if err != nil {
 		return nil, nil, nil, errors.Wrap(err, "failed to sign server cert")
 	}
-	servKeyPEM := pem.EncodeToMemory(&pem.Block{
-		Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(servKey),
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	})
-	return servKeyPEM, servCertPEM, caCertificatePEM, nil
+	return privateKeyPEM, certPEM, caCertificatePEM, nil
 }
