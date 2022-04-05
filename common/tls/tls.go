@@ -77,7 +77,9 @@ func createCA(org string, hosts []string, notAfter time.Time) (*rsa.PrivateKey, 
 }
 
 // CreateCerts creates and returns a CA certificate and certificate and key
-// if forClient==true, generate these for a client; else a server
+// if server==true, generate these for a server
+// if client==true, generate these for a client
+// can generate for both server and client but at least one must be specified
 func CreateCerts(org string, hosts []string, notAfter time.Time, server bool, client bool) (serverKey, serverCert, caCert []byte, err error) {
 
 	if !server && !client {
