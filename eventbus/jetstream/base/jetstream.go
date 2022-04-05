@@ -2,6 +2,7 @@ package base
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
@@ -55,6 +56,7 @@ func (stream *Jetstream) Init() error {
 func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	log := stream.Logger
 	conn := &JetstreamConnection{Logger: stream.Logger}
+
 	opts := []nats.Option{
 		// todo: try out Jetstream's auto-reconnection capability
 		nats.NoReconnect(),
@@ -66,11 +68,15 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 			conn.NATSConnected = true
 			log.Info("Reconnected to NATS server")
 		}),
+		nats.Secure(&tls.Config{
+			InsecureSkipVerify: true,
+		}),
 	}
+
 	switch stream.auth.Strategy {
 	case eventbusv1alpha1.AuthStrategyToken:
 		log.Info("NATS auth strategy: Token")
-		opts = append(opts, nats.Token(stream.auth.Crendential.Token))
+		opts = append(opts, nats.Token(stream.auth.Credential.Token))
 	case eventbusv1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:
