@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -154,6 +155,7 @@ func TestRun(t *testing.T) {
 	go func() {
 		_ = ac.Run(ctx)
 	}()
+	time.Sleep(5 * time.Second)
 	_, err := net.Dial("tcp", fmt.Sprintf(":%d", opts.Port))
 	assert.NotNil(t, err)
 }
