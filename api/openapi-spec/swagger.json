@@ -372,15 +372,6 @@
         }
       }
     },
-    "io.argoproj.eventbus.v1alpha1.JetStreamAuth": {
-      "type": "object",
-      "properties": {
-        "token": {
-          "description": "Secret for auth token",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        }
-      }
-    },
     "io.argoproj.eventbus.v1alpha1.JetStreamBus": {
       "description": "JetStreamBus holds the JetStream EventBus information",
       "type": "object",
@@ -477,8 +468,9 @@
     "io.argoproj.eventbus.v1alpha1.JetStreamConfig": {
       "type": "object",
       "properties": {
-        "auth": {
-          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamAuth"
+        "accessSecret": {
+          "description": "Secret for auth",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "streamConfig": {
           "type": "string"

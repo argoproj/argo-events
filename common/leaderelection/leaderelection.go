@@ -38,7 +38,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
-		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
 	default:
 		return nil, errors.New("invalid event bus")
 	}
@@ -112,6 +112,9 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	opts.Url = e.url
 	if e.auth.Strategy == eventbusv1alpha1.AuthStrategyToken {
 		opts.Token = e.auth.Credential.Token
+	} else if e.auth.Strategy == eventbusv1alpha1.AuthStrategyBasic {
+		opts.User = e.auth.Credential.Username
+		opts.Password = e.auth.Credential.Password
 	}
 
 	opts.TLSConfig = &tls.Config{ // seems fine to pass this in even when we're not using TLS

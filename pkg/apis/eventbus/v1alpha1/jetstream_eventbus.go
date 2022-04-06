@@ -96,14 +96,10 @@ func (j JetStreamBus) GetReplicas() int {
 
 type JetStreamConfig struct {
 	// JetStream (Nats) URL
-	URL  string         `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	Auth *JetStreamAuth `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
+	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
+	// Secret for auth
+	// +optional
+	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,2,opt,name=accessSecret"`
 	// +optional
 	StreamConfig string `json:"streamConfig,omitempty" protobuf:"bytes,3,opt,name=streamConfig"`
-}
-
-type JetStreamAuth struct {
-	// Secret for auth token
-	// +optional
-	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,1,opt,name=token"`
 }

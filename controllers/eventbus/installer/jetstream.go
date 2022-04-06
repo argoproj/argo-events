@@ -115,13 +115,11 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 	return &v1alpha1.BusConfig{
 		JetStream: &v1alpha1.JetStreamConfig{
 			URL: fmt.Sprintf("nats://%s.%s.svc.cluster.local:%s", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace, strconv.Itoa(int(jsClientPort))),
-			Auth: &v1alpha1.JetStreamAuth{
-				Token: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: generateJetStreamClientAuthSecretName(r.eventBus),
-					},
-					Key: common.JetStreamClientAuthSecretKey,
+			AccessSecret: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: generateJetStreamClientAuthSecretName(r.eventBus),
 				},
+				Key: common.JetStreamClientAuthSecretKey,
 			},
 			StreamConfig: string(b),
 		},
@@ -502,16 +500,19 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 	if !oldClientObjExisting || !oldServerObjExisting {
 		// Generate server-auth.conf file
 		encryptionKey := common.RandomString(12)
-		token := common.RandomString(24)
+		jsUser := common.RandomString(8)
+		jsPass := common.RandomString(16)
 		sysPassword := common.RandomString(24)
 		authTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/server-auth.conf"))
 		var authTplOutput bytes.Buffer
 		if err := authTpl.Execute(&authTplOutput, struct {
-			Token       string
-			SysPassword string
+			JetStreamUser     string
+			JetStreamPassword string
+			SysPassword       string
 		}{
-			Token:       token,
-			SysPassword: sysPassword,
+			JetStreamUser:     jsUser,
+			JetStreamPassword: jsPass,
+			SysPassword:       sysPassword,
 		}); err != nil {
 			return fmt.Errorf("failed to parse nats auth template, error: %w", err)
 		}
@@ -570,7 +571,7 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
-				common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("token: \"%s\"", token)),
+				common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("username: %s\npassword: %s", jsUser, jsPass)),
 			},
 		}
 

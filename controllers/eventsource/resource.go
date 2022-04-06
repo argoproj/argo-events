@@ -200,17 +200,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	}
 	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
-	var authStrategy *eventbusv1alpha1.AuthStrategy
 	var accessSecret *corev1.SecretKeySelector
 	switch {
 	case eventBus.Status.Config.NATS != nil:
 		natsConf := eventBus.Status.Config.NATS
-		authStrategy = natsConf.Auth
 		accessSecret = natsConf.AccessSecret
 	case eventBus.Status.Config.JetStream != nil:
 		jsConf := eventBus.Status.Config.JetStream
-		authStrategy = &eventbusv1alpha1.AuthStrategyToken
-		accessSecret = jsConf.Auth.Token
+		accessSecret = jsConf.AccessSecret
 	default:
 		return nil, errors.New("unsupported event bus")
 	}
@@ -223,7 +220,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	})
 	volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
 
-	if authStrategy != nil && accessSecret != nil {
+	if accessSecret != nil {
 		// Mount the secret as volume instead of using envFrom to gain the ability
 		// for the sensor deployment to auto reload when the secret changes
 		volumes = append(volumes, corev1.Volume{
