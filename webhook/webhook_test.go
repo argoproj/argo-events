@@ -157,6 +157,7 @@ func TestRun(t *testing.T) {
 	}()
 	time.Sleep(5 * time.Second)
 	_, err := net.Dial("tcp", fmt.Sprintf(":%d", opts.Port))
+	fmt.Printf("error from TestRun: %v", err)
 	assert.NotNil(t, err)
 }
 
