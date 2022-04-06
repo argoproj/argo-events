@@ -36,7 +36,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
-		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
 	default:
 		return nil, errors.New("invalid event bus")
 	}
@@ -108,6 +108,9 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	opts.Url = e.url
 	if e.auth.Strategy == eventbusv1alpha1.AuthStrategyToken {
 		opts.Token = e.auth.Crendential.Token
+	} else if e.auth.Strategy == eventbusv1alpha1.AuthStrategyBasic {
+		opts.User = e.auth.Crendential.Username
+		opts.Password = e.auth.Crendential.Password
 	}
 	rpc, err := graft.NewNatsRpc(opts)
 	if err != nil {

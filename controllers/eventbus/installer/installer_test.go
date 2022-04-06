@@ -187,7 +187,6 @@ func TestInstall(t *testing.T) {
 		assert.True(t, testObj.Status.IsReady())
 		assert.NotNil(t, testObj.Status.Config.JetStream)
 		assert.NotEmpty(t, testObj.Status.Config.JetStream.URL)
-		assert.NotNil(t, testObj.Status.Config.JetStream.Auth)
-		assert.NotNil(t, testObj.Status.Config.JetStream.Auth.Token)
+		assert.NotNil(t, testObj.Status.Config.JetStream.AccessSecret)
 	})
 }

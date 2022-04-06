@@ -71,6 +71,9 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	case eventbusv1alpha1.AuthStrategyToken:
 		log.Info("NATS auth strategy: Token")
 		opts = append(opts, nats.Token(stream.auth.Crendential.Token))
+	case eventbusv1alpha1.AuthStrategyBasic:
+		log.Info("NATS auth strategy: Basic")
+		opts = append(opts, nats.UserInfo(stream.auth.Crendential.Username, stream.auth.Crendential.Password))
 	case eventbusv1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:
