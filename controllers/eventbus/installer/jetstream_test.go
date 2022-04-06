@@ -118,9 +118,15 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		s := &corev1.Secret{}
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamServerSecretName(testObj)}, s)
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(s.Data))
+		assert.Equal(t, 8, len(s.Data))
 		assert.Contains(t, s.Data, common.JetStreamServerSecretAuthKey)
 		assert.Contains(t, s.Data, common.JetStreamServerSecretEncryptionKey)
+		assert.Contains(t, s.Data, common.JetStreamServerPrivateKeyKey)
+		assert.Contains(t, s.Data, common.JetStreamServerCertKey)
+		assert.Contains(t, s.Data, common.JetStreamServerCACertKey)
+		assert.Contains(t, s.Data, common.JetStreamClusterPrivateKeyKey)
+		assert.Contains(t, s.Data, common.JetStreamClusterCertKey)
+		assert.Contains(t, s.Data, common.JetStreamClusterCACertKey)
 		s = &corev1.Secret{}
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamClientAuthSecretName(testObj)}, s)
 		assert.NoError(t, err)

@@ -140,8 +140,8 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 			logger.Fatal("Eventbus auth config file changed, exiting..")
 		})
 		auth = &eventbuscommon.Auth{
-			Strategy:    *eventBusAuth,
-			Crendential: cred,
+			Strategy:   *eventBusAuth,
+			Credential: cred,
 		}
 	}
 
