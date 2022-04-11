@@ -249,6 +249,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		el.log.Infow("expected next calendar event", zap.Any(logging.LabelTime, t.UTC().String()))
 		select {
 		case tx := <-timer:
+			if time.Now().Before(t) { // noticed while running with k3d on mac that the timer sometimes fires early, so this is to handle that case
+				continue
+			}
 			if err = sendEventFunc(tx); err != nil {
 				el.log.Errorw("failed to dispatch calendar event", zap.Error(err))
 				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
