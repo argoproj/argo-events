@@ -33,7 +33,7 @@ jobs:
       - name: Make checksums
         run: make checksums
       - name: store artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: binaries
           path: dist
@@ -101,7 +101,7 @@ jobs:
       - run: bom generate --image quay.io/argoproj/argo-events:$VERSION -o dist/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: tar -zcf sbom.tar.gz dist/*.spdx
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: sbom.tar.gz
           path: sbom.tar.gz
