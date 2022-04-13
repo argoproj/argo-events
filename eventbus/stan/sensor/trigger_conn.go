@@ -40,7 +40,7 @@ func (n *STANTriggerConn) String() string {
 	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.ClientID, n.sensorName, n.triggerName)
 }
 
-func (n *STANTriggerConn) IsInterfaceNil() bool {
+func (n *STANTriggerConn) IsInterfaceValueNil() bool {
 	return n == nil
 }
 

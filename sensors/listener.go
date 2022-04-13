@@ -118,17 +118,20 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 		initRateLimiter(t)
 		wg.Add(1)
 		go func(trigger v1alpha1.Trigger) {
+
+			triggerLogger := logger.With(logging.LabelTriggerName, trigger.Template.Name)
+
 			defer wg.Done()
 			depExpression, err := sensorCtx.getDependencyExpression(ctx, trigger)
 			if err != nil {
-				logger.Errorw("failed to get dependency expression", zap.Error(err))
+				triggerLogger.Errorw("failed to get dependency expression", zap.Error(err))
 				return
 			}
 			// Calculate dependencies of each of the triggers.
 			de := strings.ReplaceAll(depExpression, "-", "\\-")
 			expr, err := govaluate.NewEvaluableExpression(de)
 			if err != nil {
-				logger.Errorw("failed to get new evaluable expression", zap.Error(err))
+				triggerLogger.Errorw("failed to get new evaluable expression", zap.Error(err))
 				return
 			}
 			depNames := unique(expr.Vars())
@@ -136,7 +139,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			for _, depName := range depNames {
 				dep, ok := depMapping[depName]
 				if !ok {
-					logger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
+					triggerLogger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
 					return
 				}
 				d := eventbuscommon.Dependency{
@@ -151,10 +154,11 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			err = common.Connect(&common.DefaultBackoff, func() error {
 				var err error
 				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
+				triggerLogger.Debugf("just created connection %v, %+v", &conn, conn)
 				return err
 			})
 			if err != nil {
-				logger.Fatalw("failed to connect to event bus", zap.Error(err))
+				triggerLogger.Fatalw("failed to connect to event bus", zap.Error(err))
 				return
 			}
 			defer conn.Close()
@@ -183,15 +187,15 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				result, err := sensordependencies.Filter(argoEvent, dep.Filters, dep.FiltersLogicalOperator)
 				if err != nil {
 					if !result {
-						logger.Warnf("Event [%s] discarded due to filtering error: %s",
+						triggerLogger.Warnf("Event [%s] discarded due to filtering error: %s",
 							eventToString(argoEvent), err.Error())
 					} else {
-						logger.Warnf("Event [%s] passed but with filtering error: %s",
+						triggerLogger.Warnf("Event [%s] passed but with filtering error: %s",
 							eventToString(argoEvent), err.Error())
 					}
 				} else {
 					if !result {
-						logger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
+						triggerLogger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
 					}
 				}
 				return result
@@ -199,7 +203,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 			actionFunc := func(events map[string]cloudevents.Event) {
 				if err := sensorCtx.triggerActions(ctx, sensor, events, trigger); err != nil {
-					logger.Errorw("failed to trigger actions", zap.Error(err))
+					triggerLogger.Errorw("failed to trigger actions", zap.Error(err))
 				}
 			}
 
@@ -223,7 +227,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					if c.ByTime.Timezone != "" {
 						location, err := time.LoadLocation(c.ByTime.Timezone)
 						if err != nil {
-							logger.Errorw("failed to load timezone", zap.Error(err))
+							triggerLogger.Errorw("failed to load timezone", zap.Error(err))
 							continue
 						}
 						opts = append(opts, cronlib.WithLocation(location))
@@ -234,21 +238,21 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						resetConditionsCh <- struct{}{}
 					})
 					if err != nil {
-						logger.Errorw("failed to add cron schedule", zap.Error(err))
+						triggerLogger.Errorw("failed to add cron schedule", zap.Error(err))
 						continue
 					}
 					cr.Start()
 
-					logger.Debugf("just started cron job; entries=%v", cr.Entries())
+					triggerLogger.Debugf("just started cron job; entries=%v", cr.Entries())
 
 					// set lastResetTime (the last time this would've been triggered)
 					if len(cr.Entries()) > 0 {
 						prevTriggerTime, err := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
 						if err != nil {
-							logger.Errorw("couldn't get previous cron trigger time", zap.Error(err))
+							triggerLogger.Errorw("couldn't get previous cron trigger time", zap.Error(err))
 							continue
 						}
-						logger.Infof("previous trigger time: %v", prevTriggerTime)
+						triggerLogger.Infof("previous trigger time: %v", prevTriggerTime)
 						if prevTriggerTime.After(lastResetTime) {
 							lastResetTime = prevTriggerTime
 						}
@@ -263,47 +267,52 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					// release the lock when goroutine exits
 					defer atomic.StoreUint32(&subLock, 0)
 
-					logger.Infof("started subscribing to events for trigger %s with client %s", trigger.Template.Name, conn)
+					triggerLogger.Infof("started subscribing to events for trigger %s with client connection %s", trigger.Template.Name, conn)
 
 					subject := &sensorCtx.eventBusSubject
 					err = conn.Subscribe(ctx, closeSubCh, resetConditionsCh, lastResetTime, transformFunc, filterFunc, actionFunc, subject)
 					if err != nil {
-						logger.Errorw("failed to subscribe to eventbus", zap.Any("connection", conn), zap.Error(err))
+						triggerLogger.Errorw("failed to subscribe to eventbus", zap.Any("connection", conn), zap.Error(err))
 						return
 					}
+					triggerLogger.Debugf("exiting subscribe goroutine, conn=%+v", conn)
 				}()
 			}
 
 			subscribeOnce(&subLock, subscribeFunc)
 
-			logger.Infof("starting eventbus connection daemon for client %s...", conn)
+			triggerLogger.Infof("starting eventbus connection daemon for client %s...", conn)
 			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
 			for {
 				select {
 				case <-ctx.Done():
-					logger.Infof("exiting eventbus connection daemon for client %s...", conn)
+					triggerLogger.Infof("exiting eventbus connection daemon for client %s...", conn)
 					wg1.Wait()
 					return
 				case <-ticker.C:
-					if conn == nil || conn.IsInterfaceNil() || conn.IsClosed() {
-						logger.Info("NATS connection lost, reconnecting...")
+					if conn == nil || conn.IsInterfaceValueNil() || conn.IsClosed() {
+						triggerLogger.Info("NATS connection lost, reconnecting...")
 						conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 						if err != nil {
-							logger.Errorw("failed to reconnect to eventbus", zap.Any("connection", conn), zap.Error(err))
+							triggerLogger.Errorw("failed to reconnect to eventbus", zap.Any("connection", conn), zap.Error(err))
 							continue
 						}
-						logger.Infow("reconnected to NATS streaming server.", zap.Any("connection", conn))
+						triggerLogger.Infow("reconnected to NATS server.", zap.Any("connection", conn))
 
 						if atomic.LoadUint32(&subLock) == 1 {
+							triggerLogger.Debug("acquired sublock, instructing trigger to shutdown subscription")
 							closeSubCh <- struct{}{}
 							// give subscription time to close
 							time.Sleep(2 * time.Second)
+						} else {
+							triggerLogger.Debug("sublock not acquired")
 						}
+
 					}
 
 					// create subscription if conn is alive and no subscription is currently held
-					if conn != nil && !conn.IsInterfaceNil() && !conn.IsClosed() {
+					if conn != nil && !conn.IsInterfaceValueNil() && !conn.IsClosed() {
 						subscribeOnce(&subLock, subscribeFunc)
 					}
 				}

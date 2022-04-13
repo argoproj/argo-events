@@ -88,7 +88,7 @@ func (conn *JetstreamTriggerConn) String() string {
 	return fmt.Sprintf("JetstreamTriggerConn{Sensor:%s,Trigger:%s}", conn.sensorName, conn.triggerName)
 }
 
-func (conn *JetstreamTriggerConn) IsInterfaceNil() bool {
+func (conn *JetstreamTriggerConn) IsInterfaceValueNil() bool {
 	return conn == nil
 }
 
@@ -119,6 +119,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	ch := make(chan *nats.Msg) // channel with no buffer (I believe this should be okay - we will block writing messages to this channel while a message is still being processed but volume of messages shouldn't be so high as to cause a problem)
 	wg := sync.WaitGroup{}
 	processMsgsCloseCh := make(chan struct{})
+	pullSubscribeCloseCh := make(map[string]chan struct{}, len(subjects))
 
 	subscriptions := make([]*nats.Subscription, len(subjects))
 	subscriptionIndex := 0
@@ -134,9 +135,14 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		if err != nil {
 			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
 			continue
+		} else {
+			log.Debugf("successfully subscribed to subject %s with durable name %s", subject, durableName)
 		}
-		go conn.pullSubscribe(subscriptions[subscriptionIndex], ch, processMsgsCloseCh, &wg)
+
+		pullSubscribeCloseCh[subject] = make(chan struct{})
+		go conn.pullSubscribe(subscriptions[subscriptionIndex], ch, pullSubscribeCloseCh[subject], &wg)
 		wg.Add(1)
+		log.Debug("adding 1 to WaitGroup (pullSubscribe)")
 
 		subscriptionIndex++
 	}
@@ -145,23 +151,30 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	// one goroutine and we don't need to worry about race conditions
 	go conn.processMsgs(ch, processMsgsCloseCh, resetConditionsCh, transform, filter, action, &wg)
 	wg.Add(1)
+	log.Debug("adding 1 to WaitGroup (processMsgs)")
 
 	for {
 		select {
 		case <-ctx.Done():
 			log.Info("exiting, closing connection...")
-			processMsgsCloseCh <- struct{}{}
-			wg.Wait()
-			conn.NATSConn.Close()
+			conn.shutdownSubscriptions(processMsgsCloseCh, pullSubscribeCloseCh, &wg)
 			return nil
 		case <-closeCh:
 			log.Info("closing connection...")
-			processMsgsCloseCh <- struct{}{}
-			wg.Wait()
-			conn.NATSConn.Close()
+			conn.shutdownSubscriptions(processMsgsCloseCh, pullSubscribeCloseCh, &wg)
 			return nil
 		}
 	}
+}
+
+func (conn *JetstreamTriggerConn) shutdownSubscriptions(processMsgsCloseCh chan struct{}, pullSubscribeCloseCh map[string]chan struct{}, wg *sync.WaitGroup) {
+	processMsgsCloseCh <- struct{}{}
+	for _, ch := range pullSubscribeCloseCh {
+		ch <- struct{}{}
+	}
+	wg.Wait()
+	conn.NATSConn.Close()
+	conn.Logger.Debug("closed NATSConn")
 }
 
 func (conn *JetstreamTriggerConn) pullSubscribe(
@@ -175,23 +188,26 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 
 	for {
 		// call Fetch with timeout
-		msgs, err := subscription.Fetch(1, nats.MaxWait(time.Second*1))
-		if err != nil && !errors.Is(err, nats.ErrTimeout) {
-			if previousErr != err || time.Now().Sub(previousErrTime) > 10*time.Second {
+		msgs, fetchErr := subscription.Fetch(1, nats.MaxWait(time.Second*1))
+		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
+			if previousErr != fetchErr || time.Now().Sub(previousErrTime) > 10*time.Second {
 				// avoid log spew - only log error every 10 seconds
-				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, err, previousErr, previousErrTime)
+				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, fetchErr, previousErr, previousErrTime)
 			}
-			previousErr = err
+			previousErr = fetchErr
 			previousErrTime = time.Now()
 		}
 
-		// then check to see if closeCh has anything; if so, wg.Done() and exit
-		if len(closeCh) != 0 {
+		// read from close channel but don't block if it's empty
+		select {
+		case <-closeCh:
 			wg.Done()
+			conn.Logger.Debug("wg.Done(): pullSubscribe")
 			conn.Logger.Infof("exiting pullSubscribe() for subscription %+v", subscription)
 			return
+		default:
 		}
-		if err != nil && !errors.Is(err, nats.ErrTimeout) {
+		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
 			continue
 		}
 
@@ -210,7 +226,10 @@ func (conn *JetstreamTriggerConn) processMsgs(
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	wg *sync.WaitGroup) {
-	defer wg.Done()
+	defer func() {
+		wg.Done()
+		conn.Logger.Debug("wg.Done(): processMsgs")
+	}()
 
 	for {
 		select {
