@@ -33,6 +33,8 @@ type TriggerConnection interface {
 		filter func(string, cloudevents.Event) bool,
 		action func(map[string]cloudevents.Event),
 		defaultSubject *string) error
+
+	IsInterfaceNil() bool
 }
 
 type EventSourceDriver interface {

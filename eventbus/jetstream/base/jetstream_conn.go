@@ -22,8 +22,5 @@ func (jsc *JetstreamConnection) Close() error {
 }
 
 func (jsc *JetstreamConnection) IsClosed() bool {
-	if jsc.NATSConn == nil || !jsc.NATSConnected || jsc.NATSConn.IsClosed() {
-		return true
-	}
-	return false
+	return jsc.NATSConn == nil || !jsc.NATSConnected || jsc.NATSConn.IsClosed()
 }

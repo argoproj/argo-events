@@ -88,6 +88,10 @@ func (conn *JetstreamTriggerConn) String() string {
 	return fmt.Sprintf("JetstreamTriggerConn{Sensor:%s,Trigger:%s}", conn.sensorName, conn.triggerName)
 }
 
+func (conn *JetstreamTriggerConn) IsInterfaceNil() bool {
+	return conn == nil
+}
+
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
@@ -165,11 +169,20 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 	msgChannel chan<- *nats.Msg,
 	closeCh <-chan struct{},
 	wg *sync.WaitGroup) {
+
+	var previousErr error
+	var previousErrTime time.Time
+
 	for {
 		// call Fetch with timeout
 		msgs, err := subscription.Fetch(1, nats.MaxWait(time.Second*1))
 		if err != nil && !errors.Is(err, nats.ErrTimeout) {
-			conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v", subscription, err)
+			if previousErr != err || time.Now().Sub(previousErrTime) > 10*time.Second {
+				// avoid log spew - only log error every 10 seconds
+				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, err, previousErr, previousErrTime)
+			}
+			previousErr = err
+			previousErrTime = time.Now()
 		}
 
 		// then check to see if closeCh has anything; if so, wg.Done() and exit
@@ -177,6 +190,9 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 			wg.Done()
 			conn.Logger.Infof("exiting pullSubscribe() for subscription %+v", subscription)
 			return
+		}
+		if err != nil && !errors.Is(err, nats.ErrTimeout) {
+			continue
 		}
 
 		// then push the msgs to the channel which will consume them

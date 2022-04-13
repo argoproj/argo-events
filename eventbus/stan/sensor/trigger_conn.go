@@ -40,6 +40,10 @@ func (n *STANTriggerConn) String() string {
 	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.ClientID, n.sensorName, n.triggerName)
 }
 
+func (n *STANTriggerConn) IsInterfaceNil() bool {
+	return n == nil
+}
+
 // Subscribe is used to subscribe to multiple event source dependencies
 // Parameter - ctx, context
 // Parameter - conn, eventbus connection
