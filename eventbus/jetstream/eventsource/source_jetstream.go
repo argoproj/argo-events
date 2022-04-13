@@ -26,6 +26,10 @@ func (n *SourceJetstream) Initialize() error {
 	return n.Init() // member of jetstreambase.Jetstream
 }
 
+func (n *SourceJetstream) IsInterfaceValueNil() bool {
+	return n == nil
+}
+
 func (n *SourceJetstream) Connect(clientID string) (eventbuscommon.EventSourceConnection, error) {
 	conn, err := n.MakeConnection()
 	if err != nil {

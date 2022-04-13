@@ -13,6 +13,10 @@ type STANSourceConn struct {
 	subject         string
 }
 
+func (n *STANSourceConn) IsInterfaceValueNil() bool {
+	return n == nil
+}
+
 func (n *STANSourceConn) Publish(ctx context.Context,
 	msg eventbuscommon.Message) error {
 	return n.STANConn.Publish(n.subject, msg.Body)

@@ -18,6 +18,8 @@ type EventSourceConnection interface {
 	Connection
 
 	Publish(ctx context.Context, msg Message) error
+
+	IsInterfaceValueNil() bool
 }
 
 type TriggerConnection interface {
