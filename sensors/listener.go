@@ -286,7 +286,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					wg1.Wait()
 					return
 				case <-ticker.C:
-					if conn == nil || conn.IsClosed() {
+					if conn == nil || conn.IsInterfaceNil() || conn.IsClosed() {
 						logger.Info("NATS connection lost, reconnecting...")
 						conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
 						if err != nil {
@@ -303,7 +303,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					}
 
 					// create subscription if conn is alive and no subscription is currently held
-					if conn != nil && !conn.IsClosed() {
+					if conn != nil && !conn.IsInterfaceNil() && !conn.IsClosed() {
 						subscribeOnce(&subLock, subscribeFunc)
 					}
 				}
