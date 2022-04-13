@@ -133,8 +133,9 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
 		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew())
 		if err != nil {
-			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
-			continue
+			errorStr := fmt.Sprintf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
+			log.Error(errorStr)
+			return errors.New(errorStr)
 		} else {
 			log.Debugf("successfully subscribed to subject %s with durable name %s", subject, durableName)
 		}
