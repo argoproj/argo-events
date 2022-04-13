@@ -435,7 +435,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 				logger.Info("exiting eventbus connection daemon...")
 				return
 			case <-ticker.C:
-				if e.eventBusConn == nil || e.eventBusConn.IsInterfaceValueNil() || e.eventBusConn.IsClosed() {
+				if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 					clientID := generateClientID(e.hostname)
@@ -515,7 +515,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							return err
 						}
 
-						if e.eventBusConn == nil || e.eventBusConn.IsInterfaceValueNil() || e.eventBusConn.IsClosed() {
+						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
 

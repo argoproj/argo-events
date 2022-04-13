@@ -85,6 +85,9 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 }
 
 func (conn *JetstreamTriggerConn) String() string {
+	if conn == nil {
+		return ""
+	}
 	return fmt.Sprintf("JetstreamTriggerConn{Sensor:%s,Trigger:%s}", conn.sensorName, conn.triggerName)
 }
 
@@ -100,6 +103,10 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
+	if conn == nil {
+		return errors.New("Subscribe() failed; JetstreamTriggerConn is nil")
+	}
+
 	var err error
 	log := conn.Logger
 	// derive subjects that we'll subscribe with using the dependencies passed in
@@ -183,7 +190,6 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 	msgChannel chan<- *nats.Msg,
 	closeCh <-chan struct{},
 	wg *sync.WaitGroup) {
-
 	var previousErr error
 	var previousErrTime time.Time
 
