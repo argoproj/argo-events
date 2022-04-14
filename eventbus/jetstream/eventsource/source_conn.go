@@ -27,10 +27,6 @@ func CreateJetstreamSourceConn(conn *jetstreambase.JetstreamConnection, eventSou
 	}
 }
 
-func (jsc *JetstreamSourceConn) IsInterfaceValueNil() bool {
-	return jsc == nil
-}
-
 func (jsc *JetstreamSourceConn) Publish(ctx context.Context,
 	msg eventbuscommon.Message) error {
 	if jsc == nil {

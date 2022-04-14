@@ -14,10 +14,6 @@ type STANSourceConn struct {
 	subject         string
 }
 
-func (n *STANSourceConn) IsInterfaceValueNil() bool {
-	return n == nil
-}
-
 func (n *STANSourceConn) Publish(ctx context.Context,
 	msg eventbuscommon.Message) error {
 	if n == nil {

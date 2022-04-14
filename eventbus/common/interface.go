@@ -18,8 +18,6 @@ type EventSourceConnection interface {
 	Connection
 
 	Publish(ctx context.Context, msg Message) error
-
-	IsInterfaceValueNil() bool
 }
 
 type TriggerConnection interface {
@@ -35,8 +33,6 @@ type TriggerConnection interface {
 		filter func(string, cloudevents.Event) bool,
 		action func(map[string]cloudevents.Event),
 		defaultSubject *string) error
-
-	IsInterfaceValueNil() bool
 }
 
 type EventSourceDriver interface {

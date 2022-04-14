@@ -91,10 +91,6 @@ func (conn *JetstreamTriggerConn) String() string {
 	return fmt.Sprintf("JetstreamTriggerConn{Sensor:%s,Trigger:%s}", conn.sensorName, conn.triggerName)
 }
 
-func (conn *JetstreamTriggerConn) IsInterfaceValueNil() bool {
-	return conn == nil
-}
-
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
