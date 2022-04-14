@@ -37,6 +37,9 @@ func NewSTANTriggerConn(conn *stanbase.STANConnection, sensorName string, trigge
 }
 
 func (n *STANTriggerConn) String() string {
+	if n == nil {
+		return ""
+	}
 	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.ClientID, n.sensorName, n.triggerName)
 }
 
@@ -60,6 +63,10 @@ func (n *STANTriggerConn) Subscribe(
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
+	if n == nil {
+		return errors.New("Subscribe() failed; STANTriggerConn is nil")
+	}
+
 	log := n.Logger
 
 	if defaultSubject == nil {
