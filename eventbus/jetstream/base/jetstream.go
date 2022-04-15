@@ -155,7 +155,6 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 			} else {
 				stream.Logger.Warn(errStr)
 			}
-
 		}
 	}
 
