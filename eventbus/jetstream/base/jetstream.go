@@ -146,8 +146,9 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	for retry := 0; retry < maxRetries; retry++ {
 		_, err = conn.JSContext.AddStream(&streamConfig)
 		if err != nil {
-			errStr := fmt.Sprintf("Failed to add Jetstream stream '%s': %v for connection %+v; retry=%d",
-				common.JetStreamStreamName, err, conn, retry)
+			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v (this can happen if another Jetstream client "
+				is trying to create the Stream at the same time); retry count=%d`,
+				common.JetStreamStreamName, conn, err, retry)
 			if retry == maxRetries-1 {
 				stream.Logger.Error(errStr)
 				return errors.New(errStr)
