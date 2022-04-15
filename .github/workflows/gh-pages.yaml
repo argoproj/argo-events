@@ -1,9 +1,10 @@
-name: Deploy
+name: gh-pages
 
 on:
   push:
     branches:
       - master
+      - mkdocs*
 
 jobs:
   deploy:
@@ -21,7 +22,7 @@ jobs:
           go-version: '1.17.1'
       - name: build
         run: |
-          pip install mkdocs==1.0.4 mkdocs_material==4.1.1
+          pip install mkdocs==1.3.0 mkdocs_material==8.2.9
           mkdocs build
       - name: deploy
         uses: peaceiris/actions-gh-pages@v3
