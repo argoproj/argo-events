@@ -117,7 +117,8 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return nil
 	}
 	if err != nil && err != nats.ErrStreamNotFound {
-		stream.Logger.Errorw("Error calling StreamInfo for Stream '%s': %v", common.JetStreamStreamName, err)
+		stream.Logger.Warnf(`Error calling StreamInfo for Stream '%s' (this can happen if another Jetstream client "
+		is trying to create the Stream at the same time): %v`, common.JetStreamStreamName, err)
 	}
 
 	// unmarshal settings
@@ -141,11 +142,20 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
 
-	options := make([]nats.JSOpt, 0)
+	maxRetries := 2
+	for retry := 0; retry < maxRetries; retry++ {
+		_, err = conn.JSContext.AddStream(&streamConfig)
+		if err != nil {
+			errStr := fmt.Sprintf("Failed to add Jetstream stream '%s': %v for connection %+v; retry=%d",
+				common.JetStreamStreamName, err, conn, retry)
+			if retry == maxRetries-1 {
+				stream.Logger.Error(errStr)
+				return errors.New(errStr)
+			} else {
+				stream.Logger.Warn(errStr)
+			}
 
-	_, err = conn.JSContext.AddStream(&streamConfig, options...)
-	if err != nil {
-		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", common.JetStreamStreamName, err, conn)
+		}
 	}
 
 	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", common.JetStreamStreamName, conn)
