@@ -142,20 +142,18 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
 
-	maxRetries := 2
-	for retry := 0; retry < maxRetries; retry++ {
+	connectErr := common.Connect(nil, func() error { // exponential backoff if it fails the first time
 		_, err = conn.JSContext.AddStream(&streamConfig)
 		if err != nil {
-			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v (this can happen if another Jetstream client "
-				is trying to create the Stream at the same time); retry count=%d`,
-				common.JetStreamStreamName, conn, err, retry)
-			if retry == maxRetries-1 {
-				stream.Logger.Error(errStr)
-				return errors.New(errStr)
-			} else {
-				stream.Logger.Warn(errStr)
-			}
+			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v`,
+				common.JetStreamStreamName, conn, err)
+			return errors.New(errStr)
+		} else {
+			return nil
 		}
+	})
+	if connectErr != nil {
+		return connectErr
 	}
 
 	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", common.JetStreamStreamName, conn)
