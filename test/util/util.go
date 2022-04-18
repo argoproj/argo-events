@@ -245,27 +245,27 @@ deployWatch:
 	}
 }
 
-func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, eventSourceName, regex string, timeout time.Duration) (bool, error) {
+func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, eventSourceName, regex string, timeout time.Duration, countOpt *int) (bool, error) {
 	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", eventSourceName)
 	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
 	if err != nil {
 		return false, fmt.Errorf("error getting event source pod name: %w", err)
 	}
 
-	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout), nil
+	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout, countOpt), nil
 }
 
-func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, sensorName, regex string, timeout time.Duration) (bool, error) {
+func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, sensorName, regex string, timeout time.Duration, countOpt *int) (bool, error) {
 	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", sensorName)
 	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
 	if err != nil {
 		return false, fmt.Errorf("error getting sensor pod name: %w", err)
 	}
 
-	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout), nil
+	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout, countOpt), nil
 }
 
-func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, regex string, podList *corev1.PodList, timeout time.Duration) bool {
+func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, regex string, podList *corev1.PodList, timeout time.Duration, countOpt *int) bool {
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	errChan := make(chan error)
@@ -273,7 +273,13 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 	for _, p := range podList.Items {
 		go func(podName string) {
 			fmt.Printf("Watching POD: %s\n", podName)
-			contains, err := podLogContains(cctx, kubeClient, namespace, podName, regex)
+			var contains bool
+			var err error
+			if countOpt == nil {
+				contains, err = podLogContains(cctx, kubeClient, namespace, podName, regex)
+			} else {
+				contains, err = podLogContainsCount(cctx, kubeClient, namespace, podName, regex, *countOpt)
+			}
 			if err != nil {
 				errChan <- err
 				return
@@ -287,10 +293,13 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 	for {
 		select {
 		case <-cctx.Done():
+			fmt.Printf("context done, time:%v\n", time.Now().Unix())
 			return false
 		case result := <-resultChan:
 			if result {
 				return true
+			} else {
+				fmt.Println("read resultChan but not true")
 			}
 		case err := <-errChan:
 			fmt.Printf("error: %v", err)
@@ -326,4 +335,59 @@ func podLogContains(ctx context.Context, client kubernetes.Interface, namespace,
 			}
 		}
 	}
+}
+
+func podLogContainsCount(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string, count int) (bool, error) {
+	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = stream.Close() }()
+
+	exp, err := regexp.Compile(regex)
+	if err != nil {
+		return false, err
+	}
+
+	instancesChan := make(chan struct{}, 0)
+
+	go func(ctx context.Context, instancesChan chan<- struct{}) error {
+		s := bufio.NewScanner(stream)
+		for {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+				if !s.Scan() {
+					return s.Err()
+				}
+				data := s.Bytes()
+				fmt.Println(string(data))
+				if exp.Match(data) {
+					instancesChan <- struct{}{}
+				}
+			}
+		}
+
+	}(ctx, instancesChan)
+
+	actualCount := 0
+	for {
+		select {
+		case <-instancesChan:
+			actualCount++
+		case <-time.After(10 * time.Second):
+			fmt.Printf("time:%v, count:%d,actualCount:%d\n", time.Now().Unix(), count, actualCount)
+			return count == actualCount, nil
+		}
+	}
+}
+
+func DeletePod(ctx context.Context, client kubernetes.Interface, namespace string, labelSelector string) error {
+	err := client.CoreV1().Pods(namespace).DeleteCollection(ctx, *metav1.NewDeleteOptions(10), metav1.ListOptions{LabelSelector: labelSelector})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
 }
