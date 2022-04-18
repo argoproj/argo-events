@@ -48,6 +48,7 @@ func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
 		Builder(func(req *httpexpect.Request) {})
 }
 
+/*
 func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
 		When().
@@ -285,7 +286,7 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		Status(200)
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &twoCount)
 }
-
+*/
 // Start Pod with a multidependency condition
 // send it one dependency
 // verify that if it goes down and comes back up it triggers when sent the other part of the condition
@@ -323,7 +324,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 
 	t2.TerminateAllPodPortForwards()
 
-	// delete the Sensor...or should we delete Pod here?
+	// delete the Sensor
 	t2.When().
 		DeleteSensor()
 
@@ -348,8 +349,10 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 }
 
 func (s *FunctionalSuite) TestMultipleSensors() {
-	// Start two sensors but staggered in time such that one receives the partial condition
+	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
+
+	// Start one Sensor
 
 }
 
