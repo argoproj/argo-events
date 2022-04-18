@@ -76,6 +76,20 @@ func (w *When) CreateEventSource() *When {
 	return w
 }
 
+func (w *When) DeleteEventSource() *When {
+	w.t.Helper()
+	if w.eventSource == nil {
+		w.t.Fatal("No event source to delete")
+	}
+	w.t.Log("Deleting event source", w.eventSource.Name)
+	ctx := context.Background()
+	err := w.eventSourceClient.Delete(ctx, w.eventSource.Name, metav1.DeleteOptions{})
+	if err != nil {
+		w.t.Fatal(err)
+	}
+	return w
+}
+
 func (w *When) CreateSensor() *When {
 	w.t.Helper()
 	if w.sensor == nil {
@@ -88,6 +102,20 @@ func (w *When) CreateSensor() *When {
 		w.t.Fatal(err)
 	} else {
 		w.sensor = s
+	}
+	return w
+}
+
+func (w *When) DeleteSensor() *When {
+	w.t.Helper()
+	if w.sensor == nil {
+		w.t.Fatal("No sensor to delete")
+	}
+	w.t.Log("Deleting sensor", w.sensor.Name)
+	ctx := context.Background()
+	err := w.sensorClient.Delete(ctx, w.sensor.Name, metav1.DeleteOptions{})
+	if err != nil {
+		w.t.Fatal(err)
 	}
 	return w
 }
@@ -156,6 +184,18 @@ func (w *When) WaitForSensorReady() *When {
 	w.t.Logf("Pod of Sensor %s is running", w.sensor.Name)
 	return w
 }
+
+/*
+func (w *When) DeleteSensorPod() *When {
+	ctx := context.Background()
+	labelSelector := fmt.Sprintf("sensor-name=%s", w.sensor.Name)
+	w.t.Logf("Deleting pod with label %s", labelSelector)
+	err := testutil.DeletePod(ctx, w.kubeClient, Namespace, labelSelector)
+	if err != nil {
+		w.t.Fatalf("deletion of sensor pod %s failed: %v", w.sensor.Name, err)
+	}
+	return w
+}*/
 
 func (w *When) Given() *Given {
 	return &Given{
