@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: e2e-log-multi-dep-2
+  name: e2e-multi-sensor-2
 spec:
   replicas: 1
   template:
@@ -22,10 +22,6 @@ spec:
       eventName: example3
   triggers:
     - template:
-        conditions: "(test-dep-1 && test-dep-2) || test-dep-3"
+        conditions: "(test-dep-1 && test-dep-3) || test-dep-3"
         name: log-trigger-1
-        log: {}
-    - template:
-        conditions: "test-dep-1"
-        name: log-trigger-2
         log: {}

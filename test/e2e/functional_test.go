@@ -307,7 +307,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 
 	oneCount := 1
 	twoCount := 2
-	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+	t2 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -332,7 +332,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 
 	time.Sleep(5 * time.Second)
 
-	t3 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+	t3 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -376,7 +376,7 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 	zeroCount := 0
 	oneCount := 1
 	twoCount := 2
-	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+	t2 := s.Given().Sensor("@testdata/sensor-multi-sensor.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -398,7 +398,7 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
 
 	// Start second Sensor
-	t3 := s.Given().Sensor("@testdata/sensor-multi-dep-2.yaml").
+	t3 := s.Given().Sensor("@testdata/sensor-multi-sensor-2.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -448,7 +448,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	zeroCount := 0
 	oneCount := 1
 	twoCount := 2
-	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+	t2 := s.Given().Sensor("@testdata/sensor-trigger-spec-change.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
@@ -471,7 +471,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	time.Sleep(3 * time.Second)
 
 	// Change Sensor's spec
-	t2 = s.Given().Sensor("@testdata/sensor-multi-dep-3.yaml").
+	t2 = s.Given().Sensor("@testdata/sensor-trigger-spec-change-2.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
