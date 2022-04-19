@@ -2,7 +2,6 @@ package validator
 
 import (
 	"context"
-	"fmt"
 
 	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/client-go/kubernetes"
@@ -67,7 +66,6 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 			}
 		}
 	case eb.neweb.Spec.JetStream != nil:
-		fmt.Println("checking update of Jetstream spec")
 		if eb.oldeb.Spec.JetStream == nil {
 			return DeniedResponse("Can not change event bus implmementation")
 		}
