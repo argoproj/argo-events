@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: e2e-multi-event-webhook
+  name: e2e-multi-dep
 spec:
   webhook:
     example1:

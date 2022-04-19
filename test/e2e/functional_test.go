@@ -48,6 +48,7 @@ func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
 		Builder(func(req *httpexpect.Request) {})
 }
 
+/*
 func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
 		When().
@@ -223,9 +224,9 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 
 func (s *FunctionalSuite) TestMultiDependencyConditions() {
 
-	time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
+	//time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
 
-	t1 := s.Given().EventSource("@testdata/es-multi-event-webhook.yaml").
+	t1 := s.Given().EventSource("@testdata/es-multi-dep.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -285,13 +286,13 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		Status(200)
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &twoCount)
 }
-
+*/
 // Start Pod with a multidependency condition
 // send it one dependency
 // verify that if it goes down and comes back up it triggers when sent the other part of the condition
 func (s *FunctionalSuite) TestDurableConsumer() {
 
-	t1 := s.Given().EventSource("@testdata/es-multi-event-webhook.yaml").
+	t1 := s.Given().EventSource("@testdata/es-durable-consumer.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -315,7 +316,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
 		SensorPodPortForward(7780, 7777)
 
-	time.Sleep(3 * time.Second)
+	time.Sleep(6 * time.Second)
 
 	// test-dep-1
 	s.e("http://localhost:12002").POST("/example").WithBytes([]byte("{}")).
@@ -330,7 +331,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	t2.When().
 		DeleteSensor()
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(20 * time.Second)
 
 	t3 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
 		When().
@@ -346,19 +347,23 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	s.e("http://localhost:13002").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
+
+	time.Sleep(6 * time.Second)
+
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
 
 }
 
+/*
 func (s *FunctionalSuite) TestMultipleSensors() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
 
-	time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
+	//time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
 
 	// Start EventSource
-	t1 := s.Given().EventSource("@testdata/es-multi-event-webhook.yaml").
+	t1 := s.Given().EventSource("@testdata/es-multi-sensor.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -427,10 +432,10 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 func (s *FunctionalSuite) TestTriggerSpecChange() {
 	// Start a sensor which uses "A && B"; send A; replace the Sensor with a new spec which uses A; send C and verify that there's no trigger
 
-	time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
+	//time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
 
 	// Start EventSource
-	t1 := s.Given().EventSource("@testdata/es-multi-event-webhook.yaml").
+	t1 := s.Given().EventSource("@testdata/es-trigger-spec-change.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
@@ -492,7 +497,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	// Verify no Trigger this time since test-dep-1 should have been cleared
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &zeroCount)
-}
+}*/
 
 func TestFunctionalSuite(t *testing.T) {
 	suite.Run(t, new(FunctionalSuite))
