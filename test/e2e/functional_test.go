@@ -48,7 +48,6 @@ func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
 		Builder(func(req *httpexpect.Request) {})
 }
 
-/*
 func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
 		When().
@@ -286,7 +285,7 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		Status(200)
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &twoCount)
 }
-*/
+
 // Start Pod with a multidependency condition
 // send it one dependency
 // verify that if it goes down and comes back up it triggers when sent the other part of the condition
@@ -307,6 +306,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	defer t1.TerminateAllPodPortForwards()
 
 	oneCount := 1
+	twoCount := 2
 	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
 		When().
 		CreateSensor().
@@ -321,6 +321,8 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	s.e("http://localhost:12002").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
+
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
 
 	t2.TerminateAllPodPortForwards()
 
@@ -344,6 +346,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	s.e("http://localhost:13002").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
 
 }
@@ -352,11 +355,77 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
 
+	time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
+
+	// Start EventSource
+	t1 := s.Given().EventSource("@testdata/es-multi-event-webhook.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		EventSourcePodPortForward(12003, 12000).
+		EventSourcePodPortForward(13003, 13000).
+		EventSourcePodPortForward(14003, 14000).
+		EventSourcePodPortForward(7781, 7777)
+
+	defer t1.When().DeleteEventSource()
+	defer t1.TerminateAllPodPortForwards()
+
 	// Start one Sensor
+	zeroCount := 0
+	oneCount := 1
+	twoCount := 2
+	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		SensorPodPortForward(7782, 7777)
+
+	defer t2.TerminateAllPodPortForwards()
+	defer t2.When().DeleteSensor()
+
+	time.Sleep(3 * time.Second)
+
+	// Trigger first dependency
+	// test-dep-1
+	s.e("http://localhost:12003").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
+
+	// Start second Sensor
+	t3 := s.Given().Sensor("@testdata/sensor-multi-dep-2.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		SensorPodPortForward(7783, 7777)
+
+	defer t3.TerminateAllPodPortForwards()
+	defer t3.When().DeleteSensor()
+
+	time.Sleep(3 * time.Second)
+
+	// Trigger second dependency
+	// test-dep-2
+	s.e("http://localhost:13003").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount) //todo: could speed things up by instead of looking for count just search for exact string
+
+	// Verify trigger occurs for first Sensor and not second
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), nil)
+	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &zeroCount)
 
 }
 
 func (s *FunctionalSuite) TestTriggerSpecChange() {
+	// Start a sensor which uses "A && B"; send A; replace the Sensor with a new spec which uses A; send C and verify that there's no trigger
 
 }
 
