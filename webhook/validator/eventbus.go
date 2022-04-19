@@ -33,6 +33,7 @@ func (eb *eventbus) ValidateCreate(ctx context.Context) *admissionv1.AdmissionRe
 	if err := eventbuscontroller.ValidateEventBus(eb.neweb); err != nil {
 		return DeniedResponse(err.Error())
 	}
+
 	return AllowedResponse()
 }
 
