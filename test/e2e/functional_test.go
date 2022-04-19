@@ -427,6 +427,71 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 func (s *FunctionalSuite) TestTriggerSpecChange() {
 	// Start a sensor which uses "A && B"; send A; replace the Sensor with a new spec which uses A; send C and verify that there's no trigger
 
+	time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
+
+	// Start EventSource
+	t1 := s.Given().EventSource("@testdata/es-multi-event-webhook.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		EventSourcePodPortForward(12004, 12000).
+		EventSourcePodPortForward(13004, 13000).
+		EventSourcePodPortForward(14004, 14000).
+		EventSourcePodPortForward(7784, 7777)
+
+	defer t1.When().DeleteEventSource()
+	defer t1.TerminateAllPodPortForwards()
+
+	// Start one Sensor
+	zeroCount := 0
+	oneCount := 1
+	twoCount := 2
+	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		SensorPodPortForward(7785, 7777)
+
+	time.Sleep(3 * time.Second)
+
+	// Trigger first dependency
+	// test-dep-1
+	s.e("http://localhost:12004").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
+
+	t2.TerminateAllPodPortForwards()
+	t2.When().DeleteSensor()
+	time.Sleep(3 * time.Second)
+
+	// Change Sensor's spec
+	t2 = s.Given().Sensor("@testdata/sensor-multi-dep-3.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		SensorPodPortForward(7786, 7777)
+
+	defer t2.TerminateAllPodPortForwards()
+	defer t2.When().DeleteSensor()
+
+	time.Sleep(3 * time.Second)
+
+	// test-dep-3
+	s.e("http://localhost:14004").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
+	// Verify no Trigger this time since test-dep-1 should have been cleared
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &zeroCount)
 }
 
 func TestFunctionalSuite(t *testing.T) {
