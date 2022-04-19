@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"fmt"
 
 	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/client-go/kubernetes"
@@ -43,7 +44,8 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 	if err := eventbuscontroller.ValidateEventBus(eb.neweb); err != nil {
 		return DeniedResponse(err.Error())
 	}
-	if eb.neweb.Spec.NATS != nil {
+	switch {
+	case eb.neweb.Spec.NATS != nil:
 		if eb.oldeb.Spec.NATS == nil {
 			return DeniedResponse("Can not change event bus implmementation")
 		}
@@ -64,7 +66,22 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 				return DeniedResponse("\"spec.nats.exotic.auth\" is immutable, can not be updated")
 			}
 		}
+	case eb.neweb.Spec.JetStream != nil:
+		fmt.Println("checking update of Jetstream spec")
+		if eb.oldeb.Spec.JetStream == nil {
+			return DeniedResponse("Can not change event bus implmementation")
+		}
+		oldJs := eb.oldeb.Spec.JetStream
+		newJs := eb.neweb.Spec.JetStream
+		if (oldJs.StreamConfig == nil && newJs.StreamConfig != nil) ||
+			(oldJs.StreamConfig != nil && newJs.StreamConfig == nil) {
+			return DeniedResponse("\"spec.jetstream.config\" is immutable, can not be updated")
+		}
+		if oldJs.StreamConfig != nil && newJs.StreamConfig != nil && *oldJs.StreamConfig != *newJs.StreamConfig {
+			return DeniedResponse("\"spec.jetstream.config\" is immutable, can not be updated, old value='%s', new value='%s'", *oldJs.StreamConfig, *newJs.StreamConfig)
+		}
 	}
+
 	return AllowedResponse()
 }
 
