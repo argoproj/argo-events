@@ -4,4 +4,4 @@ metadata:
   name: default
 spec:
   jetstream:
-    version: 2.7.4
+    version: latest
