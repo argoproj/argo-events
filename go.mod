@@ -65,7 +65,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.1
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/tidwall/gjson v1.14.0
+	github.com/tidwall/gjson v1.14.1
 	github.com/tidwall/sjson v1.2.4
 	github.com/xanzy/go-gitlab v0.63.0
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
