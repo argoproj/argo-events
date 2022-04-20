@@ -25,6 +25,7 @@ import (
 	cronlib "github.com/robfig/cron/v3"
 
 	"github.com/argoproj/argo-events/common"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -32,8 +33,8 @@ import (
 // we return an error so that it can be logged as a message on the sensor status
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
 // Exporting this function so that external APIs can use this to validate sensor resource.
-func ValidateSensor(s *v1alpha1.Sensor) error {
-	if err := validateDependencies(s.Spec.Dependencies); err != nil {
+func ValidateSensor(s *v1alpha1.Sensor, b *eventbusv1alpha1.EventBus) error {
+	if err := validateDependencies(s.Spec.Dependencies, b); err != nil {
 		s.Status.MarkDependenciesNotProvided("InvalidDependencies", err.Error())
 		return err
 	}
@@ -420,10 +421,11 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 }
 
 // perform a check to see that each event dependency is in correct format and has valid filters set if any
-func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
+func validateDependencies(eventDependencies []v1alpha1.EventDependency, b *eventbusv1alpha1.EventBus) error {
 	if len(eventDependencies) < 1 {
 		return errors.New("no event dependencies found")
 	}
+
 	comboKeys := make(map[string]bool)
 	for _, dep := range eventDependencies {
 		if dep.Name == "" {
@@ -436,13 +438,14 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 		if dep.EventName == "" {
 			return errors.New("event dependency must define the EventName")
 		}
-		// EventSourceName + EventName can not be referenced more than once in one Sensor object.
-		comboKey := fmt.Sprintf("%s-$$$-%s", dep.EventSourceName, dep.EventName)
-		// todo: conditionally perform this check for STAN and not Jetstream (may need to reverse the order of calls in order to perform validation after getting the EventBus configuration (to know the type))
-		if _, existing := comboKeys[comboKey]; existing {
-			return errors.Errorf("%s and %s are referenced more than once in this Sensor object", dep.EventSourceName, dep.EventName)
+		if b.Spec.NATS != nil {
+			// For STAN, EventSourceName + EventName can not be referenced more than once in one Sensor object.
+			comboKey := fmt.Sprintf("%s-$$$-%s", dep.EventSourceName, dep.EventName)
+			if _, existing := comboKeys[comboKey]; existing {
+				return errors.Errorf("%s and %s are referenced more than once in this Sensor object", dep.EventSourceName, dep.EventName)
+			}
+			comboKeys[comboKey] = true
 		}
-		comboKeys[comboKey] = true
 
 		if err := validateEventFilter(dep.Filters); err != nil {
 			return err
