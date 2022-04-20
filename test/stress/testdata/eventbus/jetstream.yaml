@@ -3,4 +3,5 @@ kind: EventBus
 metadata:
   name: default
 spec:
-  jetstream
+  jetstream:
+    version: 2.7.4
