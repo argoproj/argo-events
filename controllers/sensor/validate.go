@@ -442,7 +442,7 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency, b *event
 			// For STAN, EventSourceName + EventName can not be referenced more than once in one Sensor object.
 			comboKey := fmt.Sprintf("%s-$$$-%s", dep.EventSourceName, dep.EventName)
 			if _, existing := comboKeys[comboKey]; existing {
-				return errors.Errorf("%s and %s are referenced more than once in this Sensor object", dep.EventSourceName, dep.EventName)
+				return errors.Errorf("Event '%s' from EventSource '%s' is referenced for more than one dependency in this Sensor object", dep.EventName, dep.EventSourceName)
 			}
 			comboKeys[comboKey] = true
 		}

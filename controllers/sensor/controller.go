@@ -98,7 +98,10 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	sensor.Status.InitConditions()
 
 	eventBus := &eventbusv1alpha1.EventBus{}
-	eventBusName := common.DefaultEventBusName
+	eventBusName := sensor.Spec.EventBusName
+	if eventBusName == "" {
+		eventBusName = common.DefaultEventBusName
+	}
 	err := r.client.Get(ctx, types.NamespacedName{Namespace: sensor.Namespace, Name: eventBusName}, eventBus)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
