@@ -50,6 +50,13 @@ type AdaptorArgs struct {
 func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	sensor := args.Sensor
+
+	if eventBus == nil {
+		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
+		logger.Error("failed to get EventBus")
+		return errors.New("failed to get EventBus")
+	}
+
 	eventBusName := common.DefaultEventBusName
 	if !eventBus.Status.IsReady() {
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
