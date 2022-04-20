@@ -74,10 +74,10 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 		newJs := eb.neweb.Spec.JetStream
 		if (oldJs.StreamConfig == nil && newJs.StreamConfig != nil) ||
 			(oldJs.StreamConfig != nil && newJs.StreamConfig == nil) {
-			return DeniedResponse("\"spec.jetstream.config\" is immutable, can not be updated")
+			return DeniedResponse("\"spec.jetstream.streamConfig\" is immutable, can not be updated")
 		}
 		if oldJs.StreamConfig != nil && newJs.StreamConfig != nil && *oldJs.StreamConfig != *newJs.StreamConfig {
-			return DeniedResponse("\"spec.jetstream.config\" is immutable, can not be updated, old value='%s', new value='%s'", *oldJs.StreamConfig, *newJs.StreamConfig)
+			return DeniedResponse("\"spec.jetstream.streamConfig\" is immutable, can not be updated, old value='%s', new value='%s'", *oldJs.StreamConfig, *newJs.StreamConfig)
 		}
 	}
 
