@@ -47,20 +47,20 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 	switch {
 	case eb.neweb.Spec.NATS != nil:
 		if eb.oldeb.Spec.NATS == nil {
-			return DeniedResponse("Can not change event bus implmementation")
+			return DeniedResponse("Can not change event bus implementation")
 		}
 		oldNats := eb.oldeb.Spec.NATS
 		newNats := eb.neweb.Spec.NATS
 		if newNats.Native != nil {
 			if oldNats.Native == nil {
-				return DeniedResponse("Can not change NATS event bus implmementation from exotic to native")
+				return DeniedResponse("Can not change NATS event bus implementation from exotic to native")
 			}
 			if authChanged(oldNats.Native.Auth, newNats.Native.Auth) {
 				return DeniedResponse("\"spec.nats.native.auth\" is immutable, can not be updated")
 			}
 		} else if newNats.Exotic != nil {
 			if oldNats.Exotic == nil {
-				return DeniedResponse("Can not change NATS event bus implmementation from native to exotic")
+				return DeniedResponse("Can not change NATS event bus implementation from native to exotic")
 			}
 			if authChanged(oldNats.Exotic.Auth, newNats.Exotic.Auth) {
 				return DeniedResponse("\"spec.nats.exotic.auth\" is immutable, can not be updated")
@@ -68,7 +68,7 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 		}
 	case eb.neweb.Spec.JetStream != nil:
 		if eb.oldeb.Spec.JetStream == nil {
-			return DeniedResponse("Can not change event bus implmementation")
+			return DeniedResponse("Can not change event bus implementation")
 		}
 		oldJs := eb.oldeb.Spec.JetStream
 		newJs := eb.neweb.Spec.JetStream
