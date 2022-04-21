@@ -302,6 +302,11 @@ data:
           replicas: 3
           duplicates: 300s
         versions:
+        - version: latest
+          natsImage: nats:latest
+          metricsExporterImage: natsio/prometheus-nats-exporter:latest
+          configReloaderImage: natsio/nats-server-config-reloader:latest
+          startCommand: nats-server
         - version: 2.7.4
           natsImage: nats:2.7.4
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1

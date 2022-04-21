@@ -59,7 +59,7 @@ const (
 
 	logEventSourceStarted      = "Eventing server started."
 	logSensorStarted           = "Sensor started."
-	logTriggerActionSuccessful = "successfully processed the trigger"
+	logTriggerActionSuccessful = "successfully processed trigger"
 	logTriggerActionFailed     = "failed to execute a trigger"
 	logEventSuccessful         = "succeeded to publish an event"
 	logEventFailed             = "failed to publish an event"
@@ -76,6 +76,15 @@ const (
 	KafkaEventSource       TestingEventSource = "kafka"
 	NATSEventSource        TestingEventSource = "nats"
 	RedisEventSource       TestingEventSource = "redis"
+)
+
+type EventBusType string
+
+// possible value of EventBus type
+const (
+	UnsupportedEventBusType EventBusType = "unsupported"
+	STANEventBus            EventBusType = "stan"
+	JetstreamEventBus       EventBusType = "jetstream"
 )
 
 type TestingTrigger string
@@ -95,6 +104,7 @@ type options struct {
 	namespace          string
 	testingEventSource TestingEventSource
 	testingTrigger     TestingTrigger
+	eventBusType       EventBusType
 	esName             string
 	sensorName         string
 	// Inactive time before exiting
@@ -109,7 +119,7 @@ type options struct {
 	restConfig        *rest.Config
 }
 
-func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTrigger, esName, sensorName string, idleTimeout time.Duration, noCleanUp bool) (*options, error) {
+func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTrigger, eventBusType EventBusType, esName, sensorName string, idleTimeout time.Duration, noCleanUp bool) (*options, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	configOverrides := &clientcmd.ConfigOverrides{}
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
@@ -129,6 +139,7 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 		namespace:          namespace,
 		testingEventSource: testingEventSource,
 		testingTrigger:     testingTrigger,
+		eventBusType:       eventBusType,
 		esName:             esName,
 		sensorName:         sensorName,
 		kubeClient:         kubeClient,
@@ -142,10 +153,10 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 }
 
 func (o *options) createEventBus(ctx context.Context) (*eventbusv1alpha1.EventBus, error) {
-	fmt.Println("------- Creating EventBus -------")
+	fmt.Printf("------- Creating %v EventBus -------\n", o.eventBusType)
 	eb := &eventbusv1alpha1.EventBus{}
-	if err := readResource("@testdata/eventbus/default.yaml", eb); err != nil {
-		return nil, fmt.Errorf("failed to read event bus yaml file: %w", err)
+	if err := readResource(fmt.Sprintf("@testdata/eventbus/%v.yaml", o.eventBusType), eb); err != nil {
+		return nil, fmt.Errorf("failed to read %v event bus yaml file: %w", o.eventBusType, err)
 	}
 	l := eb.GetLabels()
 	if l == nil {
@@ -690,6 +701,17 @@ func getTestingEventSource(str string) TestingEventSource {
 	}
 }
 
+func getEventBusType(str string) EventBusType {
+	switch str {
+	case "jetstream":
+		return JetstreamEventBus
+	case "stan":
+		return STANEventBus
+	default:
+		return UnsupportedEventBusType
+	}
+}
+
 func getTestingTrigger(str string) TestingTrigger {
 	switch str {
 	case "log":
@@ -703,6 +725,7 @@ func getTestingTrigger(str string) TestingTrigger {
 
 func main() {
 	var (
+		ebTypeStr      string
 		esTypeStr      string
 		triggerTypeStr string
 		esName         string
@@ -735,6 +758,12 @@ func main() {
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
+			eventBusType := getEventBusType(ebTypeStr)
+			if eventBusType == UnsupportedEventBusType {
+				fmt.Printf("Invalid event bus type %s\n\n", ebTypeStr)
+				cmd.HelpFunc()(cmd, args)
+				os.Exit(1)
+			}
 
 			idleTimeout, err := time.ParseDuration(idleTimeoutStr)
 			if err != nil {
@@ -742,7 +771,7 @@ func main() {
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
-			opts, err := NewOptions(esType, triggerType, esName, sensorName, idleTimeout, noCleanUp)
+			opts, err := NewOptions(esType, triggerType, eventBusType, esName, sensorName, idleTimeout, noCleanUp)
 			if err != nil {
 				fmt.Printf("Failed: %v\n", err)
 				os.Exit(1)
@@ -762,6 +791,7 @@ func main() {
 			}
 		},
 	}
+	rootCmd.Flags().StringVarP(&ebTypeStr, "eb-type", "b", "", "Type of event bus to be tested: stan, jetstream")
 	rootCmd.Flags().StringVarP(&esTypeStr, "es-type", "e", "", "Type of event source to be tested, e.g. webhook, sqs, etc.")
 	rootCmd.Flags().StringVarP(&triggerTypeStr, "trigger-type", "t", string(LogTrigger), "Type of trigger to be tested, e.g. log, workflow.")
 	rootCmd.Flags().StringVar(&esName, "es-name", "", "Name of an existing event source to be tested")
