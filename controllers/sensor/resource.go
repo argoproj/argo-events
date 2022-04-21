@@ -31,7 +31,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
@@ -48,28 +47,23 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
+func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	sensor := args.Sensor
-	eventBus := &eventbusv1alpha1.EventBus{}
+
+	if eventBus == nil {
+		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
+		logger.Error("failed to get EventBus")
+		return errors.New("failed to get EventBus")
+	}
+
 	eventBusName := common.DefaultEventBusName
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
-	err := client.Get(ctx, types.NamespacedName{Namespace: sensor.Namespace, Name: eventBusName}, eventBus)
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
-			logger.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
-			return errors.Errorf("eventbus %s not found", eventBusName)
-		}
-		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
-		logger.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)
-		return err
-	}
 	if !eventBus.Status.IsReady() {
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
-		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName, "error", err)
+		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName)
 		return errors.New("eventbus not ready")
 	}
 
