@@ -79,7 +79,7 @@ spec:
               topologyKey: kubernetes.io/hostname
 ```
 
-To do AZ (Availablity Zone) anti-affinity, change the value of `topologyKey`
+To do AZ (Availability Zone) anti-affinity, change the value of `topologyKey`
 from `kubernetes.io/hostname` to `topology.kubernetes.io/zone`.
 
 Besides `affinity`,

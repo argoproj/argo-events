@@ -45,7 +45,7 @@ Make sure there are no errors in any of the event-sources.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-5.  You will notice an Argo worklfow with name `group-1-xxxx` is created with
+5.  You will notice an Argo workflow with name `group-1-xxxx` is created with
     following output,
 
          __________________________

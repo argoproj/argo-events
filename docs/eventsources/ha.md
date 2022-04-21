@@ -18,15 +18,15 @@ behaviors!**
 
 - AWS SNS
 - AWS SQS
-- BitBucket
-- Github
-- Gitlab
+- Bitbucket
+- GitHub
+- GitLab
 - NetApp Storage GRID
 - Slack
 - Stripe
 - Webhook
 
-When `spec.replicas` is set to N (N > 1), all the N Pods serve trafic.
+When `spec.replicas` is set to N (N > 1), all the N Pods serve traffic.
 
 ## Active-Passive
 

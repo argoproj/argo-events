@@ -123,7 +123,7 @@ Prometheus configuration.
 
 Following metrics are considered as
 [Golden Signals](https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals)
-of monitoring your applictions running with Argo Events.
+of monitoring your applications running with Argo Events.
 
 - Latency
 

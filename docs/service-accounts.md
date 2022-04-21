@@ -5,7 +5,7 @@
 A `Service Account` can be specified in the EventSource object with
 `spec.template.serviceAccountName`, however it is not needed for all the
 EventSource types except `resource`. For a `resource` EventSource, you need to
-specify a Service Accout and give it `list` and `watch` permissions for the
+specify a Service Account and give it `list` and `watch` permissions for the
 resource being watched.
 
 For example, if you want to watch actions on `Deployment` objects, you need to:
@@ -56,7 +56,7 @@ trigger, make sure to grant `create` permission to that resource.
 For these triggers, you **don't** need to specify a Service Account to the
 Sensor.
 
-## Service Account for Trigged Workflows (or other K8s resources)
+## Service Account for Triggered Workflows (or other K8s resources)
 
 When the Sensor is used to trigger a Workflow, you might need to configure the
 Service Account used in the Workflow spec (**NOT**

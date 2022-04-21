@@ -2,7 +2,7 @@
 
 ## Multiple Dependencies
 
-If there are mulitple dependencies defined in the `Sensor`, you can configure
+If there are multiple dependencies defined in the `Sensor`, you can configure
 [Trigger Conditions](trigger-conditions.md) to determine what kind of situation
 could get the trigger executed.
 
