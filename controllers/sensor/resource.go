@@ -58,6 +58,9 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 	}
 
 	eventBusName := common.DefaultEventBusName
+	if len(sensor.Spec.EventBusName) > 0 {
+		eventBusName = sensor.Spec.EventBusName
+	}
 	if !eventBus.Status.IsReady() {
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
 		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName)
