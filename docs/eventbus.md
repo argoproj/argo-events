@@ -131,7 +131,7 @@ for the full spec of `native`.
   settings for the StatefulSet PODs.
 
   A best effort and a hard requirement node anti-affinity config look like
-  below, if you want to do AZ (Availablity Zone) anti-affinity, change the value
+  below, if you want to do AZ (Availability Zone) anti-affinity, change the value
   of `topologyKey` from `kubernetes.io/hostname` to
   `topology.kubernetes.io/zone`.
 
@@ -170,7 +170,7 @@ affinity:
   `spec.nats.native.maxBytes` to customize it, `"0"` means unlimited.
 
 - Max age of messages is 72 hours, which means messages over 72 hours will be
-  deleted automatically. It can be cutomized by setting
+  deleted automatically. It can be customized by setting
   `spec.nats.native.maxAge`, i.e. `240h`.
 
 - Max subscription number is defaults to `1000`, it could be customized by

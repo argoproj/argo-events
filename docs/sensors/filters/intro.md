@@ -1,5 +1,5 @@
 
-# Introducation
+# Introduction
 
 Filters provide a powerful mechanism to apply constraints on the events in order to determine a validity.
 

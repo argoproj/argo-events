@@ -10,7 +10,7 @@ dependencies are resolved.
 1. Argo Rollouts
 1. Argo Workflows
 1. Custom - Build Your Own
-1. HTTP Requests - Serverless Workloads (OpenFaas, Kubeless, KNative etc.)
+1. HTTP Requests - Serverless Workloads (OpenFaaS, Kubeless, KNative etc.)
 1. Kafka Messages
 1. NATS Messages
 1. Slack Notifications
