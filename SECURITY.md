@@ -1,4 +1,4 @@
-# Security policy for Argo Events 
+# Security policy for Argo Events
 
 ## Reporting a Vulnerability
 
@@ -6,11 +6,11 @@ If you find a security related bug in Argo Events, we kindly ask you for respons
 disclosure and for giving us appropriate time to react, analyze and develop a
 fix to mitigate the found security vulnerability.
 
-Please report vulnerabilities by e-mail to the following address: 
+Please report vulnerabilities by e-mail to the following address:
 
 * cncf-argo-security@lists.cncf.io
 
-All vulnerabilites and associated information will be treated with full confidentiality. 
+All vulnerabilities and associated information will be treated with full confidentiality.
 
 ## Public Disclosure
 

@@ -8,7 +8,7 @@ combination.
 
 | Topic Provided/Existing | Sub ID Provided/Existing | Actions                                                               |
 | ----------------------- | ------------------------ | --------------------------------------------------------------------- |
-| Yes/Yes                 | Yes/Yes                  | Validate if given topic matches subsciption's topic                   |
+| Yes/Yes                 | Yes/Yes                  | Validate if given topic matches subscription's topic                   |
 | Yes/Yes                 | Yes/No                   | Create a subscription with given ID                                   |
 | Yes/Yes                 | No/-                     | Create or re-use subscription with auto generated subID               |
 | Yes/No                  | Yes/No                   | Create a topic and a subscription with given subID                    |

@@ -11,8 +11,8 @@ Argo Events provides a set of simple tools to do stress testing:
 - Set up Prometheus metrics monitoring.
 
   Follow the [instruction](https://argoproj.github.io/argo-events/metrics/) to
-  set up Prometheus to grab metrics, also make sure the basic Kubenetes metrics
-  like Pod CPU/memory ussage are captured. Display the metrics using tools like
+  set up Prometheus to grab metrics, also make sure the basic Kubernetes metrics
+  like Pod CPU/memory usage are captured. Display the metrics using tools like
   [Grafana](https://grafana.com/).
 
 - Create the EventSource and Sensor for testing.
@@ -20,7 +20,7 @@ Argo Events provides a set of simple tools to do stress testing:
   You can use the tool below to create the EventSource and Sensor, or use your
   existing ones for testing. If you want to run the testing against a webhook
   typed EventSource (e.g. `webhook`, `sns`, etc), you need to set up the ingress
-  for it beforehands.
+  for it beforehand.
 
 ```shell
   # Make sure you have sourced a KUBECONFIG file
