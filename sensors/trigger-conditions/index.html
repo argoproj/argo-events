@@ -1389,7 +1389,7 @@
   
     <li class="md-nav__item">
       <a href="../filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1773,7 +1773,7 @@ won't be executed until the expression resolves to true. The operators in
 <code>&amp;&amp;</code> logic of all the defined dependencies.</p>
 <h2 id="conditions-reset">Conditions Reset<a class="headerlink" href="#conditions-reset" title="Permanent link">&para;</a></h2>
 <p>When multiple dependencies are defined for a trigger, the trigger won't be executed until the condition expression is resolved to <code>true</code>. Sometimes you might want to reset all the stakeholders of the conditions, <code>conditions reset</code> is the way to do it.</p>
-<p>For example, your trigger has a condtion as <code>A &amp;&amp; B</code>, both <code>A</code> and <code>B</code> are expected to have an event everyday. One day for some reason, <code>A</code> gets an event but <code>B</code> does't, then it ends up with today's <code>A</code> and tomorrow's <code>B</code> triggering an action, which might not be something you want. To avoid that, you can reset the conditons as following:</p>
+<p>For example, your trigger has a condition as <code>A &amp;&amp; B</code>, both <code>A</code> and <code>B</code> are expected to have an event everyday. One day for some reason, <code>A</code> gets an event but <code>B</code> doesn't, then it ends up with today's <code>A</code> and tomorrow's <code>B</code> triggering an action, which might not be something you want. To avoid that, you can reset the conditions as following:</p>
 <div class="codehilite"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>

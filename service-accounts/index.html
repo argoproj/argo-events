@@ -1339,7 +1339,7 @@
   
     <li class="md-nav__item">
       <a href="../sensors/filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1527,8 +1527,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#service-account-for-trigged-workflows-or-other-k8s-resources" class="md-nav__link">
-    Service Account for Trigged Workflows (or other K8s resources)
+  <a href="#service-account-for-triggered-workflows-or-other-k8s-resources" class="md-nav__link">
+    Service Account for Triggered Workflows (or other K8s resources)
   </a>
   
 </li>
@@ -1761,8 +1761,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#service-account-for-trigged-workflows-or-other-k8s-resources" class="md-nav__link">
-    Service Account for Trigged Workflows (or other K8s resources)
+  <a href="#service-account-for-triggered-workflows-or-other-k8s-resources" class="md-nav__link">
+    Service Account for Triggered Workflows (or other K8s resources)
   </a>
   
 </li>
@@ -1790,7 +1790,7 @@
 <p>A <code>Service Account</code> can be specified in the EventSource object with
 <code>spec.template.serviceAccountName</code>, however it is not needed for all the
 EventSource types except <code>resource</code>. For a <code>resource</code> EventSource, you need to
-specify a Service Accout and give it <code>list</code> and <code>watch</code> permissions for the
+specify a Service Account and give it <code>list</code> and <code>watch</code> permissions for the
 resource being watched.</p>
 <p>For example, if you want to watch actions on <code>Deployment</code> objects, you need to:</p>
 <ol>
@@ -1841,7 +1841,7 @@ trigger, make sure to grant <code>create</code> permission to that resource.</p>
 <h3 id="aws-lambda-http-slack-nats-kafka-and-openwhisk-triggers">AWS Lambda, HTTP, Slack, NATS, Kafka, and OpenWhisk Triggers<a class="headerlink" href="#aws-lambda-http-slack-nats-kafka-and-openwhisk-triggers" title="Permanent link">&para;</a></h3>
 <p>For these triggers, you <strong>don't</strong> need to specify a Service Account to the
 Sensor.</p>
-<h2 id="service-account-for-trigged-workflows-or-other-k8s-resources">Service Account for Trigged Workflows (or other K8s resources)<a class="headerlink" href="#service-account-for-trigged-workflows-or-other-k8s-resources" title="Permanent link">&para;</a></h2>
+<h2 id="service-account-for-triggered-workflows-or-other-k8s-resources">Service Account for Triggered Workflows (or other K8s resources)<a class="headerlink" href="#service-account-for-triggered-workflows-or-other-k8s-resources" title="Permanent link">&para;</a></h2>
 <p>When the Sensor is used to trigger a Workflow, you might need to configure the
 Service Account used in the Workflow spec (<strong>NOT</strong>
 <code>spec.template.serviceAccountName</code>) following Argo Workflow

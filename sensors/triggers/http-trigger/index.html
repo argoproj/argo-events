@@ -1203,7 +1203,7 @@
       
         <li class="md-nav__item">
   <a href="#openfaas" class="md-nav__link">
-    OpenFaas
+    OpenFaaS
   </a>
   
 </li>
@@ -1432,7 +1432,7 @@
   
     <li class="md-nav__item">
       <a href="../../filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1773,7 +1773,7 @@
       
         <li class="md-nav__item">
   <a href="#openfaas" class="md-nav__link">
-    OpenFaas
+    OpenFaaS
   </a>
   
 </li>
@@ -1804,7 +1804,7 @@
 
 
 <h1 id="http-trigger">HTTP Trigger<a class="headerlink" href="#http-trigger" title="Permanent link">&para;</a></h1>
-<p>Argo Events offers HTTP trigger which can easily invoke serverless functions like OpenFaas, Kubeless, Knative, Nuclio and make REST API calls.</p>
+<p>Argo Events offers HTTP trigger which can easily invoke serverless functions like OpenFaaS, Kubeless, Knative, Nuclio and make REST API calls.</p>
 <p><br/>
 <br/></p>
 <p align="center">
@@ -1819,7 +1819,7 @@
 <p>Consider a scenario where your REST API server needs to consume events from event-sources S3, GitHub, SQS etc. Usually, you'd end up writing
 the integration yourself in the server code, although server logic has nothing to do any of the event-sources. This is where Argo Events HTTP trigger
 can help. The HTTP trigger takes the task of consuming events from event-sources away from API server and seamlessly integrates these events via REST API calls.</p>
-<p>We will set up a basic go http server and connect it with the minio events.</p>
+<p>We will set up a basic go http server and connect it with the Minio events.</p>
 <ol>
 <li>
 <p>The HTTP server simply prints the request body as follows.</p>
@@ -1893,7 +1893,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 </li>
 </ol>
 <h3 id="request-payload">Request Payload<a class="headerlink" href="#request-payload" title="Permanent link">&para;</a></h3>
-<p>In order to construct a request payload based on the event data, sensor offers 
+<p>In order to construct a request payload based on the event data, sensor offers
 <code>payload</code> field as a part of the HTTP trigger.</p>
 <p>Let's examine a HTTP trigger,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">http</span><span class="p">:</span><span class="w"></span>
@@ -1918,7 +1918,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
     }
 </code></pre></div>
 
-<p>The above payload will be passed in the HTTP request. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>. </p>
+<p>The above payload will be passed in the HTTP request. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>.</p>
 <p><strong>Note</strong>: Take a look at <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">Parameterization</a> in order to understand how to extract particular key-value from
 event data.</p>
 <h3 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h3>
@@ -1926,7 +1926,7 @@ event data.</p>
 you want to define a generic trigger template in the sensor and populate values like URL, payload values on the fly.</p>
 <p>You can learn more about trigger parameterization <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
 <h3 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h3>
-<p>Trigger policy helps you determine the status of the HTTP request and decide whether to stop or continue sensor. </p>
+<p>Trigger policy helps you determine the status of the HTTP request and decide whether to stop or continue sensor.</p>
 <p>To determine whether the HTTP request was successful or not, the HTTP trigger provides a <code>Status</code> policy.
 The <code>Status</code> holds a list of response statuses that are considered valid.</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">http</span><span class="p">:</span><span class="w"></span>
@@ -1951,13 +1951,13 @@ The <code>Status</code> holds a list of response statuses that are considered va
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="mi">201</span><span class="w"></span>
 </code></pre></div>
 
-<p>The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status. </p>
-<h2 id="openfaas">OpenFaas<a class="headerlink" href="#openfaas" title="Permanent link">&para;</a></h2>
-<p>OpenFaas offers a simple way to spin up serverless functions. Lets see how we can leverage Argo Events HTTP trigger
-to invoke OpenFaas function.</p>
+<p>The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status.</p>
+<h2 id="openfaas">OpenFaaS<a class="headerlink" href="#openfaas" title="Permanent link">&para;</a></h2>
+<p>OpenFaaS offers a simple way to spin up serverless functions. Lets see how we can leverage Argo Events HTTP trigger
+to invoke OpenFaaS function.</p>
 <ol>
 <li>
-<p>If you don't have OpenFaas installed, follow the <a href="https://docs.openfaas.com/deployment/kubernetes/">instructions</a>.</p>
+<p>If you don't have OpenFaaS installed, follow the <a href="https://docs.openfaas.com/deployment/kubernetes/">instructions</a>.</p>
 </li>
 <li>
 <p>Let's create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>.
@@ -1979,14 +1979,14 @@ to invoke OpenFaas function.</p>
 <p>Make sure the function pod is up and running.</p>
 </li>
 <li>
-<p>We are going to invoke OpenFaas function on a message on Redis Subscriber.</p>
+<p>We are going to invoke OpenFaaS function on a message on Redis Subscriber.</p>
 </li>
 <li>
 <p>Let's set up the Redis Database, Redis PubSub event-source as specified <a href="https://argoproj.github.io/argo-events/setup/redis/">here</a>.
    Do not create the Redis sensor, we are going to create it in next step.</p>
 </li>
 <li>
-<p>Let's create the sensor with OpenFaas trigger.</p>
+<p>Let's create the sensor with OpenFaaS trigger.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
 <span class="n">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
 <span class="n">metadata</span><span class="p">:</span><span class="w"></span>
@@ -2016,7 +2016,7 @@ to invoke OpenFaas function.</p>
 
 </li>
 <li>
-<p>As soon as you publish the message, the sensor will invoke the OpenFaas function <code>gohash</code>.</p>
+<p>As soon as you publish the message, the sensor will invoke the OpenFaaS function <code>gohash</code>.</p>
 </li>
 </ol>
 <h2 id="kubeless">Kubeless<a class="headerlink" href="#kubeless" title="Permanent link">&para;</a></h2>
@@ -2086,7 +2086,7 @@ to invoke OpenFaas function.</p>
 </li>
 </ol>
 <h1 id="other-serverless-frameworks">Other serverless frameworks<a class="headerlink" href="#other-serverless-frameworks" title="Permanent link">&para;</a></h1>
-<p>Similar to OpenFaas and Kubeless invocation demonstrated above, you can easily trigger KNative, Nuclio, Fission functions using HTTP trigger.</p>
+<p>Similar to OpenFaaS and Kubeless invocation demonstrated above, you can easily trigger KNative, Nuclio, Fission functions using HTTP trigger.</p>
 
               
             </article>

@@ -1405,7 +1405,7 @@
   
     <li class="md-nav__item">
       <a href="../../filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1750,7 +1750,7 @@
 
 
 <h1 id="slack-trigger">Slack Trigger<a class="headerlink" href="#slack-trigger" title="Permanent link">&para;</a></h1>
-<p>The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario. </p>
+<p>The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario.</p>
 <h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
@@ -1816,7 +1816,7 @@
 </li>
 </ol>
 <h2 id="slack-trigger_1">Slack Trigger<a class="headerlink" href="#slack-trigger_1" title="Permanent link">&para;</a></h2>
-<p>We will set up a basic slack trigger and send a default message, and then a dynamic custom message. </p>
+<p>We will set up a basic slack trigger and send a default message, and then a dynamic custom message.</p>
 <ol>
 <li>
 <p>Create a sensor with Slack trigger. We will discuss the trigger details in the following sections.</p>
@@ -1825,14 +1825,14 @@
 
 </li>
 <li>
-<p>Send a http request to the event-source-pod to fire the Slack trigger. </p>
+<p>Send a http request to the event-source-pod to fire the Slack trigger.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;text&quot;:&quot;Hello, World!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
 <p><strong>Note</strong>: The default slack-trigger will send the message "hello world" to the #general channel. You may change the default message and channel in slack-trigger.yaml under triggers.slack.channel and triggers.slack.message.</p>
 </li>
 <li>
-<p>Alternatively, you can dynamically determine the channel and message based on parameterization of your event. </p>
+<p>Alternatively, you can dynamically determine the channel and message based on parameterization of your event.</p>
 <div class="codehilite"><pre><span></span><code><span class="nv">curl</span> <span class="o">-</span><span class="nv">d</span> <span class="s1">&#39;</span><span class="s">{&quot;channel&quot;:&quot;random&quot;,&quot;message&quot;:&quot;test message&quot;}</span><span class="s1">&#39;</span> <span class="o">-</span><span class="nv">H</span> <span class="s2">&quot;</span><span class="s">Content-Type: application/json</span><span class="s2">&quot;</span> <span class="o">-</span><span class="nv">X</span> <span class="nv">POST</span> <span class="nv">http</span>:<span class="o">//</span><span class="nv">localhost</span>:<span class="mi">12000</span><span class="o">/</span><span class="nv">example</span>
 </code></pre></div>
 
@@ -1861,16 +1861,16 @@
 <li><code>contextKey</code>: to extract a particular key-value from event' context.</li>
 </ol>
 <p>The <code>dest</code> is the destination key within the result payload.</p>
-<p>So, the above trigger paramters will generate a request payload as,</p>
+<p>So, the above trigger parameters will generate a request payload as,</p>
 <div class="codehilite"><pre><span></span><code>    {
         &quot;channel&quot;: &quot;channel_to_send_message&quot;,
         &quot;message&quot;: &quot;message_to_send_to_channel&quot;
     }
 </code></pre></div>
 
-<p><strong><em>Note</em></strong>: If you define both the <code>contextKey</code> and <code>dataKey</code> within a paramter item, then
+<p><strong><em>Note</em></strong>: If you define both the <code>contextKey</code> and <code>dataKey</code> within a parameter item, then
 the <code>dataKey</code> takes the precedence.</p>
-<p>You can create any paramater structure you want. To get more info on how to 
+<p>You can create any parameter structure you want. To get more info on how to
 generate complex event payloads, take a look at <a href="https://github.com/tidwall/sjson">this library</a>.</p>
 <p>The complete specification of Slack trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#slacktrigger">here</a>.</p>
 

@@ -1405,7 +1405,7 @@
   
     <li class="md-nav__item">
       <a href="../../../sensors/filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1775,12 +1775,12 @@
 Example event-source yaml file is <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml">here</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <blockquote>
-<p><strong><em>NOTE:</em></strong> In this setup, we will use the basic auth strategy together with <a href="https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/">App password</a> (there is also support for <a href="https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/">OAuth</a>). </p>
+<p><strong><em>NOTE:</em></strong> In this setup, we will use the basic auth strategy together with <a href="https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/">App password</a> (there is also support for <a href="https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/">OAuth</a>).</p>
 </blockquote>
 <ol>
 <li>
 <p>Create an App password if you don't have one. Follow <a href="https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/">instructions</a> to create a new Bitbucket App password.
-   Grant it the <code>Webhooks - Read and Write</code> permissions as well as any permissions that applies to the events that the webhook subscribes to (e.g. if you're using the <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml">example event-source yaml file</a> which subscribes to <code>repo:push</code> event then you would also need to grant the <code>Repositories - Read</code> permission). </p>
+   Grant it the <code>Webhooks - Read and Write</code> permissions as well as any permissions that applies to the events that the webhook subscribes to (e.g. if you're using the <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml">example event-source yaml file</a> which subscribes to <code>repo:push</code> event then you would also need to grant the <code>Repositories - Read</code> permission).</p>
 </li>
 <li>
 <p>Base64 encode your App password and your Bitbucket username.</p>
@@ -1811,7 +1811,7 @@ echo -n &lt;password&gt; | base64
 <li>
 <p>The event-source for Bitbucket creates a pod and exposes it via service.
    The name for the service is in <code>&lt;event-source-name&gt;-eventsource-svc</code> format.
-   You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket.
+   You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from Bitbucket.
    You can find more information on Ingress or Route online.</p>
 </li>
 <li>
@@ -1833,7 +1833,7 @@ echo -n &lt;password&gt; | base64
 <p>Make a change to one of your project files and commit. It will trigger an argo workflow.</p>
 </li>
 <li>
-<p>Run <code>argo list</code> to find the workflow. </p>
+<p>Run <code>argo list</code> to find the workflow.</p>
 </li>
 </ol>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>

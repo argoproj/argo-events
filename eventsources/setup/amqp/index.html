@@ -1398,7 +1398,7 @@
   
     <li class="md-nav__item">
       <a href="../../../sensors/filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1736,7 +1736,7 @@
 
 
 <h1 id="amqp">AMQP<a class="headerlink" href="#amqp" title="Permanent link">&para;</a></h1>
-<p>AMQP event-source listens to messages on the MQ and helps sensor trigger the workloads.  </p>
+<p>AMQP event-source listens to messages on the MQ and helps sensor trigger the workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code>    {
@@ -1763,7 +1763,7 @@
             &quot;appId&quot;: &quot;AppId refers to the application id&quot;,
             &quot;exchange&quot;: &quot;Exchange is basic.publish exchange&quot;,
             &quot;routingKey&quot;: &quot;RoutingKey is basic.publish routing key&quot;,
-            &quot;body&quot;: &quot;Body represents the messsage body&quot;,
+            &quot;body&quot;: &quot;Body represents the message body&quot;,
         }
     }
 </code></pre></div>
@@ -1836,13 +1836,13 @@
 
 </li>
 <li>
-<p>Lets set up a rabbitmq publisher. If you don't have <code>pika</code> installed, run.</p>
+<p>Lets set up a RabbitMQ publisher. If you don't have <code>pika</code> installed, run.</p>
 <div class="codehilite"><pre><span></span><code>python -m pip install pika --upgrade
 </code></pre></div>
 
 </li>
 <li>
-<p>Open a python REPL and run following code to publish a message on <code>exhange</code> called <code>test</code>. </p>
+<p>Open a python REPL and run following code to publish a message on <code>exchange</code> called <code>test</code>.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">pika</span>
 <span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span>
 <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
@@ -1853,7 +1853,7 @@
 
 </li>
 <li>
-<p>As soon as you publish a message, sensor will trigger an Argo workflow. Run <code>argo list</code> to find the workflow. </p>
+<p>As soon as you publish a message, sensor will trigger an Argo workflow. Run <code>argo list</code> to find the workflow.</p>
 </li>
 </ol>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>

@@ -1396,7 +1396,7 @@
   
     <li class="md-nav__item">
       <a href="../../sensors/filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1742,9 +1742,9 @@ to any type of event-source.</p>
 <ul>
 <li>Follow the installation guide to set up the Argo Events.</li>
 <li>
-<p>Make sure to configure Argo Workflow controller to listen to workflow objects created in <code>argo-events</code> namespace. 
-  (See <a href="https://github.com/argoproj/argo-workflows/blob/master/docs/managed-namespace.md">this</a> link.) 
-  The Workflow Controller will need to be installed either in a cluster-scope configuration (i.e. no "--namespaced" argument) so that it has visiblity to all namespaces, or with "--managed-namespace" set to define "argo-events" as a namespace it has visibility to. To deploy Argo Workflows with a cluster-scope configuration you can use this installation yaml file:</p>
+<p>Make sure to configure Argo Workflow controller to listen to workflow objects created in <code>argo-events</code> namespace.
+  (See <a href="https://github.com/argoproj/argo-workflows/blob/master/docs/managed-namespace.md">this</a> link.)
+  The Workflow Controller will need to be installed either in a cluster-scope configuration (i.e. no "--namespaced" argument) so that it has visibility to all namespaces, or with "--managed-namespace" set to define "argo-events" as a namespace it has visibility to. To deploy Argo Workflows with a cluster-scope configuration you can use this installation yaml file:</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml
 </code></pre></div>
 
@@ -1755,7 +1755,7 @@ to any type of event-source.</p>
   <a href="https://argoproj.github.io/argo-events/concepts/sensor/">sensor</a>.
   <a href="https://argoproj.github.io/argo-events/concepts/event_source/">event source</a>.</p>
 </li>
-<li>Follow the <a href="https://github.com/argoproj/argo-events/tree/master/examples">instruction</a> to create a Service Account <code>operate-workflow-sa</code> with proper privileges, and make sure the Service Account used by Workflows (here we use <code>default</code> in the turorials for demonstration purpose) has proper RBAC settings.</li>
+<li>Follow the <a href="https://github.com/argoproj/argo-events/tree/master/examples">instruction</a> to create a Service Account <code>operate-workflow-sa</code> with proper privileges, and make sure the Service Account used by Workflows (here we use <code>default</code> in the tutorials for demonstration purpose) has proper RBAC settings.</li>
 </ul>
 <h2 id="get-started">Get Started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
 <p>We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon an HTTP Post request.</p>

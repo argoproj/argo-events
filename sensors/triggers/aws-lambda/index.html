@@ -1412,7 +1412,7 @@
   
     <li class="md-nav__item">
       <a href="../../filters/intro/" class="md-nav__link">
-        Introducation
+        Introduction
       </a>
     </li>
   
@@ -1764,7 +1764,7 @@
 
 
 <h1 id="aws-lambda">AWS Lambda<a class="headerlink" href="#aws-lambda" title="Permanent link">&para;</a></h1>
-<p>AWS Lambda provides a tremendous value, but the event driven lambda invocation is limited to 
+<p>AWS Lambda provides a tremendous value, but the event driven lambda invocation is limited to
 SNS, SQS and few other event sources. Argo Events makes it easy to integrate lambda with event sources
 that are not native to AWS.</p>
 <p><br/>
@@ -1840,7 +1840,7 @@ that are not native to AWS.</p>
 <p>The AWS Lambda trigger specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#awslambdatrigger">here</a>.</p>
 <h2 id="request-payload">Request Payload<a class="headerlink" href="#request-payload" title="Permanent link">&para;</a></h2>
 <p>Invoking the AWS Lambda without a request payload would not be very useful. The lambda trigger within a sensor
-is invoked when sensor receives an event from the eventbus. In order to construct a request payload based on the event data, sensor offers 
+is invoked when sensor receives an event from the eventbus. In order to construct a request payload based on the event data, sensor offers
 <code>payload</code> field as a part of the lambda trigger.</p>
 <p>Let's examine a lambda trigger,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">            </span><span class="n">awsLambda</span><span class="p">:</span><span class="w"></span>
@@ -1867,7 +1867,7 @@ is invoked when sensor receives an event from the eventbus. In order to construc
     }
 </code></pre></div>
 
-<p>The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>. </p>
+<p>The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>.</p>
 <p><strong>Note</strong>: Take a look at <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">Parameterization</a> in order to understand how to extract particular key-value from event data.</p>
 <h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
 <p>Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
@@ -1898,8 +1898,8 @@ you want to define a generic trigger template in the sensor and populate values 
 <p>With <code>parameters</code> the sensor will replace the function name <code>hello</code> with the value of field <code>function_name</code> from event data.</p>
 <p>You can learn more about trigger parameterization <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
 <h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
-<p>Trigger policy helps you determine the status of the lambda invocation and decide whether to stop or continue sensor. </p>
-<p>To determine whether the lamda was successful or not, Lambda trigger provides a <code>Status</code> policy.
+<p>Trigger policy helps you determine the status of the lambda invocation and decide whether to stop or continue sensor.</p>
+<p>To determine whether the lambda was successful or not, Lambda trigger provides a <code>Status</code> policy.
 The <code>Status</code> holds a list of response statuses that are considered valid.</p>
 <div class="codehilite"><pre><span></span><code><span class="w">                    </span><span class="n">awsLambda</span><span class="p">:</span><span class="w"></span>
 <span class="w">                      </span><span class="n">functionName</span><span class="p">:</span><span class="w"> </span><span class="n">hello</span><span class="w"></span>
@@ -1923,7 +1923,7 @@ The <code>Status</code> holds a list of response statuses that are considered va
 <span class="w">                                </span><span class="o">-</span><span class="w"> </span><span class="mi">201</span><span class="w"></span>
 </code></pre></div>
 
-<p>The above lambda trigger will be treated successful only if its invocation returns with either 200 or 201 status. </p>
+<p>The above lambda trigger will be treated successful only if its invocation returns with either 200 or 201 status.</p>
 
               
             </article>
