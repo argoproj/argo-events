@@ -10,7 +10,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	sensorcontroller "github.com/argoproj/argo-events/controllers/sensor"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
 	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
@@ -34,8 +33,6 @@ func NewSensorValidator(client kubernetes.Interface, ebClient eventbusclient.Int
 }
 
 func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
-
-	eventBus := &eventbusv1alpha1.EventBus{}
 	eventBusName := common.DefaultEventBusName
 	if len(s.newSensor.Spec.EventBusName) > 0 {
 		eventBusName = s.newSensor.Spec.EventBusName

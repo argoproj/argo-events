@@ -53,7 +53,6 @@ func TestValidateSensor(t *testing.T) {
 }
 
 func TestValidDependencies(t *testing.T) {
-
 	jetstreamBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{JetStream: &eventbusv1alpha1.JetStreamBus{}}}
 	stanBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{NATS: &eventbusv1alpha1.NATSBus{}}}
 
