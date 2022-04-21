@@ -66,5 +66,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep-minio
-                dataKey: s3.bucket.name
+                dataKey: notification.0.s3.bucket.name
               dest: spec.templates.0.container.args.0
