@@ -105,6 +105,13 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - driver: stan
+          - driver: jetstream
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -137,5 +144,5 @@ jobs:
       - name: Run tests
         env:
           GOPATH: /home/runner/go
-        run: KUBECONFIG=~/.kube/argo-events-e2e-config make test-functional
+        run: KUBECONFIG=~/.kube/argo-events-e2e-config EventBusDriver=${{matrix.driver}} make test-functional
 
