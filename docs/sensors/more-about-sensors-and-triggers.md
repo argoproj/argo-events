@@ -18,8 +18,8 @@ from each dependencies will be used to trigger the actions.
 
 ## Duplicate Dependencies
 
-Due to technical reasons, same `eventSourceName` and `eventName` combo can not
-be referenced twice in one `Sensor` object. For example, following dependency
+Due to technical reasons when using the NATS Streaming bus, the same `eventSourceName` and `eventName` combo can not
+be referenced twice in one `Sensor` object. For example, the following dependency
 definitions are not allowed. However, it can be referenced unlimited times in
 different `Sensor` objects, so if you do have similar requirements, use 2
 `Sensor` objects instead.
@@ -48,6 +48,8 @@ spec:
             value:
               - "50.0"
 ```
+
+Note that this is not an issue for the Jetstream bus, however.
 
 ## Events Delivery Order
 
