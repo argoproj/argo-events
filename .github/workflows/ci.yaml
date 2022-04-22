@@ -80,27 +80,6 @@ jobs:
       - name: Test
         run: make test
 
-  lint:
-    name: lint
-    runs-on: ubuntu-latest
-    needs: [ codegen, unit-tests ]
-    timeout-minutes: 10
-    env:
-      GOPATH: /home/runner/go
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Golang
-        uses: actions/setup-go@v3
-        with:
-          go-version: "1.17.1"
-      - name: Restore Go build cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-build-v1-${{ github.run_id }}
-      - run: make lint
-      - run: git diff --exit-code
-
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
