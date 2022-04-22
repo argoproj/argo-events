@@ -4,6 +4,13 @@ metadata:
   name: argo-events-role
 rules:
   - apiGroups:
+    - ""
+    resources:
+    - "events"
+    verbs:
+      - "create"
+      - "patch"
+  - apiGroups:
       - coordination.k8s.io
     resources:
       - leases
