@@ -212,6 +212,20 @@ metadata:
   name: argo-events-role
 rules:
 - apiGroups:
+  - ""
+  - coordination.k8s.io
+  resources:
+  - configmaps
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
   - argoproj.io
   resources:
   - sensors
