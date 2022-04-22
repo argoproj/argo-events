@@ -22,29 +22,4 @@ and Sensor
 
 
 
-## More Information
 
-- To view a finalized EventBus config:
-
-```sh
-kubectl get eventbus default  -o json | jq '.status.config'
-```
-
-A sample result:
-
-```json
-{
-  "nats": {
-    "accessSecret": {
-      "key": "client-auth",
-      "name": "eventbus-default-client"
-    },
-    "auth": "token",
-    "clusterID": "eventbus-default",
-    "url": "nats://eventbus-default-stan-svc:4222"
-  }
-}
-```
-
-- All the events in a namespace are published to same channel/subject/topic
-  named `eventbus-{namespace}` in the EventBus.
