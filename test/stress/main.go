@@ -360,16 +360,16 @@ Or you can terminate it any time by Ctrl + C.
 				}
 				timeout := 5 * 60 * time.Second
 				lastActionTime := startTime
+				sensorLock.RLock()
 				if len(sensorMap) > 0 && len(sensorTimeMap) > 0 {
 					timeout = o.idleTimeout
-					sensorLock.RLock()
 					for _, v := range sensorTimeMap {
 						if v.After(lastActionTime) {
 							lastActionTime = v
 						}
 					}
-					sensorLock.RUnlock()
 				}
+				sensorLock.RUnlock()
 
 				if time.Since(lastActionTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited Sensor Pod %s due to no actions in the last %v\n", podName, o.idleTimeout)
@@ -446,16 +446,17 @@ Or you can terminate it any time by Ctrl + C.
 				}
 				timeout := 5 * 60 * time.Second
 				lastEventTime := startTime
+
+				esLock.RLock()
 				if len(esMap) > 0 && len(esTimeMap) > 0 {
 					timeout = o.idleTimeout
-					esLock.RLock()
 					for _, v := range esTimeMap {
 						if v.After(lastEventTime) {
 							lastEventTime = v
 						}
 					}
-					esLock.RUnlock()
 				}
+				esLock.RUnlock()
 				if time.Since(lastEventTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited EventSource Pod %s due to no active events in the last %v\n", podName, o.idleTimeout)
 					return
