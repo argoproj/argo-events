@@ -18,6 +18,8 @@ The example above brings up a Jetstream
 [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 with 3 replicas in the namespace. 
 
+Unlike with NATS Streaming, we are not offering the "exotic" option (i.e. connect to the Jetstream bus you provide), at least not now.
+
 
 ## Properties
 
@@ -60,3 +62,9 @@ spec:
 ## Security
 
 For Jetstream, TLS is turned on for all client-server communication as well as between Jetstream nodes. In addition, for client-server communication we by default use password authentication (and because TLS is turned on, the password is encrypted).
+
+## How it works under the hood
+
+Jetstream has the concept of a Stream, and Subjects (i.e. topics) which are used on a Stream. From the documentation: “Each Stream defines how messages are stored and what the limits (duration, size, interest) of the retention are.” For Argo Events, we have one Stream called "default" with a single set of settings, but we have multiple subjects, each of which is named `default.<eventsourcename>.<eventname>`. Sensors subscribe to the subjects they need using durable consumers.
+
+
