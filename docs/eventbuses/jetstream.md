@@ -9,7 +9,7 @@ metadata:
   name: default
 spec:
   jetstream:
-    version: 2.8.1
+    version: 2.8.1  # see 'version' section below
 ```
 
 The example above brings up a Jetstream
