@@ -62,12 +62,9 @@ acknowledge the second one before the first one is redelivered.
 
 ## Events Delivery Guarantee
 
-`NATS Streaming` offers `at-least-once` delivery guarantee. In the `Sensor`
-application, an in-memory cache is implemented to cache the events IDs delivered
-in the last 5 minutes, this is used to make sure there won't be any duplicate
-events delivered.
-
-Based on this, it is considered as `exact-once` delivery.
+`NATS Streaming` offers `at-least-once` delivery guarantee. Jetstream has additional features that get closer to "exactly once". In addition, in the `Sensor` application, an in-memory cache is implemented to cache the events IDs delivered
+in the last 5 minutes: this is used to make sure there won't be any duplicate
+events delivered. Based on this, we are able to achieve 1) "exactly once" in almost all cases, with the exception of pods dying while processing messages, and 2) "at least once" in all cases.
 
 ## Trigger Retries
 
