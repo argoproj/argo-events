@@ -9,7 +9,7 @@ metadata:
   name: default
 spec:
   jetstream:
-    version: 2.7.4
+    version: 2.8.1
 ```
 
 The example above brings up a Jetstream
@@ -37,7 +37,7 @@ metadata:
   name: default
 spec:
   jetstream:
-    version: 2.7.4
+    version: 2.8.1
     persistence: # optional
         storageClassName: standard
         accessMode: ReadWriteOnce
