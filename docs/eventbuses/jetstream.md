@@ -1,4 +1,4 @@
-#### Jetstream
+## Jetstream
 
 A simplest Jetstream EventBus example:
 
