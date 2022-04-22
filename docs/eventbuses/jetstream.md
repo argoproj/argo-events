@@ -1,5 +1,7 @@
 ## Jetstream
 
+[Jetstream](https://docs.nats.io/nats-concepts/jetstream) is the latest streaming server implemented by the NATS community, with improvements from the original NATS Streaming (which will eventually be deprecated).
+
 A simplest Jetstream EventBus example:
 
 ```yaml
