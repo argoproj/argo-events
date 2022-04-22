@@ -83,7 +83,6 @@ jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
-    needs: [ codegen, unit-tests ]
     timeout-minutes: 10
     env:
       GOPATH: /home/runner/go
