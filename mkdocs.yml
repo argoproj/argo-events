@@ -43,7 +43,6 @@ nav:
       - 'eventbuses/stan.md'
       - 'eventbuses/jetstream.md'
       - 'eventbuses/antiaffinity.md'
-      - 'eventbuses/moreinfo.md'
   - EventSources:
       - Setup:
           - 'eventsources/setup/amqp.md'
