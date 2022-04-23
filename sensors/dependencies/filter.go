@@ -18,6 +18,7 @@ package dependencies
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -30,7 +31,6 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/pkg/json"
 	"github.com/tidwall/gjson"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -88,14 +88,19 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, operator v1alpha1.Logic
 		errMessages = append(errMessages, timeErr.Error())
 	}
 
+	scriptFilter, err := filterScript(filter.Script, event)
+	if err != nil {
+		return false, err
+	}
+
 	if operator == v1alpha1.OrLogicalOperator {
 		if len(errMessages) > 0 {
 			return exprFilter || dataFilter || ctxFilter || timeFilter,
 				errors.New(strings.Join(errMessages, errMsgListSeparator))
 		}
-		return exprFilter || dataFilter || ctxFilter || timeFilter, nil
+		return exprFilter || dataFilter || ctxFilter || timeFilter || scriptFilter, nil
 	}
-	return exprFilter && dataFilter && ctxFilter && timeFilter, nil
+	return exprFilter && dataFilter && ctxFilter && timeFilter && scriptFilter, nil
 }
 
 // filterExpr applies expression based filters against event data
@@ -112,7 +117,7 @@ func filterExpr(filters []v1alpha1.ExprFilter, operator v1alpha1.LogicalOperator
 	if payload == nil {
 		return true, nil
 	}
-	if !json.IsJSON(payload) {
+	if !gjson.Valid(string(payload)) {
 		return false, fmt.Errorf(errMsgTemplate, "expr", "event data not valid JSON")
 	}
 
@@ -196,7 +201,7 @@ func filterData(filters []v1alpha1.DataFilter, operator v1alpha1.LogicalOperator
 	if payload == nil {
 		return true, nil
 	}
-	if !json.IsJSON(payload) {
+	if !gjson.Valid(string(payload)) {
 		return false, fmt.Errorf(errMsgTemplate, "data", "event data not valid JSON")
 	}
 

@@ -744,6 +744,13 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"script": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Script refers to a Lua script evaluated to determine the validity of an event.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
