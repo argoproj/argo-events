@@ -152,7 +152,6 @@ rules:
 - apiGroups:
   - argoproj.io
   resources:
-  - workflows
   - sensors
   - sensors/finalizers
   - sensors/status
