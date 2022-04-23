@@ -46,6 +46,8 @@ func Start(namespaced bool, managedNamespace string) {
 	opts := ctrl.Options{
 		MetricsBindAddress:     fmt.Sprintf(":%d", common.ControllerMetricsPort),
 		HealthProbeBindAddress: ":8081",
+		LeaderElection:         true,
+		LeaderElectionID:       "argo-events-controller",
 	}
 	if namespaced {
 		opts.Namespace = managedNamespace

@@ -7,7 +7,7 @@ retract v1.15.1 // Contains retractions only.
 retract v1.15.0 // Published accidentally.
 
 require (
-	cloud.google.com/go/compute v1.6.0
+	cloud.google.com/go/compute v1.6.1
 	cloud.google.com/go/pubsub v1.20.0
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.17
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
@@ -18,14 +18,14 @@ require (
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.8.1
 	github.com/argoproj/pkg v0.12.0
-	github.com/aws/aws-sdk-go v1.43.43
+	github.com/aws/aws-sdk-go v1.43.44
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
 	github.com/cloudevents/sdk-go/v2 v2.9.0
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/emitter-io/go/v2 v2.0.9
-	github.com/fsnotify/fsnotify v1.5.2
+	github.com/fsnotify/fsnotify v1.5.3
 	github.com/gavv/httpexpect/v2 v2.2.0
 	github.com/gfleury/go-bitbucket-v1 v0.0.0-20210707202713-7d616f7c18ac
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -51,7 +51,7 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nats-io/graft v0.0.0-20220215174245-93d18541496f
-	github.com/nats-io/nats.go v1.13.1-0.20220308171302-2f2f6968e98d
+	github.com/nats-io/nats.go v1.14.0
 	github.com/nats-io/stan.go v0.10.2
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/errors v0.9.1
@@ -219,7 +219,7 @@ require (
 	github.com/moby/spdystream v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/nats-io/nats-server/v2 v2.7.4 // indirect
+	github.com/nats-io/nats-server/v2 v2.8.1 // indirect
 	github.com/nats-io/nats-streaming-server v0.24.3 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
@@ -273,7 +273,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220414192740-2d67ff6cf2b4 // indirect
+	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect

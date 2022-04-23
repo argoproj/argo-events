@@ -2,7 +2,7 @@
 
 ## Multiple Dependencies
 
-If there are mulitple dependencies defined in the `Sensor`, you can configure
+If there are multiple dependencies defined in the `Sensor`, you can configure
 [Trigger Conditions](trigger-conditions.md) to determine what kind of situation
 could get the trigger executed.
 
@@ -18,8 +18,8 @@ from each dependencies will be used to trigger the actions.
 
 ## Duplicate Dependencies
 
-Due to technical reasons, same `eventSourceName` and `eventName` combo can not
-be referenced twice in one `Sensor` object. For example, following dependency
+Due to technical reasons when using the NATS Streaming bus, the same `eventSourceName` and `eventName` combo can not
+be referenced twice in one `Sensor` object. For example, the following dependency
 definitions are not allowed. However, it can be referenced unlimited times in
 different `Sensor` objects, so if you do have similar requirements, use 2
 `Sensor` objects instead.
@@ -49,6 +49,8 @@ spec:
               - "50.0"
 ```
 
+Note that this is not an issue for the Jetstream bus, however.
+
 ## Events Delivery Order
 
 Following statements are based on using `NATS Streaming` as the EventBus.
@@ -60,12 +62,9 @@ acknowledge the second one before the first one is redelivered.
 
 ## Events Delivery Guarantee
 
-`NATS Streaming` offers `at-least-once` delivery guarantee. In the `Sensor`
-application, an in-memory cache is implemented to cache the events IDs delivered
-in the last 5 minutes, this is used to make sure there won't be any duplicate
-events delivered.
-
-Based on this, it is considered as `exact-once` delivery.
+`NATS Streaming` offers `at-least-once` delivery guarantee. `Jetstream` has additional features that get closer to "exactly once". In addition, in the `Sensor` application, an in-memory cache is implemented to cache the events IDs delivered
+in the last 5 minutes: this is used to make sure there won't be any duplicate
+events delivered. Based on this, we are able to achieve 1) "exactly once" in almost all cases, with the exception of pods dying while processing messages, and 2) "at least once" in all cases.
 
 ## Trigger Retries
 
