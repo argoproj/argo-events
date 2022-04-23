@@ -17,7 +17,12 @@ package argo_workflow
 
 import (
 	"context"
+	"fmt"
+	"os/exec"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 
 	"github.com/argoproj/argo-events/common/logging"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -47,6 +52,10 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
+var (
+	un = newUnstructured("argoproj.io/v1alpha1", "Workflow", "fake", "test")
+)
+
 func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
 		Object: map[string]interface{}{
@@ -63,10 +72,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 	}
 }
 
-func getFakeWfTrigger() *ArgoWorkflowTrigger {
+func getFakeWfTrigger(operation v1alpha1.ArgoWorkflowOperation) *ArgoWorkflowTrigger {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-	un := newUnstructured("argoproj.io/v1alpha1", "Workflow", "fake", "test")
 	artifact := apicommon.NewResource(un)
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
@@ -75,7 +83,7 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 				Source: &v1alpha1.ArtifactLocation{
 					Resource: &artifact,
 				},
-				Operation: "Submit",
+				Operation: operation,
 			},
 		},
 	}
@@ -83,7 +91,7 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 }
 
 func TestFetchResource(t *testing.T) {
-	trigger := getFakeWfTrigger()
+	trigger := getFakeWfTrigger("submit")
 	resource, err := trigger.FetchResource(context.TODO())
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
@@ -95,4 +103,43 @@ func TestFetchResource(t *testing.T) {
 
 func TestApplyResourceParameters(t *testing.T) {
 
+}
+
+func TestExecute(t *testing.T) {
+	t.Run("passes trigger args as flags to argo command", func(t *testing.T) {
+		ctx := context.Background()
+		var actual string
+		firstArg := "--foo"
+		secondArg := "--bar"
+		trigger := storingCmdTrigger(&actual, firstArg, secondArg)
+
+		_, err := namespacedClientFrom(trigger).Namespace(un.GetNamespace()).Create(ctx, un, metav1.CreateOptions{})
+		assert.Nil(t, err)
+
+		_, err = trigger.Execute(ctx, nil, un)
+		assert.Nil(t, err)
+
+		expected := fmt.Sprintf("argo -n %s resume test %s %s", un.GetNamespace(), firstArg, secondArg)
+		assert.Contains(t, actual, expected)
+	})
+}
+
+func storingCmdTrigger(cmdStr *string, wfArgs ...string) *ArgoWorkflowTrigger {
+	trigger := getFakeWfTrigger("resume")
+	f := func(cmd *exec.Cmd) error {
+		*cmdStr = cmd.String()
+		return nil
+	}
+	trigger.cmdRunner = f
+	trigger.Trigger.Template.ArgoWorkflow.Args = wfArgs
+
+	return trigger
+}
+
+func namespacedClientFrom(trigger *ArgoWorkflowTrigger) dynamic.NamespaceableResourceInterface {
+	return trigger.DynamicClient.Resource(schema.GroupVersionResource{
+		Group:    "argoproj.io",
+		Version:  "v1alpha1",
+		Resource: "workflows",
+	})
 }

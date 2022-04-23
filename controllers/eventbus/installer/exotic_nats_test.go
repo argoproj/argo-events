@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	testExoticBus = &v1alpha1.EventBus{
+	testNatsExoticBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
@@ -38,7 +38,7 @@ var (
 
 func TestInstallationExotic(t *testing.T) {
 	t.Run("installation with exotic nats config", func(t *testing.T) {
-		installer := NewExoticNATSInstaller(testExoticBus, logging.NewArgoEventsLogger())
+		installer := NewExoticNATSInstaller(testNatsExoticBus, logging.NewArgoEventsLogger())
 		conf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, conf.NATS)
@@ -48,7 +48,7 @@ func TestInstallationExotic(t *testing.T) {
 
 func TestUninstallationExotic(t *testing.T) {
 	t.Run("uninstallation with exotic nats config", func(t *testing.T) {
-		installer := NewExoticNATSInstaller(testExoticBus, logging.NewArgoEventsLogger())
+		installer := NewExoticNATSInstaller(testNatsExoticBus, logging.NewArgoEventsLogger())
 		err := installer.Uninstall(context.TODO())
 		assert.NoError(t, err)
 	})

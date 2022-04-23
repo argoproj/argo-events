@@ -5,29 +5,69 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/controllers"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+)
+
+const (
+	testJetStreamImage         = "test-js-image"
+	testJSReloaderImage        = "test-nats-rl-image"
+	testJetStreamExporterImage = "test-js-e-image"
+)
+
+var (
+	fakeConfig = &controllers.GlobalConfig{
+		EventBus: &controllers.EventBusConfig{
+			NATS: &controllers.StanConfig{
+				Versions: []controllers.StanVersion{
+					{
+						Version:              "0.22.1",
+						NATSStreamingImage:   "test-n-s-image",
+						MetricsExporterImage: "test-n-s-m-image",
+					},
+				},
+			},
+			JetStream: &controllers.JetStreamConfig{
+				Versions: []controllers.JetStreamVersion{
+					{
+						Version:              "2.7.3",
+						NatsImage:            testJetStreamImage,
+						ConfigReloaderImage:  testJSReloaderImage,
+						MetricsExporterImage: testJetStreamExporterImage,
+					},
+				},
+			},
+		},
+	}
 )
 
 func TestGetInstaller(t *testing.T) {
 	t.Run("get installer", func(t *testing.T) {
-		installer, err := getInstaller(testEventBus, nil, "", "", logging.NewArgoEventsLogger())
+		installer, err := getInstaller(testNatsEventBus, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.NoError(t, err)
 		assert.NotNil(t, installer)
 		_, ok := installer.(*natsInstaller)
 		assert.True(t, ok)
 
-		installer, err = getInstaller(testExoticBus, nil, "", "", logging.NewArgoEventsLogger())
+		installer, err = getInstaller(testNatsExoticBus, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.NoError(t, err)
 		assert.NotNil(t, installer)
 		_, ok = installer.(*exoticNATSInstaller)
+		assert.True(t, ok)
+	})
+
+	t.Run("get jetstream installer", func(t *testing.T) {
+		installer, err := getInstaller(testJetStreamEventBus, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
+		assert.NoError(t, err)
+		assert.NotNil(t, installer)
+		_, ok := installer.(*jetStreamInstaller)
 		assert.True(t, ok)
 	})
 }
@@ -87,18 +127,18 @@ func fakeSensor() *sensorv1alpha1.Sensor {
 			Namespace: testNamespace,
 		},
 		Spec: sensorv1alpha1.SensorSpec{
-			Triggers: []v1alpha1.Trigger{
+			Triggers: []sensorv1alpha1.Trigger{
 				{
-					Template: &v1alpha1.TriggerTemplate{
+					Template: &sensorv1alpha1.TriggerTemplate{
 						Name: "fake-trigger",
-						K8s: &v1alpha1.StandardK8STrigger{
+						K8s: &sensorv1alpha1.StandardK8STrigger{
 							Operation: "create",
-							Source:    &v1alpha1.ArtifactLocation{},
+							Source:    &sensorv1alpha1.ArtifactLocation{},
 						},
 					},
 				},
 			},
-			Dependencies: []v1alpha1.EventDependency{
+			Dependencies: []sensorv1alpha1.EventDependency{
 				{
 					Name:            "fake-dep",
 					EventSourceName: "fake-source",
@@ -107,4 +147,46 @@ func fakeSensor() *sensorv1alpha1.Sensor {
 			},
 		},
 	}
+}
+
+func TestInstall(t *testing.T) {
+	cl := fake.NewClientBuilder().Build()
+	ctx := context.TODO()
+
+	t.Run("test nats error", func(t *testing.T) {
+		testObj := testNatsEventBus.DeepCopy()
+		testObj.Spec.NATS = nil
+		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		assert.Error(t, err)
+		assert.Equal(t, "invalid eventbus spec", err.Error())
+	})
+
+	t.Run("test nats install ok", func(t *testing.T) {
+		testObj := testNatsEventBus.DeepCopy()
+		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		assert.NoError(t, err)
+		assert.True(t, testObj.Status.IsReady())
+		assert.NotNil(t, testObj.Status.Config.NATS)
+		assert.NotEmpty(t, testObj.Status.Config.NATS.URL)
+		assert.NotNil(t, testObj.Status.Config.NATS.Auth)
+		assert.NotNil(t, testObj.Status.Config.NATS.AccessSecret)
+	})
+
+	t.Run("test jetstream error", func(t *testing.T) {
+		testObj := testJetStreamEventBus.DeepCopy()
+		testObj.Spec.JetStream = nil
+		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		assert.Error(t, err)
+		assert.Equal(t, "invalid eventbus spec", err.Error())
+	})
+
+	t.Run("test jetstream install ok", func(t *testing.T) {
+		testObj := testJetStreamEventBus.DeepCopy()
+		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		assert.NoError(t, err)
+		assert.True(t, testObj.Status.IsReady())
+		assert.NotNil(t, testObj.Status.Config.JetStream)
+		assert.NotEmpty(t, testObj.Status.Config.JetStream.URL)
+		assert.NotNil(t, testObj.Status.Config.JetStream.AccessSecret)
+	})
 }

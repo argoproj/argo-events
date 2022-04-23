@@ -13,14 +13,14 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Restore go build cache
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: ~/.cache/go-build
           key: ${{ runner.os }}-go-build-v1-${{ hashFiles('**/go.mod') }}
       - name: Setup Golang
-        uses: actions/setup-go@v2.2.0
+        uses: actions/setup-go@v3.0.0
         with:
           go-version: "1.17.1"
       - name: Add bins to PATH
@@ -64,14 +64,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Set up Go 1.x
-        uses: actions/setup-go@v2.2.0
+        uses: actions/setup-go@v3.0.0
         with:
           go-version: "1.17.1"
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Restore Go build cache
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: ~/.cache/go-build
           key: ${{ runner.os }}-go-build-v1-${{ github.run_id }}
@@ -80,20 +80,47 @@ jobs:
       - name: Test
         run: make test
 
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GOPATH: /home/runner/go
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.17.1"
+      - name: Restore Go build cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-go-build-v1-${{ github.run_id }}
+      - run: make lint
+      - run: git diff --exit-code
+
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - driver: stan
+          - driver: jetstream
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Restore go build cache
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: ~/.cache/go-build
           key: ${{ runner.os }}-go-build-v2-${{ hashFiles('**/go.mod') }}
       - name: Setup Golang
-        uses: actions/setup-go@v2.2.0
+        uses: actions/setup-go@v3.0.0
         with:
           go-version: "1.17.1"
       - name: Add bins to PATH
@@ -116,5 +143,5 @@ jobs:
       - name: Run tests
         env:
           GOPATH: /home/runner/go
-        run: KUBECONFIG=~/.kube/argo-events-e2e-config make test-functional
+        run: KUBECONFIG=~/.kube/argo-events-e2e-config EventBusDriver=${{matrix.driver}} make test-functional
 

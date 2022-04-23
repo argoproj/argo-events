@@ -25,6 +25,7 @@ import (
 	"encoding/pem"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"reflect"
 	"regexp"
 	"time"
@@ -268,7 +269,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts an SNS event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	logger := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 
@@ -285,10 +286,30 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}, controller, dispatch)
 }
 
+func (m *httpNotification) verifySigningCertUrl() error {
+	regexSigningCertHost := `^sns\.[a-zA-Z0-9\-]{3,}\.amazonaws\.com(\.cn)?$`
+	regex := regexp.MustCompile(regexSigningCertHost)
+	url, err := url.Parse(m.SigningCertURL)
+	if err != nil {
+		return errors.Wrap(err, "SigningCertURL is not a valid URL")
+	}
+	if !regex.MatchString(url.Hostname()) {
+		return errors.Errorf("SigningCertURL hostname `%s` does not match `%s`", url.Hostname(), regexSigningCertHost)
+	}
+	if url.Scheme != "https" {
+		return errors.New("SigningCertURL is not using https")
+	}
+	return nil
+}
+
 func (m *httpNotification) verify() error {
 	msgSig, err := base64.StdEncoding.DecodeString(m.Signature)
 	if err != nil {
 		return errors.Wrap(err, "failed to base64 decode signature")
+	}
+
+	if err := m.verifySigningCertUrl(); err != nil {
+		return errors.Wrap(err, "failed to verify SigningCertURL")
 	}
 
 	res, err := http.Get(m.SigningCertURL)

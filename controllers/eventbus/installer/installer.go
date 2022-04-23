@@ -8,6 +8,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -22,8 +23,8 @@ type Installer interface {
 }
 
 // Install function installs the event bus
-func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) error {
-	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
+func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
+	installer, err := getInstaller(eventBus, client, config, logger)
 	if err != nil {
 		logger.Errorw("failed to an installer", zap.Error(err))
 		return err
@@ -38,13 +39,15 @@ func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Cli
 }
 
 // GetInstaller returns Installer implementation
-func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) (Installer, error) {
+func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, config *controllers.GlobalConfig, logger *zap.SugaredLogger) (Installer, error) {
 	if nats := eventBus.Spec.NATS; nats != nil {
 		if nats.Exotic != nil {
 			return NewExoticNATSInstaller(eventBus, logger), nil
 		} else if nats.Native != nil {
-			return NewNATSInstaller(client, eventBus, natsStreamingImage, natsMetricsImage, getLabels(eventBus), logger), nil
+			return NewNATSInstaller(client, eventBus, config, getLabels(eventBus), logger), nil
 		}
+	} else if js := eventBus.Spec.JetStream; js != nil {
+		return NewJetStreamInstaller(client, eventBus, config, getLabels(eventBus), logger), nil
 	}
 	return nil, errors.New("invalid eventbus spec")
 }
@@ -65,7 +68,7 @@ func getLabels(bus *v1alpha1.EventBus) map[string]string {
 // separately.
 //
 // It could also be used to check if the EventBus object can be safely deleted.
-func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger) error {
+func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
 	linkedEventSources, err := linkedEventSources(ctx, eventBus.Namespace, eventBus.Name, client)
 	if err != nil {
 		logger.Errorw("failed to query linked EventSources", zap.Error(err))
@@ -84,7 +87,7 @@ func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.C
 		return errors.Errorf("Can not delete an EventBus with %v Sensors connected", linkedSensors)
 	}
 
-	installer, err := getInstaller(eventBus, client, natsStreamingImage, natsMetricsImage, logger)
+	installer, err := getInstaller(eventBus, client, config, logger)
 	if err != nil {
 		logger.Errorw("failed to get an installer", zap.Error(err))
 		return err

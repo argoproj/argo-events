@@ -19,7 +19,7 @@ import (
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
@@ -42,6 +42,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
 	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
+	redisstream "github.com/argoproj/argo-events/eventsources/sources/redisStream"
 	"github.com/argoproj/argo-events/eventsources/sources/resource"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
@@ -66,7 +67,7 @@ type EventingServer interface {
 	GetEventSourceType() apicommon.EventSourceType
 
 	// Function to start listening events.
-	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error
+	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
@@ -240,6 +241,16 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 		}
 		result[apicommon.RedisEvent] = servers
 	}
+	if len(eventSource.Spec.RedisStream) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.RedisStream {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &redisstream.EventListener{EventSourceName: eventSource.Name, EventName: k, EventSource: v, Metrics: metrics})
+		}
+		result[apicommon.RedisStreamEvent] = servers
+	}
 	if len(eventSource.Spec.SNS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SNS {
@@ -328,7 +339,7 @@ type EventSourceAdaptor struct {
 	eventBusSubject string
 	hostname        string
 
-	eventBusConn eventbusdriver.Connection
+	eventBusConn eventbuscommon.EventSourceConnection
 
 	metrics *eventsourcemetrics.Metrics
 }
@@ -390,13 +401,17 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
 	clientID := generateClientID(e.hostname)
-	driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
+	driver, err := eventbus.GetEventSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
 	if err != nil {
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
 	}
 	if err = common.Connect(&common.DefaultBackoff, func() error {
-		e.eventBusConn, err = driver.Connect()
+		err = driver.Initialize()
+		if err != nil {
+			return err
+		}
+		e.eventBusConn, err = driver.Connect(clientID)
 		return err
 	}); err != nil {
 		logger.Errorw("failed to connect to eventbus", zap.Error(err))
@@ -424,12 +439,12 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					logger.Info("NATS connection lost, reconnecting...")
 					// Regenerate the client ID to avoid the issue that NAT server still thinks the client is alive.
 					clientID := generateClientID(e.hostname)
-					driver, err := eventbus.GetDriver(ctx, *e.eventBusConfig, e.eventBusSubject, clientID)
+					driver, err := eventbus.GetEventSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
 					if err != nil {
 						logger.Errorw("failed to get eventbus driver during reconnection", zap.Error(err))
 						continue
 					}
-					e.eventBusConn, err = driver.Connect()
+					e.eventBusConn, err = driver.Connect(clientID)
 					if err != nil {
 						logger.Errorw("failed to reconnect to eventbus", zap.Error(err))
 						continue
@@ -466,7 +481,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					Jitter:   &jitter,
 				}
 				if err = common.Connect(&backoff, func() error {
-					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Options) error {
+					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) error {
 						if filter, ok := filters[s.GetEventName()]; ok {
 							proceed, err := filterEvent(data, filter)
 							if err != nil {
@@ -503,7 +518,17 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
 							return errors.New("failed to publish event, eventbus connection closed")
 						}
-						if err = driver.Publish(e.eventBusConn, eventBody); err != nil {
+
+						msg := eventbuscommon.Message{
+							MsgHeader: eventbuscommon.MsgHeader{
+								EventSourceName: s.GetEventSourceName(),
+								EventName:       s.GetEventName(),
+								ID:              event.ID(),
+							},
+							Body: eventBody,
+						}
+
+						if err = e.eventBusConn.Publish(ctx, msg); err != nil {
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
@@ -554,7 +579,6 @@ func generateClientID(hostname string) string {
 }
 
 func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) {
-
 	dataMap := make(map[string]interface{})
 	err := json.Unmarshal(data, &dataMap)
 	if err != nil {
@@ -566,5 +590,5 @@ func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) 
 		params[strings.ReplaceAll(key, "-", "_")] = value
 	}
 	env := expr.GetFuncMap(params)
-	return expr.EvalBool(strings.ReplaceAll(filter.Expression, "-", "_"), env)
+	return expr.EvalBool(filter.Expression, env)
 }

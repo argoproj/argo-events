@@ -2,10 +2,8 @@ package installer
 
 import (
 	"context"
-	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/big"
 	"strconv"
 	"strings"
 	"time"
@@ -22,6 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/controllers"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -39,27 +38,28 @@ const (
 	serverAuthSecretKey = "auth"
 	// key of stan.conf in the configmap
 	configMapKey = "stan-config"
+
+	// default nats streaming version to be installed
+	defaultSTANVersion = "0.22.1"
 )
 
 // natsInstaller is used create a NATS installation.
 type natsInstaller struct {
-	client         client.Client
-	eventBus       *v1alpha1.EventBus
-	streamingImage string
-	metricsImage   string
-	labels         map[string]string
-	logger         *zap.SugaredLogger
+	client   client.Client
+	eventBus *v1alpha1.EventBus
+	config   *controllers.GlobalConfig
+	labels   map[string]string
+	logger   *zap.SugaredLogger
 }
 
 // NewNATSInstaller returns a new NATS installer
-func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, streamingImage, metricsImage string, labels map[string]string, logger *zap.SugaredLogger) Installer {
+func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, logger *zap.SugaredLogger) Installer {
 	return &natsInstaller{
-		client:         client,
-		eventBus:       eventBus,
-		streamingImage: streamingImage,
-		metricsImage:   metricsImage,
-		labels:         labels,
-		logger:         logger.Named("nats"),
+		client:   client,
+		eventBus: eventBus,
+		config:   config,
+		labels:   labels,
+		logger:   logger.Named("nats"),
 	}
 }
 
@@ -93,7 +93,6 @@ func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error
 		return nil, err
 	}
 	i.eventBus.Status.MarkDeployed("Succeeded", "NATS is deployed")
-	i.eventBus.Status.MarkConfigured()
 	clusterID := generateClusterID(i.eventBus)
 	busConfig := &v1alpha1.BusConfig{
 		NATS: &v1alpha1.NATSConfig{
@@ -290,12 +289,7 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		log.Infow("created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
 		return expectedSSecret, nil, nil
 	case v1alpha1.AuthStrategyToken:
-		token, err := generateToken(64)
-		if err != nil {
-			i.eventBus.Status.MarkDeployFailed("BuildServerAuthSecretFailed", "Failed to generate auth token")
-			log.Errorw("error generating auth token", zap.Error(err))
-			return nil, nil, err
-		}
+		token := common.RandomString(64)
 		serverAuthText := fmt.Sprintf(`authorization {
   token: "%s"
 }`, token)
@@ -441,7 +435,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if replicas < 3 {
 		replicas = 3
 	}
-	maxAge := common.NATSStreamingMaxAge
+	maxAge := common.STANMaxAge
 	if i.eventBus.Spec.NATS.Native.MaxAge != nil {
 		maxAge = *i.eventBus.Spec.NATS.Native.MaxAge
 	}
@@ -449,23 +443,23 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	maxMsgs := common.NATSStreamingMaxMsgs
+	maxMsgs := common.STANMaxMsgs
 	if i.eventBus.Spec.NATS.Native.MaxMsgs != nil {
 		maxMsgs = *i.eventBus.Spec.NATS.Native.MaxMsgs
 	}
-	maxSubs := common.NATSStreamingMaxSubs
+	maxSubs := common.STANMaxSubs
 	if i.eventBus.Spec.NATS.Native.MaxSubs != nil {
 		maxSubs = *i.eventBus.Spec.NATS.Native.MaxSubs
 	}
-	maxBytes := common.NATSStreamingMaxBytes
+	maxBytes := common.STANMaxBytes
 	if i.eventBus.Spec.NATS.Native.MaxBytes != nil {
 		maxBytes = *i.eventBus.Spec.NATS.Native.MaxBytes
 	}
-	maxPayload := common.NATSStreamingMaxPayload
+	maxPayload := common.STANMaxPayload
 	if i.eventBus.Spec.NATS.Native.MaxPayload != nil {
 		maxPayload = *i.eventBus.Spec.NATS.Native.MaxPayload
 	}
-	raftHeartbeatTimeout := common.NATSStreamingRaftHeartbeatTimeout
+	raftHeartbeatTimeout := common.STANRaftHeartbeatTimeout
 	if i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout != nil {
 		raftHeartbeatTimeout = *i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout
 	}
@@ -473,7 +467,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftElectionTimeout := common.NATSStreamingRaftElectionTimeout
+	raftElectionTimeout := common.STANRaftElectionTimeout
 	if i.eventBus.Spec.NATS.Native.RaftElectionTimeout != nil {
 		raftElectionTimeout = *i.eventBus.Spec.NATS.Native.RaftElectionTimeout
 	}
@@ -481,7 +475,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftLeaseTimeout := common.NATSStreamingRaftLeaseTimeout
+	raftLeaseTimeout := common.STANRaftLeaseTimeout
 	if i.eventBus.Spec.NATS.Native.RaftLeaseTimeout != nil {
 		raftLeaseTimeout = *i.eventBus.Spec.NATS.Native.RaftLeaseTimeout
 	}
@@ -489,7 +483,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftCommitTimeout := common.NATSStreamingRaftCommitTimeout
+	raftCommitTimeout := common.STANRaftCommitTimeout
 	if i.eventBus.Spec.NATS.Native.RaftCommitTimeout != nil {
 		raftCommitTimeout = *i.eventBus.Spec.NATS.Native.RaftCommitTimeout
 	}
@@ -618,6 +612,10 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 }
 
 func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSecretName string) (*appv1.StatefulSetSpec, error) {
+	stanVersion, err := i.config.GetSTANVersion(defaultSTANVersion)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get nats streaming version, err: %w", err)
+	}
 	// Streaming requires minimal size 3.
 	replicas := i.eventBus.Spec.NATS.Native.Replicas
 	if replicas < 3 {
@@ -713,7 +711,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				Containers: []corev1.Container{
 					{
 						Name:            "stan",
-						Image:           i.streamingImage,
+						Image:           stanVersion.NATSStreamingImage,
 						ImagePullPolicy: stanContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: clientPort},
@@ -732,7 +730,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						Resources:       stanContainerResources,
 						SecurityContext: stanContainerSecurityContext,
 						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
+							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: &corev1.HTTPGetAction{
 									Path: "/",
 									Port: intstr.FromInt(int(monitorPort)),
@@ -744,7 +742,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 					},
 					{
 						Name:            "metrics",
-						Image:           i.metricsImage,
+						Image:           stanVersion.MetricsExporterImage,
 						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "metrics", ContainerPort: common.EventBusMetricsPort},
@@ -920,20 +918,6 @@ func (i *natsInstaller) mergeEventBusLabels(given map[string]string) map[string]
 		result[k] = v
 	}
 	return result
-}
-
-// generate a random string as token with given length
-func generateToken(length int) (string, error) {
-	seeds := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	result := make([]byte, length)
-	for i := 0; i < length; i++ {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(seeds))))
-		if err != nil {
-			return "", err
-		}
-		result[i] = seeds[num.Int64()]
-	}
-	return string(result), nil
 }
 
 func serverAuthSecretLabels(given map[string]string) map[string]string {

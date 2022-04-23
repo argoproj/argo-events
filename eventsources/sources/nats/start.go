@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"time"
 
-	natslib "github.com/nats-io/go-nats"
+	natslib "github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -59,7 +59,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())

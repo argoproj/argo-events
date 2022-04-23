@@ -51,6 +51,7 @@ const (
 	Retry     ArgoWorkflowOperation = "retry"     // retry a workflow
 	Resume    ArgoWorkflowOperation = "resume"    // resume a workflow
 	Terminate ArgoWorkflowOperation = "terminate" // terminate a workflow
+	Stop      ArgoWorkflowOperation = "stop"      // stop a workflow
 )
 
 // Comparator refers to the comparator operator for a data filter
@@ -438,6 +439,8 @@ type ArgoWorkflowTrigger struct {
 	Operation ArgoWorkflowOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation,casttype=ArgoWorkflowOperation"`
 	// Parameters is the list of parameters to pass to resolved Argo Workflow object
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
+	// Args is the list of arguments to pass to the argo CLI
+	Args []string `json:"args,omitempty" protobuf:"bytes,4,rep,name=args"`
 }
 
 // HTTPTrigger is the trigger for the HTTP request

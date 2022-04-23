@@ -128,7 +128,7 @@ For a given payload such as:
   "body": {
     "action":"opened",
    "labels": [
-      {"id":"1234", "name":"Webhook"}, 
+      {"id":"1234", "name":"Webhook"},
       {"id":"5678", "name":"Approved"}
     ]
   }
@@ -173,7 +173,7 @@ The message `'{"message":"aGVsbG8gd29ybGQ="}'` will match with the above filter 
 
 **Note**: Data type is assumed to be string before applying the `template`, then cast to the user defined `type` for value matching.
 
-## Pratical examples (comparator)
+## Practical examples (comparator)
 
 1. Create a webhook event-source
 

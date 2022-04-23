@@ -85,6 +85,9 @@ message ArgoWorkflowTrigger {
 
   // Parameters is the list of parameters to pass to resolved Argo Workflow object
   repeated TriggerParameter parameters = 3;
+
+  // Args is the list of arguments to pass to the argo CLI
+  repeated string args = 4;
 }
 
 // ArtifactLocation describes the source location for an external artifact

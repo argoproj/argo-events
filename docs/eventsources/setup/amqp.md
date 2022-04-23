@@ -1,6 +1,6 @@
 # AMQP
 
-AMQP event-source listens to messages on the MQ and helps sensor trigger the workloads.  
+AMQP event-source listens to messages on the MQ and helps sensor trigger the workloads.
 
 ## Event Structure
 
@@ -30,7 +30,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
               	"appId": "AppId refers to the application id",
               	"exchange": "Exchange is basic.publish exchange",
               	"routingKey": "RoutingKey is basic.publish routing key",
-              	"body": "Body represents the messsage body",
+              	"body": "Body represents the message body",
             }
         }
 
@@ -92,11 +92,11 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/amqp.yaml
 
-8. Lets set up a rabbitmq publisher. If you don't have `pika` installed, run.
+8. Lets set up a RabbitMQ publisher. If you don't have `pika` installed, run.
 
         python -m pip install pika --upgrade
 
-9. Open a python REPL and run following code to publish a message on `exhange` called `test`. 
+9. Open a python REPL and run following code to publish a message on `exchange` called `test`.
 
         import pika
         connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -105,7 +105,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
                               routing_key='hello',
                               body='{"message": "hello"}')
 
-10. As soon as you publish a message, sensor will trigger an Argo workflow. Run `argo list` to find the workflow. 
-                                                                            
+10. As soon as you publish a message, sensor will trigger an Argo workflow. Run `argo list` to find the workflow.
+
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,16 +21,14 @@ import (
 )
 
 const (
-	testNamespace      = "test-ns"
-	testName           = "test-name"
-	testStreamingImage = "test-s-image"
-	testMetricsImage   = "test-m-image"
+	testNamespace = "test-ns"
+	testName      = "test-name"
 )
 
 var (
 	testLabels = map[string]string{"controller": "test-controller"}
 
-	testEventBus = &v1alpha1.EventBus{
+	testNatsEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
@@ -111,12 +110,11 @@ func init() {
 func TestBadInstallation(t *testing.T) {
 	t.Run("bad installation", func(t *testing.T) {
 		installer := &natsInstaller{
-			client:         fake.NewClientBuilder().Build(),
-			eventBus:       testEventBusBad,
-			streamingImage: testStreamingImage,
-			metricsImage:   testMetricsImage,
-			labels:         testLabels,
-			logger:         logging.NewArgoEventsLogger(),
+			client:   fake.NewClientBuilder().Build(),
+			eventBus: testEventBusBad,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   logging.NewArgoEventsLogger(),
 		}
 		_, err := installer.Install(context.TODO())
 		assert.Error(t, err)
@@ -126,7 +124,7 @@ func TestBadInstallation(t *testing.T) {
 func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
-		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
+		installer := NewNATSInstaller(cl, testNatsEventBus, fakeConfig, testLabels, zaptest.NewLogger(t).Sugar())
 		busconf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -175,7 +173,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
-		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testMetricsImage, testLabels, logging.NewArgoEventsLogger())
+		installer := NewNATSInstaller(cl, testEventBusAuthNone, fakeConfig, testLabels, zaptest.NewLogger(t).Sugar())
 		busconf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -212,12 +210,11 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 	t.Run("installation with persistence", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
 		installer := &natsInstaller{
-			client:         cl,
-			eventBus:       testEventBusPersist,
-			streamingImage: testStreamingImage,
-			metricsImage:   testMetricsImage,
-			labels:         testLabels,
-			logger:         logging.NewArgoEventsLogger(),
+			client:   cl,
+			eventBus: testEventBusPersist,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   logging.NewArgoEventsLogger(),
 		}
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
@@ -227,12 +224,11 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 	t.Run("installation with image pull secrets", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
 		installer := &natsInstaller{
-			client:         cl,
-			eventBus:       testEventBus,
-			streamingImage: testStreamingImage,
-			metricsImage:   testMetricsImage,
-			labels:         testLabels,
-			logger:         logging.NewArgoEventsLogger(),
+			client:   cl,
+			eventBus: testNatsEventBus,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   logging.NewArgoEventsLogger(),
 		}
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
@@ -241,15 +237,14 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 
 	t.Run("installation with priority class", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
-		eb := testEventBus.DeepCopy()
+		eb := testNatsEventBus.DeepCopy()
 		eb.Spec.NATS.Native.PriorityClassName = "test-class"
 		installer := &natsInstaller{
-			client:         cl,
-			eventBus:       eb,
-			streamingImage: testStreamingImage,
-			metricsImage:   testMetricsImage,
-			labels:         testLabels,
-			logger:         logging.NewArgoEventsLogger(),
+			client:   cl,
+			eventBus: eb,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   logging.NewArgoEventsLogger(),
 		}
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
@@ -261,12 +256,11 @@ func TestBuildServiceAccountStatefulSetSpec(t *testing.T) {
 	t.Run("installation with Service Account Name", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
 		installer := &natsInstaller{
-			client:         cl,
-			eventBus:       testEventBus,
-			streamingImage: testStreamingImage,
-			metricsImage:   testMetricsImage,
-			labels:         testLabels,
-			logger:         logging.NewArgoEventsLogger(),
+			client:   cl,
+			eventBus: testNatsEventBus,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   logging.NewArgoEventsLogger(),
 		}
 		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
@@ -278,12 +272,11 @@ func TestBuildConfigMap(t *testing.T) {
 	t.Run("test build config map", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
 		installer := &natsInstaller{
-			client:         cl,
-			eventBus:       testEventBus,
-			streamingImage: testStreamingImage,
-			metricsImage:   testMetricsImage,
-			labels:         testLabels,
-			logger:         logging.NewArgoEventsLogger(),
+			client:   cl,
+			eventBus: testNatsEventBus,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   logging.NewArgoEventsLogger(),
 		}
 		cm, err := installer.buildConfigMap()
 		assert.NoError(t, err)
@@ -291,8 +284,8 @@ func TestBuildConfigMap(t *testing.T) {
 		conf, ok := cm.Data[configMapKey]
 		assert.True(t, ok)
 		assert.True(t, strings.Contains(conf, "routes:"))
-		svcName := generateServiceName(testEventBus)
-		ssName := generateStatefulSetName(testEventBus)
+		svcName := generateServiceName(testNatsEventBus)
+		ssName := generateStatefulSetName(testNatsEventBus)
 		r := fmt.Sprintf("nats://%s-%s.%s.%s.svc:%s", ssName, "0", svcName, testNamespace, strconv.Itoa(int(clusterPort)))
 		lines := strings.Split(conf, `\n`)
 		for _, l := range lines {
@@ -302,11 +295,4 @@ func TestBuildConfigMap(t *testing.T) {
 			}
 		}
 	})
-}
-
-func TestGenerateToken(t *testing.T) {
-	n := 30
-	token, err := generateToken(n)
-	assert.NoError(t, err)
-	assert.Equal(t, len(token), n)
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
@@ -13,15 +14,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
 const (
-	testBusName        = "test-bus"
-	testStreamingImage = "test-steaming-image"
-	testNamespace      = "testNamespace"
-	testURL            = "http://test"
+	testBusName   = "test-bus"
+	testNamespace = "testNamespace"
+	testURL       = "http://test"
 )
 
 var (
@@ -69,6 +69,30 @@ var (
 			},
 		},
 	}
+
+	fakeConfig = &controllers.GlobalConfig{
+		EventBus: &controllers.EventBusConfig{
+			NATS: &controllers.StanConfig{
+				Versions: []controllers.StanVersion{
+					{
+						Version:              "0.22.1",
+						NATSStreamingImage:   "test-n-s-image",
+						MetricsExporterImage: "test-n-s-m-image",
+					},
+				},
+			},
+			JetStream: &controllers.JetStreamConfig{
+				Versions: []controllers.JetStreamVersion{
+					{
+						Version:              "testVersion",
+						NatsImage:            "testJSImage",
+						ConfigReloaderImage:  "test-nats-rl-image",
+						MetricsExporterImage: "testJSMetricsImage",
+					},
+				},
+			},
+		},
+	}
 )
 
 func init() {
@@ -83,10 +107,10 @@ func TestReconcileNative(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
-			client:             cl,
-			scheme:             scheme.Scheme,
-			natsStreamingImage: testStreamingImage,
-			logger:             logging.NewArgoEventsLogger(),
+			client: cl,
+			scheme: scheme.Scheme,
+			config: fakeConfig,
+			logger: zaptest.NewLogger(t).Sugar(),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -103,10 +127,10 @@ func TestReconcileExotic(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
-			client:             cl,
-			scheme:             scheme.Scheme,
-			natsStreamingImage: testStreamingImage,
-			logger:             logging.NewArgoEventsLogger(),
+			client: cl,
+			scheme: scheme.Scheme,
+			config: fakeConfig,
+			logger: zaptest.NewLogger(t).Sugar(),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -120,10 +144,10 @@ func TestNeedsUpdate(t *testing.T) {
 		testBus := nativeBus.DeepCopy()
 		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
-			client:             cl,
-			scheme:             scheme.Scheme,
-			natsStreamingImage: testStreamingImage,
-			logger:             logging.NewArgoEventsLogger(),
+			client: cl,
+			scheme: scheme.Scheme,
+			config: fakeConfig,
+			logger: zaptest.NewLogger(t).Sugar(),
 		}
 		assert.False(t, r.needsUpdate(nativeBus, testBus))
 		controllerutil.AddFinalizer(testBus, finalizerName)

@@ -1,0 +1,211 @@
+package installer
+
+import (
+	"context"
+	"testing"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
+	appv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+)
+
+var (
+	testJetStreamEventBus = &v1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      testName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			JetStream: &v1alpha1.JetStreamBus{
+				Version: "2.7.3",
+			},
+		},
+	}
+)
+
+func TestJetStreamBadInstallation(t *testing.T) {
+	t.Run("bad installation", func(t *testing.T) {
+		badEventBus := testJetStreamEventBus.DeepCopy()
+		badEventBus.Spec.JetStream = nil
+		installer := &jetStreamInstaller{
+			client:   fake.NewClientBuilder().Build(),
+			eventBus: badEventBus,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   zaptest.NewLogger(t).Sugar(),
+		}
+		_, err := installer.Install(context.TODO())
+		assert.Error(t, err)
+	})
+}
+
+func TestJetStreamGenerateNames(t *testing.T) {
+	n := generateJetStreamStatefulSetName(testJetStreamEventBus)
+	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js", n)
+	n = generateJetStreamServerSecretName(testJetStreamEventBus)
+	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-server", n)
+	n = generateJetStreamClientAuthSecretName(testJetStreamEventBus)
+	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-client-auth", n)
+	n = generateJetStreamConfigMapName(testJetStreamEventBus)
+	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-config", n)
+	n = generateJetStreamPVCName(testJetStreamEventBus)
+	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-vol", n)
+	n = generateJetStreamServiceName(testJetStreamEventBus)
+	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-svc", n)
+}
+
+func TestJetStreamCreateObjects(t *testing.T) {
+	cl := fake.NewClientBuilder().Build()
+	ctx := context.TODO()
+	i := &jetStreamInstaller{
+		client:   cl,
+		eventBus: testJetStreamEventBus,
+		config:   fakeConfig,
+		labels:   testLabels,
+		logger:   zaptest.NewLogger(t).Sugar(),
+	}
+
+	t.Run("test create sts", func(t *testing.T) {
+		testObj := testJetStreamEventBus.DeepCopy()
+		i.eventBus = testObj
+		err := i.createStatefulSet(ctx)
+		assert.NoError(t, err)
+		sts := &appv1.StatefulSet{}
+		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamStatefulSetName(testObj)}, sts)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, len(sts.Spec.Template.Spec.Containers))
+		assert.Contains(t, sts.Annotations, common.AnnotationResourceSpecHash)
+		assert.Equal(t, testJetStreamImage, sts.Spec.Template.Spec.Containers[0].Image)
+		assert.Equal(t, testJSReloaderImage, sts.Spec.Template.Spec.Containers[1].Image)
+		assert.Equal(t, testJetStreamExporterImage, sts.Spec.Template.Spec.Containers[2].Image)
+		assert.True(t, len(sts.Spec.Template.Spec.Volumes) > 1)
+		envNames := []string{}
+		for _, e := range sts.Spec.Template.Spec.Containers[0].Env {
+			envNames = append(envNames, e.Name)
+		}
+		for _, e := range []string{"POD_NAME", "SERVER_NAME", "POD_NAMESPACE", "CLUSTER_ADVERTISE", "JS_KEY"} {
+			assert.Contains(t, envNames, e)
+		}
+	})
+
+	t.Run("test create svc", func(t *testing.T) {
+		testObj := testJetStreamEventBus.DeepCopy()
+		i.eventBus = testObj
+		err := i.createService(ctx)
+		assert.NoError(t, err)
+		svc := &corev1.Service{}
+		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamServiceName(testObj)}, svc)
+		assert.NoError(t, err)
+		assert.Equal(t, 4, len(svc.Spec.Ports))
+		assert.Contains(t, svc.Annotations, common.AnnotationResourceSpecHash)
+	})
+
+	t.Run("test create auth secrets", func(t *testing.T) {
+		testObj := testJetStreamEventBus.DeepCopy()
+		i.eventBus = testObj
+		err := i.createSecrets(ctx)
+		assert.NoError(t, err)
+		s := &corev1.Secret{}
+		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamServerSecretName(testObj)}, s)
+		assert.NoError(t, err)
+		assert.Equal(t, 8, len(s.Data))
+		assert.Contains(t, s.Data, common.JetStreamServerSecretAuthKey)
+		assert.Contains(t, s.Data, common.JetStreamServerSecretEncryptionKey)
+		assert.Contains(t, s.Data, common.JetStreamServerPrivateKeyKey)
+		assert.Contains(t, s.Data, common.JetStreamServerCertKey)
+		assert.Contains(t, s.Data, common.JetStreamServerCACertKey)
+		assert.Contains(t, s.Data, common.JetStreamClusterPrivateKeyKey)
+		assert.Contains(t, s.Data, common.JetStreamClusterCertKey)
+		assert.Contains(t, s.Data, common.JetStreamClusterCACertKey)
+		s = &corev1.Secret{}
+		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamClientAuthSecretName(testObj)}, s)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(s.Data))
+		assert.Contains(t, s.Data, common.JetStreamClientAuthSecretKey)
+	})
+
+	t.Run("test create configmap", func(t *testing.T) {
+		testObj := testJetStreamEventBus.DeepCopy()
+		i.eventBus = testObj
+		err := i.createConfigMap(ctx)
+		assert.NoError(t, err)
+		c := &corev1.ConfigMap{}
+		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamConfigMapName(testObj)}, c)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(c.Data))
+		assert.Contains(t, c.Annotations, common.AnnotationResourceSpecHash)
+	})
+}
+
+func TestBuildJetStreamStatefulSetSpec(t *testing.T) {
+	cl := fake.NewClientBuilder().Build()
+	i := &jetStreamInstaller{
+		client:   cl,
+		eventBus: testJetStreamEventBus,
+		config:   fakeConfig,
+		labels:   testLabels,
+		logger:   zaptest.NewLogger(t).Sugar(),
+	}
+
+	t.Run("without persistence", func(t *testing.T) {
+		s := i.buildStatefulSetSpec(&fakeConfig.EventBus.JetStream.Versions[0])
+		assert.Equal(t, int32(3), *s.Replicas)
+		assert.Equal(t, generateJetStreamServiceName(testJetStreamEventBus), s.ServiceName)
+		assert.Equal(t, testJetStreamImage, s.Template.Spec.Containers[0].Image)
+		assert.Equal(t, testJSReloaderImage, s.Template.Spec.Containers[1].Image)
+		assert.Equal(t, testJetStreamExporterImage, s.Template.Spec.Containers[2].Image)
+		assert.Equal(t, "test-controller", s.Selector.MatchLabels["controller"])
+		assert.Equal(t, jsClientPort, s.Template.Spec.Containers[0].Ports[0].ContainerPort)
+		assert.Equal(t, jsClusterPort, s.Template.Spec.Containers[0].Ports[1].ContainerPort)
+		assert.Equal(t, jsMonitorPort, s.Template.Spec.Containers[0].Ports[2].ContainerPort)
+		assert.Equal(t, jsMetricsPort, s.Template.Spec.Containers[2].Ports[0].ContainerPort)
+		assert.False(t, len(s.VolumeClaimTemplates) > 0)
+		assert.True(t, len(s.Template.Spec.Volumes) > 0)
+	})
+
+	t.Run("with persistence", func(t *testing.T) {
+		st := "test"
+		i.eventBus.Spec.JetStream = &v1alpha1.JetStreamBus{
+			Persistence: &v1alpha1.PersistenceStrategy{
+				StorageClassName: &st,
+			},
+		}
+		s := i.buildStatefulSetSpec(&fakeConfig.EventBus.JetStream.Versions[0])
+		assert.True(t, len(s.VolumeClaimTemplates) > 0)
+	})
+}
+
+func TestJetStreamGetServiceSpec(t *testing.T) {
+	cl := fake.NewClientBuilder().Build()
+	i := &jetStreamInstaller{
+		client:   cl,
+		eventBus: testJetStreamEventBus,
+		config:   fakeConfig,
+		labels:   testLabels,
+		logger:   zaptest.NewLogger(t).Sugar(),
+	}
+	spec := i.buildJetStreamServiceSpec()
+	assert.Equal(t, 4, len(spec.Ports))
+	assert.Equal(t, corev1.ClusterIPNone, spec.ClusterIP)
+}
+
+func Test_JSBufferGetReplicas(t *testing.T) {
+	s := v1alpha1.JetStreamBus{}
+	assert.Equal(t, 3, s.GetReplicas())
+	five := int32(5)
+	s.Replicas = &five
+	assert.Equal(t, 5, s.GetReplicas())
+	two := int32(2)
+	s.Replicas = &two
+	assert.Equal(t, 3, s.GetReplicas())
+}
