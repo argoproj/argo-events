@@ -13,7 +13,7 @@
     
     
       
-        <title>Filtering EventSources - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Antiaffinity - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#filtering-eventsources" class="md-skip">
+        <a href="#anti-affinity" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Filtering EventSources
+              Antiaffinity
             
           </span>
         </div>
@@ -554,12 +554,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
       
       
       
@@ -582,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../eventbus/eventbus/" class="md-nav__link">
+      <a href="../eventbus/" class="md-nav__link">
         EventBus
       </a>
     </li>
@@ -596,7 +598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../eventbus/stan/" class="md-nav__link">
+      <a href="../stan/" class="md-nav__link">
         Stan
       </a>
     </li>
@@ -610,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../eventbus/jetstream/" class="md-nav__link">
+      <a href="../jetstream/" class="md-nav__link">
         Jetstream
       </a>
     </li>
@@ -622,11 +624,48 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../eventbus/antiaffinity/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Antiaffinity
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Antiaffinity
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anti-affinity" class="md-nav__link">
+    Anti-affinity
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -644,14 +683,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
       
       
       
@@ -700,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/amqp/" class="md-nav__link">
+      <a href="../../eventsources/setup/amqp/" class="md-nav__link">
         AMQP
       </a>
     </li>
@@ -714,7 +751,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/aws-sns/" class="md-nav__link">
+      <a href="../../eventsources/setup/aws-sns/" class="md-nav__link">
         AWS SNS
       </a>
     </li>
@@ -728,7 +765,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/aws-sqs/" class="md-nav__link">
+      <a href="../../eventsources/setup/aws-sqs/" class="md-nav__link">
         AWS SQS
       </a>
     </li>
@@ -742,7 +779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/calendar/" class="md-nav__link">
+      <a href="../../eventsources/setup/calendar/" class="md-nav__link">
         Calendar
       </a>
     </li>
@@ -756,7 +793,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/emitter/" class="md-nav__link">
+      <a href="../../eventsources/setup/emitter/" class="md-nav__link">
         Emitter
       </a>
     </li>
@@ -770,7 +807,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/file/" class="md-nav__link">
+      <a href="../../eventsources/setup/file/" class="md-nav__link">
         File
       </a>
     </li>
@@ -784,7 +821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/gcp-pub-sub/" class="md-nav__link">
+      <a href="../../eventsources/setup/gcp-pub-sub/" class="md-nav__link">
         GCP Pub/Sub
       </a>
     </li>
@@ -798,7 +835,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/github/" class="md-nav__link">
+      <a href="../../eventsources/setup/github/" class="md-nav__link">
         GitHub
       </a>
     </li>
@@ -812,7 +849,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/gitlab/" class="md-nav__link">
+      <a href="../../eventsources/setup/gitlab/" class="md-nav__link">
         GitLab
       </a>
     </li>
@@ -826,7 +863,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/bitbucket/" class="md-nav__link">
+      <a href="../../eventsources/setup/bitbucket/" class="md-nav__link">
         Bitbucket (Cloud)
       </a>
     </li>
@@ -840,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/bitbucketserver/" class="md-nav__link">
+      <a href="../../eventsources/setup/bitbucketserver/" class="md-nav__link">
         Bitbucket Server
       </a>
     </li>
@@ -854,7 +891,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/kafka/" class="md-nav__link">
+      <a href="../../eventsources/setup/kafka/" class="md-nav__link">
         Kafka
       </a>
     </li>
@@ -868,7 +905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/minio/" class="md-nav__link">
+      <a href="../../eventsources/setup/minio/" class="md-nav__link">
         Minio
       </a>
     </li>
@@ -882,7 +919,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/mqtt/" class="md-nav__link">
+      <a href="../../eventsources/setup/mqtt/" class="md-nav__link">
         MQTT
       </a>
     </li>
@@ -896,7 +933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/nats/" class="md-nav__link">
+      <a href="../../eventsources/setup/nats/" class="md-nav__link">
         NATS
       </a>
     </li>
@@ -910,7 +947,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/nsq/" class="md-nav__link">
+      <a href="../../eventsources/setup/nsq/" class="md-nav__link">
         NSQ
       </a>
     </li>
@@ -924,7 +961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/redis/" class="md-nav__link">
+      <a href="../../eventsources/setup/redis/" class="md-nav__link">
         Redis
       </a>
     </li>
@@ -938,7 +975,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/resource/" class="md-nav__link">
+      <a href="../../eventsources/setup/resource/" class="md-nav__link">
         Resource
       </a>
     </li>
@@ -952,7 +989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/webhook/" class="md-nav__link">
+      <a href="../../eventsources/setup/webhook/" class="md-nav__link">
         Webhook
       </a>
     </li>
@@ -966,7 +1003,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/pulsar/" class="md-nav__link">
+      <a href="../../eventsources/setup/pulsar/" class="md-nav__link">
         Pulsar
       </a>
     </li>
@@ -987,7 +1024,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../multiple-events/" class="md-nav__link">
+      <a href="../../eventsources/multiple-events/" class="md-nav__link">
         EventSource With Multiple Events
       </a>
     </li>
@@ -1001,7 +1038,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../naming/" class="md-nav__link">
+      <a href="../../eventsources/naming/" class="md-nav__link">
         EventSource Names
       </a>
     </li>
@@ -1015,7 +1052,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services/" class="md-nav__link">
+      <a href="../../eventsources/services/" class="md-nav__link">
         EventSource Services
       </a>
     </li>
@@ -1029,7 +1066,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ha/" class="md-nav__link">
+      <a href="../../eventsources/ha/" class="md-nav__link">
         EventSource High Availability
       </a>
     </li>
@@ -1041,21 +1078,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../eventsources/filtering/" class="md-nav__link">
         Filtering EventSources
       </a>
-      
     </li>
   
 
@@ -1067,7 +1094,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../webhook-authentication/" class="md-nav__link">
+      <a href="../../eventsources/webhook-authentication/" class="md-nav__link">
         Webhook Authentication
       </a>
     </li>
@@ -1081,7 +1108,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../webhook-health-check/" class="md-nav__link">
+      <a href="../../eventsources/webhook-health-check/" class="md-nav__link">
         Webhook Health Check
       </a>
     </li>
@@ -1095,7 +1122,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calendar-catch-up/" class="md-nav__link">
+      <a href="../../eventsources/calendar-catch-up/" class="md-nav__link">
         Calender EventSource Catch Up
       </a>
     </li>
@@ -1109,7 +1136,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../gcp-pubsub/" class="md-nav__link">
+      <a href="../../eventsources/gcp-pubsub/" class="md-nav__link">
         GCP PubSub
       </a>
     </li>
@@ -1123,7 +1150,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../generic/" class="md-nav__link">
+      <a href="../../eventsources/generic/" class="md-nav__link">
         Generic EventSource
       </a>
     </li>
@@ -1715,8 +1742,21 @@
   
   
   
-    
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anti-affinity" class="md-nav__link">
+    Anti-affinity
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1728,62 +1768,42 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/argoproj/argo-events/edit/master/docs/eventsources/filtering.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/argoproj/argo-events/edit/master/docs/eventbus/antiaffinity.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="filtering-eventsources">Filtering EventSources<a class="headerlink" href="#filtering-eventsources" title="Permanent link">&para;</a></h1>
-<p>When event sources watch events from external data sources (ie. Kafka topics), it will ingest all messages.
-With filtering, we are able to apply constraints and determine if the event should be published or skipped.
-This is achieved by evaluating an expression in the EventSource spec.</p>
-<h1 id="fields">Fields<a class="headerlink" href="#fields" title="Permanent link">&para;</a></h1>
-<p>A <code>filter</code> in an example Kafka EventSource:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span><span class="w"></span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventSource</span><span class="w"></span>
-<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka</span><span class="w"></span>
-<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">kafka</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">example</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka.argo-events:9092</span><span class="w"></span>
-<span class="w">      </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">topic-2</span><span class="w"></span>
-<span class="w">      </span><span class="nt">jsonBody</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="nt">partition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="c1"># filter field </span><span class="w"></span>
-<span class="w">        </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(body.id</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">4)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">(body.name</span><span class="nv"> </span><span class="s">!=</span><span class="nv"> </span><span class="s">&#39;Joe&#39;)&quot;</span><span class="w"> </span><span class="c1">#expression to be evaluated</span><span class="w"></span>
-<span class="w">      </span><span class="nt">connectionBackoff</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span><span class="w"></span>
-<span class="w">        </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
-<span class="w">        </span><span class="nt">factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
-<span class="w">        </span><span class="nt">jitter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"></span>
+  <h1>Antiaffinity</h1>
+
+<h2 id="anti-affinity">Anti-affinity<a class="headerlink" href="#anti-affinity" title="Permanent link">&para;</a></h2>
+<p>Kubernetes offers a concept of <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/">anti-affinity</a>, meaning that pods are scheduled on separate nodes. The anti-affinity can either be "best effort" or a hard requirement.</p>
+<p>A best effort and a hard requirement node anti-affinity config look like
+  below, if you want to do AZ (Availability Zone) anti-affinity, change the value
+  of <code>topologyKey</code> from <code>kubernetes.io/hostname</code> to
+  <code>topology.kubernetes.io/zone</code>.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Best effort</span><span class="w"></span>
+<span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podAffinityTerm</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
+<span class="w">              </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">          </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
+<span class="w">        </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
 </code></pre></div>
 
-<p>The <code>expression</code> string is evaluated with the <a href="https://github.com/antonmedv/expr">expr</a> package which offers a wide set of basic operators and comparators.</p>
-<h1 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h1>
-<ol>
-<li>Creating a Kafka EventSource with filter field present</li>
-</ol>
-<div class="codehilite"><pre><span></span><code>kubectl apply -f examples/event-sources/kafka.yaml -n argo-events
-</code></pre></div>
-
-<ol>
-<li>Sending an event with passing filter conditions to kafka</li>
-</ol>
-<div class="codehilite"><pre><span></span><code><span class="n">echo</span><span class="w"> </span><span class="s1">&#39;{&quot;id&quot;: 4,&quot;name&quot;: &quot;John&quot;, &quot;email&quot;: &quot;john@intuit.com&quot;, &quot;department&quot;:{&quot;id&quot;: 1,&quot;name&quot;: &quot;HR&quot;,&quot;bu&quot;:{&quot;id&quot;: 2,&quot;name&quot; : &quot;devp&quot;}}}&#39;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">kcat</span><span class="w"> </span><span class="o">-</span><span class="n">b</span><span class="w"> </span><span class="nl">localhost</span><span class="p">:</span><span class="mi">9092</span><span class="w"> </span><span class="o">-</span><span class="n">P</span><span class="w"> </span><span class="o">-</span><span class="n">t</span><span class="w"> </span><span class="n">topic</span><span class="o">-</span><span class="mi">2</span><span class="w"></span>
-</code></pre></div>
-
-<ol>
-<li>Sending an event with failing filter conditions</li>
-</ol>
-<div class="codehilite"><pre><span></span><code><span class="n">echo</span><span class="w"> </span><span class="s1">&#39;{&quot;id&quot;: 2,&quot;name&quot;: &quot;Johnson&quot;, &quot;email&quot;: &quot;john@intuit.com&quot;, &quot;department&quot;:{&quot;id&quot;: 1,&quot;name&quot;: &quot;HR&quot;,&quot;bu&quot;:{&quot;id&quot;: 2,&quot;name&quot; : &quot;devp&quot;}}}&#39;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">kcat</span><span class="w"> </span><span class="o">-</span><span class="n">b</span><span class="w"> </span><span class="nl">localhost</span><span class="p">:</span><span class="mi">9092</span><span class="w"> </span><span class="o">-</span><span class="n">P</span><span class="w"> </span><span class="o">-</span><span class="n">t</span><span class="w"> </span><span class="n">topic</span><span class="o">-</span><span class="mi">2</span><span class="w"></span>
-</code></pre></div>
-
-<h1 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h1>
-<p>Successful logs from kafka event source pod:</p>
-<div class="codehilite"><pre><span></span><code><span class="err">{</span><span class="ss">&quot;level&quot;</span><span class="err">:</span><span class="ss">&quot;info&quot;</span><span class="p">,</span><span class="ss">&quot;ts&quot;</span><span class="err">:</span><span class="mf">1644017495.0711913</span><span class="p">,</span><span class="ss">&quot;logger&quot;</span><span class="err">:</span><span class="ss">&quot;argo-events.eventsource&quot;</span><span class="p">,</span><span class="ss">&quot;caller&quot;</span><span class="err">:</span><span class="ss">&quot;kafka/start.go:217&quot;</span><span class="p">,</span><span class="ss">&quot;msg&quot;</span><span class="err">:</span><span class="ss">&quot;dispatching event on the data channel...&quot;</span><span class="p">,</span><span class="ss">&quot;eventSourceName&quot;</span><span class="err">:</span><span class="ss">&quot;kafka&quot;</span><span class="p">,</span><span class="ss">&quot;eventSourceType&quot;</span><span class="err">:</span><span class="ss">&quot;kafka&quot;</span><span class="p">,</span><span class="ss">&quot;eventName&quot;</span><span class="err">:</span><span class="ss">&quot;example&quot;</span><span class="p">,</span><span class="ss">&quot;partition-id&quot;</span><span class="err">:</span><span class="ss">&quot;0&quot;</span><span class="err">}</span><span class="w"></span>
-<span class="err">{</span><span class="ss">&quot;level&quot;</span><span class="err">:</span><span class="ss">&quot;info&quot;</span><span class="p">,</span><span class="ss">&quot;ts&quot;</span><span class="err">:</span><span class="mf">1644017495.1374986</span><span class="p">,</span><span class="ss">&quot;logger&quot;</span><span class="err">:</span><span class="ss">&quot;argo-events.eventsource&quot;</span><span class="p">,</span><span class="ss">&quot;caller&quot;</span><span class="err">:</span><span class="ss">&quot;eventsources/eventing.go:514&quot;</span><span class="p">,</span><span class="ss">&quot;msg&quot;</span><span class="err">:</span><span class="ss">&quot;succeeded to publish an event&quot;</span><span class="p">,</span><span class="ss">&quot;eventSourceName&quot;</span><span class="err">:</span><span class="ss">&quot;kafka&quot;</span><span class="p">,</span><span class="ss">&quot;eventName&quot;</span><span class="err">:</span><span class="ss">&quot;example&quot;</span><span class="p">,</span><span class="ss">&quot;eventSourceType&quot;</span><span class="err">:</span><span class="ss">&quot;kafka&quot;</span><span class="p">,</span><span class="ss">&quot;eventID&quot;</span><span class="err">:</span><span class="ss">&quot;kafka:example:kafka-broker:9092:topic-2:0:7&quot;</span><span class="err">}</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Hard requirement</span><span class="w"></span>
+<span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
+<span class="w">            </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="w">        </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
 </code></pre></div>
 
               
@@ -1798,7 +1818,7 @@ This is achieved by evaluating an expression in the EventSource spec.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../ha/" class="md-footer__link md-footer__link--prev" aria-label="Previous: EventSource High Availability" rel="prev">
+        <a href="../jetstream/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Jetstream" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1807,20 +1827,20 @@ This is achieved by evaluating an expression in the EventSource spec.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              EventSource High Availability
+              Jetstream
             </div>
           </div>
         </a>
       
       
         
-        <a href="../webhook-authentication/" class="md-footer__link md-footer__link--next" aria-label="Next: Webhook Authentication" rel="next">
+        <a href="../../eventsources/setup/amqp/" class="md-footer__link md-footer__link--next" aria-label="Next: AMQP" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Webhook Authentication
+              AMQP
             </div>
           </div>
           <div class="md-footer__button md-icon">
