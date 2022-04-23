@@ -313,8 +313,8 @@ Or you can terminate it any time by Ctrl + C.
 	sensorMap := map[string]int64{}
 	sensorTimeMap := map[string]time.Time{}
 
-	var esLock = &sync.Mutex{}
-	var sensorLock = &sync.Mutex{}
+	var esLock = &sync.RWMutex{}
+	var sensorLock = &sync.RWMutex{}
 
 	startTime := time.Now()
 
@@ -360,6 +360,7 @@ Or you can terminate it any time by Ctrl + C.
 				}
 				timeout := 5 * 60 * time.Second
 				lastActionTime := startTime
+				sensorLock.RLock()
 				if len(sensorMap) > 0 && len(sensorTimeMap) > 0 {
 					timeout = o.idleTimeout
 					for _, v := range sensorTimeMap {
@@ -368,6 +369,7 @@ Or you can terminate it any time by Ctrl + C.
 						}
 					}
 				}
+				sensorLock.RUnlock()
 
 				if time.Since(lastActionTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited Sensor Pod %s due to no actions in the last %v\n", podName, o.idleTimeout)
@@ -444,6 +446,8 @@ Or you can terminate it any time by Ctrl + C.
 				}
 				timeout := 5 * 60 * time.Second
 				lastEventTime := startTime
+
+				esLock.RLock()
 				if len(esMap) > 0 && len(esTimeMap) > 0 {
 					timeout = o.idleTimeout
 					for _, v := range esTimeMap {
@@ -452,6 +456,7 @@ Or you can terminate it any time by Ctrl + C.
 						}
 					}
 				}
+				esLock.RUnlock()
 				if time.Since(lastEventTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited EventSource Pod %s due to no active events in the last %v\n", podName, o.idleTimeout)
 					return
