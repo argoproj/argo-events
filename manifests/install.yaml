@@ -297,7 +297,7 @@ subjects:
 ---
 apiVersion: v1
 data:
-  controller-config.yaml: |+
+  controller-config.yaml: |
     eventBus:
       nats:
         versions:
@@ -321,22 +321,21 @@ data:
           replicas: 3
           duplicates: 300s
         versions:
-        - version: latest
-          natsImage: nats:latest
-          metricsExporterImage: natsio/prometheus-nats-exporter:latest
-          configReloaderImage: natsio/nats-server-config-reloader:latest
-          startCommand: nats-server
-        - version: 2.7.4
-          natsImage: nats:2.7.4
+        - version: stable
+          natsImage: nats:2.8.1
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.6.3
           startCommand: /nats-server
-        - version: 2.7.4-alpine
-          natsImage: nats:2.7.4-alpine
+        - version: 2.8.1
+          natsImage: nats:2.8.1
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
+          configReloaderImage: natsio/nats-server-config-reloader:0.6.3
+          startCommand: /nats-server
+        - version: 2.8.1-alpine
+          natsImage: nats:2.8.1-alpine
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.6.3
           startCommand: nats-server
-
 kind: ConfigMap
 metadata:
   name: argo-events-controller-config
