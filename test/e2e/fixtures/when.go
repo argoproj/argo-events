@@ -122,7 +122,7 @@ func (w *When) Exec(name string, args []string, block func(t *testing.T, output 
 func (w *When) WaitForEventBusReady() *When {
 	w.t.Helper()
 	ctx := context.Background()
-	if err := testutil.WaitForEventBusReady(ctx, w.eventBusClient, w.eventBus.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForEventBusReady(ctx, w.eventBusClient, w.eventBus.Name, 2*time.Minute); err != nil {
 		w.t.Fatal(err)
 	}
 	if err := testutil.WaitForEventBusStatefulSetReady(ctx, w.kubeClient, Namespace, w.eventBus.Name, defaultTimeout); err != nil {
