@@ -51,7 +51,7 @@ metadata:
   name: default
 spec:
   jetstream:
-    version: latest`
+    version: stable`
 )
 
 type E2ESuite struct {
