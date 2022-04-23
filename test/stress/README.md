@@ -46,7 +46,7 @@ For example, command below creates a `webhook` EventSource and a Sensor with
 It will exit in 5 minutes and clean up the created resources.
 
 ```shell
-go run ./test/stress/main.go --es-type webhook --trigger-type log --hard-timeout 5m
+go run ./test/stress/main.go --eb-type jetstream --es-type webhook --trigger-type log --hard-timeout 5m
 ```
 
 The spec of `webhook` EventSource is located in
@@ -82,5 +82,5 @@ It could also hook into your existing EventSources and Sensors to give a simple
 report.
 
 ```shell
-go run ./test/stress/main.go --es-name my-sqs-es --sensor-name my-sensor --hard-timeout 5m
+go run ./test/stress/main.go --eb-type jetstream --es-name my-sqs-es --sensor-name my-sensor --hard-timeout 5m
 ```
