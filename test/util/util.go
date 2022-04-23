@@ -107,6 +107,8 @@ statefulSetWatch:
 					if _, existing := podNames[p.GetName()]; !existing {
 						podNames[p.GetName()] = true
 					}
+				} else {
+					fmt.Printf("pod: %s, phase: %v\n", p.GetName(), p.Status.Phase)
 				}
 			} else {
 				return fmt.Errorf("not pod")
