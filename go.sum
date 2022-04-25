@@ -1231,8 +1231,8 @@ github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4/go.mod h1:50w
 github.com/valyala/tcplisten v0.0.0-20161114210144-ceec8f93295a/go.mod h1:v3UYOV9WzVtRmSR+PDvWpU/qWl4Wa5LApYYX4ZtKbio=
 github.com/valyala/tcplisten v1.0.0/go.mod h1:T0xQ8SeCZGxckz9qRXTfG43PvQ/mcWh7FwZEA7Ioqkc=
 github.com/vektah/gqlparser v1.1.2/go.mod h1:1ycwN7Ij5njmMkPPAOaRFY4rET2Enx7IkVv3vaXspKw=
-github.com/xanzy/go-gitlab v0.63.0 h1:a9fXpKWykUS6dowapFej/2Wjf4aOAEFC1q2ZIcz4IpI=
-github.com/xanzy/go-gitlab v0.63.0/go.mod h1:F0QEXwmqiBUxCgJm8fE9S+1veX4XC9Z4cfaAbqwk4YM=
+github.com/xanzy/go-gitlab v0.64.0 h1:rMgQdW9S1w3qvNAH2LYpFd2xh7KNLk+JWJd7sorNuTc=
+github.com/xanzy/go-gitlab v0.64.0/go.mod h1:F0QEXwmqiBUxCgJm8fE9S+1veX4XC9Z4cfaAbqwk4YM=
 github.com/xanzy/ssh-agent v0.3.0 h1:wUMzuKtKilRgBAD1sUb8gOwwRr2FGoBVumcjoOACClI=
 github.com/xanzy/ssh-agent v0.3.0/go.mod h1:3s9xbODqPuuhK9JV1R321M/FlMZSBvE5aY6eAcqrDh0=
 github.com/xdg-go/pbkdf2 v1.0.0 h1:Su7DPu48wXMwC3bs7MCNG+z4FhcyEuz5dlvchbq0B0c=
