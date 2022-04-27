@@ -29,10 +29,10 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 ## Setup
 
-> **_NOTE:_** In this setup, we will use the basic auth strategy together with [App password](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) (there is also support for [OAuth](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/)). 
+> **_NOTE:_** In this setup, we will use the basic auth strategy together with [App password](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) (there is also support for [OAuth](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/)).
 
 1. Create an App password if you don't have one. Follow [instructions](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) to create a new Bitbucket App password.
-   Grant it the `Webhooks - Read and Write` permissions. 
+   Grant it the `Webhooks - Read and Write` permissions as well as any permissions that applies to the events that the webhook subscribes to (e.g. if you're using the [example event-source yaml file](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml) which subscribes to `repo:push` event then you would also need to grant the `Repositories - Read` permission).
 
 1. Base64 encode your App password and your Bitbucket username.
 
@@ -56,11 +56,11 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1. The event-source for Bitbucket creates a pod and exposes it via service.
    The name for the service is in `<event-source-name>-eventsource-svc` format.
-   You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket.
+   You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from Bitbucket.
    You can find more information on Ingress or Route online.
 
-1. Create the event source by running the following command. You can use the example event-source yaml file from [here](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml) but make sure to replace the `url` field and to modify the `owner`, `repositorySlug` and `projectKey` with your own repo.
-   
+1. Create the event source by running the following command. You can use the [example event-source yaml file](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucket.yaml) but make sure to replace the `url` field and to modify `owner`, `repositorySlug` and `projectKey` fields with your own repo.
+
         kubectl apply -n argo-events -f <event-source-file>
 
 1. Go to `Webhooks` under your project settings on Bitbucket and verify the webhook is registered. You can also do the same by looking at the event-source pod logs.
@@ -71,7 +71,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1. Make a change to one of your project files and commit. It will trigger an argo workflow.
 
-1. Run `argo list` to find the workflow. 
+1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

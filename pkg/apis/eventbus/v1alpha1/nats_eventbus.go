@@ -20,6 +20,7 @@ type AuthStrategy string
 var (
 	AuthStrategyNone  AuthStrategy = "none"
 	AuthStrategyToken AuthStrategy = "token"
+	AuthStrategyBasic AuthStrategy = "basic"
 )
 
 // NativeStrategy indicates to install a native NATS service

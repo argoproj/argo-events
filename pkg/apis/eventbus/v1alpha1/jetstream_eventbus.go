@@ -74,6 +74,14 @@ type JetStreamBus struct {
 	// Only configure "max_memory_store" or "max_file_store", do not set "store_dir" as it has been hardcoded.
 	// +optional
 	Settings *string `json:"settings,omitempty" protobuf:"bytes,16,opt,name=settings"`
+	// Optional arguments to start nats-server. For example, "-D" to enable debugging output, "-DV" to enable debugging and tracing.
+	// Check https://docs.nats.io/ for all the available arguments.
+	// +optional
+	StartArgs []string `json:"startArgs,omitempty" protobuf:"bytes,17,rep,name=startArgs"`
+	// Optional configuration for the streams to be created in this JetStream service, if specified, it will be merged with the default configuration in controller-config.
+	// It accepts a YAML format configuration, available fields include, "maxBytes", "maxMsgs", "maxAge" (e.g. 72h), "replicas" (1, 3, 5), "duplicates" (e.g. 5m).
+	// +optional
+	StreamConfig *string `json:"streamConfig,omitempty" protobuf:"bytes,18,opt,name=streamConfig"`
 }
 
 func (j JetStreamBus) GetReplicas() int {
@@ -88,12 +96,10 @@ func (j JetStreamBus) GetReplicas() int {
 
 type JetStreamConfig struct {
 	// JetStream (Nats) URL
-	URL  string         `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	Auth *JetStreamAuth `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
-}
-
-type JetStreamAuth struct {
-	// Secret for auth token
+	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
+	// Secret for auth
 	// +optional
-	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,1,opt,name=token"`
+	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,2,opt,name=accessSecret"`
+	// +optional
+	StreamConfig string `json:"streamConfig,omitempty" protobuf:"bytes,3,opt,name=streamConfig"`
 }

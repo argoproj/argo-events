@@ -36,7 +36,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusList":        schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec":        schema_pkg_apis_eventbus_v1alpha1_EventBusSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusStatus":      schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamAuth":       schema_pkg_apis_eventbus_v1alpha1_JetStreamAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamBus":        schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig":     schema_pkg_apis_eventbus_v1alpha1_JetStreamConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSBus":             schema_pkg_apis_eventbus_v1alpha1_NATSBus(ref),
@@ -268,26 +267,6 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 	}
 }
 
-func schema_pkg_apis_eventbus_v1alpha1_JetStreamAuth(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"token": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Secret for auth token",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
-	}
-}
-
 func schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -428,6 +407,28 @@ func schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref common.ReferenceCallback
 							Format:      "",
 						},
 					},
+					"startArgs": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Optional arguments to start nats-server. For example, \"-D\" to enable debugging output, \"-DV\" to enable debugging and tracing. Check https://docs.nats.io/ for all the available arguments.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"streamConfig": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Optional configuration for the streams to be created in this JetStream service, if specified, it will be merged with the default configuration in controller-config. It accepts a YAML format configuration, available fields include, \"maxBytes\", \"maxMsgs\", \"maxAge\" (e.g. 72h), \"replicas\" (1, 3, 5), \"duplicates\" (e.g. 5m).",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -449,16 +450,23 @@ func schema_pkg_apis_eventbus_v1alpha1_JetStreamConfig(ref common.ReferenceCallb
 							Format:      "",
 						},
 					},
-					"auth": {
+					"accessSecret": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamAuth"),
+							Description: "Secret for auth",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"streamConfig": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamAuth"},
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -16,10 +18,13 @@ import (
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/yaml"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/tls"
 	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -34,6 +39,18 @@ const (
 var (
 	//go:embed assets/jetstream/*
 	jetStremAssets embed.FS
+)
+
+const (
+	secretServerKeyPEMFile  = "server-key.pem"
+	secretServerCertPEMFile = "server-cert.pem"
+	secretCACertPEMFile     = "ca-cert.pem"
+
+	secretClusterKeyPEMFile    = "cluster-server-key.pem"
+	secretClusterCertPEMFile   = "cluster-server-cert.pem"
+	secretClusterCACertPEMFile = "cluster-ca-cert.pem"
+
+	certOrg = "io.argoproj"
 )
 
 type jetStreamInstaller struct {
@@ -58,7 +75,23 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 	if js := r.eventBus.Spec.JetStream; js == nil {
 		return nil, fmt.Errorf("invalid jetstream eventbus spec")
 	}
-	if err := r.createAuthSecrets(ctx); err != nil {
+	// merge
+	v := viper.New()
+	v.SetConfigType("yaml")
+	if err := v.ReadConfig(bytes.NewBufferString(r.config.EventBus.JetStream.StreamConfig)); err != nil {
+		return nil, fmt.Errorf("invalid jetstream config in global configuration, %w", err)
+	}
+	if x := r.eventBus.Spec.JetStream.StreamConfig; x != nil {
+		if err := v.MergeConfig(bytes.NewBufferString(*x)); err != nil {
+			return nil, fmt.Errorf("failed to merge customized stream config, %w", err)
+		}
+	}
+	b, err := yaml.Marshal(v.AllSettings())
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal merged buffer config, %w", err)
+	}
+
+	if err := r.createSecrets(ctx); err != nil {
 		r.logger.Errorw("failed to create jetstream auth secrets", zap.Error(err))
 		r.eventBus.Status.MarkDeployFailed("JetStreamAuthSecretsFailed", err.Error())
 		return nil, err
@@ -81,15 +114,14 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 	r.eventBus.Status.MarkDeployed("Succeeded", "JetStream is deployed")
 	return &v1alpha1.BusConfig{
 		JetStream: &v1alpha1.JetStreamConfig{
-			URL: fmt.Sprintf("nats://%s:%s", generateJetStreamServiceName(r.eventBus), strconv.Itoa(int(jsClientPort))),
-			Auth: &v1alpha1.JetStreamAuth{
-				Token: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: generateJetStreamClientAuthSecretName(r.eventBus),
-					},
-					Key: common.JetStreamClientAuthSecretKey,
+			URL: fmt.Sprintf("nats://%s.%s.svc.cluster.local:%s", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace, strconv.Itoa(int(jsClientPort))),
+			AccessSecret: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: generateJetStreamClientAuthSecretName(r.eventBus),
 				},
+				Key: common.JetStreamClientAuthSecretKey,
 			},
+			StreamConfig: string(b),
 		},
 	}, nil
 }
@@ -103,9 +135,10 @@ func (r *jetStreamInstaller) buildJetStreamServiceSpec() corev1.ServiceSpec {
 			{Name: "metrics", Port: jsMetricsPort},
 			{Name: "monitor", Port: jsMonitorPort},
 		},
-		Type:      corev1.ServiceTypeClusterIP,
-		ClusterIP: corev1.ClusterIPNone,
-		Selector:  r.labels,
+		Type:                     corev1.ServiceTypeClusterIP,
+		ClusterIP:                corev1.ClusterIPNone,
+		PublishNotReadyAddresses: true,
+		Selector:                 r.labels,
 	}
 }
 
@@ -267,12 +300,36 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 									{
 										Secret: &corev1.SecretProjection{
 											LocalObjectReference: corev1.LocalObjectReference{
-												Name: generateJetStreamServerAuthSecretName(r.eventBus),
+												Name: generateJetStreamServerSecretName(r.eventBus),
 											},
 											Items: []corev1.KeyToPath{
 												{
-													Key:  common.JetStreamServerAuthSecretKey,
+													Key:  common.JetStreamServerSecretAuthKey,
 													Path: "auth.conf",
+												},
+												{
+													Key:  common.JetStreamServerPrivateKeyKey,
+													Path: secretServerKeyPEMFile,
+												},
+												{
+													Key:  common.JetStreamServerCertKey,
+													Path: secretServerCertPEMFile,
+												},
+												{
+													Key:  common.JetStreamServerCACertKey,
+													Path: secretCACertPEMFile,
+												},
+												{
+													Key:  common.JetStreamClusterPrivateKeyKey,
+													Path: secretClusterKeyPEMFile,
+												},
+												{
+													Key:  common.JetStreamClusterCertKey,
+													Path: secretClusterCertPEMFile,
+												},
+												{
+													Key:  common.JetStreamClusterCACertKey,
+													Path: secretClusterCACertPEMFile,
 												},
 											},
 										},
@@ -293,17 +350,30 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 							{Name: "monitor", ContainerPort: jsMonitorPort},
 						},
 						Command: []string{jsVersion.StartCommand, "--config", "/etc/nats-config/nats-js.conf"},
+						Args:    js.StartArgs,
 						Env: []corev1.EnvVar{
 							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
 							{Name: "SERVER_NAME", Value: "$(POD_NAME)"},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
-							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc"},
+							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc.cluster.local"},
+							{Name: "JS_KEY", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: generateJetStreamServerSecretName(r.eventBus)}, Key: common.JetStreamServerSecretEncryptionKey}}},
 						},
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/nats-config"},
 							{Name: "pid", MountPath: "/var/run/nats"},
 						},
 						SecurityContext: jsContainerSecurityContext,
+						StartupProbe: &corev1.Probe{
+							ProbeHandler: corev1.ProbeHandler{
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/healthz",
+									Port: intstr.FromInt(int(jsMonitorPort)),
+								},
+							},
+							FailureThreshold:    30,
+							InitialDelaySeconds: 10,
+							TimeoutSeconds:      5,
+						},
 						LivenessProbe: &corev1.Probe{
 							ProbeHandler: corev1.ProbeHandler{
 								HTTPGet: &corev1.HTTPGetAction{
@@ -312,6 +382,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 								},
 							},
 							InitialDelaySeconds: 10,
+							PeriodSeconds:       30,
 							TimeoutSeconds:      5,
 						},
 						Lifecycle: &corev1.Lifecycle{
@@ -340,7 +411,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 						Ports: []corev1.ContainerPort{
 							{Name: "metrics", ContainerPort: jsMetricsPort},
 						},
-						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(jsMonitorPort)))},
+						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-prefix=nats", "-use_internal_server_id", "-jsz=all", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(jsMonitorPort)))},
 						SecurityContext: metricsContainerSecurityContext,
 					},
 				},
@@ -404,55 +475,12 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 	return spec
 }
 
-func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
-	token := common.RandomString(24)
-	sysPassword := common.RandomString(24)
-	authTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/server-auth.conf"))
-	var authTplOutput bytes.Buffer
-	if err := authTpl.Execute(&authTplOutput, struct {
-		Token       string
-		SysPassword string
-	}{
-		Token:       token,
-		SysPassword: sysPassword,
-	}); err != nil {
-		return fmt.Errorf("failed to parse nats auth template, error: %w", err)
-	}
-
-	serverAuthObj := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: r.eventBus.Namespace,
-			Name:      generateJetStreamServerAuthSecretName(r.eventBus),
-			Labels:    r.labels,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
-			},
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			common.JetStreamServerAuthSecretKey: authTplOutput.Bytes(),
-		},
-	}
-
-	clientAuthObj := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: r.eventBus.Namespace,
-			Name:      generateJetStreamClientAuthSecretName(r.eventBus),
-			Labels:    r.labels,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
-			},
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			common.JetStreamClientAuthSecretKey: []byte(token),
-		},
-	}
-
+func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
+	// first check to see if the secrets already exist
 	oldServerObjExisting, oldClientObjExisting := true, true
 
 	oldSObj := &corev1.Secret{}
-	if err := r.client.Get(ctx, client.ObjectKeyFromObject(serverAuthObj), oldSObj); err != nil {
+	if err := r.client.Get(ctx, apitypes.NamespacedName{Namespace: r.eventBus.Namespace, Name: generateJetStreamServerSecretName(r.eventBus)}, oldSObj); err != nil {
 		if apierrors.IsNotFound(err) {
 			oldServerObjExisting = false
 		} else {
@@ -461,7 +489,7 @@ func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 	}
 
 	oldCObj := &corev1.Secret{}
-	if err := r.client.Get(ctx, client.ObjectKeyFromObject(clientAuthObj), oldCObj); err != nil {
+	if err := r.client.Get(ctx, apitypes.NamespacedName{Namespace: r.eventBus.Namespace, Name: generateJetStreamClientAuthSecretName(r.eventBus)}, oldCObj); err != nil {
 		if apierrors.IsNotFound(err) {
 			oldClientObjExisting = false
 		} else {
@@ -469,33 +497,106 @@ func (r *jetStreamInstaller) createAuthSecrets(ctx context.Context) error {
 		}
 	}
 
-	if oldClientObjExisting && oldServerObjExisting { // Both existing, do nothing
-		return nil
-	}
-
-	if oldClientObjExisting {
-		if err := r.client.Delete(ctx, oldSObj); err != nil {
-			return fmt.Errorf("failed to delete malformed nats server auth secret, err: %w", err)
+	if !oldClientObjExisting || !oldServerObjExisting {
+		// Generate server-auth.conf file
+		encryptionKey := common.RandomString(12)
+		jsUser := common.RandomString(8)
+		jsPass := common.RandomString(16)
+		sysPassword := common.RandomString(24)
+		authTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/server-auth.conf"))
+		var authTplOutput bytes.Buffer
+		if err := authTpl.Execute(&authTplOutput, struct {
+			JetStreamUser     string
+			JetStreamPassword string
+			SysPassword       string
+		}{
+			JetStreamUser:     jsUser,
+			JetStreamPassword: jsPass,
+			SysPassword:       sysPassword,
+		}); err != nil {
+			return fmt.Errorf("failed to parse nats auth template, error: %w", err)
 		}
-		r.logger.Infow("deleted malformed nats server auth secret successfully")
-	}
 
-	if oldServerObjExisting {
-		if err := r.client.Delete(ctx, oldCObj); err != nil {
-			return fmt.Errorf("failed to delete malformed nats client auth secret, err: %w", err)
+		// Generate TLS self signed certificate for Jetstream bus: includes TLS private key, certificate, and CA certificate
+		hosts := []string{}
+		hosts = append(hosts, fmt.Sprintf("%s.%s.svc.cluster.local", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace)) // todo: get an error in the log file related to this: do we need it?
+		hosts = append(hosts, fmt.Sprintf("%s.%s.svc", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace))
+
+		serverKeyPEM, serverCertPEM, caCertPEM, err := tls.CreateCerts(certOrg, hosts, time.Now().Add(10*365*24*time.Hour), true, false) // expires in 10 years
+		if err != nil {
+			return err
 		}
-		r.logger.Infow("deleted malformed nats client auth secret successfully")
+
+		// Generate TLS self signed certificate for Jetstream cluster nodes: includes TLS private key, certificate, and CA certificate
+		clusterNodeHosts := []string{fmt.Sprintf("*.%s.%s.svc.cluster.local", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace)}
+		r.logger.Infof("cluster node hosts: %+v", clusterNodeHosts)
+		clusterKeyPEM, clusterCertPEM, clusterCACertPEM, err := tls.CreateCerts(certOrg, clusterNodeHosts, time.Now().Add(10*365*24*time.Hour), true, true) // expires in 10 years
+		if err != nil {
+			return err
+		}
+
+		serverObj := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: r.eventBus.Namespace,
+				Name:      generateJetStreamServerSecretName(r.eventBus),
+				Labels:    r.labels,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+				},
+			},
+			Type: corev1.SecretTypeOpaque,
+			Data: map[string][]byte{
+				common.JetStreamServerSecretAuthKey:       authTplOutput.Bytes(),
+				common.JetStreamServerSecretEncryptionKey: []byte(encryptionKey),
+				common.JetStreamServerPrivateKeyKey:       serverKeyPEM,
+				common.JetStreamServerCertKey:             serverCertPEM,
+				common.JetStreamServerCACertKey:           caCertPEM,
+				common.JetStreamClusterPrivateKeyKey:      clusterKeyPEM,
+				common.JetStreamClusterCertKey:            clusterCertPEM,
+				common.JetStreamClusterCACertKey:          clusterCACertPEM,
+			},
+		}
+
+		clientAuthObj := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: r.eventBus.Namespace,
+				Name:      generateJetStreamClientAuthSecretName(r.eventBus),
+				Labels:    r.labels,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+				},
+			},
+			Type: corev1.SecretTypeOpaque,
+			Data: map[string][]byte{
+				common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("username: %s\npassword: %s", jsUser, jsPass)),
+			},
+		}
+
+		if oldServerObjExisting {
+			if err := r.client.Delete(ctx, oldSObj); err != nil {
+				return fmt.Errorf("failed to delete malformed nats server auth secret, err: %w", err)
+			}
+			r.logger.Infow("deleted malformed nats server auth secret successfully")
+		}
+
+		if oldClientObjExisting {
+			if err := r.client.Delete(ctx, oldCObj); err != nil {
+				return fmt.Errorf("failed to delete malformed nats client auth secret, err: %w", err)
+			}
+			r.logger.Infow("deleted malformed nats client auth secret successfully")
+		}
+
+		if err := r.client.Create(ctx, serverObj); err != nil {
+			return fmt.Errorf("failed to create nats server auth secret, err: %w", err)
+		}
+		r.logger.Infow("created nats server auth secret successfully")
+
+		if err := r.client.Create(ctx, clientAuthObj); err != nil {
+			return fmt.Errorf("failed to create nats client auth secret, err: %w", err)
+		}
+		r.logger.Infow("created nats client auth secret successfully")
 	}
 
-	if err := r.client.Create(ctx, serverAuthObj); err != nil {
-		return fmt.Errorf("failed to create nats server auth secret, err: %w", err)
-	}
-	r.logger.Infow("created nats server auth secret successfully")
-
-	if err := r.client.Create(ctx, clientAuthObj); err != nil {
-		return fmt.Errorf("failed to create nats client auth secret, err: %w", err)
-	}
-	r.logger.Infow("created nats client auth secret successfully")
 	return nil
 }
 
@@ -509,7 +610,7 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	}
 	routes := []string{}
 	for j := 0; j < replicas; j++ {
-		routes = append(routes, fmt.Sprintf("nats://%s-%s.%s.%s.svc:%s", ssName, strconv.Itoa(j), svcName, r.eventBus.Namespace, strconv.Itoa(int(jsClusterPort))))
+		routes = append(routes, fmt.Sprintf("nats://%s-%s.%s.%s.svc.cluster.local:%s", ssName, strconv.Itoa(j), svcName, r.eventBus.Namespace, strconv.Itoa(int(jsClusterPort))))
 	}
 	settings := r.config.EventBus.JetStream.Settings
 	if x := r.eventBus.Spec.JetStream.Settings; x != nil {
@@ -612,8 +713,8 @@ func (r *jetStreamInstaller) getPVCs(ctx context.Context) ([]corev1.PersistentVo
 	return pvcl.Items, nil
 }
 
-func generateJetStreamServerAuthSecretName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-js-server-auth", eventBus.Name)
+func generateJetStreamServerSecretName(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("eventbus-%s-js-server", eventBus.Name)
 }
 
 func generateJetStreamClientAuthSecretName(eventBus *v1alpha1.EventBus) string {

@@ -300,42 +300,6 @@ Config holds the fininalized configuration of EventBus
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.JetStreamAuth">
-JetStreamAuth
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.JetStreamConfig">JetStreamConfig</a>)
-</p>
-<p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>token</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Secret for auth token
-</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="argoproj.io/v1alpha1.JetStreamBus">
 JetStreamBus
 </h3>
@@ -574,6 +538,35 @@ Only configure “max_memory_store” or “max_file_store”, do not set
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>startArgs</code></br> <em> \[\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Optional arguments to start nats-server. For example, “-D” to enable
+debugging output, “-DV” to enable debugging and tracing. Check
+<a href="https://docs.nats.io/">https://docs.nats.io/</a> for all the
+available arguments.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>streamConfig</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Optional configuration for the streams to be created in this JetStream
+service, if specified, it will be merged with the default configuration
+in controller-config. It accepts a YAML format configuration, available
+fields include, “maxBytes”, “maxMsgs”, “maxAge” (e.g. 72h), “replicas”
+(1, 3, 5), “duplicates” (e.g. 5m).
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.JetStreamConfig">
@@ -609,10 +602,23 @@ JetStream (Nats) URL
 </tr>
 <tr>
 <td>
-<code>auth</code></br> <em>
-<a href="#argoproj.io/v1alpha1.JetStreamAuth"> JetStreamAuth </a> </em>
+<code>accessSecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
+<p>
+Secret for auth
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>streamConfig</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
 </td>
 </tr>
 </tbody>

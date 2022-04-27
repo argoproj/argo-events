@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: redis-stream
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: redis-stream
+      eventName: example
+  triggers:
+    - template:
+        name: workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: redis-stream-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  - container:
+                      args:
+                        - "hello" # it will get replaced by the event payload
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: values
+              dest: spec.templates.0.container.args.0

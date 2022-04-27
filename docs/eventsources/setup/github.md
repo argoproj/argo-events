@@ -30,7 +30,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 ## Setup
 
 1. Create an API token if you don't have one. Follow [instructions](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) to create a new GitHub API Token.
-   Grant it the `repo_hook` permissions. 
+   Grant it the `repo_hook` permissions.
 
 1. Base64 encode your API token key.
 
@@ -53,11 +53,11 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1. The event-source for GitHub creates a pod and exposes it via service.
    The name for the service is in `<event-source-name>-eventsource-svc` format.
-   You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from GitHub.
+   You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from GitHub.
    You can find more information on Ingress or Route online.
 
 1. Create the event source by running the following command. Make sure to replace the `url` field.
-   
+
         kubectl apply -n argo-events -f <event-source-file-updated-in-previous-step>
 
 1. Go to `Webhooks` under your project settings on GitHub and verify the webhook is registered. You can also do the same by looking at the event-source pod logs.
@@ -68,7 +68,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1. Make a change to one of your project files and commit. It will trigger an argo workflow.
 
-1. Run `argo list` to find the workflow. 
+1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

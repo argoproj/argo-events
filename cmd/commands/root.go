@@ -23,9 +23,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(NewEventBusControllerCommand())
-	rootCmd.AddCommand(NewEventSourceControllerCommand())
-	rootCmd.AddCommand(NewSensorControllerCommand())
+	rootCmd.AddCommand(NewControllerCommand())
 	rootCmd.AddCommand(NewEventSourceCommand())
 	rootCmd.AddCommand(NewSensorCommand())
 	rootCmd.AddCommand(NewWebhookCommand())

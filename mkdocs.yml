@@ -8,9 +8,10 @@ theme:
   font:
     text: 'Work Sans'
   logo: 'assets/logo.png'
-google_analytics:
-  - 'UA-105170809-9'
-  - 'auto'
+extra:
+  analytics:
+    provider: google
+    property: UA-105170809-9
 markdown_extensions:
   - codehilite
   - admonition
@@ -37,6 +38,11 @@ nav:
       - 'tutorials/05-trigger-custom-resources.md'
       - 'tutorials/06-trigger-conditions.md'
       - 'tutorials/07-policy.md'
+  - EventBus:
+      - 'eventbus/eventbus.md'
+      - 'eventbus/stan.md'
+      - 'eventbus/jetstream.md'
+      - 'eventbus/antiaffinity.md'
   - EventSources:
       - Setup:
           - 'eventsources/setup/amqp.md'
@@ -93,7 +99,6 @@ nav:
         - 'sensors/filters/ctx.md'
         - 'sensors/filters/time.md'
       - More Information: 'sensors/more-about-sensors-and-triggers.md'
-  - 'eventbus.md'
   - 'service-accounts.md'
   - 'security.md'
   - Operator Guide:

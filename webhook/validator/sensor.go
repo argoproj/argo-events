@@ -2,8 +2,11 @@ package validator
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/argoproj/argo-events/common"
 	admissionv1 "k8s.io/api/admission/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	sensorcontroller "github.com/argoproj/argo-events/controllers/sensor"
@@ -30,7 +33,16 @@ func NewSensorValidator(client kubernetes.Interface, ebClient eventbusclient.Int
 }
 
 func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
-	if err := sensorcontroller.ValidateSensor(s.newSensor); err != nil {
+	eventBusName := common.DefaultEventBusName
+	if len(s.newSensor.Spec.EventBusName) > 0 {
+		eventBusName = s.newSensor.Spec.EventBusName
+	}
+	eventBus, err := s.eventBusClient.ArgoprojV1alpha1().EventBus(s.newSensor.Namespace).Get(ctx, eventBusName, metav1.GetOptions{})
+	if err != nil {
+		return DeniedResponse(fmt.Sprintf("failed to get EventBus eventBusName=%s; err=%v", eventBusName, err))
+	}
+
+	if err := sensorcontroller.ValidateSensor(s.newSensor, eventBus); err != nil {
 		return DeniedResponse(err.Error())
 	}
 	return AllowedResponse()

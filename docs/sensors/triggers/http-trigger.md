@@ -1,6 +1,6 @@
 # HTTP Trigger
 
-Argo Events offers HTTP trigger which can easily invoke serverless functions like OpenFaas, Kubeless, Knative, Nuclio and make REST API calls.
+Argo Events offers HTTP trigger which can easily invoke serverless functions like OpenFaaS, Kubeless, Knative, Nuclio and make REST API calls.
 
 <br/>
 <br/>
@@ -22,18 +22,18 @@ the integration yourself in the server code, although server logic has nothing t
 can help. The HTTP trigger takes the task of consuming events from event-sources away from API server and seamlessly integrates these events via REST API calls.
 
 
-We will set up a basic go http server and connect it with the minio events.
+We will set up a basic go http server and connect it with the Minio events.
 
 1. The HTTP server simply prints the request body as follows.
 
         package main
-        
+
         import (
         	"fmt"
         	"io/ioutil"
         	"net/http"
         )
-        
+
         func hello(w http.ResponseWriter, req *http.Request) {
         	body, err := ioutil.ReadAll(req.Body)
         	if err != nil {
@@ -43,7 +43,7 @@ We will set up a basic go http server and connect it with the minio events.
         	fmt.Println(string(body))
         	fmt.Fprintf(w, "hello\n")
         }
-        
+
         func main() {
         	http.HandleFunc("/hello", hello)
         	fmt.Println("server is listening on 8090")
@@ -72,7 +72,7 @@ We will set up a basic go http server and connect it with the minio events.
 
 7. Now, drop a file onto `input` bucket in Minio server.
 
-  
+
 8. The sensor has triggered a http request to the http server. Take a look at the logs.
 
         server is listening on 8090
@@ -82,7 +82,7 @@ We will set up a basic go http server and connect it with the minio events.
 
 ### Request Payload
 
-In order to construct a request payload based on the event data, sensor offers 
+In order to construct a request payload based on the event data, sensor offers
 `payload` field as a part of the HTTP trigger.
 
 Let's examine a HTTP trigger,
@@ -109,7 +109,7 @@ The `payload` declared above will generate a request payload like below,
           "bucket": "bucket name from event data"
         }
 
-The above payload will be passed in the HTTP request. You can add however many number of `src` and `dest` under `payload`. 
+The above payload will be passed in the HTTP request. You can add however many number of `src` and `dest` under `payload`.
 
 **Note**: Take a look at [Parameterization](https://argoproj.github.io/argo-events/tutorials/02-parameterization/) in order to understand how to extract particular key-value from
 event data.
@@ -122,7 +122,7 @@ you want to define a generic trigger template in the sensor and populate values 
 You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
 
 ### Policy
-Trigger policy helps you determine the status of the HTTP request and decide whether to stop or continue sensor. 
+Trigger policy helps you determine the status of the HTTP request and decide whether to stop or continue sensor.
 
 To determine whether the HTTP request was successful or not, the HTTP trigger provides a `Status` policy.
 The `Status` holds a list of response statuses that are considered valid.
@@ -148,25 +148,25 @@ The `Status` holds a list of response statuses that are considered valid.
             - 200
             - 201
 
-The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status. 
+The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status.
 
-## OpenFaas
+## OpenFaaS
 
-OpenFaas offers a simple way to spin up serverless functions. Lets see how we can leverage Argo Events HTTP trigger
-to invoke OpenFaas function.
+OpenFaaS offers a simple way to spin up serverless functions. Lets see how we can leverage Argo Events HTTP trigger
+to invoke OpenFaaS function.
 
-1. If you don't have OpenFaas installed, follow the [instructions](https://docs.openfaas.com/deployment/kubernetes/).
+1. If you don't have OpenFaaS installed, follow the [instructions](https://docs.openfaas.com/deployment/kubernetes/).
 
 2. Let's create a basic function. You can follow the [steps](https://blog.alexellis.io/serverless-golang-with-openfaas/).
    to set up the function.
-        
-        
+
+
         package function
-        
+
         import (
         	"fmt"
         )
-        
+
         // Handle a serverless request
         func Handle(req []byte) string {
         	return fmt.Sprintf("Hello, Go. You said: %s", string(req))
@@ -175,12 +175,12 @@ to invoke OpenFaas function.
 
 3. Make sure the function pod is up and running.
 
-4. We are going to invoke OpenFaas function on a message on Redis Subscriber.
+4. We are going to invoke OpenFaaS function on a message on Redis Subscriber.
 
 5. Let's set up the Redis Database, Redis PubSub event-source as specified [here](https://argoproj.github.io/argo-events/setup/redis/).
    Do not create the Redis sensor, we are going to create it in next step.
 
-6. Let's create the sensor with OpenFaas trigger.
+6. Let's create the sensor with OpenFaaS trigger.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -206,7 +206,7 @@ to invoke OpenFaas function.
 
         PUBLISH FOO hello
 
-8. As soon as you publish the message, the sensor will invoke the OpenFaas function `gohash`.
+8. As soon as you publish the message, the sensor will invoke the OpenFaaS function `gohash`.
 
 ## Kubeless
 
@@ -226,7 +226,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
 
 5. Let's set up the NATS event-source. Follow [instructions](https://argoproj.github.io/argo-events/setup/nats/#setup) for details.
    Do not create the NATS sensor, we are going to create it in next step.
-   
+
 6. Let's create NATS sensor with HTTP trigger.
 
         apiVersion: argoproj.io/v1alpha1
@@ -259,9 +259,9 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
         go run main.go -s localhost foo '{"first_name": "foo", "last_name": "bar"}'
 
 8. It will invoke Kubeless function `hello`.
-        
+
         {'event-time': None, 'extensions': {'request': <LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/> }, 'event-type': None, 'event-namespace': None, 'data': '{"first_name":"foo","last_name":"bar"}', 'event-id': None}
 
 # Other serverless frameworks
 
-Similar to OpenFaas and Kubeless invocation demonstrated above, you can easily trigger KNative, Nuclio, Fission functions using HTTP trigger.
+Similar to OpenFaaS and Kubeless invocation demonstrated above, you can easily trigger KNative, Nuclio, Fission functions using HTTP trigger.
