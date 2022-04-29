@@ -45,8 +45,5 @@ func validate(eventSource *v1alpha1.BitbucketServerEventSource) error {
 	if eventSource.AccessToken == nil {
 		return fmt.Errorf("access token can't be nil")
 	}
-	if eventSource.WebhookSecret == nil {
-		return fmt.Errorf("the webhook secret can't be nil")
-	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }
