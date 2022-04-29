@@ -54,6 +54,8 @@ type Router struct {
 	// Bitbucket Server API docs:
 	// https://developer.atlassian.com/server/bitbucket/reference/rest-api/
 	hookIDs map[string]int
+	// hookSecret is a Bitbucket Server webhook secret
+	hookSecret string
 	// bitbucketserverEventSource is the event source that contains configuration necessary to consume events from Bitbucket Server
 	bitbucketserverEventSource *v1alpha1.BitbucketServerEventSource
 }
