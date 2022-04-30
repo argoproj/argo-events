@@ -62,7 +62,6 @@ nav:
           - 'eventsources/setup/nats.md'
           - 'eventsources/setup/nsq.md'
           - 'eventsources/setup/redis.md'
-          - 'eventsources/setup/redis-streams.md'
           - 'eventsources/setup/resource.md'
           - 'eventsources/setup/webhook.md'
           - 'eventsources/setup/pulsar.md'
