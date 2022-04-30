@@ -1083,6 +1083,17 @@ and if left blank treated as and (&&).
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>script</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Script refers to a Lua script evaluated to determine the validity of an
+event.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventDependencyTransformer">
