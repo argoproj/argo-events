@@ -95,7 +95,7 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, operator v1alpha1.Logic
 
 	if operator == v1alpha1.OrLogicalOperator {
 		if len(errMessages) > 0 {
-			return exprFilter || dataFilter || ctxFilter || timeFilter,
+			return exprFilter || dataFilter || ctxFilter || timeFilter || scriptFilter,
 				errors.New(strings.Join(errMessages, errMsgListSeparator))
 		}
 		return exprFilter || dataFilter || ctxFilter || timeFilter || scriptFilter, nil
