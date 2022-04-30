@@ -44,11 +44,11 @@ The structure of an event dispatched by the event-source over eventbus looks lik
 
 1. The event-source for AWS SNS creates a pod and exposes it via service.
    The name for the service is in `<event-source-name>-eventsource-svc` format.
-   You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from AWS.
+   You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from AWS.
    You can find more information on Ingress or Route online.
 
 1. Create the event source by running the following command. Make sure to update the URL in the configuration within the event-source.
-   
+
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/aws-sns.yaml
 
 1. Go to SNS settings on AWS and verify the webhook is registered. You can also check it by inspecting the event-source pod logs.
@@ -59,7 +59,7 @@ The structure of an event dispatched by the event-source over eventbus looks lik
 
 1. Publish a message to the SNS topic, and it will trigger an argo workflow.
 
-1. Run `argo list` to find the workflow. 
+1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

@@ -300,42 +300,6 @@ Config holds the fininalized configuration of EventBus
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.JetStreamAuth">
-JetStreamAuth
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.JetStreamConfig">JetStreamConfig</a>)
-</p>
-<p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>token</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Secret for auth token
-</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="argoproj.io/v1alpha1.JetStreamBus">
 JetStreamBus
 </h3>
@@ -638,10 +602,15 @@ JetStream (Nats) URL
 </tr>
 <tr>
 <td>
-<code>auth</code></br> <em>
-<a href="#argoproj.io/v1alpha1.JetStreamAuth"> JetStreamAuth </a> </em>
+<code>accessSecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
+<p>
+Secret for auth
+</p>
 </td>
 </tr>
 <tr>

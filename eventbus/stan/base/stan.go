@@ -45,7 +45,7 @@ func (n *STAN) MakeConnection(clientID string) (*STANConnection, error) {
 	switch n.auth.Strategy {
 	case eventbusv1alpha1.AuthStrategyToken:
 		log.Info("NATS auth strategy: Token")
-		opts = append(opts, nats.Token(n.auth.Crendential.Token))
+		opts = append(opts, nats.Token(n.auth.Credential.Token))
 	case eventbusv1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:

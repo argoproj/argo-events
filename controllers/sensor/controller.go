@@ -23,13 +23,16 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/common"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -93,7 +96,25 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	controllerutil.AddFinalizer(sensor, finalizerName)
 
 	sensor.Status.InitConditions()
-	if err := ValidateSensor(sensor); err != nil {
+
+	eventBus := &eventbusv1alpha1.EventBus{}
+	eventBusName := common.DefaultEventBusName
+	if len(sensor.Spec.EventBusName) > 0 {
+		eventBusName = sensor.Spec.EventBusName
+	}
+	err := r.client.Get(ctx, types.NamespacedName{Namespace: sensor.Namespace, Name: eventBusName}, eventBus)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
+			log.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
+			return errors.Errorf("eventbus %s not found", eventBusName)
+		}
+		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
+		log.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)
+		return err
+	}
+
+	if err := ValidateSensor(sensor, eventBus); err != nil {
 		log.Errorw("validation error", "error", err)
 		return err
 	}
@@ -106,7 +127,7 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 			common.LabelOwnerName:  sensor.Name,
 		},
 	}
-	return Reconcile(r.client, args, log)
+	return Reconcile(r.client, eventBus, args, log)
 }
 
 func (r *reconciler) needsUpdate(old, new *v1alpha1.Sensor) bool {

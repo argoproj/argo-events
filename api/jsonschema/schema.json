@@ -380,15 +380,6 @@
       },
       "type": "object"
     },
-    "io.argoproj.eventbus.v1alpha1.JetStreamAuth": {
-      "properties": {
-        "token": {
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
-          "description": "Secret for auth token"
-        }
-      },
-      "type": "object"
-    },
     "io.argoproj.eventbus.v1alpha1.JetStreamBus": {
       "description": "JetStreamBus holds the JetStream EventBus information",
       "properties": {
@@ -484,8 +475,9 @@
     },
     "io.argoproj.eventbus.v1alpha1.JetStreamConfig": {
       "properties": {
-        "auth": {
-          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamAuth"
+        "accessSecret": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Secret for auth"
         },
         "streamConfig": {
           "type": "string"
@@ -3141,6 +3133,10 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ExprFilter"
           },
           "type": "array"
+        },
+        "script": {
+          "description": "Script refers to a Lua script evaluated to determine the validity of an event.",
+          "type": "string"
         },
         "time": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter",

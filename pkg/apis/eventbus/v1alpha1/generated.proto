@@ -89,12 +89,6 @@ message EventBusStatus {
   optional BusConfig config = 2;
 }
 
-message JetStreamAuth {
-  // Secret for auth token
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector token = 1;
-}
-
 // JetStreamBus holds the JetStream EventBus information
 message JetStreamBus {
   // JetStream version, such as "2.7.3"
@@ -195,7 +189,9 @@ message JetStreamConfig {
   // JetStream (Nats) URL
   optional string url = 1;
 
-  optional JetStreamAuth auth = 2;
+  // Secret for auth
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 2;
 
   // +optional
   optional string streamConfig = 3;

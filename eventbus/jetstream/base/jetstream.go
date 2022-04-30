@@ -2,6 +2,7 @@ package base
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
@@ -55,6 +56,7 @@ func (stream *Jetstream) Init() error {
 func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	log := stream.Logger
 	conn := &JetstreamConnection{Logger: stream.Logger}
+
 	opts := []nats.Option{
 		// todo: try out Jetstream's auto-reconnection capability
 		nats.NoReconnect(),
@@ -66,11 +68,18 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 			conn.NATSConnected = true
 			log.Info("Reconnected to NATS server")
 		}),
+		nats.Secure(&tls.Config{
+			InsecureSkipVerify: true,
+		}),
 	}
+
 	switch stream.auth.Strategy {
 	case eventbusv1alpha1.AuthStrategyToken:
 		log.Info("NATS auth strategy: Token")
-		opts = append(opts, nats.Token(stream.auth.Crendential.Token))
+		opts = append(opts, nats.Token(stream.auth.Credential.Token))
+	case eventbusv1alpha1.AuthStrategyBasic:
+		log.Info("NATS auth strategy: Basic")
+		opts = append(opts, nats.UserInfo(stream.auth.Credential.Username, stream.auth.Credential.Password))
 	case eventbusv1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:
@@ -108,7 +117,8 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return nil
 	}
 	if err != nil && err != nats.ErrStreamNotFound {
-		stream.Logger.Errorw("Error calling StreamInfo for Stream '%s': %v", common.JetStreamStreamName, err)
+		stream.Logger.Warnf(`Error calling StreamInfo for Stream '%s' (this can happen if another Jetstream client "
+		is trying to create the Stream at the same time): %v`, common.JetStreamStreamName, err)
 	}
 
 	// unmarshal settings
@@ -132,11 +142,18 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
 
-	options := make([]nats.JSOpt, 0)
-
-	_, err = conn.JSContext.AddStream(&streamConfig, options...)
-	if err != nil {
-		return errors.Errorf("Failed to add Jetstream stream '%s': %v for connection %+v", common.JetStreamStreamName, err, conn)
+	connectErr := common.Connect(nil, func() error { // exponential backoff if it fails the first time
+		_, err = conn.JSContext.AddStream(&streamConfig)
+		if err != nil {
+			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v`,
+				common.JetStreamStreamName, conn, err)
+			return errors.New(errStr)
+		} else {
+			return nil
+		}
+	})
+	if connectErr != nil {
+		return connectErr
 	}
 
 	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", common.JetStreamStreamName, conn)

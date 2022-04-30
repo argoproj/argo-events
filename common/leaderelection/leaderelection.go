@@ -2,6 +2,7 @@ package leaderelection
 
 import (
 	"context"
+	"crypto/tls"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/nats-io/graft"
@@ -28,6 +29,7 @@ type LeaderCallbacks struct {
 
 func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, clusterName string, clusterSize int) (Elector, error) {
 	logger := logging.FromContext(ctx)
+
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
 	switch {
@@ -36,10 +38,11 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
-		eventBusAuth = &eventbusv1alpha1.AuthStrategyToken
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
 	default:
 		return nil, errors.New("invalid event bus")
 	}
+
 	var auth *eventbuscommon.Auth
 	cred := &eventbuscommon.AuthCredential{}
 	if eventBusAuth == nil || *eventBusAuth == eventbusv1alpha1.AuthStrategyNone {
@@ -66,10 +69,11 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 			logger.Fatal("Eventbus auth config file changed, exiting..")
 		})
 		auth = &eventbuscommon.Auth{
-			Strategy:    *eventBusAuth,
-			Crendential: cred,
+			Strategy:   *eventBusAuth,
+			Credential: cred,
 		}
 	}
+
 	var elector Elector
 	switch eventBusType {
 	case apicommon.EventBusNATS:
@@ -107,8 +111,16 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	opts.MaxReconnect = -1
 	opts.Url = e.url
 	if e.auth.Strategy == eventbusv1alpha1.AuthStrategyToken {
-		opts.Token = e.auth.Crendential.Token
+		opts.Token = e.auth.Credential.Token
+	} else if e.auth.Strategy == eventbusv1alpha1.AuthStrategyBasic {
+		opts.User = e.auth.Credential.Username
+		opts.Password = e.auth.Credential.Password
 	}
+
+	opts.TLSConfig = &tls.Config{ // seems fine to pass this in even when we're not using TLS
+		InsecureSkipVerify: true,
+	}
+
 	rpc, err := graft.NewNatsRpc(opts)
 	if err != nil {
 		log.Fatalw("failed to new Nats Rpc", zap.Error(err))

@@ -6,8 +6,8 @@ import (
 
 // Auth contains the auth infor for event bus
 type Auth struct {
-	Strategy    eventbusv1alpha1.AuthStrategy
-	Crendential *AuthCredential
+	Strategy   eventbusv1alpha1.AuthStrategy
+	Credential *AuthCredential
 }
 
 // AuthCredential host the credential info

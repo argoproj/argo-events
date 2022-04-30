@@ -28,6 +28,13 @@ type JetstreamTriggerConn struct {
 	evaluableExpression  *govaluate.EvaluableExpression
 	deps                 []eventbuscommon.Dependency
 	sourceDepMap         map[string][]string // maps EventSource and EventName to dependency name
+	recentMsgsByID       map[string]*msg     // prevent re-processing the same message as before (map of msg ID to time)
+	recentMsgsByTime     []*msg
+}
+
+type msg struct {
+	time  int64
+	msgID string
 }
 
 func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
@@ -54,7 +61,9 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		dependencyExpression: dependencyExpression,
 		requiresANDLogic:     strings.Contains(dependencyExpression, "&"),
 		deps:                 deps,
-		sourceDepMap:         sourceDepMap}
+		sourceDepMap:         sourceDepMap,
+		recentMsgsByID:       make(map[string]*msg),
+		recentMsgsByTime:     make([]*msg, 0)}
 	connection.Logger = connection.Logger.With("triggerName", connection.triggerName)
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
@@ -76,6 +85,9 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 }
 
 func (conn *JetstreamTriggerConn) String() string {
+	if conn == nil {
+		return ""
+	}
 	return fmt.Sprintf("JetstreamTriggerConn{Sensor:%s,Trigger:%s}", conn.sensorName, conn.triggerName)
 }
 
@@ -87,6 +99,10 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
+	if conn == nil {
+		return errors.New("Subscribe() failed; JetstreamTriggerConn is nil")
+	}
+
 	var err error
 	log := conn.Logger
 	// derive subjects that we'll subscribe with using the dependencies passed in
@@ -106,6 +122,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	ch := make(chan *nats.Msg) // channel with no buffer (I believe this should be okay - we will block writing messages to this channel while a message is still being processed but volume of messages shouldn't be so high as to cause a problem)
 	wg := sync.WaitGroup{}
 	processMsgsCloseCh := make(chan struct{})
+	pullSubscribeCloseCh := make(map[string]chan struct{}, len(subjects))
 
 	subscriptions := make([]*nats.Subscription, len(subjects))
 	subscriptionIndex := 0
@@ -119,11 +136,17 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
 		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew())
 		if err != nil {
-			log.Errorf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
-			continue
+			errorStr := fmt.Sprintf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
+			log.Error(errorStr)
+			return errors.New(errorStr)
+		} else {
+			log.Debugf("successfully subscribed to subject %s with durable name %s", subject, durableName)
 		}
-		go conn.pullSubscribe(subscriptions[subscriptionIndex], ch, processMsgsCloseCh, &wg)
+
+		pullSubscribeCloseCh[subject] = make(chan struct{})
+		go conn.pullSubscribe(subscriptions[subscriptionIndex], ch, pullSubscribeCloseCh[subject], &wg)
 		wg.Add(1)
+		log.Debug("adding 1 to WaitGroup (pullSubscribe)")
 
 		subscriptionIndex++
 	}
@@ -132,23 +155,30 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	// one goroutine and we don't need to worry about race conditions
 	go conn.processMsgs(ch, processMsgsCloseCh, resetConditionsCh, transform, filter, action, &wg)
 	wg.Add(1)
+	log.Debug("adding 1 to WaitGroup (processMsgs)")
 
 	for {
 		select {
 		case <-ctx.Done():
 			log.Info("exiting, closing connection...")
-			processMsgsCloseCh <- struct{}{}
-			wg.Wait()
-			conn.NATSConn.Close()
+			conn.shutdownSubscriptions(processMsgsCloseCh, pullSubscribeCloseCh, &wg)
 			return nil
 		case <-closeCh:
 			log.Info("closing connection...")
-			processMsgsCloseCh <- struct{}{}
-			wg.Wait()
-			conn.NATSConn.Close()
+			conn.shutdownSubscriptions(processMsgsCloseCh, pullSubscribeCloseCh, &wg)
 			return nil
 		}
 	}
+}
+
+func (conn *JetstreamTriggerConn) shutdownSubscriptions(processMsgsCloseCh chan struct{}, pullSubscribeCloseCh map[string]chan struct{}, wg *sync.WaitGroup) {
+	processMsgsCloseCh <- struct{}{}
+	for _, ch := range pullSubscribeCloseCh {
+		ch <- struct{}{}
+	}
+	wg.Wait()
+	conn.NATSConn.Close()
+	conn.Logger.Debug("closed NATSConn")
 }
 
 func (conn *JetstreamTriggerConn) pullSubscribe(
@@ -156,18 +186,32 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 	msgChannel chan<- *nats.Msg,
 	closeCh <-chan struct{},
 	wg *sync.WaitGroup) {
+	var previousErr error
+	var previousErrTime time.Time
+
 	for {
 		// call Fetch with timeout
-		msgs, err := subscription.Fetch(1, nats.MaxWait(time.Second*1))
-		if err != nil && !errors.Is(err, nats.ErrTimeout) {
-			conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v", subscription, err)
+		msgs, fetchErr := subscription.Fetch(1, nats.MaxWait(time.Second*1))
+		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
+			if previousErr != fetchErr || time.Since(previousErrTime) > 10*time.Second {
+				// avoid log spew - only log error every 10 seconds
+				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, fetchErr, previousErr, previousErrTime)
+			}
+			previousErr = fetchErr
+			previousErrTime = time.Now()
 		}
 
-		// then check to see if closeCh has anything; if so, wg.Done() and exit
-		if len(closeCh) != 0 {
+		// read from close channel but don't block if it's empty
+		select {
+		case <-closeCh:
 			wg.Done()
+			conn.Logger.Debug("wg.Done(): pullSubscribe")
 			conn.Logger.Infof("exiting pullSubscribe() for subscription %+v", subscription)
 			return
+		default:
+		}
+		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
+			continue
 		}
 
 		// then push the msgs to the channel which will consume them
@@ -185,7 +229,10 @@ func (conn *JetstreamTriggerConn) processMsgs(
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event),
 	wg *sync.WaitGroup) {
-	defer wg.Done()
+	defer func() {
+		wg.Done()
+		conn.Logger.Debug("wg.Done(): processMsgs")
+	}()
 
 	for {
 		select {
@@ -217,6 +264,7 @@ func (conn *JetstreamTriggerConn) processMsg(
 			errStr := fmt.Sprintf("Error performing AckSync() on message: %v", err)
 			conn.Logger.Error(errStr)
 		}
+
 		conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
 	}()
 	log := conn.Logger
@@ -224,6 +272,14 @@ func (conn *JetstreamTriggerConn) processMsg(
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
 		log.Errorf("Failed to convert to a cloudevent, discarding it... err: %v", err)
+		return
+	}
+
+	// De-duplication
+	// In the off chance that we receive the same message twice, don't re-process
+	_, alreadyReceived := conn.recentMsgsByID[event.ID()]
+	if alreadyReceived {
+		log.Debugf("already received message of ID %d, ignore this", event.ID())
 		return
 	}
 
@@ -240,6 +296,10 @@ func (conn *JetstreamTriggerConn) processMsg(
 	for _, depName := range depNames {
 		conn.processDependency(m, event, depName, transform, filter, action)
 	}
+
+	// Save message for de-duplication purposes
+	conn.storeMessageID(event.ID())
+	conn.purgeOldMsgs()
 }
 
 func (conn *JetstreamTriggerConn) processDependency(
@@ -450,4 +510,27 @@ func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName 
 	}
 
 	return deps, nil
+}
+
+// save the message in our recent messages list (for de-duplication purposes)
+func (conn *JetstreamTriggerConn) storeMessageID(id string) {
+	now := time.Now().UnixNano()
+	saveMsg := &msg{msgID: id, time: now}
+	conn.recentMsgsByID[id] = saveMsg
+	conn.recentMsgsByTime = append(conn.recentMsgsByTime, saveMsg)
+}
+
+func (conn *JetstreamTriggerConn) purgeOldMsgs() {
+	now := time.Now().UnixNano()
+
+	// evict any old messages from our message cache
+	for _, msg := range conn.recentMsgsByTime {
+		if now-msg.time > 60*1000*1000*1000 { // older than 1 minute
+			conn.Logger.Debugf("deleting message %v from cache", *msg)
+			delete(conn.recentMsgsByID, msg.msgID)
+			conn.recentMsgsByTime = conn.recentMsgsByTime[1:]
+		} else {
+			break // these are ordered by time so we can break when we hit one that's still valid
+		}
+	}
 }

@@ -31,7 +31,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
@@ -48,28 +47,23 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
+func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	sensor := args.Sensor
-	eventBus := &eventbusv1alpha1.EventBus{}
+
+	if eventBus == nil {
+		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
+		logger.Error("failed to get EventBus")
+		return errors.New("failed to get EventBus")
+	}
+
 	eventBusName := common.DefaultEventBusName
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
-	err := client.Get(ctx, types.NamespacedName{Namespace: sensor.Namespace, Name: eventBusName}, eventBus)
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
-			logger.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
-			return errors.Errorf("eventbus %s not found", eventBusName)
-		}
-		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
-		logger.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)
-		return err
-	}
 	if !eventBus.Status.IsReady() {
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
-		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName, "error", err)
+		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName)
 		return errors.New("eventbus not ready")
 	}
 
@@ -167,17 +161,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
 
-	var authStrategy *eventbusv1alpha1.AuthStrategy
 	var accessSecret *corev1.SecretKeySelector
 	switch {
 	case eventBus.Status.Config.NATS != nil:
 		natsConf := eventBus.Status.Config.NATS
-		authStrategy = natsConf.Auth
 		accessSecret = natsConf.AccessSecret
 	case eventBus.Status.Config.JetStream != nil:
 		jsConf := eventBus.Status.Config.JetStream
-		authStrategy = &eventbusv1alpha1.AuthStrategyToken
-		accessSecret = jsConf.Auth.Token
+		accessSecret = jsConf.AccessSecret
 	default:
 		return nil, errors.New("unsupported event bus")
 	}
@@ -190,7 +181,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	})
 	volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
 
-	if authStrategy != nil && accessSecret != nil {
+	if accessSecret != nil {
 		// Mount the secret as volume instead of using envFrom to gain the ability
 		// for the sensor deployment to auto reload when the secret changes
 		volumes = append(volumes, corev1.Volume{
