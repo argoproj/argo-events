@@ -20,7 +20,7 @@ spec:
       eventName: example
       filters:
         script: |-
-          if event.a == "b" and event.d.e == "z" then return true else return false end
+          if event.body.a == "b" and event.body.d.e == "z" then return true else return false end
   triggers:
     - template:
         name: workflow
