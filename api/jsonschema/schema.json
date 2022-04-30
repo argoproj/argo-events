@@ -3134,6 +3134,10 @@
           },
           "type": "array"
         },
+        "script": {
+          "description": "Script refers to a Lua script evaluated to determine the validity of an event.",
+          "type": "string"
+        },
         "time": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter",
           "description": "Time filter on the event with escalation"
