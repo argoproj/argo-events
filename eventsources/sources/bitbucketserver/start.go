@@ -85,7 +85,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	body, err := router.parseAndValidateBitbucketServerRequest(request)
 	if err != nil {
-		logger.Errorw("failed to parse request body", zap.Error(err))
+		logger.Errorw("failed to parse/validate request", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
