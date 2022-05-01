@@ -3,6 +3,7 @@ kind: Sensor
 metadata:
   name: stress-testing-log
 spec:
+  replicas: 3
   # template:
   #   container:
   #     resources:

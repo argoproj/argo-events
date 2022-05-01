@@ -52,6 +52,9 @@ old one is gone.
 - Redis
 - Resource
 
+Leader election is achieved through the RAFT algorithm, which states that there should be an odd number of nodes >= 3 for consensus. 
+Therefore, it's recommended to use that for number of replicas.
+
 ## More
 
 Click [here](../dr_ha_recommendations.md) to learn more information about Argo

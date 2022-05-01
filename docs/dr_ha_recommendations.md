@@ -121,7 +121,7 @@ spec:
 
 ### Replicas
 
-EventSources can run with HA by setting `spec.replicas` to a number `>1`, see
+EventSources can run with HA by setting `spec.replicas` to a number `>1` (and for EventSources in Active-Passive mode an odd number `>2`), see
 more detail [here](eventsources/ha.md).
 
 ### EventSource POD Node Selection
@@ -139,7 +139,7 @@ Priority could be set through `spec.template.priorityClassName` or
 
 ### Replicas
 
-Sensors can run with HA by setting `spec.replicas` to a number `>1`, see more
+Sensors can run with HA by setting `spec.replicas` to an odd number `>2`, see more
 detail [here](sensors/ha.md).
 
 ### Sensor POD Node Selection
