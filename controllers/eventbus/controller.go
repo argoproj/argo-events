@@ -84,8 +84,10 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	eventBus.Status.InitConditions()
 	if err := ValidateEventBus(eventBus); err != nil {
 		log.Errorw("validation failed", zap.Error(err))
-		eventBus.Status.MarkDeployFailed("InvalidSpec", err.Error())
+		eventBus.Status.MarkNotConfigured("InvalidSpec", err.Error())
 		return err
+	} else {
+		eventBus.Status.MarkConfigured()
 	}
 	return installer.Install(ctx, eventBus, r.client, r.config, log)
 }

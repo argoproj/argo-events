@@ -1,5 +1,4 @@
-
-# Introducation
+# Introduction
 
 Filters provide a powerful mechanism to apply constraints on the events in order to determine a validity.
 
@@ -11,10 +10,11 @@ If filters determine an event is not valid, this won't trigger any action.
 
 Argo Events offers 4 types of filters:
 
-1. [`Expr` Filter](https://argoproj.github.io/argo-events/filters/expr)
-1. [`Data` Filter](https://argoproj.github.io/argo-events/filters/data)
-1. [`Context` Filter](https://argoproj.github.io/argo-events/filters/ctx)
-1. [`Time` Filter](https://argoproj.github.io/argo-events/filters/time)
+1. [`Expr` Filter](expr.md)
+1. [`Data` Filter](data.md)
+1. [`Script` Filter](script.md)
+1. [`Context` Filter](ctx.md)
+1. [`Time` Filter](time.md)
 
 > ⚠️ `PLEASE NOTE` this is the order in which Sensor evaluates filter types: expr, data, context, time.
 

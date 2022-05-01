@@ -71,9 +71,9 @@ GCP Pub/Sub event-source specification is available [here](https://github.com/ar
 
 1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
-## Subscription, topic and service account preparetion
+## Subscription, topic and service account preparation
 
-You can use exisiting subscriptions/topics, or let Argo Events create them.
+You can use existing subscriptions/topics, or let Argo Events create them.
 
 Here's the table of which fields are required in the configuration file and what permissions are needed for service account.
 

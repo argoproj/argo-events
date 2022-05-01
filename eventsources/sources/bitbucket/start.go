@@ -126,7 +126,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	defer sources.Recover(el.GetEventName())
 
 	bitbucketEventSource := &el.BitbucketEventSource
@@ -161,7 +161,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	r1 := rand.New(s1)
 	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
 
-	err = router.saveBitbucketWebhook()
+	err = router.applyBitbucketWebhook()
 	if err != nil {
 		logger.Errorw("failed to save Bitbucket webhook", zap.Error(err))
 	}
@@ -180,7 +180,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				logger.Info("exiting bitbucket hooks manager daemon")
 				return
 			case <-ticker.C:
-				err := router.saveBitbucketWebhook()
+				err := router.applyBitbucketWebhook()
 				if err != nil {
 					logger.Errorw("failed to save Bitbucket webhook", zap.Error(err))
 				}
@@ -204,8 +204,8 @@ func (router *Router) chooseAuthStrategy() (AuthStrategy, error) {
 	}
 }
 
-// saveBitbucketWebhook creates or updates the configured webhook in Bitbucket
-func (router *Router) saveBitbucketWebhook() error {
+// applyBitbucketWebhook creates or updates the configured webhook in Bitbucket
+func (router *Router) applyBitbucketWebhook() error {
 	logger := router.GetRoute().Logger
 	bitbucketEventSource := router.bitbucketEventSource
 	formattedWebhookURL := common.FormattedURL(bitbucketEventSource.Webhook.URL, bitbucketEventSource.Webhook.Endpoint)

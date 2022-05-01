@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: redis-stream
+spec:
+  redisStream:
+    example:
+      # HostAddress refers to the address of the Redis host/server
+      hostAddress: redis.argo-events.svc:6379
+
+      # Password required for authentication.
+      # +optional
+      # password:
+      #   name: name_of_secret_that_holds_password
+      #   key: key_within_secret_which_holds_password_value
+
+      # DB to use. If not specified, default DB 0 will be used.
+      # +optional
+      db: 0
+      
+      # MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP of all streams
+      # Example: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a total of 20 messages.
+      # Same as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro). Defaults to 10
+      # +optional
+      # maxMsgCountPerRead: 50
+      
+      # ConsumerGroup refers to the Redis stream consumer group that will be created on all redis streams.
+      # Messages are read through this group. Defaults to 'argo-events-cg'
+      # +optional
+      # consumerGroup: argo-events-cg
+      
+      # Streams to listen for events. XREADGROUP is used on all streams using a single consumer group.
+      streams:
+        - FOO
+
+#    example-tls:
+#      hostAddress: redis.argo-events.svc:6379
+#      db: 0
+#      streams:
+#        - FOO
+#      tls:
+#        caCertSecret:
+#          name: my-secret
+#          key: ca-cert-key
+#        clientCertSecret:
+#          name: my-secret
+#          key: client-cert-key
+#        clientKeySecret:
+#          name: my-secret
+#          key: client-key-key

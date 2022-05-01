@@ -162,7 +162,7 @@ func TestResourceReconcile(t *testing.T) {
 			Sensor: sensorObj,
 			Labels: testLabels,
 		}
-		err := Reconcile(cl, args, logging.NewArgoEventsLogger())
+		err := Reconcile(cl, nil, args, logging.NewArgoEventsLogger())
 		assert.Error(t, err)
 		assert.False(t, sensorObj.Status.IsReady())
 	})
@@ -180,7 +180,7 @@ func TestResourceReconcile(t *testing.T) {
 			Sensor: sensorObj,
 			Labels: testLabels,
 		}
-		err = Reconcile(cl, args, logging.NewArgoEventsLogger())
+		err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
 		assert.Nil(t, err)
 		assert.True(t, sensorObj.Status.IsReady())
 

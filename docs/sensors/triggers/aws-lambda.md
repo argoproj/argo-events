@@ -1,6 +1,6 @@
 # AWS Lambda
 
-AWS Lambda provides a tremendous value, but the event driven lambda invocation is limited to 
+AWS Lambda provides a tremendous value, but the event driven lambda invocation is limited to
 SNS, SQS and few other event sources. Argo Events makes it easy to integrate lambda with event sources
 that are not native to AWS.
 
@@ -42,12 +42,12 @@ that are not native to AWS.
         };
 
 1. Let's set up webhook event-source to invoke the lambda over http requests.
-        
+
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 1. Let's expose the webhook event-source using `port-forward` so that we can make a request to it.
 
-        kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
+        kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000
 
 1. Deploy the webhook sensor with AWS Lambda trigger.
 
@@ -55,7 +55,7 @@ that are not native to AWS.
 
 1. Once the sensor pod is in running state, make a `curl` request to webhook event-source pod,
 
-         curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example 
+         curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 9. It will trigger the AWS Lambda function `hello`. Look at the CloudWatch logs to verify.
 
@@ -66,7 +66,7 @@ The AWS Lambda trigger specification is available [here](https://github.com/argo
 ## Request Payload
 
 Invoking the AWS Lambda without a request payload would not be very useful. The lambda trigger within a sensor
-is invoked when sensor receives an event from the eventbus. In order to construct a request payload based on the event data, sensor offers 
+is invoked when sensor receives an event from the eventbus. In order to construct a request payload based on the event data, sensor offers
 `payload` field as a part of the lambda trigger.
 
 Let's examine a lambda trigger,
@@ -95,7 +95,7 @@ The `payload` declared above will generate a request payload like below,
           "name": "foo" // name field from event data
         }
 
-The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of `src` and `dest` under `payload`. 
+The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of `src` and `dest` under `payload`.
 
 **Note**: Take a look at [Parameterization](https://argoproj.github.io/argo-events/tutorials/02-parameterization/) in order to understand how to extract particular key-value from event data.
 
@@ -131,9 +131,9 @@ With `parameters` the sensor will replace the function name `hello` with the val
 You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
 
 ## Policy
-Trigger policy helps you determine the status of the lambda invocation and decide whether to stop or continue sensor. 
+Trigger policy helps you determine the status of the lambda invocation and decide whether to stop or continue sensor.
 
-To determine whether the lamda was successful or not, Lambda trigger provides a `Status` policy.
+To determine whether the lambda was successful or not, Lambda trigger provides a `Status` policy.
 The `Status` holds a list of response statuses that are considered valid.
 
                         awsLambda:
@@ -157,4 +157,4 @@ The `Status` holds a list of response statuses that are considered valid.
                                     - 200
                                     - 201
 
-The above lambda trigger will be treated successful only if its invocation returns with either 200 or 201 status. 
+The above lambda trigger will be treated successful only if its invocation returns with either 200 or 201 status.

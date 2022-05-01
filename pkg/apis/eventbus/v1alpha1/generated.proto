@@ -89,12 +89,6 @@ message EventBusStatus {
   optional BusConfig config = 2;
 }
 
-message JetStreamAuth {
-  // Secret for auth token
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector token = 1;
-}
-
 // JetStreamBus holds the JetStream EventBus information
 message JetStreamBus {
   // JetStream version, such as "2.7.3"
@@ -179,13 +173,28 @@ message JetStreamBus {
   // Only configure "max_memory_store" or "max_file_store", do not set "store_dir" as it has been hardcoded.
   // +optional
   optional string settings = 16;
+
+  // Optional arguments to start nats-server. For example, "-D" to enable debugging output, "-DV" to enable debugging and tracing.
+  // Check https://docs.nats.io/ for all the available arguments.
+  // +optional
+  repeated string startArgs = 17;
+
+  // Optional configuration for the streams to be created in this JetStream service, if specified, it will be merged with the default configuration in controller-config.
+  // It accepts a YAML format configuration, available fields include, "maxBytes", "maxMsgs", "maxAge" (e.g. 72h), "replicas" (1, 3, 5), "duplicates" (e.g. 5m).
+  // +optional
+  optional string streamConfig = 18;
 }
 
 message JetStreamConfig {
   // JetStream (Nats) URL
   optional string url = 1;
 
-  optional JetStreamAuth auth = 2;
+  // Secret for auth
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 2;
+
+  // +optional
+  optional string streamConfig = 3;
 }
 
 // NATSBus holds the NATS eventbus information

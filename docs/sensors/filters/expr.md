@@ -31,7 +31,7 @@ An expr filter has following fields:
 filters:
   exprLogicalOperator: logical_operator_applied
   expr:
-    - expr: expression_to_evalute
+    - expr: expression_to_evaluate
       fields:
         - name: parameter_name
           path: path_to_parameter_value
@@ -92,7 +92,7 @@ The `expr` field defines the expression to be evaluated. The `fields` stanza def
 
 The expr filter evaluates the expression contained in `expr` using [govaluate](https://github.com/Knetic/govaluate). This library leverages an incredible flexibility and power.
 
-With govaluate we are able to define complex combination of arithmetic (`-`, `*`, `/`, `**`, `%`), negation (`-`), inversion (`!`), bitwise not (`~`), logical (`&&`, `||`), ternary conditional (`?`, `:`) operators, 
+With govaluate we are able to define complex combination of arithmetic (`-`, `*`, `/`, `**`, `%`), negation (`-`), inversion (`!`), bitwise not (`~`), logical (`&&`, `||`), ternary conditional (`?`, `:`) operators,
 together with comparators (`>`, `<`, `>=`, `<=`), comma-separated arrays and custom functions.
 
 Here some examples:
@@ -103,7 +103,7 @@ Here some examples:
 
 To discover all options offered by govaluate, take a look at its [manual](https://github.com/Knetic/govaluate/blob/master/MANUAL.md).
 
-## Partical example
+## Practical example
 
 1. Create a webhook event-source
 

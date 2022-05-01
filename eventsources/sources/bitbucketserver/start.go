@@ -163,7 +163,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	defer sources.Recover(el.GetEventName())
 
 	bitbucketserverEventSource := &el.BitbucketServerEventSource
@@ -209,9 +209,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
 
-	createWebhooks := func() {
+	applyWebhooks := func() {
 		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
-			if err = router.saveBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
+			if err = router.applyBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
 				logger.Errorw("failed to create/update Bitbucket webhook",
 					zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
 				continue
@@ -226,7 +226,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
-	createWebhooks()
+	applyWebhooks()
 
 	go func() {
 		// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
@@ -241,7 +241,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				logger.Info("exiting bitbucket hooks manager daemon")
 				return
 			case <-ticker.C:
-				createWebhooks()
+				applyWebhooks()
 			}
 		}
 	}()
@@ -249,8 +249,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	return webhook.ManageRoute(ctx, router, controller, dispatch)
 }
 
-// saveBitbucketServerWebhook creates or updates the configured webhook in Bitbucket
-func (router *Router) saveBitbucketServerWebhook(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration, repo v1alpha1.BitbucketServerRepository) error {
+// applyBitbucketServerWebhook creates or updates the configured webhook in Bitbucket
+func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration, repo v1alpha1.BitbucketServerRepository) error {
 	bitbucketserverEventSource := router.bitbucketserverEventSource
 	route := router.route
 

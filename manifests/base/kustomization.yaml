@@ -8,9 +8,7 @@ kind: Kustomization
 resources:
   - crds
   - argo-events-sa.yaml
-  - eventsource-controller
-  - sensor-controller
-  - eventbus-controller
+  - controller-manager
 
 images:
   - name: quay.io/argoproj/argo-events
@@ -21,25 +19,12 @@ patchesStrategicMerge:
     apiVersion: apps/v1
     kind: Deployment
     metadata:
-      name: eventsource-controller
+      name: controller-manager
     spec:
       template:
         spec:
           containers:
-            - name: eventsource-controller
+            - name: controller-manager
               env:
-                - name: EVENTSOURCE_IMAGE
-                  value: quay.io/argoproj/argo-events:latest
-  - |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: sensor-controller
-    spec:
-      template:
-        spec:
-          containers:
-            - name: sensor-controller
-              env:
-                - name: SENSOR_IMAGE
+                - name: ARGO_EVENTS_IMAGE
                   value: quay.io/argoproj/argo-events:latest

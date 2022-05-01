@@ -380,15 +380,6 @@
       },
       "type": "object"
     },
-    "io.argoproj.eventbus.v1alpha1.JetStreamAuth": {
-      "properties": {
-        "token": {
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
-          "description": "Secret for auth token"
-        }
-      },
-      "type": "object"
-    },
     "io.argoproj.eventbus.v1alpha1.JetStreamBus": {
       "description": "JetStreamBus holds the JetStream EventBus information",
       "properties": {
@@ -457,6 +448,17 @@
           "description": "JetStream configuration, if not specified, global settings in controller-config will be used. See https://docs.nats.io/running-a-nats-service/configuration#jetstream. Only configure \"max_memory_store\" or \"max_file_store\", do not set \"store_dir\" as it has been hardcoded.",
           "type": "string"
         },
+        "startArgs": {
+          "description": "Optional arguments to start nats-server. For example, \"-D\" to enable debugging output, \"-DV\" to enable debugging and tracing. Check https://docs.nats.io/ for all the available arguments.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "streamConfig": {
+          "description": "Optional configuration for the streams to be created in this JetStream service, if specified, it will be merged with the default configuration in controller-config. It accepts a YAML format configuration, available fields include, \"maxBytes\", \"maxMsgs\", \"maxAge\" (e.g. 72h), \"replicas\" (1, 3, 5), \"duplicates\" (e.g. 5m).",
+          "type": "string"
+        },
         "tolerations": {
           "description": "If specified, the pod's tolerations.",
           "items": {
@@ -473,8 +475,12 @@
     },
     "io.argoproj.eventbus.v1alpha1.JetStreamConfig": {
       "properties": {
-        "auth": {
-          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamAuth"
+        "accessSecret": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Secret for auth"
+        },
+        "streamConfig": {
+          "type": "string"
         },
         "url": {
           "description": "JetStream (Nats) URL",
@@ -1359,6 +1365,13 @@
           "description": "Redis event source",
           "type": "object"
         },
+        "redisStream": {
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.RedisStreamEventSource"
+          },
+          "description": "Redis stream source",
+          "type": "object"
+        },
         "replicas": {
           "description": "Replicas is the event source deployment replicas",
           "format": "int32",
@@ -2159,6 +2172,10 @@
           "description": "HostAddress refers to the address of the Redis host/server",
           "type": "string"
         },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -2182,6 +2199,60 @@
       "required": [
         "hostAddress",
         "channels"
+      ],
+      "type": "object"
+    },
+    "io.argoproj.eventsource.v1alpha1.RedisStreamEventSource": {
+      "description": "RedisStreamEventSource describes an event source for Redis streams (https://redis.io/topics/streams-intro)",
+      "properties": {
+        "consumerGroup": {
+          "description": "ConsumerGroup refers to the Redis stream consumer group that will be created on all redis streams. Messages are read through this group. Defaults to 'argo-events-cg'",
+          "type": "string"
+        },
+        "db": {
+          "description": "DB to use. If not specified, default DB 0 will be used.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
+        "hostAddress": {
+          "description": "HostAddress refers to the address of the Redis host/server (master instance)",
+          "type": "string"
+        },
+        "maxMsgCountPerRead": {
+          "description": "MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP of all streams Example: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a total of 20 messages. Same as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro). Defaults to 10",
+          "format": "int32",
+          "type": "integer"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object"
+        },
+        "password": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Password required for authentication if any."
+        },
+        "streams": {
+          "description": "Streams to look for entries. XREADGROUP is used on all streams using a single consumer group.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig",
+          "description": "TLS configuration for the redis client."
+        }
+      },
+      "required": [
+        "hostAddress",
+        "streams"
       ],
       "type": "object"
     },
@@ -3062,6 +3133,10 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ExprFilter"
           },
           "type": "array"
+        },
+        "script": {
+          "description": "Script refers to a Lua script evaluated to determine the validity of an event.",
+          "type": "string"
         },
         "time": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter",

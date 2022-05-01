@@ -39,6 +39,7 @@ func (t *Then) ExpectEventBusDeleted() *Then {
 	if err == nil || !apierr.IsNotFound(err) {
 		t.t.Fatalf("expected event bus to be deleted: %v", err)
 	}
+
 	return t
 }
 
@@ -49,7 +50,19 @@ func (t *Then) ExpectEventSourcePodLogContains(regex string) *Then {
 		t.t.Fatalf("expected event source pod logs: %v", err)
 	}
 	if !contains {
-		t.t.Fatalf("expected event source pod log contains %s", regex)
+		t.t.Fatalf("expected event source pod log contains '%s'", regex)
+	}
+	return t
+}
+
+func (t *Then) ExpectEventSourcePodLogDoesNotContain(regex string) *Then {
+	ctx := context.Background()
+	contains, err := testutil.EventSourcePodLogContains(ctx, t.kubeClient, Namespace, t.eventSource.Name, regex, defaultTimeout)
+	if err != nil {
+		t.t.Fatalf("expected event source pod logs: %v", err)
+	}
+	if contains {
+		t.t.Fatalf("expected event source pod log doesn't contain '%s'", regex)
 	}
 	return t
 }
@@ -61,7 +74,19 @@ func (t *Then) ExpectSensorPodLogContains(regex string) *Then {
 		t.t.Fatalf("expected sensor pod logs: %v", err)
 	}
 	if !contains {
-		t.t.Fatalf("expected sensor pod log contains %s", regex)
+		t.t.Fatalf("expected sensor pod log contains '%s'", regex)
+	}
+	return t
+}
+
+func (t *Then) ExpectSensorPodLogDoesNotContain(regex string) *Then {
+	ctx := context.Background()
+	contains, err := testutil.SensorPodLogContains(ctx, t.kubeClient, Namespace, t.sensor.Name, regex, defaultTimeout)
+	if err != nil {
+		t.t.Fatalf("expected event source pod logs: %v", err)
+	}
+	if contains {
+		t.t.Fatalf("expected event source pod log doesn't contain '%s'", regex)
 	}
 	return t
 }
@@ -115,6 +140,7 @@ func (t *Then) TerminateAllPodPortForwards() *Then {
 			close(v)
 		}
 	}
+
 	return t
 }
 
