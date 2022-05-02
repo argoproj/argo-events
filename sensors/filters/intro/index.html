@@ -1843,7 +1843,7 @@
 <p>If filters determine an event is valid, this will trigger the action defined by the Sensor.</p>
 <p>If filters determine an event is not valid, this won't trigger any action.</p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<p>Argo Events offers 4 types of filters:</p>
+<p>Argo Events offers 5 types of filters:</p>
 <ol>
 <li><a href="../expr/"><code>Expr</code> Filter</a></li>
 <li><a href="../data/"><code>Data</code> Filter</a></li>
@@ -1855,7 +1855,7 @@
 <p>⚠️ <code>PLEASE NOTE</code> this is the order in which Sensor evaluates filter types: expr, data, context, time.</p>
 </blockquote>
 <h2 id="logical-operator">Logical operator<a class="headerlink" href="#logical-operator" title="Permanent link">&para;</a></h2>
-<p>Filters types can be evaluated together in 2 ways:</p>
+<p>Filter types can be evaluated together in 2 ways:</p>
 <ul>
 <li><code>and</code>, meaning that all filters returning <code>true</code> are required for an event to be valid</li>
 <li><code>or</code>, meaning that only one filter returning <code>true</code> is enough for an event to be valid</li>
