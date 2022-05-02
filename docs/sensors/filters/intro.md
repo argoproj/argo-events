@@ -20,7 +20,7 @@ Argo Events offers 5 types of filters:
 
 ## Logical operator
 
-Filters types can be evaluated together in 2 ways:
+Filter types can be evaluated together in 2 ways:
 
 - `and`, meaning that all filters returning `true` are required for an event to be valid
 - `or`, meaning that only one filter returning `true` is enough for an event to be valid
