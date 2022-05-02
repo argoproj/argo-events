@@ -8,7 +8,7 @@ If filters determine an event is not valid, this won't trigger any action.
 
 ## Types
 
-Argo Events offers 4 types of filters:
+Argo Events offers 5 types of filters:
 
 1. [`Expr` Filter](expr.md)
 1. [`Data` Filter](data.md)
