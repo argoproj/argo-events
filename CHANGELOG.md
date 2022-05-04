@@ -1,5 +1,40 @@
 # Changelog
 
+## v1.7.0 (2022-05-04)
+
+ * [6b10ce4d](https://github.com/argoproj/argo-events/commit/6b10ce4d463c312085fb33f6be12cfd137ea19bc) Update manifests to v1.7.0
+ * [14a6d1c2](https://github.com/argoproj/argo-events/commit/14a6d1c27ef85d0b80bd6e9087fbfa1929b715a2) chore(deps): bump google.golang.org/api from 0.77.0 to 0.78.0 (#1924)
+ * [2736104d](https://github.com/argoproj/argo-events/commit/2736104d08c9f96dd76afe37e8a737ed0d6368f6) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.5 to 1.44.6 (#1923)
+ * [a07013e4](https://github.com/argoproj/argo-events/commit/a07013e41de1ee15c1232feb9e77cc19420aaa52) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.4 to 1.44.5 (#1922)
+ * [f3cf34e5](https://github.com/argoproj/argo-events/commit/f3cf34e50aa01a956b806b82a8ba5104a3068d17) fix: Enforce webhook secret in BitbucketServer event source (#1917)
+ * [bbe135f7](https://github.com/argoproj/argo-events/commit/bbe135f730402f05a949045dc12fa066e1a20ca2) chore(deps): bump google.golang.org/api from 0.76.0 to 0.77.0 (#1919)
+ * [cfe47a04](https://github.com/argoproj/argo-events/commit/cfe47a0436adaa14d017fdcce2a8c08b1671c4f3) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.2 to 1.44.4 (#1918)
+ * [3781f13c](https://github.com/argoproj/argo-events/commit/3781f13c2d2b410732bc4d36777508e54d033d14) added script filter (#1894)
+ * [56f202ac](https://github.com/argoproj/argo-events/commit/56f202ac2bcbeb91f77e5a0b90df91cb698c17f2) fix: Bitbucketserver webhook secret optional (#1902)
+ * [881fc7fb](https://github.com/argoproj/argo-events/commit/881fc7fb91d85566abc7a48c1cc69befd0545918) chore(deps): bump github.com/Azure/azure-event-hubs-go/v3 (#1912)
+ * [90415435](https://github.com/argoproj/argo-events/commit/90415435a921de3d8f8f12d00a1a83775e1cb44e) chore(deps): bump github.com/argoproj/pkg from 0.13.0 to 0.13.1 (#1911)
+ * [d754f181](https://github.com/argoproj/argo-events/commit/d754f18158e5cf85a4b6dad93bf46004a84bd4f6) chore(deps): bump google.golang.org/api from 0.75.0 to 0.76.0 (#1910)
+ * [191730cc](https://github.com/argoproj/argo-events/commit/191730cca0c21f67a485ac75021164cf591b6c35) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.1 to 1.44.2 (#1909)
+ * [e324e0e0](https://github.com/argoproj/argo-events/commit/e324e0e0fd244996ff2a3422e1dff55837e7d7d0) chore(deps): bump github.com/fsnotify/fsnotify from 1.5.3 to 1.5.4 (#1907)
+ * [a417a8be](https://github.com/argoproj/argo-events/commit/a417a8be4e6c0b47c2aa5ab3c11939317ac6c895) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.0 to 1.44.1 (#1906)
+ * [a3a7fc6f](https://github.com/argoproj/argo-events/commit/a3a7fc6fc686d19fe9c36c1932254582689e3f64) chore(deps): bump github.com/google/go-cmp from 0.5.7 to 0.5.8 (#1905)
+ * [e4d6338a](https://github.com/argoproj/argo-events/commit/e4d6338a6acb065e36372903e08893ee88366f00) chore(deps): bump cloud.google.com/go/pubsub from 1.20.0 to 1.21.0 (#1904)
+ * [dfcb8056](https://github.com/argoproj/argo-events/commit/dfcb8056d0c919b7f936eb85d824ba8666eedebb) chore(deps): bump github.com/argoproj/pkg from 0.12.0 to 0.13.0 (#1903)
+ * [dcd13f2c](https://github.com/argoproj/argo-events/commit/dcd13f2cf9a0817a6f2650ac6741af0f27eac116) chore(deps): bump github.com/aws/aws-sdk-go from 1.43.45 to 1.44.0 (#1900)
+ * [2df44805](https://github.com/argoproj/argo-events/commit/2df44805cd2ac7fbb2c13973a76764f3184fdace) chore(deps): bump github.com/aws/aws-sdk-go from 1.43.44 to 1.43.45 (#1898)
+ * [1a27bcb2](https://github.com/argoproj/argo-events/commit/1a27bcb2e3c63510870ca9c674a0240a0bc54b65) chore(deps): bump github.com/xanzy/go-gitlab from 0.63.0 to 0.64.0 (#1897)
+ * [650d83f8](https://github.com/argoproj/argo-events/commit/650d83f84bd407b5743b2f0137c51434c61a553c) chore(deps): bump github.com/slack-go/slack from 0.10.2 to 0.10.3 (#1896)
+ * [0950594c](https://github.com/argoproj/argo-events/commit/0950594cf5daeb47c1612071e412a5c5972916b2) chore(deps): bump google.golang.org/grpc from 1.45.0 to 1.46.0 (#1895)
+ * [f6924a09](https://github.com/argoproj/argo-events/commit/f6924a0927f4a13727c1aff68d939cc3047c35d7) Fix a concurrency bug in stress test, plus clean up of e2e tests (#1882)
+
+### Contributors
+
+ * Daniel
+ * Derek Wang
+ * Julie Vogelman
+ * Vaibhav
+ * dependabot[bot]
+
 ## v1.7.0-rc1 (2022-04-23)
 
  * [5b2905b0](https://github.com/argoproj/argo-events/commit/5b2905b04688ccd43cffb15329e5a9a106748eea) Update manifests to v1.7.0-rc1
