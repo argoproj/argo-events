@@ -12,13 +12,13 @@ spec:
           value: "true"
   dependencies:
     - name: test-dep-1
-      eventSourceName: e2e-multi-event-webhook
+      eventSourceName: e2e-multi-sensor
       eventName: example1
     - name: test-dep-2
-      eventSourceName: e2e-multi-event-webhook
+      eventSourceName: e2e-multi-sensor
       eventName: example2
     - name: test-dep-3
-      eventSourceName: e2e-multi-event-webhook
+      eventSourceName: e2e-multi-sensor
       eventName: example3
   triggers:
     - template:
