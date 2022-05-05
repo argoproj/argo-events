@@ -381,12 +381,3 @@ func podLogContainsCount(ctx context.Context, client kubernetes.Interface, names
 		}
 	}
 }
-
-func DeletePod(ctx context.Context, client kubernetes.Interface, namespace string, labelSelector string) error {
-	err := client.CoreV1().Pods(namespace).DeleteCollection(ctx, *metav1.NewDeleteOptions(10), metav1.ListOptions{LabelSelector: labelSelector})
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	return nil
-}
