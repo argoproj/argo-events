@@ -202,7 +202,7 @@ func (o *options) createEventSource(ctx context.Context) (*eventsourcev1alpha1.E
 	if err := testutil.WaitForEventSourceDeploymentReady(ctx, o.kubeClient, o.namespace, es.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see event source deployment and pod ready: %w", err)
 	}
-	contains, err := testutil.EventSourcePodLogContains(ctx, o.kubeClient, o.namespace, es.Name, logEventSourceStarted, defaultTimeout)
+	contains, err := testutil.EventSourcePodLogContains(ctx, o.kubeClient, o.namespace, es.Name, logEventSourceStarted, defaultTimeout, nil)
 	if err != nil {
 		return nil, fmt.Errorf("expected to see event source pod contains something: %w", err)
 	}
@@ -236,7 +236,7 @@ func (o *options) createSensor(ctx context.Context) (*sensorv1alpha1.Sensor, err
 	if err := testutil.WaitForSensorDeploymentReady(ctx, o.kubeClient, o.namespace, sensor.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see sensor deployment and pod ready: %w", err)
 	}
-	contains, err := testutil.SensorPodLogContains(ctx, o.kubeClient, o.namespace, sensor.Name, logSensorStarted, defaultTimeout)
+	contains, err := testutil.SensorPodLogContains(ctx, o.kubeClient, o.namespace, sensor.Name, logSensorStarted, defaultTimeout, nil)
 	if err != nil {
 		return nil, fmt.Errorf("expected to see sensor pod contains something: %w", err)
 	}
