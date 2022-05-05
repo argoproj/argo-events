@@ -185,18 +185,6 @@ func (w *When) WaitForSensorReady() *When {
 	return w
 }
 
-/*
-func (w *When) DeleteSensorPod() *When {
-	ctx := context.Background()
-	labelSelector := fmt.Sprintf("sensor-name=%s", w.sensor.Name)
-	w.t.Logf("Deleting pod with label %s", labelSelector)
-	err := testutil.DeletePod(ctx, w.kubeClient, Namespace, labelSelector)
-	if err != nil {
-		w.t.Fatalf("deletion of sensor pod %s failed: %v", w.sensor.Name, err)
-	}
-	return w
-}*/
-
 func (w *When) Given() *Given {
 	return &Given{
 		t:                 w.t,

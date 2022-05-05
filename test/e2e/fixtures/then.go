@@ -54,19 +54,6 @@ func (t *Then) ExpectEventSourcePodLogContains(regex string, countOpt *int) *The
 	return t
 }
 
-//todo: this could be replacd by ExpectEventSourcePodLogContains with *countOpt = 0
-func (t *Then) ExpectEventSourcePodLogDoesNotContain(regex string) *Then {
-	ctx := context.Background()
-	contains, err := testutil.EventSourcePodLogContains(ctx, t.kubeClient, Namespace, t.eventSource.Name, regex, defaultTimeout, nil)
-	if err != nil {
-		t.t.Fatalf("expected event source pod logs: %v", err)
-	}
-	if contains {
-		t.t.Fatalf("expected event source pod log doesn't contain '%s'", regex)
-	}
-	return t
-}
-
 func (t *Then) ExpectSensorPodLogContains(regex string, countOpt *int) *Then {
 	ctx := context.Background()
 	contains, err := testutil.SensorPodLogContains(ctx, t.kubeClient, Namespace, t.sensor.Name, regex, defaultTimeout, countOpt)
@@ -112,7 +99,6 @@ func (t *Then) EventSourcePodPortForward(localPort, remotePort int) *Then {
 	return t
 }
 
-// todo: look at moving these methods to When
 func (t *Then) SensorPodPortForward(localPort, remotePort int) *Then {
 	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", t.sensor.Name)
 	ctx := context.Background()
