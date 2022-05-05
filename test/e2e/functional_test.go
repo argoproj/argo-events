@@ -223,8 +223,6 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 
 func (s *FunctionalSuite) TestMultiDependencyConditions() {
 
-	//time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
-
 	t1 := s.Given().EventSource("@testdata/es-multi-dep.yaml").
 		When().
 		CreateEventSource().
@@ -315,8 +313,6 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
 		SensorPodPortForward(7780, 7777)
 
-	time.Sleep(6 * time.Second)
-
 	// test-dep-1
 	s.e("http://localhost:12002").POST("/example").WithBytes([]byte("{}")).
 		Expect().
@@ -330,7 +326,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	t2.When().
 		DeleteSensor()
 
-	time.Sleep(20 * time.Second)
+	time.Sleep(6 * time.Second) // need to give this time to be deleted before we create the new one
 
 	t3 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
 		When().
@@ -347,7 +343,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		Expect().
 		Status(200)
 
-	time.Sleep(6 * time.Second)
+	time.Sleep(20 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
@@ -357,8 +353,6 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 func (s *FunctionalSuite) TestMultipleSensors() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
-
-	//time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
 
 	// Start EventSource
 	t1 := s.Given().EventSource("@testdata/es-multi-sensor.yaml").
@@ -429,8 +423,6 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 
 func (s *FunctionalSuite) TestTriggerSpecChange() {
 	// Start a sensor which uses "A && B"; send A; replace the Sensor with a new spec which uses A; send C and verify that there's no trigger
-
-	//time.Sleep(5 * time.Second) // todo: don't like to have all of these sleeps but this seems to allow reuse of the same EventSource/Sensor - maybe we can have a WaitForEventSourceDeletion instead
 
 	// Start EventSource
 	t1 := s.Given().EventSource("@testdata/es-trigger-spec-change.yaml").
