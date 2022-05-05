@@ -153,7 +153,7 @@ func (w *When) WaitForEventBusReady() *When {
 	if err := testutil.WaitForEventBusReady(ctx, w.eventBusClient, w.eventBus.Name, defaultTimeout); err != nil {
 		w.t.Fatal(err)
 	}
-	if err := testutil.WaitForEventBusStatefulSetReady(ctx, w.kubeClient, Namespace, w.eventBus.Name, defaultTimeout); err != nil {
+	if err := testutil.WaitForEventBusStatefulSetReady(ctx, w.kubeClient, Namespace, w.eventBus.Name, 2*time.Minute); err != nil {
 		w.t.Fatal(err)
 	}
 	return w

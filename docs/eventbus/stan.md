@@ -1,26 +1,3 @@
-# EventBus
-
-![GA](assets/ga.svg)
-
-> v0.17.0 and after
-
-EventBus is a Kubernetes
-[Custom Resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
-which is used for events transmission from EventSources to Sensors. Currently
-EventBus is backed by
-[NATS Streaming](https://github.com/nats-io/nats-streaming-server), and it is
-open to support other technologies.
-
-EventBus is namespaced, an EventBus object is required in a namespace to make
-EventSource and Sensor work.
-
-The common practice is to create an EventBus named `default` in the namespace. If
-you want to use a different name, or you want to have multiple EventBus in one
-namespace, you need to specify `eventBusName` in the spec of EventSource and
-Sensor correspondingly, so that they can find the right one. See EventSource
-[spec](https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#eventsourcespec)
-and Sensor
-[spec](https://github.com/argoproj/argo-events/tree/stable/api/sensor.md#sensorspec).
 
 ## NATS Streaming
 
@@ -130,36 +107,7 @@ for the full spec of `native`.
   [Affinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
   settings for the StatefulSet PODs.
 
-  A best effort and a hard requirement node anti-affinity config look like
-  below, if you want to do AZ (Availablity Zone) anti-affinity, change the value
-  of `topologyKey` from `kubernetes.io/hostname` to
-  `topology.kubernetes.io/zone`.
-
-```yaml
-# Best effort
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - podAffinityTerm:
-          labelSelector:
-            matchLabels:
-              controller: eventbus-controller
-              eventbus-name: default
-          topologyKey: kubernetes.io/hostname
-        weight: 100
-```
-
-```yaml
-# Hard requirement
-affinity:
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchLabels:
-            controller: eventbus-controller
-            eventbus-name: default
-        topologyKey: kubernetes.io/hostname
-```
+ 
 
 #### More About Native NATS EventBus
 
@@ -170,7 +118,7 @@ affinity:
   `spec.nats.native.maxBytes` to customize it, `"0"` means unlimited.
 
 - Max age of messages is 72 hours, which means messages over 72 hours will be
-  deleted automatically. It can be cutomized by setting
+  deleted automatically. It can be customized by setting
   `spec.nats.native.maxAge`, i.e. `240h`.
 
 - Max subscription number is defaults to `1000`, it could be customized by
@@ -220,5 +168,5 @@ A sample result:
 }
 ```
 
-- All the events in a namespace are published to same channel/subject/topic
+All the events in a namespace are published to same channel/subject/topic
   named `eventbus-{namespace}` in the EventBus.

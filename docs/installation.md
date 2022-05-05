@@ -20,18 +20,18 @@
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
 
 
-       NOTE: 
-       
+       NOTE:
+
          * On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
-    
+
                 kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
-           
-         * On Openshift: 
+
+         * On OpenShift:
              - Make sure to grant `anyuid` scc to the service account.
 
                 oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
-					
-             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the vaildating admission controller)
+
+             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the validating admission controller)
 
                 - apiGroups:
                   - rbac.authorization.k8s.io
@@ -61,18 +61,18 @@
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
-       NOTE: 
-       
+       NOTE:
+
          * On GKE, you may need to grant your account the ability to create new custom resource definitions
-    
+
                 kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
-         
-         * On Openshift: 
+
+         * On OpenShift:
              - Make sure to grant `anyuid` scc to the service account.
 
                 oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
-					
-             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the vaildating admission controller)
+
+             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the validating admission controller)
 
                 - apiGroups:
                   - rbac.authorization.k8s.io
@@ -89,7 +89,7 @@
 
 3. Deploy the eventbus.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml        
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
 
 ### Using Kustomize

@@ -231,6 +231,8 @@ type EventDependencyFilter struct {
 	// Available values: and (&&), or (||)
 	// Is optional and if left blank treated as and (&&).
 	ExprLogicalOperator LogicalOperator `json:"exprLogicalOperator,omitempty" protobuf:"bytes,6,opt,name=exprLogicalOperator,casttype=ExprLogicalOperator"`
+	// Script refers to a Lua script evaluated to determine the validity of an event.
+	Script string `json:"script,omitempty" protobuf:"bytes,7,opt,name=script"`
 }
 
 type ExprFilter struct {

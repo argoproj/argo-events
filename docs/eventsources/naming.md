@@ -38,4 +38,4 @@ spec:
 ## EventName
 
 `eventName` is the map key of a configured event. In the example above,
-`eventName` could be `exmaple` or `example-foo`.
+`eventName` could be `example` or `example-foo`.
