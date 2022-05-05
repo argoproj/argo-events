@@ -349,17 +349,17 @@ func podLogContainsCount(ctx context.Context, client kubernetes.Interface, names
 		return false, err
 	}
 
-	instancesChan := make(chan struct{}, 0)
+	instancesChan := make(chan struct{})
 
-	go func(ctx context.Context, instancesChan chan<- struct{}) error {
+	go func(ctx context.Context, instancesChan chan<- struct{}) {
 		s := bufio.NewScanner(stream)
 		for {
 			select {
 			case <-ctx.Done():
-				return nil
+				return
 			default:
 				if !s.Scan() {
-					return s.Err()
+					return
 				}
 				data := s.Bytes()
 				fmt.Println(string(data))
@@ -368,7 +368,6 @@ func podLogContainsCount(ctx context.Context, client kubernetes.Interface, names
 				}
 			}
 		}
-
 	}(ctx, instancesChan)
 
 	actualCount := 0
