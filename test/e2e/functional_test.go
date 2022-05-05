@@ -343,7 +343,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		Expect().
 		Status(200)
 
-	time.Sleep(30 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
+	time.Sleep(60 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
