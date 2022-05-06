@@ -284,6 +284,8 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &twoCount)
 }
 
+// TestDurableConsumer() is commented out due to it not reliably passing with the STAN bus
+// (because when Sensor pod restarts it sometimes takes a little while for the STAN bus to resend the message to the durable consumer)
 /*
 // Start Pod with a multidependency condition
 // send it one dependency
