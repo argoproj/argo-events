@@ -307,6 +307,7 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 	}
 }
 
+// look for at least one instance of the regex string in the log
 func podLogContains(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string) (bool, error) {
 	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
 	if err != nil {
@@ -337,6 +338,7 @@ func podLogContains(ctx context.Context, client kubernetes.Interface, namespace,
 	}
 }
 
+// look for a specific number of instances of the regex string in the log
 func podLogContainsCount(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string, count int) (bool, error) {
 	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
 	if err != nil {
