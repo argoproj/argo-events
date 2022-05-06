@@ -360,27 +360,17 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
 		f()
 
-		if githubEventSource.DeleteHookOnFinish {
+		go func() {
 			// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
 			// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from github.
 			// This is a workaround to mitigate the race conditions.
-			go func() {
-				logger.Info("starting github hooks manager daemon")
-				ticker := time.NewTicker(60 * time.Second)
-				defer ticker.Stop()
-				for {
-					select {
-					case <-ctx.Done():
-						logger.Info("exiting github hooks manager daemon")
-						return
-					case <-ticker.C:
-						f()
-					}
-				}
-			}()
-		} else {
-			logger.Info("no need to start github hooks manager daemon")
-		}
+			logger.Info("starting github hooks manager daemon")
+			for i := 0; i < 10; i++ {
+				time.Sleep(60 * time.Second)
+				f()
+			}
+			logger.Info("exiting github hooks manager daemon")
+		}()
 	} else {
 		logger.Info("no need to create webhooks")
 	}
