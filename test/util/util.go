@@ -353,6 +353,7 @@ func podLogContainsCount(ctx context.Context, client kubernetes.Interface, names
 
 	instancesChan := make(chan struct{})
 
+	// scan the log looking for matches
 	go func(ctx context.Context, instancesChan chan<- struct{}) {
 		s := bufio.NewScanner(stream)
 		for {
@@ -372,6 +373,7 @@ func podLogContainsCount(ctx context.Context, client kubernetes.Interface, names
 		}
 	}(ctx, instancesChan)
 
+	// set a 10 second timer to stop looking and see if we got the right count
 	actualCount := 0
 	for {
 		select {
