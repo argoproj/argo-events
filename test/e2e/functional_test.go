@@ -158,7 +158,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 	defer t2.TerminateAllPodPortForwards()
 	defer t2.When().DeleteSensor()
 
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
 
 	s.e("http://localhost:12000").POST("/example").WithBytes([]byte("{}")).
 		Expect().
@@ -251,7 +251,7 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 	defer t2.When().DeleteSensor()
 	defer t2.TerminateAllPodPortForwards()
 
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
 
 	// need to verify the conditional logic is working successfully
 	// If we trigger test-dep-1 (port 12000) we should see log-trigger-2 but not log-trigger-1
@@ -384,7 +384,7 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 	defer t2.TerminateAllPodPortForwards()
 	defer t2.When().DeleteSensor()
 
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
 
 	// Trigger first dependency
 	// test-dep-1
@@ -406,14 +406,14 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 	defer t3.TerminateAllPodPortForwards()
 	defer t3.When().DeleteSensor()
 
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
 
 	// Trigger second dependency
 	// test-dep-2
 	s.e("http://localhost:13003").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount) //todo: could speed things up by instead of looking for count just search for exact string
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 
 	// Verify trigger occurs for first Sensor and not second
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), nil)
