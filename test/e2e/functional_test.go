@@ -284,6 +284,7 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &twoCount)
 }
 
+/*
 // Start Pod with a multidependency condition
 // send it one dependency
 // verify that if it goes down and comes back up it triggers when sent the other part of the condition
@@ -347,7 +348,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
-}
+}*/
 
 func (s *FunctionalSuite) TestMultipleSensors() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
