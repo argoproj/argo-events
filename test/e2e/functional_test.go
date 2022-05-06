@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/test/e2e/fixtures"
+	"github.com/argoproj/argo-events/test/util"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/suite"
 )
@@ -54,7 +55,7 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
-		ExpectEventSourcePodLogContains(LogPublishEventSuccessful, nil)
+		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	defer t1.When().DeleteEventSource()
 
@@ -63,7 +64,7 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), nil)
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 
 	defer t2.When().DeleteSensor()
 }
@@ -73,9 +74,9 @@ func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady().
-		Wait(3*time.Second).
+		Wait(3 * time.Second).
 		Then().
-		ExpectEventSourcePodLogContains(LogPublishEventSuccessful, nil)
+		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	defer t1.When().DeleteEventSource()
 
@@ -83,9 +84,9 @@ func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
 		When().
 		CreateSensor().
 		WaitForSensorReady().
-		Wait(3*time.Second).
+		Wait(3 * time.Second).
 		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), nil)
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 	defer t2.When().DeleteSensor()
 }
 
@@ -95,13 +96,13 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(7777, 7777)
 
 	defer t1.TerminateAllPodPortForwards()
 	defer t1.When().DeleteEventSource()
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, nil)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	// EventSource POD metrics
 	s.e("http://localhost:7777").GET("/metrics").
@@ -117,13 +118,13 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, nil).
+		ExpectSensorPodLogContains(LogSensorStarted).
 		SensorPodPortForward(7778, 7777)
 
 	defer t2.TerminateAllPodPortForwards()
 	defer t2.When().DeleteSensor()
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), nil)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 
 	// Sensor POD metrics
 	s.e("http://localhost:7778").GET("/metrics").
@@ -140,7 +141,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12000, 12000).
 		EventSourcePodPortForward(7777, 7777)
 
@@ -152,7 +153,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, nil).
+		ExpectSensorPodLogContains(LogSensorStarted).
 		SensorPodPortForward(7778, 7777)
 
 	defer t2.TerminateAllPodPortForwards()
@@ -164,7 +165,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, nil)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	// Post something invalid
 	s.e("http://localhost:12000").POST("/example").WithBytes([]byte("Invalid JSON")).
@@ -182,8 +183,8 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Contains("argo_events_events_processing_failed_total")
 
 	// Expect to see 1 success and 1 failure
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), nil).
-		ExpectSensorPodLogContains(LogTriggerActionFailed, nil)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger")).
+		ExpectSensorPodLogContains(LogTriggerActionFailed)
 
 	// Sensor POD metrics
 	s.e("http://localhost:7778").GET("/metrics").
@@ -203,7 +204,7 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 		Exec("kubectl", []string{"-n", fixtures.Namespace, "run", "test-pod", "--image", "hello-world", "-l", fixtures.Label + "=" + fixtures.LabelValue}, fixtures.OutputRegexp(`pod/.* created`))
 
 	t1 := w1.Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil)
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
 	defer t1.When().DeleteEventSource()
 
 	t2 := s.Given().Sensor("@testdata/sensor-resource.yaml").
@@ -211,14 +212,14 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, nil)
+		ExpectSensorPodLogContains(LogSensorStarted)
 	defer t2.When().DeleteSensor()
 
 	w1.Exec("kubectl", []string{"-n", fixtures.Namespace, "delete", "pod", "test-pod"}, fixtures.OutputRegexp(`pod "test-pod" deleted`))
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, nil)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), nil)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 }
 
 func (s *FunctionalSuite) TestMultiDependencyConditions() {
@@ -228,7 +229,7 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12001, 12000).
 		EventSourcePodPortForward(13001, 13000).
 		EventSourcePodPortForward(14001, 14000).
@@ -237,15 +238,12 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 	defer t1.When().DeleteEventSource()
 	defer t1.TerminateAllPodPortForwards()
 
-	zeroCount := 0
-	oneCount := 1
-	twoCount := 2
 	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
 		SensorPodPortForward(7778, 7777)
 
 	defer t2.When().DeleteSensor()
@@ -259,29 +257,29 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-2"), &oneCount).
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &zeroCount)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-2"), util.PodLogCheckOptionWithCount(1)).
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 
 	// Then if we trigger test-dep-2 we should see log-trigger-2
 	s.e("http://localhost:13001").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 
 	// Then we trigger test-dep-2 again and shouldn't see anything
 	s.e("http://localhost:13001").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 
 	// Finally trigger test-dep-3 and we should see log-trigger-1..
 	s.e("http://localhost:14001").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &twoCount)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(2))
 }
 
 // Start Pod with a multidependency condition
@@ -298,7 +296,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12002, 12000).
 		EventSourcePodPortForward(13002, 13000).
 		EventSourcePodPortForward(14002, 14000).
@@ -307,14 +305,12 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	defer t1.When().DeleteEventSource()
 	defer t1.TerminateAllPodPortForwards()
 
-	oneCount := 1
-	twoCount := 2
 	t2 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
 		SensorPodPortForward(7780, 7777)
 
 	// test-dep-1
@@ -322,7 +318,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
 	t2.TerminateAllPodPortForwards()
 
@@ -337,7 +333,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
 		SensorPodPortForward(7780, 7777)
 
 	defer t3.TerminateAllPodPortForwards()
@@ -349,8 +345,8 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 
 	time.Sleep(60 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
-	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
+	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 }
 
 func (s *FunctionalSuite) TestMultipleSensors() {
@@ -363,7 +359,7 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12003, 12000).
 		EventSourcePodPortForward(13003, 13000).
 		EventSourcePodPortForward(14003, 14000).
@@ -373,15 +369,12 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 	defer t1.TerminateAllPodPortForwards()
 
 	// Start one Sensor
-	zeroCount := 0
-	oneCount := 1
-	twoCount := 2
 	t2 := s.Given().Sensor("@testdata/sensor-multi-sensor.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
 		SensorPodPortForward(7782, 7777)
 
 	defer t2.TerminateAllPodPortForwards()
@@ -395,7 +388,7 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
 	// Start second Sensor
 	t3 := s.Given().Sensor("@testdata/sensor-multi-sensor-2.yaml").
@@ -403,7 +396,7 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
 		SensorPodPortForward(7783, 7777)
 
 	defer t3.TerminateAllPodPortForwards()
@@ -416,11 +409,11 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 	s.e("http://localhost:13003").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
 
 	// Verify trigger occurs for first Sensor and not second
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), nil)
-	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &zeroCount)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"))
+	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 
 }
 
@@ -433,7 +426,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		CreateEventSource().
 		WaitForEventSourceReady().
 		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted, nil).
+		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12004, 12000).
 		EventSourcePodPortForward(13004, 13000).
 		EventSourcePodPortForward(14004, 14000).
@@ -443,15 +436,13 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	defer t1.TerminateAllPodPortForwards()
 
 	// Start one Sensor
-	zeroCount := 0
-	oneCount := 1
-	twoCount := 2
+
 	t2 := s.Given().Sensor("@testdata/sensor-trigger-spec-change.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
 		SensorPodPortForward(7785, 7777)
 
 	time.Sleep(3 * time.Second)
@@ -462,7 +453,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &oneCount)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
 	t2.TerminateAllPodPortForwards()
 	t2.When().DeleteSensor()
@@ -474,7 +465,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, &oneCount).
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
 		SensorPodPortForward(7786, 7777)
 
 	defer t2.TerminateAllPodPortForwards()
@@ -487,9 +478,9 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
+	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
 	// Verify no Trigger this time since test-dep-1 should have been cleared
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &zeroCount)
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 }
 
 func TestFunctionalSuite(t *testing.T) {

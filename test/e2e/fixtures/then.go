@@ -44,9 +44,9 @@ func (t *Then) ExpectEventBusDeleted() *Then {
 
 // look for regex match in Sensor pod's log
 // if countOpt != nil, look for specific count of regex match; else look for at least one instance
-func (t *Then) ExpectEventSourcePodLogContains(regex string, countOpt *int) *Then {
+func (t *Then) ExpectEventSourcePodLogContains(regex string, options ...testutil.PodLogCheckOption) *Then {
 	ctx := context.Background()
-	contains, err := testutil.EventSourcePodLogContains(ctx, t.kubeClient, Namespace, t.eventSource.Name, regex, defaultTimeout, countOpt)
+	contains, err := testutil.EventSourcePodLogContains(ctx, t.kubeClient, Namespace, t.eventSource.Name, regex, options...)
 	if err != nil {
 		t.t.Fatalf("expected event source pod logs: %v", err)
 	}
@@ -58,9 +58,9 @@ func (t *Then) ExpectEventSourcePodLogContains(regex string, countOpt *int) *The
 
 // look for regex match in EventSource pod's log
 // if countOpt != nil, look for specific count of regex match; else look for at least one instance
-func (t *Then) ExpectSensorPodLogContains(regex string, countOpt *int) *Then {
+func (t *Then) ExpectSensorPodLogContains(regex string, options ...testutil.PodLogCheckOption) *Then {
 	ctx := context.Background()
-	contains, err := testutil.SensorPodLogContains(ctx, t.kubeClient, Namespace, t.sensor.Name, regex, defaultTimeout, countOpt)
+	contains, err := testutil.SensorPodLogContains(ctx, t.kubeClient, Namespace, t.sensor.Name, regex, options...)
 	if err != nil {
 		t.t.Fatalf("expected sensor pod logs: %v", err)
 	}
