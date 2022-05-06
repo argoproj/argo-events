@@ -347,7 +347,6 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
-
 }
 
 func (s *FunctionalSuite) TestMultipleSensors() {
