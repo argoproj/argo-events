@@ -390,12 +390,9 @@ func podLogContainsCount(ctx context.Context, client kubernetes.Interface, names
 		for {
 			select {
 			case <-ctx.Done():
-				fmt.Println("podLogContainsCount: ctx.Done()")
 				return
 			default:
-				fmt.Println("podLogContainsCount: about to s.Scan()")
 				if !s.Scan() {
-					fmt.Println("podLogContainsCount: s.Scan() done")
 					return
 				}
 				data := s.Bytes()
