@@ -284,13 +284,14 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &twoCount)
 }
 
-// TestDurableConsumer() is commented out due to it not reliably passing with the STAN bus
-// (because when Sensor pod restarts it sometimes takes a little while for the STAN bus to resend the message to the durable consumer)
-/*
 // Start Pod with a multidependency condition
 // send it one dependency
 // verify that if it goes down and comes back up it triggers when sent the other part of the condition
 func (s *FunctionalSuite) TestDurableConsumer() {
+	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
+		s.T().SkipNow() // todo: TestDurableConsumer() is being skipped for now due to it not reliably passing with the STAN bus
+		// (because when Sensor pod restarts it sometimes takes a little while for the STAN bus to resend the message to the durable consumer)
+	}
 
 	t1 := s.Given().EventSource("@testdata/es-durable-consumer.yaml").
 		When().
@@ -350,7 +351,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, &twoCount)
 	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), &oneCount)
-}*/
+}
 
 func (s *FunctionalSuite) TestMultipleSensors() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
