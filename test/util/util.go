@@ -245,35 +245,75 @@ deployWatch:
 	}
 }
 
-func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, eventSourceName, regex string, timeout time.Duration) (bool, error) {
+type podLogCheckOptions struct {
+	timeout time.Duration
+	count   int
+}
+
+func defaultPodLogCheckOptions() *podLogCheckOptions {
+	return &podLogCheckOptions{
+		timeout: 10 * time.Second,
+		count:   -1,
+	}
+}
+
+type PodLogCheckOption func(*podLogCheckOptions)
+
+func PodLogCheckOptionWithTimeout(t time.Duration) PodLogCheckOption {
+	return func(o *podLogCheckOptions) {
+		o.timeout = t
+	}
+}
+
+func PodLogCheckOptionWithCount(c int) PodLogCheckOption {
+	return func(o *podLogCheckOptions) {
+		o.count = c
+	}
+}
+
+func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, eventSourceName, regex string, options ...PodLogCheckOption) (bool, error) {
 	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", eventSourceName)
 	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
 	if err != nil {
 		return false, fmt.Errorf("error getting event source pod name: %w", err)
 	}
 
-	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout), nil
+	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, options...), nil
 }
 
-func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, sensorName, regex string, timeout time.Duration) (bool, error) {
+func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, sensorName, regex string, options ...PodLogCheckOption) (bool, error) {
 	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", sensorName)
 	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
 	if err != nil {
 		return false, fmt.Errorf("error getting sensor pod name: %w", err)
 	}
 
-	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, timeout), nil
+	return PodsLogContains(ctx, kubeClient, namespace, regex, podList, options...), nil
 }
 
-func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, regex string, podList *corev1.PodList, timeout time.Duration) bool {
-	cctx, cancel := context.WithTimeout(ctx, timeout)
+func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, regex string, podList *corev1.PodList, options ...PodLogCheckOption) bool {
+	// parse options
+	o := defaultPodLogCheckOptions()
+	for _, opt := range options {
+		if opt != nil {
+			opt(o)
+		}
+	}
+
+	cctx, cancel := context.WithTimeout(ctx, o.timeout)
 	defer cancel()
 	errChan := make(chan error)
 	resultChan := make(chan bool)
 	for _, p := range podList.Items {
 		go func(podName string) {
 			fmt.Printf("Watching POD: %s\n", podName)
-			contains, err := podLogContains(cctx, kubeClient, namespace, podName, regex)
+			var contains bool
+			var err error
+			if o.count == -1 {
+				contains, err = podLogContains(cctx, kubeClient, namespace, podName, regex)
+			} else {
+				contains, err = podLogContainsCount(cctx, kubeClient, namespace, podName, regex, o.count)
+			}
 			if err != nil {
 				errChan <- err
 				return
@@ -286,11 +326,11 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 
 	for {
 		select {
-		case <-cctx.Done():
-			return false
 		case result := <-resultChan:
 			if result {
 				return true
+			} else {
+				fmt.Println("read resultChan but not true")
 			}
 		case err := <-errChan:
 			fmt.Printf("error: %v", err)
@@ -298,6 +338,7 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 	}
 }
 
+// look for at least one instance of the regex string in the log
 func podLogContains(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string) (bool, error) {
 	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
 	if err != nil {
@@ -324,6 +365,53 @@ func podLogContains(ctx context.Context, client kubernetes.Interface, namespace,
 			if exp.Match(data) {
 				return true, nil
 			}
+		}
+	}
+}
+
+// look for a specific number of instances of the regex string in the log
+func podLogContainsCount(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string, count int) (bool, error) {
+	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = stream.Close() }()
+
+	exp, err := regexp.Compile(regex)
+	if err != nil {
+		return false, err
+	}
+
+	instancesChan := make(chan struct{})
+
+	// scan the log looking for matches
+	go func(ctx context.Context, instancesChan chan<- struct{}) {
+		s := bufio.NewScanner(stream)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				if !s.Scan() {
+					return
+				}
+				data := s.Bytes()
+				fmt.Println(string(data))
+				if exp.Match(data) {
+					instancesChan <- struct{}{}
+				}
+			}
+		}
+	}(ctx, instancesChan)
+
+	actualCount := 0
+	for {
+		select {
+		case <-instancesChan:
+			actualCount++
+		case <-ctx.Done():
+			fmt.Printf("time:%v, count:%d,actualCount:%d\n", time.Now().Unix(), count, actualCount)
+			return count == actualCount, nil
 		}
 	}
 }
