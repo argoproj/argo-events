@@ -89,6 +89,11 @@ test:
 test-functional:
 	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e
 
+# to run just one of the functional e2e tests by name (i.e. 'make TestMetricsWithWebhook'):
+Test%:
+	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e  -run='.*/$*'
+
+
 coverage:
 	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/)
 	go tool cover -func=profile.cov

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: e2e-multi-dep
+  name: e2e-durable-consumer
 spec:
   replicas: 1
   template:
@@ -12,13 +12,13 @@ spec:
           value: "true"
   dependencies:
     - name: test-dep-1
-      eventSourceName: e2e-multi-dep
+      eventSourceName: e2e-durable-consumer
       eventName: example1
     - name: test-dep-2
-      eventSourceName: e2e-multi-dep
+      eventSourceName: e2e-durable-consumer
       eventName: example2
     - name: test-dep-3
-      eventSourceName: e2e-multi-dep
+      eventSourceName: e2e-durable-consumer
       eventName: example3
   triggers:
     - template:
