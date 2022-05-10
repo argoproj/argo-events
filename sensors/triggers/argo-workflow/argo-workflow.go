@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -160,6 +161,18 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 			return nil, errors.Wrapf(err, "failed to write workflow json %s to the temp file %s", name, file.Name())
 		}
 		cmd = exec.Command("argo", "-n", namespace, "submit", file.Name())
+	case v1alpha1.SubmitFrom:
+		wf := obj.GetKind()
+		switch strings.ToLower(wf) {
+		case "cronworkflow":
+			wf = "cronwf"
+		case "workflow":
+			wf = "wf"
+		default:
+			return nil, errors.Errorf("invalid kind %s", wf)
+		}
+		fromArg := fmt.Sprintf("%s/%s", wf, name)
+		cmd = exec.Command("argo", "-n", namespace, "submit", "--from", fromArg)
 	case v1alpha1.Resubmit:
 		cmd = exec.Command("argo", "-n", namespace, "resubmit", name)
 	case v1alpha1.Resume:

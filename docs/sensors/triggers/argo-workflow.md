@@ -60,14 +60,17 @@ Although the sensor defined above lets you trigger an Argo workflow, it doesn't 
 provided by the Argo CLI such as,
 
 1. Submit
-2. Resubmit
-3. Resume
-4. Retry
-5. Suspend
+2. Submit --from
+3. Resubmit
+4. Resume
+5. Retry
+6. Suspend
+7. Terminate
+8. Stop
 
 To make use of Argo CLI operations, The sensor provides the `argoWorkflow` trigger template,
 
         argoWorkflow:
-          operation: submit  # submit, resubmit, resume, retry, suspend, terminate or stop
+          operation: submit  # submit, submit-from, resubmit, resume, retry, suspend, terminate or stop
 
 Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/special-workflow-trigger.yaml).
