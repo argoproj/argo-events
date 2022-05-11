@@ -17,10 +17,11 @@ package bitbucket
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -157,9 +158,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	// When running multiple replicas of the eventsource, they will all try to create the webhook.
 	// Randomly sleep some time to mitigate the issue.
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+	time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 
 	err = router.applyBitbucketWebhook()
 	if err != nil {

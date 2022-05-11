@@ -1,9 +1,9 @@
 package sensor
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
-	"time"
+	"math/big"
 
 	"github.com/argoproj/argo-events/common"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
@@ -30,11 +30,9 @@ func (n *SensorSTAN) Initialize() error {
 func (n *SensorSTAN) Connect(triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) (eventbuscommon.TriggerConnection, error) {
 	// Generate clientID with hash code
 	hashKey := fmt.Sprintf("%s-%s-%s", n.sensorName, triggerName, dependencyExpression)
-
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
+	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(100)))
 	hashVal := common.Hasher(hashKey)
-	clientID := fmt.Sprintf("client-%v-%v", hashVal, r1.Intn(100))
+	clientID := fmt.Sprintf("client-%v-%v", hashVal, randomNum.Int64())
 
 	conn, err := n.MakeConnection(clientID)
 	if err != nil {
