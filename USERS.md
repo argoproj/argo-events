@@ -30,6 +30,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Rakuten](https://www.rakuten.com)
 1. [RTL Nederland](https://www.rtl.nl)
 1. [SAP Concur](https://www.concur.com/)
+1. [Softonic](https://www.softonic.com)
 1. [Swissblock Technologies](https://swissblock.net)
 1. [Ubie](https://ubie.life/)
 1. [Viaduct](https://www.viaduct.ai/)
