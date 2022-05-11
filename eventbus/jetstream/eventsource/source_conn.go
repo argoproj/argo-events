@@ -16,7 +16,6 @@ type JetstreamSourceConn struct {
 }
 
 func CreateJetstreamSourceConn(conn *jetstreambase.JetstreamConnection, eventSourceName string) *JetstreamSourceConn {
-
 	return &JetstreamSourceConn{
 		conn, eventSourceName,
 	}
