@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
-	"time"
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	jetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
@@ -15,15 +13,12 @@ import (
 type JetstreamSourceConn struct {
 	*jetstreambase.JetstreamConnection
 	eventSourceName string
-	randomGenerator *rand.Rand
 }
 
 func CreateJetstreamSourceConn(conn *jetstreambase.JetstreamConnection, eventSourceName string) *JetstreamSourceConn {
-	randSource := rand.NewSource(time.Now().UnixNano())
-	randomGenerator := rand.New(randSource)
 
 	return &JetstreamSourceConn{
-		conn, eventSourceName, randomGenerator,
+		conn, eventSourceName,
 	}
 }
 

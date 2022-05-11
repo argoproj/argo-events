@@ -18,9 +18,10 @@ package gitlab
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"io/ioutil"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"reflect"
 	"time"
@@ -251,9 +252,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		// Mitigate race condtions - it might create multiple hooks with same config when replicas > 1
-		s1 := rand.NewSource(time.Now().UnixNano())
-		r1 := rand.New(s1)
-		time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+		randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+		time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 		f()
 
 		ctx, cancel := context.WithCancel(ctx)
