@@ -17,9 +17,10 @@ package github
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"net/url"
 	"time"
@@ -355,9 +356,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		// Github can not handle race conditions well - it might create multiple hooks with same config
 		// when replicas > 1
 		// Randomly sleep some time to mitigate the issue.
-		s1 := rand.NewSource(time.Now().UnixNano())
-		r1 := rand.New(s1)
-		time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+		randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+		time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 		f()
 
 		go func() {
