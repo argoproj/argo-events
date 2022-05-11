@@ -201,9 +201,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 
 			actionFunc := func(events map[string]cloudevents.Event) {
-				if err := sensorCtx.triggerActions(ctx, sensor, events, trigger); err != nil {
-					triggerLogger.Errorw("failed to trigger actions", zap.Error(err))
-				}
+				sensorCtx.triggerActions(ctx, sensor, events, trigger)
 			}
 
 			var subLock uint32
@@ -325,7 +323,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	return nil
 }
 
-func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1alpha1.Sensor, events map[string]cloudevents.Event, trigger v1alpha1.Trigger) error {
+func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1alpha1.Sensor, events map[string]cloudevents.Event, trigger v1alpha1.Trigger) {
 	eventsMapping := make(map[string]*v1alpha1.Event)
 	depNames := make([]string, 0, len(events))
 	eventIDs := make([]string, 0, len(events))
@@ -335,7 +333,6 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		eventIDs = append(eventIDs, v.ID())
 	}
 	go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
-	return nil
 }
 
 func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) {
