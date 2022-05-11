@@ -216,7 +216,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return errors.Wrapf(err, "failed to initialize client")
 		}
 
-		getHook := func(hooks []*gitlab.ProjectHook, url string, events []string) *gitlab.ProjectHook {
+		getHook := func(hooks []*gitlab.ProjectHook, url string) *gitlab.ProjectHook {
 			for _, h := range hooks {
 				if h.URL != url {
 					continue
@@ -235,7 +235,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					logger.Errorf("failed to list existing webhooks of project %s. err: %+v", p, err)
 					continue
 				}
-				hook := getHook(hooks, formattedURL, gitlabEventSource.Events)
+				hook := getHook(hooks, formattedURL)
 				if hook != nil {
 					router.hookIDs[p] = hook.ID
 					continue
