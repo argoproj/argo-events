@@ -1,6 +1,8 @@
 package base
 
 import (
+	"errors"
+
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
 	"go.uber.org/zap"
@@ -20,6 +22,9 @@ type STANConnection struct {
 }
 
 func (nsc *STANConnection) Close() error {
+	if nsc == nil {
+		return errors.New("can't close STAN connection, STANConnection is nil")
+	}
 	if nsc.STANConn != nil {
 		err := nsc.STANConn.Close()
 		if err != nil {
@@ -33,8 +38,5 @@ func (nsc *STANConnection) Close() error {
 }
 
 func (nsc *STANConnection) IsClosed() bool {
-	if nsc.NATSConn == nil || nsc.STANConn == nil || !nsc.NATSConnected || !nsc.STANConnected || nsc.NATSConn.IsClosed() {
-		return true
-	}
-	return false
+	return nsc == nil || nsc.NATSConn == nil || nsc.STANConn == nil || !nsc.NATSConnected || !nsc.STANConnected || nsc.NATSConn.IsClosed()
 }

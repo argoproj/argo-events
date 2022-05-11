@@ -36,7 +36,7 @@ const (
 var (
 	background = metav1.DeletePropagationBackground
 
-	e2eEventBusSTAN = `apiVersion: argoproj.io/v1alpha1
+	E2EEventBusSTAN = `apiVersion: argoproj.io/v1alpha1
 kind: EventBus
 metadata:
   name: default
@@ -45,14 +45,13 @@ spec:
     native:
       auth: token`
 
-	e2eEventBusJetstream = `apiVersion: argoproj.io/v1alpha1
+	E2EEventBusJetstream = `apiVersion: argoproj.io/v1alpha1
 kind: EventBus
 metadata:
   name: default
 spec:
   jetstream:
-    version: 2.7.4
-    replicas: 3`
+    version: latest`
 )
 
 type E2ESuite struct {
@@ -91,7 +90,7 @@ func (s *E2ESuite) SetupSuite() {
 	}
 	s.deleteResources(resources)
 
-	s.Given().EventBus(getBusDriverSpec()).
+	s.Given().EventBus(GetBusDriverSpec()).
 		When().
 		CreateEventBus().
 		WaitForEventBusReady()
@@ -102,7 +101,7 @@ func (s *E2ESuite) SetupSuite() {
 
 func (s *E2ESuite) TearDownSuite() {
 	s.DeleteResources()
-	s.Given().EventBus(getBusDriverSpec()).
+	s.Given().EventBus(GetBusDriverSpec()).
 		When().
 		DeleteEventBus().
 		Wait(3 * time.Second).
@@ -167,10 +166,10 @@ func (s *E2ESuite) Given() *Given {
 	}
 }
 
-func getBusDriverSpec() string {
+func GetBusDriverSpec() string {
 	x := strings.ToUpper(os.Getenv("EventBusDriver"))
 	if x == "JETSTREAM" {
-		return e2eEventBusJetstream
+		return E2EEventBusJetstream
 	}
-	return e2eEventBusSTAN
+	return E2EEventBusSTAN
 }

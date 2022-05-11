@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: e2e-durable-consumer
+spec:
+  webhook:
+    example1:
+      port: "12000"
+      endpoint: /example
+      method: POST
+    example2:
+      port: "13000"
+      endpoint: /example
+      method: POST
+    example3:
+      port: "14000"
+      endpoint: /example
+      method: POST

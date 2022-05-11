@@ -89,6 +89,11 @@ test:
 test-functional:
 	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e
 
+# to run just one of the functional e2e tests by name (i.e. 'make TestMetricsWithWebhook'):
+Test%:
+	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e  -run='.*/$*'
+
+
 coverage:
 	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/)
 	go tool cover -func=profile.cov
@@ -144,7 +149,7 @@ $(GOPATH)/bin/golangci-lint:
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
 	go mod tidy
-	golangci-lint run --fix --verbose
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 10m
 
 # release - targets only available on release branch
 ifneq ($(findstring release,$(GIT_BRANCH)),)

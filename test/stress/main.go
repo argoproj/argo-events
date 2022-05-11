@@ -59,7 +59,7 @@ const (
 
 	logEventSourceStarted      = "Eventing server started."
 	logSensorStarted           = "Sensor started."
-	logTriggerActionSuccessful = "successfully processed the trigger"
+	logTriggerActionSuccessful = "successfully processed trigger"
 	logTriggerActionFailed     = "failed to execute a trigger"
 	logEventSuccessful         = "succeeded to publish an event"
 	logEventFailed             = "failed to publish an event"
@@ -76,6 +76,15 @@ const (
 	KafkaEventSource       TestingEventSource = "kafka"
 	NATSEventSource        TestingEventSource = "nats"
 	RedisEventSource       TestingEventSource = "redis"
+)
+
+type EventBusType string
+
+// possible value of EventBus type
+const (
+	UnsupportedEventBusType EventBusType = "unsupported"
+	STANEventBus            EventBusType = "stan"
+	JetstreamEventBus       EventBusType = "jetstream"
 )
 
 type TestingTrigger string
@@ -95,6 +104,7 @@ type options struct {
 	namespace          string
 	testingEventSource TestingEventSource
 	testingTrigger     TestingTrigger
+	eventBusType       EventBusType
 	esName             string
 	sensorName         string
 	// Inactive time before exiting
@@ -109,7 +119,7 @@ type options struct {
 	restConfig        *rest.Config
 }
 
-func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTrigger, esName, sensorName string, idleTimeout time.Duration, noCleanUp bool) (*options, error) {
+func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTrigger, eventBusType EventBusType, esName, sensorName string, idleTimeout time.Duration, noCleanUp bool) (*options, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	configOverrides := &clientcmd.ConfigOverrides{}
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
@@ -129,6 +139,7 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 		namespace:          namespace,
 		testingEventSource: testingEventSource,
 		testingTrigger:     testingTrigger,
+		eventBusType:       eventBusType,
 		esName:             esName,
 		sensorName:         sensorName,
 		kubeClient:         kubeClient,
@@ -142,10 +153,10 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 }
 
 func (o *options) createEventBus(ctx context.Context) (*eventbusv1alpha1.EventBus, error) {
-	fmt.Println("------- Creating EventBus -------")
+	fmt.Printf("------- Creating %v EventBus -------\n", o.eventBusType)
 	eb := &eventbusv1alpha1.EventBus{}
-	if err := readResource("@testdata/eventbus/default.yaml", eb); err != nil {
-		return nil, fmt.Errorf("failed to read event bus yaml file: %w", err)
+	if err := readResource(fmt.Sprintf("@testdata/eventbus/%v.yaml", o.eventBusType), eb); err != nil {
+		return nil, fmt.Errorf("failed to read %v event bus yaml file: %w", o.eventBusType, err)
 	}
 	l := eb.GetLabels()
 	if l == nil {
@@ -191,7 +202,7 @@ func (o *options) createEventSource(ctx context.Context) (*eventsourcev1alpha1.E
 	if err := testutil.WaitForEventSourceDeploymentReady(ctx, o.kubeClient, o.namespace, es.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see event source deployment and pod ready: %w", err)
 	}
-	contains, err := testutil.EventSourcePodLogContains(ctx, o.kubeClient, o.namespace, es.Name, logEventSourceStarted, defaultTimeout)
+	contains, err := testutil.EventSourcePodLogContains(ctx, o.kubeClient, o.namespace, es.Name, logEventSourceStarted)
 	if err != nil {
 		return nil, fmt.Errorf("expected to see event source pod contains something: %w", err)
 	}
@@ -225,7 +236,7 @@ func (o *options) createSensor(ctx context.Context) (*sensorv1alpha1.Sensor, err
 	if err := testutil.WaitForSensorDeploymentReady(ctx, o.kubeClient, o.namespace, sensor.Name, defaultTimeout); err != nil {
 		return nil, fmt.Errorf("expected to see sensor deployment and pod ready: %w", err)
 	}
-	contains, err := testutil.SensorPodLogContains(ctx, o.kubeClient, o.namespace, sensor.Name, logSensorStarted, defaultTimeout)
+	contains, err := testutil.SensorPodLogContains(ctx, o.kubeClient, o.namespace, sensor.Name, logSensorStarted)
 	if err != nil {
 		return nil, fmt.Errorf("expected to see sensor pod contains something: %w", err)
 	}
@@ -302,8 +313,8 @@ Or you can terminate it any time by Ctrl + C.
 	sensorMap := map[string]int64{}
 	sensorTimeMap := map[string]time.Time{}
 
-	var esLock = &sync.Mutex{}
-	var sensorLock = &sync.Mutex{}
+	var esLock = &sync.RWMutex{}
+	var sensorLock = &sync.RWMutex{}
 
 	startTime := time.Now()
 
@@ -349,6 +360,7 @@ Or you can terminate it any time by Ctrl + C.
 				}
 				timeout := 5 * 60 * time.Second
 				lastActionTime := startTime
+				sensorLock.RLock()
 				if len(sensorMap) > 0 && len(sensorTimeMap) > 0 {
 					timeout = o.idleTimeout
 					for _, v := range sensorTimeMap {
@@ -357,6 +369,7 @@ Or you can terminate it any time by Ctrl + C.
 						}
 					}
 				}
+				sensorLock.RUnlock()
 
 				if time.Since(lastActionTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited Sensor Pod %s due to no actions in the last %v\n", podName, o.idleTimeout)
@@ -433,6 +446,8 @@ Or you can terminate it any time by Ctrl + C.
 				}
 				timeout := 5 * 60 * time.Second
 				lastEventTime := startTime
+
+				esLock.RLock()
 				if len(esMap) > 0 && len(esTimeMap) > 0 {
 					timeout = o.idleTimeout
 					for _, v := range esTimeMap {
@@ -441,6 +456,7 @@ Or you can terminate it any time by Ctrl + C.
 						}
 					}
 				}
+				esLock.RUnlock()
 				if time.Since(lastEventTime).Seconds() > timeout.Seconds() {
 					fmt.Printf("Exited EventSource Pod %s due to no active events in the last %v\n", podName, o.idleTimeout)
 					return
@@ -690,6 +706,17 @@ func getTestingEventSource(str string) TestingEventSource {
 	}
 }
 
+func getEventBusType(str string) EventBusType {
+	switch str {
+	case "jetstream":
+		return JetstreamEventBus
+	case "stan":
+		return STANEventBus
+	default:
+		return UnsupportedEventBusType
+	}
+}
+
 func getTestingTrigger(str string) TestingTrigger {
 	switch str {
 	case "log":
@@ -703,6 +730,7 @@ func getTestingTrigger(str string) TestingTrigger {
 
 func main() {
 	var (
+		ebTypeStr      string
 		esTypeStr      string
 		triggerTypeStr string
 		esName         string
@@ -735,6 +763,12 @@ func main() {
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
+			eventBusType := getEventBusType(ebTypeStr)
+			if eventBusType == UnsupportedEventBusType {
+				fmt.Printf("Invalid event bus type %s\n\n", ebTypeStr)
+				cmd.HelpFunc()(cmd, args)
+				os.Exit(1)
+			}
 
 			idleTimeout, err := time.ParseDuration(idleTimeoutStr)
 			if err != nil {
@@ -742,7 +776,7 @@ func main() {
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
-			opts, err := NewOptions(esType, triggerType, esName, sensorName, idleTimeout, noCleanUp)
+			opts, err := NewOptions(esType, triggerType, eventBusType, esName, sensorName, idleTimeout, noCleanUp)
 			if err != nil {
 				fmt.Printf("Failed: %v\n", err)
 				os.Exit(1)
@@ -762,6 +796,7 @@ func main() {
 			}
 		},
 	}
+	rootCmd.Flags().StringVarP(&ebTypeStr, "eb-type", "b", "", "Type of event bus to be tested: stan, jetstream")
 	rootCmd.Flags().StringVarP(&esTypeStr, "es-type", "e", "", "Type of event source to be tested, e.g. webhook, sqs, etc.")
 	rootCmd.Flags().StringVarP(&triggerTypeStr, "trigger-type", "t", string(LogTrigger), "Type of trigger to be tested, e.g. log, workflow.")
 	rootCmd.Flags().StringVar(&esName, "es-name", "", "Name of an existing event source to be tested")

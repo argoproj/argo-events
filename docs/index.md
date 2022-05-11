@@ -41,7 +41,7 @@ to set up Argo Events.
 
 1. Argo Workflows
 1. Standard K8s Objects
-1. HTTP Requests / Serverless Workloads (OpenFaas, Kubeless, KNative etc.)
+1. HTTP Requests / Serverless Workloads (OpenFaaS, Kubeless, KNative etc.)
 1. AWS Lambda
 1. NATS Messages
 1. Kafka Messages

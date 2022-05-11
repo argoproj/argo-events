@@ -22,19 +22,26 @@ spec:
                 generateName: artifact-workflow-2-
               spec:
                 entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # the value will get overridden by event payload from test-dep
+                      value: THIS_WILL_BE_REPLACED
                 templates:
                   - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
                     container:
                       command:
                         - cowsay
                       image: docker/whalesay:latest
-                      args:
-                        - THIS_WILL_BE_REPLACED
-            # The container args from the workflow are overridden by the s3 notification key
-            parameters:
-              - src:
-                  dependencyName: test-dep
-                  dataKey: notification.0.s3.object.key
-                dest: spec.templates.0.container.args.0
+                      args: ["{{inputs.parameters.message}}"]
+          # The container args from the workflow are overridden by the s3 notification key
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: notification.0.s3.object.key
+              dest: spec.arguments.parameters.0.value
       retryStrategy:
         steps: 3

@@ -1,6 +1,6 @@
 # Slack Trigger
 
-The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario. 
+The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario.
 
 ## Prerequisite
 1. Deploy the eventbus in the namespace.
@@ -13,7 +13,7 @@ The Slack trigger is used to send a custom message to a desired Slack channel in
 
 3. Set up port-forwarding to expose the http server. We will
    use port-forwarding here.
-   
+
         kubectl port-forward -n argo-events <event-source-pod-name> 12000:12000
 
 ## Create a Slack App
@@ -47,19 +47,19 @@ We need to create a Slack App which will send messages to your Slack Workspace. 
         kubectl -n argo-events apply -f slack-secret.yaml
 
 ## Slack Trigger
-We will set up a basic slack trigger and send a default message, and then a dynamic custom message. 
+We will set up a basic slack trigger and send a default message, and then a dynamic custom message.
 
 1. Create a sensor with Slack trigger. We will discuss the trigger details in the following sections.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/slack-trigger.yaml
 
-2. Send a http request to the event-source-pod to fire the Slack trigger. 
+2. Send a http request to the event-source-pod to fire the Slack trigger.
 
         curl -d '{"text":"Hello, World!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-        
+
       **Note**: The default slack-trigger will send the message "hello world" to the #general channel. You may change the default message and channel in slack-trigger.yaml under triggers.slack.channel and triggers.slack.message.
 
-3. Alternatively, you can dynamically determine the channel and message based on parameterization of your event. 
+3. Alternatively, you can dynamically determine the channel and message based on parameterization of your event.
 
         curl -d '{"channel":"random","message":"test message"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -86,7 +86,7 @@ The `src` is the source of event. It contains,
 
 The `dest` is the destination key within the result payload.
 
-So, the above trigger paramters will generate a request payload as,
+So, the above trigger parameters will generate a request payload as,
 
         {
             "channel": "channel_to_send_message",
@@ -94,10 +94,10 @@ So, the above trigger paramters will generate a request payload as,
         }
 
 
-**_Note_**: If you define both the `contextKey` and `dataKey` within a paramter item, then
+**_Note_**: If you define both the `contextKey` and `dataKey` within a parameter item, then
 the `dataKey` takes the precedence.
 
-You can create any paramater structure you want. To get more info on how to 
+You can create any parameter structure you want. To get more info on how to
 generate complex event payloads, take a look at [this library](https://github.com/tidwall/sjson).
 
 The complete specification of Slack trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#slacktrigger).
