@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -48,6 +49,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", eventBus.Namespace).With("eventbus", eventBus.Name)
+	ctx = logging.WithLogger(ctx, log)
 	busCopy := eventBus.DeepCopy()
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
@@ -66,7 +68,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
-	log := r.logger.With("namespace", eventBus.Namespace).With("eventbus", eventBus.Name)
+	log := logging.FromContext(ctx)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
 		if controllerutil.ContainsFinalizer(eventBus, finalizerName) {

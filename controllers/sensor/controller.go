@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/pkg/errors"
@@ -66,6 +67,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", sensor.Namespace).With("sensor", sensor.Name)
+	ctx = logging.WithLogger(ctx, log)
 	sensorCopy := sensor.DeepCopy()
 	reconcileErr := r.reconcile(ctx, sensorCopy)
 	if reconcileErr != nil {
@@ -84,7 +86,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) error {
-	log := r.logger.With("namespace", sensor.Namespace).With("sensor", sensor.Name)
+	log := logging.FromContext(ctx)
 	if !sensor.DeletionTimestamp.IsZero() {
 		log.Info("deleting sensor")
 		if controllerutil.ContainsFinalizer(sensor, finalizerName) {
