@@ -18,7 +18,7 @@ package artifacts
 
 import (
 	"errors"
-	"io/ioutil"
+	"os"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -39,7 +39,7 @@ func NewFileReader(fileArtifact *v1alpha1.FileArtifact) (ArtifactReader, error) 
 }
 
 func (reader *FileReader) Read() ([]byte, error) {
-	content, err := ioutil.ReadFile(reader.fileArtifact.Path)
+	content, err := os.ReadFile(reader.fileArtifact.Path)
 	if err != nil {
 		return nil, err
 	}

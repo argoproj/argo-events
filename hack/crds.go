@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 
 	"sigs.k8s.io/yaml"
 )
@@ -9,7 +9,7 @@ import (
 type obj = map[string]interface{}
 
 func cleanCRD(filename string) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +43,7 @@ func cleanCRD(filename string) {
 	if err != nil {
 		panic(err)
 	}
-	err = ioutil.WriteFile(filename, data, 0666)
+	err = os.WriteFile(filename, data, 0666)
 	if err != nil {
 		panic(err)
 	}

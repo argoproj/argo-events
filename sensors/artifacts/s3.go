@@ -19,7 +19,7 @@ package artifacts
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -61,7 +61,7 @@ func (reader *S3Reader) Read() ([]byte, error) {
 		}
 	}()
 
-	b, err := ioutil.ReadAll(obj)
+	b, err := io.ReadAll(io.LimitReader(obj, 65536))
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ package storagegrid
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -102,7 +102,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			pbytes, err := yaml.Marshal(storageGridEventSource)
 			convey.So(err, convey.ShouldBeNil)
 			router.HandleRoute(writer, &http.Request{
-				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
+				Body: io.NopCloser(bytes.NewReader(pbytes)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
@@ -117,7 +117,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			}()
 
 			router.HandleRoute(writer, &http.Request{
-				Body: ioutil.NopCloser(bytes.NewReader([]byte(notification))),
+				Body: io.NopCloser(bytes.NewReader([]byte(notification))),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 		})

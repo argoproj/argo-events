@@ -18,7 +18,6 @@ package artifacts
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -78,7 +77,7 @@ func (g *GitArtifactReader) getRemote() string {
 }
 
 func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
-	sshKey, err := ioutil.ReadFile(sshKeyFile)
+	sshKey, err := os.ReadFile(sshKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
 	}
@@ -198,7 +197,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 	if isSymbolLink {
 		return nil, fmt.Errorf("%q is a symbol link which is not allowed", g.artifact.FilePath)
 	}
-	return ioutil.ReadFile(filePath)
+	return os.ReadFile(filePath)
 }
 
 func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
@@ -222,7 +221,7 @@ func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
 func (g *GitArtifactReader) Read() ([]byte, error) {
 	cloneDir := g.artifact.CloneDirectory
 	if cloneDir == "" {
-		tempDir, err := ioutil.TempDir("", "git-tmp")
+		tempDir, err := os.MkdirTemp("", "git-tmp")
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to create a temp file to clone the repository")
 		}

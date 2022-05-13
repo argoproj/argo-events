@@ -19,7 +19,7 @@ package nsq
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -36,7 +36,7 @@ func TestValidateEventSource(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "host address must be specified", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "nsq.yaml"))
+	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "nsq.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource

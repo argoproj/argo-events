@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -271,9 +271,9 @@ func (rc *Router) handleSlashCommand(request *http.Request) ([]byte, error) {
 
 func getRequestBody(request *http.Request) ([]byte, error) {
 	// Read request payload
-	body, err := ioutil.ReadAll(request.Body)
+	body, err := io.ReadAll(io.LimitReader(request.Body, 65536))
 	// Reset request.Body ReadCloser to prevent side-effect if re-read
-	request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	request.Body = io.NopCloser(bytes.NewBuffer(body))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse request body")
 	}

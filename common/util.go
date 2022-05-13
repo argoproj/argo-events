@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
@@ -151,7 +150,7 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get secret value of name: %s, key: %s", selector.Name, selector.Key)
 	}
@@ -175,7 +174,7 @@ func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get configMap value of name: %s, key: %s", selector.Name, selector.Key)
 	}
@@ -259,7 +258,7 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 
 	c := &tls.Config{}
 	if len(caCertPath) > 0 {
-		caCert, err := ioutil.ReadFile(caCertPath)
+		caCert, err := os.ReadFile(caCertPath)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to read ca cert file %s", caCertPath)
 		}
