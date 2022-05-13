@@ -1930,12 +1930,12 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 
 <span class="kn">import</span> <span class="p">(</span>
     <span class="s2">&quot;fmt&quot;</span>
-    <span class="s2">&quot;io/ioutil&quot;</span>
+    <span class="s2">&quot;io&quot;</span>
     <span class="s2">&quot;net/http&quot;</span>
 <span class="p">)</span>
 
 <span class="n">func</span> <span class="n">hello</span><span class="p">(</span><span class="n">w</span> <span class="n">http</span><span class="o">.</span><span class="n">ResponseWriter</span><span class="p">,</span> <span class="n">req</span> <span class="o">*</span><span class="n">http</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">body</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">ioutil</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span>
+    <span class="n">body</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">io</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
         <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&quot;%+v</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
         <span class="k">return</span>
@@ -1972,8 +1972,8 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 </li>
 <li>
 <p>Our goals is to seamlessly integrate Minio S3 bucket notifications with REST API server created in previous step. So,
-   lets set up the Minio event-source available <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>.
-   Don't create the sensor as we will be deploying it in next step.</p>
+    lets set up the Minio event-source available <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>.
+    Don't create the sensor as we will be deploying it in next step.</p>
 </li>
 <li>
 <p>Create a sensor as follows.</p>
@@ -2064,17 +2064,17 @@ to invoke OpenFaaS function.</p>
 </li>
 <li>
 <p>Let's create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>.
-   to set up the function.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">package</span> <span class="n">function</span>
+    to set up the function.</p>
+<div class="codehilite"><pre><span></span><code> <span class="n">package</span> <span class="n">function</span>
 
-<span class="kn">import</span> <span class="p">(</span>
+ <span class="kn">import</span> <span class="p">(</span>
     <span class="s2">&quot;fmt&quot;</span>
-<span class="p">)</span>
+ <span class="p">)</span>
 
-<span class="o">//</span> <span class="n">Handle</span> <span class="n">a</span> <span class="n">serverless</span> <span class="n">request</span>
-<span class="n">func</span> <span class="n">Handle</span><span class="p">(</span><span class="n">req</span> <span class="p">[]</span><span class="n">byte</span><span class="p">)</span> <span class="n">string</span> <span class="p">{</span>
+ <span class="o">//</span> <span class="n">Handle</span> <span class="n">a</span> <span class="n">serverless</span> <span class="n">request</span>
+ <span class="n">func</span> <span class="n">Handle</span><span class="p">(</span><span class="n">req</span> <span class="p">[]</span><span class="n">byte</span><span class="p">)</span> <span class="n">string</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s2">&quot;Hello, Go. You said: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(</span><span class="n">req</span><span class="p">))</span>
-<span class="p">}</span>
+ <span class="p">}</span>
 </code></pre></div>
 
 </li>
@@ -2086,7 +2086,7 @@ to invoke OpenFaaS function.</p>
 </li>
 <li>
 <p>Let's set up the Redis Database, Redis PubSub event-source as specified <a href="https://argoproj.github.io/argo-events/setup/redis/">here</a>.
-   Do not create the Redis sensor, we are going to create it in next step.</p>
+    Do not create the Redis sensor, we are going to create it in next step.</p>
 </li>
 <li>
 <p>Let's create the sensor with OpenFaaS trigger.</p>
@@ -2144,7 +2144,7 @@ to invoke OpenFaaS function.</p>
 </li>
 <li>
 <p>Let's set up the NATS event-source. Follow <a href="https://argoproj.github.io/argo-events/setup/nats/#setup">instructions</a> for details.
-   Do not create the NATS sensor, we are going to create it in next step.</p>
+    Do not create the NATS sensor, we are going to create it in next step.</p>
 </li>
 <li>
 <p>Let's create NATS sensor with HTTP trigger.</p>
