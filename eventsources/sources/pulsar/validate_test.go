@@ -18,7 +18,7 @@ package pulsar
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/argoproj/argo-events/eventsources/sources"
@@ -34,7 +34,7 @@ func TestEventListener_ValidateEventSource(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "topics can't be empty list", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "pulsar.yaml"))
+	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "pulsar.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource

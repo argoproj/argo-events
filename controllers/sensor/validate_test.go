@@ -18,7 +18,7 @@ package sensor
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -31,14 +31,17 @@ import (
 
 func TestValidateSensor(t *testing.T) {
 	dir := "../../examples/sensors"
-	files, dirErr := ioutil.ReadDir(dir)
-	require.NoError(t, dirErr)
+	dirEntries, err := os.ReadDir(dir)
+	require.NoError(t, err)
 
-	for _, file := range files {
+	for _, entry := range dirEntries {
+		if entry.IsDir() {
+			continue
+		}
 		t.Run(
-			fmt.Sprintf("test example load: %s/%s", dir, file.Name()),
+			fmt.Sprintf("test example load: %s/%s", dir, entry.Name()),
 			func(t *testing.T) {
-				content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
+				content, err := os.ReadFile(fmt.Sprintf("%s/%s", dir, entry.Name()))
 				assert.NoError(t, err)
 
 				var sensor *v1alpha1.Sensor

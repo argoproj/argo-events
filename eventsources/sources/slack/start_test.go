@@ -22,7 +22,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -64,7 +64,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(payload, convey.ShouldNotBeNil)
 			router.HandleRoute(writer, &http.Request{
-				Body: ioutil.NopCloser(bytes.NewReader(payload)),
+				Body: io.NopCloser(bytes.NewReader(payload)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
 		})
@@ -102,7 +102,7 @@ func TestSlackSignature(t *testing.T) {
 			}()
 
 			router.HandleRoute(writer, &http.Request{
-				Body:   ioutil.NopCloser(bytes.NewReader(payload)),
+				Body:   io.NopCloser(bytes.NewReader(payload)),
 				Header: h,
 				Method: "POST",
 			})
@@ -137,7 +137,7 @@ func TestInteractionHandler(t *testing.T) {
 			router.HandleRoute(writer, &http.Request{
 				Method: http.MethodPost,
 				Header: headers,
-				Body:   ioutil.NopCloser(strings.NewReader(buf.String())),
+				Body:   io.NopCloser(strings.NewReader(buf.String())),
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
@@ -173,7 +173,7 @@ func TestSlackCommandHandler(t *testing.T) {
 			router.HandleRoute(writer, &http.Request{
 				Method: http.MethodPost,
 				Header: headers,
-				Body:   ioutil.NopCloser(strings.NewReader(buf.String())),
+				Body:   io.NopCloser(strings.NewReader(buf.String())),
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
@@ -223,7 +223,7 @@ func TestEventHandler(t *testing.T) {
 			}()
 
 			router.HandleRoute(writer, &http.Request{
-				Body: ioutil.NopCloser(bytes.NewBuffer(payload)),
+				Body: io.NopCloser(bytes.NewBuffer(payload)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
 		})

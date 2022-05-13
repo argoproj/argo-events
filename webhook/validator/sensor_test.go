@@ -3,7 +3,7 @@ package validator
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -52,7 +52,7 @@ var (
 
 func TestValidateSensor(t *testing.T) {
 	dir := "../../examples/sensors"
-	files, err := ioutil.ReadDir(dir)
+	dirEntries, err := os.ReadDir(dir)
 	assert.Nil(t, err)
 
 	testBus := fakeBus.DeepCopy()
@@ -61,8 +61,11 @@ func TestValidateSensor(t *testing.T) {
 	_, err = fakeEventBusClient.ArgoprojV1alpha1().EventBus(testNamespace).Create(context.TODO(), testBus, metav1.CreateOptions{})
 	assert.Nil(t, err)
 
-	for _, file := range files {
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
+	for _, entry := range dirEntries {
+		if entry.IsDir() {
+			continue
+		}
+		content, err := os.ReadFile(fmt.Sprintf("%s/%s", dir, entry.Name()))
 		assert.Nil(t, err)
 		var sensor *v1alpha1.Sensor
 		err = yaml.Unmarshal(content, &sensor)

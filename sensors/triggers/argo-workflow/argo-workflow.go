@@ -18,7 +18,6 @@ package argo_workflow
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -136,7 +135,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	switch op {
 	case v1alpha1.Submit:
-		file, err := ioutil.TempFile("", fmt.Sprintf("%s%s", name, obj.GetGenerateName()))
+		file, err := os.CreateTemp("", fmt.Sprintf("%s%s", name, obj.GetGenerateName()))
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", obj.GetName())
 		}

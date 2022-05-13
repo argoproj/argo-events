@@ -18,7 +18,7 @@ package artifacts
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -74,7 +74,7 @@ func TestGetArtifactReader(t *testing.T) {
 }
 
 func TestDecodeSensor(t *testing.T) {
-	b, err := ioutil.ReadFile("../../examples/sensors/multi-trigger-sensor.yaml")
+	b, err := os.ReadFile("../../examples/sensors/multi-trigger-sensor.yaml")
 	assert.Nil(t, err)
 	_, err = decodeAndUnstructure(b)
 	assert.Nil(t, err)
