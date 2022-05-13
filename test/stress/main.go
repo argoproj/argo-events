@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -674,7 +673,7 @@ func readResource(text string, v metav1.Object) error {
 	if strings.HasPrefix(text, "@") {
 		file := strings.TrimPrefix(text, "@")
 		_, fileName, _, _ := runtime.Caller(0)
-		data, err = ioutil.ReadFile(filepath.Dir(fileName) + "/" + file)
+		data, err = os.ReadFile(filepath.Dir(fileName) + "/" + file)
 		if err != nil {
 			return fmt.Errorf("failed to read a file: %w", err)
 		}

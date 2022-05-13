@@ -19,7 +19,7 @@ package redisstream
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/argoproj/argo-events/eventsources/sources"
@@ -35,7 +35,7 @@ func TestValidateRedisEventSource(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "host address must be specified", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "redis-streams.yaml"))
+	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "redis-streams.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource

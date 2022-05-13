@@ -2,7 +2,7 @@ package artifacts
 
 import (
 	"crypto/tls"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -45,7 +45,7 @@ func (reader *URLReader) Read() ([]byte, error) {
 		return nil, errors.Errorf("status code %v", resp.StatusCode)
 	}
 
-	content, err := ioutil.ReadAll(resp.Body)
+	content, err := io.ReadAll(io.LimitReader(resp.Body, 65536))
 	if err != nil {
 		log.Warnf("failed to read url body for %s: %s", reader.urlArtifact.Path, err)
 		return nil, err

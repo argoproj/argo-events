@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -141,7 +141,8 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	logger.Info("parsing the request body...")
-	body, err := ioutil.ReadAll(request.Body)
+	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, "")

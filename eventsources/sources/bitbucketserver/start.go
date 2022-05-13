@@ -22,7 +22,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"math/big"
 	"net/http"
 	"time"
@@ -84,7 +84,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	body, err := router.parseAndValidateBitbucketServerRequest(request)
+	body, err := router.parseAndValidateBitbucketServerRequest(writer, request)
 	if err != nil {
 		logger.Errorw("failed to parse/validate request", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
@@ -391,8 +391,9 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 	return requestBody, nil
 }
 
-func (router *Router) parseAndValidateBitbucketServerRequest(request *http.Request) ([]byte, error) {
-	body, err := ioutil.ReadAll(request.Body)
+func (router *Router) parseAndValidateBitbucketServerRequest(writer http.ResponseWriter, request *http.Request) ([]byte, error) {
+	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse request body")
 	}

@@ -20,7 +20,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/big"
 	"net/http"
 	"time"
@@ -76,7 +76,8 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	body, err := ioutil.ReadAll(request.Body)
+	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Desugar().Error("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())

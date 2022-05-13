@@ -19,7 +19,7 @@ package stripe
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -97,7 +97,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 
 	const MaxBodyBytes = int64(65536)
 	request.Body = http.MaxBytesReader(writer, request.Body, MaxBodyBytes)
-	payload, err := ioutil.ReadAll(request.Body)
+	payload, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("error reading request body", zap.Error(err))
 		writer.WriteHeader(http.StatusServiceUnavailable)

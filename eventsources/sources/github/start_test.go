@@ -19,7 +19,7 @@ package github
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -74,7 +74,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 
 			router.HandleRoute(writer, &http.Request{
-				Body: ioutil.NopCloser(bytes.NewReader(body)),
+				Body: io.NopCloser(bytes.NewReader(body)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 
@@ -82,7 +82,7 @@ func TestRouteActiveHandler(t *testing.T) {
 				route.Active = true
 
 				router.HandleRoute(writer, &http.Request{
-					Body: ioutil.NopCloser(bytes.NewReader(body)),
+					Body: io.NopCloser(bytes.NewReader(body)),
 				})
 
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
@@ -121,7 +121,7 @@ func TestRouteActiveHandlerDeprecated(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 
 			router.HandleRoute(writer, &http.Request{
-				Body: ioutil.NopCloser(bytes.NewReader(body)),
+				Body: io.NopCloser(bytes.NewReader(body)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 
@@ -129,7 +129,7 @@ func TestRouteActiveHandlerDeprecated(t *testing.T) {
 				route.Active = true
 
 				router.HandleRoute(writer, &http.Request{
-					Body: ioutil.NopCloser(bytes.NewReader(body)),
+					Body: io.NopCloser(bytes.NewReader(body)),
 				})
 
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
