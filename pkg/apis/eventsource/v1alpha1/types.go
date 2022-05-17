@@ -948,6 +948,10 @@ type BitbucketServerRepository struct {
 	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,2,rep,name=repositorySlug"`
 }
 
+func (b BitbucketServerEventSource) ShouldCreateWebhooks() bool {
+	return b.AccessToken != nil && b.Webhook != nil && b.Webhook.URL != ""
+}
+
 func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []BitbucketServerRepository {
 	if len(b.Repositories) > 0 {
 		return b.Repositories
