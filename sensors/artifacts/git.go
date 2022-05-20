@@ -76,7 +76,7 @@ func (g *GitArtifactReader) getRemote() string {
 	return DefaultRemote
 }
 
-func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
+func getSSHKeyAuth(sshKeyFile string, insecureIgnoreHostKey bool) (transport.AuthMethod, error) {
 	sshKey, err := os.ReadFile(sshKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
@@ -86,7 +86,9 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 		return nil, fmt.Errorf("failed to parse ssh key. err: %+v", err)
 	}
 	auth := &go_git_ssh.PublicKeys{User: "git", Signer: signer}
-	auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+	if insecureIgnoreHostKey {
+		auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+	}
 	return auth, nil
 }
 
@@ -110,7 +112,7 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get SSH key from mounted volume")
 		}
-		return getSSHKeyAuth(sshKeyPath)
+		return getSSHKeyAuth(sshKeyPath, g.artifact.InsecureIgnoreHostKey)
 	}
 	return nil, nil
 }
