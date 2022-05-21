@@ -164,8 +164,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.Route, logger *zap.SugaredLogger) (*json.RawMessage, error) {
-	request.Body = http.MaxBytesReader(*writer, request.Body, 65536)
-
 	switch request.Method {
 	case http.MethodGet:
 		body, _ := json.Marshal(request.URL.Query())
@@ -190,6 +188,7 @@ func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.
 			return &ret, nil
 		// default including "application/json" is parsing body as JSON
 		default:
+			request.Body = http.MaxBytesReader(*writer, request.Body, 65536)
 			body, err := getRequestBody(request)
 			if err != nil {
 				logger.Errorw("failed to read request body", zap.Error(err))
