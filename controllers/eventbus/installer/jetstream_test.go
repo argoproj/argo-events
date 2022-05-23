@@ -2,6 +2,7 @@ package installer
 
 import (
 	"context"
+
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
@@ -10,6 +11,7 @@ import (
 	"go.uber.org/zap/zaptest"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -182,6 +184,62 @@ func TestBuildJetStreamStatefulSetSpec(t *testing.T) {
 		}
 		s := i.buildStatefulSetSpec(&fakeConfig.EventBus.JetStream.Versions[0])
 		assert.True(t, len(s.VolumeClaimTemplates) > 0)
+	})
+
+	t.Run("with resource requests", func(t *testing.T) {
+		i.eventBus.Spec.JetStream = &v1alpha1.JetStreamBus{
+			ContainerTemplate: &v1alpha1.ContainerTemplate{
+				Resources: corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU:    apiresource.Quantity{Format: "1"},
+						corev1.ResourceMemory: apiresource.Quantity{Format: "350Mi"},
+					},
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    apiresource.Quantity{Format: "1"},
+						corev1.ResourceMemory: apiresource.Quantity{Format: "400Mi"},
+					},
+				},
+			},
+
+			MetricsContainerTemplate: &v1alpha1.ContainerTemplate{
+				Resources: corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU:    apiresource.Quantity{Format: "1"},
+						corev1.ResourceMemory: apiresource.Quantity{Format: "200Mi"},
+					},
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    apiresource.Quantity{Format: "1"},
+						corev1.ResourceMemory: apiresource.Quantity{Format: "200Mi"},
+					},
+				},
+			},
+
+			ReloaderContainerTemplate: &v1alpha1.ContainerTemplate{
+				Resources: corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU:    apiresource.Quantity{Format: ".3"},
+						corev1.ResourceMemory: apiresource.Quantity{Format: "100Mi"},
+					},
+					Requests: corev1.ResourceList{
+						corev1.ResourceCPU:    apiresource.Quantity{Format: ".5"},
+						corev1.ResourceMemory: apiresource.Quantity{Format: "100Mi"},
+					},
+				},
+			},
+		}
+
+		statefulSpec := i.buildStatefulSetSpec(&fakeConfig.EventBus.JetStream.Versions[0])
+
+		podContainers := statefulSpec.Template.Spec.Containers
+		containers := map[string]*corev1.Container{}
+		for idx := range podContainers {
+			containers[podContainers[idx].Name] = &podContainers[idx]
+		}
+
+		js := i.eventBus.Spec.JetStream
+		assert.Equal(t, js.ContainerTemplate.Resources, containers["main"].Resources)
+		assert.Equal(t, js.MetricsContainerTemplate.Resources, containers["metrics"].Resources)
+		assert.Equal(t, js.ReloaderContainerTemplate.Resources, containers["reloader"].Resources)
 	})
 }
 
