@@ -350,6 +350,10 @@ message GitArtifact {
   // Refer https://git-scm.com/docs/git-remote
   // +optional
   optional GitRemoteConfig remote = 9;
+
+  // Whether to ignore host key
+  // +optional
+  optional bool insecureIgnoreHostKey = 10;
 }
 
 // GitCreds contain reference to git username and password
