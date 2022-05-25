@@ -3196,6 +3196,10 @@
           "description": "Path to file that contains trigger resource definition",
           "type": "string"
         },
+        "insecureIgnoreHostKey": {
+          "description": "Whether to ignore host key",
+          "type": "boolean"
+        },
         "ref": {
           "description": "Ref to use to pull trigger resource. Will result in a shallow clone and fetch.",
           "type": "string"

@@ -897,6 +897,9 @@ type GitArtifact struct {
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
 	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,9,opt,name=remote"`
+	// Whether to ignore host key
+	// +optional
+	InsecureIgnoreHostKey bool `json:"insecureIgnoreHostKey,omitempty" protobuf:"bytes,10,opt,name=insecureIgnoreHostKey"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote
