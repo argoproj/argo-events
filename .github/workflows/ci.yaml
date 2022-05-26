@@ -85,6 +85,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          repository: argoproj/argo-events
+          path: test/e2e
       - name: Restore go build cache
         uses: actions/cache@v1
         with:
