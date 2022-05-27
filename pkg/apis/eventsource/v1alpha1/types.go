@@ -367,22 +367,22 @@ type AMQPEventSource struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
 	// ExchangeDeclare holds the configuration for the exchange on the server
-	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare
+	// For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare
 	// +optional
 	ExchangeDeclare *AMQPExchangeDeclareConfig `json:"exchangeDeclare,omitempty" protobuf:"bytes,9,opt,name=exchangeDeclare"`
 	// QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers.
 	// Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches
 	// the same parameters
-	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare
+	// For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare
 	// +optional
 	QueueDeclare *AMQPQueueDeclareConfig `json:"queueDeclare,omitempty" protobuf:"bytes,10,opt,name=queueDeclare"`
 	// QueueBind holds the configuration that binds an exchange to a queue so that publishings to the
 	// exchange will be routed to the queue when the publishing routing key matches the binding routing key
-	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueBind
+	// For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind
 	// +optional
 	QueueBind *AMQPQueueBindConfig `json:"queueBind,omitempty" protobuf:"bytes,11,opt,name=queueBind"`
 	// Consume holds the configuration to immediately starts delivering queued messages
-	// For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.Consume
+	// For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume
 	// +optional
 	Consume *AMQPConsumeConfig `json:"consume,omitempty" protobuf:"bytes,12,opt,name=consume"`
 	// Auth hosts secret selectors for username and password
