@@ -12,7 +12,7 @@
 |     minio/minio-go           |     Apache-2.0          |
 |     nats-io/go-nats          |     Apache-2.0          |
 |     robfig/cron              |     MIT                 |
-|     streadway/amqp           |     BSD-2-Clause        |
+|     rabbitmq/amqp091-go      |     BSD-2-Clause        |
 |     rs/zerolog               |     MIT                 |
 |     mitchellh/hashstructure  |     MIT                 |
 |     nats-io/gnatsd           |     Apache-2.0          |
