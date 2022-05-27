@@ -693,11 +693,11 @@
         },
         "consume": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AMQPConsumeConfig",
-          "description": "Consume holds the configuration to immediately starts delivering queued messages For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.Consume"
+          "description": "Consume holds the configuration to immediately starts delivering queued messages For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume"
         },
         "exchangeDeclare": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AMQPExchangeDeclareConfig",
-          "description": "ExchangeDeclare holds the configuration for the exchange on the server For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare"
+          "description": "ExchangeDeclare holds the configuration for the exchange on the server For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare"
         },
         "exchangeName": {
           "description": "ExchangeName is the exchange name For more information, visit https://www.rabbitmq.com/tutorials/amqp-concepts.html",
@@ -724,11 +724,11 @@
         },
         "queueBind": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AMQPQueueBindConfig",
-          "description": "QueueBind holds the configuration that binds an exchange to a queue so that publishings to the exchange will be routed to the queue when the publishing routing key matches the binding routing key For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueBind"
+          "description": "QueueBind holds the configuration that binds an exchange to a queue so that publishings to the exchange will be routed to the queue when the publishing routing key matches the binding routing key For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind"
         },
         "queueDeclare": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AMQPQueueDeclareConfig",
-          "description": "QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare"
+          "description": "QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare"
         },
         "routingKey": {
           "description": "Routing key for bindings",

@@ -226,7 +226,7 @@ AMQPExchangeDeclareConfig </a> </em>
 <p>
 ExchangeDeclare holds the configuration for the exchange on the server
 For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare">https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare</a>
 </p>
 </td>
 </tr>
@@ -243,7 +243,7 @@ QueueDeclare holds the configuration of a queue to hold messages and
 deliver to consumers. Declaring creates a queue if it doesn’t already
 exist, or ensures that an existing queue matches the same parameters For
 more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare">https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare</a>
 </p>
 </td>
 </tr>
@@ -260,7 +260,7 @@ QueueBind holds the configuration that binds an exchange to a queue so
 that publishings to the exchange will be routed to the queue when the
 publishing routing key matches the binding routing key For more
 information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueBind">https://godoc.org/github.com/streadway/amqp#Channel.QueueBind</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind</a>
 </p>
 </td>
 </tr>
@@ -275,7 +275,7 @@ information, visit
 <p>
 Consume holds the configuration to immediately starts delivering queued
 messages For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.Consume">https://godoc.org/github.com/streadway/amqp#Channel.Consume</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume</a>
 </p>
 </td>
 </tr>
