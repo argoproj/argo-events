@@ -1162,6 +1162,9 @@ type RedisEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,9,opt,name=jsonBody"`
+	// Username required for ACL style authentication if any.
+	// +optional
+	Username string `json:"username,omitempty" protobuf:"bytes,10,opt,name=username"`
 }
 
 // RedisStreamEventSource describes an event source for
@@ -1195,6 +1198,9 @@ type RedisStreamEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
+	// Username required for ACL style authentication if any.
+	// +optional
+	Username string `json:"username,omitempty" protobuf:"bytes,10,opt,name=username"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub

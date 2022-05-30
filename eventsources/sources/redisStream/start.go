@@ -81,6 +81,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		opt.Password = password
 	}
 
+	if redisEventSource.Username != "" {
+		opt.Username = redisEventSource.Username
+	}
+
 	if redisEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS)
 		if err != nil {

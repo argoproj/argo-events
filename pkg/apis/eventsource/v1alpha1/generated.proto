@@ -1094,6 +1094,10 @@ message RedisEventSource {
   // source will be JSON
   // +optional
   optional bool jsonBody = 9;
+
+  // Username required for ACL style authentication if any.
+  // +optional
+  optional string username = 10;
 }
 
 // RedisStreamEventSource describes an event source for
@@ -1135,6 +1139,10 @@ message RedisStreamEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 9;
+
+  // Username required for ACL style authentication if any.
+  // +optional
+  optional string username = 10;
 }
 
 // ResourceEventSource refers to a event-source for K8s resource related events.
