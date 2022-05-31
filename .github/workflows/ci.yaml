@@ -16,7 +16,16 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+      uses: actions/checkout@v3
+      - name: Checkout code of Argo
+      uses: actions/checkout@v3
+      with:
+        repository: argoproj/${{ github.event.repository.name }}
+        path: argo
+        ref: ${{ github.base_ref }}
+      - name: Replace test directory by Argo code
+        run: |
+          cp -r argo/test test
       - name: Restore go build cache
         uses: actions/cache@v1
         with:
