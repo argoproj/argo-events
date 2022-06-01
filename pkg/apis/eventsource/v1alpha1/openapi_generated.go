@@ -2917,6 +2917,13 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username required for ACL style authentication if any.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"hostAddress", "channels"},
 			},
@@ -3009,6 +3016,13 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisStreamEventSource(ref common.Refe
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username required for ACL style authentication if any.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},

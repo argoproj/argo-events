@@ -2194,6 +2194,10 @@
         "tls": {
           "$ref": "#/definitions/io.argoproj.common.TLSConfig",
           "description": "TLS configuration for the redis client."
+        },
+        "username": {
+          "description": "Username required for ACL style authentication if any.",
+          "type": "string"
         }
       },
       "required": [
@@ -2248,6 +2252,10 @@
         "tls": {
           "$ref": "#/definitions/io.argoproj.common.TLSConfig",
           "description": "TLS configuration for the redis client."
+        },
+        "username": {
+          "description": "Username required for ACL style authentication if any.",
+          "type": "string"
         }
       },
       "required": [

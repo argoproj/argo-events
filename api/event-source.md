@@ -4366,6 +4366,17 @@ will be JSON
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>username</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Username required for ACL style authentication if any.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.RedisStreamEventSource">
@@ -4502,6 +4513,17 @@ event payload.
 <em>(Optional)</em>
 <p>
 Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>username</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Username required for ACL style authentication if any.
 </p>
 </td>
 </tr>
