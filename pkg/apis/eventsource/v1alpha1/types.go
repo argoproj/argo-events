@@ -653,6 +653,8 @@ type SQSEventSource struct {
 	// Endpoint configures connection to a specific SQS endpoint instead of Amazons servers
 	// +optional
 	Endpoint string `json:"endpoint" protobuf:"bytes,12,opt,name=endpoint"`
+	// SessionToken refers to K8s secret containing AWS temporary credentials(STS) session token
+	SessionToken *corev1.SecretKeySelector `json:"sessionToken,omitempty" protobuf:"bytes,13,opt,name=sessionToken"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
