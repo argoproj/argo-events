@@ -1,5 +1,63 @@
 # Changelog
 
+## v1.7.1 (2022-06-08)
+
+ * [a98978a3](https://github.com/argoproj/argo-events/commit/a98978a38dfc90299dc805089716ecba8374461a) Update manifests to v1.7.1
+ * [b03f5c70](https://github.com/argoproj/argo-events/commit/b03f5c707326136d06d326ebf7948e6022d6c36c) chore(deps): bump cloud.google.com/go/pubsub from 1.21.1 to 1.22.2 (#2016)
+ * [eb669285](https://github.com/argoproj/argo-events/commit/eb66928544a8af915e89d3534eb0e82ff641790b) chore(deps): bump google.golang.org/grpc from 1.46.2 to 1.47.0 (#2014)
+ * [476cf56e](https://github.com/argoproj/argo-events/commit/476cf56e05ba960c50eda8d838267b8c8f8d179a) chore(deps): bump github.com/itchyny/gojq from 0.12.7 to 0.12.8 (#2015)
+ * [22ad8c1f](https://github.com/argoproj/argo-events/commit/22ad8c1fdb84b9fb1fc8481651ae9ea5c25f919d) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.24 to 1.44.27 (#2012)
+ * [dcb32d41](https://github.com/argoproj/argo-events/commit/dcb32d41782651bb6033b79d09d8b9932f2850cf) chore(deps): bump github.com/imdario/mergo from 0.3.12 to 0.3.13 (#2001)
+ * [e1d54ed7](https://github.com/argoproj/argo-events/commit/e1d54ed74306487d4cd93f4a653a257bd4b92263) Add support for Redis ACL auth (#2007)
+ * [d549502d](https://github.com/argoproj/argo-events/commit/d549502d23bba5d2e503bba551d8b268bd474ca8) chore(deps): bump actions/setup-go from 3.1.0 to 3.2.0 (#2006)
+ * [9e26ddbb](https://github.com/argoproj/argo-events/commit/9e26ddbb7b9cbbeb880063f9a5da50afd5f067d4) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.26 to 7.0.27 (#2005)
+ * [c1b77733](https://github.com/argoproj/argo-events/commit/c1b77733b236949dc0332b924bc3fe4c17df1384) chore(deps): bump github.com/spf13/viper from 1.11.0 to 1.12.0 (#2004)
+ * [d03051bb](https://github.com/argoproj/argo-events/commit/d03051bb4b7170a4c3d0dfbd4d1ed43c1cc939ab) chore(deps): bump github.com/nats-io/nats.go from 1.15.0 to 1.16.0 (#2003)
+ * [28531dfa](https://github.com/argoproj/argo-events/commit/28531dfa207e9411093897bd547e3323415ddaca) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.21 to 1.44.24 (#2002)
+ * [15cfd7f6](https://github.com/argoproj/argo-events/commit/15cfd7f6580366340807d6acb6dbf4d22308bc0e) chore(deps): bump github.com/xanzy/go-gitlab from 0.65.0 to 0.68.0 (#1995)
+ * [48b38900](https://github.com/argoproj/argo-events/commit/48b389000f6b5fd30ae33ba6503fcd4ee5c21479) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.19 to 1.44.21 (#1993)
+ * [49121eab](https://github.com/argoproj/argo-events/commit/49121eab0064a53297bce96ab82b4ecd28037e28) chore(deps): bump github.com/ktrysmt/go-bitbucket from 0.9.45 to 0.9.46 (#1994)
+ * [fe48c003](https://github.com/argoproj/argo-events/commit/fe48c00379acf487671e1b07b065b00695c45510) chore(deps): bump google.golang.org/api from 0.80.0 to 0.81.0 (#1992)
+ * [e1fab1dd](https://github.com/argoproj/argo-events/commit/e1fab1dde13b43bcfd522c0b0139de9936dc79b7) fix: jetstream statefulset resource setting (#1989)
+ * [656b99de](https://github.com/argoproj/argo-events/commit/656b99ded768b48f823bb788f5bc03a28f1b4ca2) feat: add support to parse QueryParameter and PostForm on webhook eve… (#1978)
+ * [0a9206d8](https://github.com/argoproj/argo-events/commit/0a9206d88b89227dd8df33f874a23e5896b2b7b2) chore(deps): bump google.golang.org/api from 0.79.0 to 0.80.0 (#1985)
+ * [248b6164](https://github.com/argoproj/argo-events/commit/248b61641ff37162ac57ffce75546dc75b525214) chore(deps): bump github.com/cloudevents/sdk-go/v2 from 2.9.0 to 2.10.0 (#1984)
+ * [80863521](https://github.com/argoproj/argo-events/commit/808635214ce7cc80f222b3961043b97ea56c4a7b) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.14 to 1.44.19 (#1983)
+ * [b08d6379](https://github.com/argoproj/argo-events/commit/b08d6379e18fd9a887e225918811f65220cebd1d) fix: make access token optional (#1976)
+ * [52a26202](https://github.com/argoproj/argo-events/commit/52a2620242ee54c80e80fd4de702ccba7887454d) fix: Limit github hooks manager daemon lifetime to 10 min (#1930)
+ * [11c547fd](https://github.com/argoproj/argo-events/commit/11c547fdfb1401a65835e73163cac737e53148ba) chore(deps): bump google.golang.org/grpc from 1.46.0 to 1.46.2 (#1974)
+ * [6fa9a133](https://github.com/argoproj/argo-events/commit/6fa9a13367b77cc4064d48155e1a9e6a8ce497e7) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.9 to 1.44.14 (#1973)
+ * [69a4b4ae](https://github.com/argoproj/argo-events/commit/69a4b4ae2e8f673a6e018101ea1104fe80e55f80) chore(deps): bump actions/setup-go from 3.0.0 to 3.1.0 (#1975)
+ * [a66da058](https://github.com/argoproj/argo-events/commit/a66da05877cbc41a51d1f4a4cb6d4455aedeb47b) chore(deps): bump github.com/prometheus/client_golang (#1971)
+ * [1e8e81ed](https://github.com/argoproj/argo-events/commit/1e8e81edb49354087968429e52244d89042f8b1d) chore(deps): bump github.com/ktrysmt/go-bitbucket from 0.9.44 to 0.9.45 (#1969)
+ * [2bbe22c4](https://github.com/argoproj/argo-events/commit/2bbe22c4a5bbf2b22996bb55df9fedbaddb29215) chore(deps): bump google.golang.org/api from 0.78.0 to 0.79.0 (#1970)
+ * [1c0cfff4](https://github.com/argoproj/argo-events/commit/1c0cfff48d2d2dbf4297f3471dada3767ed5efa8) chore(deps): bump github.com/xanzy/go-gitlab from 0.64.0 to 0.65.0 (#1968)
+ * [78876451](https://github.com/argoproj/argo-events/commit/788764514be21a646cf08ec64708384a41e86eaa) chore(deps): bump github.com/Shopify/sarama from 1.32.0 to 1.33.0 (#1967)
+ * [d0f66dbc](https://github.com/argoproj/argo-events/commit/d0f66dbce78bc31923ca057b20fc722aa24ca961) fix: git artifactory arbitrary file read issue (#1965)
+ * [e80ab9f9](https://github.com/argoproj/argo-events/commit/e80ab9f9556f7f97346fb393e312f8a689ca21f8) feat: add support of submit from existing resource (#1908) (#1941)
+ * [3861f8a7](https://github.com/argoproj/argo-events/commit/3861f8a72c50284b8cc35975b64418dad6717f0e) fix: use crypto/rand instead of math/rand (#1959)
+ * [9f243f67](https://github.com/argoproj/argo-events/commit/9f243f67cbe6158c4de38cf368e2515ca9b1c0e8) fix: add nil check on sensor spec validation (#1961)
+ * [f4b6b04b](https://github.com/argoproj/argo-events/commit/f4b6b04b681bff5802ac55b15b093c7f9585fa90) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.24 to 7.0.26 (#1939)
+ * [4cb6cad8](https://github.com/argoproj/argo-events/commit/4cb6cad85824bd72cda14e392e6382dc9cdb9aaa) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.8 to 1.44.9 (#1938)
+ * [6fe18099](https://github.com/argoproj/argo-events/commit/6fe18099bff207e768774d5e69d782115e7c0553) feat: Expand e2e tests (#1859)
+ * [6284920c](https://github.com/argoproj/argo-events/commit/6284920cb864a313c212d2d50bc3bb7918737a72) chore(deps): bump docker/setup-buildx-action from 1 to 2 (#1935)
+ * [480fd9f3](https://github.com/argoproj/argo-events/commit/480fd9f334b33eb1c5c2a0f1581caa997d1bc465) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.7 to 1.44.8 (#1937)
+ * [6c6a2102](https://github.com/argoproj/argo-events/commit/6c6a2102d4dd832b75d15480b8e201049f378f74) chore(deps): bump docker/login-action from 1 to 2 (#1936)
+ * [ed5eb358](https://github.com/argoproj/argo-events/commit/ed5eb358e649043684aaa416b4d7f0d5cdb97fc5) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.6 to 1.44.7 (#1933)
+ * [a4d23d23](https://github.com/argoproj/argo-events/commit/a4d23d23b1ab943cc0e90dedca2dbad20249c146) chore(deps): bump github.com/nats-io/nats.go from 1.14.0 to 1.15.0 (#1932)
+ * [81025a67](https://github.com/argoproj/argo-events/commit/81025a67af8317c2ffe9922055d0c08385a3e775) chore(deps): bump cloud.google.com/go/pubsub from 1.21.0 to 1.21.1 (#1931)
+
+### Contributors
+
+ * Daniel
+ * Derek Wang
+ * Ivan Babiankou
+ * Julie Vogelman
+ * Omar Elbanby
+ * Tom Elliff-O'Shea
+ * dependabot[bot]
+ * shirou
+
 ## v1.7.0 (2022-05-04)
 
  * [6b10ce4d](https://github.com/argoproj/argo-events/commit/6b10ce4d463c312085fb33f6be12cfd137ea19bc) Update manifests to v1.7.0
