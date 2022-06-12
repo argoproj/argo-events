@@ -214,7 +214,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		applyWebhooks := func() {
 			for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
 				if err = router.applyBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
-					logger.Errorw("failed to create/update Bitbucket webhook",
+					logger.Errorw("failed to apply Bitbucket webhook",
 						zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
 					continue
 				}

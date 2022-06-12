@@ -33,14 +33,8 @@ func validate(eventSource *v1alpha1.BitbucketEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.ProjectKey == "" {
-		return fmt.Errorf("project key can't be empty")
-	}
-	if eventSource.RepositorySlug == "" {
-		return fmt.Errorf("repository slug can't be empty")
-	}
-	if eventSource.Owner == "" {
-		return fmt.Errorf("owner can't be empty")
+	if eventSource.GetBitbucketRepositories() == nil {
+		return fmt.Errorf("at least one repository is required")
 	}
 	if eventSource.ShouldCreateWebhook() && len(eventSource.Events) == 0 {
 		return fmt.Errorf("events must be defined to create a bitbucket webhook")
