@@ -156,8 +156,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		hookIDs:              make(map[string]string),
 	}
 
-	if !bitbucketEventSource.ShouldCreateWebhook() {
-		logger.Info("no need to create webhook")
+	if !bitbucketEventSource.ShouldCreateWebhooks() {
+		logger.Info("access token or webhook configuration were not provided, skipping webhooks creation")
 		return webhook.ManageRoute(ctx, router, controller, dispatch)
 	}
 

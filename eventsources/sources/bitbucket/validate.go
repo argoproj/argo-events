@@ -36,8 +36,8 @@ func validate(eventSource *v1alpha1.BitbucketEventSource) error {
 	if eventSource.GetBitbucketRepositories() == nil {
 		return fmt.Errorf("at least one repository is required")
 	}
-	if eventSource.ShouldCreateWebhook() && len(eventSource.Events) == 0 {
-		return fmt.Errorf("events must be defined to create a bitbucket webhook")
+	if eventSource.ShouldCreateWebhooks() && len(eventSource.Events) == 0 {
+		return fmt.Errorf("events must be defined to create a bitbucket webhooks")
 	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }
