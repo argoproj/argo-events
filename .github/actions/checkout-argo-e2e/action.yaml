@@ -11,5 +11,5 @@ runs:
         path: argo
         ref: ${{ github.base_ref }}
     - name: Replace test directory by Argo code
-      run: cp -r argo/test test
+      run: rm -rf test && cp -r argo/test test
       shell: bash
