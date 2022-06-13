@@ -125,6 +125,7 @@ jobs:
     name: E2E Tests of Argo Project
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    needs: e2e-tests
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
