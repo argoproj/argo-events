@@ -1,0 +1,15 @@
+name: "Checkout the code of project and the code of E2E from Argo repository"
+description: "Checkout the code of the project and the replaces the directory of E2E by the directory from the Argo repository"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code of Argo
+      uses: actions/checkout@v3
+      with:
+        repository: argoproj/${{ github.event.repository.name }}
+        path: argo
+        ref: ${{ github.base_ref }}
+    - name: Replace test directory by Argo code
+      run: cp -r argo/test test
+      shell: bash
