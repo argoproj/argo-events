@@ -1352,6 +1352,17 @@ Refer
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>insecureIgnoreHostKey</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Whether to ignore host key
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.GitCreds">

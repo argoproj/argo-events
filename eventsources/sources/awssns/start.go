@@ -23,7 +23,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -115,7 +115,8 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	body, err := ioutil.ReadAll(request.Body)
+	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse the request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
@@ -318,7 +319,7 @@ func (m *httpNotification) verify() error {
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(io.LimitReader(res.Body, 65536))
 	if err != nil {
 		return errors.Wrap(err, "failed to read signing cert body")
 	}

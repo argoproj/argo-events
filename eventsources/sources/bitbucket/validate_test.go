@@ -18,7 +18,7 @@ package bitbucket
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -33,9 +33,9 @@ func TestValidateEventSource(t *testing.T) {
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "project key can't be empty", err.Error())
+	assert.Equal(t, "at least one repository is required", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "bitbucket.yaml"))
+	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "bitbucket.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource

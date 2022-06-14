@@ -18,7 +18,7 @@ package bitbucketserver
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -35,7 +35,7 @@ func TestValidateEventSource(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "at least one repository is required", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "bitbucketserver.yaml"))
+	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "bitbucketserver.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource

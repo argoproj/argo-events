@@ -927,6 +927,13 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig"),
 						},
 					},
+					"insecureIgnoreHostKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Whether to ignore host key",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "cloneDirectory", "filePath"},
 			},

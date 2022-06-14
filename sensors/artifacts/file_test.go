@@ -17,7 +17,6 @@ limitations under the License.
 package artifacts
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -28,7 +27,7 @@ import (
 
 func TestFileReader(t *testing.T) {
 	content := []byte("temp content")
-	tmpfile, err := ioutil.TempFile("", "argo-events-temp")
+	tmpfile, err := os.CreateTemp("", "argo-events-temp")
 	if err != nil {
 		t.Fatal(err)
 	}

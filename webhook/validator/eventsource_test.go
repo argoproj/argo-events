@@ -2,7 +2,7 @@ package validator
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -13,10 +13,13 @@ import (
 
 func TestValidateEventSource(t *testing.T) {
 	dir := "../../examples/event-sources"
-	files, err := ioutil.ReadDir(dir)
+	dirEntries, err := os.ReadDir(dir)
 	assert.Nil(t, err)
-	for _, file := range files {
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
+	for _, entry := range dirEntries {
+		if entry.IsDir() {
+			continue
+		}
+		content, err := os.ReadFile(fmt.Sprintf("%s/%s", dir, entry.Name()))
 		assert.Nil(t, err)
 		var es *v1alpha1.EventSource
 		err = yaml.Unmarshal(content, &es)

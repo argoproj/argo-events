@@ -45,13 +45,14 @@ type ArgoWorkflowOperation string
 
 // possible values for ArgoWorkflowOperation
 const (
-	Submit    ArgoWorkflowOperation = "submit"    // submit a workflow
-	Suspend   ArgoWorkflowOperation = "suspend"   // suspends a workflow
-	Resubmit  ArgoWorkflowOperation = "resubmit"  // resubmit a workflow
-	Retry     ArgoWorkflowOperation = "retry"     // retry a workflow
-	Resume    ArgoWorkflowOperation = "resume"    // resume a workflow
-	Terminate ArgoWorkflowOperation = "terminate" // terminate a workflow
-	Stop      ArgoWorkflowOperation = "stop"      // stop a workflow
+	Submit     ArgoWorkflowOperation = "submit"      // submit a workflow
+	SubmitFrom ArgoWorkflowOperation = "submit-from" // submit from existing resource
+	Suspend    ArgoWorkflowOperation = "suspend"     // suspends a workflow
+	Resubmit   ArgoWorkflowOperation = "resubmit"    // resubmit a workflow
+	Retry      ArgoWorkflowOperation = "retry"       // retry a workflow
+	Resume     ArgoWorkflowOperation = "resume"      // resume a workflow
+	Terminate  ArgoWorkflowOperation = "terminate"   // terminate a workflow
+	Stop       ArgoWorkflowOperation = "stop"        // stop a workflow
 )
 
 // Comparator refers to the comparator operator for a data filter
@@ -896,6 +897,9 @@ type GitArtifact struct {
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
 	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,9,opt,name=remote"`
+	// Whether to ignore host key
+	// +optional
+	InsecureIgnoreHostKey bool `json:"insecureIgnoreHostKey,omitempty" protobuf:"bytes,10,opt,name=insecureIgnoreHostKey"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote

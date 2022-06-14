@@ -19,7 +19,7 @@ package gcppubsub
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/argoproj/argo-events/eventsources/sources"
@@ -35,7 +35,7 @@ func TestValidateEventSource(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "must specify topic or subscriptionID", err.Error())
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "gcp-pubsub.yaml"))
+	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "gcp-pubsub.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -86,7 +85,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	err = ioutil.WriteFile(output, jsonBytes, 0644)
+	err = os.WriteFile(output, jsonBytes, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -158,7 +157,7 @@ func swaggify(name string) string {
 }
 
 func getKubernetesSwagger(kubeSwaggerPath string) spec.Definitions {
-	data, err := ioutil.ReadFile(kubeSwaggerPath)
+	data, err := os.ReadFile(kubeSwaggerPath)
 	if err != nil {
 		panic(err)
 	}

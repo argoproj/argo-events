@@ -39,6 +39,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketAuth":              schema_pkg_apis_eventsource_v1alpha1_BitbucketAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketBasicAuth":         schema_pkg_apis_eventsource_v1alpha1_BitbucketBasicAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource":       schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketRepository":        schema_pkg_apis_eventsource_v1alpha1_BitbucketRepository(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource": schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerRepository":  schema_pkg_apis_eventsource_v1alpha1_BitbucketServerRepository(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource":        schema_pkg_apis_eventsource_v1alpha1_CalendarEventSource(ref),
@@ -207,25 +208,25 @@ func schema_pkg_apis_eventsource_v1alpha1_AMQPEventSource(ref common.ReferenceCa
 					},
 					"exchangeDeclare": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ExchangeDeclare holds the configuration for the exchange on the server For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare",
+							Description: "ExchangeDeclare holds the configuration for the exchange on the server For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPExchangeDeclareConfig"),
 						},
 					},
 					"queueDeclare": {
 						SchemaProps: spec.SchemaProps{
-							Description: "QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare",
+							Description: "QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers. Declaring creates a queue if it doesn't already exist, or ensures that an existing queue matches the same parameters For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueDeclareConfig"),
 						},
 					},
 					"queueBind": {
 						SchemaProps: spec.SchemaProps{
-							Description: "QueueBind holds the configuration that binds an exchange to a queue so that publishings to the exchange will be routed to the queue when the publishing routing key matches the binding routing key For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.QueueBind",
+							Description: "QueueBind holds the configuration that binds an exchange to a queue so that publishings to the exchange will be routed to the queue when the publishing routing key matches the binding routing key For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueBindConfig"),
 						},
 					},
 					"consume": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Consume holds the configuration to immediately starts delivering queued messages For more information, visit https://godoc.org/github.com/streadway/amqp#Channel.Consume",
+							Description: "Consume holds the configuration to immediately starts delivering queued messages For more information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPConsumeConfig"),
 						},
 					},
@@ -552,26 +553,37 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref common.Refere
 					},
 					"owner": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Owner of the repository.",
-							Default:     "",
+							Description: "DeprecatedOwner is the owner of the repository. Deprecated: use Repositories instead. Will be unsupported in v1.9",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ProjectKey is the key of the project for which integration needs to setup",
-							Default:     "",
+							Description: "DeprecatedProjectKey is the key of the project to which the repository relates Deprecated: use Repositories instead. Will be unsupported in v1.9",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"repositorySlug": {
 						SchemaProps: spec.SchemaProps{
-							Description: "RepositorySlug is a URL-friendly version of a repository name, automatically generated by Bitbucket for use in the URL.",
-							Default:     "",
+							Description: "DeprecatedRepositorySlug is a URL-friendly version of a repository name, automatically generated by Bitbucket for use in the URL Deprecated: use Repositories instead. Will be unsupported in v1.9",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"repositories": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Repositories holds a list of repositories for which integration needs to set up",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketRepository"),
+									},
+								},
+							},
 						},
 					},
 					"filter": {
@@ -581,11 +593,48 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref common.Refere
 						},
 					},
 				},
-				Required: []string{"webhook", "auth", "events", "owner", "projectKey", "repositorySlug"},
+				Required: []string{"webhook", "auth", "events"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketAuth", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketAuth", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketRepository", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_BitbucketRepository(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"owner": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Owner is the owner of the repository",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"projectKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ProjectKey is the key of the project to which the repository relates",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"repositorySlug": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RepositorySlug is a URL-friendly version of a repository name, automatically generated by Bitbucket for use in the URL",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"owner", "projectKey", "repositorySlug"},
+			},
+		},
 	}
 }
 
@@ -604,21 +653,21 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 					},
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedProjectKey is the key of project for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
+							Description: "DeprecatedProjectKey is the key of project for which integration needs to set up Deprecated: use Repositories instead. Will be unsupported in v1.8",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"repositorySlug": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedRepositorySlug is the slug of the repository for which integration needs to setup Deprecated: use Repositories instead. Will be unsupported in v1.8",
+							Description: "DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up Deprecated: use Repositories instead. Will be unsupported in v1.8",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"repositories": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repositories holds a list of repositories for which integration needs to setup",
+							Description: "Repositories holds a list of repositories for which integration needs to set up",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -711,7 +760,7 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerRepository(ref common.R
 				Properties: map[string]spec.Schema{
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ProjectKey is the key of project for which integration needs to setup",
+							Description: "ProjectKey is the key of project for which integration needs to set up",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -719,7 +768,7 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerRepository(ref common.R
 					},
 					"repositorySlug": {
 						SchemaProps: spec.SchemaProps{
-							Description: "RepositorySlug is the slug of the repository for which integration needs to setup",
+							Description: "RepositorySlug is the slug of the repository for which integration needs to set up",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2917,6 +2966,13 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username required for ACL style authentication if any.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"hostAddress", "channels"},
 			},
@@ -3009,6 +3065,13 @@ func schema_pkg_apis_eventsource_v1alpha1_RedisStreamEventSource(ref common.Refe
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username required for ACL style authentication if any.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},

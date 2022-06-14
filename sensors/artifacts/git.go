@@ -18,8 +18,9 @@ package artifacts
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
+	"path"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
@@ -44,6 +45,8 @@ var (
 		"refs/*:refs/*",
 		"HEAD:refs/heads/HEAD",
 	}
+
+	notAllowedInPath = []string{"..", "~", "\\"}
 )
 
 type GitArtifactReader struct {
@@ -52,6 +55,15 @@ type GitArtifactReader struct {
 
 // NewGitReader returns a new git reader
 func NewGitReader(gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error) {
+	if gitArtifact == nil {
+		return nil, fmt.Errorf("nil git artifact")
+	}
+	for _, na := range notAllowedInPath {
+		if strings.Contains(gitArtifact.FilePath, na) {
+			return nil, fmt.Errorf("%q is not allowed in the filepath", na)
+		}
+	}
+
 	return &GitArtifactReader{
 		artifact: gitArtifact,
 	}, nil
@@ -64,8 +76,8 @@ func (g *GitArtifactReader) getRemote() string {
 	return DefaultRemote
 }
 
-func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
-	sshKey, err := ioutil.ReadFile(sshKeyFile)
+func getSSHKeyAuth(sshKeyFile string, insecureIgnoreHostKey bool) (transport.AuthMethod, error) {
+	sshKey, err := os.ReadFile(sshKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
 	}
@@ -74,7 +86,9 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 		return nil, fmt.Errorf("failed to parse ssh key. err: %+v", err)
 	}
 	auth := &go_git_ssh.PublicKeys{User: "git", Signer: signer}
-	auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+	if insecureIgnoreHostKey {
+		auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+	}
 	return auth, nil
 }
 
@@ -98,7 +112,7 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get SSH key from mounted volume")
 		}
-		return getSSHKeyAuth(sshKeyPath)
+		return getSSHKeyAuth(sshKeyPath, g.artifact.InsecureIgnoreHostKey)
 	}
 	return nil, nil
 }
@@ -176,8 +190,16 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 			return nil, fmt.Errorf("failed to pull latest updates. err: %+v", err)
 		}
 	}
-
-	return ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, g.artifact.FilePath))
+	filePath := fmt.Sprintf("%s/%s", dir, g.artifact.FilePath)
+	// symbol link is not allowed due to security concern
+	isSymbolLink, err := isSymbolLink(filePath)
+	if err != nil {
+		return nil, err
+	}
+	if isSymbolLink {
+		return nil, fmt.Errorf("%q is a symbol link which is not allowed", g.artifact.FilePath)
+	}
+	return os.ReadFile(filePath)
 }
 
 func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
@@ -201,7 +223,7 @@ func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
 func (g *GitArtifactReader) Read() ([]byte, error) {
 	cloneDir := g.artifact.CloneDirectory
 	if cloneDir == "" {
-		tempDir, err := ioutil.TempDir("", "git-tmp")
+		tempDir, err := os.MkdirTemp("", "git-tmp")
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to create a temp file to clone the repository")
 		}
@@ -240,4 +262,15 @@ func (g *GitArtifactReader) Read() ([]byte, error) {
 		}
 	}
 	return g.readFromRepository(r, cloneDir)
+}
+
+func isSymbolLink(filepath string) (bool, error) {
+	fi, err := os.Lstat(path.Clean(filepath))
+	if err != nil {
+		return false, err
+	}
+	if fi.Mode()&os.ModeSymlink != 0 {
+		return true, nil
+	}
+	return false, nil
 }

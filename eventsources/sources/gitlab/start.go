@@ -18,9 +18,10 @@ package gitlab
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
-	"io/ioutil"
-	"math/rand"
+	"io"
+	"math/big"
 	"net/http"
 	"reflect"
 	"time"
@@ -85,8 +86,8 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			return
 		}
 	}
-
-	body, err := ioutil.ReadAll(request.Body)
+	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
@@ -215,7 +216,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return errors.Wrapf(err, "failed to initialize client")
 		}
 
-		getHook := func(hooks []*gitlab.ProjectHook, url string, events []string) *gitlab.ProjectHook {
+		getHook := func(hooks []*gitlab.ProjectHook, url string) *gitlab.ProjectHook {
 			for _, h := range hooks {
 				if h.URL != url {
 					continue
@@ -234,7 +235,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					logger.Errorf("failed to list existing webhooks of project %s. err: %+v", p, err)
 					continue
 				}
-				hook := getHook(hooks, formattedURL, gitlabEventSource.Events)
+				hook := getHook(hooks, formattedURL)
 				if hook != nil {
 					router.hookIDs[p] = hook.ID
 					continue
@@ -251,9 +252,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		// Mitigate race condtions - it might create multiple hooks with same config when replicas > 1
-		s1 := rand.NewSource(time.Now().UnixNano())
-		r1 := rand.New(s1)
-		time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+		randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+		time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 		f()
 
 		ctx, cancel := context.WithCancel(ctx)

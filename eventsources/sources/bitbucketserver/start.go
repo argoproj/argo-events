@@ -18,11 +18,12 @@ package bitbucketserver
 import (
 	"context"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"io/ioutil"
-	"math/rand"
+	"io"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -83,7 +84,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	body, err := router.parseAndValidateBitbucketServerRequest(request)
+	body, err := router.parseAndValidateBitbucketServerRequest(writer, request)
 	if err != nil {
 		logger.Errorw("failed to parse/validate request", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
@@ -183,6 +184,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		hookIDs:                    make(map[string]int),
 	}
 
+	if !bitbucketserverEventSource.ShouldCreateWebhooks() {
+		logger.Info("access token or webhook configuration were not provided, skipping webhooks creation")
+		return webhook.ManageRoute(ctx, router, controller, dispatch)
+	}
+
 	logger.Info("retrieving the access token credentials...")
 	bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
 	if err != nil {
@@ -212,7 +218,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	applyWebhooks := func() {
 		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
 			if err = router.applyBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
-				logger.Errorw("failed to create/update Bitbucket webhook",
+				logger.Errorw("failed to apply Bitbucket webhook",
 					zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
 				continue
 			}
@@ -223,9 +229,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	// When running multiple replicas of the eventsource, they will all try to create the webhook.
 	// Randomly sleep some time to mitigate the issue.
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+	time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 	applyWebhooks()
 
 	go func() {
@@ -391,8 +396,9 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 	return requestBody, nil
 }
 
-func (router *Router) parseAndValidateBitbucketServerRequest(request *http.Request) ([]byte, error) {
-	body, err := ioutil.ReadAll(request.Body)
+func (router *Router) parseAndValidateBitbucketServerRequest(writer http.ResponseWriter, request *http.Request) ([]byte, error) {
+	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse request body")
 	}

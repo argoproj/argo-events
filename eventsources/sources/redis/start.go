@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -81,6 +81,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		opt.Password = password
 	}
 
+	if redisEventSource.Username != "" {
+		opt.Username = redisEventSource.Username
+	}
+
 	if redisEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS)
 		if err != nil {
@@ -92,13 +96,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("setting up a redis client...")
 	client := redis.NewClient(opt)
 
-	if status := client.Ping(); status.Err() != nil {
+	if status := client.Ping(ctx); status.Err() != nil {
 		return errors.Wrapf(status.Err(), "failed to connect to host %s and db %d for event source %s", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName())
 	}
 
-	pubsub := client.Subscribe(redisEventSource.Channels...)
+	pubsub := client.Subscribe(ctx, redisEventSource.Channels...)
 	// Wait for confirmation that subscription is created before publishing anything.
-	if _, err := pubsub.Receive(); err != nil {
+	if _, err := pubsub.Receive(ctx); err != nil {
 		return errors.Wrapf(err, "failed to receive the subscription confirmation for event source %s", el.GetEventName())
 	}
 
@@ -118,7 +122,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 		case <-ctx.Done():
 			log.Info("event source is stopped. unsubscribing the subscription")
-			if err := pubsub.Unsubscribe(redisEventSource.Channels...); err != nil {
+			if err := pubsub.Unsubscribe(ctx, redisEventSource.Channels...); err != nil {
 				log.Errorw("failed to unsubscribe", zap.Error(err))
 			}
 			return nil

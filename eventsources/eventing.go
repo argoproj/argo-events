@@ -2,9 +2,10 @@ package eventsources
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strings"
 	"sync"
 	"time"
@@ -572,9 +573,8 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 }
 
 func generateClientID(hostname string) string {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(hostname, ".", "_"), r1.Intn(1000))
+	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(1000)))
+	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(hostname, ".", "_"), randomNum.Int64())
 	return clientID
 }
 

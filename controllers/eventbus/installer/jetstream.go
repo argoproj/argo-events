@@ -421,12 +421,25 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 	if js.Metadata != nil {
 		spec.Template.SetAnnotations(js.Metadata.Annotations)
 	}
+
+	podContainers := spec.Template.Spec.Containers
+	containers := map[string]*corev1.Container{}
+	for idx := range podContainers {
+		containers[podContainers[idx].Name] = &podContainers[idx]
+	}
+
 	if js.ContainerTemplate != nil {
-		spec.Template.Spec.Containers[0].Resources = js.ContainerTemplate.Resources
+		containers["main"].Resources = js.ContainerTemplate.Resources
 	}
+
 	if js.MetricsContainerTemplate != nil {
-		spec.Template.Spec.Containers[1].Resources = js.MetricsContainerTemplate.Resources
+		containers["metrics"].Resources = js.MetricsContainerTemplate.Resources
 	}
+
+	if js.ReloaderContainerTemplate != nil {
+		containers["reloader"].Resources = js.ReloaderContainerTemplate.Resources
+	}
+
 	if js.Persistence != nil {
 		volMode := corev1.PersistentVolumeFilesystem
 		// Default volume size

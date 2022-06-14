@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/pkg/errors"
-	amqplib "github.com/streadway/amqp"
+	amqplib "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
