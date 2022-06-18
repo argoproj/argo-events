@@ -17,7 +17,7 @@ require (
 	github.com/antonmedv/expr v1.9.0
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.8.1
-	github.com/argoproj/pkg v0.13.1
+	github.com/argoproj/pkg v0.13.3
 	github.com/aws/aws-sdk-go v1.44.37
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
@@ -94,7 +94,7 @@ require (
 	github.com/danieljoos/wincred v1.0.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
-	github.com/felixge/httpsnoop v1.0.2 // indirect
+	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
