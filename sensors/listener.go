@@ -27,6 +27,7 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/antonmedv/expr"
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
@@ -123,6 +124,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			depExpression, err := sensorCtx.getDependencyExpression(ctx, trigger)
 			if err != nil {
 				logger.Errorw("failed to get dependency expression", zap.Error(err))
+				sensorCtx.cfAPI.ReportError(
+					errors.Wrap(err, "failed to get dependency expression"),
+					codefresh.ErrorContext{
+						ObjectMeta: sensor.ObjectMeta,
+						TypeMeta:   sensor.TypeMeta,
+					},
+				)
 				return
 			}
 			// Calculate dependencies of each of the trigger.
@@ -130,6 +138,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			expr, err := govaluate.NewEvaluableExpression(de)
 			if err != nil {
 				logger.Errorw("failed to get new evaluable expression", zap.Error(err))
+				sensorCtx.cfAPI.ReportError(
+					errors.Wrap(err, "failed to get new evaluable expression"),
+					codefresh.ErrorContext{
+						ObjectMeta: sensor.ObjectMeta,
+						TypeMeta:   sensor.TypeMeta,
+					},
+				)
 				return
 			}
 			depNames := unique(expr.Vars())
@@ -138,6 +153,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				dep, ok := depMapping[depName]
 				if !ok {
 					logger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
+					sensorCtx.cfAPI.ReportError(
+						errors.Wrapf(err, "Dependency expression and dependency list do not match, %s is not found", depName),
+						codefresh.ErrorContext{
+							ObjectMeta: sensor.ObjectMeta,
+							TypeMeta:   sensor.TypeMeta,
+						},
+					)
 					return
 				}
 				d := eventbusdriver.Dependency{
@@ -151,6 +173,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			ebDriver, err := eventbus.GetDriver(logging.WithLogger(ctx, logger.With(logging.LabelTriggerName, trigger.Template.Name)), *sensorCtx.eventBusConfig, sensorCtx.eventBusSubject, clientID)
 			if err != nil {
 				logger.Errorw("failed to get eventbus driver", zap.Error(err))
+				sensorCtx.cfAPI.ReportError(
+					errors.Wrap(err, "failed to get eventbus driver"),
+					codefresh.ErrorContext{
+						ObjectMeta: sensor.ObjectMeta,
+						TypeMeta:   sensor.TypeMeta,
+					},
+				)
 				return
 			}
 			var conn eventbusdriver.Connection
@@ -160,6 +189,14 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				return err
 			})
 			if err != nil {
+				// report before fatal exit
+				sensorCtx.cfAPI.ReportError(
+					errors.Wrap(err, "failed to connect to event bus"),
+					codefresh.ErrorContext{
+						ObjectMeta: sensor.ObjectMeta,
+						TypeMeta:   sensor.TypeMeta,
+					},
+				)
 				logger.Fatalw("failed to connect to event bus", zap.Error(err))
 				return
 			}
@@ -195,6 +232,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						logger.Warnf("Event [%s] passed but with filtering error: %s",
 							eventToString(argoEvent), err.Error())
 					}
+					sensorCtx.cfAPI.ReportError(
+						errors.Wrap(err, "failed to apply filters"),
+						codefresh.ErrorContext{
+							ObjectMeta: sensor.ObjectMeta,
+							TypeMeta:   sensor.TypeMeta,
+						},
+					)
 				} else {
 					if !result {
 						logger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
@@ -206,6 +250,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			actionFunc := func(events map[string]cloudevents.Event) {
 				if err := sensorCtx.triggerActions(ctx, sensor, events, trigger); err != nil {
 					logger.Errorw("failed to trigger actions", zap.Error(err))
+					sensorCtx.cfAPI.ReportError(
+						errors.Wrap(err, "failed to trigger actions"),
+						codefresh.ErrorContext{
+							ObjectMeta: sensor.ObjectMeta,
+							TypeMeta:   sensor.TypeMeta,
+						},
+					)
 				}
 			}
 
@@ -275,6 +326,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					err = ebDriver.SubscribeEventSources(ctx, conn, group, closeSubCh, resetConditionsCh, lastResetTime, depExpression, deps, transformFunc, filterFunc, actionFunc)
 					if err != nil {
 						logger.Errorw("failed to subscribe to eventbus", zap.Any("clientID", clientID), zap.Error(err))
+						sensorCtx.cfAPI.ReportError(
+							errors.Wrapf(err, "failed to subscribe to eventbus, clientID: %v", clientID),
+							codefresh.ErrorContext{
+								ObjectMeta: sensor.ObjectMeta,
+								TypeMeta:   sensor.TypeMeta,
+							},
+						)
 						return
 					}
 				}()
@@ -355,6 +413,14 @@ func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor
 		log.Errorw("failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
 			zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
+		sensorCtx.cfAPI.ReportError(
+			errors.Wrapf(err, "failed to execute a trigger { %s: %s, %s: %+q, %s: %+q }",
+				logging.LabelTriggerName, trigger.Template.Name, "triggeredBy", depNames, "triggeredByEvents", eventIDs),
+			codefresh.ErrorContext{
+				ObjectMeta: sensor.ObjectMeta,
+				TypeMeta:   sensor.TypeMeta,
+			},
+		)
 	} else {
 		sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
 	}

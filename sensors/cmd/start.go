@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	argoevents "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/metrics"
@@ -70,8 +71,13 @@ func Start() {
 	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
 
+	cfAPI, err := codefresh.NewAPI(ctx, sensor.Namespace)
+	if err != nil {
+		logger.Warnw("WARNING: unable to initialise Codefresh API", zap.Error(err))
+	}
+
 	logger.Infow("starting sensor server", "version", argoevents.GetVersion())
-	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, hostname, m)
+	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, hostname, m, cfAPI)
 	if err := sensorExecutionCtx.Start(ctx); err != nil {
 		logger.Fatalw("failed to listen to events", zap.Error(err))
 	}

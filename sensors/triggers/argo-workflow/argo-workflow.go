@@ -1,27 +1,27 @@
 /*
 Copyright 2020 BlackRock, Inc.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
 	http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package argo_workflow
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -37,6 +37,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/common"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -121,9 +122,13 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	submittedWFLabels := make(map[string]string)
 	if op == v1alpha1.Submit {
-		submittedWFLabels["events.argoproj.io/sensor"] = t.Sensor.Name
 		submittedWFLabels["events.argoproj.io/trigger"] = trigger.Template.Name
 		submittedWFLabels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
+		common.ApplySensorLabels(submittedWFLabels, t.Sensor)
+		err := common.ApplyEventLabels(submittedWFLabels, events)
+		if err != nil {
+			t.Logger.Info("failed to apply event labels, skipping...")
+		}
 	}
 
 	namespace := obj.GetNamespace()
@@ -176,8 +181,9 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		return nil, errors.Errorf("unknown operation type %s", string(op))
 	}
 
+	var errBuff strings.Builder
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuff)
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	cmd.Args = append(cmd.Args, trigger.Template.ArgoWorkflow.Args...)
 	if err := t.cmdRunner(cmd); err != nil {
 		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s", string(op), name)

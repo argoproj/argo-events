@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	argoevents "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers/eventbus"
@@ -30,6 +31,7 @@ const (
 )
 
 func Start(namespaced bool, managedNamespace string) {
+	ctx := signals.SetupSignalHandler()
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
 	natsStreamingImage, defined := os.LookupEnv(natsStreamingEnvVar)
 	if !defined {
@@ -73,9 +75,14 @@ func Start(namespaced bool, managedNamespace string) {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
+	cfAPI, err := codefresh.NewAPI(logging.WithLogger(ctx, logger), managedNamespace)
+	if err != nil {
+		logger.Warnw("WARNING: unable to initialise Codefresh API", zap.Error(err))
+	}
+
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger, cfAPI),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up individual controller", zap.Error(err))
@@ -111,7 +118,7 @@ func Start(namespaced bool, managedNamespace string) {
 	}
 
 	logger.Infow("starting eventbus controller", "version", argoevents.GetVersion())
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		logger.Fatalw("unable to run eventbus controller", zap.Error(err))
 	}
 }

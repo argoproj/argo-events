@@ -113,3 +113,5 @@ var (
 	SecretKeySelectorType    = reflect.TypeOf(&corev1.SecretKeySelector{})
 	ConfigMapKeySelectorType = reflect.TypeOf(&corev1.ConfigMapKeySelector{})
 )
+
+type Object = map[string]interface{}
