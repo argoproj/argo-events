@@ -36,29 +36,21 @@ filters:
 
 1. Create a webhook event-source
 
-```sh
-kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 1. Create a webhook sensor with context filter
 
-```sh
-kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-script.yaml
-```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-script.yaml
 
 1. Send an HTTP request to the event-source
 
-```sh
-kubectl port-forward svc/webhook-eventsource-svc 12000
-curl -d '{"hello": "world"}' -X POST http://localhost:12000/example
-```
+        kubectl port-forward svc/webhook-eventsource-svc 12000
+        curl -d '{"hello": "world"}' -X POST http://localhost:12000/example
 
 1. You will notice in sensor logs that the event did not trigger anything.
 
 1. Send another HTTP request the event-source
 
-```sh
-curl -X POST -d '{"a": "b", "d": {"e": "z"}}' http://localhost:12000/example
-```
+        curl -X POST -d '{"a": "b", "d": {"e": "z"}}' http://localhost:12000/example
 
 1. Then you will see the event successfully triggered a workflow creation.
