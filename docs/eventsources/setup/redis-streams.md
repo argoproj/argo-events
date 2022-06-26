@@ -30,6 +30,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
         }
 
 Example:
+
         {
           "context": {
             "id": "64313638396337352d623565612d343639302d383262362d306630333562333437363637",
