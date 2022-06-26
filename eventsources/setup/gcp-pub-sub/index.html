@@ -1901,20 +1901,22 @@
 </li>
 <li>
 <p>Create a K8s secret called <code>gcp-credentials</code> to store the credentials file.</p>
-<p><code>yaml
-apiVersion: v1
-data:
-  key.json: &lt;YOUR_CREDENTIALS_STRING_FROM_JSON_FILE&gt;
-kind: Secret
-metadata:
-  name: gcp-credentials
-  namespace: argo-events
-type: Opaque</code></p>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
+<span class="n">data</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">key</span><span class="o">.</span><span class="na">json</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">YOUR_CREDENTIALS_STRING_FROM_JSON_FILE</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
+<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">gcp</span><span class="o">-</span><span class="n">credentials</span><span class="w"></span>
+<span class="w">  </span><span class="kd">namespace</span><span class="o">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
+</code></pre></div>
+
 </li>
 <li>
 <p>Create the event source by running the following command.</p>
-<p><code>sh
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/gcp-pubsub.yaml</code></p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/gcp-pubsub.yaml
+</code></pre></div>
+
 <p>If you use Workload Identity, omit <code>credentialSecret</code> field. Instead don't forget to configure appropriate service account (see <a href="https://github.com/argoproj/argo-events/blob/stable/examples/event-sources/gcp-pubsub.yaml">example</a>).</p>
 </li>
 <li>
@@ -1922,8 +1924,9 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 </li>
 <li>
 <p>Create the sensor by running the following command.</p>
-<p><code>sh
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml</code></p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml
+</code></pre></div>
+
 </li>
 <li>
 <p>Publish a message from GCP Pub/Sub console.</p>

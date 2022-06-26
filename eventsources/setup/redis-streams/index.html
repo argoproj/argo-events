@@ -1877,23 +1877,25 @@
     }
 </code></pre></div>
 
-<p>Example:
-        {
-          "context": {
-            "id": "64313638396337352d623565612d343639302d383262362d306630333562333437363637",
-            "source": "redis-stream",
-            "specversion": "1.0",
-            "type": "redisStream",
-            "datacontenttype": "application/json",
-            "subject": "example",
-            "time": "2022-03-17T04:47:42Z"
-          },
-          "data": {
-                  "stream":"FOO",
-                  "message_id":"1647495121754-0",
-                  "values": {"key-1":"val-1", "key-2":"val-2"}
-          }
-        }</p>
+<p>Example:</p>
+<div class="codehilite"><pre><span></span><code>    {
+      &quot;context&quot;: {
+        &quot;id&quot;: &quot;64313638396337352d623565612d343639302d383262362d306630333562333437363637&quot;,
+        &quot;source&quot;: &quot;redis-stream&quot;,
+        &quot;specversion&quot;: &quot;1.0&quot;,
+        &quot;type&quot;: &quot;redisStream&quot;,
+        &quot;datacontenttype&quot;: &quot;application/json&quot;,
+        &quot;subject&quot;: &quot;example&quot;,
+        &quot;time&quot;: &quot;2022-03-17T04:47:42Z&quot;
+      },
+      &quot;data&quot;: {
+              &quot;stream&quot;:&quot;FOO&quot;,
+              &quot;message_id&quot;:&quot;1647495121754-0&quot;,
+              &quot;values&quot;: {&quot;key-1&quot;:&quot;val-1&quot;, &quot;key-2&quot;:&quot;val-2&quot;}
+      }
+    }
+</code></pre></div>
+
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>Redis stream event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#argoproj.io/v1alpha1.RedisStreamEventSource">here</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>

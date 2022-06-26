@@ -2068,32 +2068,36 @@
 <p><strong>Note</strong>: Data type is assumed to be string before applying the <code>template</code>, then cast to the user defined <code>type</code> for value matching.</p>
 <h2 id="practical-examples-comparator">Practical examples (comparator)<a class="headerlink" href="#practical-examples-comparator" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Create a webhook event-source</li>
-</ol>
-<p><code>bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml</code></p>
-<ol>
-<li>Create a webhook sensor with data filter</li>
-</ol>
-<p><code>bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-data-simple-1.yaml</code></p>
-<ol>
-<li>Send an HTTP request to event-source</li>
-</ol>
-<p><code>bash
-  curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
+<li>
+<p>Create a webhook event-source</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Create a webhook sensor with data filter</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-data-simple-1.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Send an HTTP request to event-source</p>
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
+
+</li>
 <li>
 <p>You will notice in sensor logs that the event is invalid as it expects for either <code>hello</code> or <code>hey</code> as the value of <code>body.message</code></p>
 </li>
 <li>
 <p>Send another HTTP request to event-source</p>
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;hello&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
+
 </li>
-</ol>
-<p><code>bash
-  curl -d '{"message":"hello"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Look for a workflow with name starting with <code>data-workflow-</code></li>
+<li>
+<p>Look for a workflow with name starting with <code>data-workflow-</code></p>
+</li>
 </ol>
 <h2 id="further-examples">Further examples<a class="headerlink" href="#further-examples" title="Permanent link">&para;</a></h2>
 <p>You can find some examples <a href="https://github.com/argoproj/argo-events/tree/master/examples/sensors">here</a>.</p>

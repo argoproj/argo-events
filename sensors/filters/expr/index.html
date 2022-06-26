@@ -1957,32 +1957,36 @@ together with comparators (<code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</co
 <p>To discover all options offered by govaluate, take a look at its <a href="https://github.com/Knetic/govaluate/blob/master/MANUAL.md">manual</a>.</p>
 <h2 id="practical-example">Practical example<a class="headerlink" href="#practical-example" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Create a webhook event-source</li>
-</ol>
-<p><code>bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml</code></p>
-<ol>
-<li>Create a webhook sensor with expr filter</li>
-</ol>
-<p><code>bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-expressions.yaml</code></p>
-<ol>
-<li>Send an HTTP request to event-source</li>
-</ol>
-<p><code>bash
-  curl -d '{ "a": "b", "c": 11, "d": { "e": true } }' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
+<li>
+<p>Create a webhook event-source</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Create a webhook sensor with expr filter</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-expressions.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Send an HTTP request to event-source</p>
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{ &quot;a&quot;: &quot;b&quot;, &quot;c&quot;: 11, &quot;d&quot;: { &quot;e&quot;: true } }&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
+
+</li>
 <li>
 <p>You will notice in sensor logs that the event is invalid as the sensor expects <code>e == false</code></p>
 </li>
 <li>
 <p>Send another HTTP request to event-source</p>
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{ &quot;a&quot;: &quot;b&quot;, &quot;c&quot;: 11, &quot;d&quot;: { &quot;e&quot;: false } }&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
+
 </li>
-</ol>
-<p><code>bash
-  curl -d '{ "a": "b", "c": 11, "d": { "e": false } }' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Look for a workflow with name starting with <code>expr-workflow-</code></li>
+<li>
+<p>Look for a workflow with name starting with <code>expr-workflow-</code></p>
+</li>
 </ol>
 <h2 id="further-examples">Further examples<a class="headerlink" href="#further-examples" title="Permanent link">&para;</a></h2>
 <p>You can find some examples <a href="https://github.com/argoproj/argo-events/tree/master/examples/sensors">here</a>.</p>

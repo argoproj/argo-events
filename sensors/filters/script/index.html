@@ -1853,37 +1853,37 @@
 
 <h2 id="practical-example">Practical example<a class="headerlink" href="#practical-example" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Create a webhook event-source</li>
-</ol>
+<li>
+<p>Create a webhook event-source</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </code></pre></div>
 
-<ol>
-<li>Create a webhook sensor with context filter</li>
-</ol>
+</li>
+<li>
+<p>Create a webhook sensor with context filter</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-script.yaml
 </code></pre></div>
 
-<ol>
-<li>Send an HTTP request to the event-source</li>
-</ol>
-<div class="codehilite"><pre><span></span><code>kubectl port-forward svc/webhook-eventsource-svc <span class="m">12000</span>
-curl -d <span class="s1">&#39;{&quot;hello&quot;: &quot;world&quot;}&#39;</span> -X POST http://localhost:12000/example
+</li>
+<li>
+<p>Send an HTTP request to the event-source</p>
+<div class="codehilite"><pre><span></span><code>kubectl port-forward svc/webhook-eventsource-svc 12000
+curl -d &#39;{&quot;hello&quot;: &quot;world&quot;}&#39; -X POST http://localhost:12000/example
 </code></pre></div>
 
-<ol>
+</li>
 <li>
 <p>You will notice in sensor logs that the event did not trigger anything.</p>
 </li>
 <li>
 <p>Send another HTTP request the event-source</p>
-</li>
-</ol>
-<div class="codehilite"><pre><span></span><code>curl -X POST -d <span class="s1">&#39;{&quot;a&quot;: &quot;b&quot;, &quot;d&quot;: {&quot;e&quot;: &quot;z&quot;}}&#39;</span> http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -X POST -d &#39;{&quot;a&quot;: &quot;b&quot;, &quot;d&quot;: {&quot;e&quot;: &quot;z&quot;}}&#39; http://localhost:12000/example
 </code></pre></div>
 
-<ol>
-<li>Then you will see the event successfully triggered a workflow creation.</li>
+</li>
+<li>
+<p>Then you will see the event successfully triggered a workflow creation.</p>
+</li>
 </ol>
 
               

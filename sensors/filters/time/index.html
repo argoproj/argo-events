@@ -1948,28 +1948,31 @@ you need to make sure an event occurs between a certain time-frame.</p>
 </ol>
 <h2 id="practical-example">Practical example<a class="headerlink" href="#practical-example" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Create a webhook event-source</li>
-</ol>
-<p><code>bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml</code></p>
-<ol>
-<li>Create a webhook sensor with time filter</li>
-</ol>
-<p><code>bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-time.yaml</code></p>
-<ol>
-<li>Send an HTTP request to event-source</li>
-</ol>
-<p><code>bash
-  curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
+<li>
+<p>Create a webhook event-source</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Create a webhook sensor with time filter</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-time.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Send an HTTP request to event-source</p>
+<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</code></pre></div>
+
+</li>
 <li>
 <p>You will notice one of following behaviours:</p>
-</li>
-<li>
-<p>if you run this example between 02:30 and 04:30, the sensor logs the event is valid</p>
-</li>
+<ul>
+<li>if you run this example between 02:30 and 04:30, the sensor logs the event is valid</li>
 <li>if you run this example outside time range between 02:30 and 04:30, the sensor logs the event is invalid</li>
+</ul>
+</li>
 </ol>
 <h2 id="further-examples">Further examples<a class="headerlink" href="#further-examples" title="Permanent link">&para;</a></h2>
 <p>You can find some examples <a href="https://github.com/argoproj/argo-events/tree/master/examples/sensors">here</a>.</p>
