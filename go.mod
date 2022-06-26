@@ -170,6 +170,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20190818114111-108c894c2c0e // indirect
 	github.com/huandu/xstrings v1.3.1 // indirect
@@ -338,13 +339,3 @@ replace k8s.io/controller-manager => k8s.io/controller-manager v0.21.6
 replace k8s.io/component-helpers => k8s.io/component-helpers v0.21.6
 
 replace k8s.io/mount-utils => k8s.io/mount-utils v0.21.7-rc.0
-
-replace k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 => k8s.io/kube-openapi v0.0.0-20210305001622-591a79e4bda7
-
-replace github.com/spf13/cobra v1.4.0 => github.com/spf13/cobra v1.3.0
-
-replace k8s.io/api v0.23.5 => k8s.io/api v0.22.2
-
-replace k8s.io/apimachinery v0.23.5 => k8s.io/apimachinery v0.22.2
-
-replace k8s.io/client-go v0.23.5 => k8s.io/client-go v0.21.6
