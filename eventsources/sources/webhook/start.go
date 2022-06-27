@@ -188,7 +188,7 @@ func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.
 			return &ret, nil
 		// default including "application/json" is parsing body as JSON
 		default:
-			request.Body = http.MaxBytesReader(*writer, request.Body, 65536)
+			request.Body = http.MaxBytesReader(*writer, request.Body, 1024*1024)
 			body, err := getRequestBody(request)
 			if err != nil {
 				logger.Errorw("failed to read request body", zap.Error(err))

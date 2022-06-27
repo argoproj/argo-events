@@ -45,7 +45,7 @@ func (reader *URLReader) Read() ([]byte, error) {
 		return nil, errors.Errorf("status code %v", resp.StatusCode)
 	}
 
-	content, err := io.ReadAll(io.LimitReader(resp.Body, 65536))
+	content, err := io.ReadAll(io.LimitReader(resp.Body, 512*1024))
 	if err != nil {
 		log.Warnf("failed to read url body for %s: %s", reader.urlArtifact.Path, err)
 		return nil, err
