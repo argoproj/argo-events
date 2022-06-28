@@ -115,7 +115,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	request.Body = http.MaxBytesReader(writer, request.Body, 256*1024) // SNS message size limit is 256KB
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse the request body", zap.Error(err))
@@ -319,7 +319,7 @@ func (m *httpNotification) verify() error {
 	}
 	defer res.Body.Close()
 
-	body, err := io.ReadAll(io.LimitReader(res.Body, 65536))
+	body, err := io.ReadAll(io.LimitReader(res.Body, 65*1024))
 	if err != nil {
 		return errors.Wrap(err, "failed to read signing cert body")
 	}
