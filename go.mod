@@ -61,7 +61,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/slack-go/slack v0.10.1
 	github.com/smartystreets/goconvey v1.7.2
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
@@ -76,12 +76,12 @@ require (
 	google.golang.org/api v0.68.0
 	google.golang.org/grpc v1.43.0
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
-	k8s.io/api v0.23.5
-	k8s.io/apimachinery v0.23.5
-	k8s.io/client-go v0.23.5
+	k8s.io/api v0.22.2
+	k8s.io/apimachinery v0.22.2
+	k8s.io/client-go v0.21.6
 	k8s.io/code-generator v0.21.6
 	k8s.io/gengo v0.0.0-20211115164449-b448ea381d54
-	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
+	k8s.io/kube-openapi v0.0.0-20210305001622-591a79e4bda7
 	sigs.k8s.io/controller-runtime v0.9.7
 	sigs.k8s.io/controller-tools v0.7.0
 	sigs.k8s.io/yaml v1.2.0
@@ -143,7 +143,7 @@ require (
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
-	github.com/go-logr/logr v1.2.0 // indirect
+	github.com/go-logr/logr v0.4.0 // indirect
 	github.com/go-openapi/analysis v0.21.2 // indirect
 	github.com/go-openapi/errors v0.20.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -278,10 +278,10 @@ require (
 	k8s.io/apiextensions-apiserver v0.22.2 // indirect
 	k8s.io/component-base v0.21.6 // indirect
 	k8s.io/klog v0.3.0 // indirect
-	k8s.io/klog/v2 v2.30.0 // indirect
-	k8s.io/utils v0.0.0-20211116205334-6203023598ed // indirect
+	k8s.io/klog/v2 v2.9.0 // indirect
+	k8s.io/utils v0.0.0-20210802155522-efc7438f0176 // indirect
 	moul.io/http2curl v1.0.1-0.20190925090545-5cd742060b0e // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
 
 replace k8s.io/api => k8s.io/api v0.21.6
@@ -339,3 +339,5 @@ replace k8s.io/controller-manager => k8s.io/controller-manager v0.21.6
 replace k8s.io/component-helpers => k8s.io/component-helpers v0.21.6
 
 replace k8s.io/mount-utils => k8s.io/mount-utils v0.21.7-rc.0
+
+replace github.com/danielm-codefresh/argo-multi-cluster v0.0.0-20220327145759-1c387c8ebc5f => github.com/daniel-codefresh/argo-multi-cluster v0.0.0-20220628093809-3834485941a6
