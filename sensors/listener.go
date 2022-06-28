@@ -239,10 +239,8 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 							TypeMeta:   sensor.TypeMeta,
 						},
 					)
-				} else {
-					if !result {
-						logger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
-					}
+				} else if !result {
+					logger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
 				}
 				return result
 			}
