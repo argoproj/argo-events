@@ -61,7 +61,7 @@ func (reader *S3Reader) Read() ([]byte, error) {
 		}
 	}()
 
-	b, err := io.ReadAll(io.LimitReader(obj, 65536))
+	b, err := io.ReadAll(io.LimitReader(obj, 1024*1224))
 	if err != nil {
 		return nil, err
 	}

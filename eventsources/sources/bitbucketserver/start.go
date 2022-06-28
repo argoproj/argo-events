@@ -397,7 +397,7 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 }
 
 func (router *Router) parseAndValidateBitbucketServerRequest(writer http.ResponseWriter, request *http.Request) ([]byte, error) {
-	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	request.Body = http.MaxBytesReader(writer, request.Body, 256*1024)
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse request body")
