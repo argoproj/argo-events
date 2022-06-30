@@ -75,14 +75,14 @@ func Start(namespaced bool, managedNamespace string) {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
-	cfAPI, err := codefresh.NewAPI(logging.WithLogger(ctx, logger), managedNamespace)
+	cfClient, err := codefresh.NewClient(logging.WithLogger(ctx, logger), managedNamespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh API", zap.Error(err))
+		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger, cfAPI),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger, cfClient),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up individual controller", zap.Error(err))

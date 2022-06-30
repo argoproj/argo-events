@@ -65,14 +65,14 @@ func Start(namespaced bool, managedNamespace string) {
 		logger.Fatalw("unable to add EventBus scheme", zap.Error(err))
 	}
 
-	cfAPI, err := codefresh.NewAPI(logging.WithLogger(ctx, logger), managedNamespace)
+	cfClient, err := codefresh.NewClient(logging.WithLogger(ctx, logger), managedNamespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh API", zap.Error(err))
+		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventsource.ControllerName, mgr, controller.Options{
-		Reconciler: eventsource.NewReconciler(mgr.GetClient(), mgr.GetScheme(), eventSourceImage, logger, cfAPI),
+		Reconciler: eventsource.NewReconciler(mgr.GetClient(), mgr.GetScheme(), eventSourceImage, logger, cfClient),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up individual controller", zap.Error(err))

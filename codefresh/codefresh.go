@@ -35,7 +35,7 @@ type config struct {
 	authToken string
 }
 
-type API struct {
+type Client struct {
 	ctx           context.Context
 	logger        *zap.SugaredLogger
 	cfConfig      *config
@@ -66,14 +66,14 @@ type errorPayload struct {
 	Context errorContext `json:"context"`
 }
 
-func NewAPI(ctx context.Context, namespace string) (*API, error) {
+func NewClient(ctx context.Context, namespace string) (*Client, error) {
 	logger := logging.FromContext(ctx)
 	config, err := getCodefreshConfig(ctx, namespace)
 	if err != nil {
-		return &API{logger: logger}, err
+		return &Client{logger: logger}, err
 	}
 
-	return &API{
+	return &Client{
 		ctx:           ctx,
 		logger:        logger,
 		cfConfig:      config,
@@ -84,7 +84,7 @@ func NewAPI(ctx context.Context, namespace string) (*API, error) {
 	}, nil
 }
 
-func (a *API) shouldReportEvent(event cloudevents.Event) bool {
+func (a *Client) shouldReportEvent(event cloudevents.Event) bool {
 	whitelist := map[apicommon.EventSourceType]bool{
 		apicommon.GithubEvent:          true,
 		apicommon.GitlabEvent:          true,
@@ -95,7 +95,7 @@ func (a *API) shouldReportEvent(event cloudevents.Event) bool {
 	return whitelist[apicommon.EventSourceType(event.Type())]
 }
 
-func (a *API) ReportEvent(event cloudevents.Event) {
+func (a *Client) ReportEvent(event cloudevents.Event) {
 	if !a.shouldReportEvent(event) {
 		return
 	}
@@ -142,7 +142,7 @@ func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload 
 	}
 }
 
-func (a *API) ReportError(originalErr error, errContext ErrorContext) {
+func (a *Client) ReportError(originalErr error, errContext ErrorContext) {
 	originalErrMsg := originalErr.Error()
 	if !a.isInitialised {
 		a.logger.Warnw("WARNING: skipping reporting of an error to Codefresh", zap.String("originalError", originalErrMsg))
@@ -164,7 +164,7 @@ func (a *API) ReportError(originalErr error, errContext ErrorContext) {
 	}
 }
 
-func (a *API) sendJSON(jsonBody []byte, url string) error {
+func (a *Client) sendJSON(jsonBody []byte, url string) error {
 	return withRetry(&common.DefaultBackoff, func() error {
 		req, err := http.NewRequestWithContext(a.ctx, "POST", url, bytes.NewBuffer(jsonBody))
 		if err != nil {

@@ -32,12 +32,12 @@ type reconciler struct {
 	natsMetricsImage   string
 	logger             *zap.SugaredLogger
 
-	cfAPI *codefresh.API
+	cfClient *codefresh.Client
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger, cfAPI *codefresh.API) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, natsMetricsImage: natsMetricsImage, logger: logger, cfAPI: cfAPI}
+func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger, cfClient *codefresh.Client) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, natsMetricsImage: natsMetricsImage, logger: logger, cfClient: cfClient}
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -55,7 +55,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
-		r.cfAPI.ReportError(reconcileErr, codefresh.ErrorContext{
+		r.cfClient.ReportError(reconcileErr, codefresh.ErrorContext{
 			ObjectMeta: eventBus.ObjectMeta,
 			TypeMeta:   eventBus.TypeMeta,
 		})
