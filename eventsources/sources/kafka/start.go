@@ -261,7 +261,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	}
 }
 
-func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) { //nolint:interfacer
+func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) {
 	config := sarama.NewConfig()
 
 	if kafkaEventSource.Version == "" {
@@ -279,6 +279,11 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 		config.Net.SASL.Enable = true
 
 		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaEventSource.SASL.GetMechanism())
+		if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA512} }
+		} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA256} }
+		}
 
 		user, err := common.GetSecretFromVolume(kafkaEventSource.SASL.UserSecret)
 		if err != nil {
@@ -392,7 +397,6 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 // Function can be passed as Option to generate unique id for kafka event
 // eventSourceName:eventName:kafka-url:topic:partition:offset
 func genUniqueID(eventSourceName, eventName, kafkaURL, topic string, partition int32, offset int64) string {
-
 	kafkaID := fmt.Sprintf("%s:%s:%s:%s:%d:%d", eventSourceName, eventName, strings.Split(kafkaURL, ",")[0], topic, partition, offset)
 
 	return kafkaID

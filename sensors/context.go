@@ -70,11 +70,11 @@ type SensorContext struct {
 	azureEventHubsClients map[string]*eventhubs.Hub
 	metrics               *sensormetrics.Metrics
 
-	cfAPI *codefresh.API
+	cfClient *codefresh.Client
 }
 
 // NewSensorContext returns a new sensor execution context.
-func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics, cfAPI *codefresh.API) *SensorContext {
+func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics, cfClient *codefresh.Client) *SensorContext {
 	return &SensorContext{
 		kubeClient:           kubeClient,
 		dynamicClient:        dynamicClient,
@@ -94,6 +94,6 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		openwhiskClients:      make(map[string]*whisk.Client),
 		azureEventHubsClients: make(map[string]*eventhubs.Hub),
 		metrics:               metrics,
-		cfAPI:                 cfAPI,
+		cfClient:              cfClient,
 	}
 }

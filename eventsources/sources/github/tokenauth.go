@@ -1,5 +1,5 @@
 /*
-Copyright 2018 KompiTech GmbH
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,13 +15,13 @@ package github
 
 import "net/http"
 
-type TokenAuthTransport struct {
+type TokenAuthStrategy struct {
 	Token     string
 	Transport http.RoundTripper
 }
 
 // RoundTrip implements the RoundTripper interface.
-func (t *TokenAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *TokenAuthStrategy) RoundTrip(req *http.Request) (*http.Response, error) {
 	// To set extra headers, we must make a copy of the Request so
 	// that we don't modify the Request we were given. This is required by the
 	// specification of http.RoundTripper.
@@ -39,15 +39,15 @@ func (t *TokenAuthTransport) RoundTrip(req *http.Request) (*http.Response, error
 	return t.transport().RoundTrip(req2)
 }
 
-// Client returns an *http.Client that makes requests that are authenticated
-// using HTTP Basic Authentication.
-func (t *TokenAuthTransport) Client() *http.Client {
-	return &http.Client{Transport: t}
+// AuthTransport implements the AuthStrategy interface.
+func (t *TokenAuthStrategy) AuthTransport() (http.RoundTripper, error) {
+	return t, nil
 }
 
-func (t *TokenAuthTransport) transport() http.RoundTripper {
+func (t *TokenAuthStrategy) transport() http.RoundTripper {
 	if t.Transport != nil {
 		return t.Transport
 	}
+
 	return http.DefaultTransport
 }

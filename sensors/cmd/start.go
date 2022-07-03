@@ -71,13 +71,13 @@ func Start() {
 	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
 
-	cfAPI, err := codefresh.NewAPI(ctx, sensor.Namespace)
+	cfClient, err := codefresh.NewClient(ctx, sensor.Namespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh API", zap.Error(err))
+		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	logger.Infow("starting sensor server", "version", argoevents.GetVersion())
-	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, hostname, m, cfAPI)
+	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, hostname, m, cfClient)
 	if err := sensorExecutionCtx.Start(ctx); err != nil {
 		logger.Fatalw("failed to listen to events", zap.Error(err))
 	}

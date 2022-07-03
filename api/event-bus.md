@@ -92,7 +92,7 @@ Description
 <tr>
 <td>
 <code>resources</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#resourcerequirements-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements </a> </em>
 </td>
 <td>
@@ -101,8 +101,17 @@ Kubernetes core/v1.ResourceRequirements </a> </em>
 <tr>
 <td>
 <code>imagePullPolicy</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#pullpolicy-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy </a> </em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>securityContext</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#securitycontext-v1-core">
+Kubernetes core/v1.SecurityContext </a> </em>
 </td>
 <td>
 </td>
@@ -132,7 +141,7 @@ Description
 <tr>
 <td>
 <code>metadata</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta </a> </em>
 </td>
 <td>
@@ -368,7 +377,7 @@ Auth strategy, default to AuthStrategyNone
 <tr>
 <td>
 <code>accessSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -475,7 +484,7 @@ scheduled on that node. More info:
 <tr>
 <td>
 <code>tolerations</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#toleration-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
 \[\]Kubernetes core/v1.Toleration </a> </em>
 </td>
 <td>
@@ -499,7 +508,7 @@ Metadata sets the pods’s metadata, i.e. annotations and labels
 <tr>
 <td>
 <code>securityContext</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
 Kubernetes core/v1.PodSecurityContext </a> </em>
 </td>
 <td>
@@ -525,7 +534,7 @@ Max Age of existing messages, i.e. “72h”, “4h35m”
 <tr>
 <td>
 <code>imagePullSecrets</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#localobjectreference-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
 \[\]Kubernetes core/v1.LocalObjectReference </a> </em>
 </td>
 <td>
@@ -587,7 +596,7 @@ value, the higher the priority. More info:
 <tr>
 <td>
 <code>affinity</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
 Kubernetes core/v1.Affinity </a> </em>
 </td>
 <td>
@@ -627,6 +636,63 @@ Total size of messages per channel, 0 means unlimited. Defaults to 1GB
 <p>
 Maximum number of subscriptions per channel, 0 means unlimited. Defaults
 to 1000
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxPayload</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Maximum number of bytes in a message payload, 0 means unlimited.
+Defaults to 1MB
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftHeartbeatTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies the time in follower state without a leader before attempting
+an election, i.e. “72h”, “4h35m”. Defaults to 2s
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftElectionTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies the time in candidate state without a leader before attempting
+an election, i.e. “72h”, “4h35m”. Defaults to 2s
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftLeaseTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies how long a leader waits without being able to contact a quorum
+of nodes before stepping down as leader, i.e. “72h”, “4h35m”. Defaults
+to 1s
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>raftCommitTimeout</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Specifies the time without an Apply() operation before sending an
+heartbeat to ensure timely commit, i.e. “72h”, “4h35m”. Defaults to
+100ms
 </p>
 </td>
 </tr>
@@ -671,7 +737,7 @@ Name of the StorageClass required by the claim. More info:
 <tr>
 <td>
 <code>accessMode</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#persistentvolumeaccessmode-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#persistentvolumeaccessmode-v1-core">
 Kubernetes core/v1.PersistentVolumeAccessMode </a> </em>
 </td>
 <td>

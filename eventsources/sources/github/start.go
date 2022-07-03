@@ -1,5 +1,4 @@
 /*
-Copyright 2018 KompiTech GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -56,15 +55,58 @@ func init() {
 	go webhook.ProcessRouteStatus(controller)
 }
 
-// getCredentials for retrieves credentials for GitHub connection
+// getCredentials retrieves credentials for GitHub connection
 func (router *Router) getCredentials(keySelector *corev1.SecretKeySelector) (*cred, error) {
 	token, err := common.GetSecretFromVolume(keySelector)
 	if err != nil {
-		return nil, errors.Wrap(err, "token not founnd")
+		return nil, errors.Wrap(err, "secret not found")
 	}
+
 	return &cred{
 		secret: token,
 	}, nil
+}
+
+// getAPITokenAuthStrategy return an TokenAuthStrategy initialised with
+// the GitHub API token provided by the user
+func (router *Router) getAPITokenAuthStrategy() (*TokenAuthStrategy, error) {
+	apiTokenCreds, err := router.getCredentials(router.githubEventSource.APIToken)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve api token credentials")
+	}
+
+	return &TokenAuthStrategy{
+		Token: apiTokenCreds.secret,
+	}, nil
+}
+
+// getGithubAppAuthStrategy return an AppsAuthStrategy initialised with
+// the GitHub App credentials provided by the user
+func (router *Router) getGithubAppAuthStrategy() (*AppsAuthStrategy, error) {
+	appCreds := router.githubEventSource.GithubApp
+	githubAppPrivateKey, err := router.getCredentials(appCreds.PrivateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve github app credentials")
+	}
+
+	return &AppsAuthStrategy{
+		AppID:          appCreds.AppID,
+		InstallationID: appCreds.InstallationID,
+		PrivateKey:     githubAppPrivateKey.secret,
+	}, nil
+}
+
+// chooseAuthStrategy returns an AuthStrategy based on the given credentials
+func (router *Router) chooseAuthStrategy() (AuthStrategy, error) {
+	es := router.githubEventSource
+	switch {
+	case es.HasGithubAPIToken():
+		return router.getAPITokenAuthStrategy()
+	case es.HasGithubAppCreds():
+		return router.getGithubAppAuthStrategy()
+	default:
+		return nil, errors.New("none of the supported auth options were provided")
+	}
 }
 
 // Implement Router
@@ -201,11 +243,26 @@ func (router *Router) PostInactivate() error {
 
 	if githubEventSource.NeedToCreateHooks() && githubEventSource.DeleteHookOnFinish {
 		logger := router.route.Logger
-		logger.Info("deleting GitHub hooks...")
+		logger.Info("deleting GitHub org hooks...")
+
+		for _, org := range githubEventSource.Organizations {
+			id, ok := router.orgHookIDs[org]
+			if !ok {
+				return errors.Errorf("can not find hook ID for organization %s", org)
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			if _, err := router.githubClient.Organizations.DeleteHook(ctx, org, id); err != nil {
+				return errors.Errorf("failed to delete hook for organization %s. err: %+v", org, err)
+			}
+			logger.Infof("GitHub hook deleted for organization %s", org)
+		}
+
+		logger.Info("deleting GitHub repo hooks...")
 
 		for _, r := range githubEventSource.GetOwnedRepositories() {
 			for _, n := range r.Names {
-				id, ok := router.hookIDs[r.Owner+","+n]
+				id, ok := router.repoHookIDs[r.Owner+","+n]
 				if !ok {
 					return errors.Errorf("can not find hook ID for repo %s/%s", r.Owner, n)
 				}
@@ -246,21 +303,22 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		// create webhooks
 
 		// In order to successfully setup a GitHub hook for the given repository,
-		// 1. Get the API Token and Webhook secret from K8s secrets
+		// 1. Get the GitHub auth credentials and Webhook secret from K8s secrets
 		// 2. Configure the hook with url, content type, ssl etc.
 		// 3. Set up a GitHub client
 		// 4. Set the base and upload url for the client
 		// 5. Create the hook if one doesn't exist already. If exists already, then use that one.
 
-		logger.Info("retrieving api token credentials...")
-		apiTokenCreds, err := router.getCredentials(githubEventSource.APIToken)
+		logger.Info("choosing github auth strategy...")
+		authStrategy, err := router.chooseAuthStrategy()
 		if err != nil {
-			return errors.Errorf("failed to retrieve api token credentials. err: %+v", err)
+			return errors.Wrap(err, "failed to get github auth strategy")
 		}
 
-		logger.Info("setting up auth with api token...")
-		PATTransport := TokenAuthTransport{
-			Token: apiTokenCreds.secret,
+		logger.Info("setting up auth transport for http client with the chosen strategy...")
+		authTransport, err := authStrategy.AuthTransport()
+		if err != nil {
+			return errors.Wrap(err, "failed to set up auth transport for http client")
 		}
 
 		logger.Info("configuring GitHub hook...")
@@ -281,7 +339,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		logger.Info("setting up client for GitHub...")
-		client := gh.NewClient(PATTransport.Client())
+		client := gh.NewClient(&http.Client{Transport: authTransport})
 
 		logger.Info("setting up base url for GitHub client...")
 		if githubEventSource.GithubBaseURL != "" {
@@ -301,7 +359,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			client.UploadURL = uploadURL
 		}
 		router.githubClient = client
-		router.hookIDs = make(map[string]int64)
+		router.repoHookIDs = make(map[string]int64)
+		router.orgHookIDs = make(map[string]int64)
 
 		hook := &gh.Hook{
 			Events: githubEventSource.Events,
@@ -313,6 +372,27 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		defer cancel()
 
 		f := func() {
+			for _, org := range githubEventSource.Organizations {
+				hooks, _, err := router.githubClient.Organizations.ListHooks(ctx, org, nil)
+				if err != nil {
+					logger.Errorf("failed to list existing webhooks of organization %s. err: %+v", org, err)
+					continue
+				}
+				h := getHook(hooks, formattedURL, githubEventSource.Events)
+				if h != nil {
+					router.orgHookIDs[org] = *h.ID
+					continue
+				}
+				logger.Infof("hook not found for organization %s, creating ...", org)
+				h, _, err = router.githubClient.Organizations.CreateHook(ctx, org, hook)
+				if err != nil {
+					logger.Errorf("failed to create github webhook for organization %s. err: %+v", org, err)
+					continue
+				}
+				router.orgHookIDs[org] = *h.ID
+				time.Sleep(500 * time.Millisecond)
+			}
+
 			for _, r := range githubEventSource.GetOwnedRepositories() {
 				for _, name := range r.Names {
 					hooks, _, err := router.githubClient.Repositories.ListHooks(ctx, r.Owner, name, nil)
@@ -322,7 +402,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					}
 					h := getHook(hooks, formattedURL, githubEventSource.Events)
 					if h != nil {
-						router.hookIDs[r.Owner+","+name] = *h.ID
+						router.repoHookIDs[r.Owner+","+name] = *h.ID
 						continue
 					}
 					logger.Infof("hook not found for %s/%s, creating ...", r.Owner, name)
@@ -331,7 +411,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 						logger.Errorf("failed to create github webhook for %s/%s. err: %+v", r.Owner, name, err)
 						continue
 					}
-					router.hookIDs[r.Owner+","+name] = *h.ID
+					router.repoHookIDs[r.Owner+","+name] = *h.ID
 					time.Sleep(500 * time.Millisecond)
 				}
 			}
@@ -348,7 +428,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		go func() {
 			// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
 			// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from github.
-			// This is a workround to mitigate the race conditions.
+			// This is a workaround to mitigate the race conditions.
 			logger.Info("starting github hooks manager daemon")
 			ticker := time.NewTicker(60 * time.Second)
 			defer ticker.Stop()

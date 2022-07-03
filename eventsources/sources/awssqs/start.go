@@ -75,7 +75,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
 	}
 
-	sqsClient := sqslib.New(awsSession)
+	var sqsClient *sqslib.SQS
+
+	if sqsEventSource.Endpoint == "" {
+		sqsClient = sqslib.New(awsSession)
+	} else {
+		sqsClient = sqslib.New(awsSession, &aws.Config{Endpoint: &sqsEventSource.Endpoint, Region: &sqsEventSource.Region})
+	}
 
 	log.Info("fetching queue url...")
 	getQueueURLInput := &sqslib.GetQueueUrlInput{
@@ -143,7 +149,10 @@ func (el *EventListener) processMessage(ctx context.Context, message *sqslib.Mes
 	if err != nil {
 		log.Errorw("failed to marshal event data, will process next message...", zap.Error(err))
 		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-		ack()
+		// Don't ack if a DLQ is configured to allow to forward the message to the DLQ
+		if !el.SQSEventSource.DLQ {
+			ack()
+		}
 		return
 	}
 	if err = dispatch(eventBytes); err != nil {

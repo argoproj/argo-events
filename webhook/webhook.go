@@ -19,6 +19,7 @@ import (
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -52,6 +53,9 @@ type Options struct {
 
 	// DeploymentName is the deployment name of the webhook.
 	DeploymentName string
+
+	// ClusterRoleName is the cluster role name of the webhook
+	ClusterRoleName string
 
 	// SecretName is the name of k8s secret that contains the webhook
 	// server key/cert and corresponding CA cert that signed them. The
@@ -180,13 +184,12 @@ func (ac *AdmissionController) register(
 			FailurePolicy: &failurePolicy,
 		}},
 	}
-	deployment, err := ac.Client.AppsV1().Deployments(ac.Options.Namespace).Get(ctx, ac.Options.DeploymentName, metav1.GetOptions{})
+	clusterRole, err := ac.Client.RbacV1().ClusterRoles().Get(ctx, ac.Options.ClusterRoleName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "failed to fetch webhook deployment")
+		return errors.Wrapf(err, "failed to fetch webhook cluster role")
 	}
-	deploymentRef := metav1.NewControllerRef(deployment, appsv1.SchemeGroupVersion.WithKind("Deployment"))
-	deploymentRef.BlockOwnerDeletion = newFalse()
-	webhook.OwnerReferences = append(webhook.OwnerReferences, *deploymentRef)
+	clusterRoleRef := metav1.NewControllerRef(clusterRole, rbacv1.SchemeGroupVersion.WithKind("ClusterRole"))
+	webhook.OwnerReferences = append(webhook.OwnerReferences, *clusterRoleRef)
 
 	_, err = client.Create(ctx, webhook, metav1.CreateOptions{})
 	if err != nil {
@@ -400,9 +403,4 @@ func makeTLSConfig(serverCert, serverKey, caCert []byte, clientAuthType tls.Clie
 		ClientCAs:    caCertPool,
 		ClientAuth:   clientAuthType,
 	}, nil
-}
-
-func newFalse() *bool {
-	b := false
-	return &b
 }

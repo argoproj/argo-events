@@ -3,14 +3,12 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"reflect"
 
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
@@ -77,14 +75,14 @@ func Start(namespaced bool, managedNamespace string) {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
-	cfAPI, err := codefresh.NewAPI(logging.WithLogger(ctx, logger), managedNamespace)
+	cfClient, err := codefresh.NewClient(logging.WithLogger(ctx, logger), managedNamespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh API", zap.Error(err))
+		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger, cfAPI),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, natsMetricsImage, logger, cfClient),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up individual controller", zap.Error(err))
@@ -94,17 +92,7 @@ func Start(namespaced bool, managedNamespace string) {
 	if err := c.Watch(&source.Kind{Type: &eventbusv1alpha1.EventBus{}}, &handler.EnqueueRequestForObject{},
 		predicate.Or(
 			predicate.GenerationChangedPredicate{},
-			// TODO: change to use LabelChangedPredicate with controller-runtime v0.8
-			predicate.Funcs{
-				UpdateFunc: func(e event.UpdateEvent) bool {
-					if e.ObjectOld == nil {
-						return false
-					}
-					if e.ObjectNew == nil {
-						return false
-					}
-					return !reflect.DeepEqual(e.ObjectNew.GetLabels(), e.ObjectOld.GetLabels())
-				}},
+			predicate.LabelChangedPredicate{},
 		)); err != nil {
 		logger.Fatalw("unable to watch EventBus", zap.Error(err))
 	}

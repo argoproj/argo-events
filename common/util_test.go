@@ -175,27 +175,33 @@ func TestVolumesFromSecretsOrConfigMaps(t *testing.T) {
 	})
 }
 
-func fakeTLSConfig(t *testing.T) *apicommon.TLSConfig {
+func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *apicommon.TLSConfig {
 	t.Helper()
-	return &apicommon.TLSConfig{
-		CACertSecret: &corev1.SecretKeySelector{
-			Key: "fake-key1",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name1",
+	if insecureSkipVerify == true {
+		return &apicommon.TLSConfig{
+			InsecureSkipVerify: true,
+		}
+	} else {
+		return &apicommon.TLSConfig{
+			CACertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key1",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name1",
+				},
 			},
-		},
-		ClientCertSecret: &corev1.SecretKeySelector{
-			Key: "fake-key2",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name2",
+			ClientCertSecret: &corev1.SecretKeySelector{
+				Key: "fake-key2",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name2",
+				},
 			},
-		},
-		ClientKeySecret: &corev1.SecretKeySelector{
-			Key: "fake-key3",
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "fake-name3",
+			ClientKeySecret: &corev1.SecretKeySelector{
+				Key: "fake-key3",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "fake-name3",
+				},
 			},
-		},
+		}
 	}
 }
 
@@ -208,7 +214,7 @@ func TestGetTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		c.CACertSecret = nil
 		c.ClientCertSecret = nil
 		_, err := GetTLSConfig(c)
@@ -217,7 +223,7 @@ func TestGetTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test only caCertSecret is set", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		c.ClientCertSecret = nil
 		c.ClientKeySecret = nil
 		_, err := GetTLSConfig(c)
@@ -226,7 +232,7 @@ func TestGetTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test clientCertSecret and clientKeySecret are set", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		c.CACertSecret = nil
 		_, err := GetTLSConfig(c)
 		assert.NotNil(t, err)
@@ -234,11 +240,42 @@ func TestGetTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test all of 3 are set", func(t *testing.T) {
-		c := fakeTLSConfig(t)
+		c := fakeTLSConfig(t, false)
 		_, err := GetTLSConfig(c)
 		assert.NotNil(t, err)
 		assert.True(t, strings.Contains(err.Error(), "failed to read ca cert file"))
 	})
+}
+
+func TestElementsMatch(t *testing.T) {
+	assert.True(t, ElementsMatch(nil, nil))
+	assert.True(t, ElementsMatch([]string{"hello"}, []string{"hello"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "world"}))
+	assert.True(t, ElementsMatch([]string{}, []string{}))
+
+	assert.False(t, ElementsMatch([]string{"hello"}, nil))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{}))
+	assert.False(t, ElementsMatch([]string{}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"hello", "world"}))
+	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "moon"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"world", "hello"}))
+	assert.True(t, ElementsMatch([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, ElementsMatch([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
+	assert.True(t, ElementsMatch([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"*", "hello"}))
+	assert.False(t, ElementsMatch([]string{"hello", "*"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"*", "hello", "*"}, []string{"hello"}))
+	assert.False(t, ElementsMatch([]string{"hello"}, []string{"world", "world"}))
+	assert.False(t, ElementsMatch([]string{"hello", "hello"}, []string{"world", "world"}))
+}
+
+func TestSliceContains(t *testing.T) {
+	assert.True(t, SliceContains([]string{"hello", "*"}, "*"))
+	assert.True(t, SliceContains([]string{"*", "world"}, "*"))
+	assert.True(t, SliceContains([]string{"*", "world"}, "world"))
+	assert.True(t, SliceContains([]string{"*", "hello", "*"}, "*"))
+	assert.False(t, SliceContains([]string{"hello", "world"}, "*"))
 }
 
 func TestCopyStringMap(t *testing.T) {

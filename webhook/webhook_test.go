@@ -26,12 +26,13 @@ import (
 
 func fakeOptions() Options {
 	return Options{
-		Namespace:      "test-ns",
-		DeploymentName: "events-webhook",
-		ServiceName:    "webhook",
-		Port:           443,
-		SecretName:     "webhook-certs",
-		WebhookName:    "webhook.argo-events.argoproj.io",
+		Namespace:       "test-ns",
+		DeploymentName:  "events-webhook",
+		ClusterRoleName: "argo-events-webhook",
+		ServiceName:     "webhook",
+		Port:            443,
+		SecretName:      "webhook-certs",
+		WebhookName:     "webhook.argo-events.argoproj.io",
 	}
 }
 

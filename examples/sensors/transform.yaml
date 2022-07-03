@@ -1,0 +1,85 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+      transform:
+        script: |-
+          event.body.message='updated'
+          return event
+    - name: test-dep-foo
+      eventSourceName: webhook
+      eventName: example-foo
+      transform:
+        jq: ".body.message *= 2"
+  triggers:
+    - template:
+        name: webhook-workflow-trigger
+        conditions: "test-dep"
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # the value will get overridden by event payload from test-dep
+                      value: hello world
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: body
+              dest: spec.arguments.parameters.0.value
+    - template:
+        name: webhook-workflow-trigger-1
+        conditions: "test-dep-foo"
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # the value will get overridden by event payload from test-dep
+                      value: hello world
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep-foo
+                dataKey: body
+              dest: spec.arguments.parameters.0.value

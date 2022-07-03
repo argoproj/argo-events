@@ -7,32 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSliceEqual(t *testing.T) {
-	assert.True(t, sliceEqual(nil, nil))
-	assert.True(t, sliceEqual([]string{"hello"}, []string{"hello"}))
-	assert.True(t, sliceEqual([]string{"hello", "world"}, []string{"hello", "world"}))
-	assert.True(t, sliceEqual([]string{}, []string{}))
-
-	assert.False(t, sliceEqual([]string{"hello"}, nil))
-	assert.False(t, sliceEqual([]string{"hello"}, []string{}))
-	assert.False(t, sliceEqual([]string{}, []string{"hello"}))
-	assert.False(t, sliceEqual([]string{"hello"}, []string{"hello", "world"}))
-	assert.False(t, sliceEqual([]string{"hello", "world"}, []string{"hello"}))
-	assert.False(t, sliceEqual([]string{"hello", "world"}, []string{"hello", "moon"}))
-	assert.True(t, sliceEqual([]string{"hello", "world"}, []string{"world", "hello"}))
-	assert.True(t, sliceEqual([]string{"hello", "*"}, []string{"*"}))
-	assert.True(t, sliceEqual([]string{"hello", "*"}, []string{"*", "world"}))
-	assert.True(t, sliceEqual([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, sliceEqual([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, sliceEqual([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
-	assert.False(t, sliceEqual([]string{"hello"}, []string{"*", "hello"}))
-	assert.False(t, sliceEqual([]string{"hello", "*"}, []string{"hello"}))
-	assert.False(t, sliceEqual([]string{"*", "hello", "*"}, []string{"hello"}))
-	assert.False(t, sliceEqual([]string{"hello"}, []string{"world", "world"}))
-	assert.False(t, sliceEqual([]string{"hello", "hello"}, []string{"world", "world"}))
-	assert.True(t, sliceEqual([]string{"*", "hello", "*"}, []string{"*", "world", "hello", "world"}))
-}
-
 func TestCompareHook(t *testing.T) {
 	assert.False(t, compareHook(nil, "https://google.com/", []string{}))
 

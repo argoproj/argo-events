@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
-VERSION?=v1.5.5-cap-CR-10409
-BASE_VERSION:=v1.5.5-cap-CR-10409
+VERSION?=v1.6.3-cap-CR-10728
+BASE_VERSION:=v1.6.3-cap-CR-10728
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -36,6 +36,8 @@ ifneq (${GIT_TAG},)
 VERSION=$(GIT_TAG)
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
+
+K3D ?= $(shell [ "`command -v kubectl`" != '' ] && [ "`command -v k3d`" != '' ] && [[ "`kubectl config current-context`" =~ k3d-* ]] && echo true || echo false)
 
 # Check that the needed executables are available, else exit before the build
 K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(error "No $(exec) in PATH")))
@@ -63,9 +65,12 @@ dist/$(BINARY_NAME)-%:
 	CGO_ENABLED=0 $(GOARGS) go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/$(BINARY_NAME)-$* ./cmd
 
 .PHONY: image
-image: dist/$(BINARY_NAME)-linux-amd64
+image: clean dist/$(BINARY_NAME)-linux-amd64
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)  --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
+ifeq ($(K3D),true)
+	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)
+endif
 
 image-linux-%: dist/$(BINARY_NAME)-linux-$*
 	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
@@ -104,6 +109,10 @@ manifests: crds
 .PHONY: swagger
 swagger:
 	./hack/update-swagger.sh ${VERSION}
+	$(MAKE) api/jsonschema/schema.json
+
+api/jsonschema/schema.json: api/openapi-spec/swagger.json hack/jsonschema/main.go
+	go run ./hack/jsonschema
 
 .PHONY: codegen
 codegen:
@@ -126,11 +135,11 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 .PHONY: start
 start: image
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kubectl kustomize test/manifests | sed 's@quay.io/codefresh/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune --force -f -
+	kubectl kustomize test/manifests | sed 's@quay.io/codefresh/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune=false --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.42.1
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.44.0
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint

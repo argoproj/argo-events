@@ -29,6 +29,8 @@ const (
 	EnvVarKubeConfig = "KUBECONFIG"
 	// EnvVarDebugLog is the env var to turn on the debug mode for logging
 	EnvVarDebugLog = "DEBUG_LOG"
+	// EnvImagePullPolicy is the env var to set container's ImagePullPolicy
+	EnvImagePullPolicy = "IMAGE_PULL_POLICY"
 )
 
 // EventBus related
@@ -41,6 +43,22 @@ const (
 	EventBusAuthFileMountPath = "/etc/eventbus/auth"
 	// Default NATS Streaming messages max age
 	NATSStreamingMaxAge = "72h"
+	// Default NATS Streaming max messages per channel
+	NATSStreamingMaxMsgs = uint64(1000000)
+	// Default NATS Streaming max subscriptions per channel
+	NATSStreamingMaxSubs = uint64(1000)
+	// Default NATS Streaming max total size of messages per channel
+	NATSStreamingMaxBytes = "1GB"
+	// Default NATS Streaming max size of message payload
+	NATSStreamingMaxPayload = "1MB"
+	// Default NATS Streaming RAFT heartbeat timeout
+	NATSStreamingRaftHeartbeatTimeout = "2s"
+	// Default NATS Streaming RAFT election timeout
+	NATSStreamingRaftElectionTimeout = "2s"
+	// Default NATS Streaming RAFT lease timeout
+	NATSStreamingRaftLeaseTimeout = "1s"
+	// Default NATS Streaming RAFT commit timeout
+	NATSStreamingRaftCommitTimeout = "100ms"
 	// Default EventBus name
 	DefaultEventBusName = "default"
 )

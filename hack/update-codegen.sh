@@ -38,7 +38,7 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
 bash -x ${CODEGEN_PKG}/generate-groups.sh "client,informer,lister" \
   github.com/argoproj/argo-events/pkg/client/eventbus github.com/argoproj/argo-events/pkg/apis \
   "eventbus:v1alpha1" \
-  --plural-exceptions EventBus:EventBus \
+  --plural-exceptions="EventBus:EventBus" \
   --go-header-file hack/custom-boilerplate.go.txt
 
 subheader "running codegen for common"

@@ -33,11 +33,8 @@ func validate(eventSource *v1alpha1.BitbucketServerEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.ProjectKey == "" {
-		return fmt.Errorf("project key can't be empty")
-	}
-	if eventSource.RepositorySlug == "" {
-		return fmt.Errorf("repository slug can't be empty")
+	if eventSource.GetBitbucketServerRepositories() == nil {
+		return fmt.Errorf("at least one repository is required")
 	}
 	if eventSource.Events == nil {
 		return fmt.Errorf("events can't be empty")

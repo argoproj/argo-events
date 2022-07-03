@@ -1,9 +1,12 @@
 /*
 Copyright 2018 BlackRock, Inc.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
 	http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -164,8 +168,8 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get secret value of name: %s, key: %s", selector.Name, selector.Key)
 	}
-	// Secrets edied by tools like "vim" always have an extra invisible "\n" in the end,
-	// and it's often negleted, but it makes differences for some of the applications.
+	// Secrets edited by tools like "vim" always have an extra invisible "\n" in the end,
+	// and it's often neglected, but it makes differences for some of the applications.
 	return strings.TrimSuffix(string(data), "\n"), nil
 }
 
@@ -231,10 +235,18 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 	}
 }
 
-// GetTLSConfig returns a tls configuration for given cert and key.
+// GetTLSConfig returns a tls configuration for given cert and key or skips the certs if InsecureSkipVerify is true.
 func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 	if config == nil {
 		return nil, errors.New("TLSConfig is nil")
+	}
+
+	if config.InsecureSkipVerify {
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: true,
+			ClientAuth:         0,
+		}
+		return tlsConfig, nil
 	}
 
 	var caCertPath, clientCertPath, clientKeyPath string
@@ -425,6 +437,57 @@ func uniqueVolumeMounts(mounts []v1.VolumeMount) []v1.VolumeMount {
 		}
 	}
 	return rMounts
+}
+
+// ElementsMatch returns true if the two provided string slices contain the same elements while avoiding duplications.
+// WARN: this method avoids duplications.
+func ElementsMatch(first []string, second []string) bool {
+	if len(first) == 0 && len(second) == 0 {
+		return true
+	}
+	if len(first) == 0 || len(second) == 0 {
+		return false
+	}
+
+	diff := make(map[string]int)
+	for _, str := range first {
+		diff[str] = 1
+	}
+
+	for _, str := range second {
+		if _, ok := diff[str]; !ok {
+			return false
+		} else {
+			diff[str] = 2
+		}
+	}
+
+	for _, v := range diff {
+		// 1: only exists in first
+		// 2: exists in both
+		if v < 2 {
+			return false
+		}
+	}
+	return true
+}
+
+// SliceContains checks if a string slice contains a specific string
+func SliceContains(strSlice []string, targetStr string) bool {
+	for _, curr := range strSlice {
+		if curr == targetStr {
+			return true
+		}
+	}
+	return false
+}
+
+func GetImagePullPolicy() corev1.PullPolicy {
+	imgPullPolicy := corev1.PullAlways
+	if x := os.Getenv(EnvImagePullPolicy); x != "" {
+		imgPullPolicy = corev1.PullPolicy(x)
+	}
+	return imgPullPolicy
 }
 
 func CopyStringMap(originalMap map[string]string) map[string]string {

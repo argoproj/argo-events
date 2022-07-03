@@ -1,16 +1,18 @@
 /*
 Copyright 2020 BlackRock, Inc.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
 	http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package argo_workflow
 
 import (
@@ -56,6 +58,7 @@ type ArgoWorkflowTrigger struct {
 	Logger *zap.SugaredLogger
 
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
+	cmdRunner               func(cmd *exec.Cmd) error
 }
 
 // NewArgoWorkflowTrigger returns a new Argo workflow trigger
@@ -66,6 +69,9 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 		Sensor:        sensor,
 		Trigger:       trigger,
 		Logger:        logger.With(logging.LabelTriggerType, apicommon.ArgoWorkflowTrigger),
+		cmdRunner: func(cmd *exec.Cmd) error {
+			return cmd.Run()
+		},
 	}
 }
 
@@ -171,6 +177,8 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		cmd = exec.Command("argo", "-n", namespace, "suspend", name)
 	case v1alpha1.Terminate:
 		cmd = exec.Command("argo", "-n", namespace, "terminate", name)
+	case v1alpha1.Stop:
+		cmd = exec.Command("argo", "-n", namespace, "stop", name)
 	default:
 		return nil, errors.Errorf("unknown operation type %s", string(op))
 	}
@@ -178,8 +186,9 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 	var errBuff strings.Builder
 	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuff)
 	cmd.Stdout = os.Stdout
-	if err := cmd.Run(); err != nil {
-		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s: %s", string(op), name, errBuff.String())
+	cmd.Args = append(cmd.Args, trigger.Template.ArgoWorkflow.Args...)
+	if err := t.cmdRunner(cmd); err != nil {
+		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s", string(op), name)
 	}
 
 	t.namespableDynamicClient = t.DynamicClient.Resource(schema.GroupVersionResource{

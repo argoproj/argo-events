@@ -42,7 +42,7 @@ string
 <td>
 <code>accessKey</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -56,7 +56,7 @@ Kubernetes core/v1.SecretKeySelector
 <td>
 <code>secretKey</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -208,6 +208,17 @@ Default value is Submit.</p>
 <p>Parameters is the list of parameters to pass to resolved Argo Workflow object</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>args</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Args is the list of arguments to pass to the argo CLI</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation
@@ -280,7 +291,7 @@ URLArtifact
 <td>
 <code>configmap</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#configmapkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#configmapkeyselector-v1-core">
 Kubernetes core/v1.ConfigMapKeySelector
 </a>
 </em>
@@ -358,7 +369,7 @@ string
 <td>
 <code>sharedAccessKeyName</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -371,7 +382,7 @@ Kubernetes core/v1.SecretKeySelector
 <td>
 <code>sharedAccessKey</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -533,7 +544,7 @@ bool
 <td>
 <code>certSecret</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -813,7 +824,7 @@ string
 <td>
 <code>time</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta">
 Kubernetes meta/v1.Time
 </a>
 </em>
@@ -887,6 +898,34 @@ EventDependencyFilter
 <p>Filters and rules governing toleration of success and constraints on the context and data of an event</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>transform</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.EventDependencyTransformer">
+EventDependencyTransformer
+</a>
+</em>
+</td>
+<td>
+<p>Transform transforms the event data</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filtersLogicalOperator</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator">
+LogicalOperator
+</a>
+</em>
+</td>
+<td>
+<p>FiltersLogicalOperator defines how different filters are evaluated together.
+Available values: and (&amp;&amp;), or (||)
+Is optional and if left blank treated as and (&amp;&amp;).</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter
@@ -956,6 +995,79 @@ EventContext
 </td>
 <td>
 <p>Exprs contains the list of expressions evaluated against the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dataLogicalOperator</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator">
+LogicalOperator
+</a>
+</em>
+</td>
+<td>
+<p>DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together.
+Available values: and (&amp;&amp;), or (||)
+Is optional and if left blank treated as and (&amp;&amp;).</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exprLogicalOperator</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.LogicalOperator">
+LogicalOperator
+</a>
+</em>
+</td>
+<td>
+<p>ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together.
+Available values: and (&amp;&amp;), or (||)
+Is optional and if left blank treated as and (&amp;&amp;).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.EventDependencyTransformer">EventDependencyTransformer
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependency">EventDependency</a>)
+</p>
+<p>
+<p>EventDependencyTransformer transforms the event</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>jq</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JQ holds the jq command applied for transformation</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>script</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Script refers to a Lua script used to transform the event</p>
 </td>
 </tr>
 </tbody>
@@ -1089,7 +1201,7 @@ GitCreds
 <td>
 <code>sshKeySecret</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -1184,7 +1296,7 @@ Refer <a href="https://git-scm.com/docs/git-remote">https://git-scm.com/docs/git
 <td>
 <code>username</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -1196,7 +1308,7 @@ Kubernetes core/v1.SecretKeySelector
 <td>
 <code>password</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -1646,6 +1758,15 @@ uint64
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.LogicalOperator">LogicalOperator
+(<code>string</code> alias)</p></h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependency">EventDependency</a>, 
+<a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
+</p>
+<p>
+</p>
 <h3 id="argoproj.io/v1alpha1.NATSTrigger">NATSTrigger
 </h3>
 <p>
@@ -1780,7 +1901,7 @@ Defaults to &ldquo;_&rdquo;.</p>
 <td>
 <code>authToken</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -1945,7 +2066,7 @@ See <a href="https://pulsar.apache.org/docs/en/concepts-messaging/">https://puls
 <td>
 <code>tlsTrustCertsSecret</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -1995,7 +2116,7 @@ github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 <td>
 <code>authTokenSecret</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -2085,7 +2206,7 @@ int32
 <td>
 <code>metadata</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
 </a>
 </em>
@@ -2361,7 +2482,7 @@ the trigger resource.</p>
 <td>
 <code>slackToken</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
 </a>
 </em>
@@ -2565,7 +2686,7 @@ More info: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/con
 <td>
 <code>container</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#container-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#container-v1-core">
 Kubernetes core/v1.Container
 </a>
 </em>
@@ -2579,7 +2700,7 @@ Kubernetes core/v1.Container
 <td>
 <code>volumes</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#volume-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volume-v1-core">
 []Kubernetes core/v1.Volume
 </a>
 </em>
@@ -2593,7 +2714,7 @@ Kubernetes core/v1.Container
 <td>
 <code>securityContext</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
 Kubernetes core/v1.PodSecurityContext
 </a>
 </em>
@@ -2622,7 +2743,7 @@ More info: <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod
 <td>
 <code>tolerations</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#toleration-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
 []Kubernetes core/v1.Toleration
 </a>
 </em>
@@ -2636,7 +2757,7 @@ More info: <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod
 <td>
 <code>imagePullSecrets</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#localobjectreference-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
 []Kubernetes core/v1.LocalObjectReference
 </a>
 </em>
@@ -2688,7 +2809,7 @@ More info: <a href="https://kubernetes.io/docs/concepts/configuration/pod-priori
 <td>
 <code>affinity</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
 Kubernetes core/v1.Affinity
 </a>
 </em>

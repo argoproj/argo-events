@@ -19,6 +19,7 @@ spec:
       containers:
         - name: sensor-controller
           image: quay.io/argoproj/argo-events:latest
+          imagePullPolicy: Always
           args:
             - sensor-controller
           env:

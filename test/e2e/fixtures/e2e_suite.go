@@ -56,7 +56,15 @@ type E2ESuite struct {
 
 func (s *E2ESuite) SetupSuite() {
 	var err error
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+
+	kubeConfig, found := os.LookupEnv(common.EnvVarKubeConfig)
+	if !found {
+		home, _ := os.UserHomeDir()
+		kubeConfig = home + "/.kube/config"
+		if _, err := os.Stat(kubeConfig); err != nil && os.IsNotExist(err) {
+			kubeConfig = ""
+		}
+	}
 	s.restConfig, err = common.GetClientConfig(kubeConfig)
 	s.CheckError(err)
 	s.kubeClient, err = kubernetes.NewForConfig(s.restConfig)

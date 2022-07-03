@@ -294,12 +294,25 @@ Auth hosts secret selectors for username and password
 <tr>
 <td>
 <code>urlSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
 URLSecret is secret reference for rabbitmq service URL
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -500,6 +513,18 @@ NowWait when true, the queue assumes to be declared on the server
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>arguments</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Arguments of a queue (also known as “x-arguments”) used for optional
+features and plugins
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AzureEventsHubEventSource">
@@ -542,7 +567,7 @@ FQDN of the EventHubs namespace you created More info at
 <tr>
 <td>
 <code>sharedAccessKeyName</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -555,7 +580,7 @@ keys
 <tr>
 <td>
 <code>sharedAccessKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -583,6 +608,251 @@ Event Hub path/name
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.BitbucketAuth">
+BitbucketAuth
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>)
+</p>
+<p>
+<p>
+BitbucketAuth holds the different auth strategies for connecting to
+Bitbucket
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>basic</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketBasicAuth"> BitbucketBasicAuth
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Basic is BasicAuth auth strategy.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>oauthToken</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+OAuthToken refers to the K8s secret that holds the OAuth Bearer token.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.BitbucketBasicAuth">
+BitbucketBasicAuth
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketAuth">BitbucketAuth</a>)
+</p>
+<p>
+<p>
+BasicAuth holds the information required to authenticate user via basic
+auth mechanism
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>username</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+Username refers to the K8s secret that holds the username.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>password</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+Password refers to the K8s secret that holds the password.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.BitbucketEventSource">
+BitbucketEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+BitbucketEventSource describes the event source for Bitbucket
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>deleteHookOnFinish</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DeleteHookOnFinish determines whether to delete the defined Bitbucket
+hook once the event source is stopped.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will be passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
+</td>
+<td>
+<p>
+Webhook refers to the configuration required to run an http server
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>auth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketAuth"> BitbucketAuth </a> </em>
+</td>
+<td>
+<p>
+Auth information required to connect to Bitbucket.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>events</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Events this webhook is subscribed to.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>owner</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Owner of the repository.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projectKey</code></br> <em> string </em>
+</td>
+<td>
+<p>
+ProjectKey is the key of the project for which integration needs to
+setup
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositorySlug</code></br> <em> string </em>
+</td>
+<td>
+<p>
+RepositorySlug is a URL-friendly version of a repository name,
+automatically generated by Bitbucket for use in the URL.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -630,8 +900,11 @@ Webhook holds configuration to run a http server
 <code>projectKey</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-ProjectKey is the key of project for which integration needs to setup
+DeprecatedProjectKey is the key of project for which integration needs
+to setup Deprecated: use Repositories instead. Will be unsupported in
+v1.8
 </p>
 </td>
 </tr>
@@ -640,9 +913,25 @@ ProjectKey is the key of project for which integration needs to setup
 <code>repositorySlug</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-RepositorySlug is the slug of the repository for which integration needs
-to setup
+DeprecatedRepositorySlug is the slug of the repository for which
+integration needs to setup Deprecated: use Repositories instead. Will be
+unsupported in v1.8
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerRepository">
+\[\]BitbucketServerRepository </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Repositories holds a list of repositories for which integration needs to
+setup
 </p>
 </td>
 </tr>
@@ -660,7 +949,7 @@ Events are bitbucket event to listen to. Refer
 <tr>
 <td>
 <code>accessToken</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -673,7 +962,7 @@ access information
 <tr>
 <td>
 <code>webhookSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -718,6 +1007,63 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.BitbucketServerRepository">
+BitbucketServerRepository
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>projectKey</code></br> <em> string </em>
+</td>
+<td>
+<p>
+ProjectKey is the key of project for which integration needs to setup
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositorySlug</code></br> <em> string </em>
+</td>
+<td>
+<p>
+RepositorySlug is the slug of the repository for which integration needs
+to setup
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.CalendarEventSource">
@@ -751,6 +1097,7 @@ Description
 <code>schedule</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Schedule is a cron-like expression. For reference, see:
 <a href="https://en.wikipedia.org/wiki/Cron">https://en.wikipedia.org/wiki/Cron</a>
@@ -762,6 +1109,7 @@ Schedule is a cron-like expression. For reference, see:
 <code>interval</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Interval is a string that describes an interval duration, e.g. 1s, 30m,
 2h…
@@ -773,6 +1121,10 @@ Interval is a string that describes an interval duration, e.g. 1s, 30m,
 <code>exclusionDates</code></br> <em> \[\]string </em>
 </td>
 <td>
+<p>
+ExclusionDates defines the list of DATE-TIME exceptions for recurring
+events.
+</p>
 </td>
 </tr>
 <tr>
@@ -807,6 +1159,19 @@ event payload.
 <td>
 <p>
 Persistence hold the configuration for event persistence
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -957,7 +1322,7 @@ ChannelName refers to the channel name
 <tr>
 <td>
 <code>username</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -970,7 +1335,7 @@ Username to use to connect to broker
 <tr>
 <td>
 <code>password</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -1025,6 +1390,19 @@ TLS configuration for the emitter client.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -1101,7 +1479,7 @@ Description
 <tr>
 <td>
 <code>metadata</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta </a> </em>
 </td>
 <td>
@@ -1487,6 +1865,19 @@ Bitbucket Server event sources
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>bitbucket</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Bitbucket event sources
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1498,6 +1889,56 @@ Bitbucket Server event sources
 </td>
 <td>
 <em>(Optional)</em>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.EventSourceFilter">
+EventSourceFilter
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
+<a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">AzureEventsHubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>,
+<a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
+<a href="#argoproj.io/v1alpha1.CalendarEventSource">CalendarEventSource</a>,
+<a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
+<a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GenericEventSource">GenericEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
+<a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
+<a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
+<a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
+<a href="#argoproj.io/v1alpha1.PubSubEventSource">PubSubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>,
+<a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SQSEventSource">SQSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>expression</code></br> <em> string </em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
@@ -1895,6 +2336,19 @@ Bitbucket Server event sources
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>bitbucket</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BitbucketEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Bitbucket event sources
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventSourceStatus">
@@ -2004,6 +2458,19 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.GenericEventSource">
@@ -2088,7 +2555,7 @@ event payload.
 <tr>
 <td>
 <code>authSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2096,6 +2563,75 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 AuthSecret holds a secret selector that contains a bearer token for
 authentication
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.GithubAppCreds">
+GithubAppCreds
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>privateKey</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+PrivateKey refers to a K8s secret containing the GitHub app private key
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>appID</code></br> <em> int64 </em>
+</td>
+<td>
+<p>
+AppID refers to the GitHub App ID for the application you created
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>installationID</code></br> <em> int64 </em>
+</td>
+<td>
+<p>
+InstallationID refers to the Installation ID of the GitHub app you
+created and installed
 </p>
 </td>
 </tr>
@@ -2130,6 +2666,7 @@ Description
 <code>id</code></br> <em> int64 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Id is the webhook’s id Deprecated: This is not used at all, will be
 removed in v1.6
@@ -2153,6 +2690,7 @@ Webhook refers to the configuration required to run a http server
 <code>owner</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 DeprecatedOwner refers to GitHub owner name i.e. argoproj Deprecated:
 use Repositories instead. Will be unsupported in v 1.6
@@ -2164,6 +2702,7 @@ use Repositories instead. Will be unsupported in v 1.6
 <code>repository</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 DeprecatedRepository refers to GitHub repo name i.e. argo-events
 Deprecated: use Repositories instead. Will be unsupported in v 1.6
@@ -2175,12 +2714,15 @@ Deprecated: use Repositories instead. Will be unsupported in v 1.6
 <code>events</code></br> <em> \[\]string </em>
 </td>
 <td>
+<p>
+Events refer to Github events to which the event source will subscribe
+</p>
 </td>
 </tr>
 <tr>
 <td>
 <code>apiToken</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2193,7 +2735,7 @@ APIToken refers to a K8s secret containing github api token
 <tr>
 <td>
 <code>webhookSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2291,7 +2833,45 @@ event payload.
 <td>
 <p>
 Repositories holds the information of repositories, which uses repo
-owner as the key, and list of repo names as the value
+owner as the key, and list of repo names as the value. Not required if
+Organizations is set.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>organizations</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Organizations holds the names of organizations (used for organization
+level webhooks). Not required if Repositories is set.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>githubApp</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GithubAppCreds"> GithubAppCreds </a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+GitHubApp holds the GitHub app credentials
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -2352,6 +2932,7 @@ Webhook holds configuration to run a http server
 <code>projectID</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 DeprecatedProjectID is the id of project for which integration needs to
 setup Deprecated: use Projects instead. Will be unsupported in v 1.7
@@ -2372,7 +2953,7 @@ Events are gitlab event to listen to. Refer
 <tr>
 <td>
 <code>accessToken</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2440,13 +3021,26 @@ List of project IDs or project namespace paths like “whynowy/test”
 <tr>
 <td>
 <code>secretToken</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
 SecretToken references to k8 secret which holds the Secret Token used by
 webhook config
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -2530,7 +3124,7 @@ ccache or keytab is used.
 <tr>
 <td>
 <code>krbCCacheSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2543,7 +3137,7 @@ or keytab can be set to use Kerberos.
 <tr>
 <td>
 <code>krbKeytabSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2578,7 +3172,7 @@ if keytab is used.
 <tr>
 <td>
 <code>krbConfigConfigMap</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#configmapkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#configmapkeyselector-v1-core">
 Kubernetes core/v1.ConfigMapKeySelector </a> </em>
 </td>
 <td>
@@ -2608,6 +3202,19 @@ must be set if either ccache or keytab is used.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -2819,6 +3426,19 @@ SASL configuration for the kafka client
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.MQTTEventSource">
@@ -2922,6 +3542,19 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.NATSAuth">
@@ -2963,7 +3596,7 @@ Baisc auth with username and password
 <tr>
 <td>
 <code>token</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2976,7 +3609,7 @@ Token used to connect
 <tr>
 <td>
 <code>nkey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -2989,7 +3622,7 @@ NKey used to connect
 <tr>
 <td>
 <code>credential</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -3104,6 +3737,19 @@ Auth information
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.NSQEventSource">
@@ -3209,6 +3855,19 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.OwnedRepositories">
@@ -3238,7 +3897,7 @@ Description
 </td>
 <td>
 <p>
-Orgnization or user name
+Organization or user name
 </p>
 </td>
 </tr>
@@ -3370,7 +4029,7 @@ time you update the setting, which has a possibility of event loss.
 <tr>
 <td>
 <code>credentialSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -3416,6 +4075,19 @@ will be JSON
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -3480,7 +4152,7 @@ Configure the service URL for the Pulsar service.
 <tr>
 <td>
 <code>tlsTrustCertsSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -3564,13 +4236,26 @@ event payload.
 <tr>
 <td>
 <code>authTokenSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <em>(Optional)</em>
 <p>
 Authentication token for the pulsar client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -3615,7 +4300,7 @@ HostAddress refers to the address of the Redis host/server
 <tr>
 <td>
 <code>password</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -3679,6 +4364,19 @@ event payload.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ResourceEventSource">
@@ -3734,7 +4432,7 @@ filter.
 <tr>
 <td>
 <code>GroupVersionResource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#groupversionresource-v1-meta">
 Kubernetes meta/v1.GroupVersionResource </a> </em>
 </td>
 <td>
@@ -3866,7 +4564,7 @@ Same as K8s field selector, operator “=”, “==” and “!=” are supporte
 <tr>
 <td>
 <code>createdBy</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta">
 Kubernetes meta/v1.Time </a> </em>
 </td>
 <td>
@@ -3940,7 +4638,7 @@ TopicArn
 <tr>
 <td>
 <code>accessKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -3952,7 +4650,7 @@ AccessKey refers K8s secret containing aws access key
 <tr>
 <td>
 <code>secretKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4006,6 +4704,19 @@ verification
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.SQSEventSource">
@@ -4035,7 +4746,7 @@ Description
 <tr>
 <td>
 <code>accessKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4047,7 +4758,7 @@ AccessKey refers K8s secret containing aws access key
 <tr>
 <td>
 <code>secretKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4131,6 +4842,45 @@ monitor
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dlq</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DLQ specifies if a dead-letter queue is configured for messages that
+can’t be processed successfully. If set to true, messages with invalid
+payload won’t be acknowledged to allow to forward them farther to the
+dead-letter queue. The default value is false.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>endpoint</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Endpoint configures connection to a specific SQS endpoint instead of
+Amazons servers
 </p>
 </td>
 </tr>
@@ -4222,7 +4972,7 @@ Description
 <tr>
 <td>
 <code>ports</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#serviceport-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#serviceport-v1-core">
 \[\]Kubernetes core/v1.ServicePort </a> </em>
 </td>
 <td>
@@ -4278,7 +5028,7 @@ Description
 <tr>
 <td>
 <code>signingSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4290,7 +5040,7 @@ Slack App signing secret
 <tr>
 <td>
 <code>token</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4320,6 +5070,19 @@ Webhook holds configuration for a REST endpoint
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>
@@ -4415,7 +5178,7 @@ S3 region. Defaults to us-east-1
 <tr>
 <td>
 <code>authToken</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4541,7 +5304,7 @@ CreateWebhook if specified creates a new webhook programmatically.
 <tr>
 <td>
 <code>apiKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4630,7 +5393,7 @@ source pod. More info:
 <tr>
 <td>
 <code>container</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#container-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#container-v1-core">
 Kubernetes core/v1.Container </a> </em>
 </td>
 <td>
@@ -4643,7 +5406,7 @@ Container is the main container image to run in the event source pod
 <tr>
 <td>
 <code>volumes</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#volume-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volume-v1-core">
 \[\]Kubernetes core/v1.Volume </a> </em>
 </td>
 <td>
@@ -4657,7 +5420,7 @@ eventsource.
 <tr>
 <td>
 <code>securityContext</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
 Kubernetes core/v1.PodSecurityContext </a> </em>
 </td>
 <td>
@@ -4672,7 +5435,7 @@ values of each field.
 <tr>
 <td>
 <code>affinity</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
 Kubernetes core/v1.Affinity </a> </em>
 </td>
 <td>
@@ -4685,7 +5448,7 @@ If specified, the pod’s scheduling constraints
 <tr>
 <td>
 <code>tolerations</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#toleration-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
 \[\]Kubernetes core/v1.Toleration </a> </em>
 </td>
 <td>
@@ -4712,7 +5475,7 @@ scheduled on that node. More info:
 <tr>
 <td>
 <code>imagePullSecrets</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#localobjectreference-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
 \[\]Kubernetes core/v1.LocalObjectReference </a> </em>
 </td>
 <td>
@@ -4822,6 +5585,7 @@ WebhookContext
 </h3>
 <p>
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
 <a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
@@ -4893,7 +5657,7 @@ URL is the url of the server.
 <tr>
 <td>
 <code>serverCertSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4905,7 +5669,7 @@ ServerCertPath refers the file that contains the cert.
 <tr>
 <td>
 <code>serverKeySecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
@@ -4929,7 +5693,7 @@ event payload.
 <tr>
 <td>
 <code>authSecret</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>

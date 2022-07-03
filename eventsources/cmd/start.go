@@ -61,13 +61,13 @@ func Start() {
 	m := metrics.NewMetrics(eventSource.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.EventSourceMetricsPort))
 
-	cfAPI, err := codefresh.NewAPI(ctx, eventSource.Namespace)
+	cfClient, err := codefresh.NewClient(ctx, eventSource.Namespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh API", zap.Error(err))
+		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
-	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m, cfAPI)
+	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m, cfClient)
 	if err := adaptor.Start(ctx); err != nil {
 		logger.Fatalw("failed to start eventsource server", zap.Error(err))
 	}

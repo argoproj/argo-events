@@ -1,7 +1,8 @@
 # Kubernetes Object Trigger
 
-Apart from Argo workflow objects, the sensor lets you trigger standard Kubernetes objects such as Pod, Deployment, Job, CronJob, etc.
-Having the ability to trigger standard Kubernetes objects is quite powerful as provides an avenue to
+Apart from Argo workflow objects, the sensor lets you trigger any Kubernetes objects including Custom Resources 
+such as Pod, Deployment, Job, CronJob, etc.
+Having the ability to trigger Kubernetes objects is quite powerful as providing an avenue to
 set up event-driven pipelines for existing workloads.
 
 <br/>
@@ -70,8 +71,8 @@ set up event-driven pipelines for existing workloads.
 1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   
-1. Inspect the logs of the pod, you will something similar as below.
+
+1. After the pod was completed, inspect the logs of the pod, you will see something similar as below.
 
         _________________________________________ 
         / {"context":{"type":"webhook","specVersi \
@@ -109,6 +110,7 @@ Operation can be either.
 1. `create`: Creates the object if not available in K8s cluster.
 2. `update`: Updates the object.
 3. `patch`: Patches the object using given patch strategy.
+4. `delete`: Deletes the object if it exists.
 
 More info available at [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.StandardK8sTrigger).
 

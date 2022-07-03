@@ -18,10 +18,10 @@ behaviors!**
 
 - AWS SNS
 - AWS SQS
+- BitBucket
 - Github
 - Gitlab
 - NetApp Storage GRID
-- Resource
 - Slack
 - Stripe
 - Webhook
@@ -37,19 +37,20 @@ old one is gone.
 
 - AMQP
 - Azure Events Hub
-- Kafka
+- Calendar
+- Emitter
 - GCP PubSub
+- Generic
 - File
 - HDFS
-- NATS
+- Kafka
 - Minio
 - MQTT
-- Emitter
+- NATS
 - NSQ
 - Pulsar
 - Redis
-- Calendar
-- Generic
+- Resource
 
 ## More
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 BlackRock, Inc.
+Copyright 2021 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -85,6 +85,9 @@ message ArgoWorkflowTrigger {
 
   // Parameters is the list of parameters to pass to resolved Argo Workflow object
   repeated TriggerParameter parameters = 3;
+
+  // Args is the list of arguments to pass to the argo CLI
+  repeated string args = 4;
 }
 
 // ArtifactLocation describes the source location for an external artifact
@@ -249,6 +252,14 @@ message EventDependency {
 
   // Filters and rules governing toleration of success and constraints on the context and data of an event
   optional EventDependencyFilter filters = 4;
+
+  // Transform transforms the event data
+  optional EventDependencyTransformer transform = 5;
+
+  // FiltersLogicalOperator defines how different filters are evaluated together.
+  // Available values: and (&&), or (||)
+  // Is optional and if left blank treated as and (&&).
+  optional string filtersLogicalOperator = 6;
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
@@ -264,6 +275,27 @@ message EventDependencyFilter {
 
   // Exprs contains the list of expressions evaluated against the event payload.
   repeated ExprFilter exprs = 4;
+
+  // DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together.
+  // Available values: and (&&), or (||)
+  // Is optional and if left blank treated as and (&&).
+  optional string dataLogicalOperator = 5;
+
+  // ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together.
+  // Available values: and (&&), or (||)
+  // Is optional and if left blank treated as and (&&).
+  optional string exprLogicalOperator = 6;
+}
+
+// EventDependencyTransformer transforms the event
+message EventDependencyTransformer {
+  // JQ holds the jq command applied for transformation
+  // +optional
+  optional string jq = 1;
+
+  // Script refers to a Lua script used to transform the event
+  // +optional
+  optional string script = 2;
 }
 
 message ExprFilter {

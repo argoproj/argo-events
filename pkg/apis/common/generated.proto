@@ -1,5 +1,5 @@
 /*
-Copyright 2020 BlackRock, Inc.
+Copyright 2021 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -180,6 +180,10 @@ message TLSConfig {
 
   // ClientKeySecret refers to the secret that contains the client key
   optional k8s.io.api.core.v1.SecretKeySelector clientKeySecret = 3;
+
+  // If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)
+  // +optional
+  optional bool insecureSkipVerify = 4;
 }
 
 // ValueFromSource allows you to reference keys from either a Configmap or Secret

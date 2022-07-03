@@ -21,13 +21,37 @@ spec:
               metadata:
                 generateName: aws-sns-worfklow-
               spec:
-                entrypoint: whalesay
+                entrypoint: main
                 arguments:
                   parameters:
                   - name: message
-                    # value will be overridden by the event payload
-                    value: hello world
                 templates:
+                - name: main
+                  dag:
+                    tasks:
+                    - name: extract-message
+                      template: extract-sns-message
+                      arguments:
+                        parameters:
+                          - name: sns-message
+                            value: "{{workflow.parameters.message}}"
+                    - name: whalesay
+                      dependencies: [extract-message]
+                      template: whalesay
+                      arguments:
+                        parameters:
+                        - name: message
+                          value: "{{tasks.extract-message.outputs.result}}"
+                - name: extract-sns-message
+                  inputs:
+                    parameters:
+                    - name: sns-message
+                  script:
+                    image: node:12-alpine
+                    command: [node]
+                    source: |
+                      const snsMessage = {{inputs.parameters.sns-message}};
+                      console.log(snsMessage.Message);
                 - name: whalesay
                   inputs:
                     parameters:

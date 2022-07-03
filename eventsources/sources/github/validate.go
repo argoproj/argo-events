@@ -1,5 +1,5 @@
 /*
-Copyright 2018 KompiTech GmbH
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -31,8 +31,11 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	if githubEventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if githubEventSource.GetOwnedRepositories() == nil {
-		return fmt.Errorf("no valid repository owner and name found")
+	if githubEventSource.GetOwnedRepositories() == nil && githubEventSource.Organizations == nil {
+		return fmt.Errorf("either repositories or organizations is required")
+	}
+	if githubEventSource.GetOwnedRepositories() != nil && githubEventSource.Organizations != nil {
+		return fmt.Errorf("only one of repositories and organizations is allowed")
 	}
 	if githubEventSource.NeedToCreateHooks() && len(githubEventSource.Events) == 0 {
 		return fmt.Errorf("events must be defined to create a github webhook")

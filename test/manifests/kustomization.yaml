@@ -5,6 +5,54 @@ resources:
   - ../../manifests/cluster-install
   - ../../manifests/extensions/validating-webhook
 
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+    target:
+      kind: Deployment
+      name: eventbus-controller
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+    target:
+      kind: Deployment
+      name: eventsource-controller
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+    target:
+      kind: Deployment
+      name: sensor-controller
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+    target:
+      kind: Deployment
+      name: events-webhook
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: IMAGE_PULL_POLICY
+          value: IfNotPresent
+    target:
+      kind: Deployment
+      name: eventsource-controller
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: IMAGE_PULL_POLICY
+          value: IfNotPresent
+    target:
+      kind: Deployment
+      name: sensor-controller
+
 namespace: argo-events
 
 commonLabels:
