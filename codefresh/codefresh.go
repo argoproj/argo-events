@@ -88,6 +88,7 @@ func (a *Client) shouldReportEvent(event cloudevents.Event) bool {
 	whitelist := map[apicommon.EventSourceType]bool{
 		apicommon.GithubEvent:          true,
 		apicommon.GitlabEvent:          true,
+		apicommon.BitbucketEvent:       true,
 		apicommon.BitbucketServerEvent: true,
 		apicommon.CalendarEvent:        true,
 	}
