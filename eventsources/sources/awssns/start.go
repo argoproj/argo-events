@@ -30,6 +30,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -215,7 +216,12 @@ func (router *Router) PostActivate() error {
 		return err
 	}
 
-	router.session = snslib.New(awsSession)
+	if snsEventSource.Endpoint == "" {
+		router.session = snslib.New(awsSession)
+	} else {
+		router.session = snslib.New(awsSession, &aws.Config{Endpoint: &snsEventSource.Endpoint, Region: &snsEventSource.Region})
+	}
+
 	formattedURL := common.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
 	if _, err := router.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedURL,
