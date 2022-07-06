@@ -73,7 +73,7 @@ func Start() {
 
 	cfClient, err := codefresh.NewClient(ctx, sensor.Namespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
+		logger.Fatalw("unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	logger.Infow("starting sensor server", "version", argoevents.GetVersion())

@@ -36,11 +36,10 @@ type config struct {
 }
 
 type Client struct {
-	ctx           context.Context
-	logger        *zap.SugaredLogger
-	cfConfig      *config
-	client        *http.Client
-	isInitialised bool
+	ctx      context.Context
+	logger   *zap.SugaredLogger
+	cfConfig *config
+	client   *http.Client
 }
 
 type ErrorContext struct {
@@ -70,14 +69,13 @@ func NewClient(ctx context.Context, namespace string) (*Client, error) {
 	logger := logging.FromContext(ctx)
 	config, err := getCodefreshConfig(ctx, namespace)
 	if err != nil {
-		return &Client{logger: logger}, err
+		return nil, err
 	}
 
 	return &Client{
-		ctx:           ctx,
-		logger:        logger,
-		cfConfig:      config,
-		isInitialised: true,
+		ctx:      ctx,
+		logger:   logger,
+		cfConfig: config,
 		client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -98,12 +96,6 @@ func (a *Client) shouldReportEvent(event cloudevents.Event) bool {
 
 func (a *Client) ReportEvent(event cloudevents.Event) {
 	if !a.shouldReportEvent(event) {
-		return
-	}
-
-	if !a.isInitialised {
-		a.logger.Warnw("WARNING: skipping reporting of an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
-			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
 		return
 	}
 
@@ -145,11 +137,6 @@ func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload 
 
 func (a *Client) ReportError(originalErr error, errContext ErrorContext) {
 	originalErrMsg := originalErr.Error()
-	if !a.isInitialised {
-		a.logger.Warnw("WARNING: skipping reporting of an error to Codefresh", zap.String("originalError", originalErrMsg))
-		return
-	}
-
 	errPayloadJson, err := json.Marshal(constructErrorPayload(originalErrMsg, errContext))
 	if err != nil {
 		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))

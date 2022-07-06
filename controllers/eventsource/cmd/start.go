@@ -67,7 +67,7 @@ func Start(namespaced bool, managedNamespace string) {
 
 	cfClient, err := codefresh.NewClient(logging.WithLogger(ctx, logger), managedNamespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
+		logger.Fatalw("unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	// A controller with DefaultControllerRateLimiter
