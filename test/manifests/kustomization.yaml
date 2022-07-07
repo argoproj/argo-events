@@ -53,7 +53,7 @@ patches:
       kind: Deployment
       name: sensor-controller
   - patch: |-
-      - op: replace
+      - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
           name: SHOULD_REPORT_TO_CF
@@ -62,7 +62,7 @@ patches:
       kind: Deployment
       name: eventbus-controller
   - patch: |-
-      - op: replace
+      - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
           name: SHOULD_REPORT_TO_CF
@@ -71,7 +71,7 @@ patches:
       kind: Deployment
       name: eventsource-controller
   - patch: |-
-      - op: replace
+      - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
           name: SHOULD_REPORT_TO_CF
