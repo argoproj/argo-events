@@ -36,10 +36,10 @@ type config struct {
 }
 
 type Client struct {
-	ctx      context.Context
-	logger   *zap.SugaredLogger
-	cfConfig *config
-	client   *http.Client
+	ctx        context.Context
+	logger     *zap.SugaredLogger
+	cfConfig   *config
+	httpClient *http.Client
 }
 
 type ErrorContext struct {
@@ -76,13 +76,13 @@ func NewClient(ctx context.Context, namespace string) (*Client, error) {
 		ctx:      ctx,
 		logger:   logger,
 		cfConfig: config,
-		client: &http.Client{
+		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 	}, nil
 }
 
-func (a *Client) shouldReportEvent(event cloudevents.Event) bool {
+func (c *Client) shouldReportEvent(event cloudevents.Event) bool {
 	whitelist := map[apicommon.EventSourceType]bool{
 		apicommon.GithubEvent:          true,
 		apicommon.GitlabEvent:          true,
@@ -94,25 +94,25 @@ func (a *Client) shouldReportEvent(event cloudevents.Event) bool {
 	return whitelist[apicommon.EventSourceType(event.Type())]
 }
 
-func (a *Client) ReportEvent(event cloudevents.Event) {
-	if !a.shouldReportEvent(event) {
+func (c *Client) ReportEvent(event cloudevents.Event) {
+	if !c.shouldReportEvent(event) {
 		return
 	}
 
 	eventJson, err := json.Marshal(event)
 	if err != nil {
-		a.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
+		c.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
 			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
 		return
 	}
 
-	url := a.cfConfig.baseURL + "/2.0/api/events/event-payload"
-	err = a.sendJSON(eventJson, url)
+	url := c.cfConfig.baseURL + "/2.0/api/events/event-payload"
+	err = c.sendJSON(eventJson, url)
 	if err != nil {
-		a.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
+		c.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
 			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
 	} else {
-		a.logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
+		c.logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
 			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
 	}
 }
@@ -135,34 +135,34 @@ func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload 
 	}
 }
 
-func (a *Client) ReportError(originalErr error, errContext ErrorContext) {
+func (c *Client) ReportError(originalErr error, errContext ErrorContext) {
 	originalErrMsg := originalErr.Error()
 	errPayloadJson, err := json.Marshal(constructErrorPayload(originalErrMsg, errContext))
 	if err != nil {
-		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
+		c.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
 		return
 	}
 
-	url := a.cfConfig.baseURL + "/2.0/api/events/error"
-	err = a.sendJSON(errPayloadJson, url)
+	url := c.cfConfig.baseURL + "/2.0/api/events/error"
+	err = c.sendJSON(errPayloadJson, url)
 	if err != nil {
-		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
+		c.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
 	} else {
-		a.logger.Infow("succeeded to report an error to Codefresh", zap.String("originalError", originalErrMsg))
+		c.logger.Infow("succeeded to report an error to Codefresh", zap.String("originalError", originalErrMsg))
 	}
 }
 
-func (a *Client) sendJSON(jsonBody []byte, url string) error {
+func (c *Client) sendJSON(jsonBody []byte, url string) error {
 	return withRetry(&common.DefaultBackoff, func() error {
-		req, err := http.NewRequestWithContext(a.ctx, "POST", url, bytes.NewBuffer(jsonBody))
+		req, err := http.NewRequestWithContext(c.ctx, "POST", url, bytes.NewBuffer(jsonBody))
 		if err != nil {
 			return err
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", a.cfConfig.authToken)
+		req.Header.Set("Authorization", c.cfConfig.authToken)
 
-		res, err := a.client.Do(req)
+		res, err := c.httpClient.Do(req)
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("failed reporting to Codefresh, event: %s", string(jsonBody)))
 		}
