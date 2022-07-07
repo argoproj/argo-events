@@ -10,11 +10,6 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: IfNotPresent
-      - op: replace
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SHOULD_REPORT_TO_CF
-          value: "false"
     target:
       kind: Deployment
       name: eventbus-controller
@@ -22,11 +17,6 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: IfNotPresent
-      - op: replace
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SHOULD_REPORT_TO_CF
-          value: "false"
     target:
       kind: Deployment
       name: eventsource-controller
@@ -34,11 +24,6 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: IfNotPresent
-      - op: replace
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SHOULD_REPORT_TO_CF
-          value: "false"
     target:
       kind: Deployment
       name: sensor-controller
@@ -55,11 +40,6 @@ patches:
         value:
           name: IMAGE_PULL_POLICY
           value: IfNotPresent
-      - op: replace
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SHOULD_REPORT_TO_CF
-          value: "false"
     target:
       kind: Deployment
       name: eventsource-controller
@@ -69,6 +49,28 @@ patches:
         value:
           name: IMAGE_PULL_POLICY
           value: IfNotPresent
+    target:
+      kind: Deployment
+      name: sensor-controller
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SHOULD_REPORT_TO_CF
+          value: "false"
+    target:
+      kind: Deployment
+      name: eventbus-controller
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SHOULD_REPORT_TO_CF
+          value: "false"
+    target:
+      kind: Deployment
+      name: eventsource-controller
+  - patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/-
         value:
