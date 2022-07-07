@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
@@ -34,6 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -154,6 +156,10 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		{
 			Name:  common.EnvVarSensorObject,
 			Value: encodedSensorSpec,
+		},
+		{
+			Name:  codefresh.EnvVarShouldReportToCF,
+			Value: os.Getenv(codefresh.EnvVarShouldReportToCF),
 		},
 		{
 			Name:  common.EnvVarEventBusSubject,

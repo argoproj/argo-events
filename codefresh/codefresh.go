@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -22,6 +23,8 @@ import (
 )
 
 const (
+	EnvVarShouldReportToCF = "SHOULD_REPORT_TO_CF"
+
 	cfConfigMapName       = "codefresh-cm"
 	cfBaseURLConfigMapKey = "base-url"
 	cfSecretName          = "codefresh-token"
@@ -29,6 +32,14 @@ const (
 )
 
 var withRetry = common.Connect // alias
+
+var eventTypesToReportWhitelist = map[apicommon.EventSourceType]bool{
+	apicommon.GithubEvent:          true,
+	apicommon.GitlabEvent:          true,
+	apicommon.BitbucketEvent:       true,
+	apicommon.BitbucketServerEvent: true,
+	apicommon.CalendarEvent:        true,
+}
 
 type config struct {
 	baseURL   string
@@ -40,6 +51,7 @@ type Client struct {
 	logger     *zap.SugaredLogger
 	cfConfig   *config
 	httpClient *http.Client
+	dryRun     bool
 }
 
 type ErrorContext struct {
@@ -67,6 +79,15 @@ type errorPayload struct {
 
 func NewClient(ctx context.Context, namespace string) (*Client, error) {
 	logger := logging.FromContext(ctx)
+
+	dryRun := !shouldEnableReporting()
+	if dryRun {
+		return &Client{
+			logger: logger,
+			dryRun: true,
+		}, nil
+	}
+
 	config, err := getCodefreshConfig(ctx, namespace)
 	if err != nil {
 		return nil, err
@@ -82,20 +103,14 @@ func NewClient(ctx context.Context, namespace string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) shouldReportEvent(event cloudevents.Event) bool {
-	whitelist := map[apicommon.EventSourceType]bool{
-		apicommon.GithubEvent:          true,
-		apicommon.GitlabEvent:          true,
-		apicommon.BitbucketEvent:       true,
-		apicommon.BitbucketServerEvent: true,
-		apicommon.CalendarEvent:        true,
+func (c *Client) ReportEvent(event cloudevents.Event) {
+	if !shouldReportEvent(event) {
+		return
 	}
 
-	return whitelist[apicommon.EventSourceType(event.Type())]
-}
-
-func (c *Client) ReportEvent(event cloudevents.Event) {
-	if !c.shouldReportEvent(event) {
+	if c.dryRun {
+		c.logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
+			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()), zap.String("dryRun", "true"))
 		return
 	}
 
@@ -117,26 +132,15 @@ func (c *Client) ReportEvent(event cloudevents.Event) {
 	}
 }
 
-func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload {
-	gvk := errContext.GroupVersionKind()
-
-	return errorPayload{
-		ErrMsg: errMsg,
-		Context: errorContext{
-			Object: object{
-				Name:      errContext.Name,
-				Namespace: errContext.Namespace,
-				Group:     gvk.Group,
-				Version:   gvk.Version,
-				Kind:      gvk.Kind,
-				Labels:    errContext.Labels,
-			},
-		},
-	}
-}
-
 func (c *Client) ReportError(originalErr error, errContext ErrorContext) {
 	originalErrMsg := originalErr.Error()
+
+	if c.dryRun {
+		c.logger.Infow("succeeded to report an error to Codefresh",
+			zap.String("originalError", originalErrMsg), zap.String("dryRun", "true"))
+		return
+	}
+
 	errPayloadJson, err := json.Marshal(constructErrorPayload(originalErrMsg, errContext))
 	if err != nil {
 		c.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
@@ -179,6 +183,10 @@ func (c *Client) sendJSON(jsonBody []byte, url string) error {
 	})
 }
 
+func shouldReportEvent(event cloudevents.Event) bool {
+	return eventTypesToReportWhitelist[apicommon.EventSourceType(event.Type())]
+}
+
 func getCodefreshConfig(ctx context.Context, namespace string) (*config, error) {
 	kubeClient, err := common.CreateKubeClient()
 	if err != nil {
@@ -219,4 +227,30 @@ func getCodefreshBaseURL(ctx context.Context, kubeClient kubernetes.Interface, n
 	}
 
 	return common.GetConfigMapValue(ctx, kubeClient, namespace, cfConfigMapSelector)
+}
+
+func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload {
+	gvk := errContext.GroupVersionKind()
+
+	return errorPayload{
+		ErrMsg: errMsg,
+		Context: errorContext{
+			Object: object{
+				Name:      errContext.Name,
+				Namespace: errContext.Namespace,
+				Group:     gvk.Group,
+				Version:   gvk.Version,
+				Kind:      gvk.Kind,
+				Labels:    errContext.Labels,
+			},
+		},
+	}
+}
+
+func shouldEnableReporting() bool {
+	shouldReport := true
+	if x := os.Getenv(EnvVarShouldReportToCF); x == "false" {
+		shouldReport = false
+	}
+	return shouldReport
 }
