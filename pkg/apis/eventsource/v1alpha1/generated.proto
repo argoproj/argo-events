@@ -1248,6 +1248,10 @@ message SNSEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 9;
+
+  // Endpoint configures connection to a specific SNS endpoint instead of Amazons servers
+  // +optional
+  optional string endpoint = 10;
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events

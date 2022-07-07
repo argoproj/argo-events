@@ -2361,6 +2361,10 @@
           "description": "AccessKey refers K8s secret containing aws access key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
+        "endpoint": {
+          "description": "Endpoint configures connection to a specific SNS endpoint instead of Amazons servers",
+          "type": "string"
+        },
         "filter": {
           "description": "Filter",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
