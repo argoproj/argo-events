@@ -611,6 +611,9 @@ type SNSEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
+	// Endpoint configures connection to a specific SNS endpoint instead of Amazons servers
+	// +optional
+	Endpoint string `json:"endpoint" protobuf:"bytes,10,opt,name=endpoint"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
