@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -248,9 +249,12 @@ func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload 
 }
 
 func shouldEnableReporting() bool {
-	shouldReport := true
-	if x := os.Getenv(EnvVarShouldReportToCF); x == "false" {
-		shouldReport = false
+	shouldReport := true // default
+	if value, ok := os.LookupEnv(EnvVarShouldReportToCF); ok {
+		parsed, err := strconv.ParseBool(value)
+		if err == nil {
+			shouldReport = parsed
+		}
 	}
 	return shouldReport
 }
