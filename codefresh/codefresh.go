@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -22,6 +24,8 @@ import (
 )
 
 const (
+	EnvVarShouldReportToCF = "SHOULD_REPORT_TO_CF"
+
 	cfConfigMapName       = "codefresh-cm"
 	cfBaseURLConfigMapKey = "base-url"
 	cfSecretName          = "codefresh-token"
@@ -30,17 +34,25 @@ const (
 
 var withRetry = common.Connect // alias
 
+var eventTypesToReportWhitelist = map[apicommon.EventSourceType]bool{
+	apicommon.GithubEvent:          true,
+	apicommon.GitlabEvent:          true,
+	apicommon.BitbucketEvent:       true,
+	apicommon.BitbucketServerEvent: true,
+	apicommon.CalendarEvent:        true,
+}
+
 type config struct {
 	baseURL   string
 	authToken string
 }
 
 type Client struct {
-	ctx           context.Context
-	logger        *zap.SugaredLogger
-	cfConfig      *config
-	client        *http.Client
-	isInitialised bool
+	ctx        context.Context
+	logger     *zap.SugaredLogger
+	cfConfig   *config
+	httpClient *http.Client
+	dryRun     bool
 }
 
 type ErrorContext struct {
@@ -68,114 +80,94 @@ type errorPayload struct {
 
 func NewClient(ctx context.Context, namespace string) (*Client, error) {
 	logger := logging.FromContext(ctx)
+
+	dryRun := !shouldEnableReporting()
+	if dryRun {
+		return &Client{
+			logger: logger,
+			dryRun: true,
+		}, nil
+	}
+
 	config, err := getCodefreshConfig(ctx, namespace)
 	if err != nil {
-		return &Client{logger: logger}, err
+		return nil, err
 	}
 
 	return &Client{
-		ctx:           ctx,
-		logger:        logger,
-		cfConfig:      config,
-		isInitialised: true,
-		client: &http.Client{
+		ctx:      ctx,
+		logger:   logger,
+		cfConfig: config,
+		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 	}, nil
 }
 
-func (a *Client) shouldReportEvent(event cloudevents.Event) bool {
-	whitelist := map[apicommon.EventSourceType]bool{
-		apicommon.GithubEvent:          true,
-		apicommon.GitlabEvent:          true,
-		apicommon.BitbucketEvent:       true,
-		apicommon.BitbucketServerEvent: true,
-		apicommon.CalendarEvent:        true,
-	}
-
-	return whitelist[apicommon.EventSourceType(event.Type())]
-}
-
-func (a *Client) ReportEvent(event cloudevents.Event) {
-	if !a.shouldReportEvent(event) {
+func (c *Client) ReportEvent(event cloudevents.Event) {
+	if !shouldReportEvent(event) {
 		return
 	}
 
-	if !a.isInitialised {
-		a.logger.Warnw("WARNING: skipping reporting of an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
-			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
+	if c.dryRun {
+		c.logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
+			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()), zap.String("dryRun", "true"))
 		return
 	}
 
 	eventJson, err := json.Marshal(event)
 	if err != nil {
-		a.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
+		c.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
 			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
 		return
 	}
 
-	url := a.cfConfig.baseURL + "/2.0/api/events/event-payload"
-	err = a.sendJSON(eventJson, url)
+	url := c.cfConfig.baseURL + "/2.0/api/events/event-payload"
+	err = c.sendJSON(eventJson, url)
 	if err != nil {
-		a.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
+		c.logger.Errorw("failed to report an event to Codefresh", zap.Error(err), zap.String(logging.LabelEventName, event.Subject()),
 			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
 	} else {
-		a.logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
+		c.logger.Infow("succeeded to report an event to Codefresh", zap.String(logging.LabelEventName, event.Subject()),
 			zap.String(logging.LabelEventSourceType, event.Type()), zap.String("eventID", event.ID()))
 	}
 }
 
-func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload {
-	gvk := errContext.GroupVersionKind()
-
-	return errorPayload{
-		ErrMsg: errMsg,
-		Context: errorContext{
-			Object: object{
-				Name:      errContext.Name,
-				Namespace: errContext.Namespace,
-				Group:     gvk.Group,
-				Version:   gvk.Version,
-				Kind:      gvk.Kind,
-				Labels:    errContext.Labels,
-			},
-		},
-	}
-}
-
-func (a *Client) ReportError(originalErr error, errContext ErrorContext) {
+func (c *Client) ReportError(originalErr error, errContext ErrorContext) {
 	originalErrMsg := originalErr.Error()
-	if !a.isInitialised {
-		a.logger.Warnw("WARNING: skipping reporting of an error to Codefresh", zap.String("originalError", originalErrMsg))
+
+	if c.dryRun {
+		c.logger.Infow("succeeded to report an error to Codefresh",
+			zap.String("originalError", originalErrMsg), zap.String("dryRun", "true"))
 		return
 	}
 
 	errPayloadJson, err := json.Marshal(constructErrorPayload(originalErrMsg, errContext))
 	if err != nil {
-		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
+		c.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
 		return
 	}
 
-	url := a.cfConfig.baseURL + "/2.0/api/events/error"
-	err = a.sendJSON(errPayloadJson, url)
+	url := c.cfConfig.baseURL + "/2.0/api/events/error"
+	err = c.sendJSON(errPayloadJson, url)
 	if err != nil {
-		a.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
+		c.logger.Errorw("failed to report an error to Codefresh", zap.Error(err), zap.String("originalError", originalErrMsg))
 	} else {
-		a.logger.Infow("succeeded to report an error to Codefresh", zap.String("originalError", originalErrMsg))
+		c.logger.Infow("succeeded to report an error to Codefresh", zap.String("originalError", originalErrMsg))
 	}
 }
 
-func (a *Client) sendJSON(jsonBody []byte, url string) error {
+func (c *Client) sendJSON(jsonBody []byte, url string) error {
 	return withRetry(&common.DefaultBackoff, func() error {
-		req, err := http.NewRequestWithContext(a.ctx, "POST", url, bytes.NewBuffer(jsonBody))
+		req, err := http.NewRequestWithContext(c.ctx, "POST", url, bytes.NewBuffer(jsonBody))
 		if err != nil {
 			return err
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", a.cfConfig.authToken)
+		req.Header.Set("Authorization", c.cfConfig.authToken)
 
-		res, err := a.client.Do(req)
+		res, err := c.httpClient.Do(req)
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("failed reporting to Codefresh, event: %s", string(jsonBody)))
 		}
@@ -190,6 +182,10 @@ func (a *Client) sendJSON(jsonBody []byte, url string) error {
 
 		return nil
 	})
+}
+
+func shouldReportEvent(event cloudevents.Event) bool {
+	return eventTypesToReportWhitelist[apicommon.EventSourceType(event.Type())]
 }
 
 func getCodefreshConfig(ctx context.Context, namespace string) (*config, error) {
@@ -232,4 +228,33 @@ func getCodefreshBaseURL(ctx context.Context, kubeClient kubernetes.Interface, n
 	}
 
 	return common.GetConfigMapValue(ctx, kubeClient, namespace, cfConfigMapSelector)
+}
+
+func constructErrorPayload(errMsg string, errContext ErrorContext) errorPayload {
+	gvk := errContext.GroupVersionKind()
+
+	return errorPayload{
+		ErrMsg: errMsg,
+		Context: errorContext{
+			Object: object{
+				Name:      errContext.Name,
+				Namespace: errContext.Namespace,
+				Group:     gvk.Group,
+				Version:   gvk.Version,
+				Kind:      gvk.Kind,
+				Labels:    errContext.Labels,
+			},
+		},
+	}
+}
+
+func shouldEnableReporting() bool {
+	shouldReport := true // default
+	if value, ok := os.LookupEnv(EnvVarShouldReportToCF); ok {
+		parsed, err := strconv.ParseBool(value)
+		if err == nil {
+			shouldReport = parsed
+		}
+	}
+	return shouldReport
 }

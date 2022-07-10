@@ -63,7 +63,7 @@ func Start() {
 
 	cfClient, err := codefresh.NewClient(ctx, eventSource.Namespace)
 	if err != nil {
-		logger.Warnw("WARNING: unable to initialise Codefresh Client", zap.Error(err))
+		logger.Fatalw("unable to initialise Codefresh Client", zap.Error(err))
 	}
 
 	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())

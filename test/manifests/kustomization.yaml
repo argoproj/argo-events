@@ -52,6 +52,33 @@ patches:
     target:
       kind: Deployment
       name: sensor-controller
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SHOULD_REPORT_TO_CF
+          value: "false"
+    target:
+      kind: Deployment
+      name: eventbus-controller
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SHOULD_REPORT_TO_CF
+          value: "false"
+    target:
+      kind: Deployment
+      name: eventsource-controller
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SHOULD_REPORT_TO_CF
+          value: "false"
+    target:
+      kind: Deployment
+      name: sensor-controller
 
 namespace: argo-events
 
