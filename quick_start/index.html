@@ -1766,7 +1766,7 @@
 The Argo Workflow controller will need to be configured to listen for Workflow objects created in <code>argo-events</code> namespace. 
   (See <a href="https://github.com/argoproj/argo-workflows/blob/master/docs/managed-namespace.md">this</a> link.) 
   The Workflow Controller will need to be installed either in a cluster-scope configuration (i.e. no "--namespaced" argument) so that it has visiblity to all namespaces, or with "--managed-namespace" set to define "argo-events" as a namespace it has visibility to. To deploy Argo Workflows with a cluster-scope configuration you can use this installation yaml file:</p>
-<div class="codehilite"><pre><span></span><code>    kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml
+<div class="codehilite"><pre><span></span><code>    kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/stable/manifests/install.yaml
 </code></pre></div>
 
 <ol>
