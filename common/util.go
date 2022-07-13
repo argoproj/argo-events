@@ -490,6 +490,15 @@ func GetImagePullPolicy() corev1.PullPolicy {
 	return imgPullPolicy
 }
 
+func StructToMap(obj interface{}, output map[string]interface{}) error {
+	data, err := json.Marshal(obj) // Convert to a json string
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(data, &output) // Convert to a map
+}
+
 func CopyStringMap(originalMap map[string]string) map[string]string {
 	newMap := make(map[string]string)
 	for k, v := range originalMap {
