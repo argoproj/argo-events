@@ -273,7 +273,7 @@ type ResourceEventData struct {
 	Resource string `json:"resource"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	Metadata map[string]string `json:"metadata,omitempty"`
-	// Cluster from which the event occured
+	// Cluster from which the event occurred
 	Cluster string `json:"cluster"`
 }
 

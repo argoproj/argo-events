@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/codefresh"
 	"os"
 
 	"go.uber.org/zap"
@@ -17,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	argoevents "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers"
