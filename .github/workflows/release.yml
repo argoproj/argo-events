@@ -5,8 +5,8 @@ on:
     tags:
       - 'v*'
     branches:
-      - master
-      - dev-*
+      - "master"
+      - "release-*"
 
 defaults:
   run:
@@ -15,7 +15,6 @@ defaults:
 jobs:
   build-binaries:
     runs-on: ubuntu-20.04
-    if: github.repository == 'argoproj/argo-events'
     name: Build binaries
     steps:
       - name: Checkout
@@ -42,7 +41,6 @@ jobs:
     name: Build & push linux/amd64 and linux/arm64
     needs: [ build-binaries ]
     runs-on: ubuntu-20.04
-    if: github.repository == 'argoproj/argo-events'
     strategy:
       matrix:
         target: [ argo-events ]
@@ -80,7 +78,6 @@ jobs:
 
   bom:
     runs-on: ubuntu-latest
-    if: github.repository == 'argoproj/argo-events'
     needs: [ build-push-linux-multi ]
     steps:
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
@@ -98,7 +95,7 @@ jobs:
       - run: go install github.com/spdx/spdx-sbom-generator/cmd/generator@v0.0.13
       - run: mkdir -p dist
       - run: generator -o dist -p .
-      - run: bom generate --image quay.io/argoproj/argo-events:$VERSION -o dist/argo-events.spdx
+      - run: bom generate --image quay.io/codefresh/argo-events:$VERSION -o dist/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: tar -zcf sbom.tar.gz dist/*.spdx
       - uses: actions/upload-artifact@v3
@@ -108,7 +105,6 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    if: github.repository == 'argoproj/argo-events'
     needs: [ build-push-linux-multi, bom ]
     steps:
       - name: Download binaries

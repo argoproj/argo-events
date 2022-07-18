@@ -11,5 +11,5 @@ namespace: argo-events
 
 images:
   - name: quay.io/argoproj/argo-events
-    newTag: v1.7.1
-
+    newName: quay.io/codefresh/argo-events
+    newTag: v1.6.3-cap-CR-13090
