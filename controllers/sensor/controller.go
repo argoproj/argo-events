@@ -75,7 +75,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	reconcileErr := r.reconcile(ctx, sensorCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
-		r.cfClient.ReportError(reconcileErr, codefresh.ErrorContext{
+		r.cfClient.ReportError(errors.Wrap(reconcileErr, "reconcile error"), codefresh.ErrorContext{
 			ObjectMeta: sensor.ObjectMeta,
 			TypeMeta:   sensor.TypeMeta,
 		})

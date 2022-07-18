@@ -405,7 +405,6 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer, filters map[string]*v1alpha1.EventSourceFilter) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
-
 	clientID := generateClientID(e.hostname)
 	driver, err := eventbus.GetEventSourceDriver(ctx, *e.eventBusConfig, e.eventSource.Name, e.eventBusSubject)
 	if err != nil {

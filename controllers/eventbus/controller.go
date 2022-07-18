@@ -17,6 +17,7 @@ import (
 	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -57,7 +58,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
-		r.cfClient.ReportError(reconcileErr, codefresh.ErrorContext{
+		r.cfClient.ReportError(errors.Wrap(reconcileErr, "reconcile error"), codefresh.ErrorContext{
 			ObjectMeta: eventBus.ObjectMeta,
 			TypeMeta:   eventBus.TypeMeta,
 		})

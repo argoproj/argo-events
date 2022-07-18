@@ -16,6 +16,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -56,7 +57,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	reconcileErr := r.reconcile(ctx, esCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
-		r.cfClient.ReportError(reconcileErr, codefresh.ErrorContext{
+		r.cfClient.ReportError(errors.Wrap(reconcileErr, "reconcile error"), codefresh.ErrorContext{
 			ObjectMeta: eventSource.ObjectMeta,
 			TypeMeta:   eventSource.TypeMeta,
 		})
