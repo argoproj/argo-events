@@ -1,4 +1,4 @@
-package kafka
+package common
 
 import (
 	"crypto/sha256"
@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	SHA256 scram.HashGeneratorFcn = sha256.New
-	SHA512 scram.HashGeneratorFcn = sha512.New
+	SHA256New scram.HashGeneratorFcn = sha256.New
+	SHA512New scram.HashGeneratorFcn = sha512.New
 )
 
 type XDGSCRAMClient struct {
