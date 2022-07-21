@@ -2746,6 +2746,11 @@
           "description": "REST API endpoint",
           "type": "string"
         },
+        "maxPayloadSize": {
+          "description": "MaxPayloadSize is the maximum webhook payload size that the server will accept. Requests exceeding that limit will be rejected with \"request too large\" response. Default value: 1048576 (1MB).",
+          "type": "integer",
+          "format": "int64"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
