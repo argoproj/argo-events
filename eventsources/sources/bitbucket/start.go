@@ -77,7 +77,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	request.Body = http.MaxBytesReader(writer, request.Body, 256*1024)
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Desugar().Error("failed to parse request body", zap.Error(err))
