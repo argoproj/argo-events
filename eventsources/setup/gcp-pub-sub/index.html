@@ -1941,36 +1941,36 @@
 <table>
 <thead>
 <tr>
-<th align="left">Actions</th>
-<th align="left">Required configuration fields</th>
-<th align="left">Necessary permissions for service account</th>
-<th align="left">Example role</th>
+<th style="text-align: left;">Actions</th>
+<th style="text-align: left;">Required configuration fields</th>
+<th style="text-align: left;">Necessary permissions for service account</th>
+<th style="text-align: left;">Example role</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left">Use existing subscription</td>
-<td align="left">Existing <code>SubscriptionID</code></td>
-<td align="left"><code>pubsub.subscriptions.consume</code> for the subscription</td>
-<td align="left"><code>roles/pubsub.subscriber</code></td>
+<td style="text-align: left;">Use existing subscription</td>
+<td style="text-align: left;">Existing <code>SubscriptionID</code></td>
+<td style="text-align: left;"><code>pubsub.subscriptions.consume</code> for the subscription</td>
+<td style="text-align: left;"><code>roles/pubsub.subscriber</code></td>
 </tr>
 <tr>
-<td align="left">Use existing subscription and verify topic</td>
-<td align="left">Existing <code>SubscriptionID</code> and its <code>Topic</code></td>
-<td align="left">Above +<br><code>pubsub.subscriptions.get</code> for the subscription</td>
-<td align="left"><code>roles/pubsub.subscriber</code><br>+ <code>roles/pubsub.viewer</code></td>
+<td style="text-align: left;">Use existing subscription and verify topic</td>
+<td style="text-align: left;">Existing <code>SubscriptionID</code> and its <code>Topic</code></td>
+<td style="text-align: left;">Above +<br><code>pubsub.subscriptions.get</code> for the subscription</td>
+<td style="text-align: left;"><code>roles/pubsub.subscriber</code><br>+ <code>roles/pubsub.viewer</code></td>
 </tr>
 <tr>
-<td align="left">Create subscription for existing topic</td>
-<td align="left">Existing <code>Topic</code><br>(<code>SubscriptionID</code> is optional†)</td>
-<td align="left">Above +<br><code>pubsub.subscriptions.create</code> for the project<br><code>pubsub.topics.attachSubscription</code> for the topic</td>
-<td align="left"><code>roles/pubsub.subscriber</code><br>+ <code>roles/pubsub.editor</code></td>
+<td style="text-align: left;">Create subscription for existing topic</td>
+<td style="text-align: left;">Existing <code>Topic</code><br>(<code>SubscriptionID</code> is optional†)</td>
+<td style="text-align: left;">Above +<br><code>pubsub.subscriptions.create</code> for the project<br><code>pubsub.topics.attachSubscription</code> for the topic</td>
+<td style="text-align: left;"><code>roles/pubsub.subscriber</code><br>+ <code>roles/pubsub.editor</code></td>
 </tr>
 <tr>
-<td align="left">Create topic and subscription</td>
-<td align="left">Non-existing <code>Topic</code><br>(<code>SubscriptionID</code> is optional†)</td>
-<td align="left">Above +<br><code>pubsub.topic.create</code> for the project</td>
-<td align="left"><code>roles/pubsub.subscriber</code><br>+ <code>roles/pubsub.editor</code></td>
+<td style="text-align: left;">Create topic and subscription</td>
+<td style="text-align: left;">Non-existing <code>Topic</code><br>(<code>SubscriptionID</code> is optional†)</td>
+<td style="text-align: left;">Above +<br><code>pubsub.topic.create</code> for the project</td>
+<td style="text-align: left;"><code>roles/pubsub.subscriber</code><br>+ <code>roles/pubsub.editor</code></td>
 </tr>
 </tbody>
 </table>
