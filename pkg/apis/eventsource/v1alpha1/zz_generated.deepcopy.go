@@ -1931,6 +1931,11 @@ func (in *WebhookContext) DeepCopyInto(out *WebhookContext) {
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.MaxPayloadSize != nil {
+		in, out := &in.MaxPayloadSize, &out.MaxPayloadSize
+		*out = new(int64)
+		**out = **in
+	}
 	return
 }
 
