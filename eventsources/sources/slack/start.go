@@ -210,7 +210,7 @@ func (rc *Router) handleEvent(request *http.Request) ([]byte, []byte, error) {
 	var err error
 	var response []byte
 	var data []byte
-	body, err := getRequestBody(request)
+	body, err := rc.getRequestBody(request)
 	if err != nil {
 		return data, response, errors.Wrap(err, "failed to fetch request body")
 	}
@@ -269,9 +269,9 @@ func (rc *Router) handleSlashCommand(request *http.Request) ([]byte, error) {
 	return data, nil
 }
 
-func getRequestBody(request *http.Request) ([]byte, error) {
+func (rc *Router) getRequestBody(request *http.Request) ([]byte, error) {
 	// Read request payload
-	body, err := io.ReadAll(io.LimitReader(request.Body, 65536))
+	body, err := io.ReadAll(io.LimitReader(request.Body, rc.route.Context.GetMaxPayloadSize()))
 	// Reset request.Body ReadCloser to prevent side-effect if re-read
 	request.Body = io.NopCloser(bytes.NewBuffer(body))
 	if err != nil {
@@ -293,7 +293,7 @@ func (rc *Router) verifyRequest(request *http.Request) error {
 		}
 
 		// Read the request body
-		body, err := getRequestBody(request)
+		body, err := rc.getRequestBody(request)
 		if err != nil {
 			return err
 		}

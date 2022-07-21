@@ -5930,6 +5930,19 @@ authentication
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>maxPayloadSize</code></br> <em> int64 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MaxPayloadSize is the maximum webhook payload size that the server will
+accept. Requests exceeding that limit will be rejected with “request too
+large” response. Default value: 1048576 (1MB).
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <hr/>
