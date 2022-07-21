@@ -115,7 +115,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	request.Body = http.MaxBytesReader(writer, request.Body, 65536)
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse the request body", zap.Error(err))

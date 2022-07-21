@@ -4,6 +4,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+const DefaultMaxWebhookPayloadSize int64 = 1048576 // 1MB
+
 // WebhookContext holds a general purpose REST API context
 type WebhookContext struct {
 	// REST API endpoint
@@ -25,4 +27,18 @@ type WebhookContext struct {
 	// AuthSecret holds a secret selector that contains a bearer token for authentication
 	// +optional
 	AuthSecret *corev1.SecretKeySelector `json:"authSecret,omitempty" protobuf:"bytes,8,opt,name=authSecret"`
+	// MaxPayloadSize is the maximum webhook payload size that the server will accept.
+	// Requests exceeding that limit will be rejected with "request too large" response.
+	// Default value: 1048576 (1MB).
+	// +optional
+	MaxPayloadSize *int64 `json:"maxPayloadSize,omitempty" protobuf:"bytes,9,opt,name=maxPayloadSize"`
+}
+
+func (wc *WebhookContext) GetMaxPayloadSize() int64 {
+	maxPayloadSize := DefaultMaxWebhookPayloadSize
+	if wc != nil && wc.MaxPayloadSize != nil {
+		maxPayloadSize = *wc.MaxPayloadSize
+	}
+
+	return maxPayloadSize
 }

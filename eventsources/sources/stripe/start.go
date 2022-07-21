@@ -95,8 +95,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	const MaxBodyBytes = int64(65536)
-	request.Body = http.MaxBytesReader(writer, request.Body, MaxBodyBytes)
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
 	payload, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("error reading request body", zap.Error(err))

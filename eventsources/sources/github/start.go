@@ -175,6 +175,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
 	body, err := parseValidateRequest(request, []byte(router.hookSecret))
 	if err != nil {
 		logger.Errorw("request is not valid event notification, discarding it", zap.Error(err))
