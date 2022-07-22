@@ -3424,6 +3424,12 @@ func schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref common.ReferenceCal
 							Format:      "",
 						},
 					},
+					"sessionToken": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SessionToken refers to K8s secret containing AWS temporary credentials(STS) session token",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 				Required: []string{"region", "queue", "waitTimeSeconds"},
 			},

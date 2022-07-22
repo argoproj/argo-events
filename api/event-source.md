@@ -5110,6 +5110,19 @@ Amazons servers
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>sessionToken</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+SessionToken refers to K8s secret containing AWS temporary
+credentials(STS) session token
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.Selector">
