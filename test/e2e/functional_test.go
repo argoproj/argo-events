@@ -90,21 +90,22 @@ func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
 }
 
 func (s *FunctionalSuite) TestMetricsWithCalendar() {
-	t1 := s.Given().EventSource("@testdata/es-calendar-metrics.yaml").
+	w1 := s.Given().EventSource("@testdata/es-calendar-metrics.yaml").
 		When().
 		CreateEventSource().
-		WaitForEventSourceReady().
-		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted).
-		EventSourcePodPortForward(7777, 7777)
+		WaitForEventSourceReady()
 
-	defer t1.TerminateAllPodPortForwards()
-	defer t1.When().DeleteEventSource()
+	defer w1.DeleteEventSource()
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().EventSourcePodPortForward(17777, 7777)
+
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	// EventSource POD metrics
-	s.e("http://localhost:7777").GET("/metrics").
+	s.e("http://localhost:17777").GET("/metrics").
 		Expect().
 		Status(200).
 		Body().
@@ -112,21 +113,20 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 		Contains("argo_events_events_sent_total").
 		Contains("argo_events_event_processing_duration_milliseconds")
 
-	t2 := s.Given().Sensor("@testdata/sensor-log-metrics.yaml").
+	w2 := s.Given().Sensor("@testdata/sensor-log-metrics.yaml").
 		When().
 		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogSensorStarted).
-		SensorPodPortForward(7778, 7777)
+		WaitForSensorReady()
+	defer w2.DeleteSensor()
 
-	defer t2.TerminateAllPodPortForwards()
-	defer t2.When().DeleteSensor()
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted)
+	defer w2.Then().SensorPodPortForward(17778, 7777).TerminateAllPodPortForwards()
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 
 	// Sensor POD metrics
-	s.e("http://localhost:7778").GET("/metrics").
+	s.e("http://localhost:17778").GET("/metrics").
 		Expect().
 		Status(200).
 		Body().
