@@ -456,7 +456,6 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 
 	t2.TerminateAllPodPortForwards()
 	t2.When().DeleteSensor().Then().ExpectNoSensorPodFound()
-	time.Sleep(3 * time.Second)
 
 	// Change Sensor's spec
 	t2 = s.Given().Sensor("@testdata/sensor-trigger-spec-change-2.yaml").
