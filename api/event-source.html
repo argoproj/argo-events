@@ -5774,6 +5774,20 @@ Kubernetes core/v1.SecretKeySelector
 <p>AuthSecret holds a secret selector that contains a bearer token for authentication</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>maxPayloadSize</code></br>
+<em>
+int64
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>MaxPayloadSize is the maximum webhook payload size that the server will accept.
+Requests exceeding that limit will be rejected with &ldquo;request too large&rdquo; response.
+Default value: 1048576 (1MB).</p>
+</td>
+</tr>
 </tbody>
 </table>
 <hr/>

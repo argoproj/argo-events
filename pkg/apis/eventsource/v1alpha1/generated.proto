@@ -1521,5 +1521,11 @@ message WebhookContext {
   // AuthSecret holds a secret selector that contains a bearer token for authentication
   // +optional
   optional k8s.io.api.core.v1.SecretKeySelector authSecret = 8;
+
+  // MaxPayloadSize is the maximum webhook payload size that the server will accept.
+  // Requests exceeding that limit will be rejected with "request too large" response.
+  // Default value: 1048576 (1MB).
+  // +optional
+  optional int64 maxPayloadSize = 9;
 }
 
