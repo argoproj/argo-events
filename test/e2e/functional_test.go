@@ -142,7 +142,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12000, 12000).
-		EventSourcePodPortForward(7777, 7777)
+		EventSourcePodPortForward(7717, 7777)
 
 	defer t1.TerminateAllPodPortForwards()
 	defer t1.When().DeleteEventSource()
@@ -153,7 +153,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		WaitForSensorReady().
 		Then().
 		ExpectSensorPodLogContains(LogSensorStarted).
-		SensorPodPortForward(7778, 7777)
+		SensorPodPortForward(7718, 7777)
 
 	defer t2.TerminateAllPodPortForwards()
 	defer t2.When().DeleteSensor()
@@ -172,7 +172,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Status(400)
 
 	// EventSource POD metrics
-	s.e("http://localhost:7777").GET("/metrics").
+	s.e("http://localhost:7717").GET("/metrics").
 		Expect().
 		Status(200).
 		Body().
@@ -186,7 +186,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		ExpectSensorPodLogContains(LogTriggerActionFailed)
 
 	// Sensor POD metrics
-	s.e("http://localhost:7778").GET("/metrics").
+	s.e("http://localhost:7718").GET("/metrics").
 		Expect().
 		Status(200).
 		Body().
