@@ -135,28 +135,30 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 }
 
 func (s *FunctionalSuite) TestMetricsWithWebhook() {
-	t1 := s.Given().EventSource("@testdata/es-test-metrics-webhook.yaml").
+	w1 := s.Given().EventSource("@testdata/es-test-metrics-webhook.yaml").
 		When().
 		CreateEventSource().
-		WaitForEventSourceReady().
-		Then().
+		WaitForEventSourceReady()
+
+	defer w1.DeleteEventSource()
+
+	w1.Then().ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12000, 12000).
-		EventSourcePodPortForward(7717, 7777)
+		EventSourcePodPortForward(7717, 7777).TerminateAllPodPortForwards()
 
-	defer t1.TerminateAllPodPortForwards()
-	defer t1.When().DeleteEventSource()
-
-	t2 := s.Given().Sensor("@testdata/sensor-test-metrics.yaml").
+	w2 := s.Given().Sensor("@testdata/sensor-test-metrics.yaml").
 		When().
 		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogSensorStarted).
-		SensorPodPortForward(7718, 7777)
+		WaitForSensorReady()
 
-	defer t2.TerminateAllPodPortForwards()
-	defer t2.When().DeleteSensor()
+	defer w2.DeleteSensor()
+
+	defer w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted).
+		SensorPodPortForward(7718, 7777).TerminateAllPodPortForwards()
 
 	time.Sleep(3 * time.Second)
 
@@ -164,7 +166,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	// Post something invalid
 	s.e("http://localhost:12000").POST("/example").WithBytes([]byte("Invalid JSON")).
@@ -182,7 +184,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Contains("argo_events_events_processing_failed_total")
 
 	// Expect to see 1 success and 1 failure
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger")).
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger")).
 		ExpectSensorPodLogContains(LogTriggerActionFailed)
 
 	// Sensor POD metrics
