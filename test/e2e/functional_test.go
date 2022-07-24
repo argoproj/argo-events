@@ -225,62 +225,59 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 
 func (s *FunctionalSuite) TestMultiDependencyConditions() {
 
-	t1 := s.Given().EventSource("@testdata/es-multi-dep.yaml").
+	w1 := s.Given().EventSource("@testdata/es-multi-dep.yaml").
 		When().
 		CreateEventSource().
-		WaitForEventSourceReady().
-		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted).
-		EventSourcePodPortForward(12001, 12000).
-		EventSourcePodPortForward(13001, 13000).
-		EventSourcePodPortForward(14001, 14000).
-		EventSourcePodPortForward(7777, 7777)
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
 
-	defer t1.When().DeleteEventSource()
-	defer t1.TerminateAllPodPortForwards()
+	w1.Then().ExpectEventSourcePodLogContains(LogEventSourceStarted)
 
-	t2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
+	defer w1.Then().
+		EventSourcePodPortForward(12011, 12000).
+		EventSourcePodPortForward(13011, 13000).
+		EventSourcePodPortForward(14011, 14000).
+		TerminateAllPodPortForwards()
+
+	w2 := s.Given().Sensor("@testdata/sensor-multi-dep.yaml").
 		When().
 		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
-		SensorPodPortForward(7778, 7777)
+		WaitForSensorReady()
+	defer w2.DeleteSensor()
 
-	defer t2.When().DeleteSensor()
-	defer t2.TerminateAllPodPortForwards()
+	w2.Then().ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
 	time.Sleep(3 * time.Second)
 
 	// need to verify the conditional logic is working successfully
 	// If we trigger test-dep-1 (port 12000) we should see log-trigger-2 but not log-trigger-1
-	s.e("http://localhost:12001").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:12011").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-2"), util.PodLogCheckOptionWithCount(1)).
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-2"), util.PodLogCheckOptionWithCount(1)).
 		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 
 	// Then if we trigger test-dep-2 we should see log-trigger-2
-	s.e("http://localhost:13001").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:13011").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 
 	// Then we trigger test-dep-2 again and shouldn't see anything
-	s.e("http://localhost:13001").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:13011").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 
 	// Finally trigger test-dep-3 and we should see log-trigger-1..
-	s.e("http://localhost:14001").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:14011").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(2))
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(2))
 }
 
 // Start Pod with a multidependency condition
