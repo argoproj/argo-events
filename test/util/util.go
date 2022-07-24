@@ -415,3 +415,23 @@ func podLogContainsCount(ctx context.Context, client kubernetes.Interface, names
 		}
 	}
 }
+
+func WaitForNoPodFound(ctx context.Context, kubeClient kubernetes.Interface, namespace, labelSelector string, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	for {
+		podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector})
+		if err != nil {
+			return fmt.Errorf("error getting pod list: %w", err)
+		}
+		if len(podList.Items) == 0 {
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("timeout waiting for pod disappearing")
+		default:
+		}
+		time.Sleep(2 * time.Second)
+	}
+}

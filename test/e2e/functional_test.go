@@ -455,7 +455,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
 	t2.TerminateAllPodPortForwards()
-	t2.When().DeleteSensor()
+	t2.When().DeleteSensor().Then().ExpectNoSensorPodFound()
 	time.Sleep(3 * time.Second)
 
 	// Change Sensor's spec
