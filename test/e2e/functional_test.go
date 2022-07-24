@@ -428,8 +428,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
 		EventSourcePodPortForward(12004, 12000).
 		EventSourcePodPortForward(13004, 13000).
-		EventSourcePodPortForward(14004, 14000).
-		EventSourcePodPortForward(7784, 7777)
+		EventSourcePodPortForward(14004, 14000)
 
 	defer t1.When().DeleteEventSource()
 	defer t1.TerminateAllPodPortForwards()
@@ -441,8 +440,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
-		SensorPodPortForward(7785, 7777)
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
 	time.Sleep(3 * time.Second)
 
@@ -454,7 +452,6 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
-	t2.TerminateAllPodPortForwards()
 	t2.When().DeleteSensor().Then().ExpectNoSensorPodFound()
 
 	// Change Sensor's spec
@@ -463,10 +460,8 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		CreateSensor().
 		WaitForSensorReady().
 		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
-		SensorPodPortForward(7786, 7777)
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
-	defer t2.TerminateAllPodPortForwards()
 	defer t2.When().DeleteSensor()
 
 	time.Sleep(3 * time.Second)
