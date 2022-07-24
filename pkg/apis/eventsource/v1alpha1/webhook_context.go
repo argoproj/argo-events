@@ -16,13 +16,10 @@ type WebhookContext struct {
 	// Port on which HTTP server is listening for incoming events.
 	Port string `json:"port" protobuf:"bytes,3,opt,name=port"`
 	// URL is the url of the server.
-	// +optional
-	URL string `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
+	URL string `json:"url" protobuf:"bytes,4,opt,name=url"`
 	// ServerCertPath refers the file that contains the cert.
-	// +optional
 	ServerCertSecret *corev1.SecretKeySelector `json:"serverCertSecret,omitempty" protobuf:"bytes,5,opt,name=serverCertSecret"`
 	// ServerKeyPath refers the file that contains private key
-	// +optional
 	ServerKeySecret *corev1.SecretKeySelector `json:"serverKeySecret,omitempty" protobuf:"bytes,6,opt,name=serverKeySecret"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
