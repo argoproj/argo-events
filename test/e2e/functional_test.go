@@ -251,7 +251,7 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 
 	// need to verify the conditional logic is working successfully
 	// If we trigger test-dep-1 (port 12000) we should see log-trigger-2 but not log-trigger-1
-	s.e("http://localhost:12011").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:12011").POST("/example1").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
@@ -261,20 +261,20 @@ func (s *FunctionalSuite) TestMultiDependencyConditions() {
 		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 
 	// Then if we trigger test-dep-2 we should see log-trigger-2
-	s.e("http://localhost:13011").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:13011").POST("/example2").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
 	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 
 	// Then we trigger test-dep-2 again and shouldn't see anything
-	s.e("http://localhost:13011").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:13011").POST("/example2").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 
 	// Finally trigger test-dep-3 and we should see log-trigger-1..
-	s.e("http://localhost:14011").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:14011").POST("/example3").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(2))
