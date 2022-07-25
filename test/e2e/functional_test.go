@@ -289,62 +289,54 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		// (because when Sensor pod restarts it sometimes takes a little while for the STAN bus to resend the message to the durable consumer)
 	}
 
-	t1 := s.Given().EventSource("@testdata/es-durable-consumer.yaml").
+	w1 := s.Given().EventSource("@testdata/es-durable-consumer.yaml").
 		When().
 		CreateEventSource().
-		WaitForEventSourceReady().
-		Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted).
-		EventSourcePodPortForward(12002, 12000).
-		EventSourcePodPortForward(13002, 13000).
-		EventSourcePodPortForward(14002, 14000).
-		EventSourcePodPortForward(7779, 7777)
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
 
-	defer t1.When().DeleteEventSource()
-	defer t1.TerminateAllPodPortForwards()
+	w1.Then().ExpectEventSourcePodLogContains(LogEventSourceStarted)
 
-	t2 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
+	defer w1.Then().
+		EventSourcePodPortForward(12102, 12000).
+		EventSourcePodPortForward(13102, 13000).TerminateAllPodPortForwards()
+
+	w2 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
 		When().
 		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
-		SensorPodPortForward(7780, 7777)
+		WaitForSensorReady()
+
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
 	// test-dep-1
-	s.e("http://localhost:12002").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:12102").POST("/example1").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-
-	t2.TerminateAllPodPortForwards()
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 
 	// delete the Sensor
-	t2.When().
-		DeleteSensor()
+	w2.DeleteSensor().Then().ExpectNoSensorPodFound()
 
-	time.Sleep(6 * time.Second) // need to give this time to be deleted before we create the new one
-
-	t3 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
+	w3 := s.Given().Sensor("@testdata/sensor-durable-consumer.yaml").
 		When().
 		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1)).
-		SensorPodPortForward(7780, 7777)
+		WaitForSensorReady()
+	defer w3.DeleteSensor()
 
-	defer t3.TerminateAllPodPortForwards()
-	defer t3.When().DeleteSensor()
+	w3.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
 	// test-dep-2
-	s.e("http://localhost:13002").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:13102").POST("/example2").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
 	time.Sleep(60 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
 
-	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
-	t3.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
+	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 }
 
 func (s *FunctionalSuite) TestMultipleSensors() {
