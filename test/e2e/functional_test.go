@@ -145,8 +145,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 	w1.Then().ExpectEventSourcePodLogContains(LogEventSourceStarted)
 
 	defer w1.Then().
-		ExpectEventSourcePodLogContains(LogEventSourceStarted).
-		EventSourcePodPortForward(12000, 12000).
+		EventSourcePodPortForward(12300, 12000).
 		EventSourcePodPortForward(7717, 7777).TerminateAllPodPortForwards()
 
 	w2 := s.Given().Sensor("@testdata/sensor-test-metrics.yaml").
@@ -155,21 +154,21 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		WaitForSensorReady()
 
 	defer w2.DeleteSensor()
+	w2.Then().ExpectSensorPodLogContains(LogSensorStarted)
 
 	defer w2.Then().
-		ExpectSensorPodLogContains(LogSensorStarted).
 		SensorPodPortForward(7718, 7777).TerminateAllPodPortForwards()
 
 	time.Sleep(3 * time.Second)
 
-	s.e("http://localhost:12000").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:12300").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	// Post something invalid
-	s.e("http://localhost:12000").POST("/example").WithBytes([]byte("Invalid JSON")).
+	s.e("http://localhost:12300").POST("/example").WithBytes([]byte("Invalid JSON")).
 		Expect().
 		Status(400)
 
@@ -333,7 +332,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 		Expect().
 		Status(200)
 
-	time.Sleep(30 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
+	time.Sleep(60 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
 	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
