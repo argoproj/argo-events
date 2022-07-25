@@ -100,7 +100,7 @@ func (s *FunctionalSuite) TestMetricsWithCalendar() {
 	w1.Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted)
 
-	defer w1.Then().EventSourcePodPortForward(17777, 7777)
+	defer w1.Then().EventSourcePodPortForward(17777, 7777).TerminateAllPodPortForwards()
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
