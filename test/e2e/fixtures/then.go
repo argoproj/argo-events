@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,6 +39,15 @@ func (t *Then) ExpectEventBusDeleted() *Then {
 	_, err := t.eventBusClient.Get(ctx, t.eventBus.Name, metav1.GetOptions{})
 	if err == nil || !apierr.IsNotFound(err) {
 		t.t.Fatalf("expected event bus to be deleted: %v", err)
+	}
+	return t
+}
+
+func (t *Then) ExpectNoSensorPodFound() *Then {
+	ctx := context.Background()
+	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", t.sensor.Name)
+	if err := testutil.WaitForNoPodFound(ctx, t.kubeClient, Namespace, labelSelector, 20*time.Second); err != nil {
+		t.t.Fatalf("expected no sensor pod found: %v", err)
 	}
 	return t
 }

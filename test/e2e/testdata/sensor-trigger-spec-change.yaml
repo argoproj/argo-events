@@ -5,7 +5,6 @@ metadata:
 spec:
   replicas: 1
   template:
-    serviceAccountName: argo-events-sa
     container:
       env:
         - name: DEBUG_LOG
