@@ -331,9 +331,6 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 	s.e("http://localhost:13102").POST("/example2").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
-
-	time.Sleep(60 * time.Second) // takes a little while for the first dependency to get sent to our new consumer
-
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
 	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(1))
 }
