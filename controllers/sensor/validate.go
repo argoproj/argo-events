@@ -25,6 +25,7 @@ import (
 	cronlib "github.com/robfig/cron/v3"
 
 	"github.com/argoproj/argo-events/common"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -32,8 +33,16 @@ import (
 // we return an error so that it can be logged as a message on the sensor status
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
 // Exporting this function so that external APIs can use this to validate sensor resource.
-func ValidateSensor(s *v1alpha1.Sensor) error {
-	if err := validateDependencies(s.Spec.Dependencies); err != nil {
+func ValidateSensor(s *v1alpha1.Sensor, b *eventbusv1alpha1.EventBus) error {
+	if s == nil {
+		s.Status.MarkDependenciesNotProvided("InvalidSensor", "nil sensor")
+		return fmt.Errorf("nil sensor")
+	}
+	if b == nil {
+		s.Status.MarkDependenciesNotProvided("InvalidEventBus", "nil eventbus")
+		return fmt.Errorf("nil eventbus")
+	}
+	if err := validateDependencies(s.Spec.Dependencies, b); err != nil {
 		s.Status.MarkDependenciesNotProvided("InvalidDependencies", err.Error())
 		return err
 	}
@@ -50,7 +59,7 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 // validateTriggers validates triggers
 func validateTriggers(triggers []v1alpha1.Trigger) error {
 	if len(triggers) < 1 {
-		return errors.Errorf("no triggers found")
+		return fmt.Errorf("no triggers found")
 	}
 
 	trigNames := make(map[string]bool)
@@ -76,22 +85,22 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 // validateTriggerTemplate validates trigger template
 func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	if template == nil {
-		return errors.Errorf("trigger template can't be nil")
+		return fmt.Errorf("trigger template can't be nil")
 	}
 	if template.Name == "" {
-		return errors.Errorf("trigger must define a name")
+		return fmt.Errorf("trigger must define a name")
 	}
 	if len(template.ConditionsReset) > 0 {
 		for _, c := range template.ConditionsReset {
 			if c.ByTime == nil {
-				return errors.Errorf("invalid conditionsReset")
+				return fmt.Errorf("invalid conditionsReset")
 			}
 			parser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
 			if _, err := parser.Parse(c.ByTime.Cron); err != nil {
-				return errors.Errorf("invalid cron expression %q", c.ByTime.Cron)
+				return fmt.Errorf("invalid cron expression %q", c.ByTime.Cron)
 			}
 			if _, err := time.LoadLocation(c.ByTime.Timezone); err != nil {
-				return errors.Errorf("invalid timezone %q", c.ByTime.Timezone)
+				return fmt.Errorf("invalid timezone %q", c.ByTime.Timezone)
 			}
 		}
 	}
@@ -178,7 +187,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	}
 
 	switch trigger.Operation {
-	case v1alpha1.Submit, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit, v1alpha1.Terminate, v1alpha1.Stop:
+	case v1alpha1.Submit, v1alpha1.SubmitFrom, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit, v1alpha1.Terminate, v1alpha1.Stop:
 	default:
 		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
@@ -420,28 +429,31 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 }
 
 // perform a check to see that each event dependency is in correct format and has valid filters set if any
-func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
+func validateDependencies(eventDependencies []v1alpha1.EventDependency, b *eventbusv1alpha1.EventBus) error {
 	if len(eventDependencies) < 1 {
-		return errors.New("no event dependencies found")
+		return fmt.Errorf("no event dependencies found")
 	}
+
 	comboKeys := make(map[string]bool)
 	for _, dep := range eventDependencies {
 		if dep.Name == "" {
-			return errors.New("event dependency must define a name")
+			return fmt.Errorf("event dependency must define a name")
 		}
 		if dep.EventSourceName == "" {
-			return errors.New("event dependency must define the EventSourceName")
+			return fmt.Errorf("event dependency must define the EventSourceName")
 		}
 
 		if dep.EventName == "" {
-			return errors.New("event dependency must define the EventName")
+			return fmt.Errorf("event dependency must define the EventName")
 		}
-		// EventSourceName + EventName can not be referenced more than once in one Sensor object.
-		comboKey := fmt.Sprintf("%s-$$$-%s", dep.EventSourceName, dep.EventName)
-		if _, existing := comboKeys[comboKey]; existing {
-			return errors.Errorf("%s and %s are referenced more than once in this Sensor object", dep.EventSourceName, dep.EventName)
+		if b.Spec.NATS != nil {
+			// For STAN, EventSourceName + EventName can not be referenced more than once in one Sensor object.
+			comboKey := fmt.Sprintf("%s-$$$-%s", dep.EventSourceName, dep.EventName)
+			if _, existing := comboKeys[comboKey]; existing {
+				return fmt.Errorf("event '%s' from EventSource '%s' is referenced for more than one dependency in this Sensor object", dep.EventName, dep.EventSourceName)
+			}
+			comboKeys[comboKey] = true
 		}
-		comboKeys[comboKey] = true
 
 		if err := validateEventFilter(dep.Filters); err != nil {
 			return err
@@ -459,7 +471,7 @@ func validateLogicalOperator(logOp v1alpha1.LogicalOperator) error {
 	if logOp != v1alpha1.AndLogicalOperator &&
 		logOp != v1alpha1.OrLogicalOperator &&
 		logOp != v1alpha1.EmptyLogicalOperator {
-		return errors.Errorf("logical operator %s not supported", logOp)
+		return fmt.Errorf("logical operator %s not supported", logOp)
 	}
 	return nil
 }
@@ -473,7 +485,7 @@ func validateComparator(comp v1alpha1.Comparator) error {
 		comp != v1alpha1.LessThan &&
 		comp != v1alpha1.LessThanOrEqualTo &&
 		comp != v1alpha1.EmptyComparator {
-		return errors.Errorf("comparator %s not supported", comp)
+		return fmt.Errorf("comparator %s not supported", comp)
 	}
 
 	return nil
@@ -527,12 +539,12 @@ func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
 func validateEventExprFilter(exprFilter *v1alpha1.ExprFilter) error {
 	if exprFilter.Expr == "" ||
 		len(exprFilter.Fields) == 0 {
-		return errors.New("one of expr filters is not valid (expr and fields must be not empty)")
+		return fmt.Errorf("one of expr filters is not valid (expr and fields must be not empty)")
 	}
 
 	for _, fld := range exprFilter.Fields {
 		if fld.Path == "" || fld.Name == "" {
-			return errors.New("one of expr filters is not valid (path and name in a field must be not empty)")
+			return fmt.Errorf("one of expr filters is not valid (path and name in a field must be not empty)")
 		}
 	}
 
@@ -550,12 +562,12 @@ func validateEventDataFilter(dataFilter *v1alpha1.DataFilter) error {
 	if dataFilter.Path == "" ||
 		dataFilter.Type == "" ||
 		len(dataFilter.Value) == 0 {
-		return errors.New("one of data filters is not valid (type, path and value must be not empty)")
+		return fmt.Errorf("one of data filters is not valid (type, path and value must be not empty)")
 	}
 
 	for _, val := range dataFilter.Value {
 		if val == "" {
-			return errors.New("one of data filters is not valid (value must be not empty)")
+			return fmt.Errorf("one of data filters is not valid (value must be not empty)")
 		}
 	}
 
@@ -568,7 +580,7 @@ func validateEventCtxFilter(ctxFilter *v1alpha1.EventContext) error {
 		ctxFilter.Subject == "" &&
 		ctxFilter.Source == "" &&
 		ctxFilter.DataContentType == "" {
-		return errors.New("no fields specified in ctx filter (aka all events will be discarded)")
+		return fmt.Errorf("no fields specified in ctx filter (aka all events will be discarded)")
 	}
 	return nil
 }
@@ -619,7 +631,7 @@ func validateK8sTriggerPolicy(policy *v1alpha1.K8SResourcePolicy) error {
 		return nil
 	}
 	if policy.Labels == nil {
-		return errors.New("resource labels are not specified")
+		return fmt.Errorf("resource labels are not specified")
 	}
 	return nil
 }
@@ -630,7 +642,7 @@ func validateStatusPolicy(policy *v1alpha1.StatusPolicy) error {
 		return nil
 	}
 	if policy.Allow == nil {
-		return errors.New("list of allowed response status is not specified")
+		return fmt.Errorf("list of allowed response status is not specified")
 	}
 	return nil
 }

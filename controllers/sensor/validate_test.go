@@ -18,10 +18,11 @@ package sensor
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
@@ -30,37 +31,55 @@ import (
 
 func TestValidateSensor(t *testing.T) {
 	dir := "../../examples/sensors"
-	files, dirErr := ioutil.ReadDir(dir)
-	require.NoError(t, dirErr)
+	dirEntries, err := os.ReadDir(dir)
+	require.NoError(t, err)
 
-	for _, file := range files {
+	for _, entry := range dirEntries {
+		if entry.IsDir() {
+			continue
+		}
 		t.Run(
-			fmt.Sprintf("test example load: %s/%s", dir, file.Name()),
+			fmt.Sprintf("test example load: %s/%s", dir, entry.Name()),
 			func(t *testing.T) {
-				content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
+				content, err := os.ReadFile(fmt.Sprintf("%s/%s", dir, entry.Name()))
 				assert.NoError(t, err)
 
 				var sensor *v1alpha1.Sensor
+				eventBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{JetStream: &eventbusv1alpha1.JetStreamBus{}}}
 				err = yaml.Unmarshal(content, &sensor)
 				assert.NoError(t, err)
 
-				err = ValidateSensor(sensor)
+				err = ValidateSensor(sensor, eventBus)
 				assert.NoError(t, err)
 			})
 	}
 }
 
 func TestValidDependencies(t *testing.T) {
-	t.Run("test duplicate deps", func(t *testing.T) {
+	jetstreamBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{JetStream: &eventbusv1alpha1.JetStreamBus{}}}
+	stanBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{NATS: &eventbusv1alpha1.NATSBus{}}}
+
+	t.Run("test duplicate deps fail for STAN", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()
 		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
 			Name:            "fake-dep2",
 			EventSourceName: "fake-source",
 			EventName:       "fake-one",
 		})
-		err := ValidateSensor(sObj)
+		err := ValidateSensor(sObj, stanBus)
 		assert.NotNil(t, err)
-		assert.Equal(t, true, strings.Contains(err.Error(), "more than once"))
+		assert.Equal(t, true, strings.Contains(err.Error(), "is referenced for more than one dependency"))
+	})
+
+	t.Run("test duplicate deps are fine for Jetstream", func(t *testing.T) {
+		sObj := sensorObj.DeepCopy()
+		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
+			Name:            "fake-dep2",
+			EventSourceName: "fake-source",
+			EventName:       "fake-one",
+		})
+		err := ValidateSensor(sObj, jetstreamBus)
+		assert.Nil(t, err)
 	})
 
 	t.Run("test empty event source name", func(t *testing.T) {
@@ -69,7 +88,7 @@ func TestValidDependencies(t *testing.T) {
 			Name:      "fake-dep2",
 			EventName: "fake-one",
 		})
-		err := ValidateSensor(sObj)
+		err := ValidateSensor(sObj, jetstreamBus)
 		assert.NotNil(t, err)
 		assert.Equal(t, true, strings.Contains(err.Error(), "must define the EventSourceName"))
 	})
@@ -80,7 +99,7 @@ func TestValidDependencies(t *testing.T) {
 			Name:            "fake-dep2",
 			EventSourceName: "fake-source",
 		})
-		err := ValidateSensor(sObj)
+		err := ValidateSensor(sObj, jetstreamBus)
 		assert.NotNil(t, err)
 		assert.Equal(t, true, strings.Contains(err.Error(), "must define the EventName"))
 	})
@@ -91,7 +110,7 @@ func TestValidDependencies(t *testing.T) {
 			EventSourceName: "fake-source2",
 			EventName:       "fake-one2",
 		})
-		err := ValidateSensor(sObj)
+		err := ValidateSensor(sObj, jetstreamBus)
 		assert.NotNil(t, err)
 		assert.Equal(t, true, strings.Contains(err.Error(), "must define a name"))
 	})

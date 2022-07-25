@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -141,7 +141,8 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	}
 
 	logger.Info("parsing the request body...")
-	body, err := ioutil.ReadAll(request.Body)
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, "")
@@ -337,7 +338,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Storage Grid event source...")

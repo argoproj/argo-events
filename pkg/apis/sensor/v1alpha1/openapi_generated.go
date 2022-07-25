@@ -24,8 +24,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	spec "github.com/go-openapi/spec"
 	common "k8s.io/kube-openapi/pkg/common"
+	spec "k8s.io/kube-openapi/pkg/validation/spec"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -759,6 +759,13 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"script": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Script refers to a Lua script evaluated to determine the validity of an event.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -918,6 +925,13 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 						SchemaProps: spec.SchemaProps{
 							Description: "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig"),
+						},
+					},
+					"insecureIgnoreHostKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Whether to ignore host key",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},

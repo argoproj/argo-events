@@ -14,7 +14,9 @@ import (
 
 	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -50,11 +52,12 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", eventSource.Namespace).With("eventSource", eventSource.Name)
+	ctx = logging.WithLogger(ctx, log)
 	esCopy := eventSource.DeepCopy()
 	reconcileErr := r.reconcile(ctx, esCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
-		r.cfClient.ReportError(reconcileErr, codefresh.ErrorContext{
+		r.cfClient.ReportError(errors.Wrap(reconcileErr, "reconcile error"), codefresh.ErrorContext{
 			ObjectMeta: eventSource.ObjectMeta,
 			TypeMeta:   eventSource.TypeMeta,
 		})
@@ -72,7 +75,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventSource) error {
-	log := r.logger.With("namespace", eventSource.Namespace).With("eventSource", eventSource.Name)
+	log := logging.FromContext(ctx)
 	if !eventSource.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventsource")
 		if controllerutil.ContainsFinalizer(eventSource, finalizerName) {

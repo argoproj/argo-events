@@ -45,13 +45,14 @@ type ArgoWorkflowOperation string
 
 // possible values for ArgoWorkflowOperation
 const (
-	Submit    ArgoWorkflowOperation = "submit"    // submit a workflow
-	Suspend   ArgoWorkflowOperation = "suspend"   // suspends a workflow
-	Resubmit  ArgoWorkflowOperation = "resubmit"  // resubmit a workflow
-	Retry     ArgoWorkflowOperation = "retry"     // retry a workflow
-	Resume    ArgoWorkflowOperation = "resume"    // resume a workflow
-	Terminate ArgoWorkflowOperation = "terminate" // terminate a workflow
-	Stop      ArgoWorkflowOperation = "stop"      // stop a workflow
+	Submit     ArgoWorkflowOperation = "submit"      // submit a workflow
+	SubmitFrom ArgoWorkflowOperation = "submit-from" // submit from existing resource
+	Suspend    ArgoWorkflowOperation = "suspend"     // suspends a workflow
+	Resubmit   ArgoWorkflowOperation = "resubmit"    // resubmit a workflow
+	Retry      ArgoWorkflowOperation = "retry"       // retry a workflow
+	Resume     ArgoWorkflowOperation = "resume"      // resume a workflow
+	Terminate  ArgoWorkflowOperation = "terminate"   // terminate a workflow
+	Stop       ArgoWorkflowOperation = "stop"        // stop a workflow
 )
 
 // Comparator refers to the comparator operator for a data filter
@@ -231,6 +232,8 @@ type EventDependencyFilter struct {
 	// Available values: and (&&), or (||)
 	// Is optional and if left blank treated as and (&&).
 	ExprLogicalOperator LogicalOperator `json:"exprLogicalOperator,omitempty" protobuf:"bytes,6,opt,name=exprLogicalOperator,casttype=ExprLogicalOperator"`
+	// Script refers to a Lua script evaluated to determine the validity of an event.
+	Script string `json:"script,omitempty" protobuf:"bytes,7,opt,name=script"`
 }
 
 type ExprFilter struct {
@@ -894,6 +897,9 @@ type GitArtifact struct {
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
 	Remote *GitRemoteConfig `json:"remote,omitempty" protobuf:"bytes,9,opt,name=remote"`
+	// Whether to ignore host key
+	// +optional
+	InsecureIgnoreHostKey bool `json:"insecureIgnoreHostKey,omitempty" protobuf:"bytes,10,opt,name=insecureIgnoreHostKey"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote

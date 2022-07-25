@@ -12,7 +12,7 @@ import (
 
 func TestCreateCerts(t *testing.T) {
 	t.Run("test create certs", func(t *testing.T) {
-		sKey, serverCertPEM, caCertBytes, err := CreateCerts("test-org", []string{"test-host"}, time.Now().AddDate(1, 0, 0))
+		sKey, serverCertPEM, caCertBytes, err := CreateCerts("test-org", []string{"test-host"}, time.Now().AddDate(1, 0, 0), true, false)
 		assert.NoError(t, err)
 		p, _ := pem.Decode(sKey)
 		assert.Equal(t, "RSA PRIVATE KEY", p.Type)

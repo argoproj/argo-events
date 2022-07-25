@@ -117,7 +117,7 @@ func (c *FakeEventBus) UpdateStatus(ctx context.Context, eventBus *v1alpha1.Even
 // Delete takes name of the eventBus and deletes it. Returns an error if one occurs.
 func (c *FakeEventBus) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(eventbusResource, c.ns, name), &v1alpha1.EventBus{})
+		Invokes(testing.NewDeleteActionWithOptions(eventbusResource, c.ns, name, opts), &v1alpha1.EventBus{})
 
 	return err
 }

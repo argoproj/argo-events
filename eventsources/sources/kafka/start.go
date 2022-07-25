@@ -72,7 +72,7 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
@@ -87,7 +87,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	config, err := getSaramaConfig(kafkaEventSource, log)
 	if err != nil {
 		return err
@@ -157,7 +157,7 @@ func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.Sug
 	return nil
 }
 
-func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.SugaredLogger, kafkaEventSource *v1alpha1.KafkaEventSource, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	defer sources.Recover(el.GetEventName())
 
 	log.Info("start kafka event source...")
@@ -320,7 +320,7 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 // Consumer represents a Sarama consumer group consumer
 type Consumer struct {
 	ready            chan bool
-	dispatch         func([]byte, ...eventsourcecommon.Options) error
+	dispatch         func([]byte, ...eventsourcecommon.Option) error
 	logger           *zap.SugaredLogger
 	kafkaEventSource *v1alpha1.KafkaEventSource
 	eventSourceName  string

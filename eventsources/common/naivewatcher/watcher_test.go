@@ -2,7 +2,6 @@ package naivewatcher
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -41,7 +40,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}
 	defer watcher.Close()
 
-	tmpdir, err := ioutil.TempDir("", "naive-watcher-")
+	tmpdir, err := os.MkdirTemp("", "naive-watcher-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +84,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}, events)
 
 	// Write a file
-	err = ioutil.WriteFile(filepath.Join(tmpdir, "bar"), []byte("wow"), 0666)
+	err = os.WriteFile(filepath.Join(tmpdir, "bar"), []byte("wow"), 0666)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +110,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = ioutil.WriteFile(filepath.Join(tmpdir, "foo"), []byte("wowwow"), 0666)
+	err = os.WriteFile(filepath.Join(tmpdir, "foo"), []byte("wowwow"), 0666)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +157,7 @@ func TestWatcherManualCheck(t *testing.T) {
 	}
 	defer watcher.Close()
 
-	tmpdir, err := ioutil.TempDir("", "naive-watcher-")
+	tmpdir, err := os.MkdirTemp("", "naive-watcher-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +192,7 @@ func TestWatcherManualCheck(t *testing.T) {
 	}, events)
 
 	// Write a file
-	err = ioutil.WriteFile(filepath.Join(tmpdir, "bar"), []byte("wow"), 0666)
+	err = os.WriteFile(filepath.Join(tmpdir, "bar"), []byte("wow"), 0666)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +216,7 @@ func TestWatcherManualCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = ioutil.WriteFile(filepath.Join(tmpdir, "foo"), []byte("wowwow"), 0666)
+	err = os.WriteFile(filepath.Join(tmpdir, "foo"), []byte("wowwow"), 0666)
 	if err != nil {
 		t.Fatal(err)
 	}

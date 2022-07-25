@@ -18,6 +18,7 @@ package dependencies
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -30,8 +31,8 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/pkg/json"
 	"github.com/tidwall/gjson"
+	lua "github.com/yuin/gopher-lua"
 )
 
 const (
@@ -87,14 +88,19 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, operator v1alpha1.Logic
 		errMessages = append(errMessages, timeErr.Error())
 	}
 
+	scriptFilter, err := filterScript(filter.Script, event)
+	if err != nil {
+		return false, err
+	}
+
 	if operator == v1alpha1.OrLogicalOperator {
 		if len(errMessages) > 0 {
-			return exprFilter || dataFilter || ctxFilter || timeFilter,
+			return exprFilter || dataFilter || ctxFilter || timeFilter || scriptFilter,
 				errors.New(strings.Join(errMessages, errMsgListSeparator))
 		}
-		return exprFilter || dataFilter || ctxFilter || timeFilter, nil
+		return exprFilter || dataFilter || ctxFilter || timeFilter || scriptFilter, nil
 	}
-	return exprFilter && dataFilter && ctxFilter && timeFilter, nil
+	return exprFilter && dataFilter && ctxFilter && timeFilter && scriptFilter, nil
 }
 
 // filterExpr applies expression based filters against event data
@@ -111,7 +117,7 @@ func filterExpr(filters []v1alpha1.ExprFilter, operator v1alpha1.LogicalOperator
 	if payload == nil {
 		return true, nil
 	}
-	if !json.IsJSON(payload) {
+	if !gjson.Valid(string(payload)) {
 		return false, fmt.Errorf(errMsgTemplate, "expr", "event data not valid JSON")
 	}
 
@@ -195,7 +201,7 @@ func filterData(filters []v1alpha1.DataFilter, operator v1alpha1.LogicalOperator
 	if payload == nil {
 		return true, nil
 	}
-	if !json.IsJSON(payload) {
+	if !gjson.Valid(string(payload)) {
 		return false, fmt.Errorf(errMsgTemplate, "data", "event data not valid JSON")
 	}
 
@@ -476,4 +482,39 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 	} else {
 		return (eventTime.After(startTime) || eventTime.Equal(startTime)) || eventTime.Before(stopTime), nil
 	}
+}
+
+func filterScript(script string, event *v1alpha1.Event) (bool, error) {
+	if script == "" {
+		return true, nil
+	}
+	if event == nil {
+		return false, fmt.Errorf("nil event")
+	}
+	payload := event.Data
+	if payload == nil {
+		return true, nil
+	}
+	var js *json.RawMessage
+	if err := json.Unmarshal(payload, &js); err != nil {
+		return false, err
+	}
+	var jsData []byte
+	jsData, err := json.Marshal(js)
+	if err != nil {
+		return false, err
+	}
+	l := lua.NewState()
+	defer l.Close()
+	var payloadJson map[string]interface{}
+	if err = json.Unmarshal(jsData, &payloadJson); err != nil {
+		return false, err
+	}
+	lEvent := mapToTable(payloadJson)
+	l.SetGlobal("event", lEvent)
+	if err = l.DoString(script); err != nil {
+		return false, err
+	}
+	lv := l.Get(-1)
+	return lv == lua.LTrue, nil
 }

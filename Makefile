@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
-VERSION?=v1.6.3-cap-CR-13090
-BASE_VERSION:=v1.6.3-cap-CR-13090
+VERSION?=v1.7.1-cap-CR-13091
+BASE_VERSION:=v1.7.1-cap-CR-13091
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -89,6 +89,11 @@ test:
 test-functional:
 	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e
 
+# to run just one of the functional e2e tests by name (i.e. 'make TestMetricsWithWebhook'):
+Test%:
+	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e  -run='.*/$*'
+
+
 coverage:
 	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/)
 	go tool cover -func=profile.cov
@@ -139,12 +144,12 @@ start: image
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.44.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
 	go mod tidy
-	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 10m
 
 # release - targets only available on release branch
 ifneq ($(findstring release,$(GIT_BRANCH)),)

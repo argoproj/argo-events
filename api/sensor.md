@@ -1083,6 +1083,17 @@ and if left blank treated as and (&&).
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>script</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Script refers to a Lua script evaluated to determine the validity of an
+event.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventDependencyTransformer">
@@ -1338,6 +1349,17 @@ fetch.
 Remote to manage set of tracked repositories. Defaults to “origin”.
 Refer
 <a href="https://git-scm.com/docs/git-remote">https://git-scm.com/docs/git-remote</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>insecureIgnoreHostKey</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Whether to ignore host key
 </p>
 </td>
 </tr>

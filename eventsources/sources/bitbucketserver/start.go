@@ -17,9 +17,13 @@ package bitbucketserver
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
-	"io/ioutil"
-	"math/rand"
+	"io"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -80,9 +84,10 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	body, err := ioutil.ReadAll(request.Body)
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
+	body, err := router.parseAndValidateBitbucketServerRequest(request)
 	if err != nil {
-		logger.Errorw("failed to parse request body", zap.Error(err))
+		logger.Errorw("failed to parse/validate request", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
@@ -160,7 +165,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	defer sources.Recover(el.GetEventName())
 
 	bitbucketserverEventSource := &el.BitbucketServerEventSource
@@ -180,68 +185,71 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		hookIDs:                    make(map[string]int),
 	}
 
-	logger.Info("retrieving the access token credentials...")
-	bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
-	if err != nil {
-		return errors.Errorf("failed to get bitbucketserver token. err: %+v", err)
-	}
-
-	if bitbucketserverEventSource.WebhookSecret != nil {
-		logger.Info("retrieving the webhook secret...")
-		webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
+	if bitbucketserverEventSource.ShouldCreateWebhooks() {
+		logger.Info("retrieving the access token credentials...")
+		bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
 		if err != nil {
-			return errors.Errorf("failed to get bitbucketserver webhook secret. err: %+v", err)
+			return errors.Errorf("failed to get bitbucketserver token. err: %+v", err)
 		}
 
-		router.hookSecret = webhookSecret
-	}
-
-	logger.Info("setting up the client to connect to Bitbucket Server...")
-	bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
-	bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
-	bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
-
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
-
-	applyWebhooks := func() {
-		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
-			if err = router.applyBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
-				logger.Errorw("failed to create/update Bitbucket webhook",
-					zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
-				continue
+		if bitbucketserverEventSource.WebhookSecret != nil {
+			logger.Info("retrieving the webhook secret...")
+			webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
+			if err != nil {
+				return errors.Errorf("failed to get bitbucketserver webhook secret. err: %+v", err)
 			}
 
-			time.Sleep(500 * time.Millisecond)
+			router.hookSecret = webhookSecret
 		}
-	}
 
-	// When running multiple replicas of the eventsource, they will all try to create the webhook.
-	// Randomly sleep some time to mitigate the issue.
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
-	applyWebhooks()
+		logger.Info("setting up the client to connect to Bitbucket Server...")
+		bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
+		bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
+		bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
 
-	go func() {
-		// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
-		// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from Bitbucket.
-		// This is a workaround to mitigate the race conditions.
-		logger.Info("starting bitbucket hooks manager daemon")
-		ticker := time.NewTicker(60 * time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ctx.Done():
-				logger.Info("exiting bitbucket hooks manager daemon")
-				return
-			case <-ticker.C:
-				applyWebhooks()
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
+
+		applyWebhooks := func() {
+			for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
+				if err = router.applyBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
+					logger.Errorw("failed to create/update Bitbucket webhook",
+						zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
+					continue
+				}
+
+				time.Sleep(500 * time.Millisecond)
 			}
 		}
-	}()
+
+		// When running multiple replicas of the eventsource, they will all try to create the webhook.
+		// Randomly sleep some time to mitigate the issue.
+		randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+		time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
+		applyWebhooks()
+
+		go func() {
+			// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
+			// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from Bitbucket.
+			// This is a workaround to mitigate the race conditions.
+			logger.Info("starting bitbucket hooks manager daemon")
+			ticker := time.NewTicker(60 * time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					logger.Info("exiting bitbucket hooks manager daemon")
+					return
+				case <-ticker.C:
+					applyWebhooks()
+				}
+			}
+		}()
+	} else {
+		logger.Info("access token or webhook configuration were not provided, skipping webhook creation")
+	}
 
 	return webhook.ManageRoute(ctx, router, controller, dispatch)
 }
@@ -386,4 +394,28 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 	}
 
 	return requestBody, nil
+}
+
+func (router *Router) parseAndValidateBitbucketServerRequest(request *http.Request) ([]byte, error) {
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse request body")
+	}
+
+	if len(router.hookSecret) != 0 {
+		signature := request.Header.Get("X-Hub-Signature")
+		if len(signature) == 0 {
+			return nil, errors.New("missing signature header")
+		}
+
+		mac := hmac.New(sha256.New, []byte(router.hookSecret))
+		_, _ = mac.Write(body)
+		expectedMAC := hex.EncodeToString(mac.Sum(nil))
+
+		if !hmac.Equal([]byte(signature[7:]), []byte(expectedMAC)) {
+			return nil, errors.New("hmac verification failed")
+		}
+	}
+
+	return body, nil
 }

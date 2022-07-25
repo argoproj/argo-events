@@ -226,7 +226,7 @@ AMQPExchangeDeclareConfig </a> </em>
 <p>
 ExchangeDeclare holds the configuration for the exchange on the server
 For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare">https://godoc.org/github.com/streadway/amqp#Channel.ExchangeDeclare</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare</a>
 </p>
 </td>
 </tr>
@@ -243,7 +243,7 @@ QueueDeclare holds the configuration of a queue to hold messages and
 deliver to consumers. Declaring creates a queue if it doesn’t already
 exist, or ensures that an existing queue matches the same parameters For
 more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare">https://godoc.org/github.com/streadway/amqp#Channel.QueueDeclare</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare</a>
 </p>
 </td>
 </tr>
@@ -260,7 +260,7 @@ QueueBind holds the configuration that binds an exchange to a queue so
 that publishings to the exchange will be routed to the queue when the
 publishing routing key matches the binding routing key For more
 information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.QueueBind">https://godoc.org/github.com/streadway/amqp#Channel.QueueBind</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind</a>
 </p>
 </td>
 </tr>
@@ -275,7 +275,7 @@ information, visit
 <p>
 Consume holds the configuration to immediately starts delivering queued
 messages For more information, visit
-<a href="https://godoc.org/github.com/streadway/amqp#Channel.Consume">https://godoc.org/github.com/streadway/amqp#Channel.Consume</a>
+<a href="https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume">https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume</a>
 </p>
 </td>
 </tr>
@@ -1878,6 +1878,19 @@ Bitbucket event sources
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>redisStream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Redis stream source
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1916,6 +1929,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.PubSubEventSource">PubSubEventSource</a>,
 <a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>,
 <a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>,
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">RedisStreamEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SQSEventSource">SQSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>)
@@ -2346,6 +2360,19 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Bitbu
 <td>
 <p>
 Bitbucket event sources
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>redisStream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisStreamEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Redis stream source
 </p>
 </td>
 </tr>
@@ -4377,6 +4404,179 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>username</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Username required for ACL style authentication if any.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.RedisStreamEventSource">
+RedisStreamEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+RedisStreamEventSource describes an event source for Redis streams
+(<a href="https://redis.io/topics/streams-intro">https://redis.io/topics/streams-intro</a>)
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>hostAddress</code></br> <em> string </em>
+</td>
+<td>
+<p>
+HostAddress refers to the address of the Redis host/server (master
+instance)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>password</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Password required for authentication if any.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>db</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DB to use. If not specified, default DB 0 will be used.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>streams</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Streams to look for entries. XREADGROUP is used on all streams using a
+single consumer group.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxMsgCountPerRead</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MaxMsgCountPerRead holds the maximum number of messages per stream that
+will be read in each XREADGROUP of all streams Example: if there are 2
+streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a
+total of 20 messages. Same as COUNT option in
+XREADGROUP(<a href="https://redis.io/topics/streams-intro">https://redis.io/topics/streams-intro</a>).
+Defaults to 10
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>consumerGroup</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ConsumerGroup refers to the Redis stream consumer group that will be
+created on all redis streams. Messages are read through this group.
+Defaults to ‘argo-events-cg’
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the redis client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>username</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Username required for ACL style authentication if any.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ResourceEventSource">
@@ -5701,6 +5901,19 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 AuthSecret holds a secret selector that contains a bearer token for
 authentication
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxPayloadSize</code></br> <em> int64 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MaxPayloadSize is the maximum webhook payload size that the server will
+accept. Requests exceeding that limit will be rejected with “request too
+large” response. Default value: 1048576 (1MB).
 </p>
 </td>
 </tr>

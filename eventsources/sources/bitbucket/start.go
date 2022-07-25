@@ -17,10 +17,11 @@ package bitbucket
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"math/rand"
+	"io"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -75,7 +76,8 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	body, err := ioutil.ReadAll(request.Body)
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
+	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Desugar().Error("failed to parse request body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
@@ -126,7 +128,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	defer sources.Recover(el.GetEventName())
 
 	bitbucketEventSource := &el.BitbucketEventSource
@@ -157,9 +159,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	// When running multiple replicas of the eventsource, they will all try to create the webhook.
 	// Randomly sleep some time to mitigate the issue.
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+	time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 
 	err = router.applyBitbucketWebhook()
 	if err != nil {

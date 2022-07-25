@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -210,7 +210,7 @@ func (rc *Router) handleEvent(request *http.Request) ([]byte, []byte, error) {
 	var err error
 	var response []byte
 	var data []byte
-	body, err := getRequestBody(request)
+	body, err := rc.getRequestBody(request)
 	if err != nil {
 		return data, response, errors.Wrap(err, "failed to fetch request body")
 	}
@@ -269,11 +269,11 @@ func (rc *Router) handleSlashCommand(request *http.Request) ([]byte, error) {
 	return data, nil
 }
 
-func getRequestBody(request *http.Request) ([]byte, error) {
+func (rc *Router) getRequestBody(request *http.Request) ([]byte, error) {
 	// Read request payload
-	body, err := ioutil.ReadAll(request.Body)
+	body, err := io.ReadAll(io.LimitReader(request.Body, rc.route.Context.GetMaxPayloadSize()))
 	// Reset request.Body ReadCloser to prevent side-effect if re-read
-	request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	request.Body = io.NopCloser(bytes.NewBuffer(body))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse request body")
 	}
@@ -293,7 +293,7 @@ func (rc *Router) verifyRequest(request *http.Request) error {
 		}
 
 		// Read the request body
-		body, err := getRequestBody(request)
+		body, err := rc.getRequestBody(request)
 		if err != nil {
 			return err
 		}
@@ -312,7 +312,7 @@ func (rc *Router) verifyRequest(request *http.Request) error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 

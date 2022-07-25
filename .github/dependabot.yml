@@ -3,12 +3,15 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
     ignore:
       - dependency-name: k8s.io/*
-    open-pull-requests-limit: 1
+      - dependency-name: sigs.k8s.io/controller-runtime
+    open-pull-requests-limit: 10
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"

@@ -1027,6 +1027,17 @@ Available values: and (&amp;&amp;), or (||)
 Is optional and if left blank treated as and (&amp;&amp;).</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>script</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Script refers to a Lua script evaluated to determine the validity of an event.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventDependencyTransformer">EventDependencyTransformer
@@ -1271,6 +1282,18 @@ GitRemoteConfig
 <em>(Optional)</em>
 <p>Remote to manage set of tracked repositories. Defaults to &ldquo;origin&rdquo;.
 Refer <a href="https://git-scm.com/docs/git-remote">https://git-scm.com/docs/git-remote</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>insecureIgnoreHostKey</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Whether to ignore host key</p>
 </td>
 </tr>
 </tbody>

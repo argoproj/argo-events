@@ -2,6 +2,7 @@ package leaderelection
 
 import (
 	"context"
+	"crypto/tls"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/nats-io/graft"
@@ -12,7 +13,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	eventbusdriver "github.com/argoproj/argo-events/eventbus/driver"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -28,18 +29,24 @@ type LeaderCallbacks struct {
 
 func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, clusterName string, clusterSize int) (Elector, error) {
 	logger := logging.FromContext(ctx)
+
 	var eventBusType apicommon.EventBusType
 	var eventBusAuth *eventbusv1alpha1.AuthStrategy
-	if eventBusConfig.NATS != nil {
+	switch {
+	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
 		eventBusAuth = eventBusConfig.NATS.Auth
-	} else {
+	case eventBusConfig.JetStream != nil:
+		eventBusType = apicommon.EventBusJetStream
+		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
+	default:
 		return nil, errors.New("invalid event bus")
 	}
-	var auth *eventbusdriver.Auth
-	cred := &eventbusdriver.AuthCredential{}
+
+	var auth *eventbuscommon.Auth
+	cred := &eventbuscommon.AuthCredential{}
 	if eventBusAuth == nil || *eventBusAuth == eventbusv1alpha1.AuthStrategyNone {
-		auth = &eventbusdriver.Auth{
+		auth = &eventbuscommon.Auth{
 			Strategy: eventbusv1alpha1.AuthStrategyNone,
 		}
 	} else {
@@ -58,17 +65,15 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		}
 		v.WatchConfig()
 		v.OnConfigChange(func(e fsnotify.Event) {
-			logger.Info("eventbus auth config file changed.")
-			err = v.Unmarshal(cred)
-			if err != nil {
-				logger.Errorw("failed to unmarshal auth.yaml after reloading", zap.Error(err))
-			}
+			// Auth file changed, let it restart.
+			logger.Fatal("Eventbus auth config file changed, exiting..")
 		})
-		auth = &eventbusdriver.Auth{
-			Strategy:    *eventBusAuth,
-			Crendential: cred,
+		auth = &eventbuscommon.Auth{
+			Strategy:   *eventBusAuth,
+			Credential: cred,
 		}
 	}
+
 	var elector Elector
 	switch eventBusType {
 	case apicommon.EventBusNATS:
@@ -76,6 +81,13 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 			clusterName: clusterName,
 			size:        clusterSize,
 			url:         eventBusConfig.NATS.URL,
+			auth:        auth,
+		}
+	case apicommon.EventBusJetStream:
+		elector = &natsEventBusElector{
+			clusterName: clusterName,
+			size:        clusterSize,
+			url:         eventBusConfig.JetStream.URL,
 			auth:        auth,
 		}
 	default:
@@ -88,17 +100,27 @@ type natsEventBusElector struct {
 	clusterName string
 	size        int
 	url         string
-	auth        *eventbusdriver.Auth
+	auth        *eventbuscommon.Auth
 }
 
 func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCallbacks) {
 	log := logging.FromContext(ctx)
 	ci := graft.ClusterInfo{Name: e.clusterName, Size: e.size}
 	opts := &nats.DefaultOptions
+	// Will never give up
+	opts.MaxReconnect = -1
 	opts.Url = e.url
 	if e.auth.Strategy == eventbusv1alpha1.AuthStrategyToken {
-		opts.Token = e.auth.Crendential.Token
+		opts.Token = e.auth.Credential.Token
+	} else if e.auth.Strategy == eventbusv1alpha1.AuthStrategyBasic {
+		opts.User = e.auth.Credential.Username
+		opts.Password = e.auth.Credential.Password
 	}
+
+	opts.TLSConfig = &tls.Config{ // seems fine to pass this in even when we're not using TLS
+		InsecureSkipVerify: true,
+	}
+
 	rpc, err := graft.NewNatsRpc(opts)
 	if err != nil {
 		log.Fatalw("failed to new Nats Rpc", zap.Error(err))

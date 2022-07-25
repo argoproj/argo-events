@@ -3,6 +3,7 @@ package fixtures
 import (
 	"context"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/stretchr/testify/suite"
@@ -35,7 +36,7 @@ const (
 var (
 	background = metav1.DeletePropagationBackground
 
-	e2eEventBus = `apiVersion: argoproj.io/v1alpha1
+	E2EEventBusSTAN = `apiVersion: argoproj.io/v1alpha1
 kind: EventBus
 metadata:
   name: default
@@ -43,6 +44,14 @@ spec:
   nats:
     native:
       auth: token`
+
+	E2EEventBusJetstream = `apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+spec:
+  jetstream:
+    version: latest`
 )
 
 type E2ESuite struct {
@@ -81,16 +90,18 @@ func (s *E2ESuite) SetupSuite() {
 	}
 	s.deleteResources(resources)
 
-	s.Given().EventBus(e2eEventBus).
+	s.Given().EventBus(GetBusDriverSpec()).
 		When().
 		CreateEventBus().
 		WaitForEventBusReady()
 	s.T().Log("EventBus is ready")
+
+	time.Sleep(10 * time.Second) // give it a little extra time to be fully ready // todo: any issues with this? Otherwise, I need to increase the allowance in the backoff
 }
 
 func (s *E2ESuite) TearDownSuite() {
 	s.DeleteResources()
-	s.Given().EventBus(e2eEventBus).
+	s.Given().EventBus(GetBusDriverSpec()).
 		When().
 		DeleteEventBus().
 		Wait(3 * time.Second).
@@ -153,4 +164,12 @@ func (s *E2ESuite) Given() *Given {
 		restConfig:        s.restConfig,
 		kubeClient:        s.kubeClient,
 	}
+}
+
+func GetBusDriverSpec() string {
+	x := strings.ToUpper(os.Getenv("EventBusDriver"))
+	if x == "JETSTREAM" {
+		return E2EEventBusJetstream
+	}
+	return E2EEventBusSTAN
 }

@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -142,7 +141,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	switch op {
 	case v1alpha1.Submit:
-		file, err := ioutil.TempFile("", fmt.Sprintf("%s%s", name, obj.GetGenerateName()))
+		file, err := os.CreateTemp("", fmt.Sprintf("%s%s", name, obj.GetGenerateName()))
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", obj.GetName())
 		}
@@ -167,6 +166,18 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 			return nil, errors.Wrapf(err, "failed to write workflow json %s to the temp file %s", name, file.Name())
 		}
 		cmd = exec.Command("argo", "-n", namespace, "submit", file.Name())
+	case v1alpha1.SubmitFrom:
+		wf := obj.GetKind()
+		switch strings.ToLower(wf) {
+		case "cronworkflow":
+			wf = "cronwf"
+		case "workflow":
+			wf = "wf"
+		default:
+			return nil, errors.Errorf("invalid kind %s", wf)
+		}
+		fromArg := fmt.Sprintf("%s/%s", wf, name)
+		cmd = exec.Command("argo", "-n", namespace, "submit", "--from", fromArg)
 	case v1alpha1.Resubmit:
 		cmd = exec.Command("argo", "-n", namespace, "resubmit", name)
 	case v1alpha1.Resume:

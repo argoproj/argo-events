@@ -285,6 +285,9 @@ message EventDependencyFilter {
   // Available values: and (&&), or (||)
   // Is optional and if left blank treated as and (&&).
   optional string exprLogicalOperator = 6;
+
+  // Script refers to a Lua script evaluated to determine the validity of an event.
+  optional string script = 7;
 }
 
 // EventDependencyTransformer transforms the event
@@ -347,6 +350,10 @@ message GitArtifact {
   // Refer https://git-scm.com/docs/git-remote
   // +optional
   optional GitRemoteConfig remote = 9;
+
+  // Whether to ignore host key
+  // +optional
+  optional bool insecureIgnoreHostKey = 10;
 }
 
 // GitCreds contain reference to git username and password

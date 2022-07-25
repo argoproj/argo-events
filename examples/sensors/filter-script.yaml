@@ -1,0 +1,55 @@
+# Event Payload
+#
+#  {
+#    "a": "b",
+#    "c": 10,
+#    "d": {
+#      "e": "z"
+#    }
+#  }
+#
+
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: with-script-filter
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+      filters:
+        script: |-
+          if event.body.a == "b" and event.body.d.e == "z" then return true else return false end
+  triggers:
+    - template:
+        name: workflow
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: workflow-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # value will get overridden by the event payload
+                      value: hello world
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: name
+              dest: spec.arguments.parameters.0.value

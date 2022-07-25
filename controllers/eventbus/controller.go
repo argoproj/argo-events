@@ -13,8 +13,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/codefresh"
+	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -28,16 +31,15 @@ type reconciler struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	natsStreamingImage string
-	natsMetricsImage   string
-	logger             *zap.SugaredLogger
+	config *controllers.GlobalConfig
+	logger *zap.SugaredLogger
 
 	cfClient *codefresh.Client
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, natsStreamingImage, natsMetricsImage string, logger *zap.SugaredLogger, cfClient *codefresh.Client) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, natsStreamingImage: natsStreamingImage, natsMetricsImage: natsMetricsImage, logger: logger, cfClient: cfClient}
+func NewReconciler(client client.Client, scheme *runtime.Scheme, config *controllers.GlobalConfig, logger *zap.SugaredLogger, cfClient *codefresh.Client) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, config: config, logger: logger, cfClient: cfClient}
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -51,11 +53,12 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", eventBus.Namespace).With("eventbus", eventBus.Name)
+	ctx = logging.WithLogger(ctx, log)
 	busCopy := eventBus.DeepCopy()
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
-		r.cfClient.ReportError(reconcileErr, codefresh.ErrorContext{
+		r.cfClient.ReportError(errors.Wrap(reconcileErr, "reconcile error"), codefresh.ErrorContext{
 			ObjectMeta: eventBus.ObjectMeta,
 			TypeMeta:   eventBus.TypeMeta,
 		})
@@ -73,12 +76,12 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
-	log := r.logger.With("namespace", eventBus.Namespace).With("eventbus", eventBus.Name)
+	log := logging.FromContext(ctx)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
 		if controllerutil.ContainsFinalizer(eventBus, finalizerName) {
 			// Finalizer logic should be added here.
-			if err := installer.Uninstall(ctx, eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log); err != nil {
+			if err := installer.Uninstall(ctx, eventBus, r.client, r.config, log); err != nil {
 				log.Errorw("failed to uninstall", zap.Error(err))
 				return err
 			}
@@ -91,10 +94,12 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	eventBus.Status.InitConditions()
 	if err := ValidateEventBus(eventBus); err != nil {
 		log.Errorw("validation failed", zap.Error(err))
-		eventBus.Status.MarkDeployFailed("InvalidSpec", err.Error())
+		eventBus.Status.MarkNotConfigured("InvalidSpec", err.Error())
 		return err
+	} else {
+		eventBus.Status.MarkConfigured()
 	}
-	return installer.Install(ctx, eventBus, r.client, r.natsStreamingImage, r.natsMetricsImage, log)
+	return installer.Install(ctx, eventBus, r.client, r.config, log)
 }
 
 func (r *reconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {

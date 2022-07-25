@@ -36,14 +36,11 @@ func validate(eventSource *v1alpha1.BitbucketServerEventSource) error {
 	if eventSource.GetBitbucketServerRepositories() == nil {
 		return fmt.Errorf("at least one repository is required")
 	}
-	if eventSource.Events == nil {
-		return fmt.Errorf("events can't be empty")
+	if eventSource.ShouldCreateWebhooks() && eventSource.Events == nil {
+		return fmt.Errorf("events must be defined to create a bitbucket server webhook")
 	}
 	if eventSource.BitbucketServerBaseURL == "" {
 		return fmt.Errorf("bitbucket server base url can't be empty")
-	}
-	if eventSource.AccessToken == nil {
-		return fmt.Errorf("access token can't be nil")
 	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }

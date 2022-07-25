@@ -17,13 +17,13 @@ limitations under the License.
 package webhook
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
-
-	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -33,6 +33,8 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 var (
@@ -101,13 +103,19 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	if route.Context.Method != request.Method {
+		logger.Info("http method does not match")
+		common.SendErrorResponse(writer, "http method does not match")
+		return
+	}
+
 	defer func(start time.Time) {
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	body, err := ioutil.ReadAll(request.Body)
+	body, err := GetBody(&writer, request, route, logger)
 	if err != nil {
-		logger.Errorw("failed to parse request body", zap.Error(err))
+		logger.Errorw("failed to get body", zap.Error(err))
 		common.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
@@ -115,7 +123,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	payload := &events.WebhookEventData{
 		Header:   request.Header,
-		Body:     (*json.RawMessage)(&body),
+		Body:     body,
 		Metadata: route.Context.Metadata,
 	}
 
@@ -144,7 +152,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the webhook event source...")
@@ -153,4 +161,56 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	return webhook.ManageRoute(ctx, &Router{
 		route: route,
 	}, controller, dispatch)
+}
+
+func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.Route, logger *zap.SugaredLogger) (*json.RawMessage, error) {
+	switch request.Method {
+	case http.MethodGet:
+		body, _ := json.Marshal(request.URL.Query())
+		ret := json.RawMessage(body)
+		return &ret, nil
+	case http.MethodPost:
+		contentType := ""
+		if len(request.Header["Content-Type"]) > 0 {
+			contentType = request.Header["Content-Type"][0]
+		}
+
+		switch contentType {
+		case "application/x-www-form-urlencoded":
+			if err := request.ParseForm(); err != nil {
+				logger.Errorw("failed to parse form data", zap.Error(err))
+				common.SendInternalErrorResponse(*writer, err.Error())
+				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
+				return nil, err
+			}
+			body, _ := json.Marshal(request.PostForm)
+			ret := json.RawMessage(body)
+			return &ret, nil
+		// default including "application/json" is parsing body as JSON
+		default:
+			request.Body = http.MaxBytesReader(*writer, request.Body, route.Context.GetMaxPayloadSize())
+			body, err := getRequestBody(request)
+			if err != nil {
+				logger.Errorw("failed to read request body", zap.Error(err))
+				common.SendErrorResponse(*writer, err.Error())
+				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
+				return nil, err
+			}
+			ret := json.RawMessage(body)
+			return &ret, nil
+		}
+	default:
+		return nil, fmt.Errorf("unsupoorted method: %s", request.Method)
+	}
+}
+
+func getRequestBody(request *http.Request) ([]byte, error) {
+	// Read request payload
+	body, err := io.ReadAll(request.Body)
+	// Reset request.Body ReadCloser to prevent side-effect if re-read
+	request.Body = io.NopCloser(bytes.NewBuffer(body))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse request body")
+	}
+	return body, nil
 }

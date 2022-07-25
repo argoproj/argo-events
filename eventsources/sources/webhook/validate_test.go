@@ -19,7 +19,7 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/argoproj/argo-events/eventsources/sources"
@@ -36,7 +36,7 @@ func TestValidateEventSource(t *testing.T) {
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "webhook.yaml"))
+	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "webhook.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource

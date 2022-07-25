@@ -34,7 +34,6 @@ func TestExpand(t *testing.T) {
 }
 
 func TestEvalBool(t *testing.T) {
-
 	env := map[string]interface{}{
 		"id":         1,
 		"first_name": "John",

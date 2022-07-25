@@ -17,9 +17,10 @@ package github
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"net/url"
 	"time"
@@ -174,6 +175,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
+	request.Body = http.MaxBytesReader(writer, request.Body, route.Context.GetMaxPayloadSize())
 	body, err := parseValidateRequest(request, []byte(router.hookSecret))
 	if err != nil {
 		logger.Errorw("request is not valid event notification, discarding it", zap.Error(err))
@@ -279,7 +281,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Options) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	logger := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	logger.Info("started processing the Github event source...")
@@ -420,9 +422,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		// Github can not handle race conditions well - it might create multiple hooks with same config
 		// when replicas > 1
 		// Randomly sleep some time to mitigate the issue.
-		s1 := rand.NewSource(time.Now().UnixNano())
-		r1 := rand.New(s1)
-		time.Sleep(time.Duration(r1.Intn(2000)) * time.Millisecond)
+		randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+		time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 		f()
 
 		go func() {
@@ -430,17 +431,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from github.
 			// This is a workaround to mitigate the race conditions.
 			logger.Info("starting github hooks manager daemon")
-			ticker := time.NewTicker(60 * time.Second)
-			defer ticker.Stop()
-			for {
-				select {
-				case <-ctx.Done():
-					logger.Info("exiting github hooks manager daemon")
-					return
-				case <-ticker.C:
-					f()
-				}
+			for i := 0; i < 10; i++ {
+				time.Sleep(60 * time.Second)
+				f()
 			}
+			logger.Info("exiting github hooks manager daemon")
 		}()
 	} else {
 		logger.Info("no need to create webhooks")
