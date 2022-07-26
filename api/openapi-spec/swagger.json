@@ -941,16 +941,11 @@
       "type": "object",
       "required": [
         "owner",
-        "projectKey",
         "repositorySlug"
       ],
       "properties": {
         "owner": {
           "description": "Owner is the owner of the repository",
-          "type": "string"
-        },
-        "projectKey": {
-          "description": "ProjectKey is the key of the project to which the repository relates",
           "type": "string"
         },
         "repositorySlug": {

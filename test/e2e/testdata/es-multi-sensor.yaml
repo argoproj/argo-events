@@ -6,13 +6,13 @@ spec:
   webhook:
     example1:
       port: "12000"
-      endpoint: /example
+      endpoint: /example1
       method: POST
     example2:
       port: "13000"
-      endpoint: /example
+      endpoint: /example2
       method: POST
     example3:
       port: "14000"
-      endpoint: /example
+      endpoint: /example3
       method: POST

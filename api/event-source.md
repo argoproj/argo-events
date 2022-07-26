@@ -911,16 +911,6 @@ Owner is the owner of the repository
 </tr>
 <tr>
 <td>
-<code>projectKey</code></br> <em> string </em>
-</td>
-<td>
-<p>
-ProjectKey is the key of the project to which the repository relates
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>repositorySlug</code></br> <em> string </em>
 </td>
 <td>
@@ -5117,6 +5107,7 @@ Amazons servers
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 SessionToken refers to K8s secret containing AWS temporary
 credentials(STS) session token
