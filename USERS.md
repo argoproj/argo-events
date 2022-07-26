@@ -7,6 +7,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Akuity](https://akuity.io/)
 1. [Alibaba Group](https://www.alibabagroup.com/)
 1. [Ant Group](https://www.antgroup.com/)
+1. [ArthurAI](https://arthur.ai/)
 1. [BioBox Analytics](https://biobox.io)
 1. [BlackRock](https://www.blackrock.com/)
 1. [Canva](https://www.canva.com/)
@@ -37,4 +38,3 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Yubo](https://www.yubo.live/)
 1. [WooliesX](https://wooliesx.com.au/)
 1. [Woolworths Group](https://www.woolworthsgroup.com.au/)
-1. [ArthurAI](https://arthur.ai/)
