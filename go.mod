@@ -74,9 +74,9 @@ require (
 	google.golang.org/api v0.88.0
 	google.golang.org/grpc v1.48.0
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
-	k8s.io/api v0.23.5
-	k8s.io/apimachinery v0.23.5
-	k8s.io/client-go v0.23.5
+	k8s.io/api v0.24.3
+	k8s.io/apimachinery v0.24.3
+	k8s.io/client-go v0.24.3
 	k8s.io/code-generator v0.23.5
 	k8s.io/gengo v0.0.0-20211115164449-b448ea381d54
 	k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8
@@ -108,6 +108,7 @@ require (
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/linkedin/goavro/v2 v2.9.8 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
+	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
@@ -180,7 +181,6 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
-	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
@@ -291,7 +291,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.23.5 // indirect
 	k8s.io/component-base v0.23.5 // indirect
 	k8s.io/klog v1.0.0 // indirect
-	k8s.io/klog/v2 v2.40.1 // indirect
+	k8s.io/klog/v2 v2.60.1 // indirect
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 	moul.io/http2curl v1.0.1-0.20190925090545-5cd742060b0e // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
