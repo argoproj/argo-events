@@ -906,11 +906,10 @@ func (b BitbucketEventSource) GetBitbucketRepositories() []BitbucketRepository {
 		return b.Repositories
 	}
 
-	if b.DeprecatedOwner != "" && b.DeprecatedProjectKey != "" && b.DeprecatedRepositorySlug != "" {
+	if b.DeprecatedOwner != "" && b.DeprecatedRepositorySlug != "" {
 		return []BitbucketRepository{
 			{
 				Owner:          b.DeprecatedOwner,
-				ProjectKey:     b.DeprecatedProjectKey,
 				RepositorySlug: b.DeprecatedRepositorySlug,
 			},
 		}
@@ -930,7 +929,7 @@ type BitbucketRepository struct {
 
 // GetRepositoryID helper returns a string key identifier for the repo
 func (r BitbucketRepository) GetRepositoryID() string {
-	return r.Owner + "," + r.ProjectKey + "," + r.RepositorySlug
+	return r.Owner + "," + r.RepositorySlug
 }
 
 // BitbucketAuth holds the different auth strategies for connecting to Bitbucket
