@@ -56,7 +56,7 @@ type Router struct {
 	// bitbucketEventSource is the event source that holds information to consume events from Bitbucket
 	bitbucketEventSource *v1alpha1.BitbucketEventSource
 	// hookIDs is a map of webhook IDs
-	// (owner + "," + projectKey + "," + repoSlug) -> hook ID
+	// (owner+","+repoSlug) -> hook ID
 	// Bitbucket API docs:
 	// https://developer.atlassian.com/cloud/bitbucket/rest/
 	hookIDs map[string]string

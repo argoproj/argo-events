@@ -231,7 +231,6 @@ func (router *Router) applyBitbucketWebhook(repo v1alpha1.BitbucketRepository) e
 		logging.LabelPort, route.Context.Port,
 		logging.LabelHTTPMethod, route.Context.Method,
 		"owner", repo.Owner,
-		"project-key", repo.ProjectKey,
 		"repository-slug", repo.RepositorySlug,
 	)
 
