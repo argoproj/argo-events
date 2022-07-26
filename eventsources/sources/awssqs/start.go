@@ -70,7 +70,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	sqsEventSource := &el.SQSEventSource
 	var awsSession *session.Session
-	awsSession, err := createAWSSession(el, log)
+	awsSession, err := el.createAWSSession(log)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		messages, err := fetchMessages(ctx, sqsClient, *queueURL.QueueUrl, 10, sqsEventSource.WaitTimeSeconds)
 		if err != nil {
 			log.Errorw("failed to get messages from SQS", zap.Error(err))
-			_, sqsClient, err = refreshSessionAndSqsClientIfCredentialsExpired(err, el, log)
+			_, newSqsClient, err := el.refreshSessionAndSqsClientIfCredentialsExpired(err, log)
+			if newSqsClient != nil && err != nil {
+				sqsClient = newSqsClient
+			}
 			time.Sleep(2 * time.Second)
 			continue
 		}
@@ -123,7 +126,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				})
 				if err != nil {
 					log.Errorw("Failed to delete message", zap.Error(err))
-					_, sqsClient, err = refreshSessionAndSqsClientIfCredentialsExpired(err, el, log)
+					_, newSqsClient, err := el.refreshSessionAndSqsClientIfCredentialsExpired(err, log)
+					if newSqsClient != nil && err != nil {
+						sqsClient = newSqsClient
+					}
 				}
 			}, log)
 		}
@@ -187,7 +193,7 @@ func fetchMessages(ctx context.Context, q *sqslib.SQS, url string, maxSize, wait
 	return result.Messages, nil
 }
 
-func createAWSSession(el *EventListener, log *zap.SugaredLogger) (*session.Session, error) {
+func (el *EventListener) createAWSSession(log *zap.SugaredLogger) (*session.Session, error) {
 	sqsEventSource := &el.SQSEventSource
 	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey, sqsEventSource.SessionToken)
 	if err != nil {
@@ -207,19 +213,20 @@ func createSqsClient(awsSession *session.Session, sqsEventSource *v1alpha1.SQSEv
 	return sqsClient, nil
 }
 
-func refreshSessionAndSqsClientIfCredentialsExpired(err error, el *EventListener, log *zap.SugaredLogger) (*session.Session, *sqslib.SQS, error) {
+func (el *EventListener) refreshSessionAndSqsClientIfCredentialsExpired(err error, log *zap.SugaredLogger) (*session.Session, *sqslib.SQS, error) {
 	var awsSession *session.Session
 	var sqsClient *sqslib.SQS
 	awsError, ok := err.(awserr.Error)
 	if el.SQSEventSource.SessionToken != nil && ok {
 		if awsError.Code() == "ExpiredToken" {
 			log.Info("credentials expired, reading credentials again")
-			awsSession, err = createAWSSession(el, log)
+			awsSession, err = el.createAWSSession(log)
 			if err != nil {
 				return nil, nil, err
 			}
 			sqsClient, err = createSqsClient(awsSession, &el.SQSEventSource)
 			if err != nil {
+				log.Errorw("Failed to create SQS client", zap.Error(err))
 				return awsSession, nil, err
 			}
 		}

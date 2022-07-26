@@ -55,10 +55,13 @@ func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.Secre
 		return nil, errors.Wrap(err, "can not find secret key")
 	}
 
-	token, err := common.GetSecretFromVolume(sessionToken)
-	if err != nil {
-		log := logging.NewArgoEventsLogger()
-		log.Warnf("Failed to fetch AWS session token from volume: %s", err)
+	var token string
+	if sessionToken != nil {
+		token, err = common.GetSecretFromVolume(sessionToken)
+		if err != nil {
+			log := logging.NewArgoEventsLogger()
+			log.Warnf("Failed to fetch AWS session token from volume: %s", err)
+		}
 	}
 
 	return credentials.NewStaticCredentialsFromCreds(credentials.Value{
