@@ -205,7 +205,8 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		}
 		return nil, err
 	}
-	// Get the value corresponding to specified key within JSON object
+
+	// Get the value corresponding to specified key or template within event payload
 	if eventPayload != nil {
 		if tmplt != "" {
 			resultValue, err = getValueWithTemplate(eventPayload, tmplt)
@@ -219,18 +220,17 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			if err == nil {
 				return &resultValue, nil
 			}
-			fmt.Printf("Failed to get value by key: %+v\n", err)
+			fmt.Printf("failed to get value by key: %+v\n", err)
 		}
 		if src.Value != nil {
 			resultValue = *src.Value
 			return &resultValue, nil
 		}
-
-		resultValue = string(eventPayload)
-		return &resultValue, nil
 	}
 
-	return nil, fmt.Errorf("unable to resolve '%s' parameter value", src.DependencyName)
+	// if we got here it means that both key and template did not match the event payload
+	// and no default value was provided, so we need to return an error
+	return nil, fmt.Errorf("unable to resolve '%s' parameter value. err: %+v", src.DependencyName, err)
 }
 
 // getValueWithTemplate will attempt to execute the provided template against
@@ -261,5 +261,5 @@ func getValueByKey(value []byte, key string) (string, error) {
 	if res.Exists() {
 		return res.String(), nil
 	}
-	return "", fmt.Errorf("key %s does not exist to in the event object\n", key)
+	return "", fmt.Errorf("key %s does not exist to in the event payload", key)
 }
