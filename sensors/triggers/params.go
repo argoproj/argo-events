@@ -171,17 +171,30 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	event, eventExists := events[src.DependencyName]
 	switch {
 	case eventExists:
-		// If context or data keys are not set, return the event payload as is
+		// If no data or context selection was provided
 		if src.ContextKey == "" && src.DataKey == "" && src.DataTemplate == "" && src.ContextTemplate == "" {
-			eventPayload, err = json.Marshal(&event)
+			// Return default value if exists
+			if src.Value != nil {
+				resultValue = *src.Value
+			} else {
+				// Default value doesn't exist so return the whole event payload
+				eventPayload, err = json.Marshal(&event)
+				resultValue = string(eventPayload)
+			}
+
+			if err == nil {
+				return &resultValue, nil
+			}
 		}
-		// Get the context bytes
+
+		// Get the context part of the payload
 		if src.ContextKey != "" || src.ContextTemplate != "" {
 			key = src.ContextKey
 			tmplt = src.ContextTemplate
 			eventPayload, err = json.Marshal(&event.Context)
 		}
-		// Get the payload bytes
+
+		// Get the data part of the payload
 		if src.DataKey != "" || src.DataTemplate != "" {
 			key = src.DataKey
 			tmplt = src.DataTemplate
@@ -197,12 +210,16 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		return nil, nil
 	}
 
+	// If the event payload parsing failed
 	if err != nil {
+		// Fall back to the default value in case it exists
 		if src.Value != nil {
-			fmt.Printf("failed to parse the event data, using default value. err: %+v\n", err)
+			fmt.Printf("failed to parse the event payload, using default value. err: %+v\n", err)
 			resultValue = *src.Value
 			return &resultValue, nil
 		}
+
+		// Otherwise, return the error
 		return nil, err
 	}
 
@@ -222,6 +239,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			}
 			fmt.Printf("failed to get value by key: %+v\n", err)
 		}
+		// In case neither key nor template resolving was successful, fall back to the default value if exists
 		if src.Value != nil {
 			resultValue = *src.Value
 			return &resultValue, nil
