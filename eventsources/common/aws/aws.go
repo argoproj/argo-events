@@ -25,7 +25,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/common/logging"
 )
 
 // GetAWSCredFromEnvironment reads credential stored in ENV by using envFrom.
@@ -59,8 +58,7 @@ func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.Secre
 	if sessionToken != nil {
 		token, err = common.GetSecretFromVolume(sessionToken)
 		if err != nil {
-			log := logging.NewArgoEventsLogger()
-			log.Warnf("Failed to fetch AWS session token from volume: %s", err)
+			return nil, errors.Wrap(err, "can not find session token")
 		}
 	}
 
