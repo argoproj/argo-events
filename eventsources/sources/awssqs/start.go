@@ -69,7 +69,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	sqsEventSource := &el.SQSEventSource
-	sqsClient, err := el.createSqsClient(log)
+	sqsClient, err := el.createSqsClient()
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			awsError, ok := err.(awserr.Error)
 			if ok && awsError.Code() == "ExpiredToken" && el.SQSEventSource.SessionToken != nil {
 				log.Info("credentials expired, reading credentials again")
-				newSqsClient, err := el.createSqsClient(log)
+				newSqsClient, err := el.createSqsClient()
 				if newSqsClient != nil && err != nil {
 					sqsClient = newSqsClient
 				}
@@ -126,7 +126,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					awsError, ok := err.(awserr.Error)
 					if ok && awsError.Code() == "ExpiredToken" && el.SQSEventSource.SessionToken != nil {
 						log.Info("credentials expired, reading credentials again")
-						newSqsClient, err := el.createSqsClient(log)
+						newSqsClient, err := el.createSqsClient()
 						if newSqsClient != nil && err != nil {
 							sqsClient = newSqsClient
 						}
@@ -194,7 +194,7 @@ func fetchMessages(ctx context.Context, q *sqslib.SQS, url string, maxSize, wait
 	return result.Messages, nil
 }
 
-func (el *EventListener) createAWSSession(log *zap.SugaredLogger) (*session.Session, error) {
+func (el *EventListener) createAWSSession() (*session.Session, error) {
 	sqsEventSource := &el.SQSEventSource
 	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey, sqsEventSource.SessionToken)
 	if err != nil {
@@ -203,8 +203,8 @@ func (el *EventListener) createAWSSession(log *zap.SugaredLogger) (*session.Sess
 	return awsSession, nil
 }
 
-func (el *EventListener) createSqsClient(log *zap.SugaredLogger) (*sqslib.SQS, error) {
-	awsSession, err := el.createAWSSession(log)
+func (el *EventListener) createSqsClient() (*sqslib.SQS, error) {
+	awsSession, err := el.createAWSSession()
 	if err != nil {
 		return nil, err
 	}
