@@ -165,8 +165,6 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		switch strings.ToLower(kind) {
 		case "cronworkflow":
 			kind = "cronwf"
-		case "workflow":
-			kind = "wf"
 		case "workflowtemplate":
 			kind = "workflowtemplate"
 		default:
