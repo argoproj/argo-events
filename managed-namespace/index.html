@@ -280,9 +280,47 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Managed Namespace
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Managed Namespace
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#v17" class="md-nav__link">
+    v1.7+
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prior-to-v17" class="md-nav__link">
+    Prior to v1.7
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1746,6 +1784,28 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#v17" class="md-nav__link">
+    v1.7+
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prior-to-v17" class="md-nav__link">
+    Prior to v1.7
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1764,7 +1824,8 @@
 
 <h1 id="managed-namespace">Managed Namespace<a class="headerlink" href="#managed-namespace" title="Permanent link">&para;</a></h1>
 <p>You can install <code>argo-events</code> in either cluster scoped or namespace scoped configuration, accordingly you need to set up ClusterRole or normal Role for service account <code>argo-events-sa</code>.</p>
-<p>In namespace scope installation, you must run <code>eventbus-controller</code>, <code>eventsource-controller</code> and <code>sensor-controller</code> with <code>--namespaced</code>. If you would like to have the controllers watching a separate namespace, add <code>--managed-namespace</code> as well.</p>
+<h2 id="v17">v1.7+<a class="headerlink" href="#v17" title="Permanent link">&para;</a></h2>
+<p>In namespace scope installation, you must run <code>controller-manager</code> deployment with <code>--namespaced</code>. If you would like to have the controller watching a separate namespace, add <code>--managed-namespace</code> as well.</p>
 <p>For example:</p>
 <div class="codehilite"><pre><span></span><code>      - args:
         - --namespaced
@@ -1772,7 +1833,8 @@
         - default
 </code></pre></div>
 
-<p>In cluster scope installation, don't include <code>--namespaced</code> or <code>--managed-namespace</code>.</p>
+<h2 id="prior-to-v17">Prior to v1.7<a class="headerlink" href="#prior-to-v17" title="Permanent link">&para;</a></h2>
+<p>There were 3 controller deployments (<code>eventbus-controller</code>, <code>eventsource-controller</code> and <code>sensor-controller</code>) in the versions prior to v1.7, to run namespaced installation, add <code>--namespaced</code> argument to each of them. Argument <code>--managed-namespace</code> is also supported to watch a different namespace.</p>
 
               
             </article>
