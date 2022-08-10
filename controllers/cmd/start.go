@@ -34,11 +34,16 @@ const (
 func Start(namespaced bool, managedNamespace string) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
 	config, err := controllers.LoadConfig(func(err error) {
-		logger.Errorf("Failed to reload global configuration file", zap.Error(err))
+		logger.Errorw("Failed to reload global configuration file", zap.Error(err))
 	})
 	if err != nil {
 		logger.Fatalw("Failed to load global configuration file", zap.Error(err))
 	}
+
+	if err = controllers.ValidateConfig(config); err != nil {
+		logger.Fatalw("Global configuration file validation failed", zap.Error(err))
+	}
+
 	imageName, defined := os.LookupEnv(imageEnvVar)
 	if !defined {
 		logger.Fatalf("required environment variable '%s' not defined", imageEnvVar)
