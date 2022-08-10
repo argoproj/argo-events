@@ -161,16 +161,16 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		}
 		cmd = exec.Command("argo", "-n", namespace, "submit", file.Name())
 	case v1alpha1.SubmitFrom:
-		wf := obj.GetKind()
-		switch strings.ToLower(wf) {
+		kind := obj.GetKind()
+		switch strings.ToLower(kind) {
 		case "cronworkflow":
-			wf = "cronwf"
-		case "workflow":
-			wf = "wf"
+			kind = "cronwf"
+		case "workflowtemplate":
+			kind = "workflowtemplate"
 		default:
-			return nil, errors.Errorf("invalid kind %s", wf)
+			return nil, errors.Errorf("invalid kind %s", kind)
 		}
-		fromArg := fmt.Sprintf("%s/%s", wf, name)
+		fromArg := fmt.Sprintf("%s/%s", kind, name)
 		cmd = exec.Command("argo", "-n", namespace, "submit", "--from", fromArg)
 	case v1alpha1.Resubmit:
 		cmd = exec.Command("argo", "-n", namespace, "resubmit", name)
