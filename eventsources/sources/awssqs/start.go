@@ -107,7 +107,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			if ok && awsError.Code() == "ExpiredToken" && el.SQSEventSource.SessionToken != nil {
 				log.Info("credentials expired, reading credentials again")
 				newSqsClient, err := el.createSqsClient()
-				if newSqsClient != nil && err != nil {
+				if err != nil {
+					log.Errorw("Error creating SQS client", zap.Error(err))
+				} else if newSqsClient != nil {
 					sqsClient = newSqsClient
 				}
 			}
@@ -127,7 +129,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					if ok && awsError.Code() == "ExpiredToken" && el.SQSEventSource.SessionToken != nil {
 						log.Info("credentials expired, reading credentials again")
 						newSqsClient, err := el.createSqsClient()
-						if newSqsClient != nil && err != nil {
+						if err != nil {
+							log.Errorw("Error creating SQS client", zap.Error(err))
+						} else if newSqsClient != nil {
 							sqsClient = newSqsClient
 						}
 					}
