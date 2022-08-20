@@ -187,25 +187,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 	applyWebhooks()
 
-	// Bitbucket hooks manager daemon
-	go func() {
-		// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
-		// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from Bitbucket.
-		// This is a workaround to mitigate the race conditions.
-		logger.Info("starting bitbucket hooks manager daemon")
-		ticker := time.NewTicker(60 * time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ctx.Done():
-				logger.Info("exiting bitbucket hooks manager daemon")
-				return
-			case <-ticker.C:
-				applyWebhooks()
-			}
-		}
-	}()
-
 	return webhook.ManageRoute(ctx, router, controller, dispatch)
 }
 
@@ -246,23 +227,15 @@ func (router *Router) applyBitbucketWebhook(repo v1alpha1.BitbucketRepository) e
 	logger.Info("checking if webhook already exists...")
 	existingHookSubscription, isFound := router.findWebhook(hooks, formattedWebhookURL)
 	if isFound {
-		logger.Info("webhook already exists")
-		router.hookIDs[repo.GetRepositoryID()] = existingHookSubscription.Uuid
-
-		if router.shouldUpdateWebhook(existingHookSubscription) {
-			logger.Info("webhook requires an update")
-			if _, err = router.updateWebhook(repo, existingHookSubscription); err != nil {
-				logger.Errorw("failed to update webhook", zap.Error(err))
-				return errors.Wrap(err, "failed to update existing webhook")
-			}
-
-			logger.Info("successfully updated the webhook")
+		logger.Info("webhook already exists, removing old webhook...")
+		if err := router.deleteWebhook(repo, existingHookSubscription.Uuid); err != nil {
+			logger.Errorw("failed to delete old webhook",
+				zap.String("owner", repo.Owner), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
+			return errors.Wrapf(err, "failed to delete old webhook for repo %s/%s.", repo.Owner, repo.RepositorySlug)
 		}
-
-		return nil
 	}
 
-	logger.Info("webhook doesn't exist yet, creating a new webhook...")
+	logger.Info("creating a new webhook...")
 	newWebhook, err := router.createWebhook(repo, formattedWebhookURL)
 	if err != nil {
 		logger.Errorw("failed to create new webhook", zap.Error(err))
@@ -289,21 +262,6 @@ func (router *Router) createWebhook(repo v1alpha1.BitbucketRepository, formatted
 	return router.client.Repositories.Webhooks.Create(opt)
 }
 
-// updateWebhook updates an existing webhook
-func (router *Router) updateWebhook(repo v1alpha1.BitbucketRepository, existingHookSubscription *WebhookSubscription) (*bitbucketv2.Webhook, error) {
-	opt := &bitbucketv2.WebhooksOptions{
-		Owner:       repo.Owner,
-		RepoSlug:    repo.RepositorySlug,
-		Uuid:        existingHookSubscription.Uuid,
-		Description: existingHookSubscription.Description,
-		Url:         existingHookSubscription.Url,
-		Active:      existingHookSubscription.Active,
-		Events:      router.bitbucketEventSource.Events,
-	}
-
-	return router.client.Repositories.Webhooks.Update(opt)
-}
-
 // deleteWebhook deletes an existing webhook
 func (router *Router) deleteWebhook(repo v1alpha1.BitbucketRepository, hookID string) error {
 	_, err := router.client.Repositories.Webhooks.Delete(&bitbucketv2.WebhooksOptions{
@@ -311,6 +269,13 @@ func (router *Router) deleteWebhook(repo v1alpha1.BitbucketRepository, hookID st
 		RepoSlug: repo.RepositorySlug,
 		Uuid:     hookID,
 	})
+	if err != nil {
+		// Skip not found errors in case the webhook was already deleted
+		var bitbucketErr *bitbucketv2.UnexpectedResponseStatusError
+		if errors.As(err, &bitbucketErr) && bitbucketErr.Status == "404 Not Found" {
+			return nil
+		}
+	}
 
 	return err
 }
@@ -360,11 +325,4 @@ func (router *Router) findWebhook(hooks []WebhookSubscription, targetWebhookURL 
 	}
 
 	return existingHookSubscription, isFound
-}
-
-func (router *Router) shouldUpdateWebhook(existingHookSubscription *WebhookSubscription) bool {
-	oldEvents := existingHookSubscription.Events
-	newEvents := router.bitbucketEventSource.Events
-
-	return !common.ElementsMatch(oldEvents, newEvents)
 }
