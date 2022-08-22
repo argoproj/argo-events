@@ -44,7 +44,7 @@ func GetAWSCredFromEnvironment(access *corev1.SecretKeySelector, secret *corev1.
 }
 
 // GetAWSCredFromVolume reads credential stored in mounted secret volume.
-func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector) (*credentials.Credentials, error) {
+func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector, sessionToken *corev1.SecretKeySelector) (*credentials.Credentials, error) {
 	accessKey, err := common.GetSecretFromVolume(access)
 	if err != nil {
 		return nil, errors.Wrap(err, "can not find access key")
@@ -53,9 +53,19 @@ func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.Secre
 	if err != nil {
 		return nil, errors.Wrap(err, "can not find secret key")
 	}
+
+	var token string
+	if sessionToken != nil {
+		token, err = common.GetSecretFromVolume(sessionToken)
+		if err != nil {
+			return nil, errors.Wrap(err, "can not find session token")
+		}
+	}
+
 	return credentials.NewStaticCredentialsFromCreds(credentials.Value{
 		AccessKeyID:     accessKey,
 		SecretAccessKey: secretKey,
+		SessionToken:    token,
 	}), nil
 }
 
@@ -97,7 +107,7 @@ func CreateAWSSessionWithCredsInEnv(region string, roleARN string, accessKey *co
 }
 
 // CreateAWSSessionWithCredsInVolume based on credentials in mounted volumes, return a aws session
-func CreateAWSSessionWithCredsInVolume(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
+func CreateAWSSessionWithCredsInVolume(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector, sessionToken *corev1.SecretKeySelector) (*session.Session, error) {
 	if roleARN != "" {
 		return GetAWSAssumeRoleCreds(roleARN, region)
 	}
@@ -106,7 +116,7 @@ func CreateAWSSessionWithCredsInVolume(region string, roleARN string, accessKey 
 		return GetAWSSessionWithoutCreds(region)
 	}
 
-	creds, err := GetAWSCredFromVolume(accessKey, secretKey)
+	creds, err := GetAWSCredFromVolume(accessKey, secretKey, sessionToken)
 	if err != nil {
 		return nil, err
 	}

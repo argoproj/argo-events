@@ -1631,6 +1631,11 @@ func (in *SQSEventSource) DeepCopyInto(out *SQSEventSource) {
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.SessionToken != nil {
+		in, out := &in.SessionToken, &out.SessionToken
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

@@ -1299,6 +1299,10 @@ message SQSEventSource {
   // Endpoint configures connection to a specific SQS endpoint instead of Amazons servers
   // +optional
   optional string endpoint = 12;
+
+  // SessionToken refers to K8s secret containing AWS temporary credentials(STS) session token
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector sessionToken = 13;
 }
 
 // Selector represents conditional operation to select K8s objects.

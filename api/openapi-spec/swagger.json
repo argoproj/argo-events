@@ -2453,6 +2453,10 @@
           "description": "SecretKey refers K8s secret containing aws secret key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
+        "sessionToken": {
+          "description": "SessionToken refers to K8s secret containing AWS temporary credentials(STS) session token",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "waitTimeSeconds": {
           "description": "WaitTimeSeconds is The duration (in seconds) for which the call waits for a message to arrive in the queue before returning.",
           "type": "integer",
