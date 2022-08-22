@@ -1791,56 +1791,56 @@
 <ol>
 <li>
 <p>Deploy the emitter in your local K8s cluster.</p>
-<div class="codehilite"><pre><span></span><code><span class="o">---</span>
-<span class="nv">apiVersion</span>: <span class="nv">v1</span>
-<span class="nv">kind</span>: <span class="nv">Service</span>
-<span class="nv">metadata</span>:
-  <span class="nv">name</span>: <span class="nv">broker</span>
-  <span class="nv">labels</span>:
-    <span class="nv">app</span>: <span class="nv">broker</span>
-<span class="nv">spec</span>:
-  <span class="nv">clusterIP</span>: <span class="nv">None</span>
-  <span class="nv">ports</span>:
-    <span class="o">-</span> <span class="nv">port</span>: <span class="mi">4000</span>
-      <span class="nv">targetPort</span>: <span class="mi">4000</span>
-  <span class="nv">selector</span>:
-    <span class="nv">app</span>: <span class="nv">broker</span>
-<span class="o">---</span>
-<span class="nv">apiVersion</span>: <span class="nv">apps</span><span class="o">/</span><span class="nv">v1</span>
-<span class="nv">kind</span>: <span class="nv">Deployment</span>
-<span class="nv">metadata</span>:
-  <span class="nv">name</span>: <span class="nv">broker</span>
-<span class="nv">spec</span>:
-  <span class="nv">replicas</span>: <span class="mi">1</span>
-  <span class="nv">selector</span>:
-    <span class="nv">matchLabels</span>:
-      <span class="nv">app</span>: <span class="nv">broker</span>
-  <span class="nv">template</span>:
-    <span class="nv">metadata</span>:
-      <span class="nv">labels</span>:
-        <span class="nv">app</span>: <span class="nv">broker</span>
-    <span class="nv">spec</span>:
-      <span class="nv">containers</span>:
-        <span class="o">-</span> <span class="nv">env</span>:
-            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">EMITTER_LICENSE</span>
-              <span class="nv">value</span>: <span class="s2">&quot;</span><span class="s">zT83oDV0DWY5_JysbSTPTDr8KB0AAAAAAAAAAAAAAAI</span><span class="s2">&quot;</span> # <span class="nv">This</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">test</span> <span class="nv">license</span>, <span class="k">DO</span> <span class="nv">NOT</span> <span class="nv">USE</span> <span class="nv">IN</span> <span class="nv">PRODUCTION</span><span class="o">!</span>
-            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">EMITTER_CLUSTER_SEED</span>
-              <span class="nv">value</span>: <span class="s2">&quot;</span><span class="s">broker</span><span class="s2">&quot;</span>
-            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">EMITTER_CLUSTER_ADVERTISE</span>
-              <span class="nv">value</span>: <span class="s2">&quot;</span><span class="s">private:4000</span><span class="s2">&quot;</span>
-          <span class="nv">name</span>: <span class="nv">broker</span>
-          <span class="nv">image</span>: <span class="nv">emitter</span><span class="o">/</span><span class="nv">server</span>:<span class="nv">latest</span>
-          <span class="nv">ports</span>:
-            <span class="o">-</span> <span class="nv">containerPort</span>: <span class="mi">8080</span>
-            <span class="o">-</span> <span class="nv">containerPort</span>: <span class="mi">443</span>
-            <span class="o">-</span> <span class="nv">containerPort</span>: <span class="mi">4000</span>
-          <span class="nv">volumeMounts</span>:
-            <span class="o">-</span> <span class="nv">name</span>: <span class="nv">broker</span><span class="o">-</span><span class="nv">volume</span>
-              <span class="nv">mountPath</span>: <span class="o">/</span><span class="nv">data</span>
-      <span class="nv">volumes</span>:
-        <span class="o">-</span> <span class="nv">name</span>: <span class="nv">broker</span><span class="o">-</span><span class="nv">volume</span>
-          <span class="nv">hostPath</span>:
-            <span class="nv">path</span>: <span class="o">/</span><span class="nv">emitter</span> #<span class="nv">directory</span> <span class="nv">on</span> <span class="nv">host</span>
+<div class="codehilite"><pre><span></span><code><span class="o">---</span><span class="w"></span>
+<span class="nv">apiVersion</span>:<span class="w"> </span><span class="nv">v1</span><span class="w"></span>
+<span class="nv">kind</span>:<span class="w"> </span><span class="nv">Service</span><span class="w"></span>
+<span class="nv">metadata</span>:<span class="w"></span>
+<span class="w">  </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">broker</span><span class="w"></span>
+<span class="w">  </span><span class="nv">labels</span>:<span class="w"></span>
+<span class="w">    </span><span class="nv">app</span>:<span class="w"> </span><span class="nv">broker</span><span class="w"></span>
+<span class="nv">spec</span>:<span class="w"></span>
+<span class="w">  </span><span class="nv">clusterIP</span>:<span class="w"> </span><span class="nv">None</span><span class="w"></span>
+<span class="w">  </span><span class="nv">ports</span>:<span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nv">port</span>:<span class="w"> </span><span class="mi">4000</span><span class="w"></span>
+<span class="w">      </span><span class="nv">targetPort</span>:<span class="w"> </span><span class="mi">4000</span><span class="w"></span>
+<span class="w">  </span><span class="nv">selector</span>:<span class="w"></span>
+<span class="w">    </span><span class="nv">app</span>:<span class="w"> </span><span class="nv">broker</span><span class="w"></span>
+<span class="o">---</span><span class="w"></span>
+<span class="nv">apiVersion</span>:<span class="w"> </span><span class="nv">apps</span><span class="o">/</span><span class="nv">v1</span><span class="w"></span>
+<span class="nv">kind</span>:<span class="w"> </span><span class="nv">Deployment</span><span class="w"></span>
+<span class="nv">metadata</span>:<span class="w"></span>
+<span class="w">  </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">broker</span><span class="w"></span>
+<span class="nv">spec</span>:<span class="w"></span>
+<span class="w">  </span><span class="nv">replicas</span>:<span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="nv">selector</span>:<span class="w"></span>
+<span class="w">    </span><span class="nv">matchLabels</span>:<span class="w"></span>
+<span class="w">      </span><span class="nv">app</span>:<span class="w"> </span><span class="nv">broker</span><span class="w"></span>
+<span class="w">  </span><span class="nv">template</span>:<span class="w"></span>
+<span class="w">    </span><span class="nv">metadata</span>:<span class="w"></span>
+<span class="w">      </span><span class="nv">labels</span>:<span class="w"></span>
+<span class="w">        </span><span class="nv">app</span>:<span class="w"> </span><span class="nv">broker</span><span class="w"></span>
+<span class="w">    </span><span class="nv">spec</span>:<span class="w"></span>
+<span class="w">      </span><span class="nv">containers</span>:<span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nv">env</span>:<span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">EMITTER_LICENSE</span><span class="w"></span>
+<span class="w">              </span><span class="nv">value</span>:<span class="w"> </span><span class="s2">&quot;zT83oDV0DWY5_JysbSTPTDr8KB0AAAAAAAAAAAAAAAI&quot;</span><span class="w"> </span>#<span class="w"> </span><span class="nv">This</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">test</span><span class="w"> </span><span class="nv">license</span>,<span class="w"> </span><span class="k">DO</span><span class="w"> </span><span class="nv">NOT</span><span class="w"> </span><span class="nv">USE</span><span class="w"> </span><span class="nv">IN</span><span class="w"> </span><span class="nv">PRODUCTION</span><span class="o">!</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">EMITTER_CLUSTER_SEED</span><span class="w"></span>
+<span class="w">              </span><span class="nv">value</span>:<span class="w"> </span><span class="s2">&quot;broker&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">EMITTER_CLUSTER_ADVERTISE</span><span class="w"></span>
+<span class="w">              </span><span class="nv">value</span>:<span class="w"> </span><span class="s2">&quot;private:4000&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">broker</span><span class="w"></span>
+<span class="w">          </span><span class="nv">image</span>:<span class="w"> </span><span class="nv">emitter</span><span class="o">/</span><span class="nv">server</span>:<span class="nv">latest</span><span class="w"></span>
+<span class="w">          </span><span class="nv">ports</span>:<span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nv">containerPort</span>:<span class="w"> </span><span class="mi">8080</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nv">containerPort</span>:<span class="w"> </span><span class="mi">443</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nv">containerPort</span>:<span class="w"> </span><span class="mi">4000</span><span class="w"></span>
+<span class="w">          </span><span class="nv">volumeMounts</span>:<span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">broker</span><span class="o">-</span><span class="nv">volume</span><span class="w"></span>
+<span class="w">              </span><span class="nv">mountPath</span>:<span class="w"> </span><span class="o">/</span><span class="nv">data</span><span class="w"></span>
+<span class="w">      </span><span class="nv">volumes</span>:<span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">broker</span><span class="o">-</span><span class="nv">volume</span><span class="w"></span>
+<span class="w">          </span><span class="nv">hostPath</span>:<span class="w"></span>
+<span class="w">            </span><span class="nv">path</span>:<span class="w"> </span><span class="o">/</span><span class="nv">emitter</span><span class="w"> </span>#<span class="nv">directory</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">host</span><span class="w"></span>
 </code></pre></div>
 
 </li>

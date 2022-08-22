@@ -1982,26 +1982,26 @@ you want to define a generic trigger template in the sensor and populate the K8s
 <p>Trigger policy helps you determine the status of the triggered K8s object and decide whether to stop or continue sensor. </p>
 <p>To determine whether the K8s object was successful or not, the K8s trigger provides a <code>Resource Labels</code> policy.
 The <code>Resource Labels</code> holds a list of labels which are checked against the triggered K8s object to determine the status of the object.</p>
-<div class="codehilite"><pre><span></span><code>            # <span class="nv">Policy</span> <span class="nv">to</span> <span class="nv">configure</span> <span class="nv">backoff</span> <span class="nv">and</span> <span class="nv">execution</span> <span class="nv">criteria</span> <span class="k">for</span> <span class="nv">the</span> <span class="nv">trigger</span>
-            # <span class="nv">Because</span> <span class="nv">the</span> <span class="nv">sensor</span> <span class="nv">is</span> <span class="nv">able</span> <span class="nv">to</span> <span class="nv">trigger</span> <span class="nv">any</span> <span class="nv">K8s</span> <span class="nv">resource</span>, <span class="nv">it</span> <span class="nv">determines</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">state</span> <span class="nv">by</span> <span class="nv">looking</span> <span class="nv">at</span> <span class="nv">the</span> <span class="nv">resource</span><span class="s1">&#39;</span><span class="s">s labels.</span>
-            <span class="nv">policy</span>:
-              <span class="nv">k8s</span>:
-                # <span class="nv">Backoff</span> <span class="nv">before</span> <span class="nv">checking</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">labels</span>
-                <span class="nv">backoff</span>:
-                  # <span class="nv">Duration</span> <span class="nv">is</span> <span class="nv">the</span> <span class="nv">duration</span> <span class="nv">in</span> <span class="nv">nanoseconds</span>
-                  <span class="nv">duration</span>: <span class="mi">1000000000</span> # <span class="mi">1</span> <span class="nv">second</span>
-                  # <span class="nv">Duration</span> <span class="nv">is</span> <span class="nv">multiplied</span> <span class="nv">by</span> <span class="nv">factor</span> <span class="nv">each</span> <span class="nv">iteration</span>
-                  <span class="nv">factor</span>: <span class="mi">2</span>
-                  # <span class="nv">The</span> <span class="nv">amount</span> <span class="nv">of</span> <span class="nv">jitter</span> <span class="nv">applied</span> <span class="nv">each</span> <span class="nv">iteration</span>
-                  <span class="nv">jitter</span>: <span class="mi">0</span>.<span class="mi">1</span>
-                  # <span class="k">Exit</span> <span class="nv">with</span> <span class="nv">error</span> <span class="nv">after</span> <span class="nv">these</span> <span class="nv">many</span> <span class="nv">steps</span>
-                  <span class="nv">steps</span>: <span class="mi">5</span>
-                # <span class="nv">labels</span> <span class="nv">set</span> <span class="nv">on</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">decide</span> <span class="k">if</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">has</span> <span class="nv">transitioned</span> <span class="nv">into</span> <span class="nv">the</span> <span class="nv">success</span> <span class="nv">state</span>.
-                <span class="nv">labels</span>:
-                  <span class="nv">workflows</span>.<span class="nv">argoproj</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">phase</span>: <span class="nv">Succeeded</span>
-                # <span class="nv">Determines</span> <span class="nv">whether</span> <span class="nv">trigger</span> <span class="nv">should</span> <span class="nv">be</span> <span class="nv">marked</span> <span class="nv">as</span> <span class="nv">failed</span> <span class="k">if</span> <span class="nv">the</span> <span class="nv">backoff</span> <span class="nv">times</span> <span class="nv">out</span> <span class="nv">and</span> <span class="nv">sensor</span> <span class="nv">is</span> <span class="nv">still</span> <span class="nv">unable</span> <span class="nv">to</span> <span class="nv">decide</span> <span class="nv">the</span> <span class="nv">state</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">trigger</span>.
-                # <span class="nv">defaults</span> <span class="nv">to</span> <span class="nv">false</span>
-                <span class="nv">errorOnBackoffTimeout</span>: <span class="nv">true</span>
+<div class="codehilite"><pre><span></span><code><span class="w">            </span>#<span class="w"> </span><span class="nv">Policy</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">configure</span><span class="w"> </span><span class="nv">backoff</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">execution</span><span class="w"> </span><span class="nv">criteria</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">trigger</span><span class="w"></span>
+<span class="w">            </span>#<span class="w"> </span><span class="nv">Because</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">sensor</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">able</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">trigger</span><span class="w"> </span><span class="nv">any</span><span class="w"> </span><span class="nv">K8s</span><span class="w"> </span><span class="nv">resource</span>,<span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">determines</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="w"> </span><span class="nv">state</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">looking</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="err">&#39;s labels.</span>
+<span class="err">            policy:</span>
+<span class="err">              k8s:</span>
+<span class="err">                # Backoff before checking the resource labels</span>
+<span class="err">                backoff:</span>
+<span class="err">                  # Duration is the duration in nanoseconds</span>
+<span class="err">                  duration: 1000000000 # 1 second</span>
+<span class="err">                  # Duration is multiplied by factor each iteration</span>
+<span class="err">                  factor: 2</span>
+<span class="err">                  # The amount of jitter applied each iteration</span>
+<span class="err">                  jitter: 0.1</span>
+<span class="err">                  # Exit with error after these many steps</span>
+<span class="err">                  steps: 5</span>
+<span class="err">                # labels set on the resource decide if the resource has transitioned into the success state.</span>
+<span class="err">                labels:</span>
+<span class="err">                  workflows.argoproj.io/phase: Succeeded</span>
+<span class="err">                # Determines whether trigger should be marked as failed if the backoff times out and sensor is still unable to decide the state of the trigger.</span>
+<span class="err">                # defaults to false</span>
+<span class="err">                errorOnBackoffTimeout: true</span><span class="w"></span>
 </code></pre></div>
 
 <p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-with-policy.yaml">here</a>. </p>
