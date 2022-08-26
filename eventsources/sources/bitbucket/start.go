@@ -183,7 +183,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	// When running multiple replicas of the eventsource, they will all try to create the webhook.
 	// Randomly sleep some time to mitigate the issue.
-	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
+	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(5000)))
 	time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 	applyWebhooks()
 
