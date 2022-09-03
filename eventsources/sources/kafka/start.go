@@ -262,7 +262,10 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 }
 
 func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) {
-	config := sarama.NewConfig()
+	config, err := common.GetSaramaConfigFromYAMLString(kafkaEventSource.Config)
+	if err != nil {
+		return nil, err
+	}
 
 	if kafkaEventSource.Version == "" {
 		config.Version = sarama.V1_0_0_0

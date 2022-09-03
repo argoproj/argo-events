@@ -503,10 +503,21 @@ type KafkaEventSource struct {
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,11,opt,name=sasl"`
-
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
+	// Yaml format Sarama config for Kafka connection.
+	// It follows the struct of sarama.Config. See https://github.com/Shopify/sarama/blob/main/config.go
+	// e.g.
+	//
+	// consumer:
+	//   fetch:
+	//     min: 1
+	// net:
+	//   MaxOpenRequests: 5
+	//
+	// +optional
+	Config string `json:"config,omitempty" protobuf:"bytes,13,opt,name=config"`
 }
 
 type KafkaConsumerGroup struct {

@@ -3516,6 +3516,23 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>config</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Yaml format Sarama config for Kafka connection. It follows the struct of
+sarama.Config. See
+<a href="https://github.com/Shopify/sarama/blob/main/config.go">https://github.com/Shopify/sarama/blob/main/config.go</a>
+e.g.
+</p>
+<p>
+consumer: fetch: min: 1 net: MaxOpenRequests: 5
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.MQTTEventSource">
