@@ -547,9 +547,9 @@ streaming {
 // Parameter - secret
 // Example:
 //
-// authorization {
-//   token: "abcd1234"
-// }
+//	authorization {
+//	  token: "abcd1234"
+//	}
 func (i *natsInstaller) buildServerAuthSecret(authStrategy v1alpha1.AuthStrategy, secret string) (*corev1.Secret, error) {
 	s := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -718,7 +718,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 							{Name: "cluster", ContainerPort: clusterPort},
 							{Name: "monitor", ContainerPort: monitorPort},
 						},
-						Command: []string{"/nats-streaming-server", "-sc", "/etc/stan-config/stan.conf"},
+						Command: []string{"/nats-streaming-server", "-sc", "/etc/stan-config/stan.conf", "--cluster_proceed_on_restore_failure"},
 						Env: []corev1.EnvVar{
 							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
