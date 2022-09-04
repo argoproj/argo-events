@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -175,7 +175,7 @@ func (c *Client) sendJSON(jsonBody []byte, url string) error {
 
 		isStatusOK := res.StatusCode >= 200 && res.StatusCode < 300
 		if !isStatusOK {
-			b, _ := ioutil.ReadAll(res.Body)
+			b, _ := io.ReadAll(res.Body)
 			return errors.Errorf("failed reporting to Codefresh, got response: status code %d and body %s, original request body: %s",
 				res.StatusCode, string(b), string(jsonBody))
 		}
