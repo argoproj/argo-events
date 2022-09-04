@@ -567,18 +567,6 @@ fields include, “maxBytes”, “maxMsgs”, “maxAge” (e.g. 72h), “repl
 </p>
 </td>
 </tr>
-<tr>
-<td>
-<code>maxPayload</code></br> <em> string </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Maximum number of bytes in a message payload, 0 means unlimited.
-Defaults to 1MB
-</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.JetStreamConfig">

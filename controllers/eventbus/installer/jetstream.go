@@ -629,29 +629,23 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	if x := r.eventBus.Spec.JetStream.Settings; x != nil {
 		settings = *x
 	}
-	maxPayload := common.JetStreamMaxPayload
-	if r.eventBus.Spec.JetStream.MaxPayload != nil {
-		maxPayload = *r.eventBus.Spec.JetStream.MaxPayload
-	}
 
 	confTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats.conf"))
 	var confTplOutput bytes.Buffer
 	if err := confTpl.Execute(&confTplOutput, struct {
-		MaxPayloadSize string
-		ClusterName    string
-		MonitorPort    string
-		ClusterPort    string
-		ClientPort     string
-		Routes         string
-		Settings       string
+		ClusterName string
+		MonitorPort string
+		ClusterPort string
+		ClientPort  string
+		Routes      string
+		Settings    string
 	}{
-		MaxPayloadSize: maxPayload,
-		ClusterName:    r.eventBus.Name,
-		MonitorPort:    strconv.Itoa(int(jsMonitorPort)),
-		ClusterPort:    strconv.Itoa(int(jsClusterPort)),
-		ClientPort:     strconv.Itoa(int(jsClientPort)),
-		Routes:         strings.Join(routes, ","),
-		Settings:       settings,
+		ClusterName: r.eventBus.Name,
+		MonitorPort: strconv.Itoa(int(jsMonitorPort)),
+		ClusterPort: strconv.Itoa(int(jsClusterPort)),
+		ClientPort:  strconv.Itoa(int(jsClientPort)),
+		Routes:      strings.Join(routes, ","),
+		Settings:    settings,
 	}); err != nil {
 		return fmt.Errorf("failed to parse nats config template, error: %w", err)
 	}

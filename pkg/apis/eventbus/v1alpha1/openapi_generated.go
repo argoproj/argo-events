@@ -429,13 +429,6 @@ func schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref common.ReferenceCallback
 							Format:      "",
 						},
 					},
-					"maxPayload": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
 			},
 		},

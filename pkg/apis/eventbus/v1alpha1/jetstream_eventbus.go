@@ -82,9 +82,6 @@ type JetStreamBus struct {
 	// It accepts a YAML format configuration, available fields include, "maxBytes", "maxMsgs", "maxAge" (e.g. 72h), "replicas" (1, 3, 5), "duplicates" (e.g. 5m).
 	// +optional
 	StreamConfig *string `json:"streamConfig,omitempty" protobuf:"bytes,18,opt,name=streamConfig"`
-	// Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB
-	// +optional
-	MaxPayload *string `json:"maxPayload,omitempty" protobuf:"bytes,19,opt,name=maxPayload"`
 }
 
 func (j JetStreamBus) GetReplicas() int {
