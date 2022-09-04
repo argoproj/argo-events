@@ -262,6 +262,11 @@ func (in *JetStreamBus) DeepCopyInto(out *JetStreamBus) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.MaxPayload != nil {
+		in, out := &in.MaxPayload, &out.MaxPayload
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 
