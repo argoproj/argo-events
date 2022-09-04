@@ -183,6 +183,10 @@ message JetStreamBus {
   // It accepts a YAML format configuration, available fields include, "maxBytes", "maxMsgs", "maxAge" (e.g. 72h), "replicas" (1, 3, 5), "duplicates" (e.g. 5m).
   // +optional
   optional string streamConfig = 18;
+
+  // Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB
+  // +optional
+  optional string maxPayload = 19;
 }
 
 message JetStreamConfig {

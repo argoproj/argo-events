@@ -393,6 +393,10 @@
           "x-kubernetes-patch-merge-key": "name",
           "x-kubernetes-patch-strategy": "merge"
         },
+        "maxPayload": {
+          "description": "Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB",
+          "type": "string"
+        },
         "metadata": {
           "description": "Metadata sets the pods's metadata, i.e. annotations and labels",
           "$ref": "#/definitions/io.argoproj.common.Metadata"
