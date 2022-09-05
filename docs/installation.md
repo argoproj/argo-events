@@ -13,7 +13,7 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, ClusterRoles, Sensor Controller, EventBus Controller and EventSource Controller.
+2. Deploy Argo Events SA, ClusterRoles, and Controller for Sensor, EventBus, and EventSource.
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
         # Install with a validating admission controller
@@ -57,7 +57,7 @@
 
         kubectl create namespace argo-events
 
-2. Deploy Argo Events, SA, Roles, Sensor Controller, EventBus Controller and EventSource Controller.
+2. Deploy Argo Events SA, ClusterRoles, and Controller for Sensor, EventBus, and EventSource.
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
