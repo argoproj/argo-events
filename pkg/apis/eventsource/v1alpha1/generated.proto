@@ -843,6 +843,19 @@ message KafkaEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 12;
+
+  // Yaml format Sarama config for Kafka connection.
+  // It follows the struct of sarama.Config. See https://github.com/Shopify/sarama/blob/main/config.go
+  // e.g.
+  //
+  // consumer:
+  //   fetch:
+  //     min: 1
+  // net:
+  //   MaxOpenRequests: 5
+  //
+  // +optional
+  optional string config = 13;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
