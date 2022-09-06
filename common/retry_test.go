@@ -99,3 +99,21 @@ func TestConnectRetry(t *testing.T) {
 	assert.Equal(t, 0, count)
 	assert.True(t, elapsed >= 2*time.Second)
 }
+
+func TestRetryFailure(t *testing.T) {
+	factor := apicommon.NewAmount("1.0")
+	jitter := apicommon.NewAmount("1")
+	duration := apicommon.FromString("1s")
+	backoff := apicommon.Backoff{
+		Duration: &duration,
+		Factor:   &factor,
+		Jitter:   &jitter,
+		Steps:    2,
+	}
+	err := Connect(&backoff, func() error {
+		return fmt.Errorf("this is an error")
+	})
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "after retries")
+	assert.Contains(t, err.Error(), "this is an error")
+}
