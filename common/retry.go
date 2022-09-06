@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 
@@ -73,7 +72,7 @@ func Convert2WaitBackoff(backoff *apicommon.Backoff) (*wait.Backoff, error) {
 	}
 	f, err := factor.Float64()
 	if err != nil {
-		return nil, errors.Wrap(err, "invalid factor")
+		return nil, fmt.Errorf("invalid factor, %w", err)
 	}
 	result.Factor = f
 
@@ -83,7 +82,7 @@ func Convert2WaitBackoff(backoff *apicommon.Backoff) (*wait.Backoff, error) {
 	}
 	j, err := jitter.Float64()
 	if err != nil {
-		return nil, errors.Wrap(err, "invalid jitter")
+		return nil, fmt.Errorf("invalid jitter, %w", err)
 	}
 	result.Jitter = j
 
@@ -101,20 +100,17 @@ func Connect(backoff *apicommon.Backoff, conn func() error) error {
 	}
 	b, err := Convert2WaitBackoff(backoff)
 	if err != nil {
-		return errors.Wrap(err, "invalid backoff configuration")
+		return fmt.Errorf("invalid backoff configuration, %w", err)
 	}
-	if waitErr := wait.ExponentialBackoff(*b, func() (bool, error) {
+	_ = wait.ExponentialBackoff(*b, func() (bool, error) {
 		if err = conn(); err != nil {
 			// return "false, err" will cover waitErr
 			return false, nil
 		}
 		return true, nil
-	}); waitErr != nil {
-		if err != nil {
-			return fmt.Errorf("%v: %v", waitErr, err)
-		} else {
-			return waitErr
-		}
+	})
+	if err != nil {
+		return fmt.Errorf("failed after retries: %w", err)
 	}
 	return nil
 }
