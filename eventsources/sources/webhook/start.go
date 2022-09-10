@@ -49,7 +49,7 @@ func init() {
 type EventListener struct {
 	EventSourceName string
 	EventName       string
-	WebhookContext  v1alpha1.WebhookContext
+	Webhook         v1alpha1.WebhookEventSource
 	Metrics         *metrics.Metrics
 }
 
@@ -157,7 +157,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the webhook event source...")
 
-	route := webhook.NewRoute(&el.WebhookContext, log, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
+	route := webhook.NewRoute(&el.Webhook.WebhookContext, log, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
 	return webhook.ManageRoute(ctx, &Router{
 		route: route,
 	}, controller, dispatch)
