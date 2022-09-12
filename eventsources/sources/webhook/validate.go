@@ -26,12 +26,12 @@ import (
 
 // ValidateEventSource validates webhook event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
-	return validate(&listener.WebhookContext)
+	return validate(&listener.Webhook)
 }
 
-func validate(webhookEventSource *v1alpha1.WebhookContext) error {
+func validate(webhookEventSource *v1alpha1.WebhookEventSource) error {
 	if webhookEventSource == nil {
 		return common.ErrNilEventSource
 	}
-	return webhook.ValidateWebhookContext(webhookEventSource)
+	return webhook.ValidateWebhookContext(&webhookEventSource.WebhookContext)
 }

@@ -1440,7 +1440,7 @@
           "description": "Webhook event sources",
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookEventSource"
           }
         }
       }
@@ -2752,6 +2752,62 @@
         "endpoint": {
           "description": "REST API endpoint",
           "type": "string"
+        },
+        "maxPayloadSize": {
+          "description": "MaxPayloadSize is the maximum webhook payload size that the server will accept. Requests exceeding that limit will be rejected with \"request too large\" response. Default value: 1048576 (1MB).",
+          "type": "integer",
+          "format": "int64"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "method": {
+          "description": "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
+          "type": "string"
+        },
+        "port": {
+          "description": "Port on which HTTP server is listening for incoming events.",
+          "type": "string"
+        },
+        "serverCertSecret": {
+          "description": "ServerCertPath refers the file that contains the cert.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "serverKeySecret": {
+          "description": "ServerKeyPath refers the file that contains private key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "url": {
+          "description": "URL is the url of the server.",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.WebhookEventSource": {
+      "description": "CalendarEventSource describes an HTTP based EventSource",
+      "type": "object",
+      "required": [
+        "endpoint",
+        "method",
+        "port",
+        "url"
+      ],
+      "properties": {
+        "authSecret": {
+          "description": "AuthSecret holds a secret selector that contains a bearer token for authentication",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "endpoint": {
+          "description": "REST API endpoint",
+          "type": "string"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
         "maxPayloadSize": {
           "description": "MaxPayloadSize is the maximum webhook payload size that the server will accept. Requests exceeding that limit will be rejected with \"request too large\" response. Default value: 1048576 (1MB).",

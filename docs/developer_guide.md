@@ -8,7 +8,7 @@ another cluster you can ignore the Minikube specific step 3.
 
 ### Requirements
 
-- Golang 1.17
+- Golang 1.19+
 - Docker
 
 ### Installation & Setup

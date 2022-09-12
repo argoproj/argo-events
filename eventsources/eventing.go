@@ -299,7 +299,10 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Webhook) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Webhook {
-			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, WebhookContext: v, Metrics: metrics})
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, Webhook: v, Metrics: metrics})
 		}
 		result[apicommon.WebhookEvent] = servers
 	}

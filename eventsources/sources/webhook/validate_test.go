@@ -30,7 +30,7 @@ import (
 
 func TestValidateEventSource(t *testing.T) {
 	listener := &EventListener{
-		WebhookContext: v1alpha1.WebhookContext{},
+		Webhook: v1alpha1.WebhookEventSource{},
 	}
 
 	err := listener.ValidateEventSource(context.Background())
@@ -46,7 +46,7 @@ func TestValidateEventSource(t *testing.T) {
 
 	for _, value := range eventSource.Spec.Webhook {
 		l := &EventListener{
-			WebhookContext: value,
+			Webhook: value,
 		}
 		err = l.ValidateEventSource(context.Background())
 		assert.NoError(t, err)
