@@ -69,7 +69,7 @@ type EventSourceSpec struct {
 	// Resource event sources
 	Resource map[string]ResourceEventSource `json:"resource,omitempty" protobuf:"bytes,7,rep,name=resource"`
 	// Webhook event sources
-	Webhook map[string]WebhookContext `json:"webhook,omitempty" protobuf:"bytes,8,rep,name=webhook"`
+	Webhook map[string]WebhookEventSource `json:"webhook,omitempty" protobuf:"bytes,8,rep,name=webhook"`
 	// AMQP event sources
 	AMQP map[string]AMQPEventSource `json:"amqp,omitempty" protobuf:"bytes,9,rep,name=amqp"`
 	// Kafka event sources
@@ -208,6 +208,14 @@ type Service struct {
 	// More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
 	// +optional
 	ClusterIP string `json:"clusterIP,omitempty" protobuf:"bytes,2,opt,name=clusterIP"`
+}
+
+// CalendarEventSource describes an HTTP based EventSource
+type WebhookEventSource struct {
+	WebhookContext `json:",inline" protobuf:"bytes,1,opt,name=webhookContext"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.

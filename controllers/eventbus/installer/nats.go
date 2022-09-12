@@ -548,9 +548,9 @@ streaming {
 // Parameter - secret
 // Example:
 //
-// authorization {
-//   token: "abcd1234"
-// }
+//	authorization {
+//	  token: "abcd1234"
+//	}
 func (i *natsInstaller) buildServerAuthSecret(authStrategy v1alpha1.AuthStrategy, secret string) (*corev1.Secret, error) {
 	s := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

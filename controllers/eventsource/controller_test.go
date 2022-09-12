@@ -88,12 +88,14 @@ func fakeCalendarEventSourceMap(name string) map[string]v1alpha1.CalendarEventSo
 	return map[string]v1alpha1.CalendarEventSource{name: {Schedule: "*/5 * * * *"}}
 }
 
-func fakeWebhookEventSourceMap(name string) map[string]v1alpha1.WebhookContext {
-	return map[string]v1alpha1.WebhookContext{
+func fakeWebhookEventSourceMap(name string) map[string]v1alpha1.WebhookEventSource {
+	return map[string]v1alpha1.WebhookEventSource{
 		name: {
-			URL:      "http://a.b",
-			Endpoint: "/abc",
-			Port:     "1234",
+			WebhookContext: v1alpha1.WebhookContext{
+				URL:      "http://a.b",
+				Endpoint: "/abc",
+				Port:     "1234",
+			},
 		},
 	}
 }

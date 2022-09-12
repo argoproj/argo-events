@@ -1649,8 +1649,8 @@ Resource event sources
 <tr>
 <td>
 <code>webhook</code></br> <em>
-<a href="#argoproj.io/v1alpha1.WebhookContext">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext
+<a href="#argoproj.io/v1alpha1.WebhookEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookEventSource
 </a> </em>
 </td>
 <td>
@@ -1996,7 +1996,8 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.RedisStreamEventSource">RedisStreamEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SQSEventSource">SQSEventSource</a>,
-<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>)
+<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
+<a href="#argoproj.io/v1alpha1.WebhookEventSource">WebhookEventSource</a>)
 </p>
 <p>
 </p>
@@ -2134,8 +2135,8 @@ Resource event sources
 <tr>
 <td>
 <code>webhook</code></br> <em>
-<a href="#argoproj.io/v1alpha1.WebhookContext">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext
+<a href="#argoproj.io/v1alpha1.WebhookEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookEventSource
 </a> </em>
 </td>
 <td>
@@ -5834,13 +5835,13 @@ WebhookContext
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
-<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
 <a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>,
-<a href="#argoproj.io/v1alpha1.StripeEventSource">StripeEventSource</a>)
+<a href="#argoproj.io/v1alpha1.StripeEventSource">StripeEventSource</a>,
+<a href="#argoproj.io/v1alpha1.WebhookEventSource">WebhookEventSource</a>)
 </p>
 <p>
 <p>
@@ -5961,6 +5962,57 @@ authentication
 MaxPayloadSize is the maximum webhook payload size that the server will
 accept. Requests exceeding that limit will be rejected with “request too
 large” response. Default value: 1048576 (1MB).
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.WebhookEventSource">
+WebhookEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+CalendarEventSource describes an HTTP based EventSource
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>WebhookContext</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>WebhookContext</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
 </p>
 </td>
 </tr>

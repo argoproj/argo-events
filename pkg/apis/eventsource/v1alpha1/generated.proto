@@ -479,7 +479,7 @@ message EventSourceSpec {
   map<string, ResourceEventSource> resource = 7;
 
   // Webhook event sources
-  map<string, WebhookContext> webhook = 8;
+  map<string, WebhookEventSource> webhook = 8;
 
   // AMQP event sources
   map<string, AMQPEventSource> amqp = 9;
@@ -1551,5 +1551,14 @@ message WebhookContext {
   // Default value: 1048576 (1MB).
   // +optional
   optional int64 maxPayloadSize = 9;
+}
+
+// CalendarEventSource describes an HTTP based EventSource
+message WebhookEventSource {
+  optional WebhookContext webhookContext = 1;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 2;
 }
 
