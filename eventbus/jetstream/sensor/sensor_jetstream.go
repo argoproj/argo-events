@@ -80,10 +80,10 @@ func (stream *SensorJetstream) Connect(triggerName string, dependencyExpression 
 }
 
 // Update the K/V store to reflect the current Spec:
-// 1. save the current spec, including list of triggers, list of dependencies and how they're defined, and trigger expressions
-// 2. selectively purge dependencies from the K/V store if either the Trigger no longer exists,
-//    the dependency definition has changed, or the trigger expression has changed
-// 3. for each dependency purged, delete the associated consumer so no new data is sent there
+//  1. save the current spec, including list of triggers, list of dependencies and how they're defined, and trigger expressions
+//  2. selectively purge dependencies from the K/V store if either the Trigger no longer exists,
+//     the dependency definition has changed, or the trigger expression has changed
+//  3. for each dependency purged, delete the associated consumer so no new data is sent there
 func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error {
 	log := stream.Logger
 	if sensorSpec == nil {
@@ -423,7 +423,7 @@ func (stream *SensorJetstream) purgeAllDepsForTrigger(triggerName string) error 
 	return nil
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
 // These are the Keys and methods to derive Keys for our K/V store
 var (
 	TriggersKey       = "Triggers"
@@ -438,7 +438,7 @@ func getTriggerExpressionKey(triggerName string) string {
 	return fmt.Sprintf("%s/Expression", triggerName)
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
 // These are the structs representing Values in our K/V store
 type DependencyDefinitionValue map[string]uint64 // value for DependencyDefsKey
 type TriggerValue []string                       // value for TriggersKey

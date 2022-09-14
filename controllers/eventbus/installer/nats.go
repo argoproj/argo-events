@@ -123,16 +123,16 @@ func (i *natsInstaller) uninstallPVCs(ctx context.Context) error {
 	log := i.logger
 	pvcs, err := i.getPVCs(ctx, i.labels)
 	if err != nil {
-		log.Errorw("failed to get PVCs created by nats streaming statefulset when uninstalling", zap.Error(err))
+		log.Errorw("Failed to get PVCs created by nats streaming statefulset when uninstalling", zap.Error(err))
 		return err
 	}
 	for _, pvc := range pvcs {
 		err = i.client.Delete(ctx, &pvc)
 		if err != nil {
-			log.Errorw("failed to delete pvc when uninstalling", zap.Any("pvcName", pvc.Name), zap.Error(err))
+			log.Errorw("Failed to delete pvc when uninstalling", zap.Any("pvcName", pvc.Name), zap.Error(err))
 			return err
 		}
-		log.Infow("pvc deleted", "pvcName", pvc.Name)
+		log.Infow("Pvc deleted", "pvcName", pvc.Name)
 	}
 	return nil
 }
@@ -143,13 +143,13 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 	svc, err := i.getStanService(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
 		i.eventBus.Status.MarkDeployFailed("GetServiceFailed", "Get existing service failed")
-		log.Errorw("error getting existing service", zap.Error(err))
+		log.Errorw("Error getting existing service", zap.Error(err))
 		return nil, err
 	}
 	expectedSvc, err := i.buildStanService()
 	if err != nil {
 		i.eventBus.Status.MarkDeployFailed("BuildServiceFailed", "Failed to build a service spec")
-		log.Errorw("error building service spec", zap.Error(err))
+		log.Errorw("Error building service spec", zap.Error(err))
 		return nil, err
 	}
 	if svc != nil {
@@ -162,20 +162,20 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 			err = i.client.Update(ctx, svc)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
-				log.Errorw("error updating existing service", zap.Error(err))
+				log.Errorw("Error updating existing service", zap.Error(err))
 				return nil, err
 			}
-			log.Infow("service is updated", "serviceName", svc.Name)
+			log.Infow("Service is updated", "serviceName", svc.Name)
 		}
 		return svc, nil
 	}
 	err = i.client.Create(ctx, expectedSvc)
 	if err != nil {
 		i.eventBus.Status.MarkDeployFailed("CreateServiceFailed", "Failed to create a service")
-		log.Errorw("error creating a service", zap.Error(err))
+		log.Errorw("Error creating a service", zap.Error(err))
 		return nil, err
 	}
-	log.Infow("service is created", "serviceName", expectedSvc.Name)
+	log.Infow("Service is created", "serviceName", expectedSvc.Name)
 	return expectedSvc, nil
 }
 
@@ -185,13 +185,13 @@ func (i *natsInstaller) createConfigMap(ctx context.Context) (*corev1.ConfigMap,
 	cm, err := i.getConfigMap(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
 		i.eventBus.Status.MarkDeployFailed("GetConfigMapFailed", "Failed to get existing configmap")
-		log.Errorw("error getting existing configmap", zap.Error(err))
+		log.Errorw("Error getting existing configmap", zap.Error(err))
 		return nil, err
 	}
 	expectedCm, err := i.buildConfigMap()
 	if err != nil {
 		i.eventBus.Status.MarkDeployFailed("BuildConfigMapFailed", "Failed to build a configmap spec")
-		log.Errorw("error building configmap spec", zap.Error(err))
+		log.Errorw("Error building configmap spec", zap.Error(err))
 		return nil, err
 	}
 	if cm != nil {
@@ -203,20 +203,20 @@ func (i *natsInstaller) createConfigMap(ctx context.Context) (*corev1.ConfigMap,
 			err := i.client.Update(ctx, cm)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateConfigMapFailed", "Failed to update existing configmap")
-				log.Errorw("error updating configmap", zap.Error(err))
+				log.Errorw("Error updating configmap", zap.Error(err))
 				return nil, err
 			}
-			log.Infow("updated configmap", "configmapName", cm.Name)
+			log.Infow("Updated configmap", "configmapName", cm.Name)
 		}
 		return cm, nil
 	}
 	err = i.client.Create(ctx, expectedCm)
 	if err != nil {
 		i.eventBus.Status.MarkDeployFailed("CreateConfigMapFailed", "Failed to create configmap")
-		log.Errorw("error creating a configmap", zap.Error(err))
+		log.Errorw("Error creating a configmap", zap.Error(err))
 		return nil, err
 	}
-	log.Infow("created configmap", "configmapName", expectedCm.Name)
+	log.Infow("Created configmap", "configmapName", expectedCm.Name)
 	return expectedCm, nil
 }
 
@@ -226,13 +226,13 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 	sSecret, err := i.getServerAuthSecret(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
 		i.eventBus.Status.MarkDeployFailed("GetServerAuthSecretFailed", "Failed to get existing server auth secret")
-		log.Errorw("error getting existing server auth secret", zap.Error(err))
+		log.Errorw("Error getting existing server auth secret", zap.Error(err))
 		return nil, nil, err
 	}
 	cSecret, err := i.getClientAuthSecret(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
 		i.eventBus.Status.MarkDeployFailed("GetClientAuthSecretFailed", "Failed to get existing client auth secret")
-		log.Errorw("error getting existing client auth secret", zap.Error(err))
+		log.Errorw("Error getting existing client auth secret", zap.Error(err))
 		return nil, nil, err
 	}
 	if strategy != v1alpha1.AuthStrategyNone { // Do not checkout AuthStrategyNone because it only has server auth secret
@@ -251,10 +251,10 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			err = i.client.Delete(ctx, cSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("DeleteClientAuthSecretFailed", "Failed to delete the client auth secret")
-				log.Errorw("error deleting client auth secret", zap.Error(err))
+				log.Errorw("Error deleting client auth secret", zap.Error(err))
 				return nil, nil, err
 			}
-			log.Info("deleted server auth secret")
+			log.Info("Deleted server auth secret")
 		}
 		if sSecret != nil && sSecret.Annotations != nil && sSecret.Annotations[authStrategyAnnoKey] == string(strategy) && len(sSecret.Data[serverAuthSecretKey]) == 0 {
 			// If the server auth secret is already existing, strategy didn't change, and the secret is empty string, reuse it without updating.
@@ -264,7 +264,7 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		expectedSSecret, err := i.buildServerAuthSecret(strategy, "")
 		if err != nil {
 			i.eventBus.Status.MarkDeployFailed("BuildServerAuthSecretFailed", "Failed to build a server auth secret spec")
-			log.Errorw("error building server auth secret spec", zap.Error(err))
+			log.Errorw("Error building server auth secret spec", zap.Error(err))
 			return nil, nil, err
 		}
 		if sSecret != nil {
@@ -274,19 +274,19 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			err = i.client.Update(ctx, sSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServerAuthSecretFailed", "Failed to update the server auth secret")
-				log.Errorw("error updating server auth secret", zap.Error(err))
+				log.Errorw("Error updating server auth secret", zap.Error(err))
 				return nil, nil, err
 			}
-			log.Infow("updated server auth secret", "serverAuthSecretName", sSecret.Name)
+			log.Infow("Updated server auth secret", "serverAuthSecretName", sSecret.Name)
 			return sSecret, nil, nil
 		}
 		err = i.client.Create(ctx, expectedSSecret)
 		if err != nil {
 			i.eventBus.Status.MarkDeployFailed("CreateServerAuthSecretFailed", "Failed to create a server auth secret")
-			log.Errorw("error creating server auth secret", zap.Error(err))
+			log.Errorw("Error creating server auth secret", zap.Error(err))
 			return nil, nil, err
 		}
-		log.Infow("created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
+		log.Infow("Created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
 		return expectedSSecret, nil, nil
 	case v1alpha1.AuthStrategyToken:
 		token := common.RandomString(64)
@@ -298,7 +298,7 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		expectedSSecret, err := i.buildServerAuthSecret(strategy, serverAuthText)
 		if err != nil {
 			i.eventBus.Status.MarkDeployFailed("BuildServerAuthSecretFailed", "Failed to build a server auth secret spec")
-			log.Errorw("error building server auth secret spec", zap.Error(err))
+			log.Errorw("Error building server auth secret spec", zap.Error(err))
 			return nil, nil, err
 		}
 		returnedSSecret := expectedSSecret
@@ -306,10 +306,10 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			err = i.client.Create(ctx, expectedSSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("CreateServerAuthSecretFailed", "Failed to create a server auth secret")
-				log.Errorw("error creating server auth secret", zap.Error(err))
+				log.Errorw("Error creating server auth secret", zap.Error(err))
 				return nil, nil, err
 			}
-			log.Infow("created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
+			log.Infow("Created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
 		} else {
 			sSecret.Data = expectedSSecret.Data
 			sSecret.SetLabels(expectedSSecret.Labels)
@@ -317,17 +317,17 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			err = i.client.Update(ctx, sSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServerAuthSecretFailed", "Failed to update the server auth secret")
-				log.Errorw("error updating server auth secret", zap.Error(err))
+				log.Errorw("Error updating server auth secret", zap.Error(err))
 				return nil, nil, err
 			}
-			log.Infow("updated server auth secret", "serverAuthSecretName", sSecret.Name)
+			log.Infow("Updated server auth secret", "serverAuthSecretName", sSecret.Name)
 			returnedSSecret = sSecret
 		}
 		// create client auth secret
 		expectedCSecret, err := i.buildClientAuthSecret(strategy, clientAuthText)
 		if err != nil {
 			i.eventBus.Status.MarkDeployFailed("BuildClientAuthSecretFailed", "Failed to build a client auth secret spec")
-			log.Errorw("error building client auth secret spec", zap.Error(err))
+			log.Errorw("Error building client auth secret spec", zap.Error(err))
 			return nil, nil, err
 		}
 		returnedCSecret := expectedCSecret
@@ -335,10 +335,10 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			err = i.client.Create(ctx, expectedCSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("CreateClientAuthSecretFailed", "Failed to create a client auth secret")
-				log.Errorw("error creating client auth secret", zap.Error(err))
+				log.Errorw("Error creating client auth secret", zap.Error(err))
 				return nil, nil, err
 			}
-			log.Infow("created client auth secret", "clientAuthSecretName", expectedCSecret.Name)
+			log.Infow("Created client auth secret", "clientAuthSecretName", expectedCSecret.Name)
 		} else {
 			cSecret.Data = expectedCSecret.Data
 			cSecret.SetLabels(expectedCSecret.Labels)
@@ -346,10 +346,10 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			err = i.client.Update(ctx, cSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateClientAuthSecretFailed", "Failed to update the client auth secret")
-				log.Errorw("error updating client auth secret", zap.Error(err))
+				log.Errorw("Error updating client auth secret", zap.Error(err))
 				return nil, nil, err
 			}
-			log.Infow("updated client auth secret", "clientAuthSecretName", cSecret.Name)
+			log.Infow("Updated client auth secret", "clientAuthSecretName", cSecret.Name)
 			returnedCSecret = cSecret
 		}
 		return returnedSSecret, returnedCSecret, nil
@@ -365,35 +365,36 @@ func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, conf
 	ss, err := i.getStatefulSet(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
 		i.eventBus.Status.MarkDeployFailed("GetStatefulSetFailed", "Failed to get existing statefulset")
-		log.Errorw("error getting existing statefulset", zap.Error(err))
+		log.Errorw("Error getting existing statefulset", zap.Error(err))
 		return err
 	}
 	expectedSs, err := i.buildStatefulSet(serviceName, configmapName, authSecretName)
 	if err != nil {
 		i.eventBus.Status.MarkDeployFailed("BuildStatefulSetFailed", "Failed to build a statefulset spec")
-		log.Errorw("error building statefulset spec", zap.Error(err))
+		log.Errorw("Error building statefulset spec", zap.Error(err))
 		return err
 	}
 	if ss != nil {
 		if ss.Annotations != nil && ss.Annotations[common.AnnotationResourceSpecHash] == expectedSs.Annotations[common.AnnotationResourceSpecHash] {
 			return nil
 		}
-		// Delete the existing one to recreate it
-		err := i.client.Delete(ctx, ss)
-		if err != nil {
-			i.eventBus.Status.MarkDeployFailed("DeleteOldStatefulSetFailed", "Failed to delete a statefulset")
-			log.Errorw("error deleting a statefulset", zap.Error(err))
+		ss.SetLabels(expectedSs.Labels)
+		ss.Annotations[common.AnnotationResourceSpecHash] = expectedSs.Annotations[common.AnnotationResourceSpecHash]
+		ss.Spec = expectedSs.Spec
+		if err := i.client.Update(ctx, ss); err != nil {
+			i.eventBus.Status.MarkDeployFailed("UpdateStatefulSetFailed", "Failed to update a statefulset")
+			log.Errorw("Error updating a statefulset", zap.Error(err))
 			return err
 		}
-		log.Infow("old statefulset is deleted", "statefulsetName", ss.Name)
+		log.Infow("Statefulset is updated", "statefulsetName", ss.Name)
+		return nil
 	}
-	err = i.client.Create(ctx, expectedSs)
-	if err != nil {
+	if err := i.client.Create(ctx, expectedSs); err != nil {
 		i.eventBus.Status.MarkDeployFailed("CreateStatefulSetFailed", "Failed to create a statefulset")
-		log.Errorw("error creating a statefulset", zap.Error(err))
+		log.Errorw("Error creating a statefulset", zap.Error(err))
 		return err
 	}
-	log.Infow("statefulset is created", "statefulsetName", expectedSs.Name)
+	log.Infow("Statefulset is created", "statefulsetName", expectedSs.Name)
 	return nil
 }
 
@@ -718,7 +719,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 							{Name: "cluster", ContainerPort: clusterPort},
 							{Name: "monitor", ContainerPort: monitorPort},
 						},
-						Command: []string{"/nats-streaming-server", "-sc", "/etc/stan-config/stan.conf", "--cluster_proceed_on_restore_failure"},
+						Command: []string{"/nats-streaming-server", "-sc", "/etc/stan-config/stan.conf"},
 						Env: []corev1.EnvVar{
 							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},

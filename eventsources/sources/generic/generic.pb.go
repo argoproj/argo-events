@@ -73,7 +73,7 @@ func (m *EventSource) GetConfig() []byte {
 	return nil
 }
 
-//*
+// *
 // Represents an event
 type Event struct {
 	// The event source name.

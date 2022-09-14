@@ -19,6 +19,7 @@ behaviors!**
 - AWS SNS
 - AWS SQS
 - Bitbucket
+- Bitbucket Server
 - GitHub
 - GitLab
 - NetApp Storage GRID

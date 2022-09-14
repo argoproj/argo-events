@@ -300,7 +300,10 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Webhook) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Webhook {
-			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, WebhookContext: v, Metrics: metrics})
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, Webhook: v, Metrics: metrics})
 		}
 		result[apicommon.WebhookEvent] = servers
 	}
@@ -546,7 +549,9 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							Body: eventBody,
 						}
 
-						if err = e.eventBusConn.Publish(ctx, msg); err != nil {
+						if err = common.Connect(&common.DefaultBackoff, func() error {
+							return e.eventBusConn.Publish(ctx, msg)
+						}); err != nil {
 							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())

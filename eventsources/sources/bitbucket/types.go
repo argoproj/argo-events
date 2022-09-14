@@ -53,10 +53,13 @@ type Router struct {
 	route *webhook.Route
 	// client to connect to Bitbucket
 	client *bitbucketv2.Client
-	// hookID holds the the uuid of the webhook that is created in Bitbucket
-	hookID string
 	// bitbucketEventSource is the event source that holds information to consume events from Bitbucket
 	bitbucketEventSource *v1alpha1.BitbucketEventSource
+	// hookIDs is a map of webhook IDs
+	// (owner+","+repoSlug) -> hook ID
+	// Bitbucket API docs:
+	// https://developer.atlassian.com/cloud/bitbucket/rest/
+	hookIDs map[string]string
 }
 
 type WebhookSubscription struct {

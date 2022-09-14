@@ -262,7 +262,10 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 }
 
 func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) {
-	config := sarama.NewConfig()
+	config, err := common.GetSaramaConfigFromYAMLString(kafkaEventSource.Config)
+	if err != nil {
+		return nil, err
+	}
 
 	if kafkaEventSource.Version == "" {
 		config.Version = sarama.V1_0_0_0
@@ -280,9 +283,9 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 
 		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaEventSource.SASL.GetMechanism())
 		if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
-			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA512} }
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA512New} }
 		} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
-			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA256} }
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA256New} }
 		}
 
 		user, err := common.GetSecretFromVolume(kafkaEventSource.SASL.UserSecret)

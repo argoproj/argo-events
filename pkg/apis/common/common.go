@@ -157,7 +157,7 @@ type SASLConfig struct {
 type Backoff struct {
 	// The initial duration in nanoseconds or strings like "1s", "3m"
 	// +optional
-	Duration *Int64OrString `json:"duration,omitempty" protobuf:"varint,1,opt,name=duration"`
+	Duration *Int64OrString `json:"duration,omitempty" protobuf:"bytes,1,opt,name=duration"`
 	// Duration is multiplied by factor each iteration
 	// +optional
 	Factor *Amount `json:"factor,omitempty" protobuf:"bytes,2,opt,name=factor"`

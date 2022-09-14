@@ -33,7 +33,7 @@ func TestValidateEventSource(t *testing.T) {
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "project key can't be empty", err.Error())
+	assert.Equal(t, "at least one repository is required", err.Error())
 
 	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "bitbucket.yaml"))
 	assert.Nil(t, err)

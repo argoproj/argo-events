@@ -446,21 +446,21 @@ func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContex
 //
 // if Start < Stop: eventTime must be in [Start, Stop)
 //
-//   0:00        Start       Stop        0:00
-//   ├───────────●───────────○───────────┤
-//               └─── OK ────┘
+//	0:00        Start       Stop        0:00
+//	├───────────●───────────○───────────┤
+//	            └─── OK ────┘
 //
 // if Stop < Start: eventTime must be in [Start, Stop@Next day)
 //
 // this is equivalent to: eventTime must be in [0:00, Stop) or [Start, 0:00@Next day)
 //
-//   0:00                    Start       0:00       Stop                     0:00
-//   ├───────────○───────────●───────────┼───────────○───────────●───────────┤
-//                           └───────── OK ──────────┘
+//	0:00                    Start       0:00       Stop                     0:00
+//	├───────────○───────────●───────────┼───────────○───────────●───────────┤
+//	                        └───────── OK ──────────┘
 //
-//   0:00        Stop        Start       0:00
-//   ●───────────○───────────●───────────○
-//   └─── OK ────┘           └─── OK ────┘
+//	0:00        Stop        Start       0:00
+//	●───────────○───────────●───────────○
+//	└─── OK ────┘           └─── OK ────┘
 func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, error) {
 	if timeFilter == nil {
 		return true, nil

@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
-VERSION?=v1.7.1-cap-CR-14417
-BASE_VERSION:=v1.7.1-cap-CR-14417
+VERSION?=v1.7.2-cap-CR-14600
+BASE_VERSION:=v1.7.2-cap-CR-14600
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -72,7 +72,7 @@ ifeq ($(K3D),true)
 	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)
 endif
 
-image-linux-%: dist/$(BINARY_NAME)-linux-$*
+image-linux-%: dist/$(BINARY_NAME)-linux-%
 	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$*; fi
 
@@ -144,7 +144,7 @@ start: image
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.46.2
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.49.0
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint

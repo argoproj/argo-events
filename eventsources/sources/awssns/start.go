@@ -30,6 +30,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -210,12 +211,17 @@ func (router *Router) PostActivate() error {
 
 	snsEventSource := router.eventSource
 
-	awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(snsEventSource.Region, snsEventSource.RoleARN, snsEventSource.AccessKey, snsEventSource.SecretKey)
+	awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(snsEventSource.Region, snsEventSource.RoleARN, snsEventSource.AccessKey, snsEventSource.SecretKey, nil)
 	if err != nil {
 		return err
 	}
 
-	router.session = snslib.New(awsSession)
+	if snsEventSource.Endpoint == "" {
+		router.session = snslib.New(awsSession)
+	} else {
+		router.session = snslib.New(awsSession, &aws.Config{Endpoint: &snsEventSource.Endpoint, Region: &snsEventSource.Region})
+	}
+
 	formattedURL := common.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
 	if _, err := router.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedURL,
@@ -319,7 +325,7 @@ func (m *httpNotification) verify() error {
 	}
 	defer res.Body.Close()
 
-	body, err := io.ReadAll(io.LimitReader(res.Body, 65536))
+	body, err := io.ReadAll(io.LimitReader(res.Body, 65*1024))
 	if err != nil {
 		return errors.Wrap(err, "failed to read signing cert body")
 	}

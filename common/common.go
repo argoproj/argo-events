@@ -85,6 +85,8 @@ const (
 	JetStreamConfigMapKey = "nats-js"
 	// Jetstream Stream name
 	JetStreamStreamName = "default"
+	// Default JetStream max size of message payload
+	JetStreamMaxPayload = "1MB"
 )
 
 // Sensor constants

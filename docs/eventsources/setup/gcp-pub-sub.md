@@ -40,22 +40,18 @@ GCP Pub/Sub event-source specification is available [here](https://github.com/ar
 
 1. Create a K8s secret called `gcp-credentials` to store the credentials file.
 
-    ```yaml
-    apiVersion: v1
-    data:
-      key.json: <YOUR_CREDENTIALS_STRING_FROM_JSON_FILE>
-    kind: Secret
-    metadata:
-      name: gcp-credentials
-      namespace: argo-events
-    type: Opaque
-    ```
+        apiVersion: v1
+        data:
+          key.json: <YOUR_CREDENTIALS_STRING_FROM_JSON_FILE>
+        kind: Secret
+        metadata:
+          name: gcp-credentials
+          namespace: argo-events
+        type: Opaque
 
 1. Create the event source by running the following command.
 
-    ```sh
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/gcp-pubsub.yaml
-    ```
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/gcp-pubsub.yaml
 
     If you use Workload Identity, omit `credentialSecret` field. Instead don't forget to configure appropriate service account (see [example](https://github.com/argoproj/argo-events/blob/stable/examples/event-sources/gcp-pubsub.yaml)).
 
@@ -63,9 +59,7 @@ GCP Pub/Sub event-source specification is available [here](https://github.com/ar
 
 1. Create the sensor by running the following command.
 
-    ```sh
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml
-    ```
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml
 
 1. Publish a message from GCP Pub/Sub console.
 

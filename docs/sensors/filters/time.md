@@ -82,26 +82,20 @@ If `stop` is smaller than `start` (`stop` < `start`), the stop time is treated a
 
 1. Create a webhook event-source
 
-  ```bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
-  ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 1. Create a webhook sensor with time filter
 
-  ```bash
-  kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-time.yaml
-  ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/filter-with-time.yaml
 
 1. Send an HTTP request to event-source
 
-  ```bash
-  curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-  ```
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 1. You will notice one of following behaviours:
 
-  - if you run this example between 02:30 and 04:30, the sensor logs the event is valid
-  - if you run this example outside time range between 02:30 and 04:30, the sensor logs the event is invalid
+    - if you run this example between 02:30 and 04:30, the sensor logs the event is valid
+    - if you run this example outside time range between 02:30 and 04:30, the sensor logs the event is invalid
 
 ## Further examples
 

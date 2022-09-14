@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/pkg/errors"
@@ -68,19 +69,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	sqsEventSource := &el.SQSEventSource
-	var awsSession *session.Session
-	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
+	sqsClient, err := el.createSqsClient()
 	if err != nil {
-		log.Errorw("Error creating AWS credentials", zap.Error(err))
-		return errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
-	}
-
-	var sqsClient *sqslib.SQS
-
-	if sqsEventSource.Endpoint == "" {
-		sqsClient = sqslib.New(awsSession)
-	} else {
-		sqsClient = sqslib.New(awsSession, &aws.Config{Endpoint: &sqsEventSource.Endpoint, Region: &sqsEventSource.Region})
+		return err
 	}
 
 	log.Info("fetching queue url...")
@@ -112,6 +103,17 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		messages, err := fetchMessages(ctx, sqsClient, *queueURL.QueueUrl, 10, sqsEventSource.WaitTimeSeconds)
 		if err != nil {
 			log.Errorw("failed to get messages from SQS", zap.Error(err))
+			awsError, ok := err.(awserr.Error)
+			if ok && awsError.Code() == "ExpiredToken" && el.SQSEventSource.SessionToken != nil {
+				log.Info("credentials expired, reading credentials again")
+				newSqsClient, err := el.createSqsClient()
+				if err != nil {
+					log.Errorw("Error creating SQS client", zap.Error(err))
+				} else if newSqsClient != nil {
+					sqsClient = newSqsClient
+				}
+			}
+
 			time.Sleep(2 * time.Second)
 			continue
 		}
@@ -123,6 +125,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				})
 				if err != nil {
 					log.Errorw("Failed to delete message", zap.Error(err))
+					awsError, ok := err.(awserr.Error)
+					if ok && awsError.Code() == "ExpiredToken" && el.SQSEventSource.SessionToken != nil {
+						log.Info("credentials expired, reading credentials again")
+						newSqsClient, err := el.createSqsClient()
+						if err != nil {
+							log.Errorw("Error creating SQS client", zap.Error(err))
+						} else if newSqsClient != nil {
+							sqsClient = newSqsClient
+						}
+					}
 				}
 			}, log)
 		}
@@ -184,4 +196,29 @@ func fetchMessages(ctx context.Context, q *sqslib.SQS, url string, maxSize, wait
 		return nil, err
 	}
 	return result.Messages, nil
+}
+
+func (el *EventListener) createAWSSession() (*session.Session, error) {
+	sqsEventSource := &el.SQSEventSource
+	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey, sqsEventSource.SessionToken)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
+	}
+	return awsSession, nil
+}
+
+func (el *EventListener) createSqsClient() (*sqslib.SQS, error) {
+	awsSession, err := el.createAWSSession()
+	if err != nil {
+		return nil, err
+	}
+
+	var sqsClient *sqslib.SQS
+	if el.SQSEventSource.Endpoint == "" {
+		sqsClient = sqslib.New(awsSession)
+	} else {
+		sqsClient = sqslib.New(awsSession, &aws.Config{Endpoint: &el.SQSEventSource.Endpoint, Region: &el.SQSEventSource.Region})
+	}
+
+	return sqsClient, nil
 }
