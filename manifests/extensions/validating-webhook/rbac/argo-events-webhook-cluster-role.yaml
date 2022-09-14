@@ -59,3 +59,10 @@ rules:
     verbs:
       - get
       - list
+  - apiGroups:
+      - apps
+    resources:
+      - deployments/finalizers
+      - clusterroles/finalizers
+    verbs:
+      - update

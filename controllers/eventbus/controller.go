@@ -12,10 +12,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -31,11 +33,13 @@ type reconciler struct {
 
 	config *controllers.GlobalConfig
 	logger *zap.SugaredLogger
+
+	cfClient *codefresh.Client
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, config *controllers.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, config: config, logger: logger}
+func NewReconciler(client client.Client, scheme *runtime.Scheme, config *controllers.GlobalConfig, logger *zap.SugaredLogger, cfClient *codefresh.Client) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, config: config, logger: logger, cfClient: cfClient}
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -54,6 +58,10 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
+		r.cfClient.ReportError(errors.Wrap(reconcileErr, "reconcile error"), codefresh.ErrorContext{
+			ObjectMeta: eventBus.ObjectMeta,
+			TypeMeta:   eventBus.TypeMeta,
+		})
 	}
 	if r.needsUpdate(eventBus, busCopy) {
 		if err := r.client.Update(ctx, busCopy); err != nil {

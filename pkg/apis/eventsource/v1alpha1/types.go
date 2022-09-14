@@ -310,6 +310,8 @@ type ResourceEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,5,rep,name=metadata"`
+	// Cluster from which events will be listened to
+	Cluster string `json:"cluster" protobuf:"bytes,6,opt,name=cluster"`
 }
 
 // ResourceFilter contains K8s ObjectMeta information to further filter resource event objects
@@ -736,6 +738,13 @@ type GithubAppCreds struct {
 	InstallationID int64 `json:"installationID" protobuf:"bytes,3,opt,name=installationID"`
 }
 
+type PayloadEnrichmentFlags struct {
+	// FetchPROnPRCommentAdded determines whether to enrich the payload provided by GitHub
+	// on "pull request comment added" events, with the full pull request info
+	// +optional
+	FetchPROnPRCommentAdded bool `json:"fetchPROnPRCommentAdded,omitempty" protobuf:"bytes,1,opt,name=fetchPROnPRCommentAdded"`
+}
+
 // GithubEventSource refers to event-source for github related events
 type GithubEventSource struct {
 	// Id is the webhook's id
@@ -792,6 +801,10 @@ type GithubEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,18,opt,name=filter"`
+	// PayloadEnrichment holds flags that determine whether to enrich GitHub's original payload with
+	// additional information.
+	// +optional
+	PayloadEnrichment PayloadEnrichmentFlags `json:"payloadEnrichment,omitempty" protobuf:"bytes,19,rep,name=payloadEnrichment"`
 }
 
 func (g GithubEventSource) GetOwnedRepositories() []OwnedRepositories {

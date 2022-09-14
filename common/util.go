@@ -111,6 +111,19 @@ func ErrEventSourceTypeMismatch(eventSourceType string) string {
 	return fmt.Sprintf("event source is not type of %s", eventSourceType)
 }
 
+func CreateKubeClient() (kubernetes.Interface, error) {
+	kubeConfig, _ := os.LookupEnv(EnvVarKubeConfig)
+	restConfig, err := GetClientConfig(kubeConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get a K8s rest config")
+	}
+	kubeClient, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to set up a K8s client from rest config")
+	}
+	return kubeClient, nil
+}
+
 // GetSecretValue retrieves the secret value from the secret in namespace with name and key
 func GetSecretValue(ctx context.Context, client kubernetes.Interface, namespace string, selector *v1.SecretKeySelector) (string, error) {
 	secret, err := client.CoreV1().Secrets(namespace).Get(ctx, selector.Name, metav1.GetOptions{})
@@ -188,6 +201,18 @@ func GetConfigMapVolumePath(selector *v1.ConfigMapKeySelector) (string, error) {
 		return "", errors.New("configmap key selector is nil")
 	}
 	return fmt.Sprintf("/argo-events/config/%s/%s", selector.Name, selector.Key), nil
+}
+
+func GetConfigMapValue(ctx context.Context, client kubernetes.Interface, namespace string, selector *v1.ConfigMapKeySelector) (string, error) {
+	configMap, err := client.CoreV1().ConfigMaps(namespace).Get(ctx, selector.Name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	val, ok := configMap.Data[selector.Key]
+	if !ok {
+		return "", errors.Errorf("config map '%s' does not have the key '%s'", selector.Name, selector.Key)
+	}
+	return val, nil
 }
 
 // GetEnvFromConfigMap retrieves the value of envFrom.configMapRef
@@ -470,4 +495,13 @@ func StructToMap(obj interface{}, output map[string]interface{}) error {
 	}
 
 	return json.Unmarshal(data, &output) // Convert to a map
+}
+
+func CopyStringMap(originalMap map[string]string) map[string]string {
+	newMap := make(map[string]string)
+	for k, v := range originalMap {
+		newMap[k] = v
+	}
+
+	return newMap
 }
