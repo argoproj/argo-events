@@ -2967,6 +2967,20 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>payloadEnrichment</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PayloadEnrichmentFlags">
+PayloadEnrichmentFlags </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+PayloadEnrichment holds flags that determine whether to enrich GitHub’s
+original payload with additional information.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.GitlabEventSource">
@@ -4008,6 +4022,42 @@ Repository names
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.PayloadEnrichmentFlags">
+PayloadEnrichmentFlags
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>fetchPROnPRCommentAdded</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+FetchPROnPRCommentAdded determines whether to enrich the payload
+provided by GitHub on “pull request comment added” events, with the full
+pull request info
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.PubSubEventSource">
 PubSubEventSource
 </h3>
@@ -4699,6 +4749,16 @@ ADD, UPDATE and DELETE.
 <p>
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>cluster</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Cluster from which events will be listened to
 </p>
 </td>
 </tr>
