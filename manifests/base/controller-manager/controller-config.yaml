@@ -28,7 +28,7 @@ data:
           duplicates: 300s
         versions:
         - version: latest
-          natsImage: nats:2.8.1
+          natsImage: nats:2.9.0
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.7.0
           startCommand: /nats-server
@@ -52,3 +52,8 @@ data:
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.7.0
           startCommand: nats-server
+        - version: 2.9.0
+          natsImage: nats:2.9.0
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
+          configReloaderImage: natsio/nats-server-config-reloader:0.7.0
+          startCommand: /nats-server
