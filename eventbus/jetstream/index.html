@@ -1895,20 +1895,19 @@
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
 <span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">jetstream</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.8.1</span><span class="w">  </span><span class="c1"># see &#39;version&#39; section below</span><span class="w"></span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span><span class="w"> </span><span class="c1"># Do NOT use &quot;latest&quot; but a specific version in your real deployment</span><span class="w"></span>
 </code></pre></div>
 
 <p>The example above brings up a Jetstream
 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
-with 3 replicas in the namespace. </p>
-<p>Unlike with NATS Streaming, we are not offering the "exotic" option (i.e. connect to the Jetstream bus you provide), at least not now.</p>
+with 3 replicas in the namespace.</p>
 <h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
 <p>Check
 <a href="https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#argoproj.io/v1alpha1.JetstreamBus">here</a>
-for the full spec of <code>jetstream</code>. </p>
+for the full spec of <code>jetstream</code>.</p>
 <h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
 <p>The version number specified in the example above is the release number for the NATS server. We will support some subset of these as we've tried them out and only plan to upgrade them as needed. To take a look at what that includes:</p>
-<div class="codehilite"><pre><span></span><code>kubectl describe configmap argo-events-controller-config
+<div class="codehilite"><pre><span></span><code>kubectl get configmap argo-events-controller-config -o yaml
 </code></pre></div>
 
 <h3 id="a-more-involved-example">A more involved example<a class="headerlink" href="#a-more-involved-example" title="Permanent link">&para;</a></h3>
@@ -1919,7 +1918,7 @@ for the full spec of <code>jetstream</code>. </p>
 <span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="k">default</span><span class="w"></span>
 <span class="n">spec</span><span class="o">:</span><span class="w"></span>
 <span class="w">  </span><span class="n">jetstream</span><span class="o">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">version</span><span class="o">:</span><span class="w"> </span><span class="mf">2.8</span><span class="o">.</span><span class="mi">1</span><span class="w"></span>
+<span class="w">    </span><span class="n">version</span><span class="o">:</span><span class="w"> </span><span class="n">latest</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="n">Do</span><span class="w"> </span><span class="n">NOT</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="s2">&quot;latest&quot;</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">specific</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">deployment</span><span class="w"></span>
 <span class="w">    </span><span class="n">replicas</span><span class="o">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
 <span class="w">    </span><span class="n">persistence</span><span class="o">:</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="n">optional</span><span class="w"></span>
 <span class="w">        </span><span class="n">storageClassName</span><span class="o">:</span><span class="w"> </span><span class="n">standard</span><span class="w"></span>
@@ -1929,7 +1928,7 @@ for the full spec of <code>jetstream</code>. </p>
 <span class="w">      </span><span class="n">maxAge</span><span class="o">:</span><span class="w"> </span><span class="mi">24</span><span class="n">h</span><span class="w"></span>
 <span class="w">    </span><span class="n">settings</span><span class="o">:</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
 <span class="w">      </span><span class="n">max_file_store</span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="n">GB</span><span class="w">       </span><span class="err">#</span><span class="w"> </span><span class="n">see</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="n">values</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">config</span><span class="w"></span>
-<span class="w">    </span><span class="n">startArgs</span><span class="o">:</span><span class="w"> </span>
+<span class="w">    </span><span class="n">startArgs</span><span class="o">:</span><span class="w"></span>
 <span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;-D&quot;</span><span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="n">debug</span><span class="o">-</span><span class="n">level</span><span class="w"> </span><span class="n">logs</span><span class="w"></span>
 </code></pre></div>
 
