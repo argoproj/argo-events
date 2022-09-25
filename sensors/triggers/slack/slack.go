@@ -18,11 +18,11 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
 
@@ -66,7 +66,7 @@ func (t *SlackTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 func (t *SlackTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the Slack trigger resource")
+		return nil, fmt.Errorf("failed to marshal the Slack trigger resource, %w", err)
 	}
 	parameters := t.Trigger.Template.Slack.Parameters
 
@@ -78,7 +78,7 @@ func (t *SlackTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event
 
 		var st *v1alpha1.SlackTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &st); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated Slack trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated Slack trigger resource after applying resource parameters, %w", err)
 		}
 
 		return st, nil
@@ -92,25 +92,25 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	t.Logger.Info("executing SlackTrigger")
 	_, ok := resource.(*v1alpha1.SlackTrigger)
 	if !ok {
-		return nil, errors.New("failed to marshal the Slack trigger resource")
+		return nil, fmt.Errorf("failed to marshal the Slack trigger resource")
 	}
 
 	slacktrigger := t.Trigger.Template.Slack
 
 	channel := slacktrigger.Channel
 	if channel == "" {
-		return nil, errors.New("no slack channel provided")
+		return nil, fmt.Errorf("no slack channel provided")
 	}
 	channel = strings.TrimPrefix(channel, "#")
 
 	message := slacktrigger.Message
 	if message == "" {
-		return nil, errors.New("no slack message to post")
+		return nil, fmt.Errorf("no slack message to post")
 	}
 
 	slackToken, err := common.GetSecretFromVolume(slacktrigger.SlackToken)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve the slack token")
+		return nil, fmt.Errorf("failed to retrieve the slack token, %w", err)
 	}
 
 	api := slack.New(slackToken, slack.OptionDebug(false))
@@ -136,7 +136,7 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 							continue
 						default:
 							t.Logger.Errorw("unable to list channels", zap.Error(err))
-							return nil, errors.Wrapf(err, "failed to list channels")
+							return nil, fmt.Errorf("failed to list channels, %w", err)
 						}
 					}
 					for _, c := range channels {
@@ -152,22 +152,22 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 					params.Cursor = nextCursor
 				}
 				if channelID == "" {
-					return nil, errors.Errorf("failed to get channelID of %s", channel)
+					return nil, fmt.Errorf("failed to get channelID of %s", channel)
 				}
 				if isPrivateChannel {
-					return nil, errors.Errorf("cannot join private channel %s", channel)
+					return nil, fmt.Errorf("cannot join private channel %s", channel)
 				}
 
 				c, _, _, err := api.JoinConversation(channelID)
 				if err != nil {
 					t.Logger.Errorw("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
-					return nil, errors.Wrapf(err, "failed to join channel %s", channel)
+					return nil, fmt.Errorf("failed to join channel %s, %w", channel, err)
 				}
 				t.Logger.Debugw("successfully joined channel", zap.Any("channel", c))
 				continue
 			} else {
 				t.Logger.Errorw("unable to post to channel...", zap.Any("channelName", channel), zap.Error(err))
-				return nil, errors.Wrapf(err, "failed to post to channel %s", channel)
+				return nil, fmt.Errorf("failed to post to channel %s, %w", channel, err)
 			}
 		}
 		t.Logger.Infow("message successfully sent to channelID with timestamp", zap.Any("message", message), zap.Any("channelID", channelID), zap.Any("timestamp", timestamp))

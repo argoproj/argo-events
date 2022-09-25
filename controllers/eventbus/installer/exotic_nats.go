@@ -2,7 +2,7 @@ package installer
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"go.uber.org/zap"
 
@@ -27,7 +27,7 @@ func NewExoticNATSInstaller(eventBus *v1alpha1.EventBus, logger *zap.SugaredLogg
 func (i *exoticNATSInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error) {
 	natsObj := i.eventBus.Spec.NATS
 	if natsObj == nil || natsObj.Exotic == nil {
-		return nil, errors.New("invalid request")
+		return nil, fmt.Errorf("invalid request")
 	}
 	i.eventBus.Status.MarkDeployed("Skipped", "Skip deployment because of using exotic config.")
 	i.logger.Info("use exotic config")

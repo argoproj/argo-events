@@ -1,7 +1,7 @@
 package base
 
 import (
-	"errors"
+	"fmt"
 
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
@@ -23,7 +23,7 @@ type STANConnection struct {
 
 func (nsc *STANConnection) Close() error {
 	if nsc == nil {
-		return errors.New("can't close STAN connection, STANConnection is nil")
+		return fmt.Errorf("can't close STAN connection, STANConnection is nil")
 	}
 	if nsc.STANConn != nil {
 		err := nsc.STANConn.Close()

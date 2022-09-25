@@ -2,8 +2,8 @@ package installer
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -49,7 +49,7 @@ func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, config *con
 	} else if js := eventBus.Spec.JetStream; js != nil {
 		return NewJetStreamInstaller(client, eventBus, config, getLabels(eventBus), logger), nil
 	}
-	return nil, errors.New("invalid eventbus spec")
+	return nil, fmt.Errorf("invalid eventbus spec")
 }
 
 func getLabels(bus *v1alpha1.EventBus) map[string]string {
@@ -72,19 +72,19 @@ func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.C
 	linkedEventSources, err := linkedEventSources(ctx, eventBus.Namespace, eventBus.Name, client)
 	if err != nil {
 		logger.Errorw("failed to query linked EventSources", zap.Error(err))
-		return errors.Wrap(err, "failed to check if there is any EventSource linked")
+		return fmt.Errorf("failed to check if there is any EventSource linked, %w", err)
 	}
 	if linkedEventSources > 0 {
-		return errors.Errorf("Can not delete an EventBus with %v EventSources connected", linkedEventSources)
+		return fmt.Errorf("Can not delete an EventBus with %v EventSources connected", linkedEventSources)
 	}
 
 	linkedSensors, err := linkedSensors(ctx, eventBus.Namespace, eventBus.Name, client)
 	if err != nil {
 		logger.Errorw("failed to query linked Sensors", zap.Error(err))
-		return errors.Wrap(err, "failed to check if there is any Sensor linked")
+		return fmt.Errorf("failed to check if there is any Sensor linked, %w", err)
 	}
 	if linkedSensors > 0 {
-		return errors.Errorf("Can not delete an EventBus with %v Sensors connected", linkedSensors)
+		return fmt.Errorf("Can not delete an EventBus with %v Sensors connected", linkedSensors)
 	}
 
 	installer, err := getInstaller(eventBus, client, config, logger)

@@ -18,11 +18,11 @@ package amqp
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 // ValidateEventSource validates gateway event source
@@ -35,16 +35,16 @@ func validate(eventSource *v1alpha1.AMQPEventSource) error {
 		return common.ErrNilEventSource
 	}
 	if eventSource.URL == "" && eventSource.URLSecret == nil {
-		return errors.New("either url or urlSecret must be specified")
+		return fmt.Errorf("either url or urlSecret must be specified")
 	}
 	if eventSource.URL != "" && eventSource.URLSecret != nil {
-		return errors.New("only one of url or urlSecret can be specified")
+		return fmt.Errorf("only one of url or urlSecret can be specified")
 	}
 	if eventSource.RoutingKey == "" {
-		return errors.New("routing key must be specified")
+		return fmt.Errorf("routing key must be specified")
 	}
 	if eventSource.ExchangeType == "" {
-		return errors.New("exchange type must be specified")
+		return fmt.Errorf("exchange type must be specified")
 	}
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)

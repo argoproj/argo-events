@@ -1,7 +1,7 @@
 package naivewatcher
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -99,7 +99,7 @@ func (w *Watcher) Close() error {
 // Start starts the watcher
 func (w *Watcher) Start(interval time.Duration) error {
 	if !w.mutexRunning.TryLock() {
-		return errors.New("watcher has already started")
+		return fmt.Errorf("watcher has already started")
 	}
 	// run initial check
 	err := w.Check()
@@ -127,7 +127,7 @@ func (w *Watcher) Start(interval time.Duration) error {
 // Stop stops the watcher
 func (w *Watcher) Stop() error {
 	if !w.mutexRunning.IsLocked() {
-		return errors.New("watcher is not started")
+		return fmt.Errorf("watcher is not started")
 	}
 	select {
 	case <-w.stop:
@@ -141,7 +141,7 @@ func (w *Watcher) Stop() error {
 // Check checks the state of target directories
 func (w *Watcher) Check() error {
 	if !w.mCheck.TryLock() {
-		return errors.New("another check is still running")
+		return fmt.Errorf("another check is still running")
 	}
 	defer w.mCheck.Unlock()
 

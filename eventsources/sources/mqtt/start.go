@@ -19,10 +19,10 @@ package mqtt
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -108,7 +108,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if mqttEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(mqttEventSource.TLS)
 		if err != nil {
-			return errors.Wrap(err, "failed to get the tls configuration")
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
 		opts.TLSConfig = tlsConfig
 	}
@@ -116,19 +116,19 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var client mqttlib.Client
 
 	log.Info("connecting to mqtt broker...")
-	if err := common.Connect(mqttEventSource.ConnectionBackoff, func() error {
+	if err := common.DoWithRetry(mqttEventSource.ConnectionBackoff, func() error {
 		client = mqttlib.NewClient(opts)
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
 			return token.Error()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrapf(err, "failed to connect to the mqtt broker for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to connect to the mqtt broker for event source %s, %w", el.GetEventName(), err)
 	}
 
 	log.Info("subscribing to the topic...")
 	if token := client.Subscribe(mqttEventSource.Topic, 0, handler); token.Wait() && token.Error() != nil {
-		return errors.Wrapf(token.Error(), "failed to subscribe to the topic %s for event source %s", mqttEventSource.Topic, el.GetEventName())
+		return fmt.Errorf("failed to subscribe to the topic %s for event source %s, %w", mqttEventSource.Topic, el.GetEventName(), token.Error())
 	}
 
 	<-ctx.Done()

@@ -19,10 +19,10 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -76,7 +76,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if redisEventSource.Password != nil {
 		password, err := common.GetSecretFromVolume(redisEventSource.Password)
 		if err != nil {
-			return errors.Wrapf(err, "failed to find the secret password %s", redisEventSource.Password.Name)
+			return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
 		}
 		opt.Password = password
 	}
@@ -88,7 +88,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if redisEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS)
 		if err != nil {
-			return errors.Wrap(err, "failed to get the tls configuration")
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
 		opt.TLSConfig = tlsConfig
 	}
@@ -97,13 +97,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	client := redis.NewClient(opt)
 
 	if status := client.Ping(ctx); status.Err() != nil {
-		return errors.Wrapf(status.Err(), "failed to connect to host %s and db %d for event source %s", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName())
+		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName(), status.Err())
 	}
 
 	pubsub := client.Subscribe(ctx, redisEventSource.Channels...)
 	// Wait for confirmation that subscription is created before publishing anything.
 	if _, err := pubsub.Receive(ctx); err != nil {
-		return errors.Wrapf(err, "failed to receive the subscription confirmation for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to receive the subscription confirmation for event source %s, %w", el.GetEventName(), err)
 	}
 
 	// Go channel which receives messages.
@@ -113,7 +113,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case message, ok := <-ch:
 			if !ok {
 				log.Error("failed to read a message, channel might have been closed")
-				return errors.New("channel might have been closed")
+				return fmt.Errorf("channel might have been closed")
 			}
 
 			if err := el.handleOne(message, dispatch, log); err != nil {
@@ -149,11 +149,11 @@ func (el *EventListener) handleOne(message *redis.Message, dispatch func([]byte,
 
 	eventBody, err := json.Marshal(&eventData)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+		return fmt.Errorf("failed to marshal the event data, rejecting the event, %w", err)
 	}
 	log.With("channel", message.Channel).Info("dispatching the event on the data channel...")
 	if err = dispatch(eventBody); err != nil {
-		return errors.Wrap(err, "failed dispatch a Redis event")
+		return fmt.Errorf("failed dispatch a Redis event, %w", err)
 	}
 	return nil
 }

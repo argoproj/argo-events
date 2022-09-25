@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron/v3"
 
 	"github.com/argoproj/argo-events/common"
@@ -106,47 +105,47 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	}
 	if template.K8s != nil {
 		if err := validateK8STrigger(template.K8s); err != nil {
-			return errors.Wrapf(err, "trigger for template %s is invalid", template.Name)
+			return fmt.Errorf("trigger for template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.ArgoWorkflow != nil {
 		if err := validateArgoWorkflowTrigger(template.ArgoWorkflow); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.HTTP != nil {
 		if err := validateHTTPTrigger(template.HTTP); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.AWSLambda != nil {
 		if err := validateAWSLambdaTrigger(template.AWSLambda); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.Kafka != nil {
 		if err := validateKafkaTrigger(template.Kafka); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.NATS != nil {
 		if err := validateNATSTrigger(template.NATS); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.Slack != nil {
 		if err := validateSlackTrigger(template.Slack); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.OpenWhisk != nil {
 		if err := validateOpenWhiskTrigger(template.OpenWhisk); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	if template.CustomTrigger != nil {
 		if err := validateCustomTrigger(template.CustomTrigger); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
 	return nil
@@ -155,22 +154,22 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 // validateK8STrigger validates a kubernetes trigger
 func validateK8STrigger(trigger *v1alpha1.StandardK8STrigger) error {
 	if trigger == nil {
-		return errors.New("k8s trigger can't be nil")
+		return fmt.Errorf("k8s trigger can't be nil")
 	}
 	if trigger.Source == nil {
-		return errors.New("k8s trigger does not contain an absolute action")
+		return fmt.Errorf("k8s trigger does not contain an absolute action")
 	}
 
 	switch trigger.Operation {
 	case "", v1alpha1.Create, v1alpha1.Patch, v1alpha1.Update, v1alpha1.Delete:
 
 	default:
-		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
+		return fmt.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -180,21 +179,21 @@ func validateK8STrigger(trigger *v1alpha1.StandardK8STrigger) error {
 // validateArgoWorkflowTrigger validates an Argo workflow trigger
 func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	if trigger == nil {
-		return errors.New("argoWorkflow trigger can't be nil")
+		return fmt.Errorf("argoWorkflow trigger can't be nil")
 	}
 	if trigger.Source == nil {
-		return errors.New("argoWorkflow trigger does not contain an absolute action")
+		return fmt.Errorf("argoWorkflow trigger does not contain an absolute action")
 	}
 
 	switch trigger.Operation {
 	case v1alpha1.Submit, v1alpha1.SubmitFrom, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit, v1alpha1.Terminate, v1alpha1.Stop:
 	default:
-		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
+		return fmt.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -204,29 +203,29 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 // validateHTTPTrigger validates the HTTP trigger
 func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 	if trigger == nil {
-		return errors.New("HTTP trigger for can't be nil")
+		return fmt.Errorf("HTTP trigger for can't be nil")
 	}
 	if trigger.URL == "" {
-		return errors.New("server URL is not specified")
+		return fmt.Errorf("server URL is not specified")
 	}
 	if trigger.Method != "" {
 		switch trigger.Method {
 		case http.MethodGet, http.MethodDelete, http.MethodPatch, http.MethodPost, http.MethodPut:
 		default:
-			return errors.New("only GET, DELETE, PATCH, POST and PUT methods are supported")
+			return fmt.Errorf("only GET, DELETE, PATCH, POST and PUT methods are supported")
 		}
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
 	if trigger.Payload != nil {
 		for i, p := range trigger.Payload {
 			if err := validateTriggerParameter(&p); err != nil {
-				return errors.Errorf("payload index: %d. err: %+v", i, err)
+				return fmt.Errorf("payload index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -236,33 +235,33 @@ func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 // validateOpenWhiskTrigger validates the OpenWhisk trigger
 func validateOpenWhiskTrigger(trigger *v1alpha1.OpenWhiskTrigger) error {
 	if trigger == nil {
-		return errors.New("openwhisk trigger for can't be nil")
+		return fmt.Errorf("openwhisk trigger for can't be nil")
 	}
 	if trigger.ActionName == "" {
-		return errors.New("action name is not specified")
+		return fmt.Errorf("action name is not specified")
 	}
 	if trigger.Host == "" {
-		return errors.New("host URL is not specified")
+		return fmt.Errorf("host URL is not specified")
 	}
 	if trigger.AuthToken != nil {
 		if trigger.AuthToken.Name == "" || trigger.AuthToken.Key == "" {
-			return errors.New("auth token key and name must be specified")
+			return fmt.Errorf("auth token key and name must be specified")
 		}
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
 	if trigger.Payload == nil {
-		return errors.New("payload parameters are not specified")
+		return fmt.Errorf("payload parameters are not specified")
 	}
 	if trigger.Payload != nil {
 		for i, p := range trigger.Payload {
 			if err := validateTriggerParameter(&p); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -272,28 +271,28 @@ func validateOpenWhiskTrigger(trigger *v1alpha1.OpenWhiskTrigger) error {
 // validateAWSLambdaTrigger validates the AWS Lambda trigger
 func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 	if trigger == nil {
-		return errors.New("openfaas trigger for can't be nil")
+		return fmt.Errorf("openfaas trigger for can't be nil")
 	}
 	if trigger.FunctionName == "" {
-		return errors.New("function name is not specified")
+		return fmt.Errorf("function name is not specified")
 	}
 	if trigger.Region == "" {
-		return errors.New("region in not specified")
+		return fmt.Errorf("region in not specified")
 	}
 	if trigger.Payload == nil {
-		return errors.New("payload parameters are not specified")
+		return fmt.Errorf("payload parameters are not specified")
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
 	if trigger.Payload != nil {
 		for i, p := range trigger.Payload {
 			if err := validateTriggerParameter(&p); err != nil {
-				return errors.Errorf("payload index: %d. err: %+v", i, err)
+				return fmt.Errorf("payload index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -303,21 +302,21 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 // validateKafkaTrigger validates the kafka trigger.
 func validateKafkaTrigger(trigger *v1alpha1.KafkaTrigger) error {
 	if trigger == nil {
-		return errors.New("trigger can't be nil")
+		return fmt.Errorf("trigger can't be nil")
 	}
 	if trigger.URL == "" {
-		return errors.New("broker url must not be empty")
+		return fmt.Errorf("broker url must not be empty")
 	}
 	if trigger.Payload == nil {
-		return errors.New("payload must not be empty")
+		return fmt.Errorf("payload must not be empty")
 	}
 	if trigger.Topic == "" {
-		return errors.New("topic must not be empty")
+		return fmt.Errorf("topic must not be empty")
 	}
 	if trigger.Payload != nil {
 		for i, p := range trigger.Payload {
 			if err := validateTriggerParameter(&p); err != nil {
-				return errors.Errorf("payload index: %d. err: %+v", i, err)
+				return fmt.Errorf("payload index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -327,21 +326,21 @@ func validateKafkaTrigger(trigger *v1alpha1.KafkaTrigger) error {
 // validateNATSTrigger validates the NATS trigger.
 func validateNATSTrigger(trigger *v1alpha1.NATSTrigger) error {
 	if trigger == nil {
-		return errors.New("trigger can't be nil")
+		return fmt.Errorf("trigger can't be nil")
 	}
 	if trigger.URL == "" {
-		return errors.New("nats server url can't be empty")
+		return fmt.Errorf("nats server url can't be empty")
 	}
 	if trigger.Subject == "" {
-		return errors.New("nats subject can't be empty")
+		return fmt.Errorf("nats subject can't be empty")
 	}
 	if trigger.Payload == nil {
-		return errors.New("payload can't be nil")
+		return fmt.Errorf("payload can't be nil")
 	}
 	if trigger.Payload != nil {
 		for i, p := range trigger.Payload {
 			if err := validateTriggerParameter(&p); err != nil {
-				return errors.Errorf("payload index: %d. err: %+v", i, err)
+				return fmt.Errorf("payload index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -351,15 +350,15 @@ func validateNATSTrigger(trigger *v1alpha1.NATSTrigger) error {
 // validateSlackTrigger validates the Slack trigger.
 func validateSlackTrigger(trigger *v1alpha1.SlackTrigger) error {
 	if trigger == nil {
-		return errors.New("trigger can't be nil")
+		return fmt.Errorf("trigger can't be nil")
 	}
 	if trigger.SlackToken == nil {
-		return errors.New("slack token can't be empty")
+		return fmt.Errorf("slack token can't be empty")
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -369,23 +368,23 @@ func validateSlackTrigger(trigger *v1alpha1.SlackTrigger) error {
 // validateCustomTrigger validates the custom trigger.
 func validateCustomTrigger(trigger *v1alpha1.CustomTrigger) error {
 	if trigger == nil {
-		return errors.New("custom trigger for can't be nil")
+		return fmt.Errorf("custom trigger for can't be nil")
 	}
 	if trigger.ServerURL == "" {
-		return errors.New("custom trigger gRPC server url is not defined")
+		return fmt.Errorf("custom trigger gRPC server url is not defined")
 	}
 	if trigger.Spec == nil {
-		return errors.New("trigger body can't be empty")
+		return fmt.Errorf("trigger body can't be empty")
 	}
 	if trigger.Secure {
 		if trigger.CertSecret == nil {
-			return errors.New("certSecret can't be nil when the trigger server connection is secure")
+			return fmt.Errorf("certSecret can't be nil when the trigger server connection is secure")
 		}
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -397,7 +396,7 @@ func validateTriggerTemplateParameters(trigger *v1alpha1.Trigger) error {
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return errors.Errorf("template parameter index: %d. err: %+v", i, err)
+				return fmt.Errorf("template parameter index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -407,13 +406,13 @@ func validateTriggerTemplateParameters(trigger *v1alpha1.Trigger) error {
 // validateTriggerParameter validates a trigger parameter
 func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 	if parameter.Src == nil {
-		return errors.Errorf("parameter source can't be empty")
+		return fmt.Errorf("parameter source can't be empty")
 	}
 	if parameter.Src.DependencyName == "" {
-		return errors.Errorf("parameter dependency name can't be empty")
+		return fmt.Errorf("parameter dependency name can't be empty")
 	}
 	if parameter.Dest == "" {
-		return errors.Errorf("parameter destination can't be empty")
+		return fmt.Errorf("parameter destination can't be empty")
 	}
 
 	switch op := parameter.Operation; op {
@@ -422,7 +421,7 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 	case v1alpha1.TriggerParameterOpPrepend:
 	case v1alpha1.TriggerParameterOpNone:
 	default:
-		return errors.Errorf("parameter operation %+v is invalid", op)
+		return fmt.Errorf("parameter operation %+v is invalid", op)
 	}
 
 	return nil
@@ -600,7 +599,7 @@ func validateEventTimeFilter(timeFilter *v1alpha1.TimeFilter) error {
 	}
 
 	if stopTime.Equal(startTime) {
-		return errors.Errorf("invalid event time filter: stop '%s' is equal to start '%s", timeFilter.Stop, timeFilter.Start)
+		return fmt.Errorf("invalid event time filter: stop '%s' is equal to start '%s", timeFilter.Stop, timeFilter.Start)
 	}
 	return nil
 }

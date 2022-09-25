@@ -2,6 +2,8 @@ package sensor
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -9,13 +11,10 @@ import (
 
 	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/pkg/errors"
-
-	"encoding/json"
+	nats "github.com/nats-io/nats.go"
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	jetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
-	nats "github.com/nats-io/nats.go"
 )
 
 type JetstreamTriggerConn struct {
@@ -70,14 +69,14 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 	if err != nil {
 		errStr := fmt.Sprintf("failed to evaluate expression %s: %v", dependencyExpression, err)
 		connection.Logger.Error(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 
 	connection.keyValueStore, err = conn.JSContext.KeyValue(sensorName)
 	if err != nil {
 		errStr := fmt.Sprintf("failed to get K/V store for sensor %s: %v", sensorName, err)
 		connection.Logger.Error(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 
 	connection.Logger.Infof("Successfully located K/V store for sensor %s", sensorName)
@@ -100,7 +99,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
 	if conn == nil {
-		return errors.New("Subscribe() failed; JetstreamTriggerConn is nil")
+		return fmt.Errorf("Subscribe() failed; JetstreamTriggerConn is nil")
 	}
 
 	var err error
@@ -138,7 +137,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		if err != nil {
 			errorStr := fmt.Sprintf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
 			log.Error(errorStr)
-			return errors.New(errorStr)
+			return fmt.Errorf(errorStr)
 		} else {
 			log.Debugf("successfully subscribed to subject %s with durable name %s", subject, durableName)
 		}
@@ -417,7 +416,7 @@ func (conn *JetstreamTriggerConn) getSavedDependency(depName string) (msg MsgInf
 			if err != nil {
 				errStr := fmt.Sprintf("error unmarshalling value %s for key %s: %v", string(entry.Value()), key, err)
 				conn.Logger.Error(errStr)
-				return MsgInfo{}, true, errors.New(errStr)
+				return MsgInfo{}, true, fmt.Errorf(errStr)
 			}
 			return msgInfo, true, nil
 		}
@@ -434,7 +433,7 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 	if err != nil {
 		errorStr := fmt.Sprintf("failed to convert msgInfo struct into JSON: %+v", msgInfo)
 		log.Error(errorStr)
-		return errors.New(errorStr)
+		return fmt.Errorf(errorStr)
 	}
 	key := getDependencyKey(conn.triggerName, depName)
 
@@ -442,7 +441,7 @@ func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo
 	if err != nil {
 		errorStr := fmt.Sprintf("failed to store dependency under key %s, value:%s: %+v", key, jsonEncodedMsg, err)
 		log.Error(errorStr)
-		return errors.New(errorStr)
+		return fmt.Errorf(errorStr)
 	}
 
 	return nil
@@ -506,7 +505,7 @@ func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName 
 		errStr := fmt.Sprintf("incoming event source and event not associated with any dependencies, event source=%s, event=%s",
 			eventSourceName, eventName)
 		conn.Logger.Error(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 
 	return deps, nil

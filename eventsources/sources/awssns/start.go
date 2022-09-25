@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -33,7 +34,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -298,13 +298,13 @@ func (m *httpNotification) verifySigningCertUrl() error {
 	regex := regexp.MustCompile(regexSigningCertHost)
 	url, err := url.Parse(m.SigningCertURL)
 	if err != nil {
-		return errors.Wrap(err, "SigningCertURL is not a valid URL")
+		return fmt.Errorf("SigningCertURL is not a valid URL, %w", err)
 	}
 	if !regex.MatchString(url.Hostname()) {
-		return errors.Errorf("SigningCertURL hostname `%s` does not match `%s`", url.Hostname(), regexSigningCertHost)
+		return fmt.Errorf("SigningCertURL hostname `%s` does not match `%s`", url.Hostname(), regexSigningCertHost)
 	}
 	if url.Scheme != "https" {
-		return errors.New("SigningCertURL is not using https")
+		return fmt.Errorf("SigningCertURL is not using https")
 	}
 	return nil
 }
@@ -312,37 +312,37 @@ func (m *httpNotification) verifySigningCertUrl() error {
 func (m *httpNotification) verify() error {
 	msgSig, err := base64.StdEncoding.DecodeString(m.Signature)
 	if err != nil {
-		return errors.Wrap(err, "failed to base64 decode signature")
+		return fmt.Errorf("failed to base64 decode signature, %w", err)
 	}
 
 	if err := m.verifySigningCertUrl(); err != nil {
-		return errors.Wrap(err, "failed to verify SigningCertURL")
+		return fmt.Errorf("failed to verify SigningCertURL, %w", err)
 	}
 
 	res, err := http.Get(m.SigningCertURL)
 	if err != nil {
-		return errors.Wrap(err, "failed to fetch signing cert")
+		return fmt.Errorf("failed to fetch signing cert, %w", err)
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(io.LimitReader(res.Body, 65*1024))
 	if err != nil {
-		return errors.Wrap(err, "failed to read signing cert body")
+		return fmt.Errorf("failed to read signing cert body, %w", err)
 	}
 
 	p, _ := pem.Decode(body)
 	if p == nil {
-		return errors.New("nothing found in pem encoded bytes")
+		return fmt.Errorf("nothing found in pem encoded bytes")
 	}
 
 	cert, err := x509.ParseCertificate(p.Bytes)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse signing cert")
+		return fmt.Errorf("failed to parse signing cert, %w", err)
 	}
 
 	err = cert.CheckSignature(x509.SHA1WithRSA, m.sigSerialized(), msgSig)
 	if err != nil {
-		return errors.Wrap(err, "message signature check error")
+		return fmt.Errorf("message signature check error, %w", err)
 	}
 
 	return nil

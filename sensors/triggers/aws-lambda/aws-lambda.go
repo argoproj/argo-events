@@ -18,10 +18,10 @@ package aws_lambda
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/lambda"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -52,7 +52,7 @@ func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alph
 	if !ok {
 		awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(lambdatrigger.Region, lambdatrigger.RoleARN, lambdatrigger.AccessKey, lambdatrigger.SecretKey, nil)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to create a AWS session")
+			return nil, fmt.Errorf("failed to create a AWS session, %w", err)
 		}
 		lambdaClient = lambda.New(awsSession, &aws.Config{Region: &lambdatrigger.Region})
 		lambdaClients[trigger.Template.Name] = lambdaClient
@@ -80,7 +80,7 @@ func (t *AWSLambdaTrigger) FetchResource(ctx context.Context) (interface{}, erro
 func (t *AWSLambdaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the aws lamda trigger resource")
+		return nil, fmt.Errorf("failed to marshal the aws lamda trigger resource, %w", err)
 	}
 	parameters := t.Trigger.Template.AWSLambda.Parameters
 	if parameters != nil {
@@ -90,7 +90,7 @@ func (t *AWSLambdaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.E
 		}
 		var ht *v1alpha1.AWSLambdaTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated aws lambda trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated aws lambda trigger resource after applying resource parameters, %w", err)
 		}
 		return ht, nil
 	}
@@ -101,11 +101,11 @@ func (t *AWSLambdaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.E
 func (t *AWSLambdaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.AWSLambdaTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	if trigger.Payload == nil {
-		return nil, errors.New("payload parameters are not specified")
+		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)
@@ -133,7 +133,7 @@ func (t *AWSLambdaTrigger) ApplyPolicy(ctx context.Context, resource interface{}
 
 	obj, ok := resource.(*lambda.InvokeOutput)
 	if !ok {
-		return errors.New("failed to interpret the trigger resource")
+		return fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.GetAllow())

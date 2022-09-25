@@ -30,7 +30,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -215,7 +214,7 @@ func (router *Router) PostActivate() error {
 
 	authToken, err := common.GetSecretFromVolume(eventSource.AuthToken)
 	if err != nil {
-		return errors.Wrap(err, "AuthToken not found")
+		return fmt.Errorf("AuthToken not found, %w", err)
 	}
 
 	registrationURL := common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
@@ -325,7 +324,7 @@ func (router *Router) PostActivate() error {
 
 	if !response.IsSuccess() {
 		errObj := response.Error().(*genericResponse)
-		return errors.Errorf("failed to configure notification. reason %s", errObj.Message.Text)
+		return fmt.Errorf("failed to configure notification. reason %s", errObj.Message.Text)
 	}
 
 	logger.Info("successfully registered notification configuration on storagegrid")

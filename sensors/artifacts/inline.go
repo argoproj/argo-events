@@ -17,7 +17,7 @@ limitations under the License.
 package artifacts
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common/logging"
 )
@@ -31,7 +31,7 @@ type InlineReader struct {
 func NewInlineReader(inlineArtifact *string) (ArtifactReader, error) {
 	// This should never happen!
 	if inlineArtifact == nil {
-		return nil, errors.New("InlineArtifact does not exist")
+		return nil, fmt.Errorf("InlineArtifact does not exist")
 	}
 	return &InlineReader{inlineArtifact}, nil
 }

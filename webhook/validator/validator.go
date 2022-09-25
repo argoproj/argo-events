@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/pkg/errors"
 	admissionv1 "k8s.io/api/admission/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -90,7 +89,7 @@ func GetValidator(ctx context.Context, client kubernetes.Interface, ebClient eve
 		}
 		return NewSensorValidator(client, ebClient, esClient, sensorClient, old, new), nil
 	default:
-		return nil, errors.Errorf("unrecognized GVK %v", kind)
+		return nil, fmt.Errorf("unrecognized GVK %v", kind)
 	}
 }
 

@@ -2,10 +2,9 @@ package artifacts
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -19,7 +18,7 @@ type URLReader struct {
 // NewURLReader creates a new ArtifactReader for workflows at URL endpoints.
 func NewURLReader(urlArtifact *v1alpha1.URLArtifact) (ArtifactReader, error) {
 	if urlArtifact == nil {
-		return nil, errors.New("URLArtifact cannot be empty")
+		return nil, fmt.Errorf("URLArtifact cannot be empty")
 	}
 	return &URLReader{urlArtifact}, nil
 }
@@ -42,7 +41,7 @@ func (reader *URLReader) Read() ([]byte, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		log.Warnf("failed to read %s. status code: %d", reader.urlArtifact.Path, resp.StatusCode)
-		return nil, errors.Errorf("status code %v", resp.StatusCode)
+		return nil, fmt.Errorf("status code %v", resp.StatusCode)
 	}
 
 	content, err := io.ReadAll(io.LimitReader(resp.Body, 512*1024))

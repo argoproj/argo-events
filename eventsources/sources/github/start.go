@@ -26,7 +26,6 @@ import (
 	"time"
 
 	gh "github.com/google/go-github/v31/github"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 
@@ -57,7 +56,7 @@ func init() {
 func (router *Router) getCredentials(keySelector *corev1.SecretKeySelector) (*cred, error) {
 	token, err := common.GetSecretFromVolume(keySelector)
 	if err != nil {
-		return nil, errors.Wrap(err, "secret not found")
+		return nil, fmt.Errorf("secret not found, %w", err)
 	}
 
 	return &cred{
@@ -70,7 +69,7 @@ func (router *Router) getCredentials(keySelector *corev1.SecretKeySelector) (*cr
 func (router *Router) getAPITokenAuthStrategy() (*TokenAuthStrategy, error) {
 	apiTokenCreds, err := router.getCredentials(router.githubEventSource.APIToken)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve api token credentials")
+		return nil, fmt.Errorf("failed to retrieve api token credentials, %w", err)
 	}
 
 	return &TokenAuthStrategy{
@@ -84,7 +83,7 @@ func (router *Router) getGithubAppAuthStrategy() (*AppsAuthStrategy, error) {
 	appCreds := router.githubEventSource.GithubApp
 	githubAppPrivateKey, err := router.getCredentials(appCreds.PrivateKey)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve github app credentials")
+		return nil, fmt.Errorf("failed to retrieve github app credentials, %w", err)
 	}
 
 	return &AppsAuthStrategy{
@@ -103,7 +102,7 @@ func (router *Router) chooseAuthStrategy() (AuthStrategy, error) {
 	case es.HasGithubAppCreds():
 		return router.getGithubAppAuthStrategy()
 	default:
-		return nil, errors.New("none of the supported auth options were provided")
+		return nil, fmt.Errorf("none of the supported auth options were provided")
 	}
 }
 
@@ -185,12 +184,12 @@ func (router *Router) PostInactivate() error {
 		for _, org := range githubEventSource.Organizations {
 			id, ok := router.orgHookIDs[org]
 			if !ok {
-				return errors.Errorf("can not find hook ID for organization %s", org)
+				return fmt.Errorf("can not find hook ID for organization %s", org)
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			if _, err := router.githubClient.Organizations.DeleteHook(ctx, org, id); err != nil {
-				return errors.Errorf("failed to delete hook for organization %s. err: %+v", org, err)
+				return fmt.Errorf("failed to delete hook for organization %s. err: %w", org, err)
 			}
 			logger.Infof("GitHub hook deleted for organization %s", org)
 		}
@@ -201,12 +200,12 @@ func (router *Router) PostInactivate() error {
 			for _, n := range r.Names {
 				id, ok := router.repoHookIDs[r.Owner+","+n]
 				if !ok {
-					return errors.Errorf("can not find hook ID for repo %s/%s", r.Owner, n)
+					return fmt.Errorf("can not find hook ID for repo %s/%s", r.Owner, n)
 				}
 				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 				defer cancel()
 				if _, err := router.githubClient.Repositories.DeleteHook(ctx, r.Owner, n, id); err != nil {
-					return errors.Errorf("failed to delete hook for repo %s/%s. err: %+v", r.Owner, n, err)
+					return fmt.Errorf("failed to delete hook for repo %s/%s. err: %w", r.Owner, n, err)
 				}
 				logger.Infof("GitHub hook deleted for repo %s/%s", r.Owner, n)
 			}
@@ -231,7 +230,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if githubEventSource.WebhookSecret != nil {
 		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret)
 		if err != nil {
-			return errors.Errorf("failed to retrieve webhook secret. err: %+v", err)
+			return fmt.Errorf("failed to retrieve webhook secret. err: %w", err)
 		}
 		router.hookSecret = webhookSecretCreds.secret
 	}
@@ -249,13 +248,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		logger.Info("choosing github auth strategy...")
 		authStrategy, err := router.chooseAuthStrategy()
 		if err != nil {
-			return errors.Wrap(err, "failed to get github auth strategy")
+			return fmt.Errorf("failed to get github auth strategy, %w", err)
 		}
 
 		logger.Info("setting up auth transport for http client with the chosen strategy...")
 		authTransport, err := authStrategy.AuthTransport()
 		if err != nil {
-			return errors.Wrap(err, "failed to set up auth transport for http client")
+			return fmt.Errorf("failed to set up auth transport for http client, %w", err)
 		}
 
 		logger.Info("configuring GitHub hook...")

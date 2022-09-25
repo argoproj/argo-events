@@ -2,6 +2,7 @@ package eventbus
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -16,7 +17,6 @@ import (
 	stansensor "github.com/argoproj/argo-events/eventbus/stan/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -26,7 +26,7 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 		return nil, err
 	}
 	if eventSourceName == "" {
-		return nil, errors.New("eventSourceName must be specified to create eventbus driver")
+		return nil, fmt.Errorf("eventSourceName must be specified to create eventbus driver")
 	}
 
 	logger := logging.FromContext(ctx)
@@ -36,20 +36,20 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 	var eventBusType apicommon.EventBusType
 	switch {
 	case eventBusConfig.NATS != nil && eventBusConfig.JetStream != nil:
-		return nil, errors.New("invalid event bus, NATS and Jetstream shouldn't both be specified")
+		return nil, fmt.Errorf("invalid event bus, NATS and Jetstream shouldn't both be specified")
 	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
 	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
 	default:
-		return nil, errors.New("invalid event bus")
+		return nil, fmt.Errorf("invalid event bus")
 	}
 
 	var dvr eventbuscommon.EventSourceDriver
 	switch eventBusType {
 	case apicommon.EventBusNATS:
 		if defaultSubject == "" {
-			return nil, errors.New("subject must be specified to create NATS Streaming driver")
+			return nil, fmt.Errorf("subject must be specified to create NATS Streaming driver")
 		}
 		dvr = stansource.NewSourceSTAN(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, eventSourceName, defaultSubject, auth, logger)
 	case apicommon.EventBusJetStream:
@@ -58,7 +58,7 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 			return nil, err
 		}
 	default:
-		return nil, errors.New("invalid eventbus type")
+		return nil, fmt.Errorf("invalid eventbus type")
 	}
 	return dvr, nil
 }
@@ -70,23 +70,23 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	}
 
 	if sensorSpec == nil {
-		return nil, errors.New("sensorSpec required for getting eventbus driver")
+		return nil, fmt.Errorf("sensorSpec required for getting eventbus driver")
 	}
 	if sensorSpec.Name == "" {
-		return nil, errors.New("sensorSpec name must be set for getting eventbus driver")
+		return nil, fmt.Errorf("sensorSpec name must be set for getting eventbus driver")
 	}
 	logger := logging.FromContext(ctx)
 
 	var eventBusType apicommon.EventBusType
 	switch {
 	case eventBusConfig.NATS != nil && eventBusConfig.JetStream != nil:
-		return nil, errors.New("invalid event bus, NATS and Jetstream shouldn't both be specified")
+		return nil, fmt.Errorf("invalid event bus, NATS and Jetstream shouldn't both be specified")
 	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
 	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
 	default:
-		return nil, errors.New("invalid event bus")
+		return nil, fmt.Errorf("invalid event bus")
 	}
 
 	var dvr eventbuscommon.SensorDriver
@@ -98,7 +98,7 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 		dvr, err = jetstreamsensor.NewSensorJetstream(eventBusConfig.JetStream.URL, sensorSpec, eventBusConfig.JetStream.StreamConfig, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 		return dvr, err
 	default:
-		return nil, errors.New("invalid eventbus type")
+		return nil, fmt.Errorf("invalid eventbus type")
 	}
 }
 
@@ -112,7 +112,7 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 	case eventBusConfig.JetStream != nil:
 		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
 	default:
-		return nil, errors.New("invalid event bus")
+		return nil, fmt.Errorf("invalid event bus")
 	}
 	var auth *eventbuscommon.Auth
 	cred := &eventbuscommon.AuthCredential{}
@@ -127,7 +127,7 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 		v.AddConfigPath(common.EventBusAuthFileMountPath)
 		err := v.ReadInConfig()
 		if err != nil {
-			return nil, errors.Errorf("failed to load auth.yaml. err: %+v", err)
+			return nil, fmt.Errorf("failed to load auth.yaml. err: %w", err)
 		}
 		err = v.Unmarshal(cred)
 		if err != nil {

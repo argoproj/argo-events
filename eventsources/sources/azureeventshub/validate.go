@@ -18,10 +18,10 @@ package azureeventshub
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 // ValidateEventSource validates azure events hub event source
@@ -34,16 +34,16 @@ func validate(eventSource *v1alpha1.AzureEventsHubEventSource) error {
 		return common.ErrNilEventSource
 	}
 	if eventSource.FQDN == "" {
-		return errors.New("FQDN is not specified")
+		return fmt.Errorf("FQDN is not specified")
 	}
 	if eventSource.HubName == "" {
-		return errors.New("hub name/path is not specified")
+		return fmt.Errorf("hub name/path is not specified")
 	}
 	if eventSource.SharedAccessKey == nil {
-		return errors.New("SharedAccessKey is not specified")
+		return fmt.Errorf("SharedAccessKey is not specified")
 	}
 	if eventSource.SharedAccessKeyName == nil {
-		return errors.New("SharedAccessKeyName is not specified")
+		return fmt.Errorf("SharedAccessKeyName is not specified")
 	}
 	return nil
 }
