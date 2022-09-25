@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"sync"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -252,7 +253,7 @@ type podLogCheckOptions struct {
 
 func defaultPodLogCheckOptions() *podLogCheckOptions {
 	return &podLogCheckOptions{
-		timeout: 10 * time.Second,
+		timeout: 30 * time.Second,
 		count:   -1,
 	}
 }
@@ -304,8 +305,11 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 	defer cancel()
 	errChan := make(chan error)
 	resultChan := make(chan bool)
+	wg := &sync.WaitGroup{}
 	for _, p := range podList.Items {
+		wg.Add(1)
 		go func(podName string) {
+			defer wg.Done()
 			fmt.Printf("Watching POD: %s\n", podName)
 			var contains bool
 			var err error
@@ -323,7 +327,11 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 			}
 		}(p.Name)
 	}
-
+	allDone := make(chan bool)
+	go func() {
+		wg.Wait()
+		close(allDone)
+	}()
 	for {
 		select {
 		case result := <-resultChan:
@@ -334,6 +342,11 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 			}
 		case err := <-errChan:
 			fmt.Printf("error: %v", err)
+		case <-allDone:
+			if len(resultChan) == 0 {
+				return false
+			}
+			return <-resultChan
 		}
 	}
 }

@@ -58,10 +58,10 @@ const (
 
 	logEventSourceStarted      = "Eventing server started."
 	logSensorStarted           = "Sensor started."
-	logTriggerActionSuccessful = "successfully processed trigger"
-	logTriggerActionFailed     = "failed to execute a trigger"
-	logEventSuccessful         = "succeeded to publish an event"
-	logEventFailed             = "failed to publish an event"
+	logTriggerActionSuccessful = "Successfully processed trigger"
+	logTriggerActionFailed     = "Failed to execute a trigger"
+	logEventSuccessful         = "Succeeded to publish an event"
+	logEventFailed             = "Failed to publish an event"
 )
 
 type TestingEventSource string
