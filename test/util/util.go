@@ -253,7 +253,7 @@ type podLogCheckOptions struct {
 
 func defaultPodLogCheckOptions() *podLogCheckOptions {
 	return &podLogCheckOptions{
-		timeout: 30 * time.Second,
+		timeout: 10 * time.Second,
 		count:   -1,
 	}
 }
@@ -343,10 +343,12 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 		case err := <-errChan:
 			fmt.Printf("error: %v", err)
 		case <-allDone:
-			if len(resultChan) == 0 {
-				return false
+			for len(resultChan) > 0 {
+				if x := <-resultChan; x {
+					return true
+				}
 			}
-			return <-resultChan
+			return false
 		}
 	}
 }
