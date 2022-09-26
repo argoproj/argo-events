@@ -20,7 +20,7 @@ import (
 func WaitForEventBusReady(ctx context.Context, eventBusClient eventbuspkg.EventBusInterface, eventBusName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + eventBusName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	for {
 		select {
@@ -42,7 +42,7 @@ func WaitForEventBusReady(ctx context.Context, eventBusClient eventbuspkg.EventB
 func WaitForEventBusStatefulSetReady(ctx context.Context, kubeClient kubernetes.Interface, namespace, eventBusName string, timeout time.Duration) error {
 	labelSelector := fmt.Sprintf("controller=eventbus-controller,eventbus-name=%s", eventBusName)
 	opts := metav1.ListOptions{LabelSelector: labelSelector}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	for {
 		select {
@@ -64,7 +64,7 @@ func WaitForEventBusStatefulSetReady(ctx context.Context, kubeClient kubernetes.
 func WaitForEventSourceReady(ctx context.Context, eventSourceClient eventsourcepkg.EventSourceInterface, eventSourceName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + eventSourceName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	for {
 		select {
@@ -91,7 +91,7 @@ func WaitForEventSourceDeploymentReady(ctx context.Context, kubeClient kubernete
 func WaitForSensorReady(ctx context.Context, sensorClient sensorpkg.SensorInterface, sensorName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + sensorName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	for {
 		select {
@@ -117,7 +117,7 @@ func WaitForSensorDeploymentReady(ctx context.Context, kubeClient kubernetes.Int
 
 func waitForDeploymentAndPodReady(ctx context.Context, kubeClient kubernetes.Interface, namespace, objectType, labelSelector string, timeout time.Duration) error {
 	opts := metav1.ListOptions{LabelSelector: labelSelector}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	for {
 		select {
