@@ -19,11 +19,11 @@ package nsq
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/nsqio/go-nsq"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -86,20 +86,20 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if nsqEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(nsqEventSource.TLS)
 		if err != nil {
-			return errors.Wrap(err, "failed to get the tls configuration")
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
 		config.TlsConfig = tlsConfig
 		config.TlsV1 = true
 	}
 
-	if err := common.Connect(nsqEventSource.ConnectionBackoff, func() error {
+	if err := common.DoWithRetry(nsqEventSource.ConnectionBackoff, func() error {
 		var err error
 		if consumer, err = nsq.NewConsumer(nsqEventSource.Topic, nsqEventSource.Channel, config); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrapf(err, "failed to create a new consumer for topic %s and channel %s for event source %s", nsqEventSource.Topic, nsqEventSource.Channel, el.GetEventName())
+		return fmt.Errorf("failed to create a new consumer for topic %s and channel %s for event source %s, %w", nsqEventSource.Topic, nsqEventSource.Channel, el.GetEventName(), err)
 	}
 
 	if nsqEventSource.JSONBody {
@@ -109,7 +109,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	consumer.AddHandler(&messageHandler{eventSourceName: el.EventSourceName, eventName: el.EventName, dispatch: dispatch, logger: log, isJSON: nsqEventSource.JSONBody, metadata: nsqEventSource.Metadata, metrics: el.Metrics})
 
 	if err := consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress); err != nil {
-		return errors.Wrapf(err, "lookup failed for host %s for event source %s", nsqEventSource.HostAddress, el.GetEventName())
+		return fmt.Errorf("lookup failed for host %s for event source %s, %w", nsqEventSource.HostAddress, el.GetEventName(), err)
 	}
 
 	<-ctx.Done()

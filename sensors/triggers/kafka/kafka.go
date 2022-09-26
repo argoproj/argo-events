@@ -18,11 +18,11 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -59,7 +59,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		} else {
 			version, err := sarama.ParseKafkaVersion(kafkatrigger.Version)
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to parse Kafka version")
+				return nil, fmt.Errorf("failed to parse Kafka version, %w", err)
 			}
 			config.Version = version
 		}
@@ -75,13 +75,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.UserSecret)
 			if err != nil {
-				return nil, errors.Wrap(err, "Error getting user value from secret")
+				return nil, fmt.Errorf("Error getting user value from secret, %w", err)
 			}
 			config.Net.SASL.User = user
 
 			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.PasswordSecret)
 			if err != nil {
-				return nil, errors.Wrap(err, "Error getting password value from secret")
+				return nil, fmt.Errorf("Error getting password value from secret, %w", err)
 			}
 			config.Net.SASL.Password = password
 		}
@@ -89,7 +89,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		if kafkatrigger.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(kafkatrigger.TLS)
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to get the tls configuration")
+				return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
 			tlsConfig.InsecureSkipVerify = true
 			config.Net.TLS.Config = tlsConfig
@@ -151,12 +151,12 @@ func (t *KafkaTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 func (t *KafkaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.KafkaTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the fetched trigger resource")
+		return nil, fmt.Errorf("failed to interpret the fetched trigger resource")
 	}
 
 	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the kafka trigger resource")
+		return nil, fmt.Errorf("failed to marshal the kafka trigger resource, %w", err)
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
@@ -166,7 +166,7 @@ func (t *KafkaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event
 		}
 		var ht *v1alpha1.KafkaTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated kafka trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated kafka trigger resource after applying resource parameters. %w", err)
 		}
 		return ht, nil
 	}
@@ -177,11 +177,11 @@ func (t *KafkaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event
 func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.KafkaTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	if trigger.Payload == nil {
-		return nil, errors.New("payload parameters are not specified")
+		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)

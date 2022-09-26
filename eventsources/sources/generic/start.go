@@ -6,7 +6,6 @@ import (
 	fmt "fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -111,11 +110,11 @@ func (el *EventListener) handleOne(event *Event, dispatch func([]byte, ...events
 	}
 	eventBytes, err := json.Marshal(eventData)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal the event data")
+		return fmt.Errorf("failed to marshal the event data, %w", err)
 	}
 	logger.Info("dispatching event...")
 	if err := dispatch(eventBytes); err != nil {
-		return errors.Wrap(err, "failed to dispatch a Generic event")
+		return fmt.Errorf("failed to dispatch a Generic event, %w", err)
 	}
 	return nil
 }

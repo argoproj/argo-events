@@ -19,13 +19,13 @@ package awssqs
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -85,7 +85,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	queueURL, err := sqsClient.GetQueueUrl(getQueueURLInput)
 	if err != nil {
 		log.Errorw("Error getting SQS Queue URL", zap.Error(err))
-		return errors.Wrapf(err, "failed to get the queue url for %s", el.GetEventName())
+		return fmt.Errorf("failed to get the queue url for %s, %w", el.GetEventName(), err)
 	}
 
 	if sqsEventSource.JSONBody {
@@ -202,7 +202,7 @@ func (el *EventListener) createAWSSession() (*session.Session, error) {
 	sqsEventSource := &el.SQSEventSource
 	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey, sqsEventSource.SessionToken)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create aws session for %s", el.GetEventName())
+		return nil, fmt.Errorf("failed to create aws session for %s, %w", el.GetEventName(), err)
 	}
 	return awsSession, nil
 }

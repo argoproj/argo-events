@@ -2,7 +2,7 @@ package log
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
 	"go.uber.org/zap"
@@ -39,7 +39,7 @@ func (t *LogTrigger) ApplyResourceParameters(_ map[string]*v1alpha1.Event, resou
 func (t *LogTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	log, ok := resource.(*v1alpha1.LogTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the fetched trigger resource")
+		return nil, fmt.Errorf("failed to interpret the fetched trigger resource")
 	}
 	if t.shouldLog(log) {
 		for dependencyName, event := range events {

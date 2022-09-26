@@ -19,6 +19,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math/big"
@@ -27,7 +28,6 @@ import (
 
 	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -121,13 +121,13 @@ func (router *Router) PostInactivate() error {
 		for _, repo := range bitbucketEventSource.GetBitbucketRepositories() {
 			hookID, ok := router.hookIDs[repo.GetRepositoryID()]
 			if !ok {
-				return errors.Errorf("can not find hook ID for repo key: %s", repo.GetRepositoryID())
+				return fmt.Errorf("can not find hook ID for repo key: %s", repo.GetRepositoryID())
 			}
 
 			if err := router.deleteWebhook(repo, hookID); err != nil {
 				logger.Errorw("failed to delete webhook",
 					zap.String("owner", repo.Owner), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
-				return errors.Wrapf(err, "failed to delete hook for repo %s/%s.", repo.Owner, repo.RepositorySlug)
+				return fmt.Errorf("failed to delete hook for repo %s/%s, %w", repo.Owner, repo.RepositorySlug, err)
 			}
 
 			logger.Info("successfully deleted hook for repo",
@@ -164,7 +164,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	logger.Info("choosing bitbucket auth strategy...")
 	authStrategy, err := router.chooseAuthStrategy()
 	if err != nil {
-		return errors.Wrap(err, "failed to get bitbucket auth strategy")
+		return fmt.Errorf("failed to get bitbucket auth strategy, %w", err)
 	}
 
 	router.client = authStrategy.BitbucketClient()
@@ -199,7 +199,7 @@ func (router *Router) chooseAuthStrategy() (AuthStrategy, error) {
 	case es.HasBitbucketOAuthToken():
 		return NewOAuthTokenAuthStrategy(es.Auth.OAuthToken)
 	default:
-		return nil, errors.New("none of the supported auth options were provided")
+		return nil, fmt.Errorf("none of the supported auth options were provided")
 	}
 }
 
@@ -221,7 +221,7 @@ func (router *Router) applyBitbucketWebhook(repo v1alpha1.BitbucketRepository) e
 	hooks, err := router.listWebhooks(repo)
 	if err != nil {
 		logger.Errorw("failed to list webhooks", zap.Error(err))
-		return errors.Wrap(err, "failed to list webhooks")
+		return fmt.Errorf("failed to list webhooks, %w", err)
 	}
 
 	logger.Info("checking if webhook already exists...")
@@ -231,7 +231,7 @@ func (router *Router) applyBitbucketWebhook(repo v1alpha1.BitbucketRepository) e
 		if err := router.deleteWebhook(repo, existingHookSubscription.Uuid); err != nil {
 			logger.Errorw("failed to delete old webhook",
 				zap.String("owner", repo.Owner), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
-			return errors.Wrapf(err, "failed to delete old webhook for repo %s/%s.", repo.Owner, repo.RepositorySlug)
+			return fmt.Errorf("failed to delete old webhook for repo %s/%s, %w", repo.Owner, repo.RepositorySlug, err)
 		}
 	}
 
@@ -239,7 +239,7 @@ func (router *Router) applyBitbucketWebhook(repo v1alpha1.BitbucketRepository) e
 	newWebhook, err := router.createWebhook(repo, formattedWebhookURL)
 	if err != nil {
 		logger.Errorw("failed to create new webhook", zap.Error(err))
-		return errors.Wrap(err, "failed to create new webhook")
+		return fmt.Errorf("failed to create new webhook, %w", err)
 	}
 
 	router.hookIDs[repo.GetRepositoryID()] = newWebhook.Uuid

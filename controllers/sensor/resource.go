@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	"github.com/imdario/mergo"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -54,7 +53,7 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 	if eventBus == nil {
 		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
 		logger.Error("failed to get EventBus")
-		return errors.New("failed to get EventBus")
+		return fmt.Errorf("failed to get EventBus")
 	}
 
 	eventBusName := common.DefaultEventBusName
@@ -64,7 +63,7 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 	if !eventBus.Status.IsReady() {
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
 		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName)
-		return errors.New("eventbus not ready")
+		return fmt.Errorf("eventbus not ready")
 	}
 
 	expectedDeploy, err := buildDeployment(args, eventBus)
@@ -136,7 +135,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	}
 	sensorBytes, err := json.Marshal(sensorCopy)
 	if err != nil {
-		return nil, errors.New("failed marshal sensor spec")
+		return nil, fmt.Errorf("failed marshal sensor spec")
 	}
 	encodedSensorSpec := base64.StdEncoding.EncodeToString(sensorBytes)
 	envVars := []corev1.EnvVar{
@@ -156,7 +155,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 
 	busConfigBytes, err := json.Marshal(eventBus.Status.Config)
 	if err != nil {
-		return nil, errors.Errorf("failed marshal event bus config: %v", err)
+		return nil, fmt.Errorf("failed marshal event bus config: %v", err)
 	}
 	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
@@ -170,7 +169,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		jsConf := eventBus.Status.Config.JetStream
 		accessSecret = jsConf.AccessSecret
 	default:
-		return nil, errors.New("unsupported event bus")
+		return nil, fmt.Errorf("unsupported event bus")
 	}
 
 	volumes := deploymentSpec.Template.Spec.Volumes

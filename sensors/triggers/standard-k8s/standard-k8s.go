@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/imdario/mergo"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -116,7 +115,7 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource(ctx context.Context) (interf
 func (k8sTrigger *StandardK8sTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 	if err := triggers.ApplyResourceParameters(events, k8sTrigger.Trigger.Template.K8s.Parameters, obj); err != nil {
 		return nil, err
@@ -130,7 +129,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	gvr := triggers.GetGroupVersionResource(obj)
@@ -176,11 +175,11 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 			k8sTrigger.Logger.Info("object not found, creating the object...")
 			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		} else if err != nil {
-			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
+			return nil, fmt.Errorf("failed to retrieve existing object. err: %w", err)
 		}
 
 		if err := mergo.Merge(oldObj, obj, mergo.WithOverride); err != nil {
-			return nil, errors.Errorf("failed to update the object. err: %+v\n", err)
+			return nil, fmt.Errorf("failed to update the object. err: %w", err)
 		}
 
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(ctx, oldObj, metav1.UpdateOptions{})
@@ -193,7 +192,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 			k8sTrigger.Logger.Info("object not found, creating the object...")
 			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		} else if err != nil {
-			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
+			return nil, fmt.Errorf("failed to retrieve existing object. err: %w", err)
 		}
 
 		if k8sTrigger.Trigger.Template.K8s.PatchStrategy == "" {
@@ -202,7 +201,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 
 		body, err := obj.MarshalJSON()
 		if err != nil {
-			return nil, errors.Errorf("failed to marshal object into JSON schema. err: %+v\n", err)
+			return nil, fmt.Errorf("failed to marshal object into JSON schema. err: %w", err)
 		}
 
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Patch(ctx, obj.GetName(), k8sTrigger.Trigger.Template.K8s.PatchStrategy, body, metav1.PatchOptions{})
@@ -215,17 +214,17 @@ func (k8sTrigger *StandardK8sTrigger) Execute(ctx context.Context, events map[st
 			k8sTrigger.Logger.Info("object not found, nothing to delete...")
 			return nil, nil
 		} else if err != nil {
-			return nil, errors.Errorf("failed to retrieve existing object. err: %+v\n", err)
+			return nil, fmt.Errorf("failed to retrieve existing object. err: %w", err)
 		}
 
 		err = k8sTrigger.namespableDynamicClient.Namespace(namespace).Delete(ctx, obj.GetName(), metav1.DeleteOptions{})
 		if err != nil {
-			return nil, errors.Errorf("failed to delete object. err: %+v\n", err)
+			return nil, fmt.Errorf("failed to delete object. err: %w", err)
 		}
 		return nil, nil
 
 	default:
-		return nil, errors.Errorf("unknown operation type %s", string(op))
+		return nil, fmt.Errorf("unknown operation type %s", string(op))
 	}
 }
 
@@ -239,7 +238,7 @@ func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(ctx context.Context, resource 
 
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
-		return errors.New("failed to interpret the trigger resource")
+		return fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	p := policy.NewResourceLabels(trigger, k8sTrigger.namespableDynamicClient, obj)
@@ -252,7 +251,7 @@ func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(ctx context.Context, resource 
 		switch err {
 		case wait.ErrWaitTimeout:
 			if trigger.Policy.K8s.ErrorOnBackoffTimeout {
-				return errors.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
+				return fmt.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
 			}
 			return nil
 		default:

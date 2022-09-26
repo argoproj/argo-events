@@ -19,12 +19,12 @@ package minio
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/notification"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -73,18 +73,18 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("retrieving access and secret key...")
 	accessKey, err := common.GetSecretFromVolume(minioEventSource.AccessKey)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get the access key for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to get the access key for event source %s, %w", el.GetEventName(), err)
 	}
 	secretKey, err := common.GetSecretFromVolume(minioEventSource.SecretKey)
 	if err != nil {
-		return errors.Wrapf(err, "failed to retrieve the secret key for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to retrieve the secret key for event source %s, %w", el.GetEventName(), err)
 	}
 
 	log.Info("setting up a minio client...")
 	minioClient, err := minio.New(minioEventSource.Endpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(accessKey, secretKey, ""), Secure: !minioEventSource.Insecure})
 	if err != nil {
-		return errors.Wrapf(err, "failed to create a client for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to create a client for event source %s, %w", el.GetEventName(), err)
 	}
 
 	prefix, suffix := getFilters(minioEventSource)
@@ -114,12 +114,12 @@ func (el *EventListener) handleOne(notification notification.Info, dispatch func
 	eventData := &events.MinioEventData{Notification: notification.Records, Metadata: el.MinioEventSource.Metadata}
 	eventBytes, err := json.Marshal(eventData)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+		return fmt.Errorf("failed to marshal the event data, rejecting the event, %w", err)
 	}
 
 	log.Info("dispatching the event on data channel...")
 	if err = dispatch(eventBytes); err != nil {
-		return errors.Wrap(err, "failed to dispatch minio event")
+		return fmt.Errorf("failed to dispatch minio event, %w", err)
 	}
 	return nil
 }

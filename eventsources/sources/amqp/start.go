@@ -19,11 +19,11 @@ package amqp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"sigs.k8s.io/yaml"
 
-	"github.com/pkg/errors"
 	amqplib "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 
@@ -70,7 +70,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	amqpEventSource := &el.AMQPEventSource
 	var conn *amqplib.Connection
-	if err := common.Connect(amqpEventSource.ConnectionBackoff, func() error {
+	if err := common.DoWithRetry(amqpEventSource.ConnectionBackoff, func() error {
 		c := amqplib.Config{
 			Heartbeat: 10 * time.Second,
 			Locale:    "en_US",
@@ -78,18 +78,18 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if amqpEventSource.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS)
 			if err != nil {
-				return errors.Wrap(err, "failed to get the tls configuration")
+				return fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
 			c.TLSClientConfig = tlsConfig
 		}
 		if amqpEventSource.Auth != nil {
 			username, err := common.GetSecretFromVolume(amqpEventSource.Auth.Username)
 			if err != nil {
-				return errors.Wrap(err, "username not found")
+				return fmt.Errorf("username not found, %w", err)
 			}
 			password, err := common.GetSecretFromVolume(amqpEventSource.Auth.Password)
 			if err != nil {
-				return errors.Wrap(err, "password not found")
+				return fmt.Errorf("password not found, %w", err)
 			}
 			c.SASL = []amqplib.Authentication{&amqplib.PlainAuth{
 				Username: username,
@@ -101,7 +101,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if amqpEventSource.URLSecret != nil {
 			url, err = common.GetSecretFromVolume(amqpEventSource.URLSecret)
 			if err != nil {
-				return errors.Wrap(err, "urlSecret not found")
+				return fmt.Errorf("urlSecret not found, %w", err)
 			}
 		} else {
 			url = amqpEventSource.URL
@@ -112,13 +112,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrapf(err, "failed to connect to amqp broker for the event source %s", el.GetEventName())
+		return fmt.Errorf("failed to connect to amqp broker for the event source %s, %w", el.GetEventName(), err)
 	}
 
 	log.Info("opening the server channel...")
 	ch, err := conn.Channel()
 	if err != nil {
-		return errors.Wrapf(err, "failed to open the channel for the event source %s", el.GetEventName())
+		return fmt.Errorf("failed to open the channel for the event source %s, %w", el.GetEventName(), err)
 	}
 
 	log.Info("checking parameters and set defaults...")
@@ -127,7 +127,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("setting up the delivery channel...")
 	delivery, err := getDelivery(ch, amqpEventSource)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get the delivery for the event source %s", el.GetEventName())
+		return fmt.Errorf("failed to get the delivery for the event source %s, %w", el.GetEventName(), err)
 	}
 
 	if amqpEventSource.JSONBody {
@@ -140,7 +140,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case msg, ok := <-delivery:
 			if !ok {
 				log.Error("failed to read a message, channel might have been closed")
-				return errors.New("channel might have been closed")
+				return fmt.Errorf("channel might have been closed")
 			}
 			if err := el.handleOne(amqpEventSource, msg, dispatch, log); err != nil {
 				log.Errorw("failed to process an AMQP message", zap.Error(err))
@@ -186,12 +186,12 @@ func (el *EventListener) handleOne(amqpEventSource *v1alpha1.AMQPEventSource, ms
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marshal the message, message-id: %s", msg.MessageId)
+		return fmt.Errorf("failed to marshal the message, message-id: %s, %w", msg.MessageId, err)
 	}
 
 	log.Info("dispatching event ...")
 	if err = dispatch(bodyBytes); err != nil {
-		return errors.Wrap(err, "failed to dispatch AMQP event")
+		return fmt.Errorf("failed to dispatch AMQP event, %w", err)
 	}
 	return nil
 }
@@ -247,14 +247,11 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		nil,
 	)
 	if err != nil {
-		return nil, errors.Errorf("failed to declare exchange with name %s and type %s. err: %+v", eventSource.ExchangeName, eventSource.ExchangeType, err)
+		return nil, fmt.Errorf("failed to declare exchange with name %s and type %s. err: %w", eventSource.ExchangeName, eventSource.ExchangeType, err)
 	}
 	optionalArguments, err := parseYamlTable(eventSource.QueueDeclare.Arguments)
 	if err != nil {
-		return nil, errors.Errorf(
-			"failed to parse optional queue declare table arguments from Yaml string: %s",
-			err,
-		)
+		return nil, fmt.Errorf("failed to parse optional queue declare table arguments from Yaml string: %w", err)
 	}
 
 	q, err := ch.QueueDeclare(
@@ -266,7 +263,7 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		optionalArguments,
 	)
 	if err != nil {
-		return nil, errors.Errorf("failed to declare queue: %s", err)
+		return nil, fmt.Errorf("failed to declare queue: %w", err)
 	}
 
 	err = ch.QueueBind(
@@ -277,7 +274,7 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		nil,
 	)
 	if err != nil {
-		return nil, errors.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", eventSource.ExchangeType, eventSource.ExchangeName, eventSource.RoutingKey, err)
+		return nil, fmt.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %w", eventSource.ExchangeType, eventSource.ExchangeName, eventSource.RoutingKey, err)
 	}
 
 	delivery, err := ch.Consume(
@@ -290,7 +287,7 @@ func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-
 		nil,
 	)
 	if err != nil {
-		return nil, errors.Errorf("failed to begin consuming messages: %s", err)
+		return nil, fmt.Errorf("failed to begin consuming messages: %w", err)
 	}
 	return delivery, nil
 }
@@ -303,7 +300,7 @@ func parseYamlTable(argString string) (amqplib.Table, error) {
 	args := []byte(argString)
 	err := yaml.Unmarshal(args, &table)
 	if err != nil {
-		return nil, errors.Errorf("unmarshalling Yaml to Table type. Args: %s. Err: %+v", argString, err)
+		return nil, fmt.Errorf("unmarshalling Yaml to Table type. Args: %s. Err: %w", argString, err)
 	}
 	return table, nil
 }

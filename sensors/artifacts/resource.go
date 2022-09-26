@@ -18,7 +18,7 @@ package artifacts
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,7 +35,7 @@ type ResourceReader struct {
 // NewResourceReader creates a new ArtifactReader for resource
 func NewResourceReader(resourceArtifact *common.Resource) (ArtifactReader, error) {
 	if resourceArtifact == nil {
-		return nil, errors.New("ResourceArtifact does not exist")
+		return nil, fmt.Errorf("ResourceArtifact does not exist")
 	}
 	data, err := json.Marshal(resourceArtifact)
 	if err != nil {

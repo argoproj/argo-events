@@ -12,7 +12,6 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -43,7 +42,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
 	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
-	redisstream "github.com/argoproj/argo-events/eventsources/sources/redisStream"
+	redisstream "github.com/argoproj/argo-events/eventsources/sources/redis_stream"
 	"github.com/argoproj/argo-events/eventsources/sources/resource"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
@@ -410,7 +409,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
 	}
-	if err = common.Connect(&common.DefaultBackoff, func() error {
+	if err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 		err = driver.Initialize()
 		if err != nil {
 			return err
@@ -484,7 +483,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					Factor:   &factor,
 					Jitter:   &jitter,
 				}
-				if err = common.Connect(&backoff, func() error {
+				if err = common.DoWithRetry(&backoff, func() error {
 					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) error {
 						if filter, ok := filters[s.GetEventName()]; ok {
 							proceed, err := filterEvent(data, filter)
@@ -493,7 +492,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 								return nil
 							}
 							if !proceed {
-								logger.Debug("Do not publish event, filter condition not met")
+								logger.Info("Filter condition not met, skip dispatching")
 								return nil
 							}
 						}
@@ -520,7 +519,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						}
 
 						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
-							return errors.New("failed to publish event, eventbus connection closed")
+							return eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
 						}
 
 						msg := eventbuscommon.Message{
@@ -532,21 +531,21 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							Body: eventBody,
 						}
 
-						if err = common.Connect(&common.DefaultBackoff, func() error {
+						if err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 							return e.eventBusConn.Publish(ctx, msg)
 						}); err != nil {
-							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
+							logger.Errorw("Failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
-							return err
+							return eventbuscommon.NewEventBusError(err)
 						}
-						logger.Infow("succeeded to publish an event", zap.String(logging.LabelEventName,
+						logger.Infow("Succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 						return nil
 					})
 				}); err != nil {
-					logger.Errorw("failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
+					logger.Errorw("Failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
 						s.GetEventSourceType()), zap.Any(logging.LabelEventName, s.GetEventName()), zap.Error(err))
 				}
 			}(server)
@@ -572,7 +571,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 			logger.Error("Erroring out, no active event server running")
 			cancel()
 			connWG.Wait()
-			return errors.New("no active event server running")
+			return fmt.Errorf("no active event server running")
 		}
 	}
 }

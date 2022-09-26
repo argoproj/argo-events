@@ -18,8 +18,7 @@ package emitter
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -36,13 +35,13 @@ func validate(eventSource *v1alpha1.EmitterEventSource) error {
 		return common.ErrNilEventSource
 	}
 	if eventSource.Broker == "" {
-		return errors.New("broker url must be specified")
+		return fmt.Errorf("broker url must be specified")
 	}
 	if eventSource.ChannelName == "" {
-		return errors.New("channel name must be specified")
+		return fmt.Errorf("channel name must be specified")
 	}
 	if eventSource.ChannelKey == "" {
-		return errors.New("channel key secret selector must be specified")
+		return fmt.Errorf("channel key secret selector must be specified")
 	}
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)

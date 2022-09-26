@@ -18,8 +18,7 @@ package stripe
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
@@ -37,7 +36,7 @@ func validate(eventSource *v1alpha1.StripeEventSource) error {
 	}
 	if eventSource.CreateWebhook {
 		if eventSource.APIKey == nil {
-			return errors.New("api key K8s secret selector not provided")
+			return fmt.Errorf("api key K8s secret selector not provided")
 		}
 	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)
