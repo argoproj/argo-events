@@ -19,11 +19,11 @@ package stripe
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/webhookendpoint"
 	"go.uber.org/zap"
@@ -151,7 +151,7 @@ func (rc *Router) PostActivate() error {
 
 		apiKey, err := common.GetSecretFromVolume(stripeEventSource.APIKey)
 		if err != nil {
-			return errors.Wrap(err, "APIKey not found")
+			return fmt.Errorf("APIKey not found, %w", err)
 		}
 
 		stripe.Key = apiKey

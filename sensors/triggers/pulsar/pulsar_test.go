@@ -17,11 +17,11 @@ package pulsar
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -49,7 +49,7 @@ func (m *mockPulsarProducer) Send(context.Context, *pulsar.ProducerMessage) (pul
 		m.expected = false
 		return nil, nil
 	}
-	return nil, errors.New("input not expected")
+	return nil, fmt.Errorf("input not expected")
 }
 func (m *mockPulsarProducer) SendAsync(context.Context, *pulsar.ProducerMessage, func(pulsar.MessageID, *pulsar.ProducerMessage, error)) {
 

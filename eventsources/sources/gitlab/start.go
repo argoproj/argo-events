@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math/big"
 	"net/http"
@@ -32,7 +33,6 @@ import (
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	"github.com/argoproj/argo-events/pkg/apis/events"
-	"github.com/pkg/errors"
 	"github.com/xanzy/go-gitlab"
 	"go.uber.org/zap"
 )
@@ -134,10 +134,10 @@ func (router *Router) PostInactivate() error {
 	for _, p := range gitlabEventSource.GetProjects() {
 		id, ok := router.hookIDs[p]
 		if !ok {
-			return errors.Errorf("can not find hook ID for project %s", p)
+			return fmt.Errorf("can not find hook ID for project %s", p)
 		}
 		if _, err := router.gitlabClient.Projects.DeleteProjectHook(p, id); err != nil {
-			return errors.Errorf("failed to delete hook for project %s. err: %+v", p, err)
+			return fmt.Errorf("failed to delete hook for project %s. err: %w", p, err)
 		}
 		logger.Infof("Gitlab hook deleted for project %s", p)
 	}
@@ -189,7 +189,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		for _, event := range gitlabEventSource.Events {
 			elem := reflect.ValueOf(opt).Elem().FieldByName(event)
 			if ok := elem.IsValid(); !ok {
-				return errors.Errorf("unknown event %s", event)
+				return fmt.Errorf("unknown event %s", event)
 			}
 			iev := reflect.New(elem.Type().Elem())
 			reflect.Indirect(iev).SetBool(true)
@@ -199,7 +199,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if gitlabEventSource.SecretToken != nil {
 			token, err := common.GetSecretFromVolume(gitlabEventSource.SecretToken)
 			if err != nil {
-				return errors.Errorf("failed to retrieve secret token. err: %+v", err)
+				return fmt.Errorf("failed to retrieve secret token. err: %w", err)
 			}
 			opt.Token = &token
 			router.secretToken = token
@@ -207,13 +207,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		accessToken, err := common.GetSecretFromVolume(gitlabEventSource.AccessToken)
 		if err != nil {
-			return errors.Errorf("failed to get gitlab credentials. err: %+v", err)
+			return fmt.Errorf("failed to get gitlab credentials. err: %w", err)
 		}
 
 		logger.Info("setting up the client to connect to GitLab...")
 		router.gitlabClient, err = gitlab.NewClient(accessToken, gitlab.WithBaseURL(gitlabEventSource.GitlabBaseURL))
 		if err != nil {
-			return errors.Wrapf(err, "failed to initialize client")
+			return fmt.Errorf("failed to initialize client, %w", err)
 		}
 
 		getHook := func(hooks []*gitlab.ProjectHook, url string) *gitlab.ProjectHook {

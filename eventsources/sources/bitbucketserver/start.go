@@ -22,6 +22,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math/big"
 	"net/http"
@@ -37,7 +38,6 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -130,7 +130,7 @@ func (router *Router) PostInactivate() error {
 
 		bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
 		if err != nil {
-			return errors.Errorf("failed to get bitbucketserver token. err: %+v", err)
+			return fmt.Errorf("failed to get bitbucketserver token. err: %w", err)
 		}
 
 		bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
@@ -140,7 +140,7 @@ func (router *Router) PostInactivate() error {
 		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
 			id, ok := router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug]
 			if !ok {
-				return errors.Errorf("can not find hook ID for project-key: %s, repository-slug: %s", repo.ProjectKey, repo.RepositorySlug)
+				return fmt.Errorf("can not find hook ID for project-key: %s, repository-slug: %s", repo.ProjectKey, repo.RepositorySlug)
 			}
 
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -151,7 +151,7 @@ func (router *Router) PostInactivate() error {
 
 			_, err = bitbucketClient.DefaultApi.DeleteWebhook(repo.ProjectKey, repo.RepositorySlug, int32(id))
 			if err != nil {
-				return errors.Errorf("failed to delete bitbucketserver webhook. err: %+v", err)
+				return fmt.Errorf("failed to delete bitbucketserver webhook. err: %w", err)
 			}
 
 			logger.Infow("bitbucket server webhook deleted",
@@ -193,14 +193,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	logger.Info("retrieving the access token credentials...")
 	bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
 	if err != nil {
-		return errors.Errorf("failed to get bitbucketserver token. err: %+v", err)
+		return fmt.Errorf("failed to get bitbucketserver token. err: %w", err)
 	}
 
 	if bitbucketserverEventSource.WebhookSecret != nil {
 		logger.Info("retrieving the webhook secret...")
 		webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
 		if err != nil {
-			return errors.Errorf("failed to get bitbucketserver webhook secret. err: %+v", err)
+			return fmt.Errorf("failed to get bitbucketserver webhook secret. err: %w", err)
 		}
 
 		router.hookSecret = webhookSecret
@@ -274,7 +274,7 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 
 	hooks, err := router.listWebhooks(bitbucketClient, repo)
 	if err != nil {
-		return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for repository %s/%s", repo.ProjectKey, repo.RepositorySlug)
+		return fmt.Errorf("failed to list existing hooks to check for duplicates for repository %s/%s, %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
 
 	var existingHook bitbucketv1.Webhook
@@ -299,7 +299,7 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 
 	requestBody, err := router.createRequestBodyFromWebhook(newHook)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create request body from webhook")
+		return fmt.Errorf("failed to create request body from webhook, %w", err)
 	}
 
 	// Update the webhook when it does exist and the events/configuration have changed
@@ -309,7 +309,7 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 			logger.Info("webhook requires an update")
 			err = router.updateWebhook(bitbucketClient, existingHook.ID, requestBody, repo)
 			if err != nil {
-				return errors.Errorf("failed to update webhook. err: %+v", err)
+				return fmt.Errorf("failed to update webhook. err: %w", err)
 			}
 
 			logger.With("hook-id", existingHook.ID).Info("hook successfully updated")
@@ -321,7 +321,7 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 	// Create the webhook when it doesn't exist yet
 	createdHook, err := router.createWebhook(bitbucketClient, requestBody, repo)
 	if err != nil {
-		return errors.Errorf("failed to create webhook. err: %+v", err)
+		return fmt.Errorf("failed to create webhook. err: %w", err)
 	}
 
 	router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug] = createdHook.ID
@@ -334,12 +334,12 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 func (router *Router) listWebhooks(bitbucketClient *bitbucketv1.APIClient, repo v1alpha1.BitbucketServerRepository) ([]bitbucketv1.Webhook, error) {
 	apiResponse, err := bitbucketClient.DefaultApi.FindWebhooks(repo.ProjectKey, repo.RepositorySlug, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to list existing hooks to check for duplicates for repository %s/%s", repo.ProjectKey, repo.RepositorySlug)
+		return nil, fmt.Errorf("failed to list existing hooks to check for duplicates for repository %s/%s, %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
 
 	hooks, err := bitbucketv1.GetWebhooksResponse(apiResponse)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to convert the list of webhooks for repository %s/%s", repo.ProjectKey, repo.RepositorySlug)
+		return nil, fmt.Errorf("failed to convert the list of webhooks for repository %s/%s, %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
 
 	return hooks, nil
@@ -348,13 +348,13 @@ func (router *Router) listWebhooks(bitbucketClient *bitbucketv1.APIClient, repo 
 func (router *Router) createWebhook(bitbucketClient *bitbucketv1.APIClient, requestBody []byte, repo v1alpha1.BitbucketServerRepository) (*bitbucketv1.Webhook, error) {
 	apiResponse, err := bitbucketClient.DefaultApi.CreateWebhook(repo.ProjectKey, repo.RepositorySlug, requestBody, []string{"application/json"})
 	if err != nil {
-		return nil, errors.Errorf("failed to add webhook. err: %+v", err)
+		return nil, fmt.Errorf("failed to add webhook. err: %w", err)
 	}
 
 	var createdHook *bitbucketv1.Webhook
 	err = mapstructure.Decode(apiResponse.Values, &createdHook)
 	if err != nil {
-		return nil, errors.Errorf("failed to convert API response to Webhook struct. err: %+v", err)
+		return nil, fmt.Errorf("failed to convert API response to Webhook struct. err: %w", err)
 	}
 
 	return createdHook, nil
@@ -381,7 +381,7 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 		hookMap := make(map[string]interface{})
 		err = common.StructToMap(hook, hookMap)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to convert webhook to map")
+			return nil, fmt.Errorf("failed to convert webhook to map, %w", err)
 		}
 
 		delete(hookMap, "configuration")
@@ -391,7 +391,7 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 
 	requestBody, err := json.Marshal(finalHook)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to marshal new webhook to JSON")
+		return nil, fmt.Errorf("failed to marshal new webhook to JSON, %w", err)
 	}
 
 	return requestBody, nil
@@ -400,13 +400,13 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 func (router *Router) parseAndValidateBitbucketServerRequest(request *http.Request) ([]byte, error) {
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse request body")
+		return nil, fmt.Errorf("failed to parse request body, %w", err)
 	}
 
 	if len(router.hookSecret) != 0 {
 		signature := request.Header.Get("X-Hub-Signature")
 		if len(signature) == 0 {
-			return nil, errors.New("missing signature header")
+			return nil, fmt.Errorf("missing signature header")
 		}
 
 		mac := hmac.New(sha256.New, []byte(router.hookSecret))
@@ -414,7 +414,7 @@ func (router *Router) parseAndValidateBitbucketServerRequest(request *http.Reque
 		expectedMAC := hex.EncodeToString(mac.Sum(nil))
 
 		if !hmac.Equal([]byte(signature[7:]), []byte(expectedMAC)) {
-			return nil, errors.New("hmac verification failed")
+			return nil, fmt.Errorf("hmac verification failed")
 		}
 	}
 

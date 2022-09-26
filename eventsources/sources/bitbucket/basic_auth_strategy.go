@@ -16,8 +16,9 @@ limitations under the License.
 package bitbucket
 
 import (
+	"fmt"
+
 	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/common"
@@ -31,12 +32,12 @@ type BasicAuthStrategy struct {
 func NewBasicAuthStrategy(usernameSecret, passwordSecret *corev1.SecretKeySelector) (*BasicAuthStrategy, error) {
 	username, err := common.GetSecretFromVolume(usernameSecret)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve bitbucket username from secret")
+		return nil, fmt.Errorf("failed to retrieve bitbucket username from secret, %w", err)
 	}
 
 	password, err := common.GetSecretFromVolume(passwordSecret)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve bitbucket password from secret")
+		return nil, fmt.Errorf("failed to retrieve bitbucket password from secret, %w", err)
 	}
 
 	return &BasicAuthStrategy{

@@ -7,7 +7,6 @@ import (
 	"net"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	admissionv1 "k8s.io/api/admission/v1"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
@@ -139,7 +138,7 @@ func createWebhook(ac *AdmissionController, wh *admissionregistrationv1.Validati
 	client := ac.Client.AdmissionregistrationV1().ValidatingWebhookConfigurations()
 	_, err := client.Create(context.TODO(), wh, metav1.CreateOptions{})
 	if err != nil {
-		panic(errors.Wrap(err, "failed to create test webhook: %s"))
+		panic(fmt.Errorf("failed to create test webhook, %w", err))
 	}
 }
 

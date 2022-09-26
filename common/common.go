@@ -17,9 +17,9 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"reflect"
 
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -110,7 +110,7 @@ const (
 )
 
 var (
-	ErrNilEventSource = errors.New("event source can't be nil")
+	ErrNilEventSource = fmt.Errorf("event source can't be nil")
 )
 
 // Miscellaneous Labels

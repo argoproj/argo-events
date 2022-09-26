@@ -94,7 +94,7 @@ func Convert2WaitBackoff(backoff *apicommon.Backoff) (*wait.Backoff, error) {
 	return &result, nil
 }
 
-func Connect(backoff *apicommon.Backoff, conn func() error) error {
+func DoWithRetry(backoff *apicommon.Backoff, f func() error) error {
 	if backoff == nil {
 		backoff = &DefaultBackoff
 	}
@@ -103,8 +103,7 @@ func Connect(backoff *apicommon.Backoff, conn func() error) error {
 		return fmt.Errorf("invalid backoff configuration, %w", err)
 	}
 	_ = wait.ExponentialBackoff(*b, func() (bool, error) {
-		if err = conn(); err != nil {
-			// return "false, err" will cover waitErr
+		if err = f(); err != nil {
 			return false, nil
 		}
 		return true, nil

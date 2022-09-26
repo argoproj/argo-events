@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/colinmarc/hdfs"
-	"github.com/pkg/errors"
 	krb "gopkg.in/jcmturner/gokrb5.v5/client"
 	"gopkg.in/jcmturner/gokrb5.v5/config"
 	"gopkg.in/jcmturner/gokrb5.v5/credentials"
@@ -45,7 +44,7 @@ type KeytabOptions struct {
 func getConfigMapKey(selector *corev1.ConfigMapKeySelector) (string, error) {
 	result, err := common.GetConfigMapFromVolume(selector)
 	if err != nil {
-		return "", errors.Wrap(err, "configmap value not injected")
+		return "", fmt.Errorf("configmap value not injected, %w", err)
 	}
 	return result, nil
 }
@@ -53,7 +52,7 @@ func getConfigMapKey(selector *corev1.ConfigMapKeySelector) (string, error) {
 func getSecretKey(selector *corev1.SecretKeySelector) ([]byte, error) {
 	result, err := common.GetSecretFromVolume(selector)
 	if err != nil {
-		return nil, errors.Wrap(err, "secret value not injected")
+		return nil, fmt.Errorf("secret value not injected, %w", err)
 	}
 	return []byte(result), nil
 }

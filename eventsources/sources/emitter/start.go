@@ -19,10 +19,10 @@ package emitter
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	emitter "github.com/emitter-io/go/v2"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -71,7 +71,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if emitterEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(emitterEventSource.TLS)
 		if err != nil {
-			return errors.Wrap(err, "failed to get the tls configuration")
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
 		options = append(options, emitter.WithTLSConfig(tlsConfig))
 	}
@@ -80,7 +80,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if emitterEventSource.Username != nil {
 		username, err := common.GetSecretFromVolume(emitterEventSource.Username)
 		if err != nil {
-			return errors.Wrapf(err, "failed to retrieve the username from %s", emitterEventSource.Username.Name)
+			return fmt.Errorf("failed to retrieve the username from %s, %w", emitterEventSource.Username.Name, err)
 		}
 		options = append(options, emitter.WithUsername(username))
 	}
@@ -88,7 +88,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if emitterEventSource.Password != nil {
 		password, err := common.GetSecretFromVolume(emitterEventSource.Password)
 		if err != nil {
-			return errors.Wrapf(err, "failed to retrieve the password from %s", emitterEventSource.Password.Name)
+			return fmt.Errorf("failed to retrieve the password from %s, %w", emitterEventSource.Password.Name, err)
 		}
 		options = append(options, emitter.WithPassword(password))
 	}
@@ -100,13 +100,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Infow("creating a client", zap.Any("channelName", emitterEventSource.ChannelName))
 	client := emitter.NewClient(options...)
 
-	if err := common.Connect(emitterEventSource.ConnectionBackoff, func() error {
+	if err := common.DoWithRetry(emitterEventSource.ConnectionBackoff, func() error {
 		if err := client.Connect(); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrapf(err, "failed to connect to %s", emitterEventSource.Broker)
+		return fmt.Errorf("failed to connect to %s, %w", emitterEventSource.Broker, err)
 	}
 
 	if err := client.Subscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
@@ -136,7 +136,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}
 	}); err != nil {
-		return errors.Wrapf(err, "failed to subscribe to channel %s", emitterEventSource.ChannelName)
+		return fmt.Errorf("failed to subscribe to channel %s, %w", emitterEventSource.ChannelName, err)
 	}
 
 	<-ctx.Done()

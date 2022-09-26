@@ -20,10 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
+	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -100,12 +98,12 @@ func (t *AzureEventHubsTrigger) FetchResource(ctx context.Context) (interface{},
 func (t *AzureEventHubsTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.AzureEventHubsTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the fetched trigger resource")
+		return nil, fmt.Errorf("failed to interpret the fetched trigger resource")
 	}
 
 	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the azure event hubs trigger resource")
+		return nil, fmt.Errorf("failed to marshal the azure event hubs trigger resource, %w", err)
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
@@ -115,7 +113,7 @@ func (t *AzureEventHubsTrigger) ApplyResourceParameters(events map[string]*v1alp
 		}
 		var ht *v1alpha1.AzureEventHubsTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated azure event hubs trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated azure event hubs trigger resource after applying resource parameters, %w", err)
 		}
 		return ht, nil
 	}
@@ -126,11 +124,11 @@ func (t *AzureEventHubsTrigger) ApplyResourceParameters(events map[string]*v1alp
 func (t *AzureEventHubsTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.AzureEventHubsTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	if trigger.Payload == nil {
-		return nil, errors.New("payload parameters are not specified")
+		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)

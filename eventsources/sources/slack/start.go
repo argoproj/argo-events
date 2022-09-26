@@ -20,11 +20,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"go.uber.org/zap"
@@ -159,7 +159,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 			}
 
 		default:
-			err = errors.New("could not determine slack type from form parameters")
+			err = fmt.Errorf("could not determine slack type from form parameters")
 			logger.Errorw("failed to determine type of slack post", zap.Error(err))
 			common.SendInternalErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
@@ -212,19 +212,19 @@ func (rc *Router) handleEvent(request *http.Request) ([]byte, []byte, error) {
 	var data []byte
 	body, err := rc.getRequestBody(request)
 	if err != nil {
-		return data, response, errors.Wrap(err, "failed to fetch request body")
+		return data, response, fmt.Errorf("failed to fetch request body, %w", err)
 	}
 
 	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: rc.token}))
 	if err != nil {
-		return data, response, errors.Wrap(err, "failed to extract event")
+		return data, response, fmt.Errorf("failed to extract event, %w", err)
 	}
 
 	if eventsAPIEvent.Type == slackevents.URLVerification {
 		var r *slackevents.ChallengeResponse
 		err = json.Unmarshal(body, &r)
 		if err != nil {
-			return data, response, errors.Wrap(err, "failed to verify the challenge")
+			return data, response, fmt.Errorf("failed to verify the challenge, %w", err)
 		}
 		response = []byte(r.Challenge)
 	}
@@ -232,7 +232,7 @@ func (rc *Router) handleEvent(request *http.Request) ([]byte, []byte, error) {
 	if eventsAPIEvent.Type == slackevents.CallbackEvent {
 		data, err = json.Marshal(&eventsAPIEvent.InnerEvent)
 		if err != nil {
-			return data, response, errors.Wrap(err, "failed to marshal event data, rejecting the event...")
+			return data, response, fmt.Errorf("failed to marshal event data, rejecting the event, %w", err)
 		}
 	}
 
@@ -244,12 +244,12 @@ func (rc *Router) handleInteraction(request *http.Request) ([]byte, error) {
 	ie := &slack.InteractionCallback{}
 	err := json.Unmarshal([]byte(payload), ie)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse interaction event")
+		return nil, fmt.Errorf("failed to parse interaction event, %w", err)
 	}
 
 	data, err := json.Marshal(ie)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal action data")
+		return nil, fmt.Errorf("failed to marshal action data, %w", err)
 	}
 
 	return data, nil
@@ -258,12 +258,12 @@ func (rc *Router) handleInteraction(request *http.Request) ([]byte, error) {
 func (rc *Router) handleSlashCommand(request *http.Request) ([]byte, error) {
 	command, err := slack.SlashCommandParse(request)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse command")
+		return nil, fmt.Errorf("failed to parse command, %w", err)
 	}
 
 	data, err := json.Marshal(command)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal command data")
+		return nil, fmt.Errorf("failed to marshal command data, %w", err)
 	}
 
 	return data, nil
@@ -275,7 +275,7 @@ func (rc *Router) getRequestBody(request *http.Request) ([]byte, error) {
 	// Reset request.Body ReadCloser to prevent side-effect if re-read
 	request.Body = io.NopCloser(bytes.NewBuffer(body))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse request body")
+		return nil, fmt.Errorf("failed to parse request body, %w", err)
 	}
 	return body, nil
 }
@@ -289,7 +289,7 @@ func (rc *Router) verifyRequest(request *http.Request) error {
 	if len(signingSecret) > 0 {
 		sv, err := slack.NewSecretsVerifier(request.Header, signingSecret)
 		if err != nil {
-			return errors.Wrap(err, "cannot create secrets verifier")
+			return fmt.Errorf("cannot create secrets verifier, %w", err)
 		}
 
 		// Read the request body
@@ -300,12 +300,12 @@ func (rc *Router) verifyRequest(request *http.Request) error {
 
 		_, err = sv.Write(body)
 		if err != nil {
-			return errors.Wrap(err, "error writing body: cannot verify signature")
+			return fmt.Errorf("error writing body: cannot verify signature, %w", err)
 		}
 
 		err = sv.Ensure()
 		if err != nil {
-			return errors.Wrap(err, "signature validation failed")
+			return fmt.Errorf("signature validation failed, %w", err)
 		}
 	}
 	return nil
@@ -323,13 +323,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("retrieving the slack token...")
 	token, err := common.GetSecretFromVolume(slackEventSource.Token)
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the token")
+		return fmt.Errorf("failed to retrieve the token, %w", err)
 	}
 
 	log.Info("retrieving the signing secret...")
 	signingSecret, err := common.GetSecretFromVolume(slackEventSource.SigningSecret)
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve the signing secret")
+		return fmt.Errorf("failed to retrieve the signing secret, %w", err)
 	}
 
 	route := webhook.NewRoute(slackEventSource.Webhook, log, el.GetEventSourceName(), el.GetEventName(), el.Metrics)

@@ -3,6 +3,7 @@ package hdfs
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/colinmarc/hdfs"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -76,20 +76,20 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("setting up HDFS configuration...")
 	hdfsConfig, err := createHDFSConfig(hdfsEventSource)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create HDFS configuration for %s", el.GetEventName())
+		return fmt.Errorf("failed to create HDFS configuration for %s, %w", el.GetEventName(), err)
 	}
 
 	log.Info("setting up HDFS client...")
 	hdfscli, err := createHDFSClient(hdfsConfig.Addresses, hdfsConfig.HDFSUser, hdfsConfig.KrbOptions)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create the HDFS client for %s", el.GetEventName())
+		return fmt.Errorf("failed to create the HDFS client for %s, %w", el.GetEventName(), err)
 	}
 	defer hdfscli.Close()
 
 	log.Info("setting up a new watcher...")
 	watcher, err := naivewatcher.NewWatcher(&WatchableHDFS{hdfscli: hdfscli})
 	if err != nil {
-		return errors.Wrapf(err, "failed to create the HDFS watcher for %s", el.GetEventName())
+		return fmt.Errorf("failed to create the HDFS watcher for %s, %w", el.GetEventName(), err)
 	}
 	defer watcher.Close()
 
@@ -97,7 +97,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if hdfsEventSource.CheckInterval != "" {
 		d, err := time.ParseDuration(hdfsEventSource.CheckInterval)
 		if err != nil {
-			return errors.Wrapf(err, "failed to parse the check in interval for %s", el.GetEventName())
+			return fmt.Errorf("failed to parse the check in interval for %s, %w", el.GetEventName(), err)
 		}
 		intervalDuration = d
 	}
@@ -105,14 +105,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("started HDFS watcher")
 	err = watcher.Start(intervalDuration)
 	if err != nil {
-		return errors.Wrapf(err, "failed to start the watcher for %s", el.GetEventName())
+		return fmt.Errorf("failed to start the watcher for %s, %w", el.GetEventName(), err)
 	}
 
 	// directory to watch must be available in HDFS. You can't watch a directory that is not present.
 	log.Info("adding configured directory to watcher...")
 	err = watcher.Add(hdfsEventSource.Directory)
 	if err != nil {
-		return errors.Wrapf(err, "failed to add directory %s for %s", hdfsEventSource.Directory, el.GetEventName())
+		return fmt.Errorf("failed to add directory %s for %s, %w", hdfsEventSource.Directory, el.GetEventName(), err)
 	}
 
 	op := fsevent.NewOp(hdfsEventSource.Type)
@@ -120,7 +120,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if hdfsEventSource.PathRegexp != "" {
 		pathRegexp, err = regexp.Compile(hdfsEventSource.PathRegexp)
 		if err != nil {
-			return errors.Wrapf(err, "failed to compile the path regex %s for %s", hdfsEventSource.PathRegexp, el.GetEventName())
+			return fmt.Errorf("failed to compile the path regex %s for %s, %w", hdfsEventSource.PathRegexp, el.GetEventName(), err)
 		}
 	}
 
@@ -131,7 +131,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			if !ok {
 				log.Info("HDFS watcher has stopped")
 				// watcher stopped watching file events
-				return errors.Errorf("watcher has been stopped for %s", el.GetEventName())
+				return fmt.Errorf("watcher has been stopped for %s", el.GetEventName())
 			}
 			event.Metadata = hdfsEventSource.Metadata
 			matched := false
@@ -150,7 +150,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 			}
 		case err := <-watcher.Errors:
-			return errors.Wrapf(err, "failed to watch events for %s", el.GetEventName())
+			return fmt.Errorf("failed to watch events for %s, %w", el.GetEventName(), err)
 		case <-ctx.Done():
 			return nil
 		}
@@ -170,12 +170,12 @@ func (el *EventListener) handleOne(event fsevent.Event, dispatch func([]byte, ..
 
 	payload, err := json.Marshal(event)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal the event data, rejecting event...")
+		return fmt.Errorf("failed to marshal the event data, rejecting event, %w", err)
 	}
 
 	logger.Info("dispatching event on data channel...")
 	if err = dispatch(payload); err != nil {
-		return errors.Wrap(err, "failed to dispatch an HDFS event")
+		return fmt.Errorf("failed to dispatch an HDFS event, %w", err)
 	}
 	return nil
 }

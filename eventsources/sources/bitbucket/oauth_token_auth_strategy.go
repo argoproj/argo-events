@@ -16,8 +16,9 @@ limitations under the License.
 package bitbucket
 
 import (
+	"fmt"
+
 	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/common"
@@ -30,7 +31,7 @@ type OAuthTokenAuthStrategy struct {
 func NewOAuthTokenAuthStrategy(oauthTokenSecret *corev1.SecretKeySelector) (*OAuthTokenAuthStrategy, error) {
 	token, err := common.GetSecretFromVolume(oauthTokenSecret)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve bitbucket oauth token from secret")
+		return nil, fmt.Errorf("failed to retrieve bitbucket oauth token from secret, %w", err)
 	}
 
 	return &OAuthTokenAuthStrategy{

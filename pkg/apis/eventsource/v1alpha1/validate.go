@@ -16,14 +16,12 @@ limitations under the License.
 
 package v1alpha1
 
-import (
-	"github.com/pkg/errors"
-)
+import fmt "fmt"
 
 // ValidateEventSource validates a generic event source
 func ValidateEventSource(eventSource *EventSource) error {
 	if eventSource == nil {
-		return errors.New("event source can't be nil")
+		return fmt.Errorf("event source can't be nil")
 	}
 	return nil
 }

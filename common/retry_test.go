@@ -43,13 +43,13 @@ func TestRetryableKubeAPIError(t *testing.T) {
 }
 
 func TestConnect(t *testing.T) {
-	err := Connect(nil, func() error {
+	err := DoWithRetry(nil, func() error {
 		return fmt.Errorf("new error")
 	})
 	assert.NotNil(t, err)
 	assert.True(t, strings.Contains(err.Error(), "new error"))
 
-	err = Connect(nil, func() error {
+	err = DoWithRetry(nil, func() error {
 		return nil
 	})
 	assert.Nil(t, err)
@@ -58,7 +58,7 @@ func TestConnect(t *testing.T) {
 func TestConnectDurationString(t *testing.T) {
 	start := time.Now()
 	count := 2
-	err := Connect(nil, func() error {
+	err := DoWithRetry(nil, func() error {
 		if count == 0 {
 			return nil
 		} else {
@@ -85,7 +85,7 @@ func TestConnectRetry(t *testing.T) {
 	}
 	count := 2
 	start := time.Now()
-	err := Connect(&backoff, func() error {
+	err := DoWithRetry(&backoff, func() error {
 		if count == 0 {
 			return nil
 		} else {
@@ -110,7 +110,7 @@ func TestRetryFailure(t *testing.T) {
 		Jitter:   &jitter,
 		Steps:    2,
 	}
-	err := Connect(&backoff, func() error {
+	err := DoWithRetry(&backoff, func() error {
 		return fmt.Errorf("this is an error")
 	})
 	assert.NotNil(t, err)

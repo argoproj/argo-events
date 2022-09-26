@@ -18,10 +18,10 @@ package apache_openwhisk
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/apache/openwhisk-client-go/whisk"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -55,7 +55,7 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 
 		config, err := whisk.GetDefaultConfig()
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to get default configuration")
+			return nil, fmt.Errorf("failed to get default configuration, %w", err)
 		}
 
 		config.Host = openwhisktrigger.Host
@@ -63,7 +63,7 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 		if openwhisktrigger.AuthToken != nil {
 			token, err := common.GetSecretFromVolume(openwhisktrigger.AuthToken)
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to retrieve auth token")
+				return nil, fmt.Errorf("failed to retrieve auth token, %w", err)
 			}
 			config.AuthToken = token
 		}
@@ -79,7 +79,7 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 
 		client, err = whisk.NewClient(http.DefaultClient, config)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to instantiate OpenWhisk client")
+			return nil, fmt.Errorf("failed to instantiate OpenWhisk client, %w", err)
 		}
 
 		openWhiskClients[trigger.Template.Name] = client
@@ -108,12 +108,12 @@ func (t *TriggerImpl) FetchResource(ctx context.Context) (interface{}, error) {
 func (t *TriggerImpl) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.OpenWhiskTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the fetched trigger resource")
+		return nil, fmt.Errorf("failed to interpret the fetched trigger resource")
 	}
 
 	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the OpenWhisk trigger resource")
+		return nil, fmt.Errorf("failed to marshal the OpenWhisk trigger resource, %w", err)
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
@@ -123,7 +123,7 @@ func (t *TriggerImpl) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 		}
 		var openwhisktrigger *v1alpha1.OpenWhiskTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &openwhisktrigger); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated OpenWhisk trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated OpenWhisk trigger resource after applying resource parameters, %w", err)
 		}
 
 		t.Logger.Debugw("applied parameters to the OpenWhisk trigger", zap.Any("name", t.Trigger.Template.Name), zap.Any("trigger", *openwhisktrigger))
@@ -141,7 +141,7 @@ func (t *TriggerImpl) Execute(ctx context.Context, events map[string]*v1alpha1.E
 
 	openwhisktrigger, ok := resource.(*v1alpha1.OpenWhiskTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the OpenWhisk trigger resource")
+		return nil, fmt.Errorf("failed to interpret the OpenWhisk trigger resource")
 	}
 
 	if openwhisktrigger.Payload != nil {
@@ -155,7 +155,7 @@ func (t *TriggerImpl) Execute(ctx context.Context, events map[string]*v1alpha1.E
 
 	response, status, err := t.OpenWhiskClient.Actions.Invoke(openwhisktrigger.ActionName, payload, true, true)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to invoke action %s", openwhisktrigger.ActionName)
+		return nil, fmt.Errorf("failed to invoke action %s, %w", openwhisktrigger.ActionName, err)
 	}
 
 	t.Logger.Debugw("response for the OpenWhisk action invocation", zap.Any("name", t.Trigger.Template.Name), zap.Any("response", response))
@@ -170,7 +170,7 @@ func (t *TriggerImpl) ApplyPolicy(ctx context.Context, resource interface{}) err
 	}
 	response, ok := resource.(*http.Response)
 	if !ok {
-		return errors.New("failed to interpret the trigger execution response")
+		return fmt.Errorf("failed to interpret the trigger execution response")
 	}
 
 	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.GetAllow())

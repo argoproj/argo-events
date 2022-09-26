@@ -24,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -87,7 +86,7 @@ func (t *ArgoWorkflowTrigger) FetchResource(ctx context.Context) (interface{}, e
 func (t *ArgoWorkflowTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 	if err := triggers.ApplyResourceParameters(events, t.Trigger.Template.ArgoWorkflow.Parameters, obj); err != nil {
 		return nil, err
@@ -106,16 +105,16 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	name := obj.GetName()
 	if name == "" {
 		if op != v1alpha1.Submit {
-			return nil, errors.Errorf("failed to execute the workflow %v operation, no name is given", op)
+			return nil, fmt.Errorf("failed to execute the workflow %v operation, no name is given", op)
 		}
 		if obj.GetGenerateName() == "" {
-			return nil, errors.New("failed to trigger the workflow, neither name nor generateName is given")
+			return nil, fmt.Errorf("failed to trigger the workflow, neither name nor generateName is given")
 		}
 	}
 
@@ -137,7 +136,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 	case v1alpha1.Submit:
 		file, err := os.CreateTemp("", fmt.Sprintf("%s%s", name, obj.GetGenerateName()))
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", obj.GetName())
+			return nil, fmt.Errorf("failed to create a temp file for the workflow %s, %w", obj.GetName(), err)
 		}
 		defer os.Remove(file.Name())
 
@@ -157,7 +156,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		}
 
 		if _, err := file.Write(jObj); err != nil {
-			return nil, errors.Wrapf(err, "failed to write workflow json %s to the temp file %s", name, file.Name())
+			return nil, fmt.Errorf("failed to write workflow json %s to the temp file %s, %w", name, file.Name(), err)
 		}
 		cmd = exec.Command("argo", "-n", namespace, "submit", file.Name())
 	case v1alpha1.SubmitFrom:
@@ -168,7 +167,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		case "workflowtemplate":
 			kind = "workflowtemplate"
 		default:
-			return nil, errors.Errorf("invalid kind %s", kind)
+			return nil, fmt.Errorf("invalid kind %s", kind)
 		}
 		fromArg := fmt.Sprintf("%s/%s", kind, name)
 		cmd = exec.Command("argo", "-n", namespace, "submit", "--from", fromArg)
@@ -185,14 +184,14 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 	case v1alpha1.Stop:
 		cmd = exec.Command("argo", "-n", namespace, "stop", name)
 	default:
-		return nil, errors.Errorf("unknown operation type %s", string(op))
+		return nil, fmt.Errorf("unknown operation type %s", string(op))
 	}
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Args = append(cmd.Args, trigger.Template.ArgoWorkflow.Args...)
 	if err := t.cmdRunner(cmd); err != nil {
-		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s", string(op), name)
+		return nil, fmt.Errorf("failed to execute %s command for workflow %s, %w", string(op), name, err)
 	}
 
 	t.namespableDynamicClient = t.DynamicClient.Resource(schema.GroupVersionResource{
@@ -209,7 +208,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		return nil, err
 	}
 	if len(l.Items) == 0 {
-		return nil, errors.New("failed to list created workflows for unknown reason")
+		return nil, fmt.Errorf("failed to list created workflows for unknown reason")
 	}
 	return l.Items[0], nil
 }
@@ -224,7 +223,7 @@ func (t *ArgoWorkflowTrigger) ApplyPolicy(ctx context.Context, resource interfac
 
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
-		return errors.New("failed to interpret the trigger resource")
+		return fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	p := policy.NewResourceLabels(trigger, t.namespableDynamicClient, obj)
@@ -237,7 +236,7 @@ func (t *ArgoWorkflowTrigger) ApplyPolicy(ctx context.Context, resource interfac
 		switch err {
 		case wait.ErrWaitTimeout:
 			if trigger.Policy.K8s.ErrorOnBackoffTimeout {
-				return errors.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
+				return fmt.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
 			}
 			return nil
 		default:

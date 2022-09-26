@@ -18,8 +18,7 @@ package nats
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -36,10 +35,10 @@ func validate(eventSource *v1alpha1.NATSEventsSource) error {
 		return common.ErrNilEventSource
 	}
 	if eventSource.URL == "" {
-		return errors.New("url must be specified")
+		return fmt.Errorf("url must be specified")
 	}
 	if eventSource.Subject == "" {
-		return errors.New("subject must be specified")
+		return fmt.Errorf("subject must be specified")
 	}
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)

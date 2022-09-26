@@ -18,8 +18,7 @@ package policy
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // StatusPolicy implements the policy for a HTTP trigger
@@ -44,5 +43,5 @@ func (hp *StatusPolicy) ApplyPolicy(ctx context.Context) error {
 			return nil
 		}
 	}
-	return errors.Errorf("policy application resulted in failure. http response status %d is not allowed", hp.Status)
+	return fmt.Errorf("policy application resulted in failure. http response status %d is not allowed", hp.Status)
 }

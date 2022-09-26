@@ -3,10 +3,10 @@ package tls
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,14 +35,14 @@ func validCertificate(cert []byte, t *testing.T) (*x509.Certificate, error) {
 	const certificate = "CERTIFICATE"
 	caCert, _ := pem.Decode(cert)
 	if caCert.Type != certificate {
-		return nil, errors.Errorf("CERT type mismatch, got %s, want: %s", caCert.Type, certificate)
+		return nil, fmt.Errorf("CERT type mismatch, got %s, want: %s", caCert.Type, certificate)
 	}
 	parsedCert, err := x509.ParseCertificate(caCert.Bytes)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse cert")
+		return nil, fmt.Errorf("failed to parse cert, %w", err)
 	}
 	if parsedCert.SignatureAlgorithm != x509.SHA256WithRSA {
-		return nil, errors.Errorf("signature not match. Got: %s, want: %s", parsedCert.SignatureAlgorithm, x509.SHA256WithRSA)
+		return nil, fmt.Errorf("signature not match. Got: %s, want: %s", parsedCert.SignatureAlgorithm, x509.SHA256WithRSA)
 	}
 	return parsedCert, nil
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -73,10 +72,10 @@ func (cmp *ConfigMapPersist) IsEnabled() bool {
 
 func (cmp *ConfigMapPersist) Save(event *Event) error {
 	if event == nil {
-		return errors.Errorf("event object is nil")
+		return fmt.Errorf("event object is nil")
 	}
 	// Using Connect util func for backoff retry if K8s API returns error
-	err := common.Connect(&common.DefaultBackoff, func() error {
+	err := common.DoWithRetry(&common.DefaultBackoff, func() error {
 		cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.ctx, cmp.name, metav1.GetOptions{})
 		if err != nil {
 			if apierr.IsNotFound(err) && cmp.createIfNotExist {
