@@ -48,7 +48,7 @@ func Start() {
 	portStr := envpkg.LookupEnvStringOr(portEnvVar, "443")
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		logger.Fatalf("port should be number, environment variable %q not valid", portStr)
+		logger.Fatalf("port should be a number, environment variable %q not valid", portStr)
 	}
 
 	options := webhook.Options{
