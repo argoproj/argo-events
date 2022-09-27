@@ -3,6 +3,7 @@ package cmd
 import (
 	"crypto/tls"
 	"os"
+	"strconv"
 
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -19,10 +20,12 @@ import (
 	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/webhook"
+	envpkg "github.com/argoproj/pkg/env"
 )
 
 const (
 	namespaceEnvVar = "NAMESPACE"
+	portEnvVar      = "PORT"
 )
 
 func Start() {
@@ -39,7 +42,13 @@ func Start() {
 
 	namespace, defined := os.LookupEnv(namespaceEnvVar)
 	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", namespaceEnvVar)
+		logger.Fatalf("required environment variable %q not defined", namespaceEnvVar)
+	}
+
+	portStr := envpkg.LookupEnvStringOr(portEnvVar, "443")
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		logger.Fatalf("port should be number, environment variable %q not valid", portStr)
 	}
 
 	options := webhook.Options{
@@ -47,7 +56,7 @@ func Start() {
 		DeploymentName:  "events-webhook",
 		ClusterRoleName: "argo-events-webhook",
 		Namespace:       namespace,
-		Port:            443,
+		Port:            port,
 		SecretName:      "events-webhook-certs",
 		WebhookName:     "webhook.argo-events.argoproj.io",
 		ClientAuth:      tls.VerifyClientCertIfGiven,
