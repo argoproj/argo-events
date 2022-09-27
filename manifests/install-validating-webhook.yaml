@@ -115,7 +115,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: PORT
-          value: 443
+          value: "443"
         image: quay.io/argoproj/argo-events:latest
         imagePullPolicy: Always
         name: webhook
