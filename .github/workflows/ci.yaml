@@ -10,23 +10,23 @@ jobs:
   codegen:
     name: Codegen
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Restore go build cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-build-v1-${{ hashFiles('**/go.mod') }}
       - name: Setup Golang
         uses: actions/setup-go@v3.2.0
         with:
           go-version: "1.19"
-      - name: Add bins to PATH
-        run: |
-          echo /home/runner/go/bin >> $GITHUB_PATH
-          echo /usr/local/bin >> $GITHUB_PATH
+      - name: Restore go build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Install protoc
         run: |
           set -eux -o pipefail
@@ -52,9 +52,7 @@ jobs:
       - name: Get dependencies
         run: go mod download
       - name: Make codegen
-        run: |
-          echo 'GOPATH=/home/runner/go' >> $GITHUB_ENV
-          make -B codegen
+        run: make -B codegen
       - name: Ensure nothing changed
         run: git diff --exit-code
 
@@ -63,21 +61,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Set up Go 1.x
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Golang
         uses: actions/setup-go@v3.2.0
         with:
           go-version: "1.19"
-        id: go
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
-      - name: Restore Go build cache
+      - name: Restore go build cache
         uses: actions/cache@v3
         with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-build-v1-${{ github.run_id }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Get dependencies
         run: go mod download
-      - name: Test
+      - name: Run tests
         run: make test
 
   lint:
@@ -87,23 +88,49 @@ jobs:
     env:
       GOPATH: /home/runner/go
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Setup Golang
         uses: actions/setup-go@v3.2.0
         with:
           go-version: "1.19"
-      - name: Restore Go build cache
+      - name: Restore go build cache
         uses: actions/cache@v3
         with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-build-v1-${{ github.run_id }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - run: make lint
       - run: git diff --exit-code
+
+  build-image:
+    name: Build image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build image
+        run: |
+          make image
+          docker save quay.io/argoproj/argo-events:latest > /tmp/argoevents_image.tar
+      - name: Archive image
+        uses: actions/upload-artifact@v3
+        with:
+          name: argoevents
+          path: /tmp/argoevents_image.tar
+          if-no-files-found: error
 
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    needs: [ build-image ]
+    env:
+      KUBECONFIG: /home/runner/.kubeconfig
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -114,34 +141,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Restore go build cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-build-v2-${{ hashFiles('**/go.mod') }}
       - name: Setup Golang
         uses: actions/setup-go@v3.2.0
         with:
           go-version: "1.19"
-      - name: Add bins to PATH
+      - name: Restore go build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Install and start K3S
         run: |
-          echo /home/runner/go/bin >> $GITHUB_PATH
-          echo /usr/local/bin >> $GITHUB_PATH
-      - name: Install k3d
-        run: curl -sfL https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash &
-      - name: Create a registry and a cluster
-        run: |
-          k3d registry create e2e-registry --port 5111
-          k3d cluster create e2e --registry-use k3d-e2e-registry:5111
-          k3d kubeconfig get e2e > ~/.kube/argo-events-e2e-config
-          echo '127.0.0.1 k3d-e2e-registry' | sudo tee -a /etc/hosts
-      - name: Install Argo Events
-        env:
-          GOPATH: /home/runner/go
-        run: |
-          KUBECONFIG=~/.kube/argo-events-e2e-config IMAGE_NAMESPACE=k3d-e2e-registry:5111 VERSION=${{ github.sha }} DOCKER_PUSH=true make start
+          curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.21.2+k3s1 INSTALL_K3S_CHANNEL=stable INSTALL_K3S_EXEC=--docker K3S_KUBECONFIG_MODE=644 sh -
+          until kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml cluster-info ; do sleep 10s ; done
+          cp /etc/rancher/k3s/k3s.yaml /home/runner/.kubeconfig
+          echo "- name: fake_token_user" >> $KUBECONFIG
+          echo "  user:" >> $KUBECONFIG
+          echo "    token: xxxxxx" >> $KUBECONFIG
+          until kubectl cluster-info ; do sleep 10s ; done
+      - name: Download image
+        uses: actions/download-artifact@v3
+        with:
+          name: argoevents
+          path: /tmp
+      - name: Load image
+        run: docker load < /tmp/argoevents_image.tar
       - name: Run tests
-        env:
-          GOPATH: /home/runner/go
-        run: KUBECONFIG=~/.kube/argo-events-e2e-config EventBusDriver=${{matrix.driver}} make test-functional
-
+        run: |
+          make start
+          EventBusDriver=${{ matrix.driver }} make test-functional
