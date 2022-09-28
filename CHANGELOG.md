@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.7.3 (2022-09-28)
+
+ * [c11f9147](https://github.com/argoproj/argo-events/commit/c11f91471077d781950451dbd41096b2f3d65d94) Update manifests to v1.7.3
+ * [7e6a9a57](https://github.com/argoproj/argo-events/commit/7e6a9a57e8def499c301806ef6b2f64379f6ea31) Make port configurable in webhook, default is set to 443 (#2215)
+ * [8441b643](https://github.com/argoproj/argo-events/commit/8441b643a8bd87a8f2c30403ce6af93ddcc4d927) feat: Kafka es discontinues processing if eb publishing fails (#2214)
+ * [63d40612](https://github.com/argoproj/argo-events/commit/63d40612789bac17a80a3ff07b76632865529d19) chore(deps): bump actions/stale from 5 to 6 (#2213)
+ * [688259f7](https://github.com/argoproj/argo-events/commit/688259f780eda92dd5ea1a1d79a92f990d0eff81) chore(deps): bump google.golang.org/api from 0.93.0 to 0.97.0 (#2211)
+ * [179cc075](https://github.com/argoproj/argo-events/commit/179cc075344f89233ecf8b540235ffa04d9db3e0) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.81 to 1.44.105 (#2208)
+ * [d3d22376](https://github.com/argoproj/argo-events/commit/d3d223767a9a9d254e19867b83d1a55e134f15e2) fix filter for github sensor example (#2188)
+ * [1c68b590](https://github.com/argoproj/argo-events/commit/1c68b590b61e667b69fb7640e0227e698f641ab3) fix: Emissary executor reads and writes to WorkflowTaskResults, not Pods (#2189)
+ * [3ea1f575](https://github.com/argoproj/argo-events/commit/3ea1f5757b424d2da7d7ee65ce70a39c4ffd9ff7) chore(deps): bump github.com/nats-io/nats.go from 1.16.0 to 1.17.0 (#2197)
+
+### Contributors
+
+ * Derek Wang
+ * Julie Vogelman
+ * Matthieu Simon
+ * Nir Shtein
+ * dependabot[bot]
+
 ## v1.7.2 (2022-09-12)
 
  * [1d3877a4](https://github.com/argoproj/argo-events/commit/1d3877a40bac56a9331d7c6fd15d1d9aa9e5e83d) Update manifests to v1.7.2
