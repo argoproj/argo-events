@@ -260,6 +260,7 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 func podLogContains(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string) (bool, error) {
 	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
 	if err != nil {
+		fmt.Printf("Failed to acquire pod %s log stream: %v", podName, err)
 		return false, err
 	}
 	defer func() { _ = stream.Close() }()
@@ -291,6 +292,7 @@ func podLogContains(ctx context.Context, client kubernetes.Interface, namespace,
 func podLogContainsCount(ctx context.Context, client kubernetes.Interface, namespace, podName, regex string, count int) (bool, error) {
 	stream, err := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{Follow: true}).Stream(ctx)
 	if err != nil {
+		fmt.Printf("Failed to acquire pod %s log stream: %v", podName, err)
 		return false, err
 	}
 	defer func() { _ = stream.Close() }()
