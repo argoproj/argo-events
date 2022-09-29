@@ -87,7 +87,7 @@ test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
 test-functional:
-	go test -v -timeout 20m -count 1 --tags functional -p 1 ./test/e2e
+	go test -v -timeout 15m -count 1 --tags functional -p 1 ./test/e2e
 
 # to run just one of the functional e2e tests by name (i.e. 'make TestMetricsWithWebhook'):
 Test%:
