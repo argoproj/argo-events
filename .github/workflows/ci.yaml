@@ -106,29 +106,10 @@ jobs:
       - run: make lint
       - run: git diff --exit-code
 
-  build-image:
-    name: Build image
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Build image
-        run: |
-          make image
-          docker save quay.io/argoproj/argo-events:latest > /tmp/argoevents_image.tar
-      - name: Archive image
-        uses: actions/upload-artifact@v3
-        with:
-          name: argoevents
-          path: /tmp/argoevents_image.tar
-          if-no-files-found: error
-
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [ build-image ]
     env:
       KUBECONFIG: /home/runner/.kubeconfig
     strategy:
@@ -163,13 +144,6 @@ jobs:
           echo "  user:" >> $KUBECONFIG
           echo "    token: xxxxxx" >> $KUBECONFIG
           until kubectl cluster-info ; do sleep 10s ; done
-      - name: Download image
-        uses: actions/download-artifact@v3
-        with:
-          name: argoevents
-          path: /tmp
-      - name: Load image
-        run: docker load < /tmp/argoevents_image.tar
       - name: Run tests
         run: |
           make start
