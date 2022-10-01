@@ -140,7 +140,7 @@ jobs:
       - name: Create k3d registry and cluster
         run: |
           k3d registry create e2e-registry --port 5111
-          k3d cluster create e2e --registry-use k3d-e2e-registry:5111
+          k3d cluster create e2e -i rancher/k3s:v1.21.7-k3s1 --registry-use k3d-e2e-registry:5111
           echo '127.0.0.1 k3d-e2e-registry' | sudo tee -a /etc/hosts
       - name: Run tests
         run: |
