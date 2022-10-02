@@ -1143,6 +1143,25 @@ type AzureEventsHubEventSource struct {
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,6,opt,name=filter"`
 }
 
+// AzureServiceBusEventSource describes the event source for azure service bus
+// More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/
+type AzureServiceBusEventSource struct {
+	// ConnectionString is the connection string for the Azure Service Bus
+	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,1,opt,name=connectionString"`
+	// QueueName is the name of the Azure Service Bus Queue
+	QueueName string `json:"queueName" protobuf:"bytes,2,opt,name=queueName"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,5,opt,name=jsonBody"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
+}
+
 // StripeEventSource describes the event source for stripe webhook notifications
 // More info at https://stripe.com/docs/webhooks
 type StripeEventSource struct {
