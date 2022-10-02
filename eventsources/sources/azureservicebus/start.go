@@ -41,6 +41,13 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 	return apicommon.AzureServiceBus
 }
 
+type ReceiverType string
+
+const (
+	ReceiverTypeQueue        ReceiverType = "queue"
+	ReceiverTypeSubscription ReceiverType = "subscription"
+)
+
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
@@ -74,23 +81,23 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	var receiver *servicebus.Receiver
-	var receiverType string
+	var receiverType ReceiverType
 
 	if servicebusEventSource.QueueName != "" {
 		log.Info("creating a queue receiver...")
-		receiverType = "queue"
+		receiverType = ReceiverTypeQueue
 		receiver, err = client.NewReceiverForQueue(servicebusEventSource.QueueName, &servicebus.ReceiverOptions{
 			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
 		})
 	} else {
 		log.Info("creating a subscription receiver...")
-		receiverType = "subscription"
+		receiverType = ReceiverTypeSubscription
 		receiver, err = client.NewReceiverForSubscription(servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, &servicebus.ReceiverOptions{
 			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
 		})
 	}
 	if err != nil {
-		if receiverType == "queue" {
+		if receiverType == ReceiverTypeQueue {
 			log.With("queue", servicebusEventSource.QueueName).Errorw("failed to create a queue receiver", zap.Error(err))
 		} else {
 			log.With("topic", servicebusEventSource.TopicName, "subscription", servicebusEventSource.SubscriptionName).Errorw("failed to create a receiver for subscription", zap.Error(err))
@@ -120,7 +127,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 			for _, message := range messages {
 				if err := el.handleOne(servicebusEventSource, message, dispatch, log); err != nil {
-					if receiverType == "queue" {
+					if receiverType == ReceiverTypeQueue {
 						log.With("queue", servicebusEventSource.QueueName, "message_id", message.MessageID).Errorw("failed to process Azure Service Bus message", zap.Error(err))
 					} else {
 						log.With("topic", servicebusEventSource.TopicName, "subscription", servicebusEventSource.SubscriptionName, "message_id", message.MessageID).Errorw("failed to process Azure Service Bus message", zap.Error(err))
