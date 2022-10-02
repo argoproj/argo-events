@@ -1156,16 +1156,19 @@ type AzureServiceBusEventSource struct {
 	TopicName string `json:"topicName" protobuf:"bytes,3,opt,name=topicName"`
 	// SubscriptionName is the name of the Azure Service Bus Topic Subscription
 	SubscriptionName string `json:"subscriptionName" protobuf:"bytes,4,opt,name=subscriptionName"`
+	// TLS configuration for the service bus client
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
-	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,5,opt,name=jsonBody"`
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,6,opt,name=jsonBody"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 	// Filter
 	// +optional
-	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications

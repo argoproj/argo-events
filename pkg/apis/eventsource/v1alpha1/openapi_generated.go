@@ -478,6 +478,12 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureServiceBusEventSource(ref common.
 							Format:      "",
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the service bus client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
+						},
+					},
 					"jsonBody": {
 						SchemaProps: spec.SchemaProps{
 							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
@@ -512,7 +518,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureServiceBusEventSource(ref common.
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

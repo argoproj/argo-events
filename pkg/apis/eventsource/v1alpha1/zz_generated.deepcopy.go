@@ -205,6 +205,11 @@ func (in *AzureServiceBusEventSource) DeepCopyInto(out *AzureServiceBusEventSour
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.TLS != nil {
+		in, out := &in.TLS, &out.TLS
+		*out = new(common.TLSConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Metadata != nil {
 		in, out := &in.Metadata, &out.Metadata
 		*out = make(map[string]string, len(*in))

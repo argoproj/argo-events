@@ -696,6 +696,18 @@ SubscriptionName is the name of the Azure Service Bus Topic Subscription
 </tr>
 <tr>
 <td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the service bus client
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>jsonBody</code></br> <em> bool </em>
 </td>
 <td>

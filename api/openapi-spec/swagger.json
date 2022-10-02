@@ -885,6 +885,10 @@
           "description": "SubscriptionName is the name of the Azure Service Bus Topic Subscription",
           "type": "string"
         },
+        "tls": {
+          "description": "TLS configuration for the service bus client",
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
+        },
         "topicName": {
           "description": "TopicName is the name of the Azure Service Bus Topic",
           "type": "string"

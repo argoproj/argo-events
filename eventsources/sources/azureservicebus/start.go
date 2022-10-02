@@ -57,7 +57,17 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	log.Info("connecting to the service bus...")
-	client, err := servicebus.NewClientFromConnectionString(connStr, nil)
+	clientOptions := servicebus.ClientOptions{}
+	if servicebusEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(servicebusEventSource.TLS)
+		if err != nil {
+			log.Errorw("failed to get the tls configuration", zap.Error(err))
+			return err
+		}
+		clientOptions.TLSConfig = tlsConfig
+	}
+
+	client, err := servicebus.NewClientFromConnectionString(connStr, &clientOptions)
 	if err != nil {
 		log.Errorw("failed to create a service bus client", zap.Error(err))
 		return err
