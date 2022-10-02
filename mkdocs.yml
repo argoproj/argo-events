@@ -48,6 +48,7 @@ nav:
           - 'eventsources/setup/amqp.md'
           - 'eventsources/setup/aws-sns.md'
           - 'eventsources/setup/aws-sqs.md'
+          - 'eventsources/setup/azure-service-bus.md'
           - 'eventsources/setup/calendar.md'
           - 'eventsources/setup/emitter.md'
           - 'eventsources/setup/file.md'
