@@ -63,7 +63,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	log.Info("creating a queue receiver...")
-	receiver, err := client.NewReceiverForQueue(servicebusEventSource.QueueName, nil)
+	receiver, err := client.NewReceiverForQueue(servicebusEventSource.QueueName, &servicebus.ReceiverOptions{
+		ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to create a receiver for queue %s, %w", servicebusEventSource.QueueName, err)
 	}
@@ -90,11 +92,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				if err := el.handleOne(servicebusEventSource, message, dispatch, log); err != nil {
 					log.With("queue", servicebusEventSource.QueueName, "message_id", message.MessageID).Errorw("failed to process Azure Service Bus message", zap.Error(err))
 					el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-					continue
-				}
-
-				if err := receiver.CompleteMessage(ctx, message, nil); err != nil {
-					log.With("queue", servicebusEventSource.QueueName, "message_id", message.MessageID).Errorw("failed to complete Azure Service Bus message", zap.Error(err))
 					continue
 				}
 			}
