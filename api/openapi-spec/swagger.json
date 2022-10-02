@@ -849,6 +849,48 @@
         }
       }
     },
+    "io.argoproj.eventsource.v1alpha1.AzureServiceBusEventSource": {
+      "description": "AzureServiceBusEventSource describes the event source for azure service bus More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/",
+      "type": "object",
+      "required": [
+        "queueName",
+        "topicName",
+        "subscriptionName"
+      ],
+      "properties": {
+        "connectionString": {
+          "description": "ConnectionString is the connection string for the Azure Service Bus",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "queueName": {
+          "description": "QueueName is the name of the Azure Service Bus Queue",
+          "type": "string"
+        },
+        "subscriptionName": {
+          "description": "SubscriptionName is the name of the Azure Service Bus Topic Subscription",
+          "type": "string"
+        },
+        "topicName": {
+          "description": "TopicName is the name of the Azure Service Bus Topic",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.eventsource.v1alpha1.BitbucketAuth": {
       "description": "BitbucketAuth holds the different auth strategies for connecting to Bitbucket",
       "type": "object",
@@ -1249,6 +1291,13 @@
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureEventsHubEventSource"
+          }
+        },
+        "azureServiceBus": {
+          "description": "Azure Service Bus event source",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureServiceBusEventSource"
           }
         },
         "bitbucket": {

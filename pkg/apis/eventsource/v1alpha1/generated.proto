@@ -206,6 +206,35 @@ message AzureEventsHubEventSource {
   optional EventSourceFilter filter = 6;
 }
 
+// AzureServiceBusEventSource describes the event source for azure service bus
+// More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/
+message AzureServiceBusEventSource {
+  // ConnectionString is the connection string for the Azure Service Bus
+  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
+
+  // QueueName is the name of the Azure Service Bus Queue
+  optional string queueName = 2;
+
+  // TopicName is the name of the Azure Service Bus Topic
+  optional string topicName = 3;
+
+  // SubscriptionName is the name of the Azure Service Bus Topic Subscription
+  optional string subscriptionName = 4;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 7;
+}
+
 // BitbucketAuth holds the different auth strategies for connecting to Bitbucket
 message BitbucketAuth {
   // Basic is BasicAuth auth strategy.
@@ -549,6 +578,9 @@ message EventSourceSpec {
 
   // Redis stream source
   map<string, RedisStreamEventSource> redisStream = 31;
+
+  // Azure Service Bus event source
+  map<string, AzureServiceBusEventSource> azureServiceBus = 32;
 }
 
 // EventSourceStatus holds the status of the event-source resource

@@ -36,6 +36,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueBindConfig":        schema_pkg_apis_eventsource_v1alpha1_AMQPQueueBindConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPQueueDeclareConfig":     schema_pkg_apis_eventsource_v1alpha1_AMQPQueueDeclareConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource":  schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource": schema_pkg_apis_eventsource_v1alpha1_AzureServiceBusEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketAuth":              schema_pkg_apis_eventsource_v1alpha1_BitbucketAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketBasicAuth":         schema_pkg_apis_eventsource_v1alpha1_BitbucketBasicAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource":       schema_pkg_apis_eventsource_v1alpha1_BitbucketEventSource(ref),
@@ -433,6 +434,81 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureEventsHubEventSource(ref common.R
 					},
 				},
 				Required: []string{"fqdn", "hubName"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_AzureServiceBusEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AzureServiceBusEventSource describes the event source for azure service bus More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"connectionString": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ConnectionString is the connection string for the Azure Service Bus",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"queueName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "QueueName is the name of the Azure Service Bus Queue",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"topicName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TopicName is the name of the Azure Service Bus Topic",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"subscriptionName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SubscriptionName is the name of the Azure Service Bus Topic Subscription",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filter",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
+						},
+					},
+				},
+				Required: []string{"queueName", "topicName", "subscriptionName"},
 			},
 		},
 		Dependencies: []string{
@@ -1579,11 +1655,26 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 							},
 						},
 					},
+					"azureServiceBus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Azure Service Bus event source",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource"),
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookEventSource"},
+			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookEventSource"},
 	}
 }
 
