@@ -116,6 +116,8 @@ type EventSourceSpec struct {
 	Bitbucket map[string]BitbucketEventSource `json:"bitbucket,omitempty" protobuf:"bytes,30,rep,name=bitbucket"`
 	// Redis stream source
 	RedisStream map[string]RedisStreamEventSource `json:"redisStream,omitempty" protobuf:"bytes,31,rep,name=redisStream"`
+	// Azure Service Bus event source
+	AzureServiceBus map[string]AzureServiceBusEventSource `json:"azureServiceBus,omitempty" protobuf:"bytes,32,rep,name=azureServiceBus"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
