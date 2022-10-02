@@ -3,7 +3,6 @@ package azureservicebus
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
@@ -53,33 +52,40 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	servicebusEventSource := &el.AzureServiceBusEventSource
 	connStr, err := common.GetSecretFromVolume(servicebusEventSource.ConnectionString)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve connection string from secret %s, %s", servicebusEventSource.ConnectionString.Name, err)
+		log.With("connection-string", servicebusEventSource.ConnectionString.Name).Errorw("failed to retrieve connection string from secret", zap.Error(err))
+		return err
 	}
 
 	log.Info("connecting to the service bus...")
 	client, err := servicebus.NewClientFromConnectionString(connStr, nil)
 	if err != nil {
-		return fmt.Errorf("failed to connect to the service bus, %w", err)
+		log.Errorw("failed to create a service bus client", zap.Error(err))
+		return err
 	}
 
 	var receiver *servicebus.Receiver
+	var receiverType string
 
 	if servicebusEventSource.QueueName != "" {
 		log.Info("creating a queue receiver...")
+		receiverType = "queue"
 		receiver, err = client.NewReceiverForQueue(servicebusEventSource.QueueName, &servicebus.ReceiverOptions{
 			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
 		})
-		if err != nil {
-			return fmt.Errorf("failed to create a receiver for queue %s, %w", servicebusEventSource.QueueName, err)
-		}
 	} else {
 		log.Info("creating a subscription receiver...")
+		receiverType = "subscription"
 		receiver, err = client.NewReceiverForSubscription(servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, &servicebus.ReceiverOptions{
 			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
 		})
-		if err != nil {
-			return fmt.Errorf("failed to create a receiver for topic %s and subscription %s, %w", servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, err)
+	}
+	if err != nil {
+		if receiverType == "queue" {
+			log.With("queue", servicebusEventSource.QueueName).Errorw("failed to create a queue receiver", zap.Error(err))
+		} else {
+			log.With("topic", servicebusEventSource.TopicName, "subscription", servicebusEventSource.SubscriptionName).Errorw("failed to create a receiver for subscription", zap.Error(err))
 		}
+		return err
 	}
 
 	if servicebusEventSource.JSONBody {
@@ -92,17 +98,23 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			log.Info("context has been cancelled, stopping the Azure Service Bus event source...")
 			if err := receiver.Close(ctx); err != nil {
 				log.Errorw("failed to close the receiver", zap.Error(err))
+				return err
 			}
 			return nil
 		default:
 			messages, err := receiver.ReceiveMessages(ctx, 1, nil)
 			if err != nil {
-				return fmt.Errorf("failed to receive messages, %w", err)
+				log.Errorw("failed to receive messages", zap.Error(err))
+				return err
 			}
 
 			for _, message := range messages {
 				if err := el.handleOne(servicebusEventSource, message, dispatch, log); err != nil {
-					log.With("queue", servicebusEventSource.QueueName, "message_id", message.MessageID).Errorw("failed to process Azure Service Bus message", zap.Error(err))
+					if receiverType == "queue" {
+						log.With("queue", servicebusEventSource.QueueName, "message_id", message.MessageID).Errorw("failed to process Azure Service Bus message", zap.Error(err))
+					} else {
+						log.With("topic", servicebusEventSource.TopicName, "subscription", servicebusEventSource.SubscriptionName, "message_id", message.MessageID).Errorw("failed to process Azure Service Bus message", zap.Error(err))
+					}
 					el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 					continue
 				}
@@ -116,7 +128,7 @@ func (el *EventListener) handleOne(servicebusEventSource *v1alpha1.AzureServiceB
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	log.Infow("received the message", zap.Any("message-id", message.MessageID))
+	log.Infow("received the message", zap.Any("message_id", message.MessageID))
 	eventData := &events.AzureServiceBusEventData{
 		ApplicationProperties: message.ApplicationProperties,
 		ContentType:           message.ContentType,
@@ -138,13 +150,14 @@ func (el *EventListener) handleOne(servicebusEventSource *v1alpha1.AzureServiceB
 	eventBytes, err := json.Marshal(eventData)
 	if err != nil {
 		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-		return fmt.Errorf("failed to marshal the event data for event source %s and message id %s, %w", el.GetEventName(), message.MessageID, err)
+		log.With("event_source", el.GetEventSourceName(), "event", el.GetEventName(), "message_id", message.MessageID).Errorw("failed to marshal the event data", zap.Error(err))
+		return err
 	}
 
 	log.Info("dispatching the event to eventbus...")
 	if err = dispatch(eventBytes); err != nil {
 		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-		log.Errorw("failed to dispatch Azure Service Bus event", zap.Error(err))
+		log.With("event_source", el.GetEventSourceName(), "event", el.GetEventName(), "message_id", message.MessageID).Errorw("failed to dispatch the event", zap.Error(err))
 		return err
 	}
 
