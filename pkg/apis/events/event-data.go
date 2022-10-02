@@ -116,7 +116,7 @@ type AzureServiceBusEventData struct {
 	MessageId string `json:"messageId"`
 	// ReplyTo is an application-defined value specify a reply path to the receiver of the message
 	ReplyTo *string `json:"replyTo"`
-	// SequenceNumber is a unique number assigned to a message by Service Bus.// SequenceNumber is a unique number assigned to a message by Service Bus
+	// SequenceNumber is a unique number assigned to a message by Service Bus
 	SequenceNumber *int64 `json:"sequenceNumber"`
 	// Subject enables an application to indicate the purpose of the message, similar to an email subject line
 	Subject *string `json:"subject"`
