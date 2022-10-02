@@ -119,8 +119,15 @@ func (el *EventListener) handleOne(servicebusEventSource *v1alpha1.AzureServiceB
 	log.Infow("received the message", zap.Any("message-id", message.MessageID))
 	log.Info("received a message from the service bus")
 	eventData := &events.AzureServiceBusEventData{
-		MessageId: message.MessageID,
-		Metadata:  servicebusEventSource.Metadata,
+		ApplicationProperties: message.ApplicationProperties,
+		ContentType:           message.ContentType,
+		CorrelationId:         message.CorrelationID,
+		EnqueuedTime:          message.EnqueuedTime,
+		MessageId:             message.MessageID,
+		ReplyTo:               message.ReplyTo,
+		SequenceNumber:        message.SequenceNumber,
+		Subject:               message.Subject,
+		Metadata:              servicebusEventSource.Metadata,
 	}
 
 	if servicebusEventSource.JSONBody {

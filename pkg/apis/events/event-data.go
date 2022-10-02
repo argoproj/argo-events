@@ -102,11 +102,25 @@ type AzureEventsHubEventData struct {
 }
 
 type AzureServiceBusEventData struct {
-	// Id of the message
-	MessageId string `json:"messageId"`
+	// ApplicationProperties can be used to store custom metadata for a message
+	ApplicationProperties map[string]interface{} `json:"applicationProperties"`
 	// Message body
 	Body interface{} `json:"body"`
-	// Metadata holds the user defined metadata which will passed along the event payload.
+	// ContentType is the MIME content type
+	ContentType *string `json:"contentType"`
+	// CorrelationId is the correlation identifier
+	CorrelationId *string `json:"correlationId"`
+	// EnqueuedTime is the time when the message was enqueued
+	EnqueuedTime *time.Time `json:"enqueuedTime"`
+	// Id of the message
+	MessageId string `json:"messageId"`
+	// ReplyTo is an application-defined value specify a reply path to the receiver of the message
+	ReplyTo *string `json:"replyTo"`
+	// SequenceNumber is a unique number assigned to a message by Service Bus.// SequenceNumber is a unique number assigned to a message by Service Bus
+	SequenceNumber *int64 `json:"sequenceNumber"`
+	// Subject enables an application to indicate the purpose of the message, similar to an email subject line
+	Subject *string `json:"subject"`
+	// Metadata holds the user defined metadata which will passed along the event payload
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
