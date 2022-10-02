@@ -9,3 +9,10 @@ spec:
       connectionString:
         name: secret_containing_connection_string_key_name
         key: key_within_the_secret_which_holds_the_value_of_connection_string_key_name
+    topic:
+      topicName: some-topic
+      subscriptionName: some-subscription
+      connectionString:
+        name: secret_containing_connection_string_key_name
+        key: key_within_the_secret_which_holds_the_value_of_connection_string_key_name
+

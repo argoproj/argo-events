@@ -62,12 +62,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return fmt.Errorf("failed to connect to the service bus, %w", err)
 	}
 
-	log.Info("creating a queue receiver...")
-	receiver, err := client.NewReceiverForQueue(servicebusEventSource.QueueName, &servicebus.ReceiverOptions{
-		ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create a receiver for queue %s, %w", servicebusEventSource.QueueName, err)
+	var receiver *servicebus.Receiver
+
+	if servicebusEventSource.QueueName != "" {
+		log.Info("creating a queue receiver...")
+		receiver, err = client.NewReceiverForQueue(servicebusEventSource.QueueName, &servicebus.ReceiverOptions{
+			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create a receiver for queue %s, %w", servicebusEventSource.QueueName, err)
+		}
+	} else {
+		log.Info("creating a subscription receiver...")
+		receiver, err = client.NewReceiverForSubscription(servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, &servicebus.ReceiverOptions{
+			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create a receiver for topic %s and subscription %s, %w", servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, err)
+		}
 	}
 
 	if servicebusEventSource.JSONBody {

@@ -1152,6 +1152,10 @@ type AzureServiceBusEventSource struct {
 	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,1,opt,name=connectionString"`
 	// QueueName is the name of the Azure Service Bus Queue
 	QueueName string `json:"queueName" protobuf:"bytes,2,opt,name=queueName"`
+	// TopicName is the name of the Azure Service Bus Topic
+	TopicName string `json:"topicName" protobuf:"bytes,3,opt,name=topicName"`
+	// SubscriptionName is the name of the Azure Service Bus Topic Subscription
+	SubscriptionName string `json:"subscriptionName" protobuf:"bytes,4,opt,name=subscriptionName"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional

@@ -36,8 +36,17 @@ func validate(eventSource *v1alpha1.AzureServiceBusEventSource) error {
 	if eventSource.ConnectionString == nil {
 		return fmt.Errorf("ConnectionString is not specified")
 	}
-	if eventSource.QueueName == "" {
-		return fmt.Errorf("QueueName is not specified")
+	if eventSource.QueueName == "" && (eventSource.TopicName == "" || eventSource.SubscriptionName == "") {
+		return fmt.Errorf("QueueName or TopicName/SubscriptionName must be specified")
+	}
+	if eventSource.QueueName != "" && (eventSource.TopicName != "" || eventSource.SubscriptionName != "") {
+		return fmt.Errorf("QueueName and TopicName/SubscriptionName cannot be specified at the same time")
+	}
+	if eventSource.TopicName == "" && eventSource.SubscriptionName != "" {
+		return fmt.Errorf("TopicName must be specified when SubscriptionName is specified")
+	}
+	if eventSource.TopicName != "" && eventSource.SubscriptionName == "" {
+		return fmt.Errorf("SubscriptionName must be specified when TopicName is specified")
 	}
 
 	return nil
