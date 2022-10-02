@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	v1 "k8s.io/api/core/v1"
 	"os"
 	"regexp"
 	"strings"
@@ -119,7 +120,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	log.Info("setting up informer factory...")
-	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, resourceEventSource.Namespace, tweakListOptions)
+	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, getInformerNamespace(resourceEventSource.Namespace), tweakListOptions)
 
 	informer := factory.ForResource(gvr)
 
@@ -354,4 +355,11 @@ func getEventTime(obj *unstructured.Unstructured, eventType v1alpha1.ResourceEve
 	default:
 		return obj.GetCreationTimestamp()
 	}
+}
+
+func getInformerNamespace(namespace string) string {
+	if namespace == "*" {
+		return v1.NamespaceAll
+	}
+	return namespace
 }
