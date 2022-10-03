@@ -30,7 +30,7 @@ An expr filter has following fields:
 ```yaml
 filters:
   exprLogicalOperator: logical_operator_applied
-  expr:
+  exprs:
     - expr: expression_to_evaluate
       fields:
         - name: parameter_name
