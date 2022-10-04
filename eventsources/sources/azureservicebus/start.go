@@ -149,9 +149,9 @@ func (el *EventListener) handleOne(servicebusEventSource *v1alpha1.AzureServiceB
 	eventData := &events.AzureServiceBusEventData{
 		ApplicationProperties: message.ApplicationProperties,
 		ContentType:           message.ContentType,
-		CorrelationId:         message.CorrelationID,
+		CorrelationID:         message.CorrelationID,
 		EnqueuedTime:          message.EnqueuedTime,
-		MessageId:             message.MessageID,
+		MessageID:             message.MessageID,
 		ReplyTo:               message.ReplyTo,
 		SequenceNumber:        message.SequenceNumber,
 		Subject:               message.Subject,

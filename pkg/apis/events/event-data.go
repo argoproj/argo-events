@@ -108,12 +108,12 @@ type AzureServiceBusEventData struct {
 	Body interface{} `json:"body"`
 	// ContentType is the MIME content type
 	ContentType *string `json:"contentType"`
-	// CorrelationId is the correlation identifier
-	CorrelationId *string `json:"correlationId"`
+	// CorrelationID is the correlation identifier
+	CorrelationID *string `json:"correlationID"`
 	// EnqueuedTime is the time when the message was enqueued
 	EnqueuedTime *time.Time `json:"enqueuedTime"`
-	// Id of the message
-	MessageId string `json:"messageId"`
+	// ID of the message
+	MessageID string `json:"messageID"`
 	// ReplyTo is an application-defined value specify a reply path to the receiver of the message
 	ReplyTo *string `json:"replyTo"`
 	// SequenceNumber is a unique number assigned to a message by Service Bus
