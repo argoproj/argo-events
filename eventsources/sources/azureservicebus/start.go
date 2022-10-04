@@ -166,14 +166,12 @@ func (el *EventListener) handleOne(servicebusEventSource *v1alpha1.AzureServiceB
 
 	eventBytes, err := json.Marshal(eventData)
 	if err != nil {
-		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		log.With("event_source", el.GetEventSourceName(), "event", el.GetEventName(), "message_id", message.MessageID).Errorw("failed to marshal the event data", zap.Error(err))
 		return err
 	}
 
 	log.Info("dispatching the event to eventbus...")
 	if err = dispatch(eventBytes); err != nil {
-		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		log.With("event_source", el.GetEventSourceName(), "event", el.GetEventName(), "message_id", message.MessageID).Errorw("failed to dispatch the event", zap.Error(err))
 		return err
 	}
