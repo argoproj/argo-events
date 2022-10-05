@@ -122,7 +122,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			messages, err := receiver.ReceiveMessages(ctx, 1, nil)
 			if err != nil {
 				log.Errorw("failed to receive messages", zap.Error(err))
-				return err
+				continue
 			}
 
 			for _, message := range messages {
