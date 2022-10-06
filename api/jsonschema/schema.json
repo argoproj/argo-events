@@ -857,6 +857,52 @@
       ],
       "type": "object"
     },
+    "io.argoproj.eventsource.v1alpha1.AzureServiceBusEventSource": {
+      "description": "AzureServiceBusEventSource describes the event source for azure service bus More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/",
+      "properties": {
+        "connectionString": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "ConnectionString is the connection string for the Azure Service Bus"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object"
+        },
+        "queueName": {
+          "description": "QueueName is the name of the Azure Service Bus Queue",
+          "type": "string"
+        },
+        "subscriptionName": {
+          "description": "SubscriptionName is the name of the Azure Service Bus Topic Subscription",
+          "type": "string"
+        },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig",
+          "description": "TLS configuration for the service bus client"
+        },
+        "topicName": {
+          "description": "TopicName is the name of the Azure Service Bus Topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "queueName",
+        "topicName",
+        "subscriptionName"
+      ],
+      "type": "object"
+    },
     "io.argoproj.eventsource.v1alpha1.BitbucketAuth": {
       "description": "BitbucketAuth holds the different auth strategies for connecting to Bitbucket",
       "properties": {
@@ -1265,6 +1311,13 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureEventsHubEventSource"
           },
           "description": "AzureEventsHub event sources",
+          "type": "object"
+        },
+        "azureServiceBus": {
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureServiceBusEventSource"
+          },
+          "description": "Azure Service Bus event source",
           "type": "object"
         },
         "bitbucket": {
