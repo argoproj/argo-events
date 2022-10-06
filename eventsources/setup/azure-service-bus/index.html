@@ -13,7 +13,7 @@
     
     
       
-        <title>Bitbucket Server - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Azure Service Bus - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bitbucket-server" class="md-skip">
+        <a href="#azure-service-bus" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Bitbucket Server
+              Azure Service Bus
             
           </span>
         </div>
@@ -742,11 +742,59 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../azure-service-bus/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Azure Service Bus
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Azure Service Bus
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#event-structure" class="md-nav__link">
+    Event Structure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    Setup
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -854,73 +902,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Bitbucket Server
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../bitbucketserver/" class="md-nav__link">
         Bitbucket Server
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#event-structure" class="md-nav__link">
-    Event Structure
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#specification" class="md-nav__link">
-    Specification
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    Setup
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshoot" class="md-nav__link">
-    Troubleshoot
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1828,22 +1814,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#specification" class="md-nav__link">
-    Specification
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#setup" class="md-nav__link">
     Setup
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshoot" class="md-nav__link">
-    Troubleshoot
   </a>
   
 </li>
@@ -1860,97 +1832,106 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/argoproj/argo-events/edit/master/docs/eventsources/setup/bitbucketserver.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/argoproj/argo-events/edit/master/docs/eventsources/setup/azure-service-bus.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="bitbucket-server">Bitbucket Server<a class="headerlink" href="#bitbucket-server" title="Permanent link">&para;</a></h1>
-<p>Bitbucket Server event-source programmatically configures webhooks for projects on Bitbucket Server and helps sensor trigger the workloads on events.</p>
+<h1 id="azure-service-bus">Azure Service Bus<a class="headerlink" href="#azure-service-bus" title="Permanent link">&para;</a></h1>
+<p>Service Bus event-source allows you to consume messages from queus and topics in Azure Service Bus and helps sensor trigger workflows.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Body is the Bitbucket Server event payload&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;headers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Headers from the Bitbucket Server event&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;applicationProperties&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ApplicationProperties can be used to store custom metadata for a message&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;body&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Body represents the message body&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;contentType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ContentType is the MIME content type&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;correlationID&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;CorrelationID is the correlation identifier&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;enqueuedTime&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;EnqueuedTime is the time when the message was enqueued&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;messageID&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ID of the message&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;replyTo&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ReplyTo is an application-defined value specify a reply path to the receiver of the message&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;sequenceNumber&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;SequenceNumber is a unique number assigned to a message by Service Bus&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Subject enables an application to indicate the purpose of the message, similar to an email subject line&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
-<h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>Bitbucket Server event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#bitbucketservereventsource">here</a>. <br />
-Example event-source yaml file is <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucketserver.yaml">here</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Create an API token if you don't have one. Follow <a href="https://confluence.atlassian.com/bitbucketserver072/personal-access-tokens-1005335924.html">instructions</a> to create a new Bitbucket Server API Token.
-   Grant it the <code>Projects: Admin</code> permissions. </p>
+<p>Create a queue called <code>test</code> either using Azure CLI or Azure Service Bus management console.</p>
 </li>
 <li>
-<p>Base64 encode your API token key.</p>
-<div class="codehilite"><pre><span></span><code>echo -n &lt;api-token-key&gt; | base64
-</code></pre></div>
-
+<p>Fetch your connection string for Azure Service Bus and base64 encode it.</p>
 </li>
 <li>
-<p>Create a secret called <code>bitbucketserver-access</code> that contains your encoded Bitbucket Server API token. You can also include a secret key that is encoded with <code>base64</code> for your webhook if any.</p>
+<p>Create a secret called <code>azure-secret</code> as follows.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
 <span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
 <span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">bitbucketserver</span><span class="o">-</span><span class="n">access</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">secret</span><span class="w"></span>
 <span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
 <span class="n">data</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span><span class="w"></span>
-<span class="w">  </span><span class="n">secret</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">webhook</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span><span class="w"></span>
+<span class="w">  </span><span class="n">connectionstring</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">connection</span><span class="o">-</span><span class="n">string</span><span class="o">&gt;</span><span class="w"></span>
 </code></pre></div>
 
 </li>
 <li>
-<p>Deploy the secret into K8s cluster.</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f bitbucketserver-access.yaml
+<p>Deploy the secret.</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f azure-secret.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>The event-source for Bitbucket Server creates a pod and exposes it via service.
-   The name for the service is in <code>&lt;event-source-name&gt;-eventsource-svc</code> format.
-   You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Bitbucket Server.
-   You can find more information on Ingress or Route online.</p>
-</li>
-<li>
-<p>Create the event source by running the following command. You can use the example event-source yaml file from <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucketserver.yaml">here</a> but make sure to replace the <code>url</code> field and to modify the <code>repositories</code> list with your own repos.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f &lt;event-source-file&gt;
+<p>Create the event source by running the following command.</p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/azure-service-bus.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Go to <code>Webhooks</code> under your project settings on Bitbucket Server and verify the webhook is registered. You can also do the same by looking at the event-source pod logs.</p>
+<p>Inspect the event-source pod logs to make sure it was able to listen to the queue specified in the event source to consume messages.</p>
 </li>
 <li>
-<p>Create the sensor by running the following command.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/bitbucketserver.yaml
+<p>Create a sensor by running the following command.</p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/azure-service-bus.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Make a change to one of your project files and commit. It will trigger an argo workflow.</p>
+<p>Lets set up a Service Bus client. If you don't have <code>azure-servicebus</code>installed, run.</p>
+<div class="codehilite"><pre><span></span><code>python -m pip install azure-servicebus --upgrade
+</code></pre></div>
+
 </li>
 <li>
-<p>Run <code>argo list</code> to find the workflow. </p>
+<p>Open a python REPL and run the following code to send a message on the queue called <code>test</code>.</p>
+<p>Before running the code, make sure you have the <code>SERVICE_BUS_CONNECTION_STRING</code> environment variable set.
+This is the connection string for your Azure Service Bus.</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">azure.servicebus</span> <span class="kn">import</span> <span class="n">ServiceBusClient</span><span class="p">,</span> <span class="n">ServiceBusMessage</span>
+<span class="n">servicebus_client</span> <span class="o">=</span> <span class="n">ServiceBusClient</span><span class="o">.</span><span class="n">from_connection_string</span><span class="p">(</span><span class="n">conn_str</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SERVICE_BUS_CONNECTION_STRING&#39;</span><span class="p">])</span>
+<span class="k">with</span> <span class="n">servicebus_client</span><span class="p">:</span>
+    <span class="n">sender</span> <span class="o">=</span> <span class="n">servicebus_client</span><span class="o">.</span><span class="n">get_queue_sender</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">sender</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">ServiceBusMessage</span><span class="p">(</span><span class="s1">&#39;{&quot;hello&quot;: &quot;world&quot;}&#39;</span><span class="p">)</span>
+        <span class="n">sender</span><span class="o">.</span><span class="n">send_messages</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
+
+</li>
+<li>
+<p>As soon as you publish a message, sensor will trigger an Argo workflow. Run argo list to find the workflow.</p>
 </li>
 </ol>
-<h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>
-<p>Please read the <a href="https://argoproj.github.io/argo-events/FAQ/">FAQ</a>.</p>
 
               
             </article>
@@ -1964,7 +1945,7 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../bitbucket/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Bitbucket (Cloud)" rel="prev">
+        <a href="../aws-sqs/" class="md-footer__link md-footer__link--prev" aria-label="Previous: AWS SQS" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1973,20 +1954,20 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
               <span class="md-footer__direction">
                 Previous
               </span>
-              Bitbucket (Cloud)
+              AWS SQS
             </div>
           </div>
         </a>
       
       
         
-        <a href="../kafka/" class="md-footer__link md-footer__link--next" aria-label="Next: Kafka" rel="next">
+        <a href="../calendar/" class="md-footer__link md-footer__link--next" aria-label="Next: Calendar" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Kafka
+              Calendar
             </div>
           </div>
           <div class="md-footer__button md-icon">
