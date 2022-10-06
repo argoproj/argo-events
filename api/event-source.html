@@ -593,6 +593,123 @@ EventSourceFilter
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.AzureServiceBusEventSource">AzureServiceBusEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>AzureServiceBusEventSource describes the event source for azure service bus
+More info at <a href="https://docs.microsoft.com/en-us/azure/service-bus-messaging/">https://docs.microsoft.com/en-us/azure/service-bus-messaging/</a></p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>connectionString</code></br>
+<em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>ConnectionString is the connection string for the Azure Service Bus</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>QueueName is the name of the Azure Service Bus Queue</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topicName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>TopicName is the name of the Azure Service Bus Topic</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subscriptionName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>SubscriptionName is the name of the Azure Service Bus Topic Subscription</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>TLS configuration for the service bus client</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JSONBody specifies that all event body payload coming from this
+source will be JSON</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter">
+EventSourceFilter
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Filter</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.BitbucketAuth">BitbucketAuth
 </h3>
 <p>
@@ -1884,6 +2001,19 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisSt
 <p>Redis stream source</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>azureServiceBus</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.AzureServiceBusEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Azure Service Bus event source</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1908,6 +2038,7 @@ EventSourceStatus
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">AzureEventsHubEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.AzureServiceBusEventSource">AzureServiceBusEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.CalendarEventSource">CalendarEventSource</a>, 
@@ -2366,6 +2497,19 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisSt
 </td>
 <td>
 <p>Redis stream source</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureServiceBus</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.AzureServiceBusEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Azure Service Bus event source</p>
 </td>
 </tr>
 </tbody>

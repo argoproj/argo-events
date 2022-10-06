@@ -43,6 +43,7 @@ var (
 	SlackEvent           EventSourceType = "slack"
 	StorageGridEvent     EventSourceType = "storagegrid"
 	AzureEventsHub       EventSourceType = "azureEventsHub"
+	AzureServiceBus      EventSourceType = "azureServiceBus"
 	StripeEvent          EventSourceType = "stripe"
 	EmitterEvent         EventSourceType = "emitter"
 	RedisEvent           EventSourceType = "redis"
@@ -63,6 +64,7 @@ var (
 		KafkaEvent,
 		PubSubEvent,
 		AzureEventsHub,
+		AzureServiceBus,
 		NATSEvent,
 		MQTTEvent,
 		MinioEvent,
