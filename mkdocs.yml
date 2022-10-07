@@ -11,7 +11,7 @@ theme:
 extra:
   analytics:
     provider: google
-    property: UA-105170809-9
+    property: G-5Z1VTPDL73
 markdown_extensions:
   - codehilite
   - admonition
