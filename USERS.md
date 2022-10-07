@@ -16,6 +16,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Dazz](https://dazz.io/)
 1. [DevSamurai](https://www.devsamurai.com/)
 1. [Fairwinds](https://fairwinds.com/)
+2. [Gepardec](https://gepardec.com/)
 1. [GHGSat](https://www.ghgsat.com/)
 1. [Gllue](https://gllue.com/)
 1. [Greenhouse Software](https://www.greenhouse.io/)
