@@ -132,5 +132,5 @@ Optionally, a `revisionHistoryLimit` may be configured in the spec as following:
 ```yaml
 spec:
   # Optional
-  revisionHistoryLimit: 2
+  revisionHistoryLimit: 3
 ```
