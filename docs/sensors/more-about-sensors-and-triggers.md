@@ -124,3 +124,13 @@ spec:
         # Requests per unit
         requestsPerUnit: 20
 ```
+
+## Revision History Limit
+
+Optionally, a `revisionHistoryLimit` may be configured in the spec as following:
+
+```yaml
+spec:
+  # Optional
+  revisionHistoryLimit: 2
+```
