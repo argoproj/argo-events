@@ -107,6 +107,9 @@ type SensorSpec struct {
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,5,opt,name=eventBusName"`
 	// Replicas is the sensor deployment replicas
 	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,6,opt,name=replicas"`
+	// RevisionHistoryLimit specifies how many old deployment revisions to retain
+	// +optional
+	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty" protobuf:"varint,7,opt,name=revisionHistoryLimit"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {

@@ -3847,6 +3847,11 @@
           "format": "int32",
           "type": "integer"
         },
+        "revisionHistoryLimit": {
+          "description": "RevisionHistoryLimit specifies how many old deployment revisions to retain",
+          "format": "int32",
+          "type": "integer"
+        },
         "template": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Template",
           "description": "Template is the pod specification for the sensor"

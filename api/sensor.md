@@ -2426,6 +2426,18 @@ Replicas is the sensor deployment replicas
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>revisionHistoryLimit</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+RevisionHistoryLimit specifies how many old deployment revisions to
+retain
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2530,6 +2542,18 @@ EventBusName references to a EventBus name. By default the value is
 <td>
 <p>
 Replicas is the sensor deployment replicas
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>revisionHistoryLimit</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+RevisionHistoryLimit specifies how many old deployment revisions to
+retain
 </p>
 </td>
 </tr>
