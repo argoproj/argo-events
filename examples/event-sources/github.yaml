@@ -19,6 +19,13 @@ spec:
           names:
             - argo-events
             - argo-workflows
+      # Github application auth. Instead of using personal token `apiToken` use app PEM       
+      #githubApp:
+      #  privateKey:
+      #    name: github-app-secret-pem
+      #    key: privateKey.pem
+      #  appID: <app id>
+      #  installationID: <app installation id>                  
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
