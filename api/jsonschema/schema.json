@@ -1943,7 +1943,6 @@
       },
       "required": [
         "url",
-        "partition",
         "topic"
       ],
       "type": "object"

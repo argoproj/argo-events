@@ -839,6 +839,7 @@ message KafkaEventSource {
   optional string url = 1;
 
   // Partition name
+  // +optional
   optional string partition = 2;
 
   // Topic name

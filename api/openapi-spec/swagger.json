@@ -1869,7 +1869,6 @@
       "type": "object",
       "required": [
         "url",
-        "partition",
         "topic"
       ],
       "properties": {
