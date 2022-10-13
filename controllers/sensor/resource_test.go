@@ -151,6 +151,20 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, hasTmpVolume)
 		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
+		assert.Nil(t, deployment.Spec.RevisionHistoryLimit)
+	})
+	t.Run("test revisionHistoryLimit", func(t *testing.T) {
+		sensorWithRevisionHistoryLimit := sensorObj.DeepCopy()
+		sensorWithRevisionHistoryLimit.Spec.RevisionHistoryLimit = func() *int32 { i := int32(3); return &i }()
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorWithRevisionHistoryLimit,
+			Labels: testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		assert.Equal(t, int32(3), *deployment.Spec.RevisionHistoryLimit)
 	})
 }
 
