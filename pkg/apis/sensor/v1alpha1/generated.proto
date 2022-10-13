@@ -636,6 +636,10 @@ message SensorSpec {
 
   // Replicas is the sensor deployment replicas
   optional int32 replicas = 6;
+
+  // RevisionHistoryLimit specifies how many old deployment revisions to retain
+  // +optional
+  optional int32 revisionHistoryLimit = 7;
 }
 
 // SensorStatus contains information about the status of a sensor.

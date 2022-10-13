@@ -1747,6 +1747,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "int32",
 						},
 					},
+					"revisionHistoryLimit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RevisionHistoryLimit specifies how many old deployment revisions to retain",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},
