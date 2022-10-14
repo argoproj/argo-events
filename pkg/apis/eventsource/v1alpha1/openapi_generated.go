@@ -2455,7 +2455,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"url", "partition", "topic"},
+				Required: []string{"url", "topic"},
 			},
 		},
 		Dependencies: []string{

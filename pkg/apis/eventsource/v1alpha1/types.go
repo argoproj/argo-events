@@ -483,6 +483,7 @@ type KafkaEventSource struct {
 	// URL to kafka cluster, multiple URLs separated by comma
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 	// Partition name
+	// +optional
 	Partition string `json:"partition" protobuf:"bytes,2,opt,name=partition"`
 	// Topic name
 	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
