@@ -3540,6 +3540,7 @@ URL to kafka cluster, multiple URLs separated by comma
 <code>partition</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Partition name
 </p>
