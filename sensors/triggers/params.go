@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"text/template"
 
 	sprig "github.com/Masterminds/sprig/v3"
@@ -41,6 +42,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
+		*value = strings.Replace(*value, "\"", "", -1)
 		tmp, err := sjson.SetBytes(payload, parameter.Dest, *value)
 		if err != nil {
 			return nil, err
