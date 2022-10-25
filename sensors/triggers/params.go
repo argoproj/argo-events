@@ -108,11 +108,13 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			current := gjson.GetBytes(jsonObj, param.Dest)
 
 			if current.Exists() {
+
 				if op == v1alpha1.TriggerParameterOpAppend {
-					*value = current.String() + *value
+					*value = "\"" + current.String() + string((*value)[1:])
 				} else {
-					*value += current.String()
+					*value = string((*value)[:len(*value)-1]) + current.String() + "\""
 				}
+
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:
 			// simply overwrite the current value with the new one
@@ -277,7 +279,7 @@ func getValueWithTemplate(value []byte, templString string) (string, error) {
 func getValueByKey(value []byte, key string) (string, error) {
 	res := gjson.GetBytes(value, key)
 	if res.Exists() {
-		return res.String(), nil
+		return res.Raw, nil
 	}
 	return "", fmt.Errorf("key %s does not exist to in the event payload", key)
 }

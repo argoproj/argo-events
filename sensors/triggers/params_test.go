@@ -398,6 +398,21 @@ func TestApplyParams(t *testing.T) {
 			jsonObj: []byte("{\"name\": \"faker\"}"),
 			result:  []byte("{\"name\": \"fake\"}"),
 		},
+		{
+			name: "apply block parameters with overwrite operation",
+			params: []v1alpha1.TriggerParameter{
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "name",
+					},
+					Dest:      "name",
+					Operation: v1alpha1.TriggerParameterOpOverwrite,
+				},
+			},
+			jsonObj: []byte("{\"name\": \"faker\"}"),
+			result:  []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}}"),
+		},
 	}
 
 	for _, test := range tests {
