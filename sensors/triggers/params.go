@@ -110,9 +110,9 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 
 			if current.Exists() {
 				if op == v1alpha1.TriggerParameterOpAppend {
-					*value = current.String() + *value //	*value = "\"" + current.String() + (*value)[1:]
+					*value = current.String() + *value
 				} else {
-					*value += current.String() //	*value = (*value)[:len(*value)-1] + current.String() + "\""
+					*value += current.String()
 				}
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:
