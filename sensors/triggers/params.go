@@ -108,13 +108,11 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			current := gjson.GetBytes(jsonObj, param.Dest)
 
 			if current.Exists() {
-
 				if op == v1alpha1.TriggerParameterOpAppend {
 					*value = "\"" + current.String() + (*value)[1:]
 				} else {
 					*value = (*value)[:len(*value)-1] + current.String() + "\""
 				}
-
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:
 			// simply overwrite the current value with the new one
