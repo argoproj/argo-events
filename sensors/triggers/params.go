@@ -120,8 +120,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 		default:
 			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
 		}
-
-		//String manipulation to support block injection.
+		// String manipulation to support block injection.
 		if len(*value) > 0 && (*value)[0:1] != `"` && (*value)[0:1] != `{` {
 			*value = `"` + *value + `"`
 		}
@@ -239,7 +238,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		}
 		if key != "" {
 			tmp, err := getValueByKey(eventPayload, key)
-			//For block injection support
+			// For block injection support
 			if len(tmp) > 0 && tmp[0] != '{' {
 				resultValue = strings.ReplaceAll(tmp, "\"", "")
 			} else {
