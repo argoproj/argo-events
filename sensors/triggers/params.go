@@ -121,7 +121,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 		}
 
 		// now let's set the value
-		tmp, err := sjson.SetBytes(jsonObj, param.Dest, *value)
+		tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
 		if err != nil {
 			return nil, err
 		}
