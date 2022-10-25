@@ -42,7 +42,6 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
-		*value = strings.Replace(*value, "\"", "", -1)
 		tmp, err := sjson.SetBytes(payload, parameter.Dest, *value)
 		if err != nil {
 			return nil, err
@@ -111,9 +110,9 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 
 			if current.Exists() {
 				if op == v1alpha1.TriggerParameterOpAppend {
-					*value = "\"" + current.String() + (*value)[1:]
+					*value = current.String() + *value //	*value = "\"" + current.String() + (*value)[1:]
 				} else {
-					*value = (*value)[:len(*value)-1] + current.String() + "\""
+					*value += current.String() //	*value = (*value)[:len(*value)-1] + current.String() + "\""
 				}
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:
@@ -122,6 +121,10 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
 		}
 
+		//String manipulation to support block injection.
+		if len(*value) > 0 && (*value)[0:1] != `"` && (*value)[0:1] != `{` {
+			*value = `"` + *value + `"`
+		}
 		// now let's set the value
 		tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
 		if err != nil {
@@ -235,7 +238,13 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
 		}
 		if key != "" {
-			resultValue, err = getValueByKey(eventPayload, key)
+			tmp, err := getValueByKey(eventPayload, key)
+			//For block injection support
+			if len(tmp) > 0 && tmp[0] != '{' {
+				resultValue = strings.ReplaceAll(tmp, "\"", "")
+			} else {
+				resultValue = tmp
+			}
 			if err == nil {
 				return &resultValue, nil
 			}
