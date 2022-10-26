@@ -32,6 +32,11 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
+const (
+	jsonType   = "JSON"
+	stringType = "String"
+)
+
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
 func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
 	var payload []byte
@@ -41,7 +46,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
-		if typ == "JSON" {
+		if typ == jsonType {
 			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(*value))
 			if err != nil {
 				return nil, err
@@ -128,7 +133,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
 		}
 		// now let's set the value
-		if typ == "JSON" {
+		if typ == jsonType {
 			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
 			if err != nil {
 				return nil, err
@@ -183,7 +188,6 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	var tmplt string
 	var resultValue string
 	var typ string
-	const stringType string = "String"
 
 	event, eventExists := events[src.DependencyName]
 	switch {
@@ -295,7 +299,7 @@ func getValueByKey(value []byte, key string) (string, string, error) {
 	if res.Exists() {
 		if res.Type.String() == "String" {
 			return res.String(), res.Type.String(), nil
-		} else if res.Type.String() == "JSON" {
+		} else if res.Type.String() == jsonType {
 			return res.Raw, res.Type.String(), nil
 		}
 		return res.Raw, res.Type.String(), nil
