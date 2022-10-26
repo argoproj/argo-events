@@ -274,7 +274,7 @@ func TestResolveParamValue(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := ResolveParamValue(test.source, events)
+			result, _, err := ResolveParamValue(test.source, events)
 			assert.Nil(t, err)
 			assert.Equal(t, test.result, *result)
 		})

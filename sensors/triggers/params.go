@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"text/template"
 
 	sprig "github.com/Masterminds/sprig/v3"
@@ -38,17 +37,25 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 	var payload []byte
 
 	for _, parameter := range parameters {
-		value, err := ResolveParamValue(parameter.Src, events)
+		value, typ, err := ResolveParamValue(parameter.Src, events)
 		if err != nil {
 			return nil, err
 		}
-		tmp, err := sjson.SetBytes(payload, parameter.Dest, *value)
-		if err != nil {
-			return nil, err
+		if typ == "Json" {
+			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(*value))
+			if err != nil {
+				return nil, err
+			}
+			payload = tmp
+		} else {
+			tmp, err := sjson.SetBytes(payload, parameter.Dest, *value)
+			if err != nil {
+				return nil, err
+			}
+			payload = tmp
 		}
-		payload = tmp
-	}
 
+	}
 	return payload, nil
 }
 
@@ -95,7 +102,7 @@ func ApplyResourceParameters(events map[string]*v1alpha1.Event, parameters []v1a
 func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]*v1alpha1.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
-		value, err := ResolveParamValue(param.Src, events)
+		value, typ, err := ResolveParamValue(param.Src, events)
 		if err != nil {
 			return nil, err
 		}
@@ -120,16 +127,20 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 		default:
 			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
 		}
-		// String manipulation to support block injection.
-		if len(*value) > 0 && (*value)[0:1] != `"` && (*value)[0:1] != `{` {
-			*value = `"` + *value + `"`
-		}
 		// now let's set the value
-		tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
-		if err != nil {
-			return nil, err
+		if typ == "JSON" {
+			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
+			if err != nil {
+				return nil, err
+			}
+			jsonObj = tmp
+		} else {
+			tmp, err := sjson.SetBytes(jsonObj, param.Dest, *value)
+			if err != nil {
+				return nil, err
+			}
+			jsonObj = tmp
 		}
-		jsonObj = tmp
 	}
 	return jsonObj, nil
 }
@@ -165,12 +176,13 @@ func renderEventDataAsJSON(event *v1alpha1.Event) ([]byte, error) {
 
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*v1alpha1.Event) (*string, error) {
+func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*v1alpha1.Event) (*string, string, error) {
 	var err error
 	var eventPayload []byte
 	var key string
 	var tmplt string
 	var resultValue string
+	var typ string
 
 	event, eventExists := events[src.DependencyName]
 	switch {
@@ -187,7 +199,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			}
 
 			if err == nil {
-				return &resultValue, nil
+				return &resultValue, "", nil
 			}
 		}
 
@@ -207,58 +219,51 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	case src.Value != nil:
 		// Use the default value set by the user in case the event is missing
 		resultValue = *src.Value
-		return &resultValue, nil
+		return &resultValue, "String", nil
 	default:
 		// The parameter doesn't have a default value and is referencing a dependency that is
 		// missing in the received events. This is not an error and may happen with || conditions.
-		return nil, nil
+		return nil, "", nil
 	}
-
 	// If the event payload parsing failed
 	if err != nil {
 		// Fall back to the default value in case it exists
 		if src.Value != nil {
 			fmt.Printf("failed to parse the event payload, using default value. err: %+v\n", err)
 			resultValue = *src.Value
-			return &resultValue, nil
+			return &resultValue, "String", nil
 		}
-
 		// Otherwise, return the error
-		return nil, err
+		return nil, "", err
 	}
-
 	// Get the value corresponding to specified key or template within event payload
 	if eventPayload != nil {
 		if tmplt != "" {
 			resultValue, err = getValueWithTemplate(eventPayload, tmplt)
 			if err == nil {
-				return &resultValue, nil
+				return &resultValue, "", nil
 			}
 			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
 		}
 		if key != "" {
-			tmp, err := getValueByKey(eventPayload, key)
+			tmp, typ, err := getValueByKey(eventPayload, key)
 			// For block injection support
-			if len(tmp) > 0 && tmp[0] != '{' {
-				resultValue = strings.ReplaceAll(tmp, "\"", "")
-			} else {
-				resultValue = tmp
-			}
-			if err == nil {
-				return &resultValue, nil
-			}
 			fmt.Printf("failed to get value by key: %+v\n", err)
+			resultValue = tmp
+			if err == nil {
+				return &resultValue, typ, nil
+			}
 		}
 		// In case neither key nor template resolving was successful, fall back to the default value if exists
 		if src.Value != nil {
 			resultValue = *src.Value
-			return &resultValue, nil
+			return &resultValue, typ, nil
 		}
 	}
 
 	// if we got here it means that both key and template did not match the event payload
 	// and no default value was provided, so we need to return an error
-	return nil, fmt.Errorf("unable to resolve '%s' parameter value. err: %+v", src.DependencyName, err)
+	return nil, "", fmt.Errorf("unable to resolve '%s' parameter value. err: %+v", src.DependencyName, err)
 }
 
 // getValueWithTemplate will attempt to execute the provided template against
@@ -284,10 +289,15 @@ func getValueWithTemplate(value []byte, templString string) (string, error) {
 
 // getValueByKey will return the value in the raw json bytes at the provided key,
 // or an error if it does not exist.
-func getValueByKey(value []byte, key string) (string, error) {
+func getValueByKey(value []byte, key string) (string, string, error) {
 	res := gjson.GetBytes(value, key)
 	if res.Exists() {
-		return res.Raw, nil
+		if res.Type.String() == "String" {
+			return res.String(), res.Type.String(), nil
+		} else if res.Type.String() == "JSON" {
+			return res.Raw, res.Type.String(), nil
+		}
+		return res.Raw, res.Type.String(), nil
 	}
-	return "", fmt.Errorf("key %s does not exist to in the event payload", key)
+	return "", "", fmt.Errorf("key %s does not exist to in the event payload", key)
 }
