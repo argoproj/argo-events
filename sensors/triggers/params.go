@@ -59,7 +59,6 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 			}
 			payload = tmp
 		}
-
 	}
 	return payload, nil
 }
