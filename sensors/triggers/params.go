@@ -41,7 +41,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
-		if typ == "Json" {
+		if typ == "JSON" {
 			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(*value))
 			if err != nil {
 				return nil, err
@@ -183,6 +183,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	var tmplt string
 	var resultValue string
 	var typ string
+	const stringType string = "String"
 
 	event, eventExists := events[src.DependencyName]
 	switch {
@@ -219,7 +220,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	case src.Value != nil:
 		// Use the default value set by the user in case the event is missing
 		resultValue = *src.Value
-		return &resultValue, "String", nil
+		return &resultValue, stringType, nil
 	default:
 		// The parameter doesn't have a default value and is referencing a dependency that is
 		// missing in the received events. This is not an error and may happen with || conditions.
@@ -231,7 +232,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		if src.Value != nil {
 			fmt.Printf("failed to parse the event payload, using default value. err: %+v\n", err)
 			resultValue = *src.Value
-			return &resultValue, "String", nil
+			return &resultValue, stringType, nil
 		}
 		// Otherwise, return the error
 		return nil, "", err
