@@ -6,6 +6,10 @@ on:
       - "release-*"
   pull_request:
     branches: [ master ]
+
+permissions:
+  contents: read
+
 jobs:
   codegen:
     name: Codegen

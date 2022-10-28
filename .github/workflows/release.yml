@@ -12,6 +12,9 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs:
   build-binaries:
     runs-on: ubuntu-20.04
@@ -107,6 +110,8 @@ jobs:
           path: sbom.tar.gz
 
   release:
+    permissions:
+      contents: write  # for softprops/action-gh-release to create GitHub release
     runs-on: ubuntu-latest
     if: github.repository == 'argoproj/argo-events'
     needs: [ build-push-linux-multi, bom ]
