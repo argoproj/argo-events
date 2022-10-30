@@ -44,7 +44,7 @@ You can also specify id, specversion and time fields in the YAML manifest, but t
 
 ## How it works
 
-Context filter takes a `start` and `stop` time in `HH:MM:SS` format in UTC.
+Specify one or more of the available context fields:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
