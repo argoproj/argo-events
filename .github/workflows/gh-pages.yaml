@@ -5,8 +5,13 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
+    permissions:
+      contents: write  # for peaceiris/actions-gh-pages to push pages branch
     if: github.repository == 'argoproj/argo-events'
     runs-on: ubuntu-latest
     steps:
