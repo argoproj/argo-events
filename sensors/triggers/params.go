@@ -204,7 +204,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			}
 
 			if err == nil {
-				return &resultValue, errorType, nil
+				return &resultValue, "", nil
 			}
 		}
 
@@ -246,7 +246,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		if tmplt != "" {
 			resultValue, err = getValueWithTemplate(eventPayload, tmplt)
 			if err == nil {
-				return &resultValue, errorType, nil
+				return &resultValue, "", nil
 			}
 			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
 		}
@@ -262,7 +262,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		// In case neither key nor template resolving was successful, fall back to the default value if exists
 		if src.Value != nil {
 			resultValue = *src.Value
-			return &resultValue, errorType, nil
+			return &resultValue, "", nil
 		}
 	}
 
