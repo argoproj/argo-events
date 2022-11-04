@@ -228,7 +228,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	default:
 		// The parameter doesn't have a default value and is referencing a dependency that is
 		// missing in the received events. This is not an error and may happen with || conditions.
-		return nil, errorType, nil
+		return nil, stringType, nil
 	}
 	// If the event payload parsing failed
 	if err != nil {
