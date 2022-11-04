@@ -188,7 +188,6 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 	var key string
 	var tmplt string
 	var resultValue string
-	var typ string
 
 	event, eventExists := events[src.DependencyName]
 	switch {
@@ -201,11 +200,10 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			} else {
 				// Default value doesn't exist so return the whole event payload
 				eventPayload, err = json.Marshal(&event)
+				if err == nil {
+					return &resultValue, errorType, nil
+				}
 				resultValue = string(eventPayload)
-			}
-
-			if err == nil {
-				return &resultValue, errorType, nil
 			}
 		}
 
@@ -263,7 +261,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 		// In case neither key nor template resolving was successful, fall back to the default value if exists
 		if src.Value != nil {
 			resultValue = *src.Value
-			return &resultValue, typ, nil
+			return &resultValue, errorType, nil
 		}
 	}
 
