@@ -200,10 +200,11 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			} else {
 				// Default value doesn't exist so return the whole event payload
 				eventPayload, err = json.Marshal(&event)
-				if err == nil {
-					return &resultValue, errorType, nil
-				}
 				resultValue = string(eventPayload)
+			}
+
+			if err == nil {
+				return &resultValue, errorType, nil
 			}
 		}
 
