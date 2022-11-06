@@ -7,7 +7,7 @@ retract v1.15.1 // Contains retractions only.
 retract v1.15.0 // Published accidentally.
 
 require (
-	cloud.google.com/go/compute/metadata v0.1.0
+	cloud.google.com/go/compute/metadata v0.2.1
 	cloud.google.com/go/pubsub v1.26.0
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.19
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.1.1
@@ -54,7 +54,7 @@ require (
 	github.com/nats-io/nats.go v1.19.0
 	github.com/nats-io/stan.go v0.10.3
 	github.com/nsqio/go-nsq v1.1.0
-	github.com/prometheus/client_golang v1.13.0
+	github.com/prometheus/client_golang v1.13.1
 	github.com/rabbitmq/amqp091-go v1.4.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/robfig/cron/v3 v3.0.1
