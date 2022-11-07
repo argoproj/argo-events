@@ -35,10 +35,11 @@ Webhook event-source specification is available [here](https://github.com/argopr
 
 1. The event-source pod is listening for HTTP requests on port `12000` and endpoint `/example`.
     It's time to create the sensor.
-    
+
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml   
 
 1. Once the sensor pod is in running state, test the setup by sending a POST request to event-source service.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

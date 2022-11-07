@@ -6,6 +6,7 @@ Minio event-source listens to minio bucket notifications and helps sensor trigge
 please set up the AWS SNS event-source.
 
 ## Event Structure
+
 The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
@@ -52,7 +53,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
           name: artifacts-minio
           namespace: argo-events
 
-1. The event source we are going to use configures notifications for a bucket called `input`. 
+1. The event source we are going to use configures notifications for a bucket called `input`.
 
         mc mb minio/input
 
@@ -61,7 +62,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
 
 1. Let's create the sensor.
-   
+
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml   
 
 1. Create a file named and `hello-world.txt` and upload it onto to the `input` bucket. This will trigger the argo workflow.
@@ -69,4 +70,5 @@ The structure of an event dispatched by the event-source over the eventbus looks
 1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

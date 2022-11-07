@@ -17,20 +17,20 @@ The structure of an event dispatched by the event-source over the eventbus looks
               "subject": "name_of_the_configuration_within_event_source"
             },
             "data": {
-              	"contentType": "ContentType is the MIME content type",
-              	"contentEncoding": "ContentEncoding is the MIME content encoding",
-              	"deliveryMode": "Delivery mode can be either - non-persistent (1) or persistent (2)",
-              	"priority": "Priority refers to the use - 0 to 9",
-              	"correlationId": "CorrelationId is the correlation identifier",
-              	"replyTo": "ReplyTo is the address to reply to (ex: RPC)",
-              	"expiration": "Expiration refers to message expiration spec",
-              	"messageId": "MessageId is message identifier",
-              	"timestamp": "Timestamp refers to the message timestamp",
-              	"type": "Type refers to the message type name",
-              	"appId": "AppId refers to the application id",
-              	"exchange": "Exchange is basic.publish exchange",
-              	"routingKey": "RoutingKey is basic.publish routing key",
-              	"body": "Body represents the message body",
+               "contentType": "ContentType is the MIME content type",
+               "contentEncoding": "ContentEncoding is the MIME content encoding",
+               "deliveryMode": "Delivery mode can be either - non-persistent (1) or persistent (2)",
+               "priority": "Priority refers to the use - 0 to 9",
+               "correlationId": "CorrelationId is the correlation identifier",
+               "replyTo": "ReplyTo is the address to reply to (ex: RPC)",
+               "expiration": "Expiration refers to message expiration spec",
+               "messageId": "MessageId is message identifier",
+               "timestamp": "Timestamp refers to the message timestamp",
+               "type": "Type refers to the message type name",
+               "appId": "AppId refers to the application id",
+               "exchange": "Exchange is basic.publish exchange",
+               "routingKey": "RoutingKey is basic.publish routing key",
+               "body": "Body represents the message body",
             }
         }
 
@@ -108,4 +108,5 @@ The structure of an event dispatched by the event-source over the eventbus looks
 10. As soon as you publish a message, sensor will trigger an Argo workflow. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
