@@ -115,12 +115,12 @@ nav:
               - "sensors/filters/ctx.md"
               - "sensors/filters/time.md"
           - More Information: "sensors/more-about-sensors-and-triggers.md"
+      - "service-accounts.md"
       - "FAQ.md"
   - Operator Manual:
       - "installation.md"
       - "managed-namespace.md"
       - "validating-admission-webhook.md"
-      - "service-accounts.md"
       - "security.md"
       - "metrics.md"
       - HA/DR Recommendations: "dr_ha_recommendations.md"
