@@ -3,6 +3,7 @@
 The Slack trigger is used to send a custom message to a desired Slack channel in a Slack workspace. The intended use is for notifications for a build pipeline, but can be used for any notification scenario.
 
 ## Prerequisite
+
 1. Deploy the eventbus in the namespace.
 
 1. Make sure to have a Slack workspace setup you wish to send a message to.
@@ -17,6 +18,7 @@ The Slack trigger is used to send a custom message to a desired Slack channel in
         kubectl port-forward -n argo-events <event-source-pod-name> 12000:12000
 
 ## Create a Slack App
+
 We need to create a Slack App which will send messages to your Slack Workspace. We will add OAuth Permissions and add the OAuth token to the k8s cluster via a secret.
 
 1. Create a Slack app by clicking `Create New App` at the [Slack API Page](https://api.slack.com/apps). Name your app and choose your intended Slack Workspace.
@@ -47,6 +49,7 @@ We need to create a Slack App which will send messages to your Slack Workspace. 
         kubectl -n argo-events apply -f slack-secret.yaml
 
 ## Slack Trigger
+
 We will set up a basic slack trigger and send a default message, and then a dynamic custom message.
 
 1. Create a sensor with Slack trigger. We will discuss the trigger details in the following sections.
@@ -66,6 +69,7 @@ We will set up a basic slack trigger and send a default message, and then a dyna
 4. Great! But, how did the sensor use the event to customize the message and channel from the http request? We will see that in next section.
 
 ## Parameterization
+
 The slack trigger parameters have the following structure,
 
         parameters:
@@ -92,7 +96,6 @@ So, the above trigger parameters will generate a request payload as,
             "channel": "channel_to_send_message",
             "message": "message_to_send_to_channel"
         }
-
 
 **_Note_**: If you define both the `contextKey` and `dataKey` within a parameter item, then
 the `dataKey` takes the precedence.

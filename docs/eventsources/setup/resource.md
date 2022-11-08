@@ -3,6 +3,7 @@
 Resource event-source watches change notifications for K8s object and helps sensor trigger the workloads.
 
 ## Event Structure
+
 The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
@@ -29,7 +30,8 @@ The structure of an event dispatched by the event-source over the eventbus looks
 Resource event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#resourceeventsource).
 
 ## Setup
-1. Create the event source by running the following command. 
+
+1. Create the event source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/resource.yaml
 
@@ -40,7 +42,7 @@ Resource event-source specification is available [here](https://github.com/argop
 1. The event source we created in step 1 contains configuration which makes the event-source listen to Argo workflows marked with label `app: my-workflow`.
 
 1. Lets create a workflow called `my-workflow` with label `app: my-workflow`.
-   
+
         apiVersion: argoproj.io/v1alpha1
         kind: Workflow
         metadata:
@@ -78,10 +80,9 @@ In the example above, we had set up the list option as follows,
                 operation: "=="
                 value: my-workflow
 
-
 The `key-operation-value` items under the `filter -> labels` are used by the event-source to filter the objects
 that are eligible for the watch. So, in the present case, the event-source will set up a watch for those
-objects who have label "app: my-workflow". You can add more `key-operation-value` items to the list as per your use-case.   
+objects who have label "app: my-workflow". You can add more `key-operation-value` items to the list as per your use-case.
 
 Similarly, you can pass `field` selectors to the watch list options, e.g.,
 
@@ -98,10 +99,10 @@ Similarly, you can pass `field` selectors to the watch list options, e.g.,
             # optional.
             operation: ==
             value: my-workflow
- 
 
 **Note:** The `label` and `fields` under `filter` are used at the time of setting up the watch by the event-source. If you want to filter the objects
 based on the `annotations` or some other fields, use the `Data Filters` available in the sensor.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

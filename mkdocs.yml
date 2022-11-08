@@ -4,10 +4,23 @@ strict: true
 theme:
   name: material
   palette:
-    primary: teal
+    - scheme: default
+      primary: teal
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
   font:
-    text: 'Work Sans'
-  logo: 'assets/logo.png'
+    text: Roboto
+    code: Roboto Mono
+  logo: "assets/logo.png"
 extra:
   analytics:
     provider: google
@@ -15,100 +28,105 @@ extra:
 markdown_extensions:
   - codehilite
   - admonition
+  - pymdownx.superfences
+  - pymdownx.details
   - toc:
       permalink: true
 nav:
-  - Overview: 'index.md'
-  - Installation:
-      - 'installation.md'
-      - 'managed-namespace.md'
-      - 'validating-admission-webhook.md'
-  - 'quick_start.md'
-  - Concepts:
-      - 'concepts/architecture.md'
-      - 'concepts/event_source.md'
-      - 'concepts/sensor.md'
-      - 'concepts/eventbus.md'
-      - 'concepts/trigger.md'
-  - Tutorials:
-      - 'tutorials/01-introduction.md'
-      - 'tutorials/02-parameterization.md'
-      - 'tutorials/03-trigger-sources.md'
-      - 'tutorials/04-standard-k8s-resources.md'
-      - 'tutorials/05-trigger-custom-resources.md'
-      - 'tutorials/06-trigger-conditions.md'
-      - 'tutorials/07-policy.md'
-  - EventBus:
-      - 'eventbus/eventbus.md'
-      - 'eventbus/stan.md'
-      - 'eventbus/jetstream.md'
-      - 'eventbus/antiaffinity.md'
-  - EventSources:
-      - Setup:
-          - 'eventsources/setup/amqp.md'
-          - 'eventsources/setup/aws-sns.md'
-          - 'eventsources/setup/aws-sqs.md'
-          - 'eventsources/setup/azure-service-bus.md'
-          - 'eventsources/setup/calendar.md'
-          - 'eventsources/setup/emitter.md'
-          - 'eventsources/setup/file.md'
-          - 'eventsources/setup/gcp-pub-sub.md'
-          - 'eventsources/setup/github.md'
-          - 'eventsources/setup/gitlab.md'
-          - 'eventsources/setup/bitbucket.md'
-          - 'eventsources/setup/bitbucketserver.md'
-          - 'eventsources/setup/kafka.md'
-          - 'eventsources/setup/minio.md'
-          - 'eventsources/setup/mqtt.md'
-          - 'eventsources/setup/nats.md'
-          - 'eventsources/setup/nsq.md'
-          - 'eventsources/setup/redis.md'
-          - 'eventsources/setup/redis-streams.md'
-          - 'eventsources/setup/resource.md'
-          - 'eventsources/setup/webhook.md'
-          - 'eventsources/setup/pulsar.md'
-      - 'eventsources/multiple-events.md'
-      - 'eventsources/naming.md'
-      - 'eventsources/services.md'
-      - 'eventsources/ha.md'
-      - 'eventsources/filtering.md'
-      - 'eventsources/webhook-authentication.md'
-      - 'eventsources/webhook-health-check.md'
-      - 'eventsources/calendar-catch-up.md'
-      - 'eventsources/gcp-pubsub.md'
-      - 'eventsources/generic.md'
-  - Sensors:
-      - Triggers:
-          - 'sensors/triggers/argo-workflow.md'
-          - 'sensors/triggers/aws-lambda.md'
-          - 'sensors/triggers/http-trigger.md'
-          - 'sensors/triggers/nats-trigger.md'
-          - 'sensors/triggers/kafka-trigger.md'
-          - 'sensors/triggers/k8s-object-trigger.md'
-          - 'sensors/triggers/log.md'
-          - 'sensors/triggers/openwhisk-trigger.md'
-          - 'sensors/triggers/slack-trigger.md'
-          - 'sensors/triggers/azure-event-hubs.md'
-          - 'sensors/triggers/pulsar-trigger.md'
-          - 'sensors/triggers/build-your-own-trigger.md'
-      - 'sensors/trigger-conditions.md'
-      - 'sensors/transform.md'
-      - 'sensors/ha.md'
-      - Filters:
-        - 'sensors/filters/intro.md'
-        - 'sensors/filters/expr.md'
-        - 'sensors/filters/data.md'
-        - 'sensors/filters/script.md'
-        - 'sensors/filters/ctx.md'
-        - 'sensors/filters/time.md'
-      - More Information: 'sensors/more-about-sensors-and-triggers.md'
-  - 'service-accounts.md'
-  - 'security.md'
-  - Operator Guide:
-      - 'metrics.md'
-      - HA/DR Recommendations: 'dr_ha_recommendations.md'
-  - 'developer_guide.md'
-  - 'FAQ.md'
-  - Releases ⧉: 'releases.md'
-  - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
-  - Blog ⧉: https://blog.argoproj.io/
+  - Home: "index.md"
+  - Getting Started:
+      - "quick_start.md"
+      - Tutorials:
+          - "tutorials/01-introduction.md"
+          - "tutorials/02-parameterization.md"
+          - "tutorials/03-trigger-sources.md"
+          - "tutorials/04-standard-k8s-resources.md"
+          - "tutorials/05-trigger-custom-resources.md"
+          - "tutorials/06-trigger-conditions.md"
+          - "tutorials/07-policy.md"
+  - User Guide:
+      - Concepts:
+          - "concepts/architecture.md"
+          - "concepts/event_source.md"
+          - "concepts/sensor.md"
+          - "concepts/eventbus.md"
+          - "concepts/trigger.md"
+      - EventBus:
+          - "eventbus/eventbus.md"
+          - "eventbus/stan.md"
+          - "eventbus/jetstream.md"
+          - "eventbus/antiaffinity.md"
+      - EventSources:
+          - Setup:
+              - "eventsources/setup/amqp.md"
+              - "eventsources/setup/aws-sns.md"
+              - "eventsources/setup/aws-sqs.md"
+              - "eventsources/setup/azure-service-bus.md"
+              - "eventsources/setup/calendar.md"
+              - "eventsources/setup/emitter.md"
+              - "eventsources/setup/file.md"
+              - "eventsources/setup/gcp-pub-sub.md"
+              - "eventsources/setup/github.md"
+              - "eventsources/setup/gitlab.md"
+              - "eventsources/setup/bitbucket.md"
+              - "eventsources/setup/bitbucketserver.md"
+              - "eventsources/setup/kafka.md"
+              - "eventsources/setup/minio.md"
+              - "eventsources/setup/mqtt.md"
+              - "eventsources/setup/nats.md"
+              - "eventsources/setup/nsq.md"
+              - "eventsources/setup/redis.md"
+              - "eventsources/setup/redis-streams.md"
+              - "eventsources/setup/resource.md"
+              - "eventsources/setup/webhook.md"
+              - "eventsources/setup/pulsar.md"
+          - "eventsources/multiple-events.md"
+          - "eventsources/naming.md"
+          - "eventsources/services.md"
+          - "eventsources/ha.md"
+          - "eventsources/filtering.md"
+          - "eventsources/webhook-authentication.md"
+          - "eventsources/webhook-health-check.md"
+          - "eventsources/calendar-catch-up.md"
+          - "eventsources/gcp-pubsub.md"
+          - "eventsources/generic.md"
+      - Sensors:
+          - Triggers:
+              - "sensors/triggers/argo-workflow.md"
+              - "sensors/triggers/aws-lambda.md"
+              - "sensors/triggers/http-trigger.md"
+              - "sensors/triggers/nats-trigger.md"
+              - "sensors/triggers/kafka-trigger.md"
+              - "sensors/triggers/k8s-object-trigger.md"
+              - "sensors/triggers/log.md"
+              - "sensors/triggers/openwhisk-trigger.md"
+              - "sensors/triggers/slack-trigger.md"
+              - "sensors/triggers/azure-event-hubs.md"
+              - "sensors/triggers/pulsar-trigger.md"
+              - "sensors/triggers/build-your-own-trigger.md"
+          - "sensors/trigger-conditions.md"
+          - "sensors/transform.md"
+          - "sensors/ha.md"
+          - Filters:
+              - "sensors/filters/intro.md"
+              - "sensors/filters/expr.md"
+              - "sensors/filters/data.md"
+              - "sensors/filters/script.md"
+              - "sensors/filters/ctx.md"
+              - "sensors/filters/time.md"
+          - More Information: "sensors/more-about-sensors-and-triggers.md"
+      - "service-accounts.md"
+      - "FAQ.md"
+  - Operator Manual:
+      - "installation.md"
+      - "managed-namespace.md"
+      - "validating-admission-webhook.md"
+      - "security.md"
+      - "metrics.md"
+      - HA/DR Recommendations: "dr_ha_recommendations.md"
+  - Developer Guide:
+      - "developer_guide.md"
+      - "CONTRIBUTING.md"
+  - Roadmap: https://github.com/argoproj/argo-events/milestones
+  - Blog: https://blog.argoproj.io/
+  - Releases: "releases.md"

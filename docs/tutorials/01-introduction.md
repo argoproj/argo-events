@@ -105,4 +105,3 @@ If you don't see the event-source and sensor pod in `argo-events` namespace,
    controllers have processed the event-source and sensor objects and there are
    no errors.
 5. Raise an issue on GitHub or post a question on `argo-events` slack channel.
-

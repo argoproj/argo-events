@@ -10,9 +10,9 @@ The Kafka trigger specification is available [here](https://github.com/argoproj/
 
 1. Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event on a Kafka topic.
 
-1. Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/). 
+1. Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/).
    Do not create the Minio sensor, we are going to create it in next step.
-   
+
 1. Lets create the sensor.
 
         apiVersion: argoproj.io/v1alpha1
@@ -44,7 +44,7 @@ The Kafka trigger specification is available [here](https://github.com/argoproj/
                         dataKey: notification.0.s3.bucket.name
                       dest: bucket
 
-1. The Kafka message needs a body. In order to construct message based on the event data, sensor offers 
+1. The Kafka message needs a body. In order to construct message based on the event data, sensor offers
    `payload` field as a part of the Kafka trigger.
 
    The `payload` contains the list of `src` which refers to the source event and `dest` which refers to destination key within result request payload.
