@@ -80,7 +80,7 @@ Emitter event-source specification is available [here](https://github.com/argopr
                 - name: broker-volume
                   hostPath:
                     path: /emitter #directory on host
- 
+
 1. Create the event-source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/emitter.yaml
@@ -91,9 +91,10 @@ Emitter event-source specification is available [here](https://github.com/argopr
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/emitter.yaml
 
-1. Send a message on emitter channel using one of the clients https://emitter.io/develop/golang/.
+1. Send a message on emitter channel using one of the clients <https://emitter.io/develop/golang/>.
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

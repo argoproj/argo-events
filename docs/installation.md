@@ -46,7 +46,6 @@
                   verbs:
                   - update
 
-
 3. Deploy the eventbus.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
@@ -90,7 +89,6 @@
 3. Deploy the eventbus.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
-
 
 ### Using Kustomize
 
