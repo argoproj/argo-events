@@ -22,30 +22,30 @@ want to trigger an Argo workflow if the sensor receives an event from the
 `Webhook` event-source, but, another workflow if it receives an event from the
 `Minio` event-source.
 
-1.  Create the webhook event-source and event-source. The event-source listens
+1. Create the webhook event-source and event-source. The event-source listens
     to HTTP requests on port `12000`.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/webhook-event-source.yaml
 
-2.  Create the minio event-source. The event-source listens to events of type
+2. Create the minio event-source. The event-source listens to events of type
     `PUT` and `DELETE` for objects in bucket `test`.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/minio-event-source.yaml
 
 Make sure there are no errors in any of the event-sources.
 
-3.  Let's create the sensor. If you take a closer look at the trigger templates,
+3. Let's create the sensor. If you take a closer look at the trigger templates,
     you will notice that it contains a field named `conditions`, which is a
     boolean expression contains dependency names. So, as soon as the expression
     is resolved as true, the corresponding trigger will be executed.
 
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-01.yaml
 
-4.  Send a HTTP request to Webhook event-source.
+4. Send a HTTP request to Webhook event-source.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-5.  You will notice an Argo workflow with name `group-1-xxxx` is created with
+5. You will notice an Argo workflow with name `group-1-xxxx` is created with
     following output,
 
          __________________________
@@ -63,10 +63,9 @@ Make sure there are no errors in any of the event-sources.
                 \    \        __/
                   \____\______/
 
-6.  Now, lets generate a Minio event so that we can run `group-2-xxxx` workflow.
+6. Now, lets generate a Minio event so that we can run `group-2-xxxx` workflow.
     Drop a file onto `test` bucket. The workflow that will get created will
     print the name of the bucket as follows,
-
 
          ______
         < test >
@@ -83,7 +82,7 @@ Make sure there are no errors in any of the event-sources.
                 \    \        __/
                   \____\______/
 
-5.  Great!! You have now learned how to use `conditions`. Lets update the sensor
+5. Great!! You have now learned how to use `conditions`. Lets update the sensor
     with a trigger that waits for both dependencies to resolve. This is the
     normal sensor behavior if `conditions` is not defined.
 
@@ -91,7 +90,6 @@ Make sure there are no errors in any of the event-sources.
 
     Send a HTTP request and perform a file drop on Minio bucket as done above.
     You should get the following output.
-
 
          _______________________________
         < this is my first webhook test >

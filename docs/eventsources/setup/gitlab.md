@@ -17,8 +17,8 @@ The structure of an event dispatched by the event-source over the eventbus looks
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
-                  	"body": "Body is the GitLab event data",
-                  	"headers": "Headers from the GitLab event",
+                   "body": "Body is the GitLab event data",
+                   "headers": "Headers from the GitLab event",
                 }
             }
 
@@ -70,5 +70,5 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
 
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

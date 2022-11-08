@@ -3,6 +3,7 @@
 NATS event-source listens to NATS subject notifications and helps sensor trigger the workloads.
 
 ## Event Structure
+
 The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
@@ -27,10 +28,10 @@ NATS event-source specification is available [here](https://github.com/argoproj/
 
 ## Setup
 
-1. Make sure to have NATS cluster deployed in the Kubernetes. If you don't have one already installed, please refer https://github.com/nats-io/nats-operator for details.
+1. Make sure to have NATS cluster deployed in the Kubernetes. If you don't have one already installed, please refer <https://github.com/nats-io/nats-operator> for details.
 
    NATS cluster setup for test purposes,
-   
+
         apiVersion: v1
         kind: Service
         metadata:
@@ -86,7 +87,6 @@ NATS event-source specification is available [here](https://github.com/argoproj/
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nats.yaml
 
-
 1. Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/nats.yaml
@@ -94,12 +94,13 @@ NATS event-source specification is available [here](https://github.com/argoproj/
 1. If you are running NATS on local K8s cluster, make sure to `port-forward` to pod,
 
         kubectl -n argo-events port-forward <nats-pod-name> 4222:4222
-        
-1. Publish a message for the subject specified in the event source. Refer the nats example to publish a message to the subject https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe.
+
+1. Publish a message for the subject specified in the event source. Refer the nats example to publish a message to the subject <https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe>.
 
         go run main.go -s localhost foo '{"message": "hello"}'
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

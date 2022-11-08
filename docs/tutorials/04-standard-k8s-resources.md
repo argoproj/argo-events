@@ -10,7 +10,7 @@ provides an avenue to set up pipelines for existing workloads.
 
 ## Prerequisites
 
-1.  Make sure that the service account used by the Sensor has necessary
+1. Make sure that the service account used by the Sensor has necessary
     permissions to create the Kubernetes resource of your choice. We use
     `k8s-resource-sa` for below examples, it should be bound to a Role like
     following.
@@ -33,24 +33,24 @@ provides an avenue to set up pipelines for existing workloads.
             verbs:
               - create
 
-2.  The `Webhook` event-source is already set up.
+2. The `Webhook` event-source is already set up.
 
 ## Pod
 
-1.  Create a sensor with K8s trigger.
+1. Create a sensor with K8s trigger.
 
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
 
-2.  Use either Curl or Postman to send a post request to the
+2. Use either Curl or Postman to send a post request to the
     `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-3.  Now, you should see a pod being created.
+3. Now, you should see a pod being created.
 
         kubectl -n argo-events get po
 
-4.  After the pod was completed, inspect the logs of the pod, you will something similar as below.
+4. After the pod was completed, inspect the logs of the pod, you will something similar as below.
 
         _________________________________________
         / {"context":{"type":"webhook","specVersi \
@@ -80,16 +80,16 @@ provides an avenue to set up pipelines for existing workloads.
 
 ## Deployment
 
-1.  Lets create a sensor with a K8s deployment as trigger.
+1. Lets create a sensor with a K8s deployment as trigger.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
 
-2.  Use either Curl or Postman to send a post request to the
+2. Use either Curl or Postman to send a post request to the
     `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-3.  Now, you should see a deployment being created. Get the corresponding pod.
+3. Now, you should see a deployment being created. Get the corresponding pod.
 
         kubectl -n argo-events get deployments
 

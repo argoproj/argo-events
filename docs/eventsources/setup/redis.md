@@ -17,9 +17,9 @@ The structure of an event dispatched by the event-source over the eventbus looks
               "subject": "name_of_the_configuration_within_event_source"
             },
             "data": {
-              	"channel": "Subscription channel",
-              	"pattern": "Message pattern",
-              	"body": "message body" // string
+               "channel": "Subscription channel",
+               "pattern": "Message pattern",
+               "body": "message body" // string
             }
         }
 
@@ -47,7 +47,8 @@ Redis event-source specification is available [here](https://github.com/argoproj
 
         PUBLISH FOO hello
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

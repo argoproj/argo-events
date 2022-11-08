@@ -51,6 +51,7 @@ type of HTTP request.
    1. `Body`: This is the request payload from the HTTP request.
 
 ### Event Context
+
 Now that we have an understanding of the structure of the event the webhook sensor receives from
 the event-source over the eventbus, lets see how we can use the event context to parameterize the Argo workflow.
 
@@ -87,6 +88,7 @@ We have successfully extracted the `type` key within the event context and param
 the workflow to print the value of the `type`.
 
 ### Event Data
+
 Now, it is time to use the event data and parameterize the Argo workflow trigger.
 We will extract the `message` from request payload and get the Argo workflow to
 print the message.
@@ -120,7 +122,6 @@ print the message.
                 \    \        __/
                   \____\______/
 
-
 Yay!! The Argo workflow printed the message. You can add however many number of parameters
 to update the trigger resource on the fly.
 
@@ -128,6 +129,7 @@ to update the trigger resource on the fly.
 the `dataKey` takes the precedence.
 
 ### Default Values
+
 Each parameter comes with an option to configure the default value. This is specially
 important when the `key` you defined in the parameter doesn't exist in the event.
 
@@ -161,7 +163,6 @@ important when the `key` you defined in the parameter doesn't exist in the event
                \    \        __/
                  \____\______/
 
-
 <br/>
 
 ### Sprig Templates
@@ -189,7 +190,6 @@ as follows,
             dataTemplate: "{{ .Input.body.name | nospace | lower }}-"
           dest: metadata.generateName
           operation: append
-
 
 Consider the event the sensor received has format like,
 
@@ -228,7 +228,6 @@ Send a curl request to event-source as follows,
 
 and you will see an Argo workflow being sprung with name like `webhook-foobar-xxxxx`.
 
-
 Check the output of the workflow, it should print something like,
 
          ____________________________
@@ -249,6 +248,7 @@ Check the output of the workflow, it should print something like,
 <br/>
 
 ### Operations
+
 Sometimes you need the ability to append or prepend a parameter value to
 an existing value in trigger resource. This is where the `operation` field within
 a parameter comes handy.
@@ -257,7 +257,6 @@ a parameter comes handy.
    We will prepend the message to an existing value.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-04.yaml
-
 
 2. Send a HTTP request to the event-source.
 
@@ -284,7 +283,6 @@ a parameter comes handy.
                 \    \        __/
                   \____\______/
 
-
 ## Trigger Template Parameterization
 
 The parameterization you saw above deals with the trigger resource, but sometimes
@@ -298,7 +296,6 @@ parameterize the trigger resource. What?...
 The sensor you have been using in this tutorial has one parameter defined in the
 trigger resource under `k8s`. We will parameterize that `parameter` by
 applying a parameter at the trigger template level.
-
 
 1. Update the `Webhook Sensor` and add parameters at trigger level.
 
@@ -328,7 +325,6 @@ applying a parameter at the trigger template level.
            \______ o          __/
             \    \        __/
               \____\______/
-
 
 Great!! You have now learned how to apply parameters at trigger resource and template level.
 Keep in mind that you can apply default values and operations like prepend and append for

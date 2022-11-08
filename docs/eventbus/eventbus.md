@@ -19,7 +19,3 @@ Sensor correspondingly, so that they can find the right one. See EventSource
 [spec](https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#eventsourcespec)
 and Sensor
 [spec](https://github.com/argoproj/argo-events/tree/stable/api/sensor.md#sensorspec).
-
-
-
-

@@ -17,8 +17,8 @@ The structure of an event dispatched by the event-source over the eventbus looks
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
-                  	"body": "Body is the Bitbucket Server event payload",
-                  	"headers": "Headers from the Bitbucket Server event",
+                   "body": "Body is the Bitbucket Server event payload",
+                   "headers": "Headers from the Bitbucket Server event",
                 }
             }
 
@@ -30,7 +30,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 ## Setup
 
 1. Create an API token if you don't have one. Follow [instructions](https://confluence.atlassian.com/bitbucketserver072/personal-access-tokens-1005335924.html) to create a new Bitbucket Server API Token.
-   Grant it the `Projects: Admin` permissions. 
+   Grant it the `Projects: Admin` permissions.
 
 1. Base64 encode your API token key.
 
@@ -57,7 +57,7 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
    You can find more information on Ingress or Route online.
 
 1. Create the event source by running the following command. You can use the example event-source yaml file from [here](https://github.com/argoproj/argo-events/blob/master/examples/event-sources/bitbucketserver.yaml) but make sure to replace the `url` field and to modify the `repositories` list with your own repos.
-   
+
         kubectl apply -n argo-events -f <event-source-file>
 
 1. Go to `Webhooks` under your project settings on Bitbucket Server and verify the webhook is registered. You can also do the same by looking at the event-source pod logs.
@@ -68,7 +68,8 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1. Make a change to one of your project files and commit. It will trigger an argo workflow.
 
-1. Run `argo list` to find the workflow. 
+1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

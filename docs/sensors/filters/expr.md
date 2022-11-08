@@ -125,7 +125,6 @@ To discover all options offered by govaluate, take a look at its [manual](https:
 
 1. Look for a workflow with name starting with `expr-workflow-`
 
-
 ## Further examples
 
 You can find some examples [here](https://github.com/argoproj/argo-events/tree/master/examples/sensors).
