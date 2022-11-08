@@ -53,22 +53,19 @@ func (stream *SensorJetstream) Initialize() error {
 	if err != nil {
 		return err
 	}
-	// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
-	stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
-	switch err {
-	case nats.ErrStreamNameAlreadyInUse:
-		// get the existing one
-		stream.keyValueStore, err = stream.MgmtConnection.JSContext.KeyValue(stream.sensorName)
+
+	// see if there's an existing one
+	stream.keyValueStore, _ = stream.MgmtConnection.JSContext.KeyValue(stream.sensorName)
+	if stream.keyValueStore == nil {
+		// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
+		stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
 		if err != nil {
-			errStr := fmt.Sprintf("failed to get existing Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
+			errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
 			stream.Logger.Error(errStr)
 			return err
 		}
+	} else {
 		stream.Logger.Infof("found existing K/V store for sensor %s, using that", stream.sensorName)
-	case nil:
-		errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
-		stream.Logger.Error(errStr)
-		return err
 	}
 	stream.Logger.Infof("successfully created/located K/V store for sensor %s", stream.sensorName)
 
