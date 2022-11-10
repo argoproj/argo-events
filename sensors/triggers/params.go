@@ -203,7 +203,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			}
 
 			if err == nil {
-				return &resultValue, "", nil
+				return &resultValue, stringType, nil
 			}
 		}
 
@@ -302,7 +302,7 @@ func getValueByKey(value []byte, key string) (string, string, error) {
 		} else if res.Type.String() == jsonType {
 			return res.Raw, res.Type.String(), nil
 		}
-		return res.Raw, res.Type.String(), nil
+		return res.String(), res.Type.String(), nil
 	}
 	return "", "", fmt.Errorf("key %s does not exist to in the event payload", key)
 }
