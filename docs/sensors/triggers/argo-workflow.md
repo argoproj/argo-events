@@ -13,6 +13,7 @@ Argo workflow is K8s custom resource which help orchestrating parallel jobs on K
 <br/>
 
 ## Trigger a workflow
+
 Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-workflows/) installed to make this work.
 
 1. Make sure to have the eventbus deployed in the namespace.
@@ -24,7 +25,7 @@ Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-wor
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/sensor-rbac.yaml
 
 1. Let's set up a webhook event-source to process incoming requests.
-        
+
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 1. Create the sensor.
@@ -50,13 +51,13 @@ You can learn more about trigger parameterization [here](https://argoproj.github
 
 ## Policy
 
-Trigger policy helps you determine the status of the triggered Argo workflow object and decide whether to stop or continue sensor. 
+Trigger policy helps you determine the status of the triggered Argo workflow object and decide whether to stop or continue sensor.
 
 Take a look at [K8s Trigger Policy](https://argoproj.github.io/argo-events/triggers/k8s-object-trigger/#policy).
 
 ## Argo CLI
 
-Although the sensor defined above lets you trigger an Argo workflow, it doesn't have the ability to leverage the functionality 
+Although the sensor defined above lets you trigger an Argo workflow, it doesn't have the ability to leverage the functionality
 provided by the Argo CLI such as,
 
 1. Submit

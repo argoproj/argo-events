@@ -53,14 +53,21 @@ func (stream *SensorJetstream) Initialize() error {
 	if err != nil {
 		return err
 	}
-	// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
-	stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
-	if err != nil {
-		errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
-		stream.Logger.Error(errStr)
-		return err
+
+	// see if there's an existing one
+	stream.keyValueStore, _ = stream.MgmtConnection.JSContext.KeyValue(stream.sensorName)
+	if stream.keyValueStore == nil {
+		// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
+		stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
+		if err != nil {
+			errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
+			stream.Logger.Error(errStr)
+			return err
+		}
+	} else {
+		stream.Logger.Infof("found existing K/V store for sensor %s, using that", stream.sensorName)
 	}
-	stream.Logger.Infof("successfully created K/V store for sensor %s (if it doesn't already exist)", stream.sensorName)
+	stream.Logger.Infof("successfully created/located K/V store for sensor %s", stream.sensorName)
 
 	// Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)

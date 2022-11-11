@@ -1,7 +1,8 @@
 # Trigger Sources
+
 A trigger source is the source of trigger resource. It can be either external source such
 as `Git`, `S3`, `K8s Configmap`, `File`, any valid `URL` that hosts the resource or an internal resource
-which is defined in the sensor object itself like `Inline` or `Resource`. 
+which is defined in the sensor object itself like `Inline` or `Resource`.
 
 In the previous sections, you have been dealing with the `Resource` trigger source. In this tutorial, we will explore other trigger sources.
 
@@ -10,7 +11,8 @@ In the previous sections, you have been dealing with the `Resource` trigger sour
 1. The `Webhook` event-source is already set up.
 
 ## Git
-Git trigger source refers to K8s trigger refers to the K8s resource stored in Git. 
+
+Git trigger source refers to K8s trigger refers to the K8s resource stored in Git.
 
 The specification for the Git source is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.GitArtifact).
 
@@ -33,12 +35,13 @@ The specification for the Git source is available [here](https://github.com/argo
 6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   
+
 7. Now, you should see an Argo workflow being created.
 
         kubectl -n argo-events get wf
 
 ## S3
+
 You can refer to the K8s resource stored on S3 compliant store as the trigger source.
 
 For this tutorial, lets set up a minio server which is S3 compliant store.
@@ -59,29 +62,31 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
 6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   
+
 7. Now, you should see an Argo workflow being created.
 
         kubectl -n argo-events get wf
 
 ## K8s Configmap
+
 K8s configmap can be treated as trigger source if needed.
 
 1. Lets create a configmap called `trigger-store`.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/trigger-store.yaml
-   
+
 2. Create a sensor with trigger source as configmap and refer it to the `trigger-store`.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-cm.yaml
-   
+
 3. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   
+
 4. Now, you should see an Argo workflow being created.
-   
+
         kubectl -n argo-events get wf
 
 ## File & URL
+
 File and URL trigger sources are pretty self explanatory. The example sensors are available under [examples/sensors](https://github.com/argoproj/argo-events/tree/master/examples/sensors) folder.

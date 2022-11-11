@@ -6,7 +6,6 @@
 
 <br/>
 
-
 Main components of Argo Events are:
 
 1. [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/)

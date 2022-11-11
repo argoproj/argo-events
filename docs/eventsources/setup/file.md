@@ -3,6 +3,7 @@
 File event-source listens to file system events and helps sensor trigger workloads.
 
 ## Event Structure
+
 The structure of an event dispatched by the event-source over the eventbus looks like following,
 
         {
@@ -20,7 +21,6 @@ The structure of an event dispatched by the event-source over the eventbus looks
                 "op": "File operation that triggered the event" // Create, Write, Remove, Rename, Chmod
             }
         }
-
 
 ## Specification
 
@@ -43,15 +43,16 @@ File event-source specification is available [here](https://github.com/argoproj/
         kubectl -n argo-events exec -it <event-source-pod-name> -c file-events -- /bin/bash
 
 1. Let's create a file called `x.txt` under `test-data` directory in the event-source pod.
- 
+
         cd test-data
         cat <<EOF > x.txt
         hello
         EOF
 
-1. Once you create file `x.txt`, the sensor will trigger argo workflow.  Run `argo list` to find the workflow. 
+1. Once you create file `x.txt`, the sensor will trigger argo workflow.  Run `argo list` to find the workflow.
 
 1. For real-world use cases, you should use PersistentVolumeClaim.
-                                                                  
+
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/). 
+
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
