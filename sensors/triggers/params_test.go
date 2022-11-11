@@ -274,7 +274,7 @@ func TestResolveParamValue(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := ResolveParamValue(test.source, events)
+			result, _, err := ResolveParamValue(test.source, events)
 			assert.Nil(t, err)
 			assert.Equal(t, test.result, *result)
 		})
@@ -397,6 +397,21 @@ func TestApplyParams(t *testing.T) {
 			},
 			jsonObj: []byte("{\"name\": \"faker\"}"),
 			result:  []byte("{\"name\": \"fake\"}"),
+		},
+		{
+			name: "apply block parameters with overwrite operation",
+			params: []v1alpha1.TriggerParameter{
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "name",
+					},
+					Dest:      "name",
+					Operation: v1alpha1.TriggerParameterOpOverwrite,
+				},
+			},
+			jsonObj: []byte("{\"name\": \"faker\"}"),
+			result:  []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}}"),
 		},
 	}
 
