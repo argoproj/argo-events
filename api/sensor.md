@@ -3304,6 +3304,18 @@ for more information on how to use this.
 </tr>
 <tr>
 <td>
+<code>useRawDataValue</code></br> <em> bool </em>
+</td>
+<td>
+<p>
+UseRawDataValue indicates if the value in event at data key should be
+used without converting to string The default behavior is to turn the
+extracted field into a string
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>dataTemplate</code></br> <em> string </em>
 </td>
 <td>

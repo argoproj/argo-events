@@ -2217,6 +2217,13 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 							Format:      "",
 						},
 					},
+					"useRawDataValue": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UseRawDataValue indicates if the value in event at data key should be used without converting to string The default behavior is to turn the extracted field into a string",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"dataTemplate": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DataTemplate is a go-template for extracting a string from the event's data. If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey. The templating follows the standard go-template syntax as well as sprig's extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/",

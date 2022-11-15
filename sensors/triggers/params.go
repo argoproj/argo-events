@@ -47,7 +47,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 			return nil, err
 		}
 		if typ == jsonType {
-			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(*value))
+			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte((*value).(string)))
 			if err != nil {
 				return nil, err
 			}
@@ -121,9 +121,9 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 
 			if current.Exists() {
 				if op == v1alpha1.TriggerParameterOpAppend {
-					*value = current.String() + *value
+					*value = fmt.Sprintf("%s%v", current.String(), *value)
 				} else {
-					*value += current.String()
+					*value = fmt.Sprintf("%v%s", *value, current.String())
 				}
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:
@@ -133,7 +133,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 		}
 		// now let's set the value
 		if typ == jsonType {
-			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
+			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte((*value).(string)))
 			if err != nil {
 				return nil, err
 			}
@@ -181,12 +181,12 @@ func renderEventDataAsJSON(event *v1alpha1.Event) ([]byte, error) {
 // helper method to resolve the parameter's value from the src
 // returns value and value type (jsonType or stringType or empty string if not found). jsonType represent a block while stringType represent a single value.
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*v1alpha1.Event) (*string, string, error) {
+func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*v1alpha1.Event) (*interface{}, string, error) {
 	var err error
 	var eventPayload []byte
 	var key string
 	var tmplt string
-	var resultValue string
+	var resultValue interface{}
 
 	event, eventExists := events[src.DependencyName]
 	switch {
@@ -250,7 +250,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
 		}
 		if key != "" {
-			tmp, typ, err := getValueByKey(eventPayload, key)
+			tmp, typ, err := getValueByKey(eventPayload, key, src.UseRawDataValue)
 			// For block injection support
 			resultValue = tmp
 			if err == nil {
@@ -293,14 +293,16 @@ func getValueWithTemplate(value []byte, templString string) (string, error) {
 
 // getValueByKey will return the value as raw json or a string and value's type at the provided key,
 // Value type (jsonType or stringType or empty string). JSON represent a block while String represent a single value.
-// or an error if it does not exist.
-func getValueByKey(value []byte, key string) (string, string, error) {
+// or an error if it does not exist. When shouldKeepValueType is true, the data type of the value found at
+// key will be preserved. When shouldKeepValueType is false, the string representation will be returned.
+func getValueByKey(value []byte, key string, shouldKeepValueType bool) (interface{}, string, error) {
 	res := gjson.GetBytes(value, key)
 	if res.Exists() {
-		if res.Type.String() == stringType {
-			return res.String(), res.Type.String(), nil
-		} else if res.Type.String() == jsonType {
+		if res.Type.String() == jsonType {
 			return res.Raw, res.Type.String(), nil
+		}
+		if shouldKeepValueType {
+			return res.Value(), res.Type.String(), nil
 		}
 		return res.String(), res.Type.String(), nil
 	}

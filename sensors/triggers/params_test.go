@@ -155,7 +155,7 @@ func TestResolveParamValue(t *testing.T) {
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
-		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
+		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}, \"reviews\": 8, \"rating\": 4.5, \"isActive\" : true, \"isVerified\" : false}"),
 	}
 	eventBody, err := json.Marshal(event)
 	assert.Nil(t, err)
@@ -169,7 +169,7 @@ func TestResolveParamValue(t *testing.T) {
 	tests := []struct {
 		name   string
 		source *v1alpha1.TriggerParameterSource
-		result string
+		result interface{}
 	}{
 		{
 			name: "get first name",
@@ -269,6 +269,60 @@ func TestResolveParamValue(t *testing.T) {
 				DataKey:        "name.first",
 			},
 			result: "fake",
+		},
+		{
+			name: "UseRawDataValue set to true - number (non-decimal)",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				DataKey:         "reviews",
+				UseRawDataValue: true,
+			},
+			result: float64(8),
+		},
+		{
+			name: "UseRawDataValue set to true - number (decimal)",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				DataKey:         "rating",
+				UseRawDataValue: true,
+			},
+			result: float64(4.5),
+		},
+		{
+			name: "UseRawDataValue set to true - bool (true)",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				DataKey:         "isActive",
+				UseRawDataValue: true,
+			},
+			result: true,
+		},
+		{
+			name: "UseRawDataValue set to true - bool (false)",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				DataKey:         "isVerified",
+				UseRawDataValue: true,
+			},
+			result: false,
+		},
+		{
+			name: "UseRawDataValue set to true - string",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				DataKey:         "name.first",
+				UseRawDataValue: true,
+			},
+			result: "fake",
+		},
+		{
+			name: "UseRawDataValue set to true - json",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				DataKey:         "name",
+				UseRawDataValue: true,
+			},
+			result: "{\"first\": \"fake\", \"last\": \"user\"}",
 		},
 	}
 
