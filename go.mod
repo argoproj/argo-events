@@ -9,6 +9,7 @@ retract v1.15.0 // Published accidentally.
 require (
 	cloud.google.com/go/compute/metadata v0.2.1
 	cloud.google.com/go/pubsub v1.26.0
+	github.com/AdaLogics/go-fuzz-headers v0.0.0-20221103172237-443f56ff4ba8
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.19
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.1.2
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
@@ -94,6 +95,7 @@ require (
 	github.com/DataDog/zstd v1.5.0 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apache/pulsar-client-go/oauth2 v0.0.0-20220120090717-25e59572242e // indirect
+	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
