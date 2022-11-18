@@ -204,7 +204,7 @@ func TestResolveParamValue(t *testing.T) {
 	tests := []struct {
 		name   string
 		source *v1alpha1.TriggerParameterSource
-		result interface{}
+		result string
 	}{
 		{
 			name: "get first name",
@@ -304,42 +304,6 @@ func TestResolveParamValue(t *testing.T) {
 				DataKey:        "name.first",
 			},
 			result: "fake",
-		},
-		{
-			name: "UseRawDataValue set to true - number (non-decimal)",
-			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
-				DataKey:         "reviews",
-				UseRawDataValue: true,
-			},
-			result: float64(8),
-		},
-		{
-			name: "UseRawDataValue set to true - number (decimal)",
-			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
-				DataKey:         "rating",
-				UseRawDataValue: true,
-			},
-			result: float64(4.5),
-		},
-		{
-			name: "UseRawDataValue set to true - bool (true)",
-			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
-				DataKey:         "isActive",
-				UseRawDataValue: true,
-			},
-			result: true,
-		},
-		{
-			name: "UseRawDataValue set to true - bool (false)",
-			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
-				DataKey:         "isVerified",
-				UseRawDataValue: true,
-			},
-			result: false,
 		},
 		{
 			name: "UseRawDataValue set to true - string",
@@ -516,8 +480,8 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "age",
+						DependencyName:  "fake-dependency",
+						DataKey:         "age",
 						UseRawDataValue: true,
 					},
 					Dest:      "age",
@@ -525,8 +489,8 @@ func TestApplyParams(t *testing.T) {
 				},
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "age",
+						DependencyName:  "fake-dependency",
+						DataKey:         "age",
 						UseRawDataValue: true,
 					},
 					Dest:      "ageWithYears",
@@ -534,8 +498,8 @@ func TestApplyParams(t *testing.T) {
 				},
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "countries",
+						DependencyName:  "fake-dependency",
+						DataKey:         "countries",
 						UseRawDataValue: true,
 					},
 					Dest:      "countries",
@@ -545,7 +509,6 @@ func TestApplyParams(t *testing.T) {
 			jsonObj: []byte("{\"age\": \"this-gets-over-written\", \"ageWithYears\": \"Years: \"}"),
 			result:  []byte("{\"age\": 100, \"ageWithYears\": \"Years: 100\",\"countries\":[\"ca\", \"us\", \"mx\"]}"),
 		},
-
 	}
 
 	for _, test := range tests {
