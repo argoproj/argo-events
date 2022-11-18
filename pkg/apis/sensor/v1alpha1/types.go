@@ -745,7 +745,7 @@ type TriggerParameterSource struct {
 	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,4,opt,name=dataKey"`
 	// UseRawDataValue indicates if the value in an event at data key should be used without converting to string.
 	// When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
-	// false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter
+	// false, the behavior is to turn the extracted field into a string or json. (e.g. when set to true, the parameter
 	// 123 will resolve to the numerical type, but when false, or not provided, the string "123" will be resolved)
 	UseRawDataValue bool `json:"useRawDataValue,omitempty" protobuf:"bytes,5,opt,name=useRawDataValue"`
 	// DataTemplate is a go-template for extracting a string from the event's data.
