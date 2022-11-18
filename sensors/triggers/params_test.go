@@ -423,7 +423,7 @@ func TestApplyParams(t *testing.T) {
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
-		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
+		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}, \"age\": 100, \"countries\": [\"ca\", \"us\", \"mx\"] }"),
 	}
 
 	events := map[string]*v1alpha1.Event{
@@ -511,6 +511,41 @@ func TestApplyParams(t *testing.T) {
 			jsonObj: []byte("{\"name\": \"faker\"}"),
 			result:  []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}}"),
 		},
+		{
+			name: "Use raw data types",
+			params: []v1alpha1.TriggerParameter{
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "age",
+						UseRawDataValue: true,
+					},
+					Dest:      "age",
+					Operation: v1alpha1.TriggerParameterOpOverwrite,
+				},
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "age",
+						UseRawDataValue: true,
+					},
+					Dest:      "ageWithYears",
+					Operation: v1alpha1.TriggerParameterOpAppend,
+				},
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "countries",
+						UseRawDataValue: true,
+					},
+					Dest:      "countries",
+					Operation: v1alpha1.TriggerParameterOpAppend,
+				},
+			},
+			jsonObj: []byte("{\"age\": \"this-gets-over-written\", \"ageWithYears\": \"Years: \"}"),
+			result:  []byte("{\"age\": 100, \"ageWithYears\": \"Years: 100\",\"countries\":[\"ca\", \"us\", \"mx\"]}"),
+		},
+
 	}
 
 	for _, test := range tests {

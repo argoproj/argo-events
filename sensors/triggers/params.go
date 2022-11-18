@@ -121,6 +121,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			current := gjson.GetBytes(jsonObj, param.Dest)
 
 			if current.Exists() {
+				typ = stringType
 				if op == v1alpha1.TriggerParameterOpAppend {
 					*value = current.String() + *value
 				} else {
@@ -133,8 +134,8 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
 		}
 		// now let's set the value
-		if typ == jsonType {
-			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte((*value)))
+		if typ == jsonType || (typ != stringType && param.Src.UseRawDataValue) {
+			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
 			if err != nil {
 				return nil, err
 			}
@@ -294,8 +295,6 @@ func getValueWithTemplate(value []byte, templString string) (string, error) {
 
 // getValueByKey will return the value as raw json or a string and value's type at the provided key,
 // Value type (jsonType or stringType or empty string). JSON represent a block while String represent a single value.
-// or an error if it does not exist. When shouldKeepValueType is true, the data type of the value found at
-// key will be preserved. When shouldKeepValueType is false, the string representation will be returned.
 func getValueByKey(value []byte, key string) (string, string, error) {
 	res := gjson.GetBytes(value, key)
 	if res.Exists() {
