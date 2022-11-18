@@ -851,8 +851,10 @@ message TriggerParameterSource {
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
   optional string dataKey = 4;
 
-  // UseRawDataValue indicates if the value in event at data key should be used without converting to string
-  // The default behavior is to turn the extracted field into a string
+  // UseRawDataValue indicates if the value in event at data key should be used without converting to string.
+  // When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
+  // false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter
+  // 123 will resolve to the numerical type, but when false the string "123" will be resolved)
   optional bool useRawDataValue = 5;
 
   // DataTemplate is a go-template for extracting a string from the event's data.

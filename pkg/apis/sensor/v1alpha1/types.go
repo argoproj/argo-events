@@ -743,8 +743,10 @@ type TriggerParameterSource struct {
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,4,opt,name=dataKey"`
-	// UseRawDataValue indicates if the value in event at data key should be used without converting to string
-	// The default behavior is to turn the extracted field into a string
+	// UseRawDataValue indicates if the value in event at data key should be used without converting to string.
+	// When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
+	// false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter
+	// 123 will resolve to the numerical type, but when false the string "123" will be resolved)
 	UseRawDataValue bool `json:"useRawDataValue,omitempty" protobuf:"bytes,5,opt,name=useRawDataValue"`
 	// DataTemplate is a go-template for extracting a string from the event's data.
 	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey.
