@@ -18,6 +18,7 @@ package triggers
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -73,6 +74,8 @@ type Details struct {
 type Payload struct {
 	FirstName string  `json:"firstName"`
 	LastName  string  `json:"lastName"`
+	Age       int     `json:"age"`
+	IsActive  bool    `json:"isActive"`
 	Details   Details `json:"details"`
 }
 
@@ -98,10 +101,21 @@ func TestConstructPayload(t *testing.T) {
 			},
 			Data: []byte("{\"lastName\": \"foo\"}"),
 		},
+		"use-event-data-type": {
+			Context: &v1alpha1.EventContext{
+				ID:              "2",
+				Type:            "calendar",
+				Source:          "calendar-gateway",
+				DataContentType: common.MediaTypeJSON,
+				Subject:         "example-1",
+			},
+			Data: []byte("{\"age\": 100, \"isActive\": false, \"countries\": [\"ca\", \"us\", \"mx\"]}"),
+		},
 	}
 
 	defaultFirstName := "faker"
 	defaultLastName := "bar"
+	defaultNotUsed := "defaultNotUsed"
 
 	parameters := []v1alpha1.TriggerParameter{
 		{
@@ -120,6 +134,24 @@ func TestConstructPayload(t *testing.T) {
 			},
 			Dest: "lastName",
 		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "age",
+				Value:          &defaultNotUsed,
+				UseRawDataValue: true,
+			},
+			Dest: "age",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "isActive",
+				Value:          &defaultNotUsed,
+				UseRawDataValue: true,
+			},
+			Dest: "isActive",
+		},
 	}
 
 	payloadBytes, err := ConstructPayload(testEvents, parameters)
@@ -128,9 +160,12 @@ func TestConstructPayload(t *testing.T) {
 
 	var p *Payload
 	err = json.Unmarshal(payloadBytes, &p)
+	fmt.Println(string(payloadBytes))
 	assert.Nil(t, err)
 	assert.Equal(t, "fake", p.FirstName)
 	assert.Equal(t, "foo", p.LastName)
+	assert.Equal(t, 100, p.Age)
+	assert.Equal(t, false, p.IsActive)
 
 	parameters[0].Src.DataKey = "unknown"
 	parameters[1].Src.DataKey = "unknown"
@@ -155,7 +190,7 @@ func TestResolveParamValue(t *testing.T) {
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
-		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}, \"reviews\": 8, \"rating\": 4.5, \"isActive\" : true, \"isVerified\" : false}"),
+		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}, \"reviews\": 8, \"rating\": 4.5, \"isActive\" : true, \"isVerified\" : false, \"countries\": [\"ca\", \"us\", \"mx\"]}"),
 	}
 	eventBody, err := json.Marshal(event)
 	assert.Nil(t, err)
@@ -323,6 +358,15 @@ func TestResolveParamValue(t *testing.T) {
 				UseRawDataValue: true,
 			},
 			result: "{\"first\": \"fake\", \"last\": \"user\"}",
+		},
+		{
+			name: "UseRawDataValue set to true - list",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				DataKey:         "countries",
+				UseRawDataValue: true,
+			},
+			result: "[\"ca\", \"us\", \"mx\"]",
 		},
 	}
 

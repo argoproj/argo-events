@@ -46,8 +46,10 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
-		if typ == jsonType {
-			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte((*value).(string)))
+		if typ == jsonType || (typ != stringType && parameter.Src.UseRawDataValue) {
+
+			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(fmt.Sprintf("%v", *value)))
+			//tmp, err = sjson.SetBytes(payload, "aalok-" + parameter.Dest, []byte((*value).(string)))
 			if err != nil {
 				return nil, err
 			}
