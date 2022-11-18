@@ -136,18 +136,18 @@ func TestConstructPayload(t *testing.T) {
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "use-event-data-type",
-				DataKey:        "age",
-				Value:          &defaultNotUsed,
+				DependencyName:  "use-event-data-type",
+				DataKey:         "age",
+				Value:           &defaultNotUsed,
 				UseRawDataValue: true,
 			},
 			Dest: "age",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "use-event-data-type",
-				DataKey:        "isActive",
-				Value:          &defaultNotUsed,
+				DependencyName:  "use-event-data-type",
+				DataKey:         "isActive",
+				Value:           &defaultNotUsed,
 				UseRawDataValue: true,
 			},
 			Dest: "isActive",
