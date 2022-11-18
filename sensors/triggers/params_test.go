@@ -18,7 +18,6 @@ package triggers
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -72,11 +71,13 @@ type Details struct {
 }
 
 type Payload struct {
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Age       int     `json:"age"`
-	IsActive  bool    `json:"isActive"`
-	Details   Details `json:"details"`
+	FirstName        string  `json:"firstName"`
+	LastName         string  `json:"lastName"`
+	Age              int     `json:"age"`
+	IsActive         bool    `json:"isActive"`
+	TypelessAge      string  `json:"typelessAge"`
+	TypelessIsActive string  `json:"typelessIsActive"`
+	Details          Details `json:"details"`
 }
 
 func TestConstructPayload(t *testing.T) {
@@ -103,7 +104,7 @@ func TestConstructPayload(t *testing.T) {
 		},
 		"use-event-data-type": {
 			Context: &v1alpha1.EventContext{
-				ID:              "2",
+				ID:              "3",
 				Type:            "calendar",
 				Source:          "calendar-gateway",
 				DataContentType: common.MediaTypeJSON,
@@ -115,7 +116,6 @@ func TestConstructPayload(t *testing.T) {
 
 	defaultFirstName := "faker"
 	defaultLastName := "bar"
-	defaultNotUsed := "defaultNotUsed"
 
 	parameters := []v1alpha1.TriggerParameter{
 		{
@@ -138,7 +138,6 @@ func TestConstructPayload(t *testing.T) {
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName:  "use-event-data-type",
 				DataKey:         "age",
-				Value:           &defaultNotUsed,
 				UseRawDataValue: true,
 			},
 			Dest: "age",
@@ -147,10 +146,23 @@ func TestConstructPayload(t *testing.T) {
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName:  "use-event-data-type",
 				DataKey:         "isActive",
-				Value:           &defaultNotUsed,
 				UseRawDataValue: true,
 			},
 			Dest: "isActive",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "age",
+			},
+			Dest: "typelessAge",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "isActive",
+			},
+			Dest: "typelessIsActive",
 		},
 	}
 
@@ -160,12 +172,13 @@ func TestConstructPayload(t *testing.T) {
 
 	var p *Payload
 	err = json.Unmarshal(payloadBytes, &p)
-	fmt.Println(string(payloadBytes))
 	assert.Nil(t, err)
 	assert.Equal(t, "fake", p.FirstName)
 	assert.Equal(t, "foo", p.LastName)
 	assert.Equal(t, 100, p.Age)
 	assert.Equal(t, false, p.IsActive)
+	assert.Equal(t, "100", p.TypelessAge)
+	assert.Equal(t, "false", p.TypelessIsActive)
 
 	parameters[0].Src.DataKey = "unknown"
 	parameters[1].Src.DataKey = "unknown"
