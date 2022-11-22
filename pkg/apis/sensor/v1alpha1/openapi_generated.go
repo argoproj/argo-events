@@ -2217,13 +2217,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"useRawDataValue": {
-						SchemaProps: spec.SchemaProps{
-							Description: "UseRawDataValue indicates if the value in an event at data key should be used without converting to string. When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly false, the behavior is to turn the extracted field into a string or json. (e.g. when set to true, the parameter 123 will resolve to the numerical type, but when false, or not provided, the string \"123\" will be resolved)",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
 					"dataTemplate": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DataTemplate is a go-template for extracting a string from the event's data. If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey. The templating follows the standard go-template syntax as well as sprig's extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/",
@@ -2235,6 +2228,13 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 						SchemaProps: spec.SchemaProps{
 							Description: "Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
 							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"useRawDataValue": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UseRawDataValue indicates if the value in an event at data key should be used without converting to string. When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter 123 will resolve to the numerical type, but when false, or not provided, the string \"123\" will be resolved)",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},

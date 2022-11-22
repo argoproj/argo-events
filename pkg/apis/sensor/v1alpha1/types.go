@@ -743,20 +743,21 @@ type TriggerParameterSource struct {
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,4,opt,name=dataKey"`
-	// UseRawDataValue indicates if the value in an event at data key should be used without converting to string.
-	// When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
-	// false, the behavior is to turn the extracted field into a string or json. (e.g. when set to true, the parameter
-	// 123 will resolve to the numerical type, but when false, or not provided, the string "123" will be resolved)
-	UseRawDataValue bool `json:"useRawDataValue,omitempty" protobuf:"bytes,5,opt,name=useRawDataValue"`
 	// DataTemplate is a go-template for extracting a string from the event's data.
 	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey.
 	// The templating follows the standard go-template syntax as well as sprig's extra functions.
 	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
-	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,6,opt,name=dataTemplate"`
+	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,5,opt,name=dataTemplate"`
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.
-	Value *string `json:"value,omitempty" protobuf:"bytes,7,opt,name=value"`
+	Value *string `json:"value,omitempty" protobuf:"bytes,6,opt,name=value"`
+	// UseRawDataValue indicates if the value in an event at data key should be used without converting to string.
+	// When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
+	// false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter
+	// 123 will resolve to the numerical type, but when false, or not provided, the string "123" will be resolved)
+	// +optional
+	UseRawDataValue bool `json:"useRawDataValue,omitempty" protobuf:"bytes,7,opt,name=useRawDataValue"`
 }
 
 // TriggerPolicy dictates the policy for the trigger retries
