@@ -294,6 +294,7 @@ func getValueWithTemplate(value []byte, templString string) (string, error) {
 
 // getValueByKey will return the value as raw json or a string and value's type at the provided key,
 // Value type (jsonType or stringType or empty string). JSON represent a block while String represent a single value.
+// or an error if it does not exist.
 func getValueByKey(value []byte, key string) (string, string, error) {
 	res := gjson.GetBytes(value, key)
 	if res.Exists() {
