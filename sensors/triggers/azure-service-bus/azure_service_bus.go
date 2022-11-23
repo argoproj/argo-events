@@ -74,11 +74,12 @@ func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigge
 
 		// Set queueOrTopicName to be azureServiceBusTrigger.QueueName or azureServiceBusTrigger.TopicName
 		var queueOrTopicName string
-		if azureServiceBusTrigger.QueueName != "" {
+		switch {
+		case azureServiceBusTrigger.QueueName != "":
 			queueOrTopicName = azureServiceBusTrigger.QueueName
-		} else if azureServiceBusTrigger.TopicName != "" {
+		case azureServiceBusTrigger.TopicName != "":
 			queueOrTopicName = azureServiceBusTrigger.TopicName
-		} else {
+		default:
 			return nil, fmt.Errorf("neither queue name nor topic name is specified")
 		}
 
