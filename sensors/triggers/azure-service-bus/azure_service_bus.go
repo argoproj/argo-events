@@ -125,9 +125,6 @@ func (t *AzureServiceBusTrigger) ApplyResourceParameters(events map[string]*v1al
 	}
 
 	parameters := fetchedResource.Parameters
-	t.Logger.With("parameters", parameters).Info("applying resource parameters")
-	t.Logger.Info(resourceBytes)
-	t.Logger.Info(fetchedResource)
 	if parameters != nil {
 		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, events)
 		if err != nil {
