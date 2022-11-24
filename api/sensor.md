@@ -1873,6 +1873,52 @@ data for busy events.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.LoggingField">
+LoggingField
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
+</p>
+<p>
+<p>
+LoggingField defines additional key-value pairs when logging happens
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Name is the key of the log
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>value</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Value is the value to the key of the log
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.LogicalOperator">
 LogicalOperator (<code>string</code> alias)
 </p>
@@ -2438,6 +2484,19 @@ retain
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>loggingFields</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LoggingField"> \[\]LoggingField </a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoggingFields add additional key-value pairs when logging happens
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2554,6 +2613,19 @@ Replicas is the sensor deployment replicas
 <p>
 RevisionHistoryLimit specifies how many old deployment revisions to
 retain
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>loggingFields</code></br> <em>
+<a href="#argoproj.io/v1alpha1.LoggingField"> \[\]LoggingField </a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoggingFields add additional key-value pairs when logging happens
 </p>
 </td>
 </tr>

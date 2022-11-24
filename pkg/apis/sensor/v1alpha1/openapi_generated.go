@@ -52,6 +52,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8SResourcePolicy":          schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger":               schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger":                 schema_pkg_apis_sensor_v1alpha1_LogTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LoggingField":               schema_pkg_apis_sensor_v1alpha1_LoggingField(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger":                schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger":           schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PayloadField":               schema_pkg_apis_sensor_v1alpha1_PayloadField(ref),
@@ -1291,6 +1292,36 @@ func schema_pkg_apis_sensor_v1alpha1_LogTrigger(ref common.ReferenceCallback) co
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_LoggingField(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "LoggingField defines additional key-value pairs when logging happens",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name is the key of the log",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"value": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Value is the value to the key of the log",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name", "value"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1754,12 +1785,26 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "int32",
 						},
 					},
+					"loggingFields": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LoggingFields add additional key-value pairs when logging happens",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LoggingField"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LoggingField", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
 	}
 }
 

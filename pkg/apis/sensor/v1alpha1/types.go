@@ -130,7 +130,7 @@ func (s SensorSpec) GetReplicas() int32 {
 type LoggingField struct {
 	// Name is the key of the log
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// Value if the value to the key of the log
+	// Value is the value to the key of the log
 	Value string `json:"value" protobuf:"bytes,2,name=value"`
 }
 

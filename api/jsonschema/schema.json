@@ -3596,6 +3596,24 @@
       },
       "type": "object"
     },
+    "io.argoproj.sensor.v1alpha1.LoggingField": {
+      "description": "LoggingField defines additional key-value pairs when logging happens",
+      "properties": {
+        "name": {
+          "description": "Name is the key of the log",
+          "type": "string"
+        },
+        "value": {
+          "description": "Value is the value to the key of the log",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "type": "object"
+    },
     "io.argoproj.sensor.v1alpha1.NATSTrigger": {
       "description": "NATSTrigger refers to the specification of the NATS trigger.",
       "properties": {
@@ -3844,6 +3862,13 @@
         "eventBusName": {
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
+        },
+        "loggingFields": {
+          "description": "LoggingFields add additional key-value pairs when logging happens",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.LoggingField"
+          },
+          "type": "array"
         },
         "replicas": {
           "description": "Replicas is the sensor deployment replicas",
