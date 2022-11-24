@@ -66,6 +66,10 @@ func Start() {
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
 	logger = logger.With("sensorName", sensor.Name)
+	for _, field := range sensor.Spec.LoggingFields {
+		logger.With(field.Name, field.Value)
+	}
+
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
 	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
