@@ -46,5 +46,8 @@ func validate(eventSource *v1alpha1.MQTTEventSource) error {
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)
 	}
+	if eventSource.Auth != nil {
+		return apicommon.ValidateBasicAuth(eventSource.Auth)
+	}
 	return nil
 }

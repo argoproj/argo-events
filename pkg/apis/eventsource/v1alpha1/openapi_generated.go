@@ -2535,12 +2535,18 @@ func schema_pkg_apis_eventsource_v1alpha1_MQTTEventSource(ref common.ReferenceCa
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
 						},
 					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Auth hosts secret selectors for username and password",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.BasicAuth"),
+						},
+					},
 				},
 				Required: []string{"url", "topic", "clientId"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/common.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"},
 	}
 }
 
