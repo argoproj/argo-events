@@ -1950,6 +1950,10 @@
     "io.argoproj.eventsource.v1alpha1.MQTTEventSource": {
       "description": "MQTTEventSource refers to event-source for MQTT related events",
       "properties": {
+        "auth": {
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth",
+          "description": "Auth hosts secret selectors for username and password"
+        },
         "clientId": {
           "description": "ClientID is the id of the client",
           "type": "string"

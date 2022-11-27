@@ -42,3 +42,17 @@ spec:
 #          name: my-secret
 #          key: client-key-key
 
+#    example-auth:
+#      url: "tcp://mqtt.argo-events:1883"
+#      topic: "bar"
+#      jsonBody: true
+#      clientId: "2345"
+#      # username and password for authentication
+#      # use secret selectors
+#      auth:
+#        username:
+#          name: my-secret
+#          key: username
+#        password:
+#          name: my-secret
+#          key: password
