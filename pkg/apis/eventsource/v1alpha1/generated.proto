@@ -925,6 +925,10 @@ message MQTTEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 8;
+
+  // Auth hosts secret selectors for username and password
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.BasicAuth auth = 9;
 }
 
 // NATSAuth refers to the auth info for NATS EventSource
