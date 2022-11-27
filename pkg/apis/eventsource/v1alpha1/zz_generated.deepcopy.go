@@ -1224,6 +1224,11 @@ func (in *MQTTEventSource) DeepCopyInto(out *MQTTEventSource) {
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.Auth != nil {
+		in, out := &in.Auth, &out.Auth
+		*out = new(common.BasicAuth)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
