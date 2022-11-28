@@ -565,6 +565,9 @@ type MQTTEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	// Auth hosts secret selectors for username and password
+	// +optional
+	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,9,opt,name=auth"`
 }
 
 // NATSEventsSource refers to event-source for NATS related events

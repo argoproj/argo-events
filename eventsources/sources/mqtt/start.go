@@ -113,6 +113,19 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		opts.TLSConfig = tlsConfig
 	}
 
+	if mqttEventSource.Auth != nil {
+		username, err := common.GetSecretFromVolume(mqttEventSource.Auth.Username)
+		if err != nil {
+			return fmt.Errorf("username not found, %w", err)
+		}
+		password, err := common.GetSecretFromVolume(mqttEventSource.Auth.Password)
+		if err != nil {
+			return fmt.Errorf("password not found, %w", err)
+		}
+		opts.SetUsername(username)
+		opts.SetPassword(password)
+	}
+
 	var client mqttlib.Client
 
 	log.Info("connecting to mqtt broker...")

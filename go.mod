@@ -20,7 +20,7 @@ require (
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.8.1
 	github.com/argoproj/pkg v0.13.6
-	github.com/aws/aws-sdk-go v1.44.136
+	github.com/aws/aws-sdk-go v1.44.145
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
 	github.com/cloudevents/sdk-go/v2 v2.11.0
@@ -28,7 +28,7 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.4.1
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gavv/httpexpect/v2 v2.4.1
+	github.com/gavv/httpexpect/v2 v2.6.1
 	github.com/gfleury/go-bitbucket-v1 v0.0.0-20210707202713-7d616f7c18ac
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-git/go-git/v5 v5.4.2
@@ -48,7 +48,7 @@ require (
 	github.com/itchyny/gojq v0.12.9
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/ktrysmt/go-bitbucket v0.9.48
-	github.com/minio/minio-go/v7 v7.0.42
+	github.com/minio/minio-go/v7 v7.0.44
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nats-io/graft v0.0.0-20220215174245-93d18541496f
@@ -65,9 +65,9 @@ require (
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/tidwall/gjson v1.14.3
+	github.com/tidwall/gjson v1.14.4
 	github.com/tidwall/sjson v1.2.4
-	github.com/xanzy/go-gitlab v0.75.0
+	github.com/xanzy/go-gitlab v0.76.0
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.21.0
@@ -113,6 +113,7 @@ require (
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/klauspost/cpuid/v2 v2.1.0 // indirect
 	github.com/linkedin/goavro/v2 v2.9.8 // indirect
+	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
@@ -120,6 +121,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sanity-io/litter v1.5.5 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
@@ -166,7 +168,7 @@ require (
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fatih/structs v1.0.0 // indirect
+	github.com/fatih/structs v1.1.0 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
@@ -197,7 +199,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20190818114111-108c894c2c0e // indirect
 	github.com/huandu/xstrings v1.3.1 // indirect
-	github.com/imkira/go-interpol v1.0.0 // indirect
+	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/itchyny/timefmt-go v0.1.4 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
@@ -261,9 +263,9 @@ require (
 	github.com/valyala/fasthttp v1.34.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
 	github.com/xdg-go/scram v1.1.1
-	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
+	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
-	github.com/xeipuuv/gojsonschema v1.1.0 // indirect
+	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
