@@ -136,17 +136,17 @@ func TestConstructPayload(t *testing.T) {
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "use-event-data-type",
-				DataKey:         "age",
-				UseRawDataValue: true,
+				DependencyName: "use-event-data-type",
+				DataKey:        "age",
+				UseRawData:     true,
 			},
 			Dest: "age",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "use-event-data-type",
-				DataKey:         "isActive",
-				UseRawDataValue: true,
+				DependencyName: "use-event-data-type",
+				DataKey:        "isActive",
+				UseRawData:     true,
 			},
 			Dest: "isActive",
 		},
@@ -319,29 +319,29 @@ func TestResolveParamValue(t *testing.T) {
 			result: "fake",
 		},
 		{
-			name: "UseRawDataValue set to true - string",
+			name: "UseRawData set to true - string",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
-				DataKey:         "name.first",
-				UseRawDataValue: true,
+				DependencyName: "fake-dependency",
+				DataKey:        "name.first",
+				UseRawData:     true,
 			},
 			result: "fake",
 		},
 		{
-			name: "UseRawDataValue set to true - json",
+			name: "UseRawData set to true - json",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
-				DataKey:         "name",
-				UseRawDataValue: true,
+				DependencyName: "fake-dependency",
+				DataKey:        "name",
+				UseRawData:     true,
 			},
 			result: "{\"first\": \"fake\", \"last\": \"user\"}",
 		},
 		{
-			name: "UseRawDataValue set to true - list",
+			name: "UseRawData set to true - list",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
-				DataKey:         "countries",
-				UseRawDataValue: true,
+				DependencyName: "fake-dependency",
+				DataKey:        "countries",
+				UseRawData:     true,
 			},
 			result: "[\"ca\", \"us\", \"mx\"]",
 		},
@@ -493,9 +493,9 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName:  "fake-dependency",
-						DataKey:         "name",
-						UseRawDataValue: true,
+						DependencyName: "fake-dependency",
+						DataKey:        "name",
+						UseRawData:     true,
 					},
 					Dest:      "name",
 					Operation: v1alpha1.TriggerParameterOpOverwrite,
@@ -509,27 +509,27 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName:  "fake-dependency",
-						DataKey:         "age",
-						UseRawDataValue: true,
+						DependencyName: "fake-dependency",
+						DataKey:        "age",
+						UseRawData:     true,
 					},
 					Dest:      "age",
 					Operation: v1alpha1.TriggerParameterOpOverwrite,
 				},
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName:  "fake-dependency",
-						DataKey:         "age",
-						UseRawDataValue: true,
+						DependencyName: "fake-dependency",
+						DataKey:        "age",
+						UseRawData:     true,
 					},
 					Dest:      "ageWithYears",
 					Operation: v1alpha1.TriggerParameterOpAppend,
 				},
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName:  "fake-dependency",
-						DataKey:         "countries",
-						UseRawDataValue: true,
+						DependencyName: "fake-dependency",
+						DataKey:        "countries",
+						UseRawData:     true,
 					},
 					Dest:      "countries",
 					Operation: v1alpha1.TriggerParameterOpAppend,

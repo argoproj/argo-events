@@ -46,7 +46,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
-		if typ != stringType && parameter.Src.UseRawDataValue {
+		if typ != stringType && parameter.Src.UseRawData {
 			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(*value))
 			if err != nil {
 				return nil, err
@@ -133,7 +133,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
 		}
 		// now let's set the value
-		if typ != stringType && param.Src.UseRawDataValue {
+		if typ != stringType && param.Src.UseRawData {
 			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
 			if err != nil {
 				return nil, err

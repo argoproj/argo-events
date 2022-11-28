@@ -752,12 +752,12 @@ type TriggerParameterSource struct {
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.
 	Value *string `json:"value,omitempty" protobuf:"bytes,6,opt,name=value"`
-	// UseRawDataValue indicates if the value in an event at data key should be used without converting to string.
+	// UseRawData indicates if the value in an event at data key should be used without converting to string.
 	// When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
 	// false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter
 	// 123 will resolve to the numerical type, but when false, or not provided, the string "123" will be resolved)
 	// +optional
-	UseRawDataValue bool `json:"useRawDataValue,omitempty" protobuf:"bytes,7,opt,name=useRawDataValue"`
+	UseRawData bool `json:"useRawData,omitempty" protobuf:"bytes,7,opt,name=useRawData"`
 }
 
 // TriggerPolicy dictates the policy for the trigger retries
