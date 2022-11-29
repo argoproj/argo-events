@@ -2314,6 +2314,9 @@ print the message.</p>
 to update the trigger resource on the fly.</p>
 <p><strong><em>Note</em></strong>: If you define both the <code>contextKey</code> and <code>dataKey</code> within a parameter, then
 the <code>dataKey</code> takes the precedence.</p>
+<p><strong><em>Note</em></strong>: When <code>useRawData</code> is not specified or explicitly set to false, the parameter
+will resolve to a string type. When <code>useRawData</code> is set to true, a number, boolean, json 
+or string parameter may be resolved.</p>
 <h3 id="default-values">Default Values<a class="headerlink" href="#default-values" title="Permanent link">&para;</a></h3>
 <p>Each parameter comes with an option to configure the default value. This is specially
 important when the <code>key</code> you defined in the parameter doesn't exist in the event.</p>
