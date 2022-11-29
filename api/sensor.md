@@ -3343,6 +3343,23 @@ this is not defined, this param source will produce an error.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>useRawData</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+UseRawData indicates if the value in an event at data key should be used
+without converting to string. When true, a number, boolean, json or
+string parameter may be extracted. When the field is unspecified, or
+explicitly false, the behavior is to turn the extracted field into a
+string. (e.g. when set to true, the parameter 123 will resolve to the
+numerical type, but when false, or not provided, the string “123” will
+be resolved)
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TriggerPolicy">
