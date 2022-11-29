@@ -46,7 +46,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
-		if typ == jsonType {
+		if typ != stringType && parameter.Src.UseRawData {
 			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(*value))
 			if err != nil {
 				return nil, err
@@ -120,6 +120,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			current := gjson.GetBytes(jsonObj, param.Dest)
 
 			if current.Exists() {
+				typ = stringType
 				if op == v1alpha1.TriggerParameterOpAppend {
 					*value = current.String() + *value
 				} else {
@@ -132,7 +133,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
 		}
 		// now let's set the value
-		if typ == jsonType {
+		if typ != stringType && param.Src.UseRawData {
 			tmp, err := sjson.SetRawBytes(jsonObj, param.Dest, []byte(*value))
 			if err != nil {
 				return nil, err
@@ -297,9 +298,7 @@ func getValueWithTemplate(value []byte, templString string) (string, error) {
 func getValueByKey(value []byte, key string) (string, string, error) {
 	res := gjson.GetBytes(value, key)
 	if res.Exists() {
-		if res.Type.String() == stringType {
-			return res.String(), res.Type.String(), nil
-		} else if res.Type.String() == jsonType {
+		if res.Type.String() == jsonType {
 			return res.Raw, res.Type.String(), nil
 		}
 		return res.String(), res.Type.String(), nil

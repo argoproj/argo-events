@@ -71,9 +71,13 @@ type Details struct {
 }
 
 type Payload struct {
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Details   Details `json:"details"`
+	FirstName        string  `json:"firstName"`
+	LastName         string  `json:"lastName"`
+	Age              int     `json:"age"`
+	IsActive         bool    `json:"isActive"`
+	TypelessAge      string  `json:"typelessAge"`
+	TypelessIsActive string  `json:"typelessIsActive"`
+	Details          Details `json:"details"`
 }
 
 func TestConstructPayload(t *testing.T) {
@@ -98,6 +102,16 @@ func TestConstructPayload(t *testing.T) {
 			},
 			Data: []byte("{\"lastName\": \"foo\"}"),
 		},
+		"use-event-data-type": {
+			Context: &v1alpha1.EventContext{
+				ID:              "3",
+				Type:            "calendar",
+				Source:          "calendar-gateway",
+				DataContentType: common.MediaTypeJSON,
+				Subject:         "example-1",
+			},
+			Data: []byte("{\"age\": 100, \"isActive\": false, \"countries\": [\"ca\", \"us\", \"mx\"]}"),
+		},
 	}
 
 	defaultFirstName := "faker"
@@ -120,6 +134,36 @@ func TestConstructPayload(t *testing.T) {
 			},
 			Dest: "lastName",
 		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "age",
+				UseRawData:     true,
+			},
+			Dest: "age",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "isActive",
+				UseRawData:     true,
+			},
+			Dest: "isActive",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "age",
+			},
+			Dest: "typelessAge",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "use-event-data-type",
+				DataKey:        "isActive",
+			},
+			Dest: "typelessIsActive",
+		},
 	}
 
 	payloadBytes, err := ConstructPayload(testEvents, parameters)
@@ -131,6 +175,10 @@ func TestConstructPayload(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "fake", p.FirstName)
 	assert.Equal(t, "foo", p.LastName)
+	assert.Equal(t, 100, p.Age)
+	assert.Equal(t, false, p.IsActive)
+	assert.Equal(t, "100", p.TypelessAge)
+	assert.Equal(t, "false", p.TypelessIsActive)
 
 	parameters[0].Src.DataKey = "unknown"
 	parameters[1].Src.DataKey = "unknown"
@@ -155,7 +203,7 @@ func TestResolveParamValue(t *testing.T) {
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
-		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
+		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}, \"reviews\": 8, \"rating\": 4.5, \"isActive\" : true, \"isVerified\" : false, \"countries\": [\"ca\", \"us\", \"mx\"]}"),
 	}
 	eventBody, err := json.Marshal(event)
 	assert.Nil(t, err)
@@ -270,6 +318,33 @@ func TestResolveParamValue(t *testing.T) {
 			},
 			result: "fake",
 		},
+		{
+			name: "UseRawData set to true - string",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataKey:        "name.first",
+				UseRawData:     true,
+			},
+			result: "fake",
+		},
+		{
+			name: "UseRawData set to true - json",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataKey:        "name",
+				UseRawData:     true,
+			},
+			result: "{\"first\": \"fake\", \"last\": \"user\"}",
+		},
+		{
+			name: "UseRawData set to true - list",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataKey:        "countries",
+				UseRawData:     true,
+			},
+			result: "[\"ca\", \"us\", \"mx\"]",
+		},
 	}
 
 	for _, test := range tests {
@@ -325,7 +400,7 @@ func TestApplyParams(t *testing.T) {
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
-		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
+		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}, \"age\": 100, \"countries\": [\"ca\", \"us\", \"mx\"] }"),
 	}
 
 	events := map[string]*v1alpha1.Event{
@@ -399,7 +474,7 @@ func TestApplyParams(t *testing.T) {
 			result:  []byte("{\"name\": \"fake\"}"),
 		},
 		{
-			name: "apply block parameters with overwrite operation",
+			name: "apply block parameters with overwrite operation - useRawDataValue false",
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
@@ -411,7 +486,57 @@ func TestApplyParams(t *testing.T) {
 				},
 			},
 			jsonObj: []byte("{\"name\": \"faker\"}"),
+			result:  []byte("{\"name\": \"{\\\"first\\\": \\\"fake\\\", \\\"last\\\": \\\"user\\\"}\"}"),
+		},
+		{
+			name: "apply block parameters with overwrite operation - useRawDataValue true",
+			params: []v1alpha1.TriggerParameter{
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "name",
+						UseRawData:     true,
+					},
+					Dest:      "name",
+					Operation: v1alpha1.TriggerParameterOpOverwrite,
+				},
+			},
+			jsonObj: []byte("{\"name\": \"faker\"}"),
 			result:  []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"}}"),
+		},
+		{
+			name: "Use raw data types",
+			params: []v1alpha1.TriggerParameter{
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "age",
+						UseRawData:     true,
+					},
+					Dest:      "age",
+					Operation: v1alpha1.TriggerParameterOpOverwrite,
+				},
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "age",
+						UseRawData:     true,
+					},
+					Dest:      "ageWithYears",
+					Operation: v1alpha1.TriggerParameterOpAppend,
+				},
+				{
+					Src: &v1alpha1.TriggerParameterSource{
+						DependencyName: "fake-dependency",
+						DataKey:        "countries",
+						UseRawData:     true,
+					},
+					Dest:      "countries",
+					Operation: v1alpha1.TriggerParameterOpAppend,
+				},
+			},
+			jsonObj: []byte("{\"age\": \"this-gets-over-written\", \"ageWithYears\": \"Years: \"}"),
+			result:  []byte("{\"age\": 100, \"ageWithYears\": \"Years: 100\",\"countries\":[\"ca\", \"us\", \"mx\"]}"),
 		},
 	}
 

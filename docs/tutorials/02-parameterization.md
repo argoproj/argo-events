@@ -128,6 +128,10 @@ to update the trigger resource on the fly.
 **_Note_**: If you define both the `contextKey` and `dataKey` within a parameter, then
 the `dataKey` takes the precedence.
 
+**_Note_**: When `useRawData` is not specified or explicitly set to false, the parameter
+will resolve to a string type. When `useRawData` is set to true, a number, boolean, json 
+or string parameter may be resolved.
+
 ### Default Values
 
 Each parameter comes with an option to configure the default value. This is specially
