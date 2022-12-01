@@ -3069,6 +3069,51 @@
       ],
       "type": "object"
     },
+    "io.argoproj.sensor.v1alpha1.AzureServiceBusTrigger": {
+      "properties": {
+        "connectionString": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "ConnectionString is the connection string for the Azure Service Bus"
+        },
+        "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          },
+          "type": "array"
+        },
+        "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          },
+          "type": "array"
+        },
+        "queueName": {
+          "description": "QueueName is the name of the Azure Service Bus Queue",
+          "type": "string"
+        },
+        "subscriptionName": {
+          "description": "SubscriptionName is the name of the Azure Service Bus Topic Subscription",
+          "type": "string"
+        },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig",
+          "description": "TLS configuration for the service bus client"
+        },
+        "topicName": {
+          "description": "TopicName is the name of the Azure Service Bus Topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "queueName",
+        "topicName",
+        "subscriptionName",
+        "payload"
+      ],
+      "type": "object"
+    },
     "io.argoproj.sensor.v1alpha1.ConditionsResetByTime": {
       "properties": {
         "cron": {
@@ -4165,6 +4210,10 @@
         "azureEventHubs": {
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AzureEventHubsTrigger",
           "description": "AzureEventHubs refers to the trigger send an event to an Azure Event Hub."
+        },
+        "azureServiceBus": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.AzureServiceBusTrigger",
+          "description": "AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus"
         },
         "conditions": {
           "description": "Conditions is the conditions to execute the trigger. For example: \"(dep01 || dep02) \u0026\u0026 dep04\"",

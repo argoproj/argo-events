@@ -454,6 +454,110 @@ are applied to the trigger resource.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.AzureServiceBusTrigger">
+AzureServiceBusTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>connectionString</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+ConnectionString is the connection string for the Azure Service Bus
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+QueueName is the name of the Azure Service Bus Queue
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topicName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+TopicName is the name of the Azure Service Bus Topic
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subscriptionName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+SubscriptionName is the name of the Azure Service Bus Topic Subscription
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the service bus client
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.Comparator">
 Comparator (<code>string</code> alias)
 </p>
@@ -3155,6 +3259,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.AWSLambdaTrigger">AWSLambdaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
 <a href="#argoproj.io/v1alpha1.AzureEventHubsTrigger">AzureEventHubsTrigger</a>,
+<a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">AzureServiceBusTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
@@ -3631,6 +3736,20 @@ Pulsar refers to the trigger designed to place messages on Pulsar topic.
 <em>(Optional)</em>
 <p>
 Criteria to reset the conditons
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureServiceBus</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">
+AzureServiceBusTrigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AzureServiceBus refers to the trigger designed to place messages on
+Azure Service Bus
 </p>
 </td>
 </tr>
