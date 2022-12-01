@@ -393,6 +393,9 @@ type TriggerTemplate struct {
 	// Criteria to reset the conditons
 	// +optional
 	ConditionsReset []ConditionsResetCriteria `json:"conditionsReset,omitempty" protobuf:"bytes,15,rep,name=conditionsReset"`
+	// AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus
+	// +optional
+	AzureServiceBus *AzureServiceBusTrigger `json:"azureServiceBus,omitempty" protobuf:"bytes,16,opt,name=azureServiceBus"`
 }
 
 type ConditionsResetCriteria struct {
@@ -536,6 +539,26 @@ type AzureEventHubsTrigger struct {
 	// the trigger resource.
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
+}
+
+type AzureServiceBusTrigger struct {
+	// ConnectionString is the connection string for the Azure Service Bus
+	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,1,opt,name=connectionString"`
+	// QueueName is the name of the Azure Service Bus Queue
+	QueueName string `json:"queueName" protobuf:"bytes,2,opt,name=queueName"`
+	// TopicName is the name of the Azure Service Bus Topic
+	TopicName string `json:"topicName" protobuf:"bytes,3,opt,name=topicName"`
+	// SubscriptionName is the name of the Azure Service Bus Topic Subscription
+	SubscriptionName string `json:"subscriptionName" protobuf:"bytes,4,opt,name=subscriptionName"`
+	// TLS configuration for the service bus client
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
 // KafkaTrigger refers to the specification of the Kafka trigger.

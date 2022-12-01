@@ -137,6 +137,32 @@ message AzureEventHubsTrigger {
   repeated TriggerParameter parameters = 6;
 }
 
+message AzureServiceBusTrigger {
+  // ConnectionString is the connection string for the Azure Service Bus
+  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
+
+  // QueueName is the name of the Azure Service Bus Queue
+  optional string queueName = 2;
+
+  // TopicName is the name of the Azure Service Bus Topic
+  optional string topicName = 3;
+
+  // SubscriptionName is the name of the Azure Service Bus Topic Subscription
+  optional string subscriptionName = 4;
+
+  // TLS configuration for the service bus client
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 5;
+
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
+  repeated TriggerParameter payload = 6;
+
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the trigger resource.
+  // +optional
+  repeated TriggerParameter parameters = 7;
+}
+
 message ConditionsResetByTime {
   // Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
   optional string cron = 1;
@@ -944,6 +970,10 @@ message TriggerTemplate {
   // Criteria to reset the conditons
   // +optional
   repeated ConditionsResetCriteria conditionsReset = 15;
+
+  // AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus
+  // +optional
+  optional AzureServiceBusTrigger azureServiceBus = 16;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.
