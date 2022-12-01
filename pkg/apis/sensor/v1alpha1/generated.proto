@@ -483,15 +483,6 @@ message LogTrigger {
   optional uint64 intervalSeconds = 1;
 }
 
-// LoggingField defines additional key-value pairs when logging happens
-message LoggingField {
-  // Name is the key of the log
-  optional string name = 1;
-
-  // Value is the value to the key of the log
-  optional string value = 2;
-}
-
 // NATSTrigger refers to the specification of the NATS trigger.
 message NATSTrigger {
   // URL of the NATS cluster.
@@ -652,7 +643,7 @@ message SensorSpec {
 
   // LoggingFields add additional key-value pairs when logging happens
   // +optional
-  repeated LoggingField loggingFields = 8;
+  map<string, string> loggingFields = 8;
 }
 
 // SensorStatus contains information about the status of a sensor.

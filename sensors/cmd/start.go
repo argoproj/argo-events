@@ -66,8 +66,8 @@ func Start() {
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
 	logger = logger.With("sensorName", sensor.Name)
-	for _, field := range sensor.Spec.LoggingFields {
-		logger.With(field.Name, field.Value)
+	for name, value := range sensor.Spec.LoggingFields {
+		logger.With(name, value)
 	}
 
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)

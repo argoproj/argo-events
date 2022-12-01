@@ -112,7 +112,7 @@ type SensorSpec struct {
 	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty" protobuf:"varint,7,opt,name=revisionHistoryLimit"`
 	// LoggingFields add additional key-value pairs when logging happens
 	// +optional
-	LoggingFields []LoggingField `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
+	LoggingFields map[string]string `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {
@@ -124,14 +124,6 @@ func (s SensorSpec) GetReplicas() int32 {
 		replicas = 1
 	}
 	return replicas
-}
-
-// LoggingField defines additional key-value pairs when logging happens
-type LoggingField struct {
-	// Name is the key of the log
-	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// Value is the value to the key of the log
-	Value string `json:"value" protobuf:"bytes,2,name=value"`
 }
 
 // Template holds the information of a sensor deployment template
