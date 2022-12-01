@@ -1754,6 +1754,22 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "int32",
 						},
 					},
+					"loggingFields": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LoggingFields add additional key-value pairs when logging happens",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},

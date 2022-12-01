@@ -110,6 +110,9 @@ type SensorSpec struct {
 	// RevisionHistoryLimit specifies how many old deployment revisions to retain
 	// +optional
 	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty" protobuf:"varint,7,opt,name=revisionHistoryLimit"`
+	// LoggingFields add additional key-value pairs when logging happens
+	// +optional
+	LoggingFields map[string]string `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {

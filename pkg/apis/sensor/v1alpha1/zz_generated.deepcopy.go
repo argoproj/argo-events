@@ -923,6 +923,13 @@ func (in *SensorSpec) DeepCopyInto(out *SensorSpec) {
 		*out = new(int32)
 		**out = **in
 	}
+	if in.LoggingFields != nil {
+		in, out := &in.LoggingFields, &out.LoggingFields
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

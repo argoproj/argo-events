@@ -2438,6 +2438,17 @@ retain
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>loggingFields</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoggingFields add additional key-value pairs when logging happens
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2554,6 +2565,17 @@ Replicas is the sensor deployment replicas
 <p>
 RevisionHistoryLimit specifies how many old deployment revisions to
 retain
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>loggingFields</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoggingFields add additional key-value pairs when logging happens
 </p>
 </td>
 </tr>
