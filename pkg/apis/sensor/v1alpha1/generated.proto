@@ -640,6 +640,10 @@ message SensorSpec {
   // RevisionHistoryLimit specifies how many old deployment revisions to retain
   // +optional
   optional int32 revisionHistoryLimit = 7;
+
+  // LoggingFields add additional key-value pairs when logging happens
+  // +optional
+  map<string, string> loggingFields = 8;
 }
 
 // SensorStatus contains information about the status of a sensor.

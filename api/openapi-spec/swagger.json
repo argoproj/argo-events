@@ -3824,6 +3824,13 @@
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
         },
+        "loggingFields": {
+          "description": "LoggingFields add additional key-value pairs when logging happens",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "replicas": {
           "description": "Replicas is the sensor deployment replicas",
           "type": "integer",
