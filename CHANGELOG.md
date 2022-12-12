@@ -1,5 +1,99 @@
 # Changelog
 
+## v1.7.4 (2022-12-11)
+
+ * [06409b6e](https://github.com/argoproj/argo-events/commit/06409b6e9a7c9644efbac248f48c276e5f12b51f) Update manifests to v1.7.4
+ * [5ad08812](https://github.com/argoproj/argo-events/commit/5ad08812278e5eb3f090c4f38bb44be9f06fbdaf) chore(deps): bump github.com/nats-io/nats.go from 1.20.0 to 1.21.0 (#2351)
+ * [bbcfce51](https://github.com/argoproj/argo-events/commit/bbcfce51a772168f149e437b350bf6580557c8b8) chore(deps): bump google.golang.org/api from 0.103.0 to 0.104.0 (#2350)
+ * [89c545a1](https://github.com/argoproj/argo-events/commit/89c545a1e0ae2d0bb912fe0661451644255351d7) chore(deps): bump github.com/Azure/azure-event-hubs-go/v3 from 3.3.19 to 3.4.0 (#2347)
+ * [0b2b5837](https://github.com/argoproj/argo-events/commit/0b2b5837e1d94ed76838592cad4b47b3d12cc924) chore(deps): bump golang.org/x/crypto from 0.3.0 to 0.4.0 (#2348)
+ * [8887cbdc](https://github.com/argoproj/argo-events/commit/8887cbdc9c9b082427ede2069757673648569ec1) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.152 to 1.44.157 (#2349)
+ * [26c173a5](https://github.com/argoproj/argo-events/commit/26c173a51b876b04bffb7c451b570131a2cc83dc) chore(deps): bump github.com/ktrysmt/go-bitbucket from 0.9.48 to 0.9.55 (#2346)
+ * [c7e185be](https://github.com/argoproj/argo-events/commit/c7e185be1041e39dd5a8ffdf2a9b5c26705e4124) chore(deps): bump cloud.google.com/go/pubsub from 1.27.1 to 1.28.0 (#2345)
+ * [ec808411](https://github.com/argoproj/argo-events/commit/ec808411c21d90e49e2d6f45b56e37fe53da7516) chore(deps): bump github.com/xdg-go/scram from 1.1.1 to 1.1.2 (#2343)
+ * [57bf8fd9](https://github.com/argoproj/argo-events/commit/57bf8fd95ed1d49ab4c358ed16b1d850886afef2) chore(deps): bump github.com/gavv/httpexpect/v2 from 2.6.1 to 2.7.0 (#2344)
+ * [f4d95c9f](https://github.com/argoproj/argo-events/commit/f4d95c9f76c57aef8a14189de5d491e5cd053101) chore(deps): bump go.uber.org/zap from 1.21.0 to 1.24.0 (#2335)
+ * [50009e84](https://github.com/argoproj/argo-events/commit/50009e84cc53f62694bebf23789c42d6daed128b) chore(deps): bump github.com/Masterminds/sprig/v3 from 3.2.0 to 3.2.3 (#2339)
+ * [3d36372a](https://github.com/argoproj/argo-events/commit/3d36372a4e68c2b22b68bb24ed4f2e4a601d4d33) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.44 to 7.0.45 (#2336)
+ * [f0759423](https://github.com/argoproj/argo-events/commit/f0759423a386a303a3342cbaec9f90d0e2a9b4de) chore(deps): bump cloud.google.com/go/pubsub from 1.26.0 to 1.27.1 (#2337)
+ * [366a6519](https://github.com/argoproj/argo-events/commit/366a651997b3a56d4a27a9d898fab92372657b49) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.145 to 1.44.152 (#2338)
+ * [0fc873bd](https://github.com/argoproj/argo-events/commit/0fc873bd7e899db67c423be91bb4a98b0b7496c5) chore(deps): bump cloud.google.com/go/compute/metadata from 0.2.1 to 0.2.2 (#2334)
+ * [275ee246](https://github.com/argoproj/argo-events/commit/275ee24685f6459ffa6112fa730afe349efcf493) chore(deps): bump github.com/itchyny/gojq from 0.12.9 to 0.12.10 (#2332)
+ * [55b59e55](https://github.com/argoproj/argo-events/commit/55b59e5559367a101170638d859ef6ef616f1d9b) chore(deps): bump actions/setup-go from 3.3.1 to 3.4.0 (#2331)
+ * [69a5dd69](https://github.com/argoproj/argo-events/commit/69a5dd692e76eb643408964ae069aed44cd42b80) feat: Azure Service Bus as a Trigger (#2280)
+ * [6f14c946](https://github.com/argoproj/argo-events/commit/6f14c9460a1f85b25cb35b8c81a156fc5f44abe1) feat: Enable adding customized logging fields in sensor (#2325)
+ * [7aa2d0a6](https://github.com/argoproj/argo-events/commit/7aa2d0a6a9216b863b7b98ae76928f21cada85db) feat: Support non-string parameters. Closes #1236 (#2317)
+ * [9e467ff0](https://github.com/argoproj/argo-events/commit/9e467ff03a55c034a26ae2ee3e56ac7bd06d67fb) [issue-1863] username and password auth support for mqtt eventsource (#2324)
+ * [9f6559ef](https://github.com/argoproj/argo-events/commit/9f6559ef64b5bd2cefe177060dd913229a19cd19) chore(deps): bump github.com/tidwall/gjson from 1.14.3 to 1.14.4 (#2327)
+ * [87a0cb74](https://github.com/argoproj/argo-events/commit/87a0cb741a5f6da7f964f5883b53e9f74c925724) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.136 to 1.44.145 (#2330)
+ * [b3ff585c](https://github.com/argoproj/argo-events/commit/b3ff585ceb6b49cee305bcae8e2cafe63ded69b7) chore(deps): bump github.com/gavv/httpexpect/v2 from 2.4.1 to 2.6.1 (#2326)
+ * [1bf92af6](https://github.com/argoproj/argo-events/commit/1bf92af6b1e08c9b027044c1a1848e4488dfb54b) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.42 to 7.0.44 (#2329)
+ * [01f1eee6](https://github.com/argoproj/argo-events/commit/01f1eee63b0901aca0f0ea4b3f33adc498fb0a38) chore(deps): bump github.com/xanzy/go-gitlab from 0.75.0 to 0.76.0 (#2328)
+ * [a4ac2053](https://github.com/argoproj/argo-events/commit/a4ac2053f43fee70efd394428784988ce6b374fa) chore(deps): bump github.com/xanzy/go-gitlab from 0.70.0 to 0.75.0 (#2320)
+ * [5b0bb312](https://github.com/argoproj/argo-events/commit/5b0bb31262a25ae52f4893495ad187ebbe9ce838) chore(deps): bump github.com/gavv/httpexpect/v2 from 2.2.0 to 2.4.1 (#2322)
+ * [9c95343e](https://github.com/argoproj/argo-events/commit/9c95343e0929441f529a30783ff2a4f0c9cdc1ec) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus from 1.1.2 to 1.1.3 (#2319)
+ * [3cc01b92](https://github.com/argoproj/argo-events/commit/3cc01b924cb9d5c023737e500be260e3b22f2bed) eventbus controller: move fuzzer from cncf-fuzzing (#2314)
+ * [4c944cc7](https://github.com/argoproj/argo-events/commit/4c944cc7bb007380a3022d5ae8af167478428c48) chore(deps): bump google.golang.org/api from 0.100.0 to 0.103.0 (#2310)
+ * [fe34f4d2](https://github.com/argoproj/argo-events/commit/fe34f4d257ff1e958b2ff802cbae6acc457a730f) chore(deps): bump github.com/nats-io/nats.go from 1.19.1 to 1.20.0 (#2311)
+ * [358419fd](https://github.com/argoproj/argo-events/commit/358419fd0c0d3796ada2a8c2b126c3cfe2eff305) chore(deps): bump github.com/spf13/viper from 1.12.0 to 1.14.0 (#2307)
+ * [b2599991](https://github.com/argoproj/argo-events/commit/b259999132bceb7ab906619276853532263dbfd7) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.126 to 1.44.136 (#2309)
+ * [73316f3c](https://github.com/argoproj/argo-events/commit/73316f3c6a82056e11ef14adf18838792bab13b1) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus from 1.1.1 to 1.1.2 (#2306)
+ * [33d45181](https://github.com/argoproj/argo-events/commit/33d45181f2ec20637d6755175cce9606a9e5f571) chore(deps): bump github.com/prometheus/client_golang from 1.13.1 to 1.14.0 (#2308)
+ * [bda9941c](https://github.com/argoproj/argo-events/commit/bda9941cc850d0c966ee2dfc90c20bf64bea9654) fix: payload serialization in sensor. Fixes #2272 (#2273)
+ * [8dd87ffb](https://github.com/argoproj/argo-events/commit/8dd87ffb3148a8795d59a44f16e37565e1f0fba9) fix: if key/value store already exists use that (#2293)
+ * [053b55f4](https://github.com/argoproj/argo-events/commit/053b55f4cf2ff42b523aa0d79f9fc9d39c3c4eeb) chore(deps): bump github.com/nats-io/nats.go from 1.19.0 to 1.19.1 (#2300)
+ * [a386d420](https://github.com/argoproj/argo-events/commit/a386d42046f19eefc1d6f6e369a968dd55fc523d) chore(deps): bump cloud.google.com/go/compute/metadata from 0.1.0 to 0.2.1 (#2303)
+ * [cf7339aa](https://github.com/argoproj/argo-events/commit/cf7339aa46c237e29ee82c38a82b34bbe9ce1867) chore(deps): bump dependabot/fetch-metadata from 1.3.4 to 1.3.5 (#2294)
+ * [db85de3e](https://github.com/argoproj/argo-events/commit/db85de3e3e5d9bbefbf3405de11b25957af44fd2) chore(deps): bump github.com/prometheus/client_golang from 1.13.0 to 1.13.1 (#2295)
+ * [261af2bd](https://github.com/argoproj/argo-events/commit/261af2bd90840034f042848f270a538499d94662) fix(docs): context filter documentation (#2277)
+ * [60fe12fc](https://github.com/argoproj/argo-events/commit/60fe12fcd3601e83f8e871ded4128a500d310387) chore(deps): bump cloud.google.com/go/compute from 1.10.0 to 1.12.1 (#2284)
+ * [94a5b775](https://github.com/argoproj/argo-events/commit/94a5b7754695d818da5ec23b79060fac93ed2f1a) chore(deps): bump github.com/spf13/cobra from 1.6.0 to 1.6.1 (#2283)
+ * [d4ba8666](https://github.com/argoproj/argo-events/commit/d4ba8666dcf5ed242374e663392a57b207a5509c) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.121 to 1.44.126 (#2289)
+ * [96b7fd4e](https://github.com/argoproj/argo-events/commit/96b7fd4e37e7e8e15ce8b353ac8e3a3afdb814cd) chore(deps): bump cloud.google.com/go/pubsub from 1.24.0 to 1.26.0 (#2288)
+ * [af10cd6c](https://github.com/argoproj/argo-events/commit/af10cd6c2aa2086b5194cfa9c2a9750fae280857) chore(deps): bump github.com/nats-io/nats.go from 1.18.0 to 1.19.0 (#2285)
+ * [f9ce3d98](https://github.com/argoproj/argo-events/commit/f9ce3d984e024ed06e61f1f9b6b132055b63b4d6) chore(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1 (#2286)
+ * [7b92eb93](https://github.com/argoproj/argo-events/commit/7b92eb93ae42574e2d610f87e4870262b47c5009) chore(deps): bump actions/setup-go from 3.2.0 to 3.3.1 (#2271)
+ * [3e5ad7e0](https://github.com/argoproj/argo-events/commit/3e5ad7e06bd4b582b15d9cb252e90181c0eeb229) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.41 to 7.0.42 (#2269)
+ * [76d04380](https://github.com/argoproj/argo-events/commit/76d0438066b385751fb36a4c09829e43afa2c32d) chore(deps): bump github.com/Azure/azure-event-hubs-go/v3 from 3.3.18 to 3.3.19 (#2270)
+ * [336f1bf4](https://github.com/argoproj/argo-events/commit/336f1bf47b195571def3b81007730db9881fb719) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.116 to 1.44.121 (#2267)
+ * [c12f81b1](https://github.com/argoproj/argo-events/commit/c12f81b19b9dc4ea4358f7c8f6734f25c80076a7) feat: update third_party dependencies (#2245)
+ * [f25d2b05](https://github.com/argoproj/argo-events/commit/f25d2b058a389de7465c6bbc4db071af17e1ae3c) chore(deps): bump google.golang.org/api from 0.98.0 to 0.99.0 (#2259)
+ * [6993fed6](https://github.com/argoproj/argo-events/commit/6993fed6cc0175ef082975057da2d6ca1b1ffbfe) chore(deps): bump actions/setup-python from 4.2.0 to 4.3.0 (#2260)
+ * [3fa45d20](https://github.com/argoproj/argo-events/commit/3fa45d209b8262696bb9db17ac63269c124c2a07) chore(deps): bump github.com/fsnotify/fsnotify from 1.5.4 to 1.6.0 (#2258)
+ * [2ece19b2](https://github.com/argoproj/argo-events/commit/2ece19b2331771649070e3e02fa670068b0b8c9d) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus from 1.1.0 to 1.1.1 (#2256)
+ * [5a12e7c6](https://github.com/argoproj/argo-events/commit/5a12e7c6f6af237c08e21a62b8310d666008ce3f) chore(deps): bump github.com/spf13/cobra from 1.5.0 to 1.6.0 (#2255)
+ * [21fd5b6b](https://github.com/argoproj/argo-events/commit/21fd5b6b5c3fd7d12f3b6e09ff9ef51777298563) chore(deps): bump google.golang.org/grpc from 1.50.0 to 1.50.1 (#2254)
+ * [e7b48445](https://github.com/argoproj/argo-events/commit/e7b484459f6543f84fbc38068083dda8b70f24fd) chore(deps): bump github.com/nats-io/nats.go from 1.17.0 to 1.18.0 (#2253)
+ * [c6f480cb](https://github.com/argoproj/argo-events/commit/c6f480cbf5982eeaba9106b5e06ddf4a82672cfc) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.114 to 1.44.116 (#2251)
+ * [5be8d1c1](https://github.com/argoproj/argo-events/commit/5be8d1c1f225c110b89c2ace902a61f91727a612) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.40 to 7.0.41 (#2252)
+ * [b2162be3](https://github.com/argoproj/argo-events/commit/b2162be303216f3977fffd50d02c314d995dcffb) fix(docs): partition as optional field for kafka eventsource fixes: #1502 (#2246)
+ * [3a0fb22e](https://github.com/argoproj/argo-events/commit/3a0fb22e2832f4b263db85b813a2428be9f68920) feat: Revision History Limit for sensor. Closes #1786 (#2244)
+ * [314f07ba](https://github.com/argoproj/argo-events/commit/314f07bace734d9d464a5ff413ecc7edbd9629ce) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.39 to 7.0.40 (#2241)
+ * [47d20f86](https://github.com/argoproj/argo-events/commit/47d20f864d3a5480ae45cdd696e8fb36a2133b1f) chore(deps): bump google.golang.org/grpc from 1.49.0 to 1.50.0 (#2240)
+ * [3278a094](https://github.com/argoproj/argo-events/commit/3278a09480d454fe7c1726a0c4368614884888cf) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.109 to 1.44.114 (#2239)
+ * [103675a5](https://github.com/argoproj/argo-events/commit/103675a575be57c1c85d16ec92d07112baaeface) feat: Azure Service Bus as EventSource (#2229)
+ * [c5e5cfc4](https://github.com/argoproj/argo-events/commit/c5e5cfc442fa43c6c5dc33987dcda36e2f438408) Property name typo in Expr filter documentation (#2231)
+ * [3ff81754](https://github.com/argoproj/argo-events/commit/3ff81754d89aa44dd78014f57a06bb6b8a937dee) chore(deps): bump dependabot/fetch-metadata from 1.3.3 to 1.3.4 (#2227)
+ * [c1af4fc6](https://github.com/argoproj/argo-events/commit/c1af4fc63702395eeb76fb807c82f98ff9921f1b) chore(deps): bump google.golang.org/api from 0.97.0 to 0.98.0 (#2226)
+ * [05b5764a](https://github.com/argoproj/argo-events/commit/05b5764a98b763be3b7e6f85de34b42be7c16f16) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.105 to 1.44.109 (#2224)
+ * [d5632222](https://github.com/argoproj/argo-events/commit/d563222249bb19dc387c3da381746ab17d195506) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.35 to 7.0.39 (#2225)
+ * [d4f53b67](https://github.com/argoproj/argo-events/commit/d4f53b674176421d5f07a5af696bdd5f967aacad) chore(deps): bump github.com/Shopify/sarama from 1.35.0 to 1.37.0 (#2223)
+
+### Contributors
+
+ * Aalok Ahluwalia
+ * AdamKorcz
+ * Derek Wang
+ * GoshaDo
+ * Jorge
+ * Julie Vogelman
+ * Ole-Martin Bratteng
+ * Peter Hoellig
+ * Prema
+ * dependabot[bot]
+ * emmayylu
+ * joepk
+
 ## v1.7.3 (2022-09-28)
 
  * [c11f9147](https://github.com/argoproj/argo-events/commit/c11f91471077d781950451dbd41096b2f3d65d94) Update manifests to v1.7.3
