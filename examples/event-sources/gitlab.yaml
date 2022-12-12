@@ -14,7 +14,7 @@ spec:
       projects:
         - "whynowy/test"
         - "3"
-      # Github will send events to following port and endpoint
+      # GitLab will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
         endpoint: /push
