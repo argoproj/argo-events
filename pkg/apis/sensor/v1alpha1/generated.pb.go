@@ -4267,6 +4267,14 @@ func (m *Trigger) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	i--
+	if m.AtleastOnce {
+		dAtA[i] = 1
+	} else {
+		dAtA[i] = 0
+	}
+	i--
+	dAtA[i] = 0x30
 	if m.RateLimit != nil {
 		{
 			size, err := m.RateLimit.MarshalToSizedBuffer(dAtA[:i])
@@ -5741,6 +5749,7 @@ func (m *Trigger) Size() (n int) {
 		l = m.RateLimit.Size()
 		n += 1 + l + sovGenerated(uint64(l))
 	}
+	n += 2
 	return n
 }
 
@@ -6620,6 +6629,7 @@ func (this *Trigger) String() string {
 		`Policy:` + strings.Replace(this.Policy.String(), "TriggerPolicy", "TriggerPolicy", 1) + `,`,
 		`RetryStrategy:` + strings.Replace(fmt.Sprintf("%v", this.RetryStrategy), "Backoff", "common.Backoff", 1) + `,`,
 		`RateLimit:` + strings.Replace(this.RateLimit.String(), "RateLimit", "RateLimit", 1) + `,`,
+		`AtleastOnce:` + fmt.Sprintf("%v", this.AtleastOnce) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -15337,6 +15347,26 @@ func (m *Trigger) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AtleastOnce", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.AtleastOnce = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipGenerated(dAtA[iNdEx:])
