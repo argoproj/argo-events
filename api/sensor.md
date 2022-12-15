@@ -3404,8 +3404,8 @@ Rate limit, default unit is Second
 <em>(Optional)</em>
 <p>
 AtLeastOnce determines the trigger execution semantics Defaults to
-false. Trigger execution will use AtMostOnce semantics If set to true,
-Trigger execution will switch to AtLeastOnce semantics
+false. Trigger execution will use at-most-once semantics If set to true,
+Trigger execution will switch to at-least-once semantics
 </p>
 </td>
 </tr>
