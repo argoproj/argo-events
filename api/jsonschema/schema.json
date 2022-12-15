@@ -4139,8 +4139,8 @@
     "io.argoproj.sensor.v1alpha1.Trigger": {
       "description": "Trigger is an action taken, output produced, an event created, a message sent",
       "properties": {
-        "atleastOnce": {
-          "description": "Delivery Semantics is AtmostOnce by default It could be changed to AtleastOnce by setting AtleastOnce = true",
+        "atLeastOnce": {
+          "description": "AtLeastOnce determines the trigger execution semantics Defaults to false. Trigger execution uses AtMostOnce semantics If set to true, Trigger execution uses AtLeastOnce semantics",
           "type": "boolean"
         },
         "parameters": {
