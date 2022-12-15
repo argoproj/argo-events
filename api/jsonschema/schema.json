@@ -4140,7 +4140,7 @@
       "description": "Trigger is an action taken, output produced, an event created, a message sent",
       "properties": {
         "atLeastOnce": {
-          "description": "AtLeastOnce determines the trigger execution semantics Defaults to false. Trigger execution uses AtMostOnce semantics If set to true, Trigger execution uses AtLeastOnce semantics",
+          "description": "AtLeastOnce determines the trigger execution semantics Defaults to false. Trigger execution will use AtMostOnce semantics If set to true, Trigger execution will switch to AtLeastOnce semantics",
           "type": "boolean"
         },
         "parameters": {
