@@ -805,6 +805,12 @@ message Trigger {
   // Rate limit, default unit is Second
   // +optional
   optional RateLimit rateLimit = 5;
+
+  // Delivery Semantics is AtmostOnce by default
+  // It could be changed to AtleastOnce by setting AtleastOnce = true
+  // +kubebuilder:default=false
+  // +optional
+  optional bool atleastOnce = 6;
 }
 
 // TriggerParameter indicates a passed parameter to a service template

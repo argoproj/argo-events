@@ -3099,6 +3099,18 @@ Rate limit, default unit is Second
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>atleastOnce</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Delivery Semantics is AtmostOnce by default It could be changed to
+AtleastOnce by setting AtleastOnce = true
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TriggerParameter">
