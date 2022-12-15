@@ -3101,13 +3101,14 @@ Rate limit, default unit is Second
 </tr>
 <tr>
 <td>
-<code>atleastOnce</code></br> <em> bool </em>
+<code>atLeastOnce</code></br> <em> bool </em>
 </td>
 <td>
 <em>(Optional)</em>
 <p>
-Delivery Semantics is AtmostOnce by default It could be changed to
-AtleastOnce by setting AtleastOnce = true
+AtLeastOnce determines the trigger execution semantics Defaults to
+false. Trigger execution uses AtMostOnce semantics If set to true,
+Trigger execution uses AtLeastOnce semantics
 </p>
 </td>
 </tr>

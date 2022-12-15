@@ -324,11 +324,12 @@ type Trigger struct {
 	// Rate limit, default unit is Second
 	// +optional
 	RateLimit *RateLimit `json:"rateLimit,omitempty" protobuf:"bytes,5,opt,name=rateLimit"`
-	// Delivery Semantics is AtmostOnce by default
-	// It could be changed to AtleastOnce by setting AtleastOnce = true
+	// AtLeastOnce determines the trigger execution semantics
+	// Defaults to false. Trigger execution uses AtMostOnce semantics
+	// If set to true, Trigger execution uses AtLeastOnce semantics
 	// +kubebuilder:default=false
 	// +optional
-	AtleastOnce bool `json:"atleastOnce,omitempty" protobuf:"varint,6,opt,name=atleastOnce"`
+	AtLeastOnce bool `json:"atLeastOnce,omitempty" protobuf:"varint,6,opt,name=atLeastOnce"`
 }
 
 type RateLimiteUnit string

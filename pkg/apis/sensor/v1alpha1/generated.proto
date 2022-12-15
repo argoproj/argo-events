@@ -806,11 +806,12 @@ message Trigger {
   // +optional
   optional RateLimit rateLimit = 5;
 
-  // Delivery Semantics is AtmostOnce by default
-  // It could be changed to AtleastOnce by setting AtleastOnce = true
+  // AtLeastOnce determines the trigger execution semantics
+  // Defaults to false. Trigger execution uses AtMostOnce semantics
+  // If set to true, Trigger execution uses AtLeastOnce semantics
   // +kubebuilder:default=false
   // +optional
-  optional bool atleastOnce = 6;
+  optional bool atLeastOnce = 6;
 }
 
 // TriggerParameter indicates a passed parameter to a service template
