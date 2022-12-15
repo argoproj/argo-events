@@ -2316,7 +2316,7 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 					},
 					"atLeastOnce": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AtLeastOnce determines the trigger execution semantics Defaults to false. Trigger execution will use at-most-once semantics If set to true, Trigger execution will switch to at-least-once semantics",
+							Description: "AtLeastOnce determines the trigger execution semantics. Defaults to false. Trigger execution will use at-most-once semantics. If set to true, Trigger execution will switch to at-least-once semantics.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
