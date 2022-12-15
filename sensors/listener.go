@@ -331,7 +331,11 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		depNames = append(depNames, k)
 		eventIDs = append(eventIDs, v.ID())
 	}
-	go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	if trigger.AtleastOnce {
+		sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	} else {
+		go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	}
 }
 
 func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) {
