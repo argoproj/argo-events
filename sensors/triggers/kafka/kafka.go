@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -194,13 +195,21 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		pk = trigger.URL
 	}
 
-	t.Producer.Input() <- &sarama.ProducerMessage{
+	if trigger.Partition == -1 {
+		pk = uuid.New().String()
+	}
+
+	msg := &sarama.ProducerMessage{
 		Topic:     trigger.Topic,
 		Key:       sarama.StringEncoder(pk),
 		Value:     sarama.ByteEncoder(payload),
-		Partition: trigger.Partition,
 		Timestamp: time.Now().UTC(),
 	}
+
+	if trigger.Partition != -1 {
+		msg.Partition = trigger.Partition
+	}
+	t.Producer.Input() <- msg
 
 	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic), zap.Any("partition", trigger.Partition))
 
