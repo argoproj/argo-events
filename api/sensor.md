@@ -1813,10 +1813,13 @@ Name of the topic. More info at
 <code>partition</code></br> <em> int32 </em>
 </td>
 <td>
-(Optional)
+<em>(Optional)</em>
 <p>
-Partition to write data to.</br> By default the value is “0” <br/> to use random partition you need set “-1” <a href="https://www.confluent.io/blog/apache-kafka-producer-improvements-sticky-partitioner/"> 
-When is setted -1 the behavior is to hash the key(uuid) of a record to get the partition<a/>
+Partition to write data to. By default the value is “0” to use random
+partition you need set “-1” more info at
+“<a href="https://www.confluent.io/blog/apache-kafka-producer-improvements-sticky-partitioner/">https://www.confluent.io/blog/apache-kafka-producer-improvements-sticky-partitioner/</a>
+When is setted -1 the behavior is to hash the key(uuid) of a record to
+get the partition<a/>
 </p>
 </td>
 </tr>

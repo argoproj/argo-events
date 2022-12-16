@@ -568,7 +568,10 @@ type KafkaTrigger struct {
 	// Name of the topic.
 	// More info at https://kafka.apache.org/documentation/#intro_topics
 	Topic string `json:"topic" protobuf:"bytes,2,opt,name=topic"`
+	// +optional
 	// Partition to write data to.
+	// By default the value is “0” to use random partition you need set “-1”  more info at "https://www.confluent.io/blog/apache-kafka-producer-improvements-sticky-partitioner/
+	// When is setted -1 the behavior is to hash the key(uuid) of a record to get the partition<a/>
 	Partition int32 `json:"partition" protobuf:"varint,3,opt,name=partition"`
 	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
