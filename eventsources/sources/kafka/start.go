@@ -96,14 +96,14 @@ func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.Sug
 
 	switch kafkaEventSource.ConsumerGroup.RebalanceStrategy {
 	case "sticky":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+		config.Consumer.Group.Rebalance.GroupStrategies = []BalanceStrategy{sarama.BalanceStrategySticky}
 	case "roundrobin":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+		config.Consumer.Group.Rebalance.GroupStrategies = []BalanceStrategy{sarama.BalanceStrategyRoundRobin}
 	case "range":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.GroupStrategies = []BalanceStrategy{sarama.BalanceStrategyRange}
 	default:
 		log.Info("Invalid rebalance strategy, using default: range")
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.GroupStrategies = []BalanceStrategy{sarama.BalanceStrategyRange}
 	}
 
 	consumer := Consumer{
