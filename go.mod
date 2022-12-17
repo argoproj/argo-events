@@ -19,6 +19,7 @@ require (
 	github.com/antonmedv/expr v1.9.0
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.8.1
+	github.com/argoproj/notifications-engine v0.3.1-0.20221203221941-490d98afd1d6
 	github.com/argoproj/pkg v0.13.6
 	github.com/aws/aws-sdk-go v1.44.157
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
@@ -98,7 +99,6 @@ require (
 	github.com/RocketChat/Rocket.Chat.Go.SDK v0.0.0-20210112200207-10ab4d695d60 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apache/pulsar-client-go/oauth2 v0.0.0-20220120090717-25e59572242e // indirect
-	github.com/argoproj/notifications-engine v0.3.1-0.20221203221941-490d98afd1d6 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
