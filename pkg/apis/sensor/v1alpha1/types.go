@@ -677,12 +677,42 @@ type SlackTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
 	SlackToken *corev1.SecretKeySelector `json:"slackToken,omitempty" protobuf:"bytes,2,opt,name=slackToken"`
-	// Channel refers to which Slack channel to send slack message.
+	// Channel refers to which Slack channel to send Slack message.
 	// +optional
 	Channel string `json:"channel,omitempty" protobuf:"bytes,3,opt,name=channel"`
 	// Message refers to the message to send to the Slack channel.
 	// +optional
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
+	// Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .
+	// +optional
+	Attachments string `json:"attachments,omitempty" protobuf:"bytes,5,opt,name=attachments"`
+	// Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .
+	// +optional
+	Blocks string `json:"blocks,omitempty" protobuf:"bytes,6,opt,name=blocks"`
+	// Thread refers to additional options for sending messages to a Slack thread.
+	// +optional
+	Thread SlackThread `json:"thread,omitempty" protobuf:"bytes,7,opt,name=thread"`
+	// Sender refers to additional configuration of the Slack application that sends the message.
+	// +optional
+	Sender SlackSender `json:"sender,omitempty" protobuf:"bytes,8,opt,name=sender"`
+}
+
+type SlackSender struct {
+	// Username is the Slack application's username
+	// +optional
+	Username string `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
+	// Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png
+	// +optional
+	Icon string `json:"icon,omitempty" protobuf:"bytes,2,opt,name=icon"`
+}
+
+type SlackThread struct {
+	// MessageAggregationKey allows to aggregate the messages to a thread by some key.
+	// +optional
+	MessageAggregationKey string `json:"messageAggregationKey,omitempty" protobuf:"bytes,1,opt,name=messageAggregationKey"`
+	// BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel
+	// +optional
+	BroadcastMessageToChannel bool `json:"broadcastMessageToChannel,omitempty" protobuf:"bytes,2,opt,name=broadcastMessageToChannel"`
 }
 
 // OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
