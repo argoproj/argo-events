@@ -62,6 +62,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":                 schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":                 schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":               schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackSender":                schema_pkg_apis_sensor_v1alpha1_SlackSender(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackThread":                schema_pkg_apis_sensor_v1alpha1_SlackThread(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger":               schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger":         schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":               schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
@@ -1894,6 +1896,58 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_SlackSender(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username is the Slack application's username",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"icon": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_SlackThread(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"messageAggregationKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MessageAggregationKey allows to aggregate the messages to a thread by some key.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"broadcastMessageToChannel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1923,7 +1977,7 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 					},
 					"channel": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Channel refers to which Slack channel to send slack message.",
+							Description: "Channel refers to which Slack channel to send Slack message.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1935,11 +1989,39 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"attachments": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"blocks": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"thread": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Thread refers to additional options for sending messages to a Slack thread.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackThread"),
+						},
+					},
+					"sender": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Sender refers to additional configuration of the Slack application that sends the message.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackSender"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackSender", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackThread", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
