@@ -1262,7 +1262,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					},
 					"partition": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Partition to write data to. By default the value is “0” to use random partition you need set “-1”  more info at \"https://www.confluent.io/blog/apache-kafka-producer-improvements-sticky-partitioner/ When is setted -1 the behavior is to hash the key(uuid) of a record to get the partition<a/>",
+							Description: "Partition to write data to. By default the value is “0”. To use random partition you need set “-1” When is setted -1 the behavior is to hash the key(uuid) of a record to get the partition<a/>",
 							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int32",
