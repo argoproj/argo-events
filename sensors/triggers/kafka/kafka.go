@@ -185,6 +185,10 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
+	if trigger.Partition == -1 && trigger.PartitioningKey != "" {
+		return nil, fmt.Errorf("partitioningKey cannot be set if the partition is -1")
+	}
+
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)
 	if err != nil {
 		return nil, err
@@ -195,18 +199,16 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		pk = trigger.URL
 	}
 
-	if trigger.Partition == -1 {
-		pk = uuid.New().String()
-	}
-
 	msg := &sarama.ProducerMessage{
 		Topic:     trigger.Topic,
-		Key:       sarama.StringEncoder(pk),
 		Value:     sarama.ByteEncoder(payload),
 		Timestamp: time.Now().UTC(),
 	}
 
-	if trigger.Partition != -1 {
+	if trigger.Partition == -1 && trigger.PartitioningKey == "" {
+		msg.Key = sarama.StringEncoder(uuid.New().String())
+	} else {
+		msg.Key = sarama.StringEncoder(pk)
 		msg.Partition = trigger.Partition
 	}
 	t.Producer.Input() <- msg
