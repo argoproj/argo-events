@@ -3939,11 +3939,45 @@
       },
       "type": "object"
     },
+    "io.argoproj.sensor.v1alpha1.SlackSender": {
+      "properties": {
+        "icon": {
+          "description": "Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png",
+          "type": "string"
+        },
+        "username": {
+          "description": "Username is the Slack application's username",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.sensor.v1alpha1.SlackThread": {
+      "properties": {
+        "broadcastMessageToChannel": {
+          "description": "BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel",
+          "type": "boolean"
+        },
+        "messageAggregationKey": {
+          "description": "MessageAggregationKey allows to aggregate the messages to a thread by some key.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "io.argoproj.sensor.v1alpha1.SlackTrigger": {
       "description": "SlackTrigger refers to the specification of the slack notification trigger.",
       "properties": {
+        "attachments": {
+          "description": "Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .",
+          "type": "string"
+        },
+        "blocks": {
+          "description": "Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .",
+          "type": "string"
+        },
         "channel": {
-          "description": "Channel refers to which Slack channel to send slack message.",
+          "description": "Channel refers to which Slack channel to send Slack message.",
           "type": "string"
         },
         "message": {
@@ -3957,9 +3991,17 @@
           },
           "type": "array"
         },
+        "sender": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackSender",
+          "description": "Sender refers to additional configuration of the Slack application that sends the message."
+        },
         "slackToken": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "SlackToken refers to the Kubernetes secret that holds the slack token required to send messages."
+        },
+        "thread": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackThread",
+          "description": "Thread refers to additional options for sending messages to a Slack thread."
         }
       },
       "type": "object"

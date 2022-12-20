@@ -680,6 +680,26 @@ message SensorStatus {
   optional github.com.argoproj.argo_events.pkg.apis.common.Status status = 1;
 }
 
+message SlackSender {
+  // Username is the Slack application's username
+  // +optional
+  optional string username = 1;
+
+  // Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png
+  // +optional
+  optional string icon = 2;
+}
+
+message SlackThread {
+  // MessageAggregationKey allows to aggregate the messages to a thread by some key.
+  // +optional
+  optional string messageAggregationKey = 1;
+
+  // BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel
+  // +optional
+  optional bool broadcastMessageToChannel = 2;
+}
+
 // SlackTrigger refers to the specification of the slack notification trigger.
 message SlackTrigger {
   // Parameters is the list of key-value extracted from event's payload that are applied to
@@ -690,13 +710,29 @@ message SlackTrigger {
   // SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
   optional k8s.io.api.core.v1.SecretKeySelector slackToken = 2;
 
-  // Channel refers to which Slack channel to send slack message.
+  // Channel refers to which Slack channel to send Slack message.
   // +optional
   optional string channel = 3;
 
   // Message refers to the message to send to the Slack channel.
   // +optional
   optional string message = 4;
+
+  // Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .
+  // +optional
+  optional string attachments = 5;
+
+  // Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .
+  // +optional
+  optional string blocks = 6;
+
+  // Thread refers to additional options for sending messages to a Slack thread.
+  // +optional
+  optional SlackThread thread = 7;
+
+  // Sender refers to additional configuration of the Slack application that sends the message.
+  // +optional
+  optional SlackSender sender = 8;
 }
 
 // StandardK8STrigger is the standard Kubernetes resource trigger

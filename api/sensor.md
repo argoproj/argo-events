@@ -2724,6 +2724,99 @@ github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.SlackSender">
+SlackSender
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>username</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Username is the Slack application’s username
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>icon</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Icon is the Slack application’s icon, e.g. :robot_face: or
+<a href="https://example.com/image.png">https://example.com/image.png</a>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.SlackThread">
+SlackThread
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>messageAggregationKey</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MessageAggregationKey allows to aggregate the messages to a thread by
+some key.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>broadcastMessageToChannel</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+BroadcastMessageToChannel allows to also broadcast the message from the
+thread to the channel
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.SlackTrigger">
 SlackTrigger
 </h3>
@@ -2783,7 +2876,7 @@ required to send messages.
 <td>
 <em>(Optional)</em>
 <p>
-Channel refers to which Slack channel to send slack message.
+Channel refers to which Slack channel to send Slack message.
 </p>
 </td>
 </tr>
@@ -2795,6 +2888,60 @@ Channel refers to which Slack channel to send slack message.
 <em>(Optional)</em>
 <p>
 Message refers to the message to send to the Slack channel.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>attachments</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Attachments is a JSON format string that represents an array of Slack
+attachments according to the attachments API:
+<a href="https://api.slack.com/reference/messaging/attachments">https://api.slack.com/reference/messaging/attachments</a>
+.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>blocks</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Blocks is a JSON format string that represents an array of Slack blocks
+according to the blocks API:
+<a href="https://api.slack.com/reference/block-kit/blocks">https://api.slack.com/reference/block-kit/blocks</a>
+.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>thread</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackThread"> SlackThread </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Thread refers to additional options for sending messages to a Slack
+thread.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sender</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackSender"> SlackSender </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Sender refers to additional configuration of the Slack application that
+sends the message.
 </p>
 </td>
 </tr>
