@@ -67,7 +67,7 @@ Participation in the Argo Events project is governed by
 the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
 
 [Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested take a look
-at our [Contributing Guidelines](./CONTRIBUTING.md).
+at our [Contributing Guidelines](./docs/CONTRIBUTING.md).
 
 ## License
 
