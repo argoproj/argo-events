@@ -185,7 +185,8 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
-	if trigger.Partition == -1 && trigger.PartitioningKey != "" {
+	pk := trigger.PartitioningKey
+	if trigger.Partition == -1 && pk != "" {
 		return nil, fmt.Errorf("partitioningKey cannot be set if the partition is -1")
 	}
 
@@ -194,7 +195,6 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, err
 	}
 
-	pk := trigger.PartitioningKey
 	if pk == "" {
 		pk = trigger.URL
 	}
