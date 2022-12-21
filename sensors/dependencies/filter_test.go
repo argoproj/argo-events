@@ -628,45 +628,39 @@ func TestFilter(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
 			Exprs: []v1alpha1.ExprFilter{
 				{
-					// C
-					Expr: `committer_email == "definitely-wrong"`, // this will be wrong
+					Expr: `A == "not-valid"`, // this will evaluate to false
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "body.head_commit.committer.email",
-							Name: "committer_email",
+							Path: "a.b",
+							Name: "A",
 						},
 					},
 				},
 			},
 			Data: []v1alpha1.DataFilter{ // these evaluate to false
 				{
-					Path:  "body.ref",
+					Path:  "a.d.e.f",
 					Type:  "string",
-					Value: []string{"definitely-wrong"},
+					Value: []string{"not-valid"},
 				},
 				{
-					Path:  "body.repository.full_name",
+					Path:  "a.h.i",
 					Type:  "string",
-					Value: []string{"foo/bar"},
-				},
-				{
-					Path:  "[body.commits.#.modified.#()#,body.commits.#.added.#()#,body.commits.#.removed.#()#]|@flatten|@flatten",
-					Type:  "string",
-					Value: []string{"^.*README.*$", "^.*service_metadata.*$"},
+					Value: []string{"not-valid", "not-valid-2"},
 				},
 			},
 		}
 
 		eventDataBytes, err := json.Marshal(map[string]interface{}{
-			"body": map[string]interface{}{
-				"ref": "foo",
-				"head_commit": map[string]interface{}{
-					"committer": map[string]interface{}{
-						"email": "aaren@adobe.com",
+			"a": map[string]interface{}{
+				"b": "c",
+				"d": map[string]interface{}{
+					"e": map[string]interface{}{
+						"f": "g",
 					},
 				},
-				"repository": map[string]interface{}{
-					"full_name": "anything/anything",
+				"h": map[string]interface{}{
+					"i": "j",
 				},
 			},
 		})
