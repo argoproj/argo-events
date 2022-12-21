@@ -17,6 +17,7 @@ limitations under the License.
 package dependencies
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -621,6 +622,74 @@ func TestFilter(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.True(t, pass)
+	})
+
+	t.Run("filtersLogicalOperator == 'or' with only a subset of filters specified", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			Exprs: []v1alpha1.ExprFilter{
+				{
+					// C
+					Expr: `committer_email == "definitely-wrong"`, // this will be wrong
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "body.head_commit.committer.email",
+							Name: "committer_email",
+						},
+					},
+				},
+			},
+			Data: []v1alpha1.DataFilter{ // these evaluate to false
+				{
+					Path:  "body.ref",
+					Type:  "string",
+					Value: []string{"definitely-wrong"},
+				},
+				{
+					Path:  "body.repository.full_name",
+					Type:  "string",
+					Value: []string{"foo/bar"},
+				},
+				{
+					Path:  "[body.commits.#.modified.#()#,body.commits.#.added.#()#,body.commits.#.removed.#()#]|@flatten|@flatten",
+					Type:  "string",
+					Value: []string{"^.*README.*$", "^.*service_metadata.*$"},
+				},
+			},
+		}
+
+		eventDataBytes, err := json.Marshal(map[string]interface{}{
+			"body": map[string]interface{}{
+				"ref": "foo",
+				"head_commit": map[string]interface{}{
+					"committer": map[string]interface{}{
+						"email": "aaren@adobe.com",
+					},
+				},
+				"repository": map[string]interface{}{
+					"full_name": "anything/anything",
+				},
+			},
+		})
+
+		assert.NoError(t, err)
+
+		// should return false because the two filters above evaluate to false
+		filtersLogicalOperator := v1alpha1.OrLogicalOperator
+
+		now := time.Now().UTC()
+		event := &v1alpha1.Event{
+			Context: &v1alpha1.EventContext{
+				Time: metav1.Time{
+					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+				},
+			},
+			Data: eventDataBytes,
+		}
+
+		pass, err := filterEvent(filter, filtersLogicalOperator, event)
+
+		assert.NoError(t, err)
+		assert.False(t, pass)
 	})
 
 	t.Run("test advanced logic: (A || B) || (C || D)", func(t *testing.T) {
