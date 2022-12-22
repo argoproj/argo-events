@@ -1,22 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook
+  name: another-slack
 spec:
+  eventBusName: codefresh-eventbus
   dependencies:
+    - name: push-commit
+      eventSourceName: push-commit
+      eventName: push-commit
     - name: test-dep
       eventSourceName: webhook
       eventName: example
   triggers:
-    - template:
-        name: slack-trigger
-        slack:
-          channel: general
-          message: hello world
-          slackToken:
-            key: token
-            name: slack-secret
-      parameters:
+    - parameters:
         - src:
             dependencyName: test-dep
             dataKey: body.channel
@@ -24,4 +20,110 @@ spec:
         - src:
             dependencyName: test-dep
             dataKey: body.message
-          dest: slack.message
+          dest:
+            slack.message
+      template:
+        conditions: "push-commit || test-dep"
+        name: slack-trigger
+        slack:
+          slackToken:
+            key: token
+            name: slack-secret
+          channel: general
+          message: hello world
+
+#          # For more info about Attachments API: https://api.slack.com/reference/messaging/attachments
+#          attachments: |
+#            [{
+#              "title": "Attachment1!",
+#              "title_link": "https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/",
+#              "color": "#18be52",
+#              "fields": [{
+#                "title": "Hello1",
+#                "value": "Hello World1",
+#                "short": true
+#              }, {
+#                "title": "Hello2",
+#                "value": "Hello World2",
+#                "short": true
+#              }]
+#            }, {
+#              "title": "Attachment2!",
+#              "title_link": "https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/",
+#              "color": "#18be52",
+#              "fields": [{
+#                "title": "Hello1",
+#                "value": "Hello World1",
+#                "short": true
+#              }, {
+#                "title": "Hello2",
+#                "value": "Hello World2",
+#                "short": true
+#              }]
+#            }]
+#
+#          # For more info about Blocks API: https://api.slack.com/reference/block-kit/blocks
+#          blocks: |
+#            [{
+#              "type": "actions",
+#              "block_id": "actionblock789",
+#              "elements": [{
+#                  "type": "datepicker",
+#                  "action_id": "datepicker123",
+#                  "initial_date": "1990-04-28",
+#                  "placeholder": {
+#                    "type": "plain_text",
+#                    "text": "Select a date"
+#                  }
+#                },
+#                {
+#                  "type": "overflow",
+#                  "options": [{
+#                      "text": {
+#                        "type": "plain_text",
+#                        "text": "*this is plain_text text*"
+#                      },
+#                      "value": "value-0"
+#                    },
+#                    {
+#                      "text": {
+#                        "type": "plain_text",
+#                        "text": "*this is plain_text text*"
+#                      },
+#                      "value": "value-1"
+#                    },
+#                    {
+#                      "text": {
+#                        "type": "plain_text",
+#                        "text": "*this is plain_text text*"
+#                      },
+#                      "value": "value-2"
+#                    },
+#                    {
+#                      "text": {
+#                        "type": "plain_text",
+#                        "text": "*this is plain_text text*"
+#                      },
+#                      "value": "value-3"
+#                    },
+#                    {
+#                      "text": {
+#                        "type": "plain_text",
+#                        "text": "*this is plain_text text*"
+#                      },
+#                      "value": "value-4"
+#                    }
+#                  ],
+#                  "action_id": "overflow"
+#                },
+#                {
+#                  "type": "button",
+#                  "text": {
+#                    "type": "plain_text",
+#                    "text": "Click Me"
+#                  },
+#                  "value": "click_me_123",
+#                  "action_id": "button"
+#                }
+#              ]
+#            }]
