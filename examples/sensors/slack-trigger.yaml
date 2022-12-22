@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: another-slack
+  name: webhook
 spec:
   eventBusName: codefresh-eventbus
   dependencies:
