@@ -16,8 +16,7 @@ spec:
         - src:
             dependencyName: test-dep
             dataKey: body.message
-          dest:
-            slack.message
+          dest: slack.message
       template:
         name: slack-trigger
         slack:
