@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -185,18 +184,9 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
-	pk := trigger.PartitioningKey
-	if trigger.Partition == -1 && pk != "" {
-		return nil, fmt.Errorf("partitioningKey cannot be set if the partition is -1")
-	}
-
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)
 	if err != nil {
 		return nil, err
-	}
-
-	if pk == "" {
-		pk = trigger.URL
 	}
 
 	msg := &sarama.ProducerMessage{
@@ -205,15 +195,13 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		Timestamp: time.Now().UTC(),
 	}
 
-	if trigger.Partition == -1 && trigger.PartitioningKey == "" {
-		msg.Key = sarama.StringEncoder(uuid.New().String())
-	} else {
-		msg.Key = sarama.StringEncoder(pk)
-		msg.Partition = trigger.Partition
+	if trigger.PartitioningKey != nil {
+		msg.Key = sarama.StringEncoder(*trigger.PartitioningKey)
 	}
+
 	t.Producer.Input() <- msg
 
-	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic), zap.Any("partition", trigger.Partition))
+	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic))
 
 	return nil, nil
 }

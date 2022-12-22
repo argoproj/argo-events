@@ -1264,7 +1264,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					},
 					"partition": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Partition to write data to. By default the value is “0”. To use random partition you need set “-1” When is setted -1 the behavior is to hash the key(uuid) of a record to get the partition<a/>",
+							Description: "DEPRECATED",
 							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int32",
@@ -1327,7 +1327,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					},
 					"partitioningKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The partitioning key for the messages put on the Kafka topic. Defaults to broker url.",
+							Description: "The partitioning key for the messages put on the Kafka topic.",
 							Type:        []string{"string"},
 							Format:      "",
 						},

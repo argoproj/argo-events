@@ -569,9 +569,7 @@ type KafkaTrigger struct {
 	// More info at https://kafka.apache.org/documentation/#intro_topics
 	Topic string `json:"topic" protobuf:"bytes,2,opt,name=topic"`
 	// +optional
-	// Partition to write data to.
-	// By default the value is “0”. To use random partition you need set “-1”
-	// When is setted -1 the behavior is to hash the key(uuid) of a record to get the partition<a/>
+	// DEPRECATED
 	Partition int32 `json:"partition" protobuf:"varint,3,opt,name=partition"`
 	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
@@ -594,9 +592,8 @@ type KafkaTrigger struct {
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
 	// The partitioning key for the messages put on the Kafka topic.
-	// Defaults to broker url.
 	// +optional.
-	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
+	PartitioningKey *string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
 	Version string `json:"version,omitempty" protobuf:"bytes,11,opt,name=version"`
