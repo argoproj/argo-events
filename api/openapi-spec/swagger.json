@@ -197,6 +197,32 @@
         }
       }
     },
+    "io.argoproj.common.SchemaRegistryConfig": {
+      "description": "AvroConfig refers to SASL configuration for a client",
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "id": {
+          "description": "Schema ID",
+          "type": "integer",
+          "format": "int64"
+        },
+        "password": {
+          "description": "Api secret is the authentication for registry",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "url": {
+          "description": "Schema Registry URL.",
+          "type": "string"
+        },
+        "username": {
+          "description": "Api key is the authentication for registry",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
     "io.argoproj.common.SecureHeader": {
       "description": "SecureHeader refers to HTTP Headers with auth tokens as values",
       "type": "object",
@@ -3595,6 +3621,10 @@
         "sasl": {
           "description": "SASL configuration for the kafka client",
           "$ref": "#/definitions/io.argoproj.common.SASLConfig"
+        },
+        "schemaRegistry": {
+          "description": "Schema Registry configuration to producer message with avro format",
+          "$ref": "#/definitions/io.argoproj.common.SchemaRegistryConfig"
         },
         "tls": {
           "description": "TLS configuration for the Kafka producer.",

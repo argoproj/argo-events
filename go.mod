@@ -49,6 +49,7 @@ require (
 	github.com/itchyny/gojq v0.12.10
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/ktrysmt/go-bitbucket v0.9.55
+	github.com/linkedin/goavro/v2 v2.11.1
 	github.com/minio/minio-go/v7 v7.0.45
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/mitchellh/mapstructure v1.5.0
@@ -59,6 +60,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/rabbitmq/amqp091-go v1.4.0
 	github.com/radovskyb/watcher v1.0.7
+	github.com/riferrei/srclient v0.5.4
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/slack-go/slack v0.12.0
 	github.com/smartystreets/goconvey v1.7.2
@@ -119,7 +121,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/klauspost/cpuid/v2 v2.1.0 // indirect
-	github.com/linkedin/goavro/v2 v2.9.8 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -130,6 +131,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sanity-io/litter v1.5.5 // indirect
+	github.com/santhosh-tekuri/jsonschema/v5 v5.0.0 // indirect
 	github.com/whilp/git-urls v0.0.0-20191001220047-6db9661140c0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect

@@ -22,6 +22,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/linkedin/goavro/v2"
+	"github.com/riferrei/srclient"
+
 	"github.com/Shopify/sarama"
 	"go.uber.org/zap"
 
@@ -42,6 +45,27 @@ type KafkaTrigger struct {
 	Producer sarama.AsyncProducer
 	// Logger to log stuff
 	Logger *zap.SugaredLogger
+}
+
+// getSchemaFromRegistry returns a schema from registry
+func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
+	user, err := common.GetSecretFromVolume(sr.UserSecret)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user value from secret, %w", err)
+	}
+	password, err := common.GetSecretFromVolume(sr.PasswordSecret)
+	if err != nil {
+		return nil, fmt.Errorf("error getting password value from secret, %w", err)
+	}
+
+	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
+	schemaRegistryClient.SetCredentials(user, password)
+
+	schema, err := schemaRegistryClient.GetSchema(sr.SchemaId)
+	if err != nil {
+		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaId, err)
+	}
+	return schema, nil
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
@@ -187,6 +211,25 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)
 	if err != nil {
 		return nil, err
+	}
+
+	// Producer with avro schema
+	if trigger.SchemaRegistry != nil {
+		schema, err := getSchemaFromRegistry(trigger.SchemaRegistry)
+		if err != nil {
+			return nil, err
+		}
+		println(schema.Schema())
+
+		codec, err := goavro.NewCodec(schema.Schema())
+		if err != nil {
+			fmt.Println(err)
+			return nil, fmt.Errorf("failed to generate a codec of avro file. %w", err)
+		}
+		payload, err = codec.BinaryFromNative(nil, payload)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert to avro. %w", err)
+		}
 	}
 
 	pk := trigger.PartitioningKey

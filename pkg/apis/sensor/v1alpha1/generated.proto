@@ -501,6 +501,10 @@ message KafkaTrigger {
   // SASL configuration for the kafka client
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 12;
+
+  // Schema Registry configuration to producer message with avro format
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.SchemaRegistryConfig schemaRegistry = 13;
 }
 
 message LogTrigger {

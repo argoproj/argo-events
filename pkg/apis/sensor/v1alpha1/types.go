@@ -600,6 +600,9 @@ type KafkaTrigger struct {
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,12,opt,name=sasl"`
+	// Schema Registry configuration to producer message with avro format
+	// +optional
+	SchemaRegistry *apicommon.SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,13,opt,name=schemaRegistry"`
 }
 
 // PulsarTrigger refers to the specification of the Pulsar trigger.

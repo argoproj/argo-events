@@ -1926,6 +1926,19 @@ SASL configuration for the kafka client
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>schemaRegistry</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Schema Registry configuration to producer message with avro format
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.KubernetesResourceOperation">
