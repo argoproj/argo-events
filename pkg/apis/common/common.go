@@ -165,7 +165,7 @@ type SchemaRegistryConfig struct {
 	// Api secret is the authentication for registry
 	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=password"`
 	// Schema ID
-	SchemaId int `json:"schemaId,omitempty" protobuf:"varint,4,opt,name=schemaId"`
+	SchemaId int32 `json:"schemaId,omitempty" protobuf:"varint,4,opt,name=schemaId"`
 }
 
 // Backoff for an operation

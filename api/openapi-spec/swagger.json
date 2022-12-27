@@ -198,26 +198,26 @@
       }
     },
     "io.argoproj.common.SchemaRegistryConfig": {
-      "description": "AvroConfig refers to SASL configuration for a client",
+      "description": "SchemaRegistryConfig refers to configuration for a client",
       "type": "object",
       "required": [
         "url"
       ],
       "properties": {
-        "id": {
-          "description": "Schema ID",
-          "type": "integer",
-          "format": "int64"
-        },
-        "password": {
+        "passwordSecret": {
           "description": "Api secret is the authentication for registry",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "schemaId": {
+          "description": "Schema ID",
+          "type": "integer",
+          "format": "int32"
         },
         "url": {
           "description": "Schema Registry URL.",
           "type": "string"
         },
-        "username": {
+        "userSecret": {
           "description": "Api key is the authentication for registry",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }

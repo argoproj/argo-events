@@ -424,7 +424,7 @@ func schema_argo_events_pkg_apis_common_SchemaRegistryConfig(ref common.Referenc
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "AvroConfig refers to SASL configuration for a client",
+				Description: "SchemaRegistryConfig refers to configuration for a client",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"url": {
@@ -435,23 +435,23 @@ func schema_argo_events_pkg_apis_common_SchemaRegistryConfig(ref common.Referenc
 							Format:      "",
 						},
 					},
-					"username": {
+					"userSecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Api key is the authentication for registry",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"password": {
+					"passwordSecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Api secret is the authentication for registry",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"id": {
+					"schemaId": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Schema ID",
 							Type:        []string{"integer"},
-							Format:      "int64",
+							Format:      "int32",
 						},
 					},
 				},

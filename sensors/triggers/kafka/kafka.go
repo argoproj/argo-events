@@ -17,12 +17,13 @@ package kafka
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/linkedin/goavro/v2"
+	"github.com/hamba/avro"
 	"github.com/riferrei/srclient"
 
 	"github.com/Shopify/sarama"
@@ -45,27 +46,6 @@ type KafkaTrigger struct {
 	Producer sarama.AsyncProducer
 	// Logger to log stuff
 	Logger *zap.SugaredLogger
-}
-
-// getSchemaFromRegistry returns a schema from registry
-func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
-	user, err := common.GetSecretFromVolume(sr.UserSecret)
-	if err != nil {
-		return nil, fmt.Errorf("error getting user value from secret, %w", err)
-	}
-	password, err := common.GetSecretFromVolume(sr.PasswordSecret)
-	if err != nil {
-		return nil, fmt.Errorf("error getting password value from secret, %w", err)
-	}
-
-	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
-	schemaRegistryClient.SetCredentials(user, password)
-
-	schema, err := schemaRegistryClient.GetSchema(sr.SchemaId)
-	if err != nil {
-		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaId, err)
-	}
-	return schema, nil
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
@@ -213,22 +193,18 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, err
 	}
 
+	var recordValue []byte
+
 	// Producer with avro schema
 	if trigger.SchemaRegistry != nil {
 		schema, err := getSchemaFromRegistry(trigger.SchemaRegistry)
 		if err != nil {
 			return nil, err
 		}
-		println(schema.Schema())
 
-		codec, err := goavro.NewCodec(schema.Schema())
+		recordValue, err = avroParser(schema.Schema(), schema.ID(), payload)
 		if err != nil {
-			fmt.Println(err)
-			return nil, fmt.Errorf("failed to generate a codec of avro file. %w", err)
-		}
-		payload, err = codec.BinaryFromNative(nil, payload)
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert to avro. %w", err)
+			return nil, err
 		}
 	}
 
@@ -240,7 +216,7 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	t.Producer.Input() <- &sarama.ProducerMessage{
 		Topic:     trigger.Topic,
 		Key:       sarama.StringEncoder(pk),
-		Value:     sarama.ByteEncoder(payload),
+		Value:     sarama.ByteEncoder(recordValue),
 		Partition: trigger.Partition,
 		Timestamp: time.Now().UTC(),
 	}
@@ -253,4 +229,52 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 // ApplyPolicy applies policy on the trigger
 func (t *KafkaTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	return nil
+}
+
+// getSchemaFromRegistry returns a schema from registry
+func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
+	user, err := common.GetSecretFromVolume(sr.UserSecret)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user value from secret, %w", err)
+	}
+	password, err := common.GetSecretFromVolume(sr.PasswordSecret)
+	if err != nil {
+		return nil, fmt.Errorf("error getting password value from secret, %w", err)
+	}
+
+	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
+	schemaRegistryClient.SetCredentials(user, password)
+
+	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaId))
+	if err != nil {
+		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaId, err)
+	}
+	return schema, nil
+}
+
+func avroParser(schema string, schemaID int, payload []byte) ([]byte, error) {
+	var recordValue []byte
+	var payloadNative map[string]interface{}
+
+	schemaAvro, err := avro.Parse(schema)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(payload, &payloadNative)
+	if err != nil {
+		return nil, err
+	}
+	avroNative, err := avro.Marshal(schemaAvro, payloadNative)
+	if err != nil {
+		return nil, err
+	}
+
+	schemaIDBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(schemaIDBytes, uint32(schemaID))
+	recordValue = append(recordValue, byte(0))
+	recordValue = append(recordValue, schemaIDBytes...)
+	recordValue = append(recordValue, avroNative...)
+
+	return recordValue, nil
 }
