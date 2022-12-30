@@ -233,18 +233,12 @@ func (t *KafkaTrigger) ApplyPolicy(ctx context.Context, resource interface{}) er
 
 // getSchemaFromRegistry returns a schema from registry
 func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
-	user, err := common.GetSecretFromVolume(sr.UserSecret)
-	if err != nil {
-		return nil, fmt.Errorf("error getting user value from secret, %w", err)
-	}
-	password, err := common.GetSecretFromVolume(sr.PasswordSecret)
-	if err != nil {
-		return nil, fmt.Errorf("error getting password value from secret, %w", err)
-	}
-
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
-	schemaRegistryClient.SetCredentials(user, password)
-
+	user, _ := common.GetSecretFromVolume(sr.UserSecret)
+	password, _ := common.GetSecretFromVolume(sr.PasswordSecret)
+	if user != "" && password != "" {
+		schemaRegistryClient.SetCredentials(user, password)
+	}
 	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaId))
 	if err != nil {
 		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaId, err)

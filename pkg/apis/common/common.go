@@ -160,8 +160,10 @@ type SASLConfig struct {
 type SchemaRegistryConfig struct {
 	// Schema Registry URL.
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// +optional
 	// Api key is the authentication for registry
 	UserSecret *corev1.SecretKeySelector `json:"userSecret,omitempty" protobuf:"bytes,2,opt,name=user"`
+	// +optional
 	// Api secret is the authentication for registry
 	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=password"`
 	// Schema ID
