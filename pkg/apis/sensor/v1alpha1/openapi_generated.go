@@ -1264,7 +1264,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					},
 					"partition": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Partition to write data to.",
+							Description: "DEPRECATED",
 							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int32",
@@ -1327,7 +1327,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					},
 					"partitioningKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The partitioning key for the messages put on the Kafka topic. Defaults to broker url.",
+							Description: "The partitioning key for the messages put on the Kafka topic.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1346,7 +1346,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"url", "topic", "partition", "payload"},
+				Required: []string{"url", "topic", "payload"},
 			},
 		},
 		Dependencies: []string{

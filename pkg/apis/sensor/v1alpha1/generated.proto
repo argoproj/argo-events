@@ -460,7 +460,8 @@ message KafkaTrigger {
   // More info at https://kafka.apache.org/documentation/#intro_topics
   optional string topic = 2;
 
-  // Partition to write data to.
+  // +optional
+  // DEPRECATED
   optional int32 partition = 3;
 
   // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
@@ -490,7 +491,6 @@ message KafkaTrigger {
   repeated TriggerParameter payload = 9;
 
   // The partitioning key for the messages put on the Kafka topic.
-  // Defaults to broker url.
   // +optional.
   optional string partitioningKey = 10;
 

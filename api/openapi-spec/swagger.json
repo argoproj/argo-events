@@ -3551,7 +3551,6 @@
       "required": [
         "url",
         "topic",
-        "partition",
         "payload"
       ],
       "properties": {
@@ -3572,12 +3571,12 @@
           }
         },
         "partition": {
-          "description": "Partition to write data to.",
+          "description": "DEPRECATED",
           "type": "integer",
           "format": "int32"
         },
         "partitioningKey": {
-          "description": "The partitioning key for the messages put on the Kafka topic. Defaults to broker url.",
+          "description": "The partitioning key for the messages put on the Kafka topic.",
           "type": "string"
         },
         "payload": {

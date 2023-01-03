@@ -1813,8 +1813,9 @@ Name of the topic. More info at
 <code>partition</code></br> <em> int32 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-Partition to write data to.
+DEPRECATED
 </p>
 </td>
 </tr>
@@ -1897,8 +1898,7 @@ construct the request payload.
 </td>
 <td>
 <p>
-The partitioning key for the messages put on the Kafka topic. Defaults
-to broker url.
+The partitioning key for the messages put on the Kafka topic.
 </p>
 </td>
 </tr>
