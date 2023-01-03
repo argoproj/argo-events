@@ -2114,25 +2114,25 @@
 <p>GCP Pub/Sub event-source subscribes to messages published by GCP publisher and helps sensor trigger workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;specversion&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;source&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;datacontenttype&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="s2">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;data&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;message id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="c1">// Attributes represents the key-value pairs the current message</span><span class="w"></span>
-<span class="w">        </span><span class="c1">// is labelled with.</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;attributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;key-values&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;publishTime&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;// The time at which the message was published&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;body&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;body refers to the message data&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;specversion&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;source&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;datacontenttype&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;data&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;message id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="c1">// Attributes represents the key-value pairs the current message</span>
+<span class="w">        </span><span class="c1">// is labelled with.</span>
+<span class="w">        </span><span class="s2">&quot;attributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;key-values&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;publishTime&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;// The time at which the message was published&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;body&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;body refers to the message data&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>GCP Pub/Sub event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/stable/api/event-source.md#pubsubeventsource">here</a>.</p>
@@ -2144,14 +2144,14 @@
 </li>
 <li>
 <p>Create a K8s secret called <code>gcp-credentials</code> to store the credentials file.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
-<span class="n">data</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">key</span><span class="o">.</span><span class="na">json</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">YOUR_CREDENTIALS_STRING_FROM_JSON_FILE</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
-<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">gcp</span><span class="o">-</span><span class="n">credentials</span><span class="w"></span>
-<span class="w">  </span><span class="kd">namespace</span><span class="o">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
-<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">data</span><span class="o">:</span>
+<span class="w">  </span><span class="n">key</span><span class="o">.</span><span class="na">json</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">YOUR_CREDENTIALS_STRING_FROM_JSON_FILE</span><span class="o">&gt;</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">gcp</span><span class="o">-</span><span class="n">credentials</span>
+<span class="w">  </span><span class="kd">namespace</span><span class="o">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span>
 </code></pre></div>
 
 </li>

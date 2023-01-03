@@ -2072,28 +2072,28 @@
 <p>Service Bus event-source allows you to consume messages from queus and topics in Azure Service Bus and helps sensor trigger workflows.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
-<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;applicationProperties&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ApplicationProperties can be used to store custom metadata for a message&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;body&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Body represents the message body&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;contentType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ContentType is the MIME content type&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;correlationID&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;CorrelationID is the correlation identifier&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;enqueuedTime&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;EnqueuedTime is the time when the message was enqueued&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;messageID&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ID of the message&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;replyTo&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ReplyTo is an application-defined value specify a reply path to the receiver of the message&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;sequenceNumber&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;SequenceNumber is a unique number assigned to a message by Service Bus&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Subject enables an application to indicate the purpose of the message, similar to an email subject line&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&quot;applicationProperties&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ApplicationProperties can be used to store custom metadata for a message&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;body&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Body represents the message body&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;contentType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ContentType is the MIME content type&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;correlationID&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;CorrelationID is the correlation identifier&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;enqueuedTime&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;EnqueuedTime is the time when the message was enqueued&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;messageID&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ID of the message&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;replyTo&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ReplyTo is an application-defined value specify a reply path to the receiver of the message&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;sequenceNumber&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;SequenceNumber is a unique number assigned to a message by Service Bus&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Subject enables an application to indicate the purpose of the message, similar to an email subject line&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
@@ -2106,13 +2106,13 @@
 </li>
 <li>
 <p>Create a secret called <code>azure-secret</code> as follows.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
-<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">secret</span><span class="w"></span>
-<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
-<span class="n">data</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">connectionstring</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">connection</span><span class="o">-</span><span class="n">string</span><span class="o">&gt;</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">azure</span><span class="o">-</span><span class="n">secret</span>
+<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span>
+<span class="n">data</span><span class="o">:</span>
+<span class="w">  </span><span class="n">connectionstring</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">connection</span><span class="o">-</span><span class="n">string</span><span class="o">&gt;</span>
 </code></pre></div>
 
 </li>

@@ -2134,13 +2134,13 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 </li>
 <li>
 <p>Create a secret called <code>gitlab-access</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
-<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">gitlab</span><span class="o">-</span><span class="n">access</span><span class="w"></span>
-<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
-<span class="n">data</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">gitlab</span><span class="o">-</span><span class="n">access</span>
+<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span>
+<span class="n">data</span><span class="o">:</span>
+<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span>
 </code></pre></div>
 
 </li>

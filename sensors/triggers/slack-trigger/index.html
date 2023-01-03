@@ -2146,12 +2146,12 @@
 </li>
 <li>
 <p>Create a kubernetes secret file <code>slack-secret.yaml</code> with your OAuth token in the following format.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
-<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">slack</span><span class="o">-</span><span class="n">secret</span><span class="w"></span>
-<span class="n">data</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="n">YOUR</span><span class="o">-</span><span class="n">BASE64</span><span class="o">-</span><span class="n">ENCODED</span><span class="o">-</span><span class="n">OAUTH</span><span class="o">-</span><span class="n">TOKEN</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">slack</span><span class="o">-</span><span class="n">secret</span>
+<span class="n">data</span><span class="o">:</span>
+<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="n">YOUR</span><span class="o">-</span><span class="n">BASE64</span><span class="o">-</span><span class="n">ENCODED</span><span class="o">-</span><span class="n">OAUTH</span><span class="o">-</span><span class="n">TOKEN</span>
 </code></pre></div>
 
 </li>
@@ -2180,7 +2180,7 @@
 </li>
 <li>
 <p>Alternatively, you can dynamically determine the channel and message based on parameterization of your event.</p>
-<div class="codehilite"><pre><span></span><code><span class="nv">curl</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="s1">&#39;{&quot;channel&quot;:&quot;random&quot;,&quot;message&quot;:&quot;test message&quot;}&#39;</span><span class="w"> </span><span class="o">-</span><span class="nv">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nv">X</span><span class="w"> </span><span class="nv">POST</span><span class="w"> </span><span class="nv">http</span>:<span class="o">//</span><span class="nv">localhost</span>:<span class="mi">12000</span><span class="o">/</span><span class="nv">example</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="nv">curl</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="s1">&#39;{&quot;channel&quot;:&quot;random&quot;,&quot;message&quot;:&quot;test message&quot;}&#39;</span><span class="w"> </span><span class="o">-</span><span class="nv">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nv">X</span><span class="w"> </span><span class="nv">POST</span><span class="w"> </span><span class="nv">http</span>:<span class="o">//</span><span class="nv">localhost</span>:<span class="mi">12000</span><span class="o">/</span><span class="nv">example</span>
 </code></pre></div>
 
 </li>

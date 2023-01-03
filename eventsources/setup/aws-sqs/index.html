@@ -2086,26 +2086,26 @@
 <p>SQS event-source listens to messages on AWS SQS queue and helps sensor trigger workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code><span class="w">        </span>{<span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;context&quot;</span>:<span class="w"> </span>{<span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;type&quot;</span>:<span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span>,<span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;specversion&quot;</span>:<span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span>,<span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;source&quot;</span>:<span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span>,<span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span>,<span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;time&quot;</span>:<span class="w"> </span><span class="s2">&quot;event_time&quot;</span>,<span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;datacontenttype&quot;</span>:<span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span>,<span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;subject&quot;</span>:<span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
-<span class="w">            </span>},<span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;data&quot;</span>:<span class="w"> </span>{<span class="w"></span>
-<span class="w">             </span><span class="s2">&quot;messageId&quot;</span>:<span class="w"> </span><span class="s2">&quot;message id&quot;</span>,<span class="w"></span>
-<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="nv">Each</span><span class="w"> </span><span class="nv">message</span><span class="w"> </span><span class="nv">attribute</span><span class="w"> </span><span class="nv">consists</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">Name</span>,<span class="w"> </span><span class="nv">Type</span>,<span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">Value</span>.<span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="nv">more</span><span class="w"> </span><span class="nv">information</span>,<span class="w"></span>
-<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="nv">see</span><span class="w"> </span><span class="nv">Amazon</span><span class="w"> </span><span class="nv">SQS</span><span class="w"> </span><span class="nv">Message</span><span class="w"> </span><span class="nv">Attributes</span><span class="w"></span>
-<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="ss">(</span><span class="nv">https</span>:<span class="o">//</span><span class="nv">docs</span>.<span class="nv">aws</span>.<span class="nv">amazon</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">AWSSimpleQueueService</span><span class="o">/</span><span class="nv">latest</span><span class="o">/</span><span class="nv">SQSDeveloperGuide</span><span class="o">/</span><span class="nv">sqs</span><span class="o">-</span><span class="nv">message</span><span class="o">-</span><span class="nv">attributes</span>.<span class="nv">html</span><span class="ss">)</span><span class="w"></span>
-<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">Amazon</span><span class="w"> </span><span class="nv">Simple</span><span class="w"> </span><span class="nv">Queue</span><span class="w"> </span><span class="nv">Service</span><span class="w"> </span><span class="nv">Developer</span><span class="w"> </span><span class="nv">Guide</span>.<span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">        </span>{
+<span class="w">            </span><span class="s2">&quot;context&quot;</span>:<span class="w"> </span>{
+<span class="w">              </span><span class="s2">&quot;type&quot;</span>:<span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span>,
+<span class="w">              </span><span class="s2">&quot;specversion&quot;</span>:<span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span>,
+<span class="w">              </span><span class="s2">&quot;source&quot;</span>:<span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span>,
+<span class="w">              </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span>,
+<span class="w">              </span><span class="s2">&quot;time&quot;</span>:<span class="w"> </span><span class="s2">&quot;event_time&quot;</span>,
+<span class="w">              </span><span class="s2">&quot;datacontenttype&quot;</span>:<span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span>,
+<span class="w">              </span><span class="s2">&quot;subject&quot;</span>:<span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">            </span>},
+<span class="w">            </span><span class="s2">&quot;data&quot;</span>:<span class="w"> </span>{
+<span class="w">             </span><span class="s2">&quot;messageId&quot;</span>:<span class="w"> </span><span class="s2">&quot;message id&quot;</span>,
+<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="nv">Each</span><span class="w"> </span><span class="nv">message</span><span class="w"> </span><span class="nv">attribute</span><span class="w"> </span><span class="nv">consists</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">Name</span>,<span class="w"> </span><span class="nv">Type</span>,<span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">Value</span>.<span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="nv">more</span><span class="w"> </span><span class="nv">information</span>,
+<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="nv">see</span><span class="w"> </span><span class="nv">Amazon</span><span class="w"> </span><span class="nv">SQS</span><span class="w"> </span><span class="nv">Message</span><span class="w"> </span><span class="nv">Attributes</span>
+<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="ss">(</span><span class="nv">https</span>:<span class="o">//</span><span class="nv">docs</span>.<span class="nv">aws</span>.<span class="nv">amazon</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">AWSSimpleQueueService</span><span class="o">/</span><span class="nv">latest</span><span class="o">/</span><span class="nv">SQSDeveloperGuide</span><span class="o">/</span><span class="nv">sqs</span><span class="o">-</span><span class="nv">message</span><span class="o">-</span><span class="nv">attributes</span>.<span class="nv">html</span><span class="ss">)</span>
+<span class="w">             </span><span class="o">//</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">Amazon</span><span class="w"> </span><span class="nv">Simple</span><span class="w"> </span><span class="nv">Queue</span><span class="w"> </span><span class="nv">Service</span><span class="w"> </span><span class="nv">Developer</span><span class="w"> </span><span class="nv">Guide</span>.
 <span class="w">             </span><span class="s2">&quot;messageAttributes&quot;</span>:<span class="w"> </span><span class="s2">&quot;message attributes&quot;</span>,<span class="w"> </span>
-<span class="w">               </span><span class="s2">&quot;body&quot;</span>:<span class="w"> </span><span class="s2">&quot;Body is the message data&quot;</span>,<span class="w"></span>
-<span class="w">            </span>}<span class="w"></span>
-<span class="w">        </span>}<span class="w"></span>
+<span class="w">               </span><span class="s2">&quot;body&quot;</span>:<span class="w"> </span><span class="s2">&quot;Body is the message data&quot;</span>,
+<span class="w">            </span>}
+<span class="w">        </span>}
 </code></pre></div>
 
 <p><br/></p>
@@ -2119,14 +2119,14 @@
 </li>
 <li>
 <p>Create a secret called <code>aws-secret</code> as follows.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
-<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">aws</span><span class="o">-</span><span class="n">secret</span><span class="w"></span>
-<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
-<span class="n">data</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">accesskey</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span><span class="w"></span>
-<span class="w">  </span><span class="n">secretkey</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">aws</span><span class="o">-</span><span class="n">secret</span>
+<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span>
+<span class="n">data</span><span class="o">:</span>
+<span class="w">  </span><span class="n">accesskey</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">access</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">secretkey</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
 </code></pre></div>
 
 </li>
@@ -2153,7 +2153,7 @@
 </li>
 <li>
 <p>Dispatch a message on sqs queue.</p>
-<div class="codehilite"><pre><span></span><code><span class="nv">aws</span><span class="w"> </span><span class="nv">sqs</span><span class="w"> </span><span class="k">send</span><span class="o">-</span><span class="nv">message</span><span class="w"> </span><span class="o">--</span><span class="nv">queue</span><span class="o">-</span><span class="nv">url</span><span class="w"> </span><span class="nv">https</span>:<span class="o">//</span><span class="nv">sqs</span>.<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>.<span class="nv">amazonaws</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">XXXXX</span><span class="o">/</span><span class="nv">test</span><span class="w"> </span><span class="o">--</span><span class="nv">message</span><span class="o">-</span><span class="nv">body</span><span class="w"> </span><span class="s1">&#39;{&quot;message&quot;: &quot;hello&quot;}&#39;</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="nv">aws</span><span class="w"> </span><span class="nv">sqs</span><span class="w"> </span><span class="k">send</span><span class="o">-</span><span class="nv">message</span><span class="w"> </span><span class="o">--</span><span class="nv">queue</span><span class="o">-</span><span class="nv">url</span><span class="w"> </span><span class="nv">https</span>:<span class="o">//</span><span class="nv">sqs</span>.<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>.<span class="nv">amazonaws</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">XXXXX</span><span class="o">/</span><span class="nv">test</span><span class="w"> </span><span class="o">--</span><span class="nv">message</span><span class="o">-</span><span class="nv">body</span><span class="w"> </span><span class="s1">&#39;{&quot;message&quot;: &quot;hello&quot;}&#39;</span>
 </code></pre></div>
 
 </li>

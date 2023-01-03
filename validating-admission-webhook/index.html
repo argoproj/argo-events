@@ -2074,7 +2074,7 @@
 <a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook">Validating Admission Webhook</a>
 is introduced to the project. To install the validating webhook, use following
 command (change the version):</p>
-<div class="highlight"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/<span class="o">{</span>version<span class="o">}</span>/manifests/install-validating-webhook.yaml
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-n<span class="w"> </span>argo-events<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/argoproj/argo-events/<span class="o">{</span>version<span class="o">}</span>/manifests/install-validating-webhook.yaml
 </code></pre></div>
 <h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
 <p>Using the validating webhook has following benefits:</p>
@@ -2084,7 +2084,7 @@ command (change the version):</p>
   errors later on.</li>
 </ul>
 <p>e.g. Creating an <code>exotic</code> NATS EventBus without <code>ClusterID</code> specified:</p>
-<div class="highlight"><pre><span></span><code>cat <span class="s">&lt;&lt;EOF | kubectl create -f -</span>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span><span class="s">&lt;&lt;EOF | kubectl create -f -</span>
 <span class="s">&gt; apiVersion: argoproj.io/v1alpha1</span>
 <span class="s">&gt; kind: EventBus</span>
 <span class="s">&gt; metadata:</span>
@@ -2093,7 +2093,7 @@ command (change the version):</p>
 <span class="s">&gt;   nats:</span>
 <span class="s">&gt;     exotic: {}</span>
 <span class="s">&gt; EOF</span>
-Error from server <span class="o">(</span>BadRequest<span class="o">)</span>: error when creating <span class="s2">&quot;STDIN&quot;</span>: admission webhook <span class="s2">&quot;webhook.argo-events.argoproj.io&quot;</span> denied the request: <span class="s2">&quot;spec.nats.exotic.clusterID&quot;</span> is missing
+Error<span class="w"> </span>from<span class="w"> </span>server<span class="w"> </span><span class="o">(</span>BadRequest<span class="o">)</span>:<span class="w"> </span>error<span class="w"> </span>when<span class="w"> </span>creating<span class="w"> </span><span class="s2">&quot;STDIN&quot;</span>:<span class="w"> </span>admission<span class="w"> </span>webhook<span class="w"> </span><span class="s2">&quot;webhook.argo-events.argoproj.io&quot;</span><span class="w"> </span>denied<span class="w"> </span>the<span class="w"> </span>request:<span class="w"> </span><span class="s2">&quot;spec.nats.exotic.clusterID&quot;</span><span class="w"> </span>is<span class="w"> </span>missing
 </code></pre></div>
 <ul>
 <li>Spec updating behavior can be validated.</li>
@@ -2104,12 +2104,12 @@ Error from server <span class="o">(</span>BadRequest<span class="o">)</span>: er
   it by using the validating webhook.</p>
 <p>For example, updating Auth Strategy for a native NATS EventBus is prohibited,
   a denied response as following will be returned.</p>
-<div class="highlight"><pre><span></span><code>Error from server <span class="o">(</span>BadRequest<span class="o">)</span>: error when applying patch:
+<div class="highlight"><pre><span></span><code>Error<span class="w"> </span>from<span class="w"> </span>server<span class="w"> </span><span class="o">(</span>BadRequest<span class="o">)</span>:<span class="w"> </span>error<span class="w"> </span>when<span class="w"> </span>applying<span class="w"> </span>patch:
 <span class="o">{</span><span class="s2">&quot;metadata&quot;</span>:<span class="o">{</span><span class="s2">&quot;annotations&quot;</span>:<span class="o">{</span><span class="s2">&quot;kubectl.kubernetes.io/last-applied-configuration&quot;</span>:<span class="s2">&quot;{\&quot;apiVersion\&quot;:\&quot;argoproj.io/v1alpha1\&quot;,\&quot;kind\&quot;:\&quot;EventBus\&quot;,\&quot;metadata\&quot;:{\&quot;annotations\&quot;:{},\&quot;name\&quot;:\&quot;default\&quot;,\&quot;namespace\&quot;:\&quot;argo-events\&quot;},\&quot;spec\&quot;:{\&quot;nats\&quot;:{\&quot;native\&quot;:{\&quot;replicas\&quot;:3}}}}\n&quot;</span><span class="o">}}</span>,<span class="s2">&quot;spec&quot;</span>:<span class="o">{</span><span class="s2">&quot;nats&quot;</span>:<span class="o">{</span><span class="s2">&quot;native&quot;</span>:<span class="o">{</span><span class="s2">&quot;auth&quot;</span>:null,<span class="s2">&quot;maxAge&quot;</span>:null,<span class="s2">&quot;securityContext&quot;</span>:null<span class="o">}}}}</span>
 to:
-Resource: <span class="s2">&quot;argoproj.io/v1alpha1, Resource=eventbus&quot;</span>, GroupVersionKind: <span class="s2">&quot;argoproj.io/v1alpha1, Kind=EventBus&quot;</span>
-Name: <span class="s2">&quot;default&quot;</span>, Namespace: <span class="s2">&quot;argo-events&quot;</span>
-<span class="k">for</span>: <span class="s2">&quot;test-eventbus.yaml&quot;</span>: admission webhook <span class="s2">&quot;webhook.argo-events.argoproj.io&quot;</span> denied the request: <span class="s2">&quot;spec.nats.native.auth&quot;</span> is immutable, can not be updated
+Resource:<span class="w"> </span><span class="s2">&quot;argoproj.io/v1alpha1, Resource=eventbus&quot;</span>,<span class="w"> </span>GroupVersionKind:<span class="w"> </span><span class="s2">&quot;argoproj.io/v1alpha1, Kind=EventBus&quot;</span>
+Name:<span class="w"> </span><span class="s2">&quot;default&quot;</span>,<span class="w"> </span>Namespace:<span class="w"> </span><span class="s2">&quot;argo-events&quot;</span>
+<span class="k">for</span>:<span class="w"> </span><span class="s2">&quot;test-eventbus.yaml&quot;</span>:<span class="w"> </span>admission<span class="w"> </span>webhook<span class="w"> </span><span class="s2">&quot;webhook.argo-events.argoproj.io&quot;</span><span class="w"> </span>denied<span class="w"> </span>the<span class="w"> </span>request:<span class="w"> </span><span class="s2">&quot;spec.nats.native.auth&quot;</span><span class="w"> </span>is<span class="w"> </span>immutable,<span class="w"> </span>can<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>updated
 </code></pre></div>
 
               

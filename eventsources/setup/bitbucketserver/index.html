@@ -2100,21 +2100,21 @@
 <p>Bitbucket Server event-source programmatically configures webhooks for projects on Bitbucket Server and helps sensor trigger the workloads on events.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">              </span><span class="s2">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Body is the Bitbucket Server event payload&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">               </span><span class="s2">&quot;headers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Headers from the Bitbucket Server event&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="s2">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="s2">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s2">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s2">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s2">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="s2">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Body is the Bitbucket Server event payload&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="s2">&quot;headers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Headers from the Bitbucket Server event&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
@@ -2134,14 +2134,14 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 </li>
 <li>
 <p>Create a secret called <code>bitbucketserver-access</code> that contains your encoded Bitbucket Server API token. You can also include a secret key that is encoded with <code>base64</code> for your webhook if any.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span><span class="w"></span>
-<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">bitbucketserver</span><span class="o">-</span><span class="n">access</span><span class="w"></span>
-<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span><span class="w"></span>
-<span class="n">data</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span><span class="w"></span>
-<span class="w">  </span><span class="n">secret</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">webhook</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">bitbucketserver</span><span class="o">-</span><span class="n">access</span>
+<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span>
+<span class="n">data</span><span class="o">:</span>
+<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">secret</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">webhook</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">&gt;</span>
 </code></pre></div>
 
 </li>

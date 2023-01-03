@@ -2122,40 +2122,40 @@ set up event-driven pipelines for existing workloads.</p>
 </li>
 <li>
 <p>To trigger a pod, we need to create a sensor as defined below.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
-<span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span><span class="w"></span>
-<span class="n">spec</span><span class="o">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">template</span><span class="o">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">serviceAccountName</span><span class="o">:</span><span class="w"> </span><span class="n">create</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">sa</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">privileges</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Pod</span><span class="w"></span>
-<span class="w">  </span><span class="n">dependencies</span><span class="o">:</span><span class="w"></span>
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
-<span class="w">      </span><span class="n">eventSourceName</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span><span class="w"></span>
-<span class="w">      </span><span class="n">eventName</span><span class="o">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
-<span class="w">  </span><span class="n">triggers</span><span class="o">:</span><span class="w"></span>
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">template</span><span class="o">:</span><span class="w"></span>
-<span class="w">        </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">trigger</span><span class="w"></span>
-<span class="w">        </span><span class="n">k8s</span><span class="o">:</span><span class="w"></span>
-<span class="w">          </span><span class="n">operation</span><span class="o">:</span><span class="w"> </span><span class="n">create</span><span class="w"></span>
-<span class="w">          </span><span class="n">source</span><span class="o">:</span><span class="w"></span>
-<span class="w">            </span><span class="n">resource</span><span class="o">:</span><span class="w"></span>
-<span class="w">              </span><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span><span class="w"></span>
-<span class="w">              </span><span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Pod</span><span class="w"></span>
-<span class="w">              </span><span class="n">metadata</span><span class="o">:</span><span class="w"></span>
-<span class="w">                </span><span class="n">generateName</span><span class="o">:</span><span class="w"> </span><span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">-</span><span class="w"></span>
-<span class="w">              </span><span class="n">spec</span><span class="o">:</span><span class="w"></span>
-<span class="w">                </span><span class="n">containers</span><span class="o">:</span><span class="w"></span>
-<span class="w">                  </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">hello</span><span class="o">-</span><span class="n">container</span><span class="w"></span>
-<span class="w">                    </span><span class="n">args</span><span class="o">:</span><span class="w"></span>
-<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;hello-world&quot;</span><span class="w"></span>
-<span class="w">                    </span><span class="n">command</span><span class="o">:</span><span class="w"></span>
-<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="n">cowsay</span><span class="w"></span>
-<span class="w">                    </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;docker/whalesay:latest&quot;</span><span class="w"></span>
-<span class="w">          </span><span class="n">parameters</span><span class="o">:</span><span class="w"></span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="o">:</span><span class="w"></span>
-<span class="w">                </span><span class="n">dependencyName</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
-<span class="w">              </span><span class="n">dest</span><span class="o">:</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="na">containers</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="mi">0</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Sensor</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span>
+<span class="n">spec</span><span class="o">:</span>
+<span class="w">  </span><span class="n">template</span><span class="o">:</span>
+<span class="w">    </span><span class="n">serviceAccountName</span><span class="o">:</span><span class="w"> </span><span class="n">create</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">sa</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">privileges</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Pod</span>
+<span class="w">  </span><span class="n">dependencies</span><span class="o">:</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+<span class="w">      </span><span class="n">eventSourceName</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span>
+<span class="w">      </span><span class="n">eventName</span><span class="o">:</span><span class="w"> </span><span class="n">example</span>
+<span class="w">  </span><span class="n">triggers</span><span class="o">:</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">template</span><span class="o">:</span>
+<span class="w">        </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">trigger</span>
+<span class="w">        </span><span class="n">k8s</span><span class="o">:</span>
+<span class="w">          </span><span class="n">operation</span><span class="o">:</span><span class="w"> </span><span class="n">create</span>
+<span class="w">          </span><span class="n">source</span><span class="o">:</span>
+<span class="w">            </span><span class="n">resource</span><span class="o">:</span>
+<span class="w">              </span><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="w">              </span><span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Pod</span>
+<span class="w">              </span><span class="n">metadata</span><span class="o">:</span>
+<span class="w">                </span><span class="n">generateName</span><span class="o">:</span><span class="w"> </span><span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">-</span>
+<span class="w">              </span><span class="n">spec</span><span class="o">:</span>
+<span class="w">                </span><span class="n">containers</span><span class="o">:</span>
+<span class="w">                  </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">hello</span><span class="o">-</span><span class="n">container</span>
+<span class="w">                    </span><span class="n">args</span><span class="o">:</span>
+<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;hello-world&quot;</span>
+<span class="w">                    </span><span class="n">command</span><span class="o">:</span>
+<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="n">cowsay</span>
+<span class="w">                    </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;docker/whalesay:latest&quot;</span>
+<span class="w">          </span><span class="n">parameters</span><span class="o">:</span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="o">:</span>
+<span class="w">                </span><span class="n">dependencyName</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+<span class="w">              </span><span class="n">dest</span><span class="o">:</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="na">containers</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="mi">0</span>
 </code></pre></div>
 
 </li>
@@ -2226,7 +2226,7 @@ you want to define a generic trigger template in the sensor and populate the K8s
 <p>Trigger policy helps you determine the status of the triggered K8s object and decide whether to stop or continue sensor.</p>
 <p>To determine whether the K8s object was successful or not, the K8s trigger provides a <code>Resource Labels</code> policy.
 The <code>Resource Labels</code> holds a list of labels which are checked against the triggered K8s object to determine the status of the object.</p>
-<div class="codehilite"><pre><span></span><code><span class="w">            </span>#<span class="w"> </span><span class="nv">Policy</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">configure</span><span class="w"> </span><span class="nv">backoff</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">execution</span><span class="w"> </span><span class="nv">criteria</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">trigger</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">            </span>#<span class="w"> </span><span class="nv">Policy</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">configure</span><span class="w"> </span><span class="nv">backoff</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">execution</span><span class="w"> </span><span class="nv">criteria</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">trigger</span>
 <span class="w">            </span>#<span class="w"> </span><span class="nv">Because</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">sensor</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">able</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">trigger</span><span class="w"> </span><span class="nv">any</span><span class="w"> </span><span class="nv">K8s</span><span class="w"> </span><span class="nv">resource</span>,<span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">determines</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="w"> </span><span class="nv">state</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">looking</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="err">&#39;s labels.</span>
 <span class="err">            policy:</span>
 <span class="err">              k8s:</span>
@@ -2245,7 +2245,7 @@ The <code>Resource Labels</code> holds a list of labels which are checked agains
 <span class="err">                  workflows.argoproj.io/phase: Succeeded</span>
 <span class="err">                # Determines whether trigger should be marked as failed if the backoff times out and sensor is still unable to decide the state of the trigger.</span>
 <span class="err">                # defaults to false</span>
-<span class="err">                errorOnBackoffTimeout: true</span><span class="w"></span>
+<span class="err">                errorOnBackoffTimeout: true</span>
 </code></pre></div>
 
 <p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-with-policy.yaml">here</a>.</p>

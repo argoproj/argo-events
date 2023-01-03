@@ -2054,27 +2054,27 @@
   below, if you want to do AZ (Availability Zone) anti-affinity, change the value
   of <code>topologyKey</code> from <code>kubernetes.io/hostname</code> to
   <code>topology.kubernetes.io/zone</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Best effort</span><span class="w"></span>
-<span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podAffinityTerm</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">              </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
-<span class="w">              </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
-<span class="w">          </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
-<span class="w">        </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Best effort</span>
+<span class="nt">affinity</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podAffinityTerm</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">labelSelector</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
+<span class="w">              </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">          </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
+<span class="w">        </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1"># Hard requirement</span><span class="w"></span>
-<span class="nt">affinity</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span><span class="w"></span>
-<span class="w">            </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
-<span class="w">        </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Hard requirement</span>
+<span class="nt">affinity</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">podAntiAffinity</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">requiredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">labelSelector</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">controller</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-controller</span>
+<span class="w">            </span><span class="nt">eventbus-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">        </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
 </code></pre></div>
 
               
