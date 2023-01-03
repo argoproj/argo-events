@@ -31,22 +31,9 @@ We need to create a Slack App which will send messages to your Slack Workspace. 
 
 5. You should land back on the `OAuth & Permissions` page. Copy your app's OAuth Access Token. This will allow the trigger to act on behalf of your newly created Slack app.
 
-6. Encode your OAuth token in base64. This can done easily with the command line.
+6. Create a kubernetes secret with the OAuth token in your cluster.
 
-        echo -n "YOUR-OAUTH-TOKEN" | base64
-
-7. Create a kubernetes secret file `slack-secret.yaml` with your OAuth token in the following format.
-
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: slack-secret
-        data:
-          token: YOUR-BASE64-ENCODED-OAUTH-TOKEN
-
-12. Apply the kubernetes secret.
-
-        kubectl -n argo-events apply -f slack-secret.yaml
+        kubectl create secret generic slack-secret --from-literal=token=$SLACK_OAUTH_TOKEN
 
 ## Slack Trigger
 
@@ -102,5 +89,130 @@ the `dataKey` takes the precedence.
 
 You can create any parameter structure you want. To get more info on how to
 generate complex event payloads, take a look at [this library](https://github.com/tidwall/sjson).
+
+## Other Capabilities
+
+#### Configuring the sender of the Slack message: 
+
+         - template:
+              name: slack-trigger
+              slack:
+                sender:
+                  username: "Cool Robot"
+                  icon: ":robot_face:" # emoji or url, e.g. https://example.com/image.png
+
+#### Sending messages to Slack threads:
+
+         - template:
+              name: slack-trigger
+              slack:
+                thread:
+                  messageAggregationKey: "abcdefg" # aggregate message by some key to send them to the same Slack thread
+                  broadcastMessageToChannel: true # also broadcast the message from the thread to the channel
+
+#### Sending attachments using [Slack Attachments API](https://api.slack.com/reference/messaging/attachments):
+
+         - template:
+              name: slack-trigger
+              slack:
+                message: "hello world!"
+                attachments: |
+                  [{
+                    "title": "Attachment1!",
+                    "title_link": "https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/",
+                    "color": "#18be52",
+                    "fields": [{
+                      "title": "Hello1",
+                      "value": "Hello World1",
+                      "short": true
+                    }, {
+                      "title": "Hello2",
+                      "value": "Hello World2",
+                      "short": true
+                    }]
+                  }, {
+                    "title": "Attachment2!",
+                    "title_link": "https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/",
+                    "color": "#18be52",
+                    "fields": [{
+                      "title": "Hello1",
+                      "value": "Hello World1",
+                      "short": true
+                    }, {
+                      "title": "Hello2",
+                      "value": "Hello World2",
+                      "short": true
+                    }]
+                  }]
+
+#### Sending blocks using [Slack Blocks API](https://api.slack.com/reference/block-kit/blocks):
+
+         - template:
+              name: slack-trigger
+              slack:
+                blocks: |
+                  [{
+                    "type": "actions",
+                    "block_id": "actionblock789",
+                    "elements": [{
+                        "type": "datepicker",
+                        "action_id": "datepicker123",
+                        "initial_date": "1990-04-28",
+                        "placeholder": {
+                          "type": "plain_text",
+                          "text": "Select a date"
+                        }
+                      },
+                      {
+                        "type": "overflow",
+                        "options": [{
+                            "text": {
+                              "type": "plain_text",
+                              "text": "*this is plain_text text*"
+                            },
+                            "value": "value-0"
+                          },
+                          {
+                            "text": {
+                              "type": "plain_text",
+                              "text": "*this is plain_text text*"
+                            },
+                            "value": "value-1"
+                          },
+                          {
+                            "text": {
+                              "type": "plain_text",
+                              "text": "*this is plain_text text*"
+                            },
+                            "value": "value-2"
+                          },
+                          {
+                            "text": {
+                              "type": "plain_text",
+                              "text": "*this is plain_text text*"
+                            },
+                            "value": "value-3"
+                          },
+                          {
+                            "text": {
+                              "type": "plain_text",
+                              "text": "*this is plain_text text*"
+                            },
+                            "value": "value-4"
+                          }
+                        ],
+                        "action_id": "overflow"
+                      },
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "Click Me"
+                        },
+                        "value": "click_me_123",
+                        "action_id": "button"
+                      }
+                    ]
+                  }]
 
 The complete specification of Slack trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#slacktrigger).
