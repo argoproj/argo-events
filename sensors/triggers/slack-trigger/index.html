@@ -1527,6 +1527,47 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#other-capabilities" class="md-nav__link">
+    Other Capabilities
+  </a>
+  
+    <nav class="md-nav" aria-label="Other Capabilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuring-the-sender-of-the-slack-message" class="md-nav__link">
+    Configuring the sender of the Slack message:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-messages-to-slack-threads" class="md-nav__link">
+    Sending messages to Slack threads:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-attachments-using-slack-attachments-api" class="md-nav__link">
+    Sending attachments using Slack Attachments API:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-blocks-using-slack-blocks-api" class="md-nav__link">
+    Sending blocks using Slack Blocks API:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2078,6 +2119,47 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#other-capabilities" class="md-nav__link">
+    Other Capabilities
+  </a>
+  
+    <nav class="md-nav" aria-label="Other Capabilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuring-the-sender-of-the-slack-message" class="md-nav__link">
+    Configuring the sender of the Slack message:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-messages-to-slack-threads" class="md-nav__link">
+    Sending messages to Slack threads:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-attachments-using-slack-attachments-api" class="md-nav__link">
+    Sending attachments using Slack Attachments API:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-blocks-using-slack-blocks-api" class="md-nav__link">
+    Sending blocks using Slack Blocks API:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2139,25 +2221,8 @@
 <p>You should land back on the <code>OAuth &amp; Permissions</code> page. Copy your app's OAuth Access Token. This will allow the trigger to act on behalf of your newly created Slack app.</p>
 </li>
 <li>
-<p>Encode your OAuth token in base64. This can done easily with the command line.</p>
-<div class="codehilite"><pre><span></span><code>echo -n &quot;YOUR-OAUTH-TOKEN&quot; | base64
-</code></pre></div>
-
-</li>
-<li>
-<p>Create a kubernetes secret file <code>slack-secret.yaml</code> with your OAuth token in the following format.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
-<span class="n">metadata</span><span class="o">:</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">slack</span><span class="o">-</span><span class="n">secret</span>
-<span class="n">data</span><span class="o">:</span>
-<span class="w">  </span><span class="n">token</span><span class="o">:</span><span class="w"> </span><span class="n">YOUR</span><span class="o">-</span><span class="n">BASE64</span><span class="o">-</span><span class="n">ENCODED</span><span class="o">-</span><span class="n">OAUTH</span><span class="o">-</span><span class="n">TOKEN</span>
-</code></pre></div>
-
-</li>
-<li>
-<p>Apply the kubernetes secret.</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f slack-secret.yaml
+<p>Create a kubernetes secret with the OAuth token in your cluster.</p>
+<div class="codehilite"><pre><span></span><code>kubectl create secret generic slack-secret --from-literal=token=$SLACK_OAUTH_TOKEN
 </code></pre></div>
 
 </li>
@@ -2219,6 +2284,130 @@
 the <code>dataKey</code> takes the precedence.</p>
 <p>You can create any parameter structure you want. To get more info on how to
 generate complex event payloads, take a look at <a href="https://github.com/tidwall/sjson">this library</a>.</p>
+<h2 id="other-capabilities">Other Capabilities<a class="headerlink" href="#other-capabilities" title="Permanent link">&para;</a></h2>
+<h4 id="configuring-the-sender-of-the-slack-message">Configuring the sender of the Slack message:<a class="headerlink" href="#configuring-the-sender-of-the-slack-message" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code>     - template:
+          name: slack-trigger
+          slack:
+            sender:
+              username: &quot;Cool Robot&quot;
+              icon: &quot;:robot_face:&quot; # emoji or url, e.g. https://example.com/image.png
+</code></pre></div>
+
+<h4 id="sending-messages-to-slack-threads">Sending messages to Slack threads:<a class="headerlink" href="#sending-messages-to-slack-threads" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="w">     </span><span class="o">-</span><span class="w"> </span><span class="nl">template:</span>
+<span class="w">          </span><span class="nl">name:</span><span class="w"> </span><span class="n">slack</span><span class="o">-</span><span class="n">trigger</span>
+<span class="w">          </span><span class="nl">slack:</span>
+<span class="w">            </span><span class="nl">thread:</span>
+<span class="w">              </span><span class="nl">messageAggregationKey:</span><span class="w"> </span><span class="s">&quot;abcdefg&quot;</span><span class="w"> </span><span class="p">#</span><span class="w"> </span><span class="n">aggregate</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">send</span><span class="w"> </span><span class="n">them</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">Slack</span><span class="w"> </span><span class="n">thread</span>
+<span class="w">              </span><span class="nl">broadcastMessageToChannel:</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="p">#</span><span class="w"> </span><span class="n">also</span><span class="w"> </span><span class="n">broadcast</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">thread</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">channel</span>
+</code></pre></div>
+
+<h4 id="sending-attachments-using-slack-attachments-api">Sending attachments using <a href="https://api.slack.com/reference/messaging/attachments">Slack Attachments API</a>:<a class="headerlink" href="#sending-attachments-using-slack-attachments-api" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code>     - template:
+          name: slack-trigger
+          slack:
+            message: &quot;hello world!&quot;
+            attachments: |
+              [{
+                &quot;title&quot;: &quot;Attachment1!&quot;,
+                &quot;title_link&quot;: &quot;https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/&quot;,
+                &quot;color&quot;: &quot;#18be52&quot;,
+                &quot;fields&quot;: [{
+                  &quot;title&quot;: &quot;Hello1&quot;,
+                  &quot;value&quot;: &quot;Hello World1&quot;,
+                  &quot;short&quot;: true
+                }, {
+                  &quot;title&quot;: &quot;Hello2&quot;,
+                  &quot;value&quot;: &quot;Hello World2&quot;,
+                  &quot;short&quot;: true
+                }]
+              }, {
+                &quot;title&quot;: &quot;Attachment2!&quot;,
+                &quot;title_link&quot;: &quot;https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/&quot;,
+                &quot;color&quot;: &quot;#18be52&quot;,
+                &quot;fields&quot;: [{
+                  &quot;title&quot;: &quot;Hello1&quot;,
+                  &quot;value&quot;: &quot;Hello World1&quot;,
+                  &quot;short&quot;: true
+                }, {
+                  &quot;title&quot;: &quot;Hello2&quot;,
+                  &quot;value&quot;: &quot;Hello World2&quot;,
+                  &quot;short&quot;: true
+                }]
+              }]
+</code></pre></div>
+
+<h4 id="sending-blocks-using-slack-blocks-api">Sending blocks using <a href="https://api.slack.com/reference/block-kit/blocks">Slack Blocks API</a>:<a class="headerlink" href="#sending-blocks-using-slack-blocks-api" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code>     - template:
+          name: slack-trigger
+          slack:
+            blocks: |
+              [{
+                &quot;type&quot;: &quot;actions&quot;,
+                &quot;block_id&quot;: &quot;actionblock789&quot;,
+                &quot;elements&quot;: [{
+                    &quot;type&quot;: &quot;datepicker&quot;,
+                    &quot;action_id&quot;: &quot;datepicker123&quot;,
+                    &quot;initial_date&quot;: &quot;1990-04-28&quot;,
+                    &quot;placeholder&quot;: {
+                      &quot;type&quot;: &quot;plain_text&quot;,
+                      &quot;text&quot;: &quot;Select a date&quot;
+                    }
+                  },
+                  {
+                    &quot;type&quot;: &quot;overflow&quot;,
+                    &quot;options&quot;: [{
+                        &quot;text&quot;: {
+                          &quot;type&quot;: &quot;plain_text&quot;,
+                          &quot;text&quot;: &quot;*this is plain_text text*&quot;
+                        },
+                        &quot;value&quot;: &quot;value-0&quot;
+                      },
+                      {
+                        &quot;text&quot;: {
+                          &quot;type&quot;: &quot;plain_text&quot;,
+                          &quot;text&quot;: &quot;*this is plain_text text*&quot;
+                        },
+                        &quot;value&quot;: &quot;value-1&quot;
+                      },
+                      {
+                        &quot;text&quot;: {
+                          &quot;type&quot;: &quot;plain_text&quot;,
+                          &quot;text&quot;: &quot;*this is plain_text text*&quot;
+                        },
+                        &quot;value&quot;: &quot;value-2&quot;
+                      },
+                      {
+                        &quot;text&quot;: {
+                          &quot;type&quot;: &quot;plain_text&quot;,
+                          &quot;text&quot;: &quot;*this is plain_text text*&quot;
+                        },
+                        &quot;value&quot;: &quot;value-3&quot;
+                      },
+                      {
+                        &quot;text&quot;: {
+                          &quot;type&quot;: &quot;plain_text&quot;,
+                          &quot;text&quot;: &quot;*this is plain_text text*&quot;
+                        },
+                        &quot;value&quot;: &quot;value-4&quot;
+                      }
+                    ],
+                    &quot;action_id&quot;: &quot;overflow&quot;
+                  },
+                  {
+                    &quot;type&quot;: &quot;button&quot;,
+                    &quot;text&quot;: {
+                      &quot;type&quot;: &quot;plain_text&quot;,
+                      &quot;text&quot;: &quot;Click Me&quot;
+                    },
+                    &quot;value&quot;: &quot;click_me_123&quot;,
+                    &quot;action_id&quot;: &quot;button&quot;
+                  }
+                ]
+              }]
+</code></pre></div>
+
 <p>The complete specification of Slack trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#slacktrigger">here</a>.</p>
 
               
