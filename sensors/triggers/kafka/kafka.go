@@ -189,20 +189,19 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, err
 	}
 
-	pk := trigger.PartitioningKey
-	if pk == "" {
-		pk = trigger.URL
-	}
-
-	t.Producer.Input() <- &sarama.ProducerMessage{
+	msg := &sarama.ProducerMessage{
 		Topic:     trigger.Topic,
-		Key:       sarama.StringEncoder(pk),
 		Value:     sarama.ByteEncoder(payload),
-		Partition: trigger.Partition,
 		Timestamp: time.Now().UTC(),
 	}
 
-	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic), zap.Any("partition", trigger.Partition))
+	if trigger.PartitioningKey != nil {
+		msg.Key = sarama.StringEncoder(*trigger.PartitioningKey)
+	}
+
+	t.Producer.Input() <- msg
+
+	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic))
 
 	return nil, nil
 }

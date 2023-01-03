@@ -43,7 +43,6 @@ var sensorObj = &v1alpha1.Sensor{
 					Kafka: &v1alpha1.KafkaTrigger{
 						URL:            "fake-kafka-url",
 						Topic:          "fake-topic",
-						Partition:      0,
 						Parameters:     nil,
 						RequiredAcks:   1,
 						Compress:       false,
@@ -53,7 +52,7 @@ var sensorObj = &v1alpha1.Sensor{
 						},
 						TLS:             nil,
 						Payload:         nil,
-						PartitioningKey: "",
+						PartitioningKey: nil,
 					},
 				},
 			},
