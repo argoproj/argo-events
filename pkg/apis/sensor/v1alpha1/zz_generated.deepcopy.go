@@ -684,6 +684,11 @@ func (in *KafkaTrigger) DeepCopyInto(out *KafkaTrigger) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.PartitioningKey != nil {
+		in, out := &in.PartitioningKey, &out.PartitioningKey
+		*out = new(string)
+		**out = **in
+	}
 	if in.SASL != nil {
 		in, out := &in.SASL, &out.SASL
 		*out = new(common.SASLConfig)
