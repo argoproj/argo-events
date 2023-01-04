@@ -136,7 +136,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: sbom.tar.gz
-          path: /tmp/sbom.tar.gz
+          path: /tmp
 
       - name: Registry Login
         uses: docker/login-action@v2
