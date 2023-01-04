@@ -258,33 +258,33 @@ func (conn *JetstreamTriggerConn) processMsg(
 	}
 
 	done := make(chan bool)
-	go func () {
-	  ticker := time.NewTicker(500 * time.Millisecond)
-	  for {
-	    select {
-	    case <- done:
-	      err = m.AckSync()
+	go func() {
+		ticker := time.NewTicker(500 * time.Millisecond)
+		for {
+			select {
+			case <-done:
+				err = m.AckSync()
 				if err != nil {
 					errStr := fmt.Sprintf("Error performing AckSync() on message: %v", err)
 					conn.Logger.Error(errStr)
 				}
 				conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
-	      ticker.Stop()
-	      break
-	    case <- ticker.C:
-	      err = m.InProgress()
+				ticker.Stop()
+				break
+			case <-ticker.C:
+				err = m.InProgress()
 				if err != nil {
 					errStr := fmt.Sprintf("Error performing InProgess() on message: %v", err)
 					conn.Logger.Error(errStr)
 				}
 				conn.Logger.Debugf("InProgess message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
-	    }
-	  }
+			}
+		}
 	}()
 
 	defer func() {
-	   done <- true
-	 }()
+		done <- true
+	}()
 
 	log := conn.Logger
 
