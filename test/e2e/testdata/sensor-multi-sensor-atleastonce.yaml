@@ -21,7 +21,7 @@ spec:
       eventName: example3
   triggers:
     - template:
-        conditions: "(test-dep-1 && test-dep-2) || test-dep-3"
+        conditions: "(test-dep-1-atleastonce && test-dep-2-atleastonce) || test-dep-3-atleastonce"
         name: log-trigger-1-atleastonce
         atLeastOnce: true
         log: {}
