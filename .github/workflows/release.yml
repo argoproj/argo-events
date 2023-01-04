@@ -103,7 +103,7 @@ jobs:
       - run: generator -o dist -p .
       - run: bom generate --image quay.io/argoproj/argo-events:$VERSION -o dist/argo-events.spdx
       # pack the boms into one file to make it easy to download
-      - run: cd /tmp && tar -zcf sbom.tar.gz dist/*.spdx
+      - run: tar -zcf /tmp/sbom.tar.gz dist/*.spdx
       - uses: actions/upload-artifact@v3
         with:
           name: sbom.tar.gz
