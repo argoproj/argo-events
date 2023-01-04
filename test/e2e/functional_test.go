@@ -453,8 +453,8 @@ func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
 
 	// Verify trigger occurs for first Sensor and not second
-	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"))
-	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1-atleastonce"))
+	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1-atleastonce"), util.PodLogCheckOptionWithCount(0))
 
 }
 
