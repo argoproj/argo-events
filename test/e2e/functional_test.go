@@ -396,6 +396,68 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 
 }
 
+
+func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
+	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
+	// Then send the other part of the condition and verify that only one triggers
+
+	// Start EventSource
+	w1 := s.Given().EventSource("@testdata/es-multi-sensor.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
+
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().EventSourcePodPortForward(12003, 12000).
+		EventSourcePodPortForward(13003, 13000).
+		EventSourcePodPortForward(14003, 14000).TerminateAllPodPortForwards()
+
+	// Start one Sensor
+	w2 := s.Given().Sensor("@testdata/sensor-multi-sensor-atleastonce.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w2.DeleteSensor()
+
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	time.Sleep(3 * time.Second)
+
+	// Trigger first dependency
+	// test-dep-1
+	s.e("http://localhost:12003").POST("/example1").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
+
+	// Start second Sensor
+	w3 := s.Given().Sensor("@testdata/sensor-multi-sensor-2-atleastonce.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w3.DeleteSensor()
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	// Trigger second dependency
+	// test-dep-2
+	s.e("http://localhost:13003").POST("/example2").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
+
+	// Verify trigger occurs for first Sensor and not second
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"))
+	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
+
+}
+
 func (s *FunctionalSuite) TestTriggerSpecChange() {
 	// Start a sensor which uses "A && B"; send A; replace the Sensor with a new spec which uses A; send C and verify that there's no trigger
 

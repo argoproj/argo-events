@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: e2e-multi-sensor
+spec:
+  replicas: 1
+  template:
+    container:
+      env:
+        - name: DEBUG_LOG
+          value: "true"
+  dependencies:
+    - name: test-dep-1
+      eventSourceName: e2e-multi-sensor
+      eventName: example1
+    - name: test-dep-2
+      eventSourceName: e2e-multi-sensor
+      eventName: example2
+    - name: test-dep-3
+      eventSourceName: e2e-multi-sensor
+      eventName: example3
+  triggers:
+    - template:
+        conditions: "(test-dep-1 && test-dep-2) || test-dep-3"
+        name: log-trigger-1
+        atLeastOnce: true
+        log: {}
