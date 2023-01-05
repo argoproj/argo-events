@@ -425,7 +425,7 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-
+	w2.Then().ExpectSensorPodLogContains("http-trigger")
 	time.Sleep(3 * time.Second)
 
 	w2.DeleteSensor()
@@ -472,7 +472,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-
+	w2.Then().ExpectSensorPodLogContains("http-trigger")
 	time.Sleep(3 * time.Second)
 
 	w2.DeleteSensor()
