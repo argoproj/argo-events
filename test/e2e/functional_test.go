@@ -443,7 +443,7 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 	ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 }
 
-func (s *FunctionalSuite) TestAtLeastOnce() {
+func (s *FunctionalSuite) TestAtMostOnce() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
 
@@ -460,7 +460,7 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 		TerminateAllPodPortForwards()
 
 
-	w2 := s.Given().Sensor("@testdata/sensor-atleastonce-failing.yaml").
+	w2 := s.Given().Sensor("@testdata/sensor-atmostonce-failing.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady()
