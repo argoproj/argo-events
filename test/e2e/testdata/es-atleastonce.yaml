@@ -1,0 +1,10 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: e2e-atleastonce
+spec:
+  webhook:
+    example:
+      port: "12000"
+      endpoint: /example
+      method: POST

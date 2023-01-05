@@ -396,6 +396,99 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 
 }
 
+func (s *FunctionalSuite) TestAtLeastOnce() {
+	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
+	// Then send the other part of the condition and verify that only one triggers
+
+	// Start EventSource
+	w1 := s.Given().EventSource("@testdata/es-atleastonce.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().EventSourcePodPortForward(12006, 12000).
+		TerminateAllPodPortForwards()
+
+
+	w2 := s.Given().Sensor("@testdata/sensor-atleastonce-failing.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+	time.Sleep(3 * time.Second)
+	s.e("http://localhost:12006").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
+
+	time.Sleep(3 * time.Second)
+
+	w2.DeleteSensor()
+
+	w3 := s.Given().Sensor("@testdata/sensor-atleastonce-triggerable.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w3.DeleteSensor()
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	w3.Then()
+	.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger")
+}
+
+func (s *FunctionalSuite) TestAtLeastOnce() {
+	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
+	// Then send the other part of the condition and verify that only one triggers
+
+	// Start EventSource
+	w1 := s.Given().EventSource("@testdata/es-atleastonce.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().EventSourcePodPortForward(12007, 12000).
+		TerminateAllPodPortForwards()
+
+
+	w2 := s.Given().Sensor("@testdata/sensor-atleastonce-failing.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+	time.Sleep(3 * time.Second)
+	s.e("http://localhost:12007").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
+
+	time.Sleep(3 * time.Second)
+
+	w2.DeleteSensor()
+
+	w3 := s.Given().Sensor("@testdata/sensor-atmostonce-triggerable.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w3.DeleteSensor()
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	w3.Then().
+	ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), util.PodLogCheckOptionWithCount(0))
+}
 
 func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition

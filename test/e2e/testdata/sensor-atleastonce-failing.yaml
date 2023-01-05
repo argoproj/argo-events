@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: e2e-atleastonce-failing
+spec:
+  replicas: 1
+  template:
+    container:
+      env:
+        - name: DEBUG_LOG
+          value: "true"
+  dependencies:
+    - name: test-dep-1
+      eventSourceName: e2e-atleastonce
+      eventName: example
+  triggers:
+    - template:
+      atLeastOnce: true
+      name: http-trigger
+      http:
+        # Expect to fail
+        url: https://not-existing.com/
+        method: GET
+      retryStrategy:
+        steps: 100
+        duration: 500s
+        factor: 5.0
