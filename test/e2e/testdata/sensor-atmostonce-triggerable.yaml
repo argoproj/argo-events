@@ -15,5 +15,5 @@ spec:
       eventName: example
   triggers:
     - template:
-      name: log-trigger
-      log: {}
+        name: log-trigger
+        log: {}

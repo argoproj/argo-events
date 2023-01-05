@@ -15,6 +15,6 @@ spec:
       eventName: example
   triggers:
     - template:
-      atLeastOnce: true
-      name: log-trigger
-      log: {}
+        atLeastOnce: true
+        name: log-trigger
+        log: {}
