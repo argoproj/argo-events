@@ -18,6 +18,7 @@ The structure of an event dispatched by the event-source over the eventbus looks
             },
             "data": {
               "subject": "name_of_the_nats_subject",
+              "headers": "headers_of_the_nats_message",
               "body": "message_payload"
             }
         }
