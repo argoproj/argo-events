@@ -15,12 +15,12 @@ spec:
       eventName: example
   triggers:
     - template:
-      name: http-trigger
-      http:
-        # Expect to fail
-        url: https://not-existing.com/
-        method: GET
-    retryStrategy:
-      steps: 100
-      duration: 500s
-      factor: 5.0
+        name: http-trigger
+        http:
+          # Expect to fail
+          url: https://not-existing.com/
+          method: GET
+      retryStrategy:
+        steps: 100
+        duration: 500s
+        factor: 5.0

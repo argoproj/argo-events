@@ -15,13 +15,13 @@ spec:
       eventName: example
   triggers:
     - template:
-      atLeastOnce: true
-      name: http-trigger
-      http:
-        # Expect to fail
-        url: https://not-existing.com/
-        method: GET
-    retryStrategy:
-      steps: 100
-      duration: 500s
-      factor: 5.0
+        atLeastOnce: true
+        name: http-trigger
+        http:
+          # Expect to fail
+          url: https://not-existing.com/
+          method: GET
+      retryStrategy:
+        steps: 100
+        duration: 500s
+        factor: 5.0
