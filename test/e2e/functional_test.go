@@ -439,8 +439,8 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 	w3.Then().
 		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
-	w3.Then()
-	.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+	w3.Then().
+	ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
 }
 
 func (s *FunctionalSuite) TestAtLeastOnce() {
