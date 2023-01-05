@@ -231,14 +231,14 @@ func (t *KafkaTrigger) ApplyPolicy(ctx context.Context, resource interface{}) er
 // getSchemaFromRegistry returns a schema from registry
 func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
-	user, _ := common.GetSecretFromVolume(sr.UserSecret)
-	password, _ := common.GetSecretFromVolume(sr.PasswordSecret)
+	user, _ := common.GetSecretFromVolume(sr.Auth.Username)
+	password, _ := common.GetSecretFromVolume(sr.Auth.Password)
 	if user != "" && password != "" {
 		schemaRegistryClient.SetCredentials(user, password)
 	}
-	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaId))
+	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaID))
 	if err != nil {
-		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaId, err)
+		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaID, err)
 	}
 	return schema, nil
 }

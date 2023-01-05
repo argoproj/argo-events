@@ -201,12 +201,13 @@
       "description": "SchemaRegistryConfig refers to configuration for a client",
       "type": "object",
       "required": [
-        "url"
+        "url",
+        "schemaId"
       ],
       "properties": {
-        "passwordSecret": {
-          "description": "Api secret is the authentication for registry",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        "auth": {
+          "description": "SchemaRegistry - basic authentication",
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth"
         },
         "schemaId": {
           "description": "Schema ID",
@@ -216,10 +217,6 @@
         "url": {
           "description": "Schema Registry URL.",
           "type": "string"
-        },
-        "userSecret": {
-          "description": "Api key is the authentication for registry",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
     },

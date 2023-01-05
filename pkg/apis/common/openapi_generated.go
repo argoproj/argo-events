@@ -435,31 +435,27 @@ func schema_argo_events_pkg_apis_common_SchemaRegistryConfig(ref common.Referenc
 							Format:      "",
 						},
 					},
-					"userSecret": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Api key is the authentication for registry",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"passwordSecret": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Api secret is the authentication for registry",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
 					"schemaId": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Schema ID",
+							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SchemaRegistry - basic authentication",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.BasicAuth"),
+						},
+					},
 				},
-				Required: []string{"url"},
+				Required: []string{"url", "schemaId"},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth"},
 	}
 }
 
