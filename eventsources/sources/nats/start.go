@@ -137,6 +137,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventData := &events.NATSEventData{
 			Subject:  msg.Subject,
+			Header:   msg.Header,
 			Metadata: natsEventSource.Metadata,
 		}
 		if natsEventSource.JSONBody {
