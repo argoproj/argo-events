@@ -237,6 +237,8 @@ type NATSEventData struct {
 	Subject string `json:"subject"`
 	// Message data.
 	Body interface{} `json:"body"`
+	// Header represents the optional Header for a NATS message, based on the implementation of http.Header.
+	Header map[string][]string `json:"header,omitempty"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
