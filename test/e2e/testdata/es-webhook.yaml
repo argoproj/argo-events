@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: e2e-atleastonce
+  name: e2e-webhook
 spec:
   webhook:
     example:

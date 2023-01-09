@@ -11,7 +11,7 @@ spec:
           value: "true"
   dependencies:
     - name: test-dep-1
-      eventSourceName: e2e-atleastonce
+      eventSourceName: e2e-webhook
       eventName: example
   triggers:
     - template:

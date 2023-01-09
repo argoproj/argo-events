@@ -405,7 +405,7 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
 		s.T().SkipNow() // Skipping because AtLeastOnce does not apply for NATS.
 	}
-	w1 := s.Given().EventSource("@testdata/es-atleastonce.yaml").
+	w1 := s.Given().EventSource("@testdata/es-webhook.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady()
@@ -454,7 +454,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 
 
 	// Start EventSource
-	w1 := s.Given().EventSource("@testdata/es-atleastonce.yaml").
+	w1 := s.Given().EventSource("@testdata/es-webhook.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady()
