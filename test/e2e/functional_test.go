@@ -478,7 +478,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-	w2.Then().ExpectSensorPodLogContains("acked message of Stream seq")
+	w2.Then().ExpectSensorPodLogContains("Triggering actions")
 	time.Sleep(3 * time.Second)
 
 	w2.DeleteSensor()
