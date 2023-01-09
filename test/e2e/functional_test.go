@@ -48,6 +48,7 @@ func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
 		Builder(func(req *httpexpect.Request) {})
 }
 
+
 func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
 		When().
@@ -452,7 +453,6 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 	// Delete the sensor and launch sensor with same name and non-failing trigger
 	// to see that the event doesn't come through.
 
-
 	// Start EventSource
 	w1 := s.Given().EventSource("@testdata/es-webhook.yaml").
 		When().
@@ -464,7 +464,6 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 
 	defer w1.Then().EventSourcePodPortForward(12007, 12000).
 		TerminateAllPodPortForwards()
-
 
 	w2 := s.Given().Sensor("@testdata/sensor-atmostonce-failing.yaml").
 		When().
@@ -494,7 +493,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
 	w3.Then().
-	ExpectSensorPodLogContains(LogTriggerActionSuccessful("trigger-atmostonce"), util.PodLogCheckOptionWithCount(0))
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("trigger-atmostonce"), util.PodLogCheckOptionWithCount(0))
 }
 
 func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
