@@ -331,7 +331,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		depNames = append(depNames, k)
 		eventIDs = append(eventIDs, v.ID())
 	}
-	if trigger.AtLeastOnce && sensorCtx.eventBusConfig.NATS == nil {
+	if trigger.AtLeastOnce {
 		sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
 	} else {
 		go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
