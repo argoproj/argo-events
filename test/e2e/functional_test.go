@@ -498,6 +498,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
+	// With AtLeastOnce flag set.
 
 	// Start EventSource
 
