@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: e2e-atmostonce-triggerable
+  name: e2e-atmostonce-sensor
 spec:
   replicas: 1
   template:
@@ -15,5 +15,5 @@ spec:
       eventName: example
   triggers:
     - template:
-        name: log-trigger
+        name: trigger-atmostonce
         log: {}

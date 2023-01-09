@@ -397,21 +397,26 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 }
 
 func (s *FunctionalSuite) TestAtLeastOnce() {
-	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
-	// Then send the other part of the condition and verify that only one triggers
+	// Send an event to a sensor with a failing trigger and make sure it doesn't ACK it.
+	// Delete the sensor and launch sensor with same name and non-failing trigger so it ACKS it.
 
 	// Start EventSource
+
+	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
+		s.T().SkipNow() // Skipping because AtLeastOnce does not apply for NATS.
+	}
 	w1 := s.Given().EventSource("@testdata/es-atleastonce.yaml").
 		When().
 		CreateEventSource().
 		WaitForEventSourceReady()
+
 	defer w1.DeleteEventSource()
+
 	w1.Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted)
 
 	defer w1.Then().EventSourcePodPortForward(12006, 12000).
 		TerminateAllPodPortForwards()
-
 
 	w2 := s.Given().Sensor("@testdata/sensor-atleastonce-failing.yaml").
 		When().
@@ -425,10 +430,9 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-	w2.Then().ExpectSensorPodLogContains("http-trigger")
-	time.Sleep(3 * time.Second)
-
+	w2.Then().ExpectSensorPodLogContains("InProgess")
 	w2.DeleteSensor()
+	time.Sleep(10 * time.Second)
 
 	w3 := s.Given().Sensor("@testdata/sensor-atleastonce-triggerable.yaml").
 		When().
@@ -440,12 +444,14 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
 	w3.Then().
-	ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("trigger-atleastonce"))
 }
 
 func (s *FunctionalSuite) TestAtMostOnce() {
-	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
-	// Then send the other part of the condition and verify that only one triggers
+	// Send an event to a sensor with a failing trigger but it will ACK it.
+	// Delete the sensor and launch sensor with same name and non-failing trigger
+	// to see that the event doesn't come through.
+
 
 	// Start EventSource
 	w1 := s.Given().EventSource("@testdata/es-atleastonce.yaml").
@@ -472,7 +478,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-	w2.Then().ExpectSensorPodLogContains("http-trigger")
+	w2.Then().ExpectSensorPodLogContains("acked message of Stream seq")
 	time.Sleep(3 * time.Second)
 
 	w2.DeleteSensor()
@@ -487,7 +493,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
 
 	w3.Then().
-	ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), util.PodLogCheckOptionWithCount(0))
+	ExpectSensorPodLogContains(LogTriggerActionSuccessful("trigger-atmostonce"), util.PodLogCheckOptionWithCount(0))
 }
 
 func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
@@ -495,6 +501,7 @@ func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
 	// Then send the other part of the condition and verify that only one triggers
 
 	// Start EventSource
+
 	w1 := s.Given().EventSource("@testdata/es-multi-sensor.yaml").
 		When().
 		CreateEventSource().

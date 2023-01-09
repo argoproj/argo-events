@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: e2e-atmostonce-failing
+  name: e2e-atmostonce-sensor
 spec:
   replicas: 1
   template:
@@ -15,7 +15,7 @@ spec:
       eventName: example
   triggers:
     - template:
-        name: http-trigger
+        name: trigger-atmostonce
         http:
           # Expect to fail
           url: https://not-existing.com/
