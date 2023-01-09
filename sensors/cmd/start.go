@@ -55,10 +55,9 @@ func Start() {
 	if busConfig.NATS != nil {
 		for _, trigger := range sensor.Spec.Triggers {
 			if trigger.AtLeastOnce {
-					logger.Warn("ignoring atLeastOnce when using NATS")
-					trigger.AtLeastOnce = false
+				logger.Warn("ignoring atLeastOnce when using NATS")
+				trigger.AtLeastOnce = false
 			}
-
 		}
 	}
 	ebSubject, defined := os.LookupEnv(common.EnvVarEventBusSubject)
