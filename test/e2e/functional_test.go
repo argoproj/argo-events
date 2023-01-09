@@ -482,6 +482,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 	time.Sleep(3 * time.Second)
 
 	w2.DeleteSensor()
+	time.Sleep(10 * time.Second)
 
 	w3 := s.Given().Sensor("@testdata/sensor-atmostonce-triggerable.yaml").
 		When().
