@@ -48,7 +48,6 @@ func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {
 		Builder(func(req *httpexpect.Request) {})
 }
 
-
 func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
 		When().
