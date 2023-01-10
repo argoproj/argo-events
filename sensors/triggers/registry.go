@@ -8,7 +8,7 @@ import (
 	"github.com/riferrei/srclient"
 )
 
-// getSchemaFromRegistry returns a schema from registry
+// GetSchemaFromRegistry returns a schema from registry
 func GetSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
 	if sr.Auth.Username != nil && sr.Auth.Password != nil {

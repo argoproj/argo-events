@@ -61,7 +61,7 @@ var sensorObj = &v1alpha1.Sensor{
 }
 
 func getFakeKafkaTrigger(producers map[string]sarama.AsyncProducer) (*KafkaTrigger, error) {
-	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
+	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger(), nil)
 }
 
 func TestNewKafkaTrigger(t *testing.T) {
@@ -69,7 +69,7 @@ func TestNewKafkaTrigger(t *testing.T) {
 	producers := map[string]sarama.AsyncProducer{
 		"fake-trigger": producer,
 	}
-	trigger, err := NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
+	trigger, err := NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger(), nil)
 
 	assert.Nil(t, err)
 	assert.Equal(t, trigger.Trigger.Template.Kafka.URL, "fake-kafka-url")

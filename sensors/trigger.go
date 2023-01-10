@@ -17,6 +17,7 @@ package sensors
 
 import (
 	"context"
+
 	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/riferrei/srclient"
 
