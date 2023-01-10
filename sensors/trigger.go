@@ -17,6 +17,8 @@ package sensors
 
 import (
 	"context"
+	"github.com/argoproj/argo-events/sensors/triggers"
+	"github.com/riferrei/srclient"
 
 	"go.uber.org/zap"
 
@@ -99,7 +101,16 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	}
 
 	if trigger.Template.Kafka != nil {
-		result, err := kafka.NewKafkaTrigger(sensorCtx.sensor, trigger, sensorCtx.kafkaProducers, log)
+		var schema *srclient.Schema
+		if trigger.Template.Kafka.SchemaRegistry != nil {
+			var err error
+			schema, err = triggers.GetSchemaFromRegistry(trigger.Template.Kafka.SchemaRegistry)
+			if err != nil {
+				return nil
+			}
+		}
+
+		result, err := kafka.NewKafkaTrigger(sensorCtx.sensor, trigger, sensorCtx.kafkaProducers, log, schema)
 		if err != nil {
 			log.Errorw("failed to new a Kafka trigger", zap.Error(err))
 			return nil

@@ -46,10 +46,12 @@ type KafkaTrigger struct {
 	Producer sarama.AsyncProducer
 	// Logger to log stuff
 	Logger *zap.SugaredLogger
+	// Avro schema of message
+	Schema *srclient.Schema
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
-func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger) (*KafkaTrigger, error) {
+func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger, schema *srclient.Schema) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
 
@@ -194,13 +196,8 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	}
 
 	// Producer with avro schema
-	if trigger.SchemaRegistry != nil {
-		schema, err := getSchemaFromRegistry(trigger.SchemaRegistry)
-		if err != nil {
-			return nil, err
-		}
-
-		payload, err = avroParser(schema.Schema(), schema.ID(), payload)
+	if t.Schema != nil {
+		payload, err = avroParser(t.Schema.Schema(), t.Schema.ID(), payload)
 		if err != nil {
 			return nil, err
 		}
@@ -226,21 +223,6 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 // ApplyPolicy applies policy on the trigger
 func (t *KafkaTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	return nil
-}
-
-// getSchemaFromRegistry returns a schema from registry
-func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
-	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
-	user, _ := common.GetSecretFromVolume(sr.Auth.Username)
-	password, _ := common.GetSecretFromVolume(sr.Auth.Password)
-	if user != "" && password != "" {
-		schemaRegistryClient.SetCredentials(user, password)
-	}
-	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaID))
-	if err != nil {
-		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaID, err)
-	}
-	return schema, nil
 }
 
 func avroParser(schema string, schemaID int, payload []byte) ([]byte, error) {
