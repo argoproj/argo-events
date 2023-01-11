@@ -260,6 +260,7 @@ func (conn *JetstreamTriggerConn) processMsg(
 	done := make(chan bool)
 	go func() {
 		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-done:
@@ -269,8 +270,7 @@ func (conn *JetstreamTriggerConn) processMsg(
 					conn.Logger.Error(errStr)
 				}
 				conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
-				ticker.Stop()
-				break
+				return
 			case <-ticker.C:
 				err = m.InProgress()
 				if err != nil {

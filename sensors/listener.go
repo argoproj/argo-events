@@ -332,6 +332,8 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		eventIDs = append(eventIDs, v.ID())
 	}
 	if trigger.AtLeastOnce {
+		// By making this a blocking call, wait to Ack the message
+		// until this trigger is executed.
 		sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
 	} else {
 		go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
