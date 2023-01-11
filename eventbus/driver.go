@@ -13,6 +13,7 @@ import (
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	jetstreamsource "github.com/argoproj/argo-events/eventbus/jetstream/eventsource"
 	jetstreamsensor "github.com/argoproj/argo-events/eventbus/jetstream/sensor"
+	kafkasource "github.com/argoproj/argo-events/eventbus/kafka/eventsource"
 	stansource "github.com/argoproj/argo-events/eventbus/stan/eventsource"
 	stansensor "github.com/argoproj/argo-events/eventbus/stan/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -41,6 +42,8 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 		eventBusType = apicommon.EventBusNATS
 	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
+	case eventBusConfig.Kafka != nil:
+		eventBusType = apicommon.EventBusKafka
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}
@@ -57,6 +60,8 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 		if err != nil {
 			return nil, err
 		}
+	case apicommon.EventBusKafka:
+		dvr = kafkasource.NewKafkaSource([]string{}, logger)
 	default:
 		return nil, fmt.Errorf("invalid eventbus type")
 	}

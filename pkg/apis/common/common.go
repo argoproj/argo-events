@@ -107,6 +107,7 @@ type EventBusType string
 var (
 	EventBusNATS      EventBusType = "nats"
 	EventBusJetStream EventBusType = "jetstream"
+	EventBusKafka     EventBusType = "kafka"
 )
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password

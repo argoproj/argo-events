@@ -51,6 +51,8 @@ type BusConfig struct {
 	NATS *NATSConfig `json:"nats,omitempty" protobuf:"bytes,1,opt,name=nats"`
 	// +optional
 	JetStream *JetStreamConfig `json:"jetstream,omitempty" protobuf:"bytes,2,opt,name=jetstream"`
+	// +optional (TODO)
+	Kafka *interface{} `json:"kafka,omitempty" protobuf:"bytes,2,opt,name=kafka"`
 }
 
 const (
