@@ -51,11 +51,13 @@ type KafkaTrigger struct {
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
-func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger, schema *srclient.Schema) (*KafkaTrigger, error) {
+func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
 
 	producer, ok := kafkaProducers[trigger.Template.Name]
+	var schema *srclient.Schema
+
 	if !ok {
 		var err error
 		config := sarama.NewConfig()
@@ -132,6 +134,14 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		}()
 
 		kafkaProducers[trigger.Template.Name] = producer
+
+		if kafkatrigger.SchemaRegistry != nil {
+			var err error
+			schema, err = triggers.GetSchemaFromRegistry(kafkatrigger.SchemaRegistry)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	return &KafkaTrigger{
@@ -139,6 +149,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		Trigger:  trigger,
 		Producer: producer,
 		Logger:   triggerLogger,
+		Schema:   schema,
 	}, nil
 }
 
