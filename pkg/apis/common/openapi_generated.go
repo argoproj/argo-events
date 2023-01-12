@@ -30,21 +30,22 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/common.Amount":          schema_argo_events_pkg_apis_common_Amount(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":         schema_argo_events_pkg_apis_common_Backoff(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth":       schema_argo_events_pkg_apis_common_BasicAuth(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Condition":       schema_argo_events_pkg_apis_common_Condition(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Int64OrString":   schema_argo_events_pkg_apis_common_Int64OrString(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":        schema_argo_events_pkg_apis_common_Metadata(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Resource":        schema_argo_events_pkg_apis_common_Resource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact":      schema_argo_events_pkg_apis_common_S3Artifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":        schema_argo_events_pkg_apis_common_S3Bucket(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":        schema_argo_events_pkg_apis_common_S3Filter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig":      schema_argo_events_pkg_apis_common_SASLConfig(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.SecureHeader":    schema_argo_events_pkg_apis_common_SecureHeader(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.Status":          schema_argo_events_pkg_apis_common_Status(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":       schema_argo_events_pkg_apis_common_TLSConfig(ref),
-		"github.com/argoproj/argo-events/pkg/apis/common.ValueFromSource": schema_argo_events_pkg_apis_common_ValueFromSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Amount":               schema_argo_events_pkg_apis_common_Amount(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Backoff":              schema_argo_events_pkg_apis_common_Backoff(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth":            schema_argo_events_pkg_apis_common_BasicAuth(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Condition":            schema_argo_events_pkg_apis_common_Condition(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Int64OrString":        schema_argo_events_pkg_apis_common_Int64OrString(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Metadata":             schema_argo_events_pkg_apis_common_Metadata(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Resource":             schema_argo_events_pkg_apis_common_Resource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact":           schema_argo_events_pkg_apis_common_S3Artifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Bucket":             schema_argo_events_pkg_apis_common_S3Bucket(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.S3Filter":             schema_argo_events_pkg_apis_common_S3Filter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig":           schema_argo_events_pkg_apis_common_SASLConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig": schema_argo_events_pkg_apis_common_SchemaRegistryConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.SecureHeader":         schema_argo_events_pkg_apis_common_SecureHeader(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.Status":               schema_argo_events_pkg_apis_common_Status(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig":            schema_argo_events_pkg_apis_common_TLSConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/common.ValueFromSource":      schema_argo_events_pkg_apis_common_ValueFromSource(ref),
 	}
 }
 
@@ -416,6 +417,45 @@ func schema_argo_events_pkg_apis_common_SASLConfig(ref common.ReferenceCallback)
 		},
 		Dependencies: []string{
 			"k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_argo_events_pkg_apis_common_SchemaRegistryConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SchemaRegistryConfig refers to configuration for a client",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schema Registry URL.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"schemaId": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schema ID",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SchemaRegistry - basic authentication",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.BasicAuth"),
+						},
+					},
+				},
+				Required: []string{"url", "schemaId"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/common.BasicAuth"},
 	}
 }
 

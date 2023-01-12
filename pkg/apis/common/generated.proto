@@ -153,6 +153,19 @@ message SASLConfig {
   optional k8s.io.api.core.v1.SecretKeySelector password = 3;
 }
 
+// SchemaRegistryConfig refers to configuration for a client
+message SchemaRegistryConfig {
+  // Schema Registry URL.
+  optional string url = 1;
+
+  // Schema ID
+  optional int32 schemaId = 2;
+
+  // +optional
+  // SchemaRegistry - basic authentication
+  optional BasicAuth auth = 3;
+}
+
 // SecureHeader refers to HTTP Headers with auth tokens as values
 message SecureHeader {
   optional string name = 1;
