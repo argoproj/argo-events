@@ -196,6 +196,29 @@
       },
       "type": "object"
     },
+    "io.argoproj.common.SchemaRegistryConfig": {
+      "description": "SchemaRegistryConfig refers to configuration for a client",
+      "properties": {
+        "auth": {
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth",
+          "description": "SchemaRegistry - basic authentication"
+        },
+        "schemaId": {
+          "description": "Schema ID",
+          "format": "int32",
+          "type": "integer"
+        },
+        "url": {
+          "description": "Schema Registry URL.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "schemaId"
+      ],
+      "type": "object"
+    },
     "io.argoproj.common.SecureHeader": {
       "description": "SecureHeader refers to HTTP Headers with auth tokens as values",
       "properties": {
@@ -3605,6 +3628,10 @@
         "sasl": {
           "$ref": "#/definitions/io.argoproj.common.SASLConfig",
           "description": "SASL configuration for the kafka client"
+        },
+        "schemaRegistry": {
+          "$ref": "#/definitions/io.argoproj.common.SchemaRegistryConfig",
+          "description": "Schema Registry configuration to producer message with avro format"
         },
         "tls": {
           "$ref": "#/definitions/io.argoproj.common.TLSConfig",

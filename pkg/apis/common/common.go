@@ -156,6 +156,17 @@ type SASLConfig struct {
 	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=password"`
 }
 
+// SchemaRegistryConfig refers to configuration for a client
+type SchemaRegistryConfig struct {
+	// Schema Registry URL.
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// Schema ID
+	SchemaID int32 `json:"schemaId" protobuf:"varint,2,name=schemaId"`
+	// +optional
+	// SchemaRegistry - basic authentication
+	Auth BasicAuth `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
+}
+
 // Backoff for an operation
 type Backoff struct {
 	// The initial duration in nanoseconds or strings like "1s", "3m"
