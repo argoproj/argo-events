@@ -47,7 +47,7 @@ type KafkaTrigger struct {
 	// Logger to log stuff
 	Logger *zap.SugaredLogger
 	// Avro schema of message
-	Schema *srclient.Schema
+	schema *srclient.Schema
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
@@ -137,7 +137,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 		if kafkatrigger.SchemaRegistry != nil {
 			var err error
-			schema, err = triggers.GetSchemaFromRegistry(kafkatrigger.SchemaRegistry)
+			schema, err = GetSchemaFromRegistry(kafkatrigger.SchemaRegistry)
 			if err != nil {
 				return nil, err
 			}
@@ -149,7 +149,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		Trigger:  trigger,
 		Producer: producer,
 		Logger:   triggerLogger,
-		Schema:   schema,
+		schema:   schema,
 	}, nil
 }
 
@@ -207,8 +207,8 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	}
 
 	// Producer with avro schema
-	if t.Schema != nil {
-		payload, err = avroParser(t.Schema.Schema(), t.Schema.ID(), payload)
+	if t.schema != nil {
+		payload, err = avroParser(t.schema.Schema(), t.schema.ID(), payload)
 		if err != nil {
 			return nil, err
 		}
@@ -261,4 +261,19 @@ func avroParser(schema string, schemaID int, payload []byte) ([]byte, error) {
 	recordValue = append(recordValue, avroNative...)
 
 	return recordValue, nil
+}
+
+// GetSchemaFromRegistry returns a schema from registry.
+func GetSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
+	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
+	if sr.Auth.Username != nil && sr.Auth.Password != nil {
+		user, _ := common.GetSecretFromVolume(sr.Auth.Username)
+		password, _ := common.GetSecretFromVolume(sr.Auth.Password)
+		schemaRegistryClient.SetCredentials(user, password)
+	}
+	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaID))
+	if err != nil {
+		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaID, err)
+	}
+	return schema, nil
 }
