@@ -83,13 +83,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.UserSecret)
 			if err != nil {
-				return nil, fmt.Errorf("Error getting user value from secret, %w", err)
+				return nil, fmt.Errorf("error getting user value from secret, %w", err)
 			}
 			config.Net.SASL.User = user
 
 			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.PasswordSecret)
 			if err != nil {
-				return nil, fmt.Errorf("Error getting password value from secret, %w", err)
+				return nil, fmt.Errorf("error getting password value from secret, %w", err)
 			}
 			config.Net.SASL.Password = password
 		}
@@ -137,7 +137,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 		if kafkatrigger.SchemaRegistry != nil {
 			var err error
-			schema, err = GetSchemaFromRegistry(kafkatrigger.SchemaRegistry)
+			schema, err = getSchemaFromRegistry(kafkatrigger.SchemaRegistry)
 			if err != nil {
 				return nil, err
 			}
@@ -263,8 +263,8 @@ func avroParser(schema string, schemaID int, payload []byte) ([]byte, error) {
 	return recordValue, nil
 }
 
-// GetSchemaFromRegistry returns a schema from registry.
-func GetSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
+// getSchemaFromRegistry returns a schema from registry.
+func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
 	if sr.Auth.Username != nil && sr.Auth.Password != nil {
 		user, _ := common.GetSecretFromVolume(sr.Auth.Username)
