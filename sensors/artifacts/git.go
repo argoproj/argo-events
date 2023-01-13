@@ -59,7 +59,10 @@ func NewGitReader(gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error)
 	}
 	for _, na := range notAllowedInPath {
 		if strings.Contains(gitArtifact.FilePath, na) {
-			return nil, fmt.Errorf("%q is not allowed in the filepath", na)
+			return nil, fmt.Errorf("%q is not allowed in the filePath", na)
+		}
+		if strings.Contains(gitArtifact.CloneDirectory, na) {
+			return nil, fmt.Errorf("%q is not allowed in the cloneDirectory", na)
 		}
 	}
 
