@@ -19,7 +19,7 @@ package artifacts
 import (
 	"testing"
 
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -46,35 +46,47 @@ var gar = &GitArtifactReader{
 }
 
 func TestNewGitReader(t *testing.T) {
-	convey.Convey("Given configuration, get new git reader", t, func() {
+	t.Run("Given configuration, get new git reader", func(t *testing.T) {
 		reader, err := NewGitReader(&v1alpha1.GitArtifact{})
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(reader, convey.ShouldNotBeNil)
+		assert.NoError(t, err)
+		assert.NotNil(t, reader)
+	})
+
+	t.Run("bad clone dir", func(t *testing.T) {
+		_, err := NewGitReader(&v1alpha1.GitArtifact{CloneDirectory: "/abc/../opt"})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not allowed")
+	})
+
+	t.Run("bad file path", func(t *testing.T) {
+		_, err := NewGitReader(&v1alpha1.GitArtifact{FilePath: "abc/efg/../../../root"})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not allowed")
 	})
 }
 
 func TestGetRemote(t *testing.T) {
-	convey.Convey("Test git remote", t, func() {
+	t.Run("Test git remote", func(t *testing.T) {
 		remote := gar.getRemote()
-		convey.So(remote, convey.ShouldEqual, DefaultRemote)
+		assert.Equal(t, DefaultRemote, remote)
 	})
 }
 
 func TestGetBranchOrTag(t *testing.T) {
-	convey.Convey("Given a git minio, get the branch or tag", t, func() {
+	t.Run("Given a git minio, get the branch or tag", func(t *testing.T) {
 		br := gar.getBranchOrTag()
-		convey.So(br.Branch, convey.ShouldEqual, "refs/heads/master")
+		assert.Equal(t, "refs/heads/master", br.Branch.String())
 		gar.artifact.Branch = "br"
 		br = gar.getBranchOrTag()
-		convey.So(br.Branch, convey.ShouldNotEqual, "refs/heads/master")
+		assert.NotEqual(t, "refs/heads/master", br.Branch.String())
 		gar.artifact.Tag = "t"
 		tag := gar.getBranchOrTag()
-		convey.So(tag.Branch, convey.ShouldNotEqual, "refs/heads/master")
+		assert.NotEqual(t, "refs/heads/master", tag.Branch.String())
 	})
 
-	convey.Convey("Given a git minio with a specific ref, get the ref", t, func() {
+	t.Run("Given a git minio with a specific ref, get the ref", func(t *testing.T) {
 		gar.artifact.Ref = "refs/something/weird/or/specific"
 		br := gar.getBranchOrTag()
-		convey.So(br.Branch, convey.ShouldEqual, "refs/something/weird/or/specific")
+		assert.Equal(t, "refs/something/weird/or/specific", br.Branch.String())
 	})
 }

@@ -176,9 +176,9 @@ jobs:
             dist/*.gz
             dist/argo-events-checksums.txt
             dist/argo-events-checksums.sig
+            dist/argo-events-cosign.pub
             manifests/*.yaml
             /tmp/sbom.tar.gz
             /tmp/sbom.tar.gz.sig
-            /dist/argo-events-cosign.pub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
