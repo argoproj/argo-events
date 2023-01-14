@@ -18,9 +18,12 @@ package logging
 
 import (
 	"context"
+	"flag"
 	"os"
+	"strconv"
 
 	zap "go.uber.org/zap"
+	"k8s.io/klog/v2"
 
 	"github.com/argoproj/argo-events/common"
 )
@@ -56,6 +59,11 @@ func NewArgoEventsLogger() *zap.SugaredLogger {
 		panic(err)
 	}
 	return logger.Named("argo-events").Sugar()
+}
+
+func SetKlogLevel(level int) {
+	klog.InitFlags(nil)
+	_ = flag.Set("v", strconv.Itoa(level))
 }
 
 type loggerKey struct{}

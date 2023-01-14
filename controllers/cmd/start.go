@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -16,7 +17,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	argoevents "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus"
@@ -31,7 +31,15 @@ const (
 	imageEnvVar = "ARGO_EVENTS_IMAGE"
 )
 
-func Start(namespaced bool, managedNamespace string) {
+type ArgoEventsControllerOpts struct {
+	Namespaced       bool
+	ManagedNamespace string
+	LeaderElection   bool
+	MetricsPort      int32
+	HealthPort       int32
+}
+
+func Start(eventsOpts ArgoEventsControllerOpts) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
 	config, err := controllers.LoadConfig(func(err error) {
 		logger.Errorw("Failed to reload global configuration file", zap.Error(err))
@@ -49,18 +57,22 @@ func Start(namespaced bool, managedNamespace string) {
 		logger.Fatalf("required environment variable '%s' not defined", imageEnvVar)
 	}
 	opts := ctrl.Options{
-		MetricsBindAddress:     fmt.Sprintf(":%d", common.ControllerMetricsPort),
-		HealthProbeBindAddress: ":8081",
-		LeaderElection:         true,
-		LeaderElectionID:       "argo-events-controller",
+		MetricsBindAddress:     fmt.Sprintf(":%d", eventsOpts.MetricsPort),
+		HealthProbeBindAddress: fmt.Sprintf(":%d", eventsOpts.HealthPort),
 	}
-	if namespaced {
-		opts.Namespace = managedNamespace
+	if eventsOpts.Namespaced {
+		opts.Namespace = eventsOpts.ManagedNamespace
 	}
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), opts)
+	if eventsOpts.LeaderElection {
+		opts.LeaderElection = true
+		opts.LeaderElectionID = "argo-events-controller"
+	}
+	restConfig := ctrl.GetConfigOrDie()
+	mgr, err := ctrl.NewManager(restConfig, opts)
 	if err != nil {
 		logger.Fatalw("unable to get a controller-runtime manager", zap.Error(err))
 	}
+	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 
 	// Readyness probe
 	if err := mgr.AddReadyzCheck("readiness", healthz.Ping); err != nil {
@@ -86,7 +98,7 @@ func Start(namespaced bool, managedNamespace string) {
 
 	// EventBus controller
 	eventBusController, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), config, logger),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), kubeClient, mgr.GetScheme(), config, logger),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up EventBus controller", zap.Error(err))
@@ -104,11 +116,6 @@ func Start(namespaced bool, managedNamespace string) {
 	// Watch ConfigMaps and enqueue owning EventBus key
 	if err := eventBusController.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventbusv1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch ConfigMaps", zap.Error(err))
-	}
-
-	// Watch Secrets and enqueue owning EventBus key
-	if err := eventBusController.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForOwner{OwnerType: &eventbusv1alpha1.EventBus{}, IsController: true}, predicate.GenerationChangedPredicate{}); err != nil {
-		logger.Fatalw("unable to watch Secrets", zap.Error(err))
 	}
 
 	// Watch StatefulSets and enqueue owning EventBus key
