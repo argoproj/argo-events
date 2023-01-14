@@ -24,7 +24,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.180
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
-	github.com/cloudevents/sdk-go/v2 v2.11.0
+	github.com/cloudevents/sdk-go/v2 v2.13.0
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/eclipse/paho.mqtt.golang v1.4.1
 	github.com/emitter-io/go/v2 v2.0.9
