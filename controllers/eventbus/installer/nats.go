@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
@@ -44,21 +45,23 @@ const (
 
 // natsInstaller is used create a NATS installation.
 type natsInstaller struct {
-	client   client.Client
-	eventBus *v1alpha1.EventBus
-	config   *controllers.GlobalConfig
-	labels   map[string]string
-	logger   *zap.SugaredLogger
+	client     client.Client
+	kubeClient kubernetes.Interface
+	eventBus   *v1alpha1.EventBus
+	config     *controllers.GlobalConfig
+	labels     map[string]string
+	logger     *zap.SugaredLogger
 }
 
 // NewNATSInstaller returns a new NATS installer
-func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, logger *zap.SugaredLogger) Installer {
+func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, kubeClient kubernetes.Interface, logger *zap.SugaredLogger) Installer {
 	return &natsInstaller{
-		client:   client,
-		eventBus: eventBus,
-		config:   config,
-		labels:   labels,
-		logger:   logger.Named("nats"),
+		client:     client,
+		kubeClient: kubeClient,
+		eventBus:   eventBus,
+		config:     config,
+		labels:     labels,
+		logger:     logger.Named("nats"),
 	}
 }
 
@@ -858,11 +861,7 @@ func (i *natsInstaller) getClientAuthSecret(ctx context.Context) (*corev1.Secret
 }
 
 func (i *natsInstaller) getSecret(ctx context.Context, labels map[string]string) (*corev1.Secret, error) {
-	sl := &corev1.SecretList{}
-	err := i.client.List(ctx, sl, &client.ListOptions{
-		Namespace:     i.eventBus.Namespace,
-		LabelSelector: labelSelector(labels),
-	})
+	sl, err := i.kubeClient.CoreV1().Secrets(i.eventBus.Namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector(labels).String()})
 	if err != nil {
 		return nil, err
 	}
