@@ -3409,6 +3409,19 @@ Rate limit, default unit is Second
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>atLeastOnce</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AtLeastOnce determines the trigger execution semantics. Defaults to
+false. Trigger execution will use at-most-once semantics. If set to
+true, Trigger execution will switch to at-least-once semantics.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TriggerParameter">
