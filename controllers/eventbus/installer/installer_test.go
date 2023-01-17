@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -50,13 +51,13 @@ var (
 
 func TestGetInstaller(t *testing.T) {
 	t.Run("get installer", func(t *testing.T) {
-		installer, err := getInstaller(testNatsEventBus, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
+		installer, err := getInstaller(testNatsEventBus, nil, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.NoError(t, err)
 		assert.NotNil(t, installer)
 		_, ok := installer.(*natsInstaller)
 		assert.True(t, ok)
 
-		installer, err = getInstaller(testNatsExoticBus, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
+		installer, err = getInstaller(testNatsExoticBus, nil, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.NoError(t, err)
 		assert.NotNil(t, installer)
 		_, ok = installer.(*exoticNATSInstaller)
@@ -64,7 +65,7 @@ func TestGetInstaller(t *testing.T) {
 	})
 
 	t.Run("get jetstream installer", func(t *testing.T) {
-		installer, err := getInstaller(testJetStreamEventBus, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
+		installer, err := getInstaller(testJetStreamEventBus, nil, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.NoError(t, err)
 		assert.NotNil(t, installer)
 		_, ok := installer.(*jetStreamInstaller)
@@ -150,20 +151,21 @@ func fakeSensor() *sensorv1alpha1.Sensor {
 }
 
 func TestInstall(t *testing.T) {
+	kubeClient := k8sfake.NewSimpleClientset()
 	cl := fake.NewClientBuilder().Build()
 	ctx := context.TODO()
 
 	t.Run("test nats error", func(t *testing.T) {
 		testObj := testNatsEventBus.DeepCopy()
 		testObj.Spec.NATS = nil
-		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		err := Install(ctx, testObj, cl, kubeClient, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.Error(t, err)
 		assert.Equal(t, "invalid eventbus spec", err.Error())
 	})
 
 	t.Run("test nats install ok", func(t *testing.T) {
 		testObj := testNatsEventBus.DeepCopy()
-		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		err := Install(ctx, testObj, cl, kubeClient, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.NoError(t, err)
 		assert.True(t, testObj.Status.IsReady())
 		assert.NotNil(t, testObj.Status.Config.NATS)
@@ -175,14 +177,14 @@ func TestInstall(t *testing.T) {
 	t.Run("test jetstream error", func(t *testing.T) {
 		testObj := testJetStreamEventBus.DeepCopy()
 		testObj.Spec.JetStream = nil
-		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		err := Install(ctx, testObj, cl, kubeClient, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.Error(t, err)
 		assert.Equal(t, "invalid eventbus spec", err.Error())
 	})
 
 	t.Run("test jetstream install ok", func(t *testing.T) {
 		testObj := testJetStreamEventBus.DeepCopy()
-		err := Install(ctx, testObj, cl, fakeConfig, zaptest.NewLogger(t).Sugar())
+		err := Install(ctx, testObj, cl, kubeClient, fakeConfig, zaptest.NewLogger(t).Sugar())
 		assert.NoError(t, err)
 		assert.True(t, testObj.Status.IsReady())
 		assert.NotNil(t, testObj.Status.Config.JetStream)
