@@ -133,6 +133,7 @@ const (
 	SensorMetricsPort      = 7777
 	ControllerMetricsPort  = 7777
 	EventBusMetricsPort    = 7777
+	ControllerHealthPort   = 8081
 )
 
 var (

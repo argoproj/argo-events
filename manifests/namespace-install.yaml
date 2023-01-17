@@ -176,7 +176,6 @@ rules:
   - pods
   - pods/exec
   - configmaps
-  - secrets
   - services
   - persistentvolumeclaims
   verbs:
@@ -185,6 +184,17 @@ rules:
   - list
   - watch
   - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - update
+  - list
   - patch
   - delete
 - apiGroups:

@@ -49,7 +49,6 @@ rules:
       - pods
       - pods/exec
       - configmaps
-      - secrets
       - services
       - persistentvolumeclaims
     verbs:
@@ -58,6 +57,18 @@ rules:
       - list
       - watch
       - update
+      - patch
+      - delete
+  # Secrets privileges are used to manage the NATs auth secrets. This can be removed from the ClusterRole and granted granularly per Namespace as needed
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - get
+      - update
+      - list
       - patch
       - delete
   - apiGroups:
