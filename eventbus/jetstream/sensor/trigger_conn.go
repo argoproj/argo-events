@@ -257,15 +257,35 @@ func (conn *JetstreamTriggerConn) processMsg(
 		conn.Logger.Errorf("can't get Metadata() for message %+v??", m)
 	}
 
-	defer func() {
-		err = m.AckSync() // this call does the acknowledgment and waits for an acknowledgment from the server (that it received the ack) too
-		if err != nil {
-			errStr := fmt.Sprintf("Error performing AckSync() on message: %v", err)
-			conn.Logger.Error(errStr)
+	done := make(chan bool)
+	go func() {
+		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-done:
+				err = m.AckSync()
+				if err != nil {
+					errStr := fmt.Sprintf("Error performing AckSync() on message: %v", err)
+					conn.Logger.Error(errStr)
+				}
+				conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
+				return
+			case <-ticker.C:
+				err = m.InProgress()
+				if err != nil {
+					errStr := fmt.Sprintf("Error performing InProgess() on message: %v", err)
+					conn.Logger.Error(errStr)
+				}
+				conn.Logger.Debugf("InProgess message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
+			}
 		}
-
-		conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
 	}()
+
+	defer func() {
+		done <- true
+	}()
+
 	log := conn.Logger
 
 	var event *cloudevents.Event

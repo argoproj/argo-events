@@ -4141,6 +4141,10 @@
       "description": "Trigger is an action taken, output produced, an event created, a message sent",
       "type": "object",
       "properties": {
+        "atLeastOnce": {
+          "description": "AtLeastOnce determines the trigger execution semantics. Defaults to false. Trigger execution will use at-most-once semantics. If set to true, Trigger execution will switch to at-least-once semantics.",
+          "type": "boolean"
+        },
         "parameters": {
           "description": "Parameters is the list of parameters applied to the trigger template definition",
           "type": "array",
