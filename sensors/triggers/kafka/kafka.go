@@ -134,7 +134,6 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		}()
 
 		kafkaProducers[trigger.Template.Name] = producer
-
 	}
 
 	if kafkatrigger.SchemaRegistry != nil {
