@@ -134,13 +134,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		}()
 
 		kafkaProducers[trigger.Template.Name] = producer
+	}
 
-		if kafkatrigger.SchemaRegistry != nil {
-			var err error
-			schema, err = getSchemaFromRegistry(kafkatrigger.SchemaRegistry)
-			if err != nil {
-				return nil, err
-			}
+	if kafkatrigger.SchemaRegistry != nil {
+		var err error
+		schema, err = getSchemaFromRegistry(kafkatrigger.SchemaRegistry)
+		if err != nil {
+			return nil, err
 		}
 	}
 

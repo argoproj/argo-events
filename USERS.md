@@ -23,6 +23,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Gllue](https://gllue.com/)
 1. [Greenhouse Software](https://www.greenhouse.io/)
 1. [Helio](https://helio.exchange)
+1. [iFood](https://www.ifood.com.br)
 1. [InsideBoard](https://www.insideboard.com)
 1. [Intuit](https://www.intuit.com/)
 1. [Loam](https://www.getloam.com/)
