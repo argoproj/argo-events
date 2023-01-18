@@ -37,6 +37,9 @@ message BusConfig {
 
   // +optional
   optional JetStreamConfig jetstream = 2;
+
+  // +optional
+  optional KafkaConfig kafka = 3;
 }
 
 // ContainerTemplate defines customized spec for a container
@@ -79,6 +82,10 @@ message EventBusSpec {
 
   // +optional
   optional JetStreamBus jetstream = 2;
+
+  // +optional
+  // Kafka eventbus
+  optional KafkaBus kafka = 3;
 }
 
 // EventBusStatus holds the status of the eventbus resource
@@ -199,6 +206,51 @@ message JetStreamConfig {
 
   // +optional
   optional string streamConfig = 3;
+}
+
+// KafkaBus holds the KafkaBus EventBus information
+message KafkaBus {
+  // Exotic holds an exotic Kafka config
+  optional KafkaConfig exotic = 1;
+}
+
+message KafkaConfig {
+  // URL to kafka cluster, multiple URLs separated by comma
+  optional string url = 1;
+
+  // TLS configuration for the kafka client.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 2;
+
+  // SASL configuration for the kafka client
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 3;
+
+  // Consumer group for kafka client
+  // +optional
+  optional KafkaConsumerGroup consumerGroup = 4;
+
+  // Secret for auth
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 5;
+
+  // Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config.
+  // It accepts a YAML format configuration, available fields include, "maxRetry", "configVersion (sarama config version)", "requiredAcks", "replication".
+  // +optional
+  optional string streamConfig = 6;
+}
+
+message KafkaConsumerGroup {
+  // The name for the consumer group to use
+  optional string groupName = 1;
+
+  // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+  // +optional
+  optional string rebalanceStrategy = 2;
+
+  // When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
+  // +optional
+  optional bool startOldest = 3;
 }
 
 // NATSBus holds the NATS eventbus information

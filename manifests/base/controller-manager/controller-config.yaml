@@ -62,3 +62,10 @@ data:
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.7.0
           startCommand: /nats-server
+      kafka:
+        streamConfig: |
+          # Default Kafka config, can be overridden by EventBus Kafka specs
+          maxRetry: 3
+          configVersion: 2.5.0
+          requiredAcks: -1
+          replication: 3

@@ -63,6 +63,19 @@ JetStreamConfig
 <em>(Optional)</em>
 </td>
 </tr>
+<tr>
+<td>
+<code>kafka</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.KafkaConfig">
+KafkaConfig
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ContainerTemplate">ContainerTemplate
@@ -188,6 +201,20 @@ JetStreamBus
 <em>(Optional)</em>
 </td>
 </tr>
+<tr>
+<td>
+<code>kafka</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.KafkaBus">
+KafkaBus
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Kafka eventbus</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -248,6 +275,20 @@ JetStreamBus
 </td>
 <td>
 <em>(Optional)</em>
+</td>
+</tr>
+<tr>
+<td>
+<code>kafka</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.KafkaBus">
+KafkaBus
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Kafka eventbus</p>
 </td>
 </tr>
 </tbody>
@@ -628,6 +669,186 @@ string
 </td>
 <td>
 <em>(Optional)</em>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.KafkaBus">KafkaBus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventBusSpec">EventBusSpec</a>)
+</p>
+<p>
+<p>KafkaBus holds the KafkaBus EventBus information</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>exotic</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.KafkaConfig">
+KafkaConfig
+</a>
+</em>
+</td>
+<td>
+<p>Exotic holds an exotic Kafka config</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.KafkaConfig">KafkaConfig
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BusConfig">BusConfig</a>, 
+<a href="#argoproj.io/v1alpha1.KafkaBus">KafkaBus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>url</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>URL to kafka cluster, multiple URLs separated by comma</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>TLS configuration for the kafka client.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sasl</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.SASLConfig
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>SASL configuration for the kafka client</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>consumerGroup</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.KafkaConsumerGroup">
+KafkaConsumerGroup
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Consumer group for kafka client</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>accessSecret</code></br>
+<em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Secret for auth</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>streamConfig</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config.
+It accepts a YAML format configuration, available fields include, &ldquo;maxRetry&rdquo;, &ldquo;configVersion (sarama config version)&rdquo;, &ldquo;requiredAcks&rdquo;, &ldquo;replication&rdquo;.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.KafkaConsumerGroup">KafkaConsumerGroup
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.KafkaConfig">KafkaConfig</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>groupName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>The name for the consumer group to use</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>rebalanceStrategy</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>startOldest</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false</p>
 </td>
 </tr>
 </tbody>
