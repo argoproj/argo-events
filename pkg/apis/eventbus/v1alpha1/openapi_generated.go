@@ -38,6 +38,9 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusStatus":      schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamBus":        schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig":     schema_pkg_apis_eventbus_v1alpha1_JetStreamConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaBus":            schema_pkg_apis_eventbus_v1alpha1_KafkaBus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig":         schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConsumerGroup":  schema_pkg_apis_eventbus_v1alpha1_KafkaConsumerGroup(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSBus":             schema_pkg_apis_eventbus_v1alpha1_NATSBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig":          schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NativeStrategy":      schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref),
@@ -62,11 +65,16 @@ func schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref common.ReferenceCallback) c
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig"),
 						},
 					},
+					"kafka": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"},
 	}
 }
 
@@ -217,11 +225,17 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusSpec(ref common.ReferenceCallback
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamBus"),
 						},
 					},
+					"kafka": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kafka eventbus",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaBus"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamBus", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSBus"},
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamBus", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaBus", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSBus"},
 	}
 }
 
@@ -474,6 +488,112 @@ func schema_pkg_apis_eventbus_v1alpha1_JetStreamConfig(ref common.ReferenceCallb
 		},
 		Dependencies: []string{
 			"k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_eventbus_v1alpha1_KafkaBus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KafkaBus holds the KafkaBus EventBus information",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"exotic": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Exotic holds an exotic Kafka config",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig"},
+	}
+}
+
+func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL to kafka cluster, multiple URLs separated by comma",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the kafka client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
+						},
+					},
+					"sasl": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SASL configuration for the kafka client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
+						},
+					},
+					"consumerGroup": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Consumer group for kafka client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConsumerGroup"),
+						},
+					},
+					"accessSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Secret for auth",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"streamConfig": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config. It accepts a YAML format configuration, available fields include, \"maxRetry\", \"configVersion (sarama config version)\", \"requiredAcks\", \"replication\".",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConsumerGroup", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_eventbus_v1alpha1_KafkaConsumerGroup(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"groupName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The name for the consumer group to use",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"rebalanceStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"startOldest": {
+						SchemaProps: spec.SchemaProps{
+							Description: "When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
 	}
 }
 

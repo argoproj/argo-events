@@ -264,6 +264,9 @@
         "jetstream": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamConfig"
         },
+        "kafka": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConfig"
+        },
         "nats": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSConfig"
         }
@@ -353,6 +356,10 @@
       "properties": {
         "jetstream": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamBus"
+        },
+        "kafka": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaBus",
+          "description": "Kafka eventbus"
         },
         "nats": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSBus",
@@ -489,6 +496,62 @@
         "url": {
           "description": "JetStream (Nats) URL",
           "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.eventbus.v1alpha1.KafkaBus": {
+      "description": "KafkaBus holds the KafkaBus EventBus information",
+      "properties": {
+        "exotic": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConfig",
+          "description": "Exotic holds an exotic Kafka config"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.eventbus.v1alpha1.KafkaConfig": {
+      "properties": {
+        "accessSecret": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Secret for auth"
+        },
+        "consumerGroup": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup",
+          "description": "Consumer group for kafka client"
+        },
+        "sasl": {
+          "$ref": "#/definitions/io.argoproj.common.SASLConfig",
+          "description": "SASL configuration for the kafka client"
+        },
+        "streamConfig": {
+          "description": "Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config. It accepts a YAML format configuration, available fields include, \"maxRetry\", \"configVersion (sarama config version)\", \"requiredAcks\", \"replication\".",
+          "type": "string"
+        },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig",
+          "description": "TLS configuration for the kafka client."
+        },
+        "url": {
+          "description": "URL to kafka cluster, multiple URLs separated by comma",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup": {
+      "properties": {
+        "groupName": {
+          "description": "The name for the consumer group to use",
+          "type": "string"
+        },
+        "rebalanceStrategy": {
+          "description": "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
+          "type": "string"
+        },
+        "startOldest": {
+          "description": "When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false",
+          "type": "boolean"
         }
       },
       "type": "object"
