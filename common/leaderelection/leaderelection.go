@@ -239,6 +239,9 @@ func (e *kubernetesElector) RunOrDie(ctx context.Context, callbacks LeaderCallba
 				},
 			})
 
+			// When the leader is lost, leaderelection.RunOrDie will
+			// cease blocking and we will cancel the context. This
+			// will halt all eventsource/sensor go routines.
 			cancel()
 		}
 	}
