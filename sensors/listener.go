@@ -56,11 +56,15 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	log := logging.FromContext(ctx)
 	custerName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
-	elector, err := leaderelection.NewEventBusElector(ctx, *sensorCtx.eventBusConfig, custerName, int(sensorCtx.sensor.Spec.GetReplicas()))
+	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
+	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
+
+	elector, err := leaderelection.NewElector(ctx, *sensorCtx.eventBusConfig, custerName, replicas, sensorCtx.sensor.Namespace, leasename, sensorCtx.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
 		return err
 	}
+
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
 			if err := sensorCtx.listenEvents(ctx); err != nil {
@@ -68,9 +72,10 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 			}
 		},
 		OnStoppedLeading: func() {
-			log.Fatalf("leader lost: %s", sensorCtx.hostname)
+			log.Warnf("leader lost: %s", sensorCtx.hostname)
 		},
 	})
+
 	return nil
 }
 

@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
@@ -62,6 +64,14 @@ func Start() {
 
 	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
 	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m)
+
+	// add annotations to context
+	for key, value := range eventSource.Annotations {
+		if strings.HasPrefix(key, "events.argoproj.io") {
+			ctx = context.WithValue(ctx, key, value)
+		}
+	}
+
 	if err := adaptor.Start(ctx); err != nil {
 		logger.Fatalw("failed to start eventsource server", zap.Error(err))
 	}

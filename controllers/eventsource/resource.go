@@ -168,8 +168,10 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	}
 	eventSourceCopy := &v1alpha1.EventSource{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: args.EventSource.Namespace,
-			Name:      args.EventSource.Name,
+			Annotations: args.EventSource.Annotations,
+			Labels:      args.EventSource.Labels,
+			Namespace:   args.EventSource.Namespace,
+			Name:        args.EventSource.Name,
 		},
 		Spec: args.EventSource.Spec,
 	}
