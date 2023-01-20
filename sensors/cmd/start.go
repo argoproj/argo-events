@@ -86,6 +86,7 @@ func Start() {
 	// add annotations to context
 	for key, value := range sensor.Annotations {
 		if strings.HasPrefix(key, "events.argoproj.io") {
+			// nolint
 			ctx = context.WithValue(ctx, key, value)
 		}
 	}
