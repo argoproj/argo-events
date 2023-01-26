@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -34,7 +36,7 @@ type LeaderCallbacks struct {
 
 func NewElector(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, clusterName string, clusterSize int, namespace string, leasename string, hostname string) (Elector, error) {
 	switch {
-	case ctx.Value("events.argoproj.io/leader-election") == "k8s":
+	case strings.ToLower(os.Getenv(common.EnvVarLeaderElection)) == "k8s":
 		return newKubernetesElector(namespace, leasename, hostname)
 	case eventBusConfig.NATS != nil:
 		return newEventBusElector(ctx, eventBusConfig.NATS.Auth, clusterName, clusterSize, eventBusConfig.NATS.URL)
@@ -230,9 +232,9 @@ func (e *kubernetesElector) RunOrDie(ctx context.Context, callbacks LeaderCallba
 			leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
 				Lock:            lock,
 				ReleaseOnCancel: true,
-				LeaseDuration:   15 * time.Second,
-				RenewDeadline:   10 * time.Second,
-				RetryPeriod:     2 * time.Second,
+				LeaseDuration:   5 * time.Second,
+				RenewDeadline:   2 * time.Second,
+				RetryPeriod:     1 * time.Second,
 				Callbacks: leaderelection.LeaderCallbacks{
 					OnStartedLeading: callbacks.OnStartedLeading,
 					OnStoppedLeading: callbacks.OnStoppedLeading,

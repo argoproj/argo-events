@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"go.uber.org/zap"
 	"k8s.io/client-go/dynamic"
@@ -82,14 +80,6 @@ func Start() {
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
 	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
-
-	// add annotations to context
-	for key, value := range sensor.Annotations {
-		if strings.HasPrefix(key, "events.argoproj.io") {
-			// nolint
-			ctx = context.WithValue(ctx, key, value)
-		}
-	}
 
 	logger.Infow("starting sensor server", "version", argoevents.GetVersion())
 	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, hostname, m)
