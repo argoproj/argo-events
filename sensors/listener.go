@@ -55,11 +55,11 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 
 func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	log := logging.FromContext(ctx)
-	custerName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
+	clusterName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
 	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
 	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
 
-	elector, err := leaderelection.NewElector(ctx, *sensorCtx.eventBusConfig, custerName, replicas, sensorCtx.sensor.Namespace, leasename, sensorCtx.hostname)
+	elector, err := leaderelection.NewElector(ctx, *sensorCtx.eventBusConfig, clusterName, replicas, sensorCtx.sensor.Namespace, leasename, sensorCtx.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
 		return err
