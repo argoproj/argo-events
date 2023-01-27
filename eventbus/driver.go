@@ -3,6 +3,7 @@ package eventbus
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -61,7 +62,7 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 			return nil, err
 		}
 	case apicommon.EventBusKafka:
-		dvr = kafkasource.NewKafkaSource([]string{}, logger)
+		dvr = kafkasource.NewKafkaSource(strings.Split(eventBusConfig.Kafka.URL, ","), defaultSubject, logger)
 	default:
 		return nil, fmt.Errorf("invalid eventbus type")
 	}
@@ -116,6 +117,8 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
 		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
+	case eventBusConfig.Kafka != nil:
+		eventBusAuth = nil
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}

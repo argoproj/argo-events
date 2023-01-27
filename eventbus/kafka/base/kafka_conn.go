@@ -3,13 +3,11 @@ package base
 import "go.uber.org/zap"
 
 type KafkaConnection struct {
-	logger *zap.SugaredLogger
+	Logger *zap.SugaredLogger
 }
 
-func (c *KafkaConnection) Close() error {
-	return nil
-}
-
-func (c *KafkaConnection) IsClosed() bool {
-	return false
+func NewKafkaConnection(logger *zap.SugaredLogger) *KafkaConnection {
+	return &KafkaConnection{
+		Logger: logger,
+	}
 }
