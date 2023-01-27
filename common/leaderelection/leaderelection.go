@@ -25,6 +25,10 @@ import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
+var (
+	eventBusAuthFileMountPath = common.EventBusAuthFileMountPath
+)
+
 type Elector interface {
 	RunOrDie(context.Context, LeaderCallbacks)
 }
@@ -74,7 +78,7 @@ func getEventBusAuth(ctx context.Context, authStrategy *eventbusv1alpha1.AuthStr
 		v := viper.New()
 		v.SetConfigName("auth")
 		v.SetConfigType("yaml")
-		v.AddConfigPath(common.EventBusAuthFileMountPath)
+		v.AddConfigPath(eventBusAuthFileMountPath)
 
 		if err := v.ReadInConfig(); err != nil {
 			return nil, fmt.Errorf("failed to load auth.yaml. err: %w", err)
@@ -189,35 +193,35 @@ type kubernetesElector struct {
 	namespace string
 	leasename string
 	hostname  string
-	client    *kubernetes.Clientset
 }
 
 func newKubernetesElector(namespace string, leasename string, hostname string) (Elector, error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
 	return &kubernetesElector{
 		namespace: namespace,
 		leasename: leasename,
 		hostname:  hostname,
-		client:    client,
 	}, nil
 }
 
 func (e *kubernetesElector) RunOrDie(ctx context.Context, callbacks LeaderCallbacks) {
+	logger := logging.FromContext(ctx)
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		logger.Fatalw("Failed to retrieve kubernetes config", zap.Error(err))
+	}
+
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		logger.Fatalw("Failed to create kubernetes client", zap.Error(err))
+	}
+
 	lock := &resourcelock.LeaseLock{
 		LeaseMeta: metav1.ObjectMeta{
 			Name:      e.leasename,
 			Namespace: e.namespace,
 		},
-		Client: e.client.CoordinationV1(),
+		Client: client.CoordinationV1(),
 		LockConfig: resourcelock.ResourceLockConfig{
 			Identity: e.hostname,
 		},

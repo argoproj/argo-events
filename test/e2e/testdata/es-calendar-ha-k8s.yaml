@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  annotations:
+    events.argoproj.io/leader-election: k8s
+  name: e2e-calendar-ha-k8s
+spec:
+  replicas: 2
+  template:
+    serviceAccountName: argo-events-sa
+  calendar:
+    example:
+      interval: 2s
