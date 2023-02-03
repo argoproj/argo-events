@@ -62,4 +62,3 @@ data:
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.7.0
           startCommand: /nats-server
-
