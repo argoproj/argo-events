@@ -48,7 +48,7 @@ func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, kubeClient 
 			return NewNATSInstaller(client, eventBus, config, getLabels(eventBus), kubeClient, logger), nil
 		}
 	} else if js := eventBus.Spec.JetStream; js != nil {
-		return NewJetStreamInstaller(client, eventBus, config, getLabels(eventBus), logger), nil
+		return NewJetStreamInstaller(client, eventBus, config, getLabels(eventBus), kubeClient, logger), nil
 	}
 	return nil, fmt.Errorf("invalid eventbus spec")
 }
@@ -76,7 +76,7 @@ func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.C
 		return fmt.Errorf("failed to check if there is any EventSource linked, %w", err)
 	}
 	if linkedEventSources > 0 {
-		return fmt.Errorf("Can not delete an EventBus with %v EventSources connected", linkedEventSources)
+		return fmt.Errorf("can not delete an EventBus with %v EventSources connected", linkedEventSources)
 	}
 
 	linkedSensors, err := linkedSensors(ctx, eventBus.Namespace, eventBus.Name, client)
@@ -85,7 +85,7 @@ func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.C
 		return fmt.Errorf("failed to check if there is any Sensor linked, %w", err)
 	}
 	if linkedSensors > 0 {
-		return fmt.Errorf("Can not delete an EventBus with %v Sensors connected", linkedSensors)
+		return fmt.Errorf("can not delete an EventBus with %v Sensors connected", linkedSensors)
 	}
 
 	installer, err := getInstaller(eventBus, client, kubeClient, config, logger)
