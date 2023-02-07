@@ -555,6 +555,10 @@
           "$ref": "#/definitions/io.argoproj.common.TLSConfig",
           "description": "TLS configuration for the kafka client."
         },
+        "topic": {
+          "description": "Topic name, defaults to namespace_name.eventbus_name",
+          "type": "string"
+        },
         "url": {
           "description": "URL to kafka cluster, multiple URLs separated by comma",
           "type": "string"

@@ -739,6 +739,17 @@ URL to kafka cluster, multiple URLs separated by comma
 </tr>
 <tr>
 <td>
+<code>topic</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Topic name, defaults to namespace_name.eventbus_name
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>tls</code></br> <em>
 github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
 </td>

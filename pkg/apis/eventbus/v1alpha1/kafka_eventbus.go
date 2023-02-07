@@ -14,22 +14,25 @@ type KafkaBus struct {
 type KafkaConfig struct {
 	// URL to kafka cluster, multiple URLs separated by comma
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
+	// Topic name, defaults to namespace_name.eventbus_name
+	// +optional
+	Topic string `json:"topic,omitempty" protobuf:"bytes,2,opt,name=topic"`
 	// TLS configuration for the kafka client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,2,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
 	// SASL configuration for the kafka client
 	// +optional
-	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,3,opt,name=sasl"`
+	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,4,opt,name=sasl"`
 	// Consumer group for kafka client
 	// +optional
-	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,4,opt,name=consumerGroup"`
+	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,5,opt,name=consumerGroup"`
 	// Secret for auth
 	// +optional
-	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,5,opt,name=accessSecret"`
+	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,6,opt,name=accessSecret"`
 	// Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config.
 	// It accepts a YAML format configuration, available fields include, "maxRetry", "configVersion (sarama config version)", "requiredAcks", "replication".
 	// +optional
-	StreamConfig string `json:"streamConfig,omitempty" protobuf:"bytes,6,opt,name=streamConfig"`
+	StreamConfig string `json:"streamConfig,omitempty" protobuf:"bytes,7,opt,name=streamConfig"`
 }
 
 type KafkaConsumerGroup struct {

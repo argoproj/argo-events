@@ -15,6 +15,7 @@ const (
 	testSensorName      = "sensor-xxxxx"
 	testEventSourceName = "es-xxxxx"
 	testSubject         = "subj-xxxxx"
+	testHostname        = "sensor-xxxxx-xxxxx"
 )
 
 var (
@@ -46,23 +47,23 @@ var (
 
 func TestGetSensorDriver(t *testing.T) {
 	t.Run("get driver without eventbus", func(t *testing.T) {
-		_, err := GetSensorDriver(context.Background(), testBadBusConfig, testValidSensorSpec)
+		_, err := GetSensorDriver(context.Background(), testBadBusConfig, testValidSensorSpec, testHostname)
 		assert.Error(t, err)
 	})
 
 	t.Run("get driver with none auth eventbus", func(t *testing.T) {
-		driver, err := GetSensorDriver(context.Background(), testBusConfig, testValidSensorSpec)
+		driver, err := GetSensorDriver(context.Background(), testBusConfig, testValidSensorSpec, testHostname)
 		assert.NoError(t, err)
 		assert.NotNil(t, driver)
 	})
 
 	t.Run("get driver with invalid sensor spec", func(t *testing.T) {
-		_, err := GetSensorDriver(context.Background(), testBusConfig, testNoNameSensorSpec)
+		_, err := GetSensorDriver(context.Background(), testBusConfig, testNoNameSensorSpec, testHostname)
 		assert.Error(t, err)
 	})
 
 	t.Run("get driver with nil sensor spec", func(t *testing.T) {
-		_, err := GetSensorDriver(context.Background(), testBusConfig, nil)
+		_, err := GetSensorDriver(context.Background(), testBusConfig, nil, testHostname)
 		assert.Error(t, err)
 	})
 }

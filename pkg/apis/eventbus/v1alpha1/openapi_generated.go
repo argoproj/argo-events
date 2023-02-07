@@ -525,6 +525,13 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback)
 							Format:      "",
 						},
 					},
+					"topic": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Topic name, defaults to namespace_name.eventbus_name",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"tls": {
 						SchemaProps: spec.SchemaProps{
 							Description: "TLS configuration for the kafka client.",

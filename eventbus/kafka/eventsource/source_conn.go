@@ -17,8 +17,7 @@ type KafkaSourceConnection struct {
 }
 
 func (c *KafkaSourceConnection) Publish(ctx context.Context, msg common.Message) error {
-	key := msg.EventSourceName + ":" + msg.EventName
-
+	key := base.EventKey(msg.EventSourceName, msg.EventName)
 	partition, offset, err := c.producer.SendMessage(&sarama.ProducerMessage{
 		Topic: c.topic,
 		Key:   sarama.StringEncoder(key),
@@ -29,7 +28,7 @@ func (c *KafkaSourceConnection) Publish(ctx context.Context, msg common.Message)
 		return err
 	}
 
-	c.Logger.Infow("Published message to kafka", zap.String("topic", c.topic), zap.Int32("partition", partition), zap.Int64("offset", offset))
+	c.Logger.Infow("Published message to kafka", zap.String("topic", c.topic), zap.String("key", key), zap.Int32("partition", partition), zap.Int64("offset", offset))
 
 	return nil
 }

@@ -1,9 +1,12 @@
 package eventsource
 
 import (
+	"strings"
+
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"go.uber.org/zap"
 )
 
@@ -12,10 +15,10 @@ type KafkaSource struct {
 	topic string
 }
 
-func NewKafkaSource(brokers []string, topic string, logger *zap.SugaredLogger) *KafkaSource {
+func NewKafkaSource(kafkaConfig *eventbusv1alpha1.KafkaConfig, logger *zap.SugaredLogger) *KafkaSource {
 	return &KafkaSource{
-		base.NewKafka(brokers, logger),
-		topic,
+		base.NewKafka(strings.Split(kafkaConfig.URL, ","), logger),
+		kafkaConfig.Topic,
 	}
 }
 

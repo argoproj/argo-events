@@ -3,7 +3,6 @@ package eventbus
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -15,6 +14,7 @@ import (
 	jetstreamsource "github.com/argoproj/argo-events/eventbus/jetstream/eventsource"
 	jetstreamsensor "github.com/argoproj/argo-events/eventbus/jetstream/sensor"
 	kafkasource "github.com/argoproj/argo-events/eventbus/kafka/eventsource"
+	kafkasensor "github.com/argoproj/argo-events/eventbus/kafka/sensor"
 	stansource "github.com/argoproj/argo-events/eventbus/stan/eventsource"
 	stansensor "github.com/argoproj/argo-events/eventbus/stan/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -37,8 +37,6 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 
 	var eventBusType apicommon.EventBusType
 	switch {
-	case eventBusConfig.NATS != nil && eventBusConfig.JetStream != nil:
-		return nil, fmt.Errorf("invalid event bus, NATS and Jetstream shouldn't both be specified")
 	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
 	case eventBusConfig.JetStream != nil:
@@ -62,14 +60,14 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 			return nil, err
 		}
 	case apicommon.EventBusKafka:
-		dvr = kafkasource.NewKafkaSource(strings.Split(eventBusConfig.Kafka.URL, ","), defaultSubject, logger)
+		dvr = kafkasource.NewKafkaSource(eventBusConfig.Kafka, logger)
 	default:
 		return nil, fmt.Errorf("invalid eventbus type")
 	}
 	return dvr, nil
 }
 
-func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorSpec *v1alpha1.Sensor) (eventbuscommon.SensorDriver, error) {
+func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorSpec *v1alpha1.Sensor, hostname string) (eventbuscommon.SensorDriver, error) {
 	auth, err := GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
@@ -85,12 +83,12 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 
 	var eventBusType apicommon.EventBusType
 	switch {
-	case eventBusConfig.NATS != nil && eventBusConfig.JetStream != nil:
-		return nil, fmt.Errorf("invalid event bus, NATS and Jetstream shouldn't both be specified")
 	case eventBusConfig.NATS != nil:
 		eventBusType = apicommon.EventBusNATS
 	case eventBusConfig.JetStream != nil:
 		eventBusType = apicommon.EventBusJetStream
+	case eventBusConfig.Kafka != nil:
+		eventBusType = apicommon.EventBusKafka
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}
@@ -103,6 +101,9 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	case apicommon.EventBusJetStream:
 		dvr, err = jetstreamsensor.NewSensorJetstream(eventBusConfig.JetStream.URL, sensorSpec, eventBusConfig.JetStream.StreamConfig, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 		return dvr, err
+	case apicommon.EventBusKafka:
+		dvr = kafkasensor.NewKafkaSensor(eventBusConfig.Kafka, sensorSpec, hostname, logger)
+		return dvr, nil
 	default:
 		return nil, fmt.Errorf("invalid eventbus type")
 	}

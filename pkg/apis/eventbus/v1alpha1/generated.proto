@@ -218,26 +218,30 @@ message KafkaConfig {
   // URL to kafka cluster, multiple URLs separated by comma
   optional string url = 1;
 
+  // Topic name, defaults to namespace_name.eventbus_name
+  // +optional
+  optional string topic = 2;
+
   // TLS configuration for the kafka client.
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 2;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 3;
 
   // SASL configuration for the kafka client
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 3;
+  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 4;
 
   // Consumer group for kafka client
   // +optional
-  optional KafkaConsumerGroup consumerGroup = 4;
+  optional KafkaConsumerGroup consumerGroup = 5;
 
   // Secret for auth
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 5;
+  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 6;
 
   // Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config.
   // It accepts a YAML format configuration, available fields include, "maxRetry", "configVersion (sarama config version)", "requiredAcks", "replication".
   // +optional
-  optional string streamConfig = 6;
+  optional string streamConfig = 7;
 }
 
 message KafkaConsumerGroup {
