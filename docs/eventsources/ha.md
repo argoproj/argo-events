@@ -53,6 +53,16 @@ old one is gone.
 - Redis
 - Resource
 
+## Kubernetes Leader Election
+
+By default, Argo Events will use NATS for the HA leader election. Alternatively,
+you can opt-in to a Kubernetes native leader election (that uses a Lease) by
+specifying the following annotation.
+```yaml
+annotations:
+  events.argoproj.io/leader-election: k8s
+```
+
 ## More
 
 Click [here](../dr_ha_recommendations.md) to learn more information about Argo
