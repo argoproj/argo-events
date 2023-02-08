@@ -56,11 +56,24 @@ old one is gone.
 ## Kubernetes Leader Election
 
 By default, Argo Events will use NATS for the HA leader election. Alternatively,
-you can opt-in to a Kubernetes native leader election (that uses a Lease) by
-specifying the following annotation.
+you can opt-in to a Kubernetes native leader election by specifying the following
+annotation.
 ```yaml
 annotations:
   events.argoproj.io/leader-election: k8s
+```
+
+To use Kubernetes leader election the following RBAC rules need to be associated
+with the EventSource ServiceAccount.
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-events-leaderelection-role
+rules:
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs:     ["get", "create", "update"]
 ```
 
 ## More
