@@ -148,8 +148,12 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
 		},
 		{
-			Name:      "POD_NAME",
+			Name:      common.EnvVarPodName,
 			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}},
+		},
+		{
+			Name:  common.EnvVarLeaderElection,
+			Value: args.Sensor.Annotations[common.AnnotationLeaderElection],
 		},
 	}
 
