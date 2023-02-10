@@ -1243,6 +1243,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#kubernetes-leader-election" class="md-nav__link">
+    Kubernetes Leader Election
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#more" class="md-nav__link">
     More
   </a>
@@ -2056,6 +2063,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#kubernetes-leader-election" class="md-nav__link">
+    Kubernetes Leader Election
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#more" class="md-nav__link">
     More
   </a>
@@ -2128,6 +2142,24 @@ old one is gone.</p>
 <li>Redis</li>
 <li>Resource</li>
 </ul>
+<h2 id="kubernetes-leader-election">Kubernetes Leader Election<a class="headerlink" href="#kubernetes-leader-election" title="Permanent link">&para;</a></h2>
+<p>By default, Argo Events will use NATS for the HA leader election. Alternatively,
+you can opt-in to a Kubernetes native leader election by specifying the following
+annotation.
+<div class="highlight"><pre><span></span><code><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">events.argoproj.io/leader-election</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s</span>
+</code></pre></div></p>
+<p>To use Kubernetes leader election the following RBAC rules need to be associated
+with the EventSource ServiceAccount.
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Role</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argo-events-leaderelection-role</span>
+<span class="nt">rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;coordination.k8s.io&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;leases&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">verbs</span><span class="p">:</span><span class="w">     </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;create&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;update&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div></p>
 <h2 id="more">More<a class="headerlink" href="#more" title="Permanent link">&para;</a></h2>
 <p>Click <a href="../../dr_ha_recommendations/">here</a> to learn more information about Argo
 Events DR/HA recommendations.</p>
