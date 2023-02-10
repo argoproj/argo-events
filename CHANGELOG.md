@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.7.6 (2023-02-09)
+
+ * [eff04343](https://github.com/argoproj/argo-events/commit/eff0434356052ccffdf0b13bef55f861dcde6e30) Update manifests to v1.7.6
+ * [d0481ae7](https://github.com/argoproj/argo-events/commit/d0481ae76047c31b04873bafc63d86ab9b1bc32b) feat: Optional kubernetes-based leader election (#2438)
+ * [413ca1f6](https://github.com/argoproj/argo-events/commit/413ca1f6dfacf878cb7f049e99560baddf1cb4f3) fix: remove the secret watch privilege dependency from js eb ctrler (#2453)
+ * [0b79a44d](https://github.com/argoproj/argo-events/commit/0b79a44dbd7d7bba2ef20dfe0127c8f867909e9f) chore(deps): bump github.com/xanzy/go-gitlab from 0.78.0 to 0.79.1 (#2460)
+ * [666a29d6](https://github.com/argoproj/argo-events/commit/666a29d686b037e8fec54527f9b8cbbf785daf75) chore(deps): bump github.com/rabbitmq/amqp091-go from 1.6.0 to 1.6.1 (#2459)
+ * [ca0fbdb7](https://github.com/argoproj/argo-events/commit/ca0fbdb7bbbd87e0bb04f7d74f1c816301388013) chore(deps): bump google.golang.org/api from 0.108.0 to 0.109.0 (#2456)
+ * [08e84bd9](https://github.com/argoproj/argo-events/commit/08e84bd92d54365d293bdba98c7b98c9887ea463) chore(deps): bump google.golang.org/grpc from 1.52.0 to 1.52.3 (#2448)
+ * [c377ea0a](https://github.com/argoproj/argo-events/commit/c377ea0a1881a91e3ce7c84625176691c07bf5d8) chore(deps): bump github.com/antonmedv/expr from 1.10.1 to 1.10.5 (#2446)
+
+### Contributors
+
+ * David Farr
+ * Derek Wang
+ * dependabot[bot]
+
 ## v1.7.5 (2023-01-23)
 
  * [de0a80e6](https://github.com/argoproj/argo-events/commit/de0a80e6020eee9cfcbd9afc1b6fb0b2479a66ae) Update manifests to v1.7.5
