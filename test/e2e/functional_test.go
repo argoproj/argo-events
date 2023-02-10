@@ -69,24 +69,31 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 }
 
 func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
-	t1 := s.Given().EventSource("@testdata/es-calendar-ha.yaml").
-		When().
-		CreateEventSource().
-		WaitForEventSourceReady().
-		Wait(3 * time.Second).
-		Then().
-		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+	for _, test := range []struct {
+		es, s string
+	}{
+		{"@testdata/es-calendar-ha.yaml", "@testdata/sensor-log-ha.yaml"},
+		{"@testdata/es-calendar-ha-k8s.yaml", "@testdata/sensor-log-ha-k8s.yaml"},
+	} {
+		t1 := s.Given().EventSource(test.es).
+			When().
+			CreateEventSource().
+			WaitForEventSourceReady().
+			Wait(3 * time.Second).
+			Then().
+			ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	defer t1.When().DeleteEventSource()
+		defer t1.When().DeleteEventSource()
 
-	t2 := s.Given().Sensor("@testdata/sensor-log-ha.yaml").
-		When().
-		CreateSensor().
-		WaitForSensorReady().
-		Wait(3 * time.Second).
-		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
-	defer t2.When().DeleteSensor()
+		t2 := s.Given().Sensor(test.s).
+			When().
+			CreateSensor().
+			WaitForSensorReady().
+			Wait(3 * time.Second).
+			Then().
+			ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+		defer t2.When().DeleteSensor()
+	}
 }
 
 func (s *FunctionalSuite) TestMetricsWithCalendar() {
