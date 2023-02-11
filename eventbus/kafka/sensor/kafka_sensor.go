@@ -10,7 +10,8 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/eventbus/common"
+	"github.com/argoproj/argo-events/common"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -92,6 +93,32 @@ func NewKafkaSensor(kafkaConfig *eventbusv1alpha1.KafkaConfig, sensor *sensorv1a
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Transaction.ID = hostname
 	config.Net.MaxOpenRequests = 1
+	// config.Net.TLS.Enable = kafkaConfig.TLS != nil
+
+	if kafkaConfig.SASL != nil {
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaConfig.SASL.GetMechanism())
+		if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA512New} }
+		} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA256New} }
+		}
+
+		user, err := common.GetSecretFromVolume(kafkaConfig.SASL.UserSecret)
+		if err != nil {
+			fmt.Printf("error getting user value from secret, %v", err)
+			return nil
+		}
+		config.Net.SASL.User = user
+
+		password, err := common.GetSecretFromVolume(kafkaConfig.SASL.PasswordSecret)
+		if err != nil {
+			fmt.Printf("error getting password value from secret, %v", err)
+			return nil
+		}
+		config.Net.SASL.Password = password
+		config.Net.TLS.Enable = true
+	}
 
 	return &KafkaSensor{
 		Kafka:     base.NewKafka(strings.Split(kafkaConfig.URL, ","), logger),
@@ -183,7 +210,7 @@ func (s *KafkaSensor) Initialize() error {
 	return nil
 }
 
-func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpression string, dependencies []common.Dependency, atLeastOnce bool) (common.TriggerConnection, error) {
+func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpression string, dependencies []eventbuscommon.Dependency, atLeastOnce bool) (eventbuscommon.TriggerConnection, error) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -201,7 +228,7 @@ func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpres
 			return nil, err
 		}
 
-		depMap := map[string]common.Dependency{}
+		depMap := map[string]eventbuscommon.Dependency{}
 		for _, dep := range dependencies {
 			depMap[base.EventKey(dep.EventSourceName, dep.EventName)] = dep
 		}
