@@ -2168,6 +2168,21 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
 						},
 					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of group IDs or group name like \"test\". Group level hook available in Premium and Ultimate Gitlab.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"events", "gitlabBaseURL"},
 			},

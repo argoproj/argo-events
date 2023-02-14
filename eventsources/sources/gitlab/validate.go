@@ -31,7 +31,7 @@ func validate(eventSource *v1alpha1.GitlabEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if len(eventSource.GetProjects()) == 0 {
+	if len(eventSource.GetProjects()) == 0 && len(eventSource.GetGroups()) == 0 {
 		return fmt.Errorf("projects can't be empty")
 	}
 	if eventSource.Events == nil {

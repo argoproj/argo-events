@@ -863,6 +863,10 @@ type GitlabEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
+	// List of group IDs or group name like "test".
+	// Group level hook available in Premium and Ultimate Gitlab.
+	// +optional
+	Groups []string `json:"groups,omitempty" protobuf:"bytes,13,rep,name=groups"`
 }
 
 func (g GitlabEventSource) GetProjects() []string {
@@ -871,6 +875,13 @@ func (g GitlabEventSource) GetProjects() []string {
 	}
 	if g.DeprecatedProjectID != "" {
 		return []string{g.DeprecatedProjectID}
+	}
+	return []string{}
+}
+
+func (g GitlabEventSource) GetGroups() []string {
+	if len(g.Groups) > 0 {
+		return g.Groups
 	}
 	return []string{}
 }

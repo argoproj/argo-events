@@ -1763,6 +1763,13 @@
           "description": "GitlabBaseURL is the base URL for API requests to a custom endpoint",
           "type": "string"
         },
+        "groups": {
+          "description": "List of group IDs or group name like \"test\". Group level hook available in Premium and Ultimate Gitlab.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",

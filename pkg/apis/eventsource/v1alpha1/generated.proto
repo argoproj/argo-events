@@ -769,6 +769,11 @@ message GitlabEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 12;
+
+  // List of group IDs or group name like "test".
+  // Group level hook available in Premium and Ultimate Gitlab.
+  // +optional
+  repeated string groups = 13;
 }
 
 // HDFSEventSource refers to event-source for HDFS related events

@@ -131,6 +131,17 @@ func (router *Router) PostInactivate() error {
 	logger := router.route.Logger
 	logger.Info("deleting Gitlab hooks...")
 
+	for _, g := range gitlabEventSource.GetGroups() {
+		id, ok := router.hookIDs[g]
+		if !ok {
+			return fmt.Errorf("can not find hook ID for group %s", g)
+		}
+		if _, err := router.gitlabClient.Groups.DeleteGroupHook(g, id); err != nil {
+			return fmt.Errorf("failed to delete hook for group %s. err: %w", g, err)
+		}
+		logger.Infof("Gitlab hook deleted for group %s", g)
+	}
+
 	for _, p := range gitlabEventSource.GetProjects() {
 		id, ok := router.hookIDs[p]
 		if !ok {
@@ -195,6 +206,20 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			reflect.Indirect(iev).SetBool(true)
 			elem.Set(iev)
 		}
+		groupHookOpt := &gitlab.AddGroupHookOptions{
+			URL:                      opt.URL,
+			EnableSSLVerification:    opt.EnableSSLVerification,
+			ConfidentialNoteEvents:   opt.ConfidentialNoteEvents,
+			PushEvents:               opt.PushEvents,
+			IssuesEvents:             opt.IssuesEvents,
+			ConfidentialIssuesEvents: opt.ConfidentialIssuesEvents,
+			MergeRequestsEvents:      opt.MergeRequestsEvents,
+			TagPushEvents:            opt.TagPushEvents,
+			NoteEvents:               opt.NoteEvents,
+			JobEvents:                opt.JobEvents,
+			PipelineEvents:           opt.PipelineEvents,
+			WikiPageEvents:           opt.WikiPageEvents,
+		}
 
 		if gitlabEventSource.SecretToken != nil {
 			token, err := common.GetSecretFromVolume(gitlabEventSource.SecretToken)
@@ -216,26 +241,37 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return fmt.Errorf("failed to initialize client, %w", err)
 		}
 
-		getHook := func(hooks []*gitlab.ProjectHook, url string) *gitlab.ProjectHook {
-			for _, h := range hooks {
-				if h.URL != url {
-					continue
-				}
-				return h
-			}
-			return nil
-		}
-
 		router.hookIDs = make(map[string]int)
 
 		f := func() {
+			for _, g := range gitlabEventSource.GetGroups() {
+				hooks, _, err := router.gitlabClient.Groups.ListGroupHooks(g, &gitlab.ListGroupHooksOptions{})
+				if err != nil {
+					logger.Errorf("failed to list existing webhooks of group %s. err: %+v", g, err)
+					continue
+				}
+				hook := getGroupHook(hooks, formattedURL)
+				if hook != nil {
+					router.hookIDs[g] = hook.ID
+					continue
+				}
+				logger.Infof("hook not found for group %s, creating ...", g)
+				hook, _, err = router.gitlabClient.Groups.AddGroupHook(g, groupHookOpt)
+				if err != nil {
+					logger.Errorf("failed to create gitlab webhook for group %s. err: %+v", g, err)
+					continue
+				}
+				router.hookIDs[g] = hook.ID
+				time.Sleep(500 * time.Millisecond)
+			}
+
 			for _, p := range gitlabEventSource.GetProjects() {
 				hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(p, &gitlab.ListProjectHooksOptions{})
 				if err != nil {
 					logger.Errorf("failed to list existing webhooks of project %s. err: %+v", p, err)
 					continue
 				}
-				hook := getHook(hooks, formattedURL)
+				hook := getProjectHook(hooks, formattedURL)
 				if hook != nil {
 					router.hookIDs[p] = hook.ID
 					continue

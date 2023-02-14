@@ -3268,6 +3268,18 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>groups</code></br> <em> \[\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+List of group IDs or group name like “test”. Group level hook available
+in Premium and Ultimate Gitlab.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.HDFSEventSource">
