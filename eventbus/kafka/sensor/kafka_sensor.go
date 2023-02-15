@@ -32,8 +32,6 @@ type KafkaSensor struct {
 	config   *sarama.Config
 	client   sarama.Client
 	consumer sarama.ConsumerGroup
-	// producer sarama.AsyncProducer
-	// offsetManager sarama.OffsetManager
 
 	// triggers
 	triggers Triggers
@@ -185,22 +183,21 @@ func (s *KafkaSensor) Initialize() error {
 		return err
 	}
 
-	// offsetManager, err := sarama.NewOffsetManagerFromClient(s.groupName, client)
-	// if err != nil {
-	// 	return err
-	// }
+	offsetManager, err := sarama.NewOffsetManagerFromClient(s.groupName, client)
+	if err != nil {
+		return err
+	}
 
 	s.client = client
 	s.consumer = consumer
-	// s.producer = producer
-	// s.offsetManager = offsetManager
-
 	s.kafkaHandler = &KafkaHandler{
-		Mutex:     &sync.Mutex{},
-		Logger:    s.Logger,
-		GroupName: s.groupName,
-		Producer:  producer,
-		Handlers: map[string]func(*sarama.ConsumerMessage) *KafkaTransaction{
+		Mutex:         &sync.Mutex{},
+		Logger:        s.Logger,
+		GroupName:     s.groupName,
+		Producer:      producer,
+		OffsetManager: offsetManager,
+		TriggerTopic:  s.topics.trigger,
+		Handlers: map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()){
 			s.topics.event:   s.Event,
 			s.topics.trigger: s.Trigger,
 			s.topics.action:  s.Action,
@@ -303,11 +300,11 @@ func (s *KafkaSensor) IsClosed() bool {
 	return !s.connected || s.client.Closed()
 }
 
-func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) *KafkaTransaction {
+func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(msg.Value, &event); err != nil {
 		s.Logger.Errorw("Failed to deserialize cloudevent, skipping", zap.Error(err))
-		return &KafkaTransaction{Offset: msg.Offset + 1}
+		return nil, msg.Offset + 1, nil
 	}
 
 	messages := []*sarama.ProducerMessage{}
@@ -349,10 +346,10 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) *KafkaTransaction {
 		})
 	}
 
-	return &KafkaTransaction{Messages: messages, Offset: msg.Offset + 1}
+	return messages, msg.Offset + 1, nil
 }
 
-func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) *KafkaTransaction {
+func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(msg.Value, &event); err != nil {
 		s.Logger.Errorw("Failed to deserialize cloudevent, skipping", zap.Error(err))
@@ -397,14 +394,14 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) *KafkaTransaction {
 		offset = trigger.Offset(msg.Partition, offset)
 	}
 
-	return &KafkaTransaction{Messages: messages, Offset: offset}
+	return messages, offset, nil
 }
 
-func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) *KafkaTransaction {
+func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {
 	var events []*cloudevents.Event
 	if err := json.Unmarshal(msg.Value, &events); err != nil {
 		s.Logger.Errorw("Failed to deserialize cloudevents, skipping", zap.Error(err))
-		return &KafkaTransaction{Offset: msg.Offset + 1}
+		return nil, msg.Offset + 1, nil
 	}
 
 	var after func()
@@ -417,5 +414,5 @@ func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) *KafkaTransaction {
 		}
 	}
 
-	return &KafkaTransaction{Offset: msg.Offset + 1, After: after}
+	return nil, msg.Offset + 1, after
 }
