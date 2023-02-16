@@ -3,6 +3,8 @@ kind: EventSource
 metadata:
   name: e2e-calendar
 spec:
+  template:
+    serviceAccountName: argo-events-sa
   calendar:
     example:
       interval: 10s
