@@ -2,9 +2,12 @@ package kafka
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	"go.uber.org/zap"
 )
 
@@ -40,6 +43,10 @@ func (c *Checkpoint) Set(key string, offset int64) {
 }
 
 func (c *Checkpoint) Metadata() string {
+	if c.Offsets == nil {
+		return ""
+	}
+
 	metadata, err := json.Marshal(c.Offsets)
 	if err != nil {
 		c.Logger.Errorw("Failed to serialize metadata", err)
@@ -95,17 +102,46 @@ func (h *KafkaHandler) Cleanup(session sarama.ConsumerGroupSession) error {
 }
 
 func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	handler, ok := h.Handlers[claim.Topic()]
+	if !ok {
+		return fmt.Errorf("unrecognized topic %s", claim.Topic())
+	}
+
+	checkpoint, ok := h.checkpoints[claim.Topic()][claim.Partition()]
+	if !ok {
+		return fmt.Errorf("unrecognized topic %s or partition %d", claim.Topic(), claim.Partition())
+	}
+
+	// Batch messsages from the claim message channel. A message will
+	// be produced on the batched channel if the max batch size is
+	// reached, or the time limit has elapsed, whichever happens
+	// first. Batching helps optimize kafka transactions.
+	batch := base.Batch(100, 2*time.Second, claim.Messages())
+
 	for {
 		select {
-		case msg := <-claim.Messages():
-			h.Logger.Infow("Received message",
-				zap.String("topic", msg.Topic),
-				zap.Int32("partition", msg.Partition),
-				zap.Int64("offset", msg.Offset))
+		case msgs := <-batch:
+			transaction := &KafkaTransaction{
+				Logger:        h.Logger,
+				Producer:      h.Producer,
+				GroupName:     h.GroupName,
+				Topic:         claim.Topic(),
+				Partition:     claim.Partition(),
+				ResetOffset:   msgs[0].Offset,
+				ResetMetadata: checkpoint.Metadata(),
+			}
 
-			if handler, ok := h.Handlers[msg.Topic]; ok {
+			var messages []*sarama.ProducerMessage
+			var offset int64
+			var fns []func()
+
+			for _, msg := range msgs {
+				h.Logger.Infow("Received message",
+					zap.String("topic", msg.Topic),
+					zap.Int32("partition", msg.Partition),
+					zap.Int64("offset", msg.Offset))
+
 				key := string(msg.Key)
-				checkpoint := h.checkpoints[msg.Topic][msg.Partition]
 
 				if checkpoint.Init {
 					session.MarkOffset(msg.Topic, msg.Partition, msg.Offset, "")
@@ -118,38 +154,30 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 					continue
 				}
 
-				messages, offset, after := handler(msg)
-
-				var metadata string
-				if msg.Topic == h.TriggerTopic {
-					if len(messages) > 0 {
-						checkpoint.Set(key, msg.Offset+1)
-					}
-
-					metadata = checkpoint.Metadata()
+				m, o, f := handler(msg)
+				if msg.Topic == h.TriggerTopic && len(m) > 0 {
+					checkpoint.Set(key, msg.Offset+1)
 				}
 
-				transaction := &KafkaTransaction{
-					Logger:    h.Logger,
-					Producer:  h.Producer,
-					GroupName: h.GroupName,
-					Messages:  messages,
-					Offset:    offset,
-					Metadata:  metadata,
-					After:     after,
+				// update transacation information
+				messages = append(messages, m...)
+				offset = o
+				if f != nil {
+					fns = append(fns, f)
 				}
+			}
 
-				func() {
-					h.Lock()
-					defer h.Unlock()
-					if err := transaction.Commit(msg, session); err != nil {
-						h.Logger.Errorw("Transaction error", zap.Error(err))
-					}
-				}()
-			} else {
-				// bump offset if we don't have a handler
-				session.MarkMessage(msg, "")
-				session.Commit()
+			func() {
+				h.Lock()
+				defer h.Unlock()
+				if err := transaction.Commit(session, messages, offset, checkpoint.Metadata()); err != nil {
+					h.Logger.Errorw("Transaction error", zap.Error(err))
+				}
+			}()
+
+			// invoke (action) functions asynchronously
+			for _, fn := range fns {
+				go fn()
 			}
 		case <-session.Context().Done():
 			return nil
