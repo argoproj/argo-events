@@ -11,15 +11,15 @@ import (
 
 type KafkaSourceConnection struct {
 	*base.KafkaConnection
-	topic    string
-	client   sarama.Client
-	producer sarama.SyncProducer
+	Topic    string
+	Client   sarama.Client
+	Producer sarama.SyncProducer
 }
 
 func (c *KafkaSourceConnection) Publish(ctx context.Context, msg common.Message) error {
 	key := base.EventKey(msg.EventSourceName, msg.EventName)
-	partition, offset, err := c.producer.SendMessage(&sarama.ProducerMessage{
-		Topic: c.topic,
+	partition, offset, err := c.Producer.SendMessage(&sarama.ProducerMessage{
+		Topic: c.Topic,
 		Key:   sarama.StringEncoder(key),
 		Value: sarama.ByteEncoder(msg.Body),
 	})
@@ -28,19 +28,19 @@ func (c *KafkaSourceConnection) Publish(ctx context.Context, msg common.Message)
 		return err
 	}
 
-	c.Logger.Infow("Published message to kafka", zap.String("topic", c.topic), zap.String("key", key), zap.Int32("partition", partition), zap.Int64("offset", offset))
+	c.Logger.Infow("Published message to kafka", zap.String("topic", c.Topic), zap.String("key", key), zap.Int32("partition", partition), zap.Int64("offset", offset))
 
 	return nil
 }
 
 func (c *KafkaSourceConnection) Close() error {
-	if err := c.producer.Close(); err != nil {
+	if err := c.Producer.Close(); err != nil {
 		return err
 	}
 
-	return c.client.Close()
+	return c.Client.Close()
 }
 
 func (c *KafkaSourceConnection) IsClosed() bool {
-	return c.client.Closed()
+	return c.Client.Closed()
 }

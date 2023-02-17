@@ -218,6 +218,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		log.Info("dispatching event on the data channel...")
 		eventData := &events.KafkaEventData{
 			Topic:     msg.Topic,
+			Key:       string(msg.Key),
 			Partition: int(msg.Partition),
 			Timestamp: msg.Timestamp.String(),
 			Metadata:  kafkaEventSource.Metadata,
@@ -384,6 +385,7 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 	consumer.logger.Info("dispatching event on the data channel...")
 	eventData := &events.KafkaEventData{
 		Topic:     message.Topic,
+		Key:       string(message.Key),
 		Partition: int(message.Partition),
 		Timestamp: message.Timestamp.String(),
 		Metadata:  consumer.kafkaEventSource.Metadata,

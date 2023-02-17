@@ -10,7 +10,6 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/common"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -24,14 +23,12 @@ type KafkaSensor struct {
 	*sync.Mutex
 	sensor *sensorv1alpha1.Sensor
 
-	// kafka config
-	topics    *Topics
-	groupName string
-
 	// kafka
-	config   *sarama.Config
-	client   sarama.Client
-	consumer sarama.ConsumerGroup
+	topics    *Topics
+	client    sarama.Client
+	consumer  sarama.ConsumerGroup
+	hostname  string
+	groupName string
 
 	// triggers
 	triggers Triggers
@@ -42,88 +39,25 @@ type KafkaSensor struct {
 }
 
 func NewKafkaSensor(kafkaConfig *eventbusv1alpha1.KafkaConfig, sensor *sensorv1alpha1.Sensor, hostname string, logger *zap.SugaredLogger) *KafkaSensor {
-	config := sarama.NewConfig()
-
 	topics := &Topics{
 		event:   kafkaConfig.Topic,
 		trigger: fmt.Sprintf("%s.%s.%s", kafkaConfig.Topic, sensor.Name, "trigger"),
 		action:  fmt.Sprintf("%s.%s.%s", kafkaConfig.Topic, sensor.Name, "action"),
 	}
 
-	var consumerGroup *eventbusv1alpha1.KafkaConsumerGroup
-	switch kafkaConfig.ConsumerGroup {
-	case nil:
-		consumerGroup = &eventbusv1alpha1.KafkaConsumerGroup{}
-	default:
-		consumerGroup = kafkaConfig.ConsumerGroup
-	}
-
 	var groupName string
-	switch consumerGroup.GroupName {
-	case "":
+	if kafkaConfig.ConsumerGroup == nil || kafkaConfig.ConsumerGroup.GroupName == "" {
 		groupName = fmt.Sprintf("%s.%s", sensor.Namespace, sensor.Name)
-	default:
-		groupName = consumerGroup.GroupName
-	}
-
-	// consumer config
-	config.Consumer.IsolationLevel = sarama.ReadCommitted
-	config.Consumer.Offsets.AutoCommit.Enable = false
-
-	switch consumerGroup.StartOldest {
-	case true:
-		config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	case false:
-		config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	}
-
-	switch consumerGroup.RebalanceStrategy {
-	case "sticky":
-		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategySticky}
-	case "roundrobin":
-		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRoundRobin}
-	default:
-		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRange}
-	}
-
-	// producer config for exactly once
-	config.Producer.Idempotent = true
-	config.Producer.RequiredAcks = sarama.WaitForAll
-	config.Producer.Transaction.ID = hostname
-	config.Net.MaxOpenRequests = 1
-	// config.Net.TLS.Enable = kafkaConfig.TLS != nil
-
-	if kafkaConfig.SASL != nil {
-		config.Net.SASL.Enable = true
-		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaConfig.SASL.GetMechanism())
-		if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
-			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA512New} }
-		} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
-			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA256New} }
-		}
-
-		user, err := common.GetSecretFromVolume(kafkaConfig.SASL.UserSecret)
-		if err != nil {
-			fmt.Printf("error getting user value from secret, %v", err)
-			return nil
-		}
-		config.Net.SASL.User = user
-
-		password, err := common.GetSecretFromVolume(kafkaConfig.SASL.PasswordSecret)
-		if err != nil {
-			fmt.Printf("error getting password value from secret, %v", err)
-			return nil
-		}
-		config.Net.SASL.Password = password
-		config.Net.TLS.Enable = true
+	} else {
+		groupName = kafkaConfig.ConsumerGroup.GroupName
 	}
 
 	return &KafkaSensor{
-		Kafka:     base.NewKafka(strings.Split(kafkaConfig.URL, ","), logger),
+		Kafka:     base.NewKafka(kafkaConfig, logger),
 		Mutex:     &sync.Mutex{},
 		sensor:    sensor,
-		config:    config,
 		topics:    topics,
+		hostname:  hostname,
 		groupName: groupName,
 		triggers:  Triggers{},
 	}
@@ -168,7 +102,15 @@ func (t Triggers) Ready() bool {
 }
 
 func (s *KafkaSensor) Initialize() error {
-	client, err := sarama.NewClient(s.Brokers, s.config)
+	config, err := s.Config()
+	if err != nil {
+		return err
+	}
+
+	// sensor specific config
+	config.Producer.Transaction.ID = s.hostname
+
+	client, err := sarama.NewClient(s.Brokers(), config)
 	if err != nil {
 		return err
 	}

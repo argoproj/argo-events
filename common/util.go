@@ -244,11 +244,6 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 		}
 	}
 
-	if len(caCertPath)+len(clientCertPath)+len(clientKeyPath) == 0 {
-		// None of 3 is configured
-		return nil, fmt.Errorf("invalid tls config, neither of caCertSecret, clientCertSecret and clientKeySecret is configured")
-	}
-
 	if len(clientCertPath)+len(clientKeyPath) > 0 && len(clientCertPath)*len(clientKeyPath) == 0 {
 		// Only one of clientCertSecret and clientKeySecret is configured
 		return nil, fmt.Errorf("invalid tls config, both of clientCertSecret and clientKeySecret need to be configured")
