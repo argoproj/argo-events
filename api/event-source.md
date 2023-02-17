@@ -3237,8 +3237,10 @@ event payload.
 <code>projects</code></br> <em> \[\]string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-List of project IDs or project namespace paths like “whynowy/test”
+List of project IDs or project namespace paths like “whynowy/test”.
+Projects and groups cannot be empty at the same time.
 </p>
 </td>
 </tr>

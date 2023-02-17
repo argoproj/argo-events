@@ -2143,7 +2143,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"projects": {
 						SchemaProps: spec.SchemaProps{
-							Description: "List of project IDs or project namespace paths like \"whynowy/test\"",
+							Description: "List of project IDs or project namespace paths like \"whynowy/test\". Projects and groups cannot be empty at the same time.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
