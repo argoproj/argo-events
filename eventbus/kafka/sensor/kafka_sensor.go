@@ -346,15 +346,10 @@ func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMes
 		return nil, msg.Offset + 1, nil
 	}
 
-	var after func()
+	var f func()
 	if trigger, ok := s.triggers[string(msg.Key)]; ok {
-		f, err := trigger.Action(events)
-		if err != nil {
-			s.Logger.Errorw("Failed to trigger action, skipping", zap.Error(err))
-		} else {
-			after = f
-		}
+		f = trigger.Action(events)
 	}
 
-	return nil, msg.Offset + 1, after
+	return nil, msg.Offset + 1, f
 }

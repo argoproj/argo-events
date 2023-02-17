@@ -18,7 +18,7 @@ type KafkaTriggerHandler interface {
 	Filter(string, *cloudevents.Event) bool
 	Update(event *cloudevents.Event, partition int32, offset int64) ([]*cloudevents.Event, error)
 	Offset(int32, int64) int64
-	Action([]*cloudevents.Event) (func(), error)
+	Action([]*cloudevents.Event) func()
 }
 
 func (c *KafkaTriggerConnection) Name() string {
@@ -101,7 +101,7 @@ func (c *KafkaTriggerConnection) Offset(partition int32, offset int64) int64 {
 	return offset
 }
 
-func (c *KafkaTriggerConnection) Action(events []*cloudevents.Event) (func(), error) {
+func (c *KafkaTriggerConnection) Action(events []*cloudevents.Event) func() {
 	eventMap := map[string]cloudevents.Event{}
 	for _, event := range events {
 		if depName, ok := c.DependsOn(event); ok {
@@ -119,7 +119,7 @@ func (c *KafkaTriggerConnection) Action(events []*cloudevents.Event) (func(), er
 		f = func() { c.action(eventMap) }
 	}
 
-	return f, nil
+	return f
 }
 
 func (c *KafkaTriggerConnection) satisfied() (interface{}, error) {
