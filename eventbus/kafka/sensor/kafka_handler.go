@@ -121,6 +121,11 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 	for {
 		select {
 		case msgs := <-batch:
+			if len(msgs) == 0 {
+				h.Logger.Warn("Kafka batch contains no messages")
+				continue
+			}
+
 			transaction := &KafkaTransaction{
 				Logger:        h.Logger,
 				Producer:      h.Producer,
