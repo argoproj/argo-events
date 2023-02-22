@@ -29,13 +29,22 @@ type KafkaTriggerConnection struct {
 	action    func(map[string]cloudevents.Event)
 
 	// state
-	events []*eventWithPartitionAndOffset
+	events        []*eventWithPartitionAndOffset
+	lastResetTime time.Time
 }
 
 type eventWithPartitionAndOffset struct {
 	*cloudevents.Event
 	partition int32
 	offset    int64
+}
+
+func (e1 *eventWithPartitionAndOffset) Same(e2 *eventWithPartitionAndOffset) bool {
+	return e1.Source() == e2.Source() && e1.Subject() == e2.Subject()
+}
+
+func (e *eventWithPartitionAndOffset) OlderThan(t time.Time) bool {
+	return t.IsZero() || e.Time().Before(t)
 }
 
 func (c *KafkaTriggerConnection) String() string {
@@ -62,6 +71,7 @@ func (c *KafkaTriggerConnection) Subscribe(
 	c.transform = transform
 	c.filter = filter
 	c.action = action
+	c.lastResetTime = lastResetTime
 
 	for {
 		select {
@@ -72,8 +82,9 @@ func (c *KafkaTriggerConnection) Subscribe(
 			// on the overall sensor vs indididual triggers
 			return nil
 		case <-resetConditionsCh:
-			// todo: make resilient (bump offset)
-			c.reset()
+			// update will filter out all events that occur before
+			// this time
+			c.lastResetTime = time.Now()
 		}
 	}
 }

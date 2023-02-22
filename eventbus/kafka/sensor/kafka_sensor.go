@@ -157,7 +157,7 @@ func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpres
 	// the connected boolean will flip and the sensor listener will
 	// attempt to reconnect by invoking this function again
 	if !s.connected {
-		go s.Listen(ctx, s.kafkaHandler)
+		go s.Listen(ctx)
 		s.connected = true
 	}
 
@@ -187,7 +187,7 @@ func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpres
 	return s.triggers[triggerName], nil
 }
 
-func (s *KafkaSensor) Listen(ctx context.Context, handler *KafkaHandler) {
+func (s *KafkaSensor) Listen(ctx context.Context) {
 	defer s.Disconnect()
 
 	for {
@@ -199,7 +199,7 @@ func (s *KafkaSensor) Listen(ctx context.Context, handler *KafkaHandler) {
 
 		s.Logger.Infow("Consuming", zap.Strings("topics", s.topics.List()), zap.String("group", s.groupName))
 
-		if err := s.consumer.Consume(ctx, s.topics.List(), handler); err != nil {
+		if err := s.consumer.Consume(ctx, s.topics.List(), s.kafkaHandler); err != nil {
 			s.Logger.Errorw("Failed to consume", zap.Error(err))
 			return
 		}

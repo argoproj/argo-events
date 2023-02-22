@@ -62,18 +62,16 @@ func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int3
 		offset:    offset,
 	}
 
-	found := false
-	for i := 0; i < len(c.events); i++ {
-		if c.events[i].Source() == event.Source() && c.events[i].Subject() == event.Subject() {
-			c.events[i] = eventWithPartitionAndOffset
-			found = true
-			break
+	// remove previous events with same source and subject and remove
+	// all events older than last condition reset time
+	i := 0
+	for _, event := range c.events {
+		if !event.Same(eventWithPartitionAndOffset) && !event.OlderThan(c.lastResetTime) {
+			c.events[i] = event
+			i++
 		}
 	}
-
-	if !found {
-		c.events = append(c.events, eventWithPartitionAndOffset)
-	}
+	c.events = append(c.events[:i], eventWithPartitionAndOffset)
 
 	satisfied, err := c.satisfied()
 	if err != nil {
