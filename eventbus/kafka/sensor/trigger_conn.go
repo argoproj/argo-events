@@ -43,8 +43,8 @@ func (e1 *eventWithPartitionAndOffset) Same(e2 *eventWithPartitionAndOffset) boo
 	return e1.Source() == e2.Source() && e1.Subject() == e2.Subject()
 }
 
-func (e *eventWithPartitionAndOffset) OlderThan(t time.Time) bool {
-	return t.IsZero() || e.Time().Before(t)
+func (e *eventWithPartitionAndOffset) After(t time.Time) bool {
+	return t.IsZero() || e.Time().After(t)
 }
 
 func (c *KafkaTriggerConnection) String() string {

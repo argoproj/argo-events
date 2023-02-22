@@ -66,7 +66,7 @@ func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int3
 	// all events older than last condition reset time
 	i := 0
 	for _, event := range c.events {
-		if !event.Same(eventWithPartitionAndOffset) && !event.OlderThan(c.lastResetTime) {
+		if !event.Same(eventWithPartitionAndOffset) && event.After(c.lastResetTime) {
 			c.events[i] = event
 			i++
 		}
