@@ -59,6 +59,12 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
 	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
 
+	// sensor for kafka eventbus can be scaled horizontally,
+	// therefore does not require an elector
+	if sensorCtx.eventBusConfig.Kafka != nil {
+		return sensorCtx.listenEvents(ctx)
+	}
+
 	elector, err := leaderelection.NewElector(ctx, *sensorCtx.eventBusConfig, clusterName, replicas, sensorCtx.sensor.Namespace, leasename, sensorCtx.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
