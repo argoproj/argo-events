@@ -3237,8 +3237,10 @@ event payload.
 <code>projects</code></br> <em> \[\]string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-List of project IDs or project namespace paths like “whynowy/test”
+List of project IDs or project namespace paths like “whynowy/test”.
+Projects and groups cannot be empty at the same time.
 </p>
 </td>
 </tr>
@@ -3265,6 +3267,18 @@ webhook config
 <em>(Optional)</em>
 <p>
 Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>groups</code></br> <em> \[\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+List of group IDs or group name like “test”. Group level hook available
+in Premium and Ultimate Gitlab.
 </p>
 </td>
 </tr>

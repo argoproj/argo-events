@@ -34,7 +34,7 @@ func TestValidateEventSource(t *testing.T) {
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "projects can't be empty", err.Error())
+	assert.Equal(t, "projects and groups cannot be empty at the same time", err.Error())
 
 	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "gitlab.yaml"))
 	assert.Nil(t, err)
