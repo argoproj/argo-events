@@ -132,7 +132,7 @@ func (router *Router) PostInactivate() error {
 	logger.Info("deleting Gitlab hooks...")
 
 	for _, g := range gitlabEventSource.GetGroups() {
-		id, ok := router.hookIDs[g]
+		id, ok := router.groupHookIDs[g]
 		if !ok {
 			return fmt.Errorf("can not find hook ID for group %s", g)
 		}
@@ -143,7 +143,7 @@ func (router *Router) PostInactivate() error {
 	}
 
 	for _, p := range gitlabEventSource.GetProjects() {
-		id, ok := router.hookIDs[p]
+		id, ok := router.projectHookIDs[p]
 		if !ok {
 			return fmt.Errorf("can not find hook ID for project %s", p)
 		}
@@ -169,6 +169,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	router := &Router{
 		route:             route,
 		gitlabEventSource: gitlabEventSource,
+		projectHookIDs:    make(map[string]int),
+		groupHookIDs:      make(map[string]int),
 	}
 
 	if gitlabEventSource.NeedToCreateHooks() {
@@ -241,8 +243,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return fmt.Errorf("failed to initialize client, %w", err)
 		}
 
-		router.hookIDs = make(map[string]int)
-
 		f := func() {
 			for _, g := range gitlabEventSource.GetGroups() {
 				hooks, _, err := router.gitlabClient.Groups.ListGroupHooks(g, &gitlab.ListGroupHooksOptions{})
@@ -252,7 +252,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 				hook := getGroupHook(hooks, formattedURL)
 				if hook != nil {
-					router.hookIDs[g] = hook.ID
+					router.groupHookIDs[g] = hook.ID
 					continue
 				}
 				logger.Infof("hook not found for group %s, creating ...", g)
@@ -261,7 +261,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					logger.Errorf("failed to create gitlab webhook for group %s. err: %+v", g, err)
 					continue
 				}
-				router.hookIDs[g] = hook.ID
+				router.groupHookIDs[g] = hook.ID
 				time.Sleep(500 * time.Millisecond)
 			}
 
@@ -273,7 +273,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 				hook := getProjectHook(hooks, formattedURL)
 				if hook != nil {
-					router.hookIDs[p] = hook.ID
+					router.projectHookIDs[p] = hook.ID
 					continue
 				}
 				logger.Infof("hook not found for project %s, creating ...", p)
@@ -282,7 +282,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					logger.Errorf("failed to create gitlab webhook for project %s. err: %+v", p, err)
 					continue
 				}
-				router.hookIDs[p] = hook.ID
+				router.projectHookIDs[p] = hook.ID
 				time.Sleep(500 * time.Millisecond)
 			}
 		}
