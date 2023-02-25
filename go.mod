@@ -19,7 +19,7 @@ require (
 	github.com/antonmedv/expr v1.12.1
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.8.1
-	github.com/argoproj/notifications-engine v0.3.1-0.20221203221941-490d98afd1d6
+	github.com/argoproj/notifications-engine v0.4.0
 	github.com/argoproj/pkg v0.13.6
 	github.com/aws/aws-sdk-go v1.44.209
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9

@@ -174,8 +174,8 @@ github.com/appscode/go v0.0.0-20191119085241-0887d8ec2ecc/go.mod h1:OawnOmAL4ZX3
 github.com/ardielle/ardielle-go v1.5.2 h1:TilHTpHIQJ27R1Tl/iITBzMwiUGSlVfiVhwDNGM3Zj4=
 github.com/ardielle/ardielle-go v1.5.2/go.mod h1:I4hy1n795cUhaVt/ojz83SNVCYIGsAFAONtv2Dr7HUI=
 github.com/ardielle/ardielle-tools v1.5.4/go.mod h1:oZN+JRMnqGiIhrzkRN9l26Cej9dEx4jeNG6A+AdkShk=
-github.com/argoproj/notifications-engine v0.3.1-0.20221203221941-490d98afd1d6 h1:b92Xft7MQv/SP56FW08zt5CMTE1rySH8UPDKOAgSzOM=
-github.com/argoproj/notifications-engine v0.3.1-0.20221203221941-490d98afd1d6/go.mod h1:pgPU59KCsBOMhyw9amRWPoSuBmUWvx3Xsc5r0mUriLg=
+github.com/argoproj/notifications-engine v0.4.0 h1:XyE4jAw0oeRQKL9vlDQBnycmqhN7EIqUdWgPsSUqnkQ=
+github.com/argoproj/notifications-engine v0.4.0/go.mod h1:uGas18+DbCCwjif1zSwWWuwR0xJ18FXF+c2dkhPbF2k=
 github.com/argoproj/pkg v0.13.6 h1:36WPD9MNYECHcO1/R1pj6teYspiK7uMQLCgLGft2abM=
 github.com/argoproj/pkg v0.13.6/go.mod h1:I698DoJBKuvNFaixh4vFl2C88cNIT1WS7KCbz5ewyF8=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
