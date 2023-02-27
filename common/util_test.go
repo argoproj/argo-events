@@ -208,7 +208,8 @@ func TestGetTLSConfig(t *testing.T) {
 	t.Run("test empty", func(t *testing.T) {
 		c := &apicommon.TLSConfig{}
 		_, err := GetTLSConfig(c)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "neither of caCertSecret, clientCertSecret and clientKeySecret is configured"))
 	})
 
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {

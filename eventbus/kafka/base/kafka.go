@@ -58,6 +58,16 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Net.MaxOpenRequests = 1
 
+	// common config
+	if k.config.Version != "" {
+		version, err := sarama.ParseKafkaVersion(k.config.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		config.Version = version
+	}
+
 	// sasl
 	if k.config.SASL != nil {
 		config.Net.SASL.Enable = true

@@ -14,7 +14,11 @@ func ValidateTLSConfig(tlsConfig *TLSConfig) error {
 		return nil
 	}
 
-	var clientCertSet, clientKeySet bool
+	var caCertSet, clientCertSet, clientKeySet bool
+
+	if tlsConfig.CACertSecret != nil {
+		caCertSet = true
+	}
 
 	if tlsConfig.ClientCertSecret != nil {
 		clientCertSet = true
@@ -22,6 +26,10 @@ func ValidateTLSConfig(tlsConfig *TLSConfig) error {
 
 	if tlsConfig.ClientKeySecret != nil {
 		clientKeySet = true
+	}
+
+	if !caCertSet && !clientCertSet && !clientKeySet {
+		return fmt.Errorf("invalid tls config, please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both")
 	}
 
 	if (clientCertSet || clientKeySet) && (!clientCertSet || !clientKeySet) {
