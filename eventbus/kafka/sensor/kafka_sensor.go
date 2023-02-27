@@ -304,7 +304,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 	// transaction messages
 	if trigger, ok := s.triggers[string(msg.Key)]; ok && event != nil {
 		func() {
-			events, err := trigger.Update(event, msg.Partition, msg.Offset)
+			events, err := trigger.Update(event, msg.Partition, msg.Offset, msg.Timestamp)
 			if err != nil {
 				s.Logger.Errorw("Failed to update trigger, skipping", zap.Error(err))
 				return

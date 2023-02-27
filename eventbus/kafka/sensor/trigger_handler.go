@@ -1,6 +1,8 @@
 package kafka
 
 import (
+	"time"
+
 	"github.com/Knetic/govaluate"
 	"github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
@@ -16,7 +18,7 @@ type KafkaTriggerHandler interface {
 	DependsOn(*cloudevents.Event) (string, bool)
 	Transform(string, *cloudevents.Event) (*cloudevents.Event, error)
 	Filter(string, *cloudevents.Event) bool
-	Update(event *cloudevents.Event, partition int32, offset int64) ([]*cloudevents.Event, error)
+	Update(event *cloudevents.Event, partition int32, offset int64, timestamp time.Time) ([]*cloudevents.Event, error)
 	Offset(int32, int64) int64
 	Action([]*cloudevents.Event) func()
 }
@@ -55,23 +57,27 @@ func (c *KafkaTriggerConnection) Filter(depName string, event *cloudevents.Event
 	return c.filter(depName, *event)
 }
 
-func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int32, offset int64) ([]*cloudevents.Event, error) {
-	eventWithPartitionAndOffset := &eventWithPartitionAndOffset{
+func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int32, offset int64, timestamp time.Time) ([]*cloudevents.Event, error) {
+	eventWithMetadata := &eventWithMetadata{
 		Event:     event,
 		partition: partition,
 		offset:    offset,
+		timestamp: timestamp,
 	}
 
 	// remove previous events with same source and subject and remove
 	// all events older than last condition reset time
 	i := 0
 	for _, event := range c.events {
-		if !event.Same(eventWithPartitionAndOffset) && event.After(c.lastResetTime) {
+		if !event.Same(eventWithMetadata) && event.After(c.lastResetTime) {
 			c.events[i] = event
 			i++
 		}
 	}
-	c.events = append(c.events[:i], eventWithPartitionAndOffset)
+	for j := i; j < len(c.events); j++ {
+		c.events[j] = nil // avoid memory leak
+	}
+	c.events = append(c.events[:i], eventWithMetadata)
 
 	satisfied, err := c.satisfied()
 	if err != nil {
@@ -134,7 +140,7 @@ func (c *KafkaTriggerConnection) satisfied() (interface{}, error) {
 }
 
 func (c *KafkaTriggerConnection) reset() {
-	c.events = []*eventWithPartitionAndOffset{}
+	c.events = nil
 }
 
 type Parameters map[string]bool
