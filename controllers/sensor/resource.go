@@ -173,7 +173,8 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		jsConf := eventBus.Status.Config.JetStream
 		accessSecret = jsConf.AccessSecret
 	case eventBus.Status.Config.Kafka != nil:
-		accessSecret = nil // todo
+		kafkaConf := eventBus.Status.Config.Kafka
+		accessSecret = kafkaConf.AccessSecret
 	default:
 		return nil, fmt.Errorf("unsupported event bus")
 	}
