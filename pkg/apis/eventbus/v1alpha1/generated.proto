@@ -218,30 +218,29 @@ message KafkaConfig {
   // URL to kafka cluster, multiple URLs separated by comma
   optional string url = 1;
 
+  // Kafka version, sarama defaults to the oldest supported stable version
+  // +optional
+  optional string version = 2;
+
   // Topic name, defaults to namespace_name.eventbus_name
   // +optional
-  optional string topic = 2;
+  optional string topic = 3;
 
   // TLS configuration for the kafka client.
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 3;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 4;
 
   // SASL configuration for the kafka client
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 4;
+  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 5;
 
   // Consumer group for kafka client
   // +optional
-  optional KafkaConsumerGroup consumerGroup = 5;
+  optional KafkaConsumerGroup consumerGroup = 6;
 
   // Secret for auth
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 6;
-
-  // Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config.
-  // It accepts a YAML format configuration, available fields include, "maxRetry", "configVersion (sarama config version)", "requiredAcks", "replication".
-  // +optional
-  optional string streamConfig = 7;
+  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 7;
 }
 
 message KafkaConsumerGroup {

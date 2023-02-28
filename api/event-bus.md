@@ -739,6 +739,17 @@ URL to kafka cluster, multiple URLs separated by comma
 </tr>
 <tr>
 <td>
+<code>version</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Kafka version, sarama defaults to the oldest supported stable version
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>topic</code></br> <em> string </em>
 </td>
 <td>
@@ -795,20 +806,6 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <em>(Optional)</em>
 <p>
 Secret for auth
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>streamConfig</code></br> <em> string </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Optional configuration for the kafka, if specified, it will be merged
-with the default configuration in controller-config. It accepts a YAML
-format configuration, available fields include, “maxRetry”,
-“configVersion (sarama config version)”, “requiredAcks”, “replication”.
 </p>
 </td>
 </tr>

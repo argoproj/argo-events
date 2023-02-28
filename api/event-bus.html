@@ -735,6 +735,18 @@ string
 </tr>
 <tr>
 <td>
+<code>version</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Kafka version, sarama defaults to the oldest supported stable version</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>topic</code></br>
 <em>
 string
@@ -795,19 +807,6 @@ Kubernetes core/v1.SecretKeySelector
 <td>
 <em>(Optional)</em>
 <p>Secret for auth</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>streamConfig</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config.
-It accepts a YAML format configuration, available fields include, &ldquo;maxRetry&rdquo;, &ldquo;configVersion (sarama config version)&rdquo;, &ldquo;requiredAcks&rdquo;, &ldquo;replication&rdquo;.</p>
 </td>
 </tr>
 </tbody>

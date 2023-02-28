@@ -525,6 +525,13 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback)
 							Format:      "",
 						},
 					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kafka version, sarama defaults to the oldest supported stable version",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"topic": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Topic name, defaults to namespace_name.eventbus_name",
@@ -554,13 +561,6 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback)
 						SchemaProps: spec.SchemaProps{
 							Description: "Secret for auth",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"streamConfig": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Optional configuration for the kafka, if specified, it will be merged with the default configuration in controller-config. It accepts a YAML format configuration, available fields include, \"maxRetry\", \"configVersion (sarama config version)\", \"requiredAcks\", \"replication\".",
-							Type:        []string{"string"},
-							Format:      "",
 						},
 					},
 				},

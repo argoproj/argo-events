@@ -16,7 +16,7 @@ type KafkaConfig struct {
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// Kafka version, sarama defaults to the oldest supported stable version
 	// +optional
-	Version string `json:"url,omitempty" protobuf:"bytes,2,opt,name=version"`
+	Version string `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
 	// Topic name, defaults to namespace_name.eventbus_name
 	// +optional
 	Topic string `json:"topic,omitempty" protobuf:"bytes,3,opt,name=topic"`
