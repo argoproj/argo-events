@@ -162,13 +162,13 @@ func TestFindTypeValues(t *testing.T) {
 
 func TestVolumesFromSecretsOrConfigMaps(t *testing.T) {
 	t.Run("test secret volumes", func(t *testing.T) {
-		vols, mounts := VolumesFromSecretsOrConfigMaps(&testXObj, SecretKeySelectorType)
+		vols, mounts := VolumesFromSecretsOrConfigMaps(SecretKeySelectorType, &testXObj)
 		assert.Equal(t, len(vols), 6)
 		assert.Equal(t, len(mounts), 6)
 	})
 
 	t.Run("test configmap volumes", func(t *testing.T) {
-		vols, mounts := VolumesFromSecretsOrConfigMaps(&testXObj, ConfigMapKeySelectorType)
+		vols, mounts := VolumesFromSecretsOrConfigMaps(ConfigMapKeySelectorType, &testXObj)
 		assert.Equal(t, len(vols), 6)
 		assert.Equal(t, len(mounts), 6)
 	})
