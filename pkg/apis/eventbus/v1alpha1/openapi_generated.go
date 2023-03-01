@@ -525,16 +525,16 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback)
 							Format:      "",
 						},
 					},
-					"version": {
+					"topic": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Kafka version, sarama defaults to the oldest supported stable version",
+							Description: "Topic name, defaults to namespace_name.eventbus_name",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"topic": {
+					"version": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Topic name, defaults to namespace_name.eventbus_name",
+							Description: "Kafka version, sarama defaults to the oldest supported stable version",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -557,17 +557,11 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback)
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConsumerGroup"),
 						},
 					},
-					"accessSecret": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Secret for auth",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConsumerGroup", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConsumerGroup"},
 	}
 }
 

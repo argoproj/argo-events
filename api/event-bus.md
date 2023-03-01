@@ -739,23 +739,23 @@ URL to kafka cluster, multiple URLs separated by comma
 </tr>
 <tr>
 <td>
-<code>version</code></br> <em> string </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Kafka version, sarama defaults to the oldest supported stable version
-</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>topic</code></br> <em> string </em>
 </td>
 <td>
 <em>(Optional)</em>
 <p>
 Topic name, defaults to namespace_name.eventbus_name
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Kafka version, sarama defaults to the oldest supported stable version
 </p>
 </td>
 </tr>
@@ -796,19 +796,6 @@ Consumer group for kafka client
 </p>
 </td>
 </tr>
-<tr>
-<td>
-<code>accessSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Secret for auth
-</p>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.KafkaConsumerGroup">
@@ -837,6 +824,7 @@ Description
 <code>groupName</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 The name for the consumer group to use
 </p>

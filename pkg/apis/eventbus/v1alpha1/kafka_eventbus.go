@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // KafkaBus holds the KafkaBus EventBus information
@@ -14,12 +13,12 @@ type KafkaBus struct {
 type KafkaConfig struct {
 	// URL to kafka cluster, multiple URLs separated by comma
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	// Kafka version, sarama defaults to the oldest supported stable version
-	// +optional
-	Version string `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
 	// Topic name, defaults to namespace_name.eventbus_name
 	// +optional
-	Topic string `json:"topic,omitempty" protobuf:"bytes,3,opt,name=topic"`
+	Topic string `json:"topic,omitempty" protobuf:"bytes,2,opt,name=topic"`
+	// Kafka version, sarama defaults to the oldest supported stable version
+	// +optional
+	Version string `json:"version,omitempty" protobuf:"bytes,3,opt,name=version"`
 	// TLS configuration for the kafka client.
 	// +optional
 	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,4,opt,name=tls"`
@@ -29,13 +28,11 @@ type KafkaConfig struct {
 	// Consumer group for kafka client
 	// +optional
 	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,6,opt,name=consumerGroup"`
-	// Secret for auth
-	// +optional
-	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,7,opt,name=accessSecret"`
 }
 
 type KafkaConsumerGroup struct {
 	// The name for the consumer group to use
+	// +optional
 	GroupName string `json:"groupName,omitempty" protobuf:"bytes,1,opt,name=groupName"`
 	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
 	// +optional

@@ -350,11 +350,6 @@ func (in *KafkaConfig) DeepCopyInto(out *KafkaConfig) {
 		*out = new(KafkaConsumerGroup)
 		**out = **in
 	}
-	if in.AccessSecret != nil {
-		in, out := &in.AccessSecret, &out.AccessSecret
-		*out = new(v1.SecretKeySelector)
-		(*in).DeepCopyInto(*out)
-	}
 	return
 }
 

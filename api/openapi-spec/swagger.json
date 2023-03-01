@@ -528,10 +528,6 @@
     "io.argoproj.eventbus.v1alpha1.KafkaConfig": {
       "type": "object",
       "properties": {
-        "accessSecret": {
-          "description": "Secret for auth",
-          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
-        },
         "consumerGroup": {
           "description": "Consumer group for kafka client",
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup"

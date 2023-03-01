@@ -218,13 +218,13 @@ message KafkaConfig {
   // URL to kafka cluster, multiple URLs separated by comma
   optional string url = 1;
 
-  // Kafka version, sarama defaults to the oldest supported stable version
-  // +optional
-  optional string version = 2;
-
   // Topic name, defaults to namespace_name.eventbus_name
   // +optional
-  optional string topic = 3;
+  optional string topic = 2;
+
+  // Kafka version, sarama defaults to the oldest supported stable version
+  // +optional
+  optional string version = 3;
 
   // TLS configuration for the kafka client.
   // +optional
@@ -237,14 +237,11 @@ message KafkaConfig {
   // Consumer group for kafka client
   // +optional
   optional KafkaConsumerGroup consumerGroup = 6;
-
-  // Secret for auth
-  // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 7;
 }
 
 message KafkaConsumerGroup {
   // The name for the consumer group to use
+  // +optional
   optional string groupName = 1;
 
   // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
