@@ -200,6 +200,15 @@ func (s *KafkaSensor) Listen(ctx context.Context) {
 		s.Logger.Infow("Consuming", zap.Strings("topics", s.topics.List()), zap.String("group", s.groupName))
 
 		if err := s.consumer.Consume(ctx, s.topics.List(), s.kafkaHandler); err != nil {
+			// fail fast if topics do not exist
+			if err == sarama.ErrUnknownTopicOrPartition {
+				s.Logger.Fatalf(
+					"Topics do not exist. Please ensure the topics '%s' have been created, or the kafka setting '%s' is set to true.",
+					s.topics.List(),
+					"auto.create.topics.enable",
+				)
+			}
+
 			s.Logger.Errorw("Failed to consume", zap.Error(err))
 			return
 		}

@@ -25,6 +25,15 @@ func (c *KafkaSourceConnection) Publish(ctx context.Context, msg common.Message)
 	})
 
 	if err != nil {
+		// fail fast if topic does not exist
+		if err == sarama.ErrUnknownTopicOrPartition {
+			c.Logger.Fatalf(
+				"Topic does not exist. Please ensure the topic '%s' has been created, or the kafka setting '%s' is set to true.",
+				c.Topic,
+				"auto.create.topics.enable",
+			)
+		}
+
 		return err
 	}
 
