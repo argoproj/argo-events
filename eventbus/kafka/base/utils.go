@@ -32,12 +32,12 @@ func Batch[T any](n int, d time.Duration, in <-chan T) <-chan []T {
 				if batch = append(batch, item); len(batch) == n {
 					timer.Stop()
 					out <- batch
-					batch = []T{}
+					batch = nil
 				}
 			case <-timer.C:
 				if len(batch) > 0 {
 					out <- batch
-					batch = []T{}
+					batch = nil
 				}
 			}
 		}
