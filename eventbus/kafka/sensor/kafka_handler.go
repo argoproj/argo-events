@@ -116,7 +116,7 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 	// be produced on the batched channel if the max batch size is
 	// reached, or the time limit has elapsed, whichever happens
 	// first. Batching helps optimize kafka transactions.
-	batch := base.Batch(100, 2*time.Second, claim.Messages())
+	batch := base.Batch(100, 1*time.Second, claim.Messages())
 
 	for {
 		select {
