@@ -57,21 +57,15 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
-
-	// client.Update() mutates busCopy so we need to make an
-	// additional copy in order to update the status.
-	statusCopy := busCopy.DeepCopy()
-
 	if r.needsUpdate(eventBus, busCopy) {
 		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
 		if err := r.client.Update(ctx, busCopy.DeepCopy()); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
-	if err := r.client.Status().Update(ctx, statusCopy); err != nil {
+	if err := r.client.Status().Update(ctx, busCopy); err != nil {
 		return reconcile.Result{}, err
 	}
-
 	return ctrl.Result{}, reconcileErr
 }
 
