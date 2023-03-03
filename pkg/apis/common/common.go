@@ -151,9 +151,9 @@ type SASLConfig struct {
 	Mechanism string `json:"mechanism,omitempty" protobuf:"bytes,1,opt,name=mechanism"`
 	// User is the authentication identity (authcid) to present for
 	// SASL/PLAIN or SASL/SCRAM authentication
-	UserSecret *corev1.SecretKeySelector `json:"userSecret,omitempty" protobuf:"bytes,2,opt,name=user"`
+	UserSecret *corev1.SecretKeySelector `json:"userSecret,omitempty" protobuf:"bytes,2,opt,name=userSecret"`
 	// Password for SASL/PLAIN authentication
-	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=password"`
+	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=passwordSecret"`
 }
 
 // SchemaRegistryConfig refers to configuration for a client
