@@ -5,9 +5,7 @@ on:
       - "master"
       - "release-*"
   pull_request:
-    branches: 
-      - "master"
-      - "feature/*"
+    branches: [ master ]
 
 permissions:
   contents: read
