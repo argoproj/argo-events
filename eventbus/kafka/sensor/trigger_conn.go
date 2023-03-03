@@ -83,8 +83,8 @@ func (c *KafkaTriggerConnection) Subscribe(
 			// on the overall sensor vs indididual triggers
 			return nil
 		case <-resetConditionsCh:
-			// update will filter out all events that occur before
-			// this time
+			// trigger update will filter out all events that occurred
+			// before this time
 			c.lastResetTime = time.Now()
 		}
 	}

@@ -19,8 +19,10 @@ type KafkaHandler struct {
 	OffsetManager sarama.OffsetManager
 	TriggerTopic  string
 	Handlers      map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func())
-	checkpoints   map[string]map[int32]*Checkpoint
+	checkpoints   Checkpoints
 }
+
+type Checkpoints map[string]map[int32]*Checkpoint
 
 type Checkpoint struct {
 	Logger  *zap.SugaredLogger
@@ -57,8 +59,9 @@ func (c *Checkpoint) Metadata() string {
 }
 
 func (h *KafkaHandler) Setup(session sarama.ConsumerGroupSession) error {
-	// instantiate/reset
-	h.checkpoints = map[string]map[int32]*Checkpoint{}
+	// instantiates checkpoints for all topic/partitions managed by
+	// this claim
+	h.checkpoints = Checkpoints{}
 
 	for topic, partitions := range session.Claims() {
 		h.checkpoints[topic] = map[int32]*Checkpoint{}
@@ -70,19 +73,24 @@ func (h *KafkaHandler) Setup(session sarama.ConsumerGroupSession) error {
 			}
 
 			func() {
+				var offsets map[string]int64
+
 				defer partitionOffsetManager.AsyncClose()
 				offset, metadata := partitionOffsetManager.NextOffset()
 
-				var offsets map[string]int64
-				if metadata != "" {
+				// only need to manage the offsets for each trigger
+				// with respect to the trigger topic
+				if topic == h.TriggerTopic && metadata != "" {
 					if err := json.Unmarshal([]byte(metadata), &offsets); err != nil {
+						// if metadata is invalid json, it will be
+						// reset to an empty map
 						h.Logger.Errorw("Failed to deserialize metadata, resetting", err)
 					}
 				}
 
 				h.checkpoints[topic][partition] = &Checkpoint{
 					Logger:  h.Logger,
-					Init:    offset == -1, // need to mark offset on first message
+					Init:    offset == -1, // mark offset when first message consumed
 					Offsets: offsets,
 				}
 			}()
@@ -113,8 +121,8 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 	}
 
 	// Batch messsages from the claim message channel. A message will
-	// be produced on the batched channel if the max batch size is
-	// reached, or the time limit has elapsed, whichever happens
+	// be produced to the batched channel if the max batch size is
+	// reached or the time limit has elapsed, whichever happens
 	// first. Batching helps optimize kafka transactions.
 	batch := base.Batch(100, 1*time.Second, claim.Messages())
 
@@ -149,6 +157,8 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 				key := string(msg.Key)
 
 				if checkpoint.Init {
+					// mark offset in order to reconsume from this
+					// offset if a restart occurs
 					session.MarkOffset(msg.Topic, msg.Partition, msg.Offset, "")
 					session.Commit()
 					checkpoint.Init = false
@@ -161,6 +171,9 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 
 				m, o, f := handler(msg)
 				if msg.Topic == h.TriggerTopic && len(m) > 0 {
+					// when a trigger is invoked (there is a message)
+					// update the checkpoint to ensure the trigger
+					// is not re-invoked in the case of a restart
 					checkpoint.Set(key, msg.Offset+1)
 				}
 

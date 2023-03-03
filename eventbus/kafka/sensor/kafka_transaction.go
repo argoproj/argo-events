@@ -16,7 +16,8 @@ type KafkaTransaction struct {
 }
 
 func (t *KafkaTransaction) Commit(session sarama.ConsumerGroupSession, messages []*sarama.ProducerMessage, offset int64, metadata string) error {
-	// No need for a transaction if no messages
+	// No need for a transaction if no messages, just update the
+	// offset and metadata
 	if len(messages) == 0 {
 		session.MarkOffset(t.Topic, t.Partition, offset, metadata)
 		session.Commit()

@@ -28,6 +28,8 @@ func (c *KafkaTriggerConnection) Name() string {
 }
 
 func (c *KafkaTriggerConnection) Ready() bool {
+	// cannot process events until the subscribe function has been
+	// called, which is when these functions are set
 	return c.transform != nil && c.filter != nil && c.action != nil
 }
 
@@ -84,6 +86,8 @@ func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int3
 		return nil, err
 	}
 
+	// if satisfied, publish a message to the action topic containing
+	// all events and reset the trigger
 	var events []*cloudevents.Event
 	if satisfied == true {
 		defer c.reset()
@@ -113,9 +117,10 @@ func (c *KafkaTriggerConnection) Action(events []*cloudevents.Event) func() {
 		}
 	}
 
-	// If at least once is specified, we must call action before the
-	// kafka transaction, otherwise action must be called after the
-	// transaction. To invoke the action after we return a function.
+	// If at least once is specified, we must call the action
+	// function before committing a transaction, otherwise the
+	// function must be called after. To call after we return a
+	// function.
 	var f func()
 	if c.atLeastOnce {
 		c.action(eventMap)

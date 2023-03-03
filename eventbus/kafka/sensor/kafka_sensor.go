@@ -304,13 +304,15 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(msg.Value, &event); err != nil {
+		// do not return here as we still need to call trigger.Offset
+		// below to determine current offset
 		s.Logger.Errorw("Failed to deserialize cloudevent, skipping", zap.Error(err))
 	}
 
 	messages := []*sarama.ProducerMessage{}
 	offset := msg.Offset + 1
 
-	// Update trigger with new event and add any resulting action to
+	// update trigger with new event and add any resulting action to
 	// transaction messages
 	if trigger, ok := s.triggers[string(msg.Key)]; ok && event != nil {
 		func() {
@@ -339,7 +341,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 		}()
 	}
 
-	// Need to determine smallest possible offset against all
+	// need to determine smallest possible offset against all
 	// triggers as other triggers may have messages that land on the
 	// same partition
 	for _, trigger := range s.triggers {
