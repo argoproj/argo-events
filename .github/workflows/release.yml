@@ -75,7 +75,7 @@ jobs:
           if [ $tag = "master" ]; then
             tag="latest"
           fi
-          echo "::set-output name=VERSION::$tag"
+          echo "VERSION=nightly-$tag" >> $GITHUB_OUTPUT
 
       - name: Container build and push with arm64/amd64
         run: |
