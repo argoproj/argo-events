@@ -338,8 +338,8 @@ github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMo
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
-github.com/gavv/httpexpect/v2 v2.13.0 h1:d9bGxLIjUpi0m1RXwxmvY7WPwhBqHQqr1gnLhB+q1ls=
-github.com/gavv/httpexpect/v2 v2.13.0/go.mod h1:Cw5O0RmjQOmUewnAPTnwhXHGmO2vXGjw07vFOq2jYRg=
+github.com/gavv/httpexpect/v2 v2.14.0 h1:rWM60bPJpVcIZWgubYDvipTeHdJlseDM5hovR+wgFVo=
+github.com/gavv/httpexpect/v2 v2.14.0/go.mod h1:lWjY74mDnFXjTqqK41HouBDDCANFo1yrejZ5VraAE1k=
 github.com/getkin/kin-openapi v0.76.0/go.mod h1:660oXbgy5JFMKreazJaQTw7o+X00qeSyhcnluiMv+Xg=
 github.com/getsentry/raven-go v0.2.0/go.mod h1:KungGk8q33+aIAZUIVWZDr2OfAEBsO49PX4NzFV5kcQ=
 github.com/gfleury/go-bitbucket-v1 v0.0.0-20210707202713-7d616f7c18ac h1:XrZTje1i6Q8Y03z5AApzVTwn1rkPKYp5iyEEAhd0CV8=
