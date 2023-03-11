@@ -11,7 +11,7 @@ require (
 	cloud.google.com/go/pubsub v1.28.0
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20221103172237-443f56ff4ba8
 	github.com/Azure/azure-event-hubs-go/v3 v3.4.0
-	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.2.0
+	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.2.1
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/Shopify/sarama v1.38.0
