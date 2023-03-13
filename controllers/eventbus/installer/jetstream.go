@@ -196,7 +196,7 @@ func (r *jetStreamInstaller) createStatefulSet(ctx context.Context) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: r.eventBus.Namespace,
 			Name:      generateJetStreamStatefulSetName(r.eventBus),
-			Labels:    r.labels,
+			Labels:    r.mergeEventBusLabels(r.labels),
 			Annotations: map[string]string{
 				common.AnnotationResourceSpecHash: hash,
 			},
@@ -750,6 +750,19 @@ func (r *jetStreamInstaller) getPVCs(ctx context.Context) ([]corev1.PersistentVo
 
 func generateJetStreamServerSecretName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-js-server", eventBus.Name)
+}
+
+func (r *jetStreamInstaller) mergeEventBusLabels(given map[string]string) map[string]string {
+	result := map[string]string{}
+	if r.eventBus.Labels != nil {
+		for k, v := range r.eventBus.Labels {
+			result[k] = v
+		}
+	}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
 }
 
 func generateJetStreamClientAuthSecretName(eventBus *v1alpha1.EventBus) string {
