@@ -694,6 +694,11 @@ func (in *KafkaTrigger) DeepCopyInto(out *KafkaTrigger) {
 		*out = new(common.SASLConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.SchemaRegistry != nil {
+		in, out := &in.SchemaRegistry, &out.SchemaRegistry
+		*out = new(common.SchemaRegistryConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

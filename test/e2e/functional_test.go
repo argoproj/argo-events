@@ -69,24 +69,31 @@ func (s *FunctionalSuite) TestCreateCalendarEventSource() {
 }
 
 func (s *FunctionalSuite) TestCreateCalendarEventSourceWithHA() {
-	t1 := s.Given().EventSource("@testdata/es-calendar-ha.yaml").
-		When().
-		CreateEventSource().
-		WaitForEventSourceReady().
-		Wait(3 * time.Second).
-		Then().
-		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+	for _, test := range []struct {
+		es, s string
+	}{
+		{"@testdata/es-calendar-ha.yaml", "@testdata/sensor-log-ha.yaml"},
+		{"@testdata/es-calendar-ha-k8s.yaml", "@testdata/sensor-log-ha-k8s.yaml"},
+	} {
+		t1 := s.Given().EventSource(test.es).
+			When().
+			CreateEventSource().
+			WaitForEventSourceReady().
+			Wait(3 * time.Second).
+			Then().
+			ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	defer t1.When().DeleteEventSource()
+		defer t1.When().DeleteEventSource()
 
-	t2 := s.Given().Sensor("@testdata/sensor-log-ha.yaml").
-		When().
-		CreateSensor().
-		WaitForSensorReady().
-		Wait(3 * time.Second).
-		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
-	defer t2.When().DeleteSensor()
+		t2 := s.Given().Sensor(test.s).
+			When().
+			CreateSensor().
+			WaitForSensorReady().
+			Wait(3 * time.Second).
+			Then().
+			ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+		defer t2.When().DeleteSensor()
+	}
 }
 
 func (s *FunctionalSuite) TestMetricsWithCalendar() {
@@ -396,6 +403,168 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 
 }
 
+func (s *FunctionalSuite) TestAtLeastOnce() {
+	// Send an event to a sensor with a failing trigger and make sure it doesn't ACK it.
+	// Delete the sensor and launch sensor with same name and non-failing trigger so it ACKS it.
+
+	// Start EventSource
+
+	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
+		s.T().SkipNow() // Skipping because AtLeastOnce does not apply for NATS.
+	}
+	w1 := s.Given().EventSource("@testdata/es-webhook.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady()
+
+	defer w1.DeleteEventSource()
+
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().EventSourcePodPortForward(12006, 12000).
+		TerminateAllPodPortForwards()
+
+	w2 := s.Given().Sensor("@testdata/sensor-atleastonce-failing.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+	time.Sleep(3 * time.Second)
+	s.e("http://localhost:12006").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
+	w2.Then().ExpectSensorPodLogContains("InProgess")
+	w2.DeleteSensor()
+	time.Sleep(10 * time.Second)
+
+	w3 := s.Given().Sensor("@testdata/sensor-atleastonce-triggerable.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w3.DeleteSensor()
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("trigger-atleastonce"))
+}
+
+func (s *FunctionalSuite) TestAtMostOnce() {
+	// Send an event to a sensor with a failing trigger but it will ACK it.
+	// Delete the sensor and launch sensor with same name and non-failing trigger
+	// to see that the event doesn't come through.
+
+	// Start EventSource
+	w1 := s.Given().EventSource("@testdata/es-webhook.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().EventSourcePodPortForward(12007, 12000).
+		TerminateAllPodPortForwards()
+
+	w2 := s.Given().Sensor("@testdata/sensor-atmostonce-failing.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+	time.Sleep(3 * time.Second)
+	s.e("http://localhost:12007").POST("/example").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
+	w2.Then().ExpectSensorPodLogContains("Triggering actions")
+	time.Sleep(3 * time.Second)
+
+	w2.DeleteSensor()
+	time.Sleep(10 * time.Second)
+
+	w3 := s.Given().Sensor("@testdata/sensor-atmostonce-triggerable.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w3.DeleteSensor()
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("trigger-atmostonce"), util.PodLogCheckOptionWithCount(0))
+}
+
+func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
+	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
+	// Then send the other part of the condition and verify that only one triggers
+	// With AtLeastOnce flag set.
+
+	// Start EventSource
+
+	w1 := s.Given().EventSource("@testdata/es-multi-sensor.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
+
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	defer w1.Then().EventSourcePodPortForward(12004, 12000).
+		EventSourcePodPortForward(13004, 13000).
+		EventSourcePodPortForward(14004, 14000).TerminateAllPodPortForwards()
+
+	// Start one Sensor
+	w2 := s.Given().Sensor("@testdata/sensor-multi-sensor-atleastonce.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w2.DeleteSensor()
+
+	w2.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	time.Sleep(3 * time.Second)
+
+	// Trigger first dependency
+	// test-dep-1
+	s.e("http://localhost:12004").POST("/example1").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
+
+	// Start second Sensor
+	w3 := s.Given().Sensor("@testdata/sensor-multi-sensor-2-atleastonce.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+	defer w3.DeleteSensor()
+
+	w3.Then().
+		ExpectSensorPodLogContains(LogSensorStarted, util.PodLogCheckOptionWithCount(1))
+
+	// Trigger second dependency
+	// test-dep-2
+	s.e("http://localhost:13004").POST("/example2").WithBytes([]byte("{}")).
+		Expect().
+		Status(200)
+	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
+
+	// Verify trigger occurs for first Sensor and not second
+	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1-atleastonce"))
+	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1-atleastonce"), util.PodLogCheckOptionWithCount(0))
+
+}
+
 func (s *FunctionalSuite) TestTriggerSpecChange() {
 	// Start a sensor which uses "A && B"; send A; replace the Sensor with a new spec which uses A; send C and verify that there's no trigger
 
@@ -406,9 +575,9 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 		WaitForEventSourceReady().
 		Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted).
-		EventSourcePodPortForward(12004, 12000).
-		EventSourcePodPortForward(13004, 13000).
-		EventSourcePodPortForward(14004, 14000)
+		EventSourcePodPortForward(12005, 12000).
+		EventSourcePodPortForward(13005, 13000).
+		EventSourcePodPortForward(14005, 14000)
 
 	defer t1.When().DeleteEventSource()
 	defer t1.TerminateAllPodPortForwards()
@@ -426,7 +595,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 
 	// Trigger first dependency
 	// test-dep-1
-	s.e("http://localhost:12004").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:12005").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 
@@ -447,7 +616,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	time.Sleep(3 * time.Second)
 
 	// test-dep-3
-	s.e("http://localhost:14004").POST("/example").WithBytes([]byte("{}")).
+	s.e("http://localhost:14005").POST("/example").WithBytes([]byte("{}")).
 		Expect().
 		Status(200)
 

@@ -196,6 +196,29 @@
       },
       "type": "object"
     },
+    "io.argoproj.common.SchemaRegistryConfig": {
+      "description": "SchemaRegistryConfig refers to configuration for a client",
+      "properties": {
+        "auth": {
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth",
+          "description": "SchemaRegistry - basic authentication"
+        },
+        "schemaId": {
+          "description": "Schema ID",
+          "format": "int32",
+          "type": "integer"
+        },
+        "url": {
+          "description": "Schema Registry URL.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "schemaId"
+      ],
+      "type": "object"
+    },
     "io.argoproj.common.SecureHeader": {
       "description": "SecureHeader refers to HTTP Headers with auth tokens as values",
       "properties": {
@@ -1752,6 +1775,13 @@
           "description": "GitlabBaseURL is the base URL for API requests to a custom endpoint",
           "type": "string"
         },
+        "groups": {
+          "description": "List of group IDs or group name like \"test\". Group level hook available in Premium and Ultimate Gitlab.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -1764,7 +1794,7 @@
           "type": "string"
         },
         "projects": {
-          "description": "List of project IDs or project namespace paths like \"whynowy/test\"",
+          "description": "List of project IDs or project namespace paths like \"whynowy/test\". Projects and groups cannot be empty at the same time.",
           "items": {
             "type": "string"
           },
@@ -3606,6 +3636,10 @@
           "$ref": "#/definitions/io.argoproj.common.SASLConfig",
           "description": "SASL configuration for the kafka client"
         },
+        "schemaRegistry": {
+          "$ref": "#/definitions/io.argoproj.common.SchemaRegistryConfig",
+          "description": "Schema Registry configuration to producer message with avro format"
+        },
         "tls": {
           "$ref": "#/definitions/io.argoproj.common.TLSConfig",
           "description": "TLS configuration for the Kafka producer."
@@ -4139,6 +4173,10 @@
     "io.argoproj.sensor.v1alpha1.Trigger": {
       "description": "Trigger is an action taken, output produced, an event created, a message sent",
       "properties": {
+        "atLeastOnce": {
+          "description": "AtLeastOnce determines the trigger execution semantics. Defaults to false. Trigger execution will use at-most-once semantics. If set to true, Trigger execution will switch to at-least-once semantics.",
+          "type": "boolean"
+        },
         "parameters": {
           "description": "Parameters is the list of parameters applied to the trigger template definition",
           "items": {

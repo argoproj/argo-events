@@ -1345,12 +1345,18 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
 						},
 					},
+					"schemaRegistry": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schema Registry configuration to producer message with avro format",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "topic", "payload"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -2312,6 +2318,13 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 						SchemaProps: spec.SchemaProps{
 							Description: "Rate limit, default unit is Second",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit"),
+						},
+					},
+					"atLeastOnce": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AtLeastOnce determines the trigger execution semantics. Defaults to false. Trigger execution will use at-most-once semantics. If set to true, Trigger execution will switch to at-least-once semantics.",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},

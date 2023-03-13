@@ -1926,6 +1926,19 @@ SASL configuration for the kafka client
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>schemaRegistry</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Schema Registry configuration to producer message with avro format
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.KubernetesResourceOperation">
@@ -3393,6 +3406,19 @@ Retry strategy, defaults to no retry
 <em>(Optional)</em>
 <p>
 Rate limit, default unit is Second
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>atLeastOnce</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AtLeastOnce determines the trigger execution semantics. Defaults to
+false. Trigger execution will use at-most-once semantics. If set to
+true, Trigger execution will switch to at-least-once semantics.
 </p>
 </td>
 </tr>

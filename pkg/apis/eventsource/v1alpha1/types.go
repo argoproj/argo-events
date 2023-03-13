@@ -856,13 +856,18 @@ type GitlabEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
-	// List of project IDs or project namespace paths like "whynowy/test"
+	// List of project IDs or project namespace paths like "whynowy/test". Projects and groups cannot be empty at the same time.
+	// +optional
 	Projects []string `json:"projects,omitempty" protobuf:"bytes,10,rep,name=projects"`
 	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
 	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,11,opt,name=secretToken"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
+	// List of group IDs or group name like "test".
+	// Group level hook available in Premium and Ultimate Gitlab.
+	// +optional
+	Groups []string `json:"groups,omitempty" protobuf:"bytes,13,rep,name=groups"`
 }
 
 func (g GitlabEventSource) GetProjects() []string {
@@ -871,6 +876,13 @@ func (g GitlabEventSource) GetProjects() []string {
 	}
 	if g.DeprecatedProjectID != "" {
 		return []string{g.DeprecatedProjectID}
+	}
+	return []string{}
+}
+
+func (g GitlabEventSource) GetGroups() []string {
+	if len(g.Groups) > 0 {
+		return g.Groups
 	}
 	return []string{}
 }

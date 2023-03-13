@@ -257,7 +257,6 @@ rules:
   - pods
   - pods/exec
   - configmaps
-  - secrets
   - services
   - persistentvolumeclaims
   verbs:
@@ -265,6 +264,17 @@ rules:
   - get
   - list
   - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
   - update
   - patch
   - delete
@@ -322,7 +332,7 @@ data:
           duplicates: 300s
         versions:
         - version: latest
-          natsImage: nats:2.9.1
+          natsImage: nats:2.9.12
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.7.0
           startCommand: /nats-server
@@ -348,6 +358,11 @@ data:
           startCommand: nats-server
         - version: 2.9.1
           natsImage: nats:2.9.1
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
+          configReloaderImage: natsio/nats-server-config-reloader:0.7.0
+          startCommand: /nats-server
+        - version: 2.9.12
+          natsImage: nats:2.9.12
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.7.0
           startCommand: /nats-server

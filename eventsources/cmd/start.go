@@ -62,6 +62,7 @@ func Start() {
 
 	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
 	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m)
+
 	if err := adaptor.Start(ctx); err != nil {
 		logger.Fatalw("failed to start eventsource server", zap.Error(err))
 	}

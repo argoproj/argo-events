@@ -760,7 +760,8 @@ message GitlabEventSource {
   // +optional
   map<string, string> metadata = 9;
 
-  // List of project IDs or project namespace paths like "whynowy/test"
+  // List of project IDs or project namespace paths like "whynowy/test". Projects and groups cannot be empty at the same time.
+  // +optional
   repeated string projects = 10;
 
   // SecretToken references to k8 secret which holds the Secret Token used by webhook config
@@ -769,6 +770,11 @@ message GitlabEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 12;
+
+  // List of group IDs or group name like "test".
+  // Group level hook available in Premium and Ultimate Gitlab.
+  // +optional
+  repeated string groups = 13;
 }
 
 // HDFSEventSource refers to event-source for HDFS related events

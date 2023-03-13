@@ -1,5 +1,85 @@
 # Changelog
 
+## v1.7.6 (2023-02-09)
+
+ * [eff04343](https://github.com/argoproj/argo-events/commit/eff0434356052ccffdf0b13bef55f861dcde6e30) Update manifests to v1.7.6
+ * [d0481ae7](https://github.com/argoproj/argo-events/commit/d0481ae76047c31b04873bafc63d86ab9b1bc32b) feat: Optional kubernetes-based leader election (#2438)
+ * [413ca1f6](https://github.com/argoproj/argo-events/commit/413ca1f6dfacf878cb7f049e99560baddf1cb4f3) fix: remove the secret watch privilege dependency from js eb ctrler (#2453)
+ * [0b79a44d](https://github.com/argoproj/argo-events/commit/0b79a44dbd7d7bba2ef20dfe0127c8f867909e9f) chore(deps): bump github.com/xanzy/go-gitlab from 0.78.0 to 0.79.1 (#2460)
+ * [666a29d6](https://github.com/argoproj/argo-events/commit/666a29d686b037e8fec54527f9b8cbbf785daf75) chore(deps): bump github.com/rabbitmq/amqp091-go from 1.6.0 to 1.6.1 (#2459)
+ * [ca0fbdb7](https://github.com/argoproj/argo-events/commit/ca0fbdb7bbbd87e0bb04f7d74f1c816301388013) chore(deps): bump google.golang.org/api from 0.108.0 to 0.109.0 (#2456)
+ * [08e84bd9](https://github.com/argoproj/argo-events/commit/08e84bd92d54365d293bdba98c7b98c9887ea463) chore(deps): bump google.golang.org/grpc from 1.52.0 to 1.52.3 (#2448)
+ * [c377ea0a](https://github.com/argoproj/argo-events/commit/c377ea0a1881a91e3ce7c84625176691c07bf5d8) chore(deps): bump github.com/antonmedv/expr from 1.10.1 to 1.10.5 (#2446)
+
+### Contributors
+
+ * David Farr
+ * Derek Wang
+ * dependabot[bot]
+
+## v1.7.5 (2023-01-23)
+
+ * [de0a80e6](https://github.com/argoproj/argo-events/commit/de0a80e6020eee9cfcbd9afc1b6fb0b2479a66ae) Update manifests to v1.7.5
+ * [be4ce30e](https://github.com/argoproj/argo-events/commit/be4ce30ecb368fd946bad77adf49fef62055d4dc) chore(deps): bump github.com/gavv/httpexpect/v2 from 2.8.0 to 2.9.0 (#2434)
+ * [9dfedcc7](https://github.com/argoproj/argo-events/commit/9dfedcc74c3de38c0ec16756acd559ac8a5b58e1) chore(deps): bump github.com/antonmedv/expr from 1.9.0 to 1.10.1 (#2433)
+ * [a3bec705](https://github.com/argoproj/argo-events/commit/a3bec705ab8167369ec681ec04bc8acc4efb5aee) chore(deps): bump github.com/spf13/viper from 1.14.0 to 1.15.0 (#2432)
+ * [650e819a](https://github.com/argoproj/argo-events/commit/650e819aa73ebe6cf852ee1c4dec6fff7c87265b) chore(deps): bump github.com/go-swagger/go-swagger from 0.29.0 to 0.30.4 (#2431)
+ * [481bed6f](https://github.com/argoproj/argo-events/commit/481bed6f1fbd685e50ace73216830dd416b3a72d) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.180 to 1.44.184 (#2429)
+ * [091e6fd5](https://github.com/argoproj/argo-events/commit/091e6fd55df9b99367f9fd72c2c740eec9b86baa) chore(deps): bump github.com/nats-io/nats.go from 1.22.1 to 1.23.0 (#2428)
+ * [f584c8f3](https://github.com/argoproj/argo-events/commit/f584c8f3d96d609e4b511a533dcccec736e7a641) chore(deps): bump google.golang.org/api from 0.107.0 to 0.108.0 (#2430)
+ * [c511457d](https://github.com/argoproj/argo-events/commit/c511457d21df6e0282f8b3fb23d65f5ec27217c5) chore(deps): bump github.com/rabbitmq/amqp091-go from 1.4.0 to 1.6.0 (#2427)
+ * [1a3a79ad](https://github.com/argoproj/argo-events/commit/1a3a79ad84a1ab3944b29a27e518bec6c670cee5) fix: kafka schema registry (#2423)
+ * [70e3ad0c](https://github.com/argoproj/argo-events/commit/70e3ad0cd375b3b773ada4898aea09e7bc545c2f) Implement optional at least once semantics (#2404)
+ * [62fb8d1a](https://github.com/argoproj/argo-events/commit/62fb8d1a01585e108fa3d2752573f4407867312c) feat: allow granular secret privileges. additional controller logging/leader-election options (#2411)
+ * [225b1d12](https://github.com/argoproj/argo-events/commit/225b1d125e64b867fd4cf4988eb5587ef2328cdd) chore(deps): bump github.com/Shopify/sarama from 1.37.0 to 1.38.0 (#2419)
+ * [08435228](https://github.com/argoproj/argo-events/commit/0843522807564e652a6a17a497e341bd0f5262b5) chore(deps): bump google.golang.org/api from 0.106.0 to 0.107.0 (#2420)
+ * [9cb1d9d4](https://github.com/argoproj/argo-events/commit/9cb1d9d4840a1408270f2234c5f87814fb3c5d2c) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.46 to 7.0.47 (#2421)
+ * [1e3a1994](https://github.com/argoproj/argo-events/commit/1e3a1994f453d1f0ce405e26f77c50d48719c35e) chore(deps): bump google.golang.org/grpc from 1.51.0 to 1.52.0 (#2418)
+ * [663ae056](https://github.com/argoproj/argo-events/commit/663ae0564b65b984edc3f17b74ed2bd1eb64745e) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus from 1.1.3 to 1.1.4 (#2417)
+ * [3ef04688](https://github.com/argoproj/argo-events/commit/3ef046885e4549fec461712b635f2a6042b95596) chore(deps): bump github.com/nats-io/stan.go from 0.10.3 to 0.10.4 (#2416)
+ * [e9927635](https://github.com/argoproj/argo-events/commit/e992763550d38e44d7a6b875482569ba9f6ca079) chore(deps): bump github.com/xanzy/go-gitlab from 0.76.0 to 0.78.0 (#2414)
+ * [d401800a](https://github.com/argoproj/argo-events/commit/d401800a9bf5dc88ef269d5219fe6243f2ac83ec) chore(deps): bump github.com/cloudevents/sdk-go/v2 from 2.11.0 to 2.13.0 (#2415)
+ * [a435af49](https://github.com/argoproj/argo-events/commit/a435af49b378d1948fcf86bf237f6dab20490a5e) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.175 to 1.44.180 (#2413)
+ * [327fd63d](https://github.com/argoproj/argo-events/commit/327fd63d63da30d04b089cce08f4f026faf16c79) chore(deps): bump actions/setup-python from 4.4.0 to 4.5.0 (#2412)
+ * [f545dfb4](https://github.com/argoproj/argo-events/commit/f545dfb4048b4feccfda0a42233c45be51716d0d) fix: cloneDirectory validation on git artifcatory spec (#2407)
+ * [f60ae2c0](https://github.com/argoproj/argo-events/commit/f60ae2c0a8c2ec29150c88f0580605e90b26fa17) feat(sensor): Kafka Trigger - support avro/schemaRegistry (#2385)
+ * [c56b2d54](https://github.com/argoproj/argo-events/commit/c56b2d54c157a309685d7abb77a770867933d7ab) chore(deps): bump golang.org/x/crypto from 0.4.0 to 0.5.0 (#2401)
+ * [ac2cb59f](https://github.com/argoproj/argo-events/commit/ac2cb59fe1f0b50f1bf797975880a114bc0cd95b) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.171 to 1.44.175 (#2400)
+ * [1b8d5fca](https://github.com/argoproj/argo-events/commit/1b8d5fca97e9dd226705654e9610093ed5312970) chore(deps): bump google.golang.org/api from 0.104.0 to 0.106.0 (#2399)
+ * [ae5abfc2](https://github.com/argoproj/argo-events/commit/ae5abfc27217773a9583c2cbdb53cc4f1765ea1d) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.45 to 7.0.46 (#2398)
+ * [0da2dfe3](https://github.com/argoproj/argo-events/commit/0da2dfe3e811a9bfbc9118e65f745dd2abf1072a) NATS event data - add header field (#2396)
+ * [ff524af8](https://github.com/argoproj/argo-events/commit/ff524af8366acaec033998f5692e842ad516a95d) fix: fix bug in evaluation of filters with filtersLogicalOperator=or (#2374)
+ * [eeae3da9](https://github.com/argoproj/argo-events/commit/eeae3da976f5f735e698f66eb44d06ff9a728251) Implement multiple partions usage in Kafka trigger  (#2360)
+ * [a0ef3c24](https://github.com/argoproj/argo-events/commit/a0ef3c24eb960539a73c157dfdab65f6fcbc8f55) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.162 to 1.44.171 (#2387)
+ * [c650f05b](https://github.com/argoproj/argo-events/commit/c650f05bdbf82abb54e9e1e5a8af6d26b2f1997f) chore(deps): bump github.com/nats-io/nats.go from 1.21.0 to 1.22.1 (#2381)
+ * [8565b135](https://github.com/argoproj/argo-events/commit/8565b135fd79220b8457cf13b013e98943c28ab3) chore(deps): bump github.com/slack-go/slack from 0.12.0 to 0.12.1 (#2379)
+ * [b7ff5c15](https://github.com/argoproj/argo-events/commit/b7ff5c15cf7c0ffee9fc0c3d968a563265520a9e) chore(deps): bump github.com/itchyny/gojq from 0.12.10 to 0.12.11 (#2380)
+ * [4db58c64](https://github.com/argoproj/argo-events/commit/4db58c64fb0a3b38eb0e511d994e49d1e39794d8) chore(deps): bump actions/setup-python from 4.3.0 to 4.4.0 (#2377)
+ * [cca6e338](https://github.com/argoproj/argo-events/commit/cca6e33809078cb4849e966d88d6560b9fddab48) chore(deps): bump actions/stale from 6 to 7 (#2378)
+ * [e2e6de21](https://github.com/argoproj/argo-events/commit/e2e6de214e6a0bf58007f87a417f268c28f1b1fd) fix: Fixed Github Sensor example and minor doc correction (#2373)
+ * [17f9abe6](https://github.com/argoproj/argo-events/commit/17f9abe6b4823506a375ba73fdc34cfb3e31da51) feat: Expand Slack Trigger Capabilities - blocks,attachments,threads and more (#2369)
+ * [6a0ef35a](https://github.com/argoproj/argo-events/commit/6a0ef35af79e9bba59e77768efb3f3b438b7f668) chore(deps): bump github.com/aws/aws-sdk-go from 1.44.157 to 1.44.162 (#2368)
+ * [46f16e53](https://github.com/argoproj/argo-events/commit/46f16e53e0d0e9ca76f79e0ed985b1cfae2c4c1d) chore(deps): bump cloud.google.com/go/compute/metadata from 0.2.2 to 0.2.3 (#2366)
+ * [957aecdb](https://github.com/argoproj/argo-events/commit/957aecdb5189e4c70b8d102cd18eba0facdfcc40) chore(deps): bump github.com/gavv/httpexpect/v2 from 2.7.0 to 2.8.0 (#2365)
+ * [8037c502](https://github.com/argoproj/argo-events/commit/8037c502283418ba0188a5991d8ba500c2e7f51e) chore(deps): bump github.com/slack-go/slack from 0.11.2 to 0.12.0 (#2364)
+ * [4f4cce93](https://github.com/argoproj/argo-events/commit/4f4cce933272e33db93746867518184e28904098) chore(deps): bump actions/setup-go from 3.4.0 to 3.5.0 (#2361)
+ * [1832666b](https://github.com/argoproj/argo-events/commit/1832666b6292582cd9d8ba421455e53773a89744) Make kafka eventsource compatible with samara 1.37.0 Addresses #2358 (#2359)
+ * [b8598982](https://github.com/argoproj/argo-events/commit/b859898290c2c044a9f96b297f887121cc8a60ee) fix: typo in gitlab example eventsource (#2353)
+
+### Contributors
+
+ * Bilal Bakht Ahmad
+ * Brad Fair
+ * Daniel
+ * Derek Wang
+ * Jesse Suen
+ * Jhonn W. Frazão
+ * Nick Palumbo
+ * Ramin A
+ * Thomas Ribeiro de Araújo
+ * dependabot[bot]
+ * jsvk
+
 ## v1.7.4 (2022-12-11)
 
  * [06409b6e](https://github.com/argoproj/argo-events/commit/06409b6e9a7c9644efbac248f48c276e5f12b51f) Update manifests to v1.7.4

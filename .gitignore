@@ -1,6 +1,7 @@
 .vscode/
 .idea/
 .DS_Store
+.env
 vendor/
 dist/
 # delve debug binaries
@@ -12,3 +13,4 @@ debug.test
 *.out
 site/
 /go-diagrams/
+argo-events

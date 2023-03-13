@@ -55,12 +55,16 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 
 func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	log := logging.FromContext(ctx)
-	custerName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
-	elector, err := leaderelection.NewEventBusElector(ctx, *sensorCtx.eventBusConfig, custerName, int(sensorCtx.sensor.Spec.GetReplicas()))
+	clusterName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
+	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
+	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
+
+	elector, err := leaderelection.NewElector(ctx, *sensorCtx.eventBusConfig, clusterName, replicas, sensorCtx.sensor.Namespace, leasename, sensorCtx.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
 		return err
 	}
+
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
 			if err := sensorCtx.listenEvents(ctx); err != nil {
@@ -71,6 +75,7 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 			log.Fatalf("leader lost: %s", sensorCtx.hostname)
 		},
 	})
+
 	return nil
 }
 
@@ -331,7 +336,13 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		depNames = append(depNames, k)
 		eventIDs = append(eventIDs, v.ID())
 	}
-	go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	if trigger.AtLeastOnce {
+		// By making this a blocking call, wait to Ack the message
+		// until this trigger is executed.
+		sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	} else {
+		go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	}
 }
 
 func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) {
