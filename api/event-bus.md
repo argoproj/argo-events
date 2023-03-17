@@ -744,7 +744,7 @@ URL to kafka cluster, multiple URLs separated by comma
 <td>
 <em>(Optional)</em>
 <p>
-Topic name, defaults to namespace_name.eventbus_name
+Topic name, defaults to {namespace_name}-{eventbus_name}
 </p>
 </td>
 </tr>
@@ -826,7 +826,7 @@ Description
 <td>
 <em>(Optional)</em>
 <p>
-The name for the consumer group to use
+Consumer group name, defaults to {namespace_name}-{sensor_name}
 </p>
 </td>
 </tr>

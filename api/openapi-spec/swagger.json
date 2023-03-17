@@ -541,7 +541,7 @@
           "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "topic": {
-          "description": "Topic name, defaults to namespace_name.eventbus_name",
+          "description": "Topic name, defaults to {namespace_name}-{eventbus_name}",
           "type": "string"
         },
         "url": {
@@ -558,7 +558,7 @@
       "type": "object",
       "properties": {
         "groupName": {
-          "description": "The name for the consumer group to use",
+          "description": "Consumer group name, defaults to {namespace_name}-{sensor_name}",
           "type": "string"
         },
         "rebalanceStrategy": {

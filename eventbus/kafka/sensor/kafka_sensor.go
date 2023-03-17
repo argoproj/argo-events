@@ -41,13 +41,13 @@ type KafkaSensor struct {
 func NewKafkaSensor(kafkaConfig *eventbusv1alpha1.KafkaConfig, sensor *sensorv1alpha1.Sensor, hostname string, logger *zap.SugaredLogger) *KafkaSensor {
 	topics := &Topics{
 		event:   kafkaConfig.Topic,
-		trigger: fmt.Sprintf("%s.%s.%s", kafkaConfig.Topic, sensor.Name, "trigger"),
-		action:  fmt.Sprintf("%s.%s.%s", kafkaConfig.Topic, sensor.Name, "action"),
+		trigger: fmt.Sprintf("%s-%s-%s", kafkaConfig.Topic, sensor.Name, "trigger"),
+		action:  fmt.Sprintf("%s-%s-%s", kafkaConfig.Topic, sensor.Name, "action"),
 	}
 
 	var groupName string
 	if kafkaConfig.ConsumerGroup == nil || kafkaConfig.ConsumerGroup.GroupName == "" {
-		groupName = fmt.Sprintf("%s.%s", sensor.Namespace, sensor.Name)
+		groupName = fmt.Sprintf("%s-%s", sensor.Namespace, sensor.Name)
 	} else {
 		groupName = kafkaConfig.ConsumerGroup.GroupName
 	}

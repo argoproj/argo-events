@@ -548,7 +548,7 @@
           "description": "TLS configuration for the kafka client."
         },
         "topic": {
-          "description": "Topic name, defaults to namespace_name.eventbus_name",
+          "description": "Topic name, defaults to {namespace_name}-{eventbus_name}",
           "type": "string"
         },
         "url": {
@@ -565,7 +565,7 @@
     "io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup": {
       "properties": {
         "groupName": {
-          "description": "The name for the consumer group to use",
+          "description": "Consumer group name, defaults to {namespace_name}-{sensor_name}",
           "type": "string"
         },
         "rebalanceStrategy": {

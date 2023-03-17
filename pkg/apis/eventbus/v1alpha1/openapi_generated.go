@@ -527,7 +527,7 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback)
 					},
 					"topic": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Topic name, defaults to namespace_name.eventbus_name",
+							Description: "Topic name, defaults to {namespace_name}-{eventbus_name}",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -573,7 +573,7 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaConsumerGroup(ref common.ReferenceCa
 				Properties: map[string]spec.Schema{
 					"groupName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The name for the consumer group to use",
+							Description: "Consumer group name, defaults to {namespace_name}-{sensor_name}",
 							Type:        []string{"string"},
 							Format:      "",
 						},

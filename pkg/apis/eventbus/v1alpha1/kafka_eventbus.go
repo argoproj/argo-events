@@ -13,7 +13,7 @@ type KafkaBus struct {
 type KafkaConfig struct {
 	// URL to kafka cluster, multiple URLs separated by comma
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	// Topic name, defaults to namespace_name.eventbus_name
+	// Topic name, defaults to {namespace_name}-{eventbus_name}
 	// +optional
 	Topic string `json:"topic,omitempty" protobuf:"bytes,2,opt,name=topic"`
 	// Kafka version, sarama defaults to the oldest supported stable version
@@ -31,7 +31,7 @@ type KafkaConfig struct {
 }
 
 type KafkaConsumerGroup struct {
-	// The name for the consumer group to use
+	// Consumer group name, defaults to {namespace_name}-{sensor_name}
 	// +optional
 	GroupName string `json:"groupName,omitempty" protobuf:"bytes,1,opt,name=groupName"`
 	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.

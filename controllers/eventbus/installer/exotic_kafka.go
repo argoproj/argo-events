@@ -30,7 +30,7 @@ func (i *exoticKafkaInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig
 		return nil, fmt.Errorf("invalid request")
 	}
 	if kafkaObj.Exotic.Topic == "" {
-		kafkaObj.Exotic.Topic = fmt.Sprintf("%s.%s", i.eventBus.Namespace, i.eventBus.Name)
+		kafkaObj.Exotic.Topic = fmt.Sprintf("%s-%s", i.eventBus.Namespace, i.eventBus.Name)
 	}
 
 	i.eventBus.Status.MarkDeployed("Skipped", "Skip deployment because of using exotic config.")

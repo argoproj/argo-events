@@ -218,7 +218,7 @@ message KafkaConfig {
   // URL to kafka cluster, multiple URLs separated by comma
   optional string url = 1;
 
-  // Topic name, defaults to namespace_name.eventbus_name
+  // Topic name, defaults to {namespace_name}-{eventbus_name}
   // +optional
   optional string topic = 2;
 
@@ -240,7 +240,7 @@ message KafkaConfig {
 }
 
 message KafkaConsumerGroup {
-  // The name for the consumer group to use
+  // Consumer group name, defaults to {namespace_name}-{sensor_name}
   // +optional
   optional string groupName = 1;
 
