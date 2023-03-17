@@ -6,11 +6,15 @@ import (
 )
 
 type KafkaTransaction struct {
-	Logger        *zap.SugaredLogger
-	Producer      sarama.AsyncProducer
-	GroupName     string
-	Topic         string
-	Partition     int32
+	Logger *zap.SugaredLogger
+
+	// kafka details
+	Producer  sarama.AsyncProducer
+	GroupName string
+	Topic     string
+	Partition int32
+
+	// used to reset the offset and metadata if transaction fails
 	ResetOffset   int64
 	ResetMetadata string
 }

@@ -13,13 +13,22 @@ import (
 
 type KafkaHandler struct {
 	*sync.Mutex
-	Logger        *zap.SugaredLogger
+	Logger *zap.SugaredLogger
+
+	// kafka details
 	GroupName     string
 	Producer      sarama.AsyncProducer
 	OffsetManager sarama.OffsetManager
 	TriggerTopic  string
-	Handlers      map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func())
-	checkpoints   Checkpoints
+
+	// handler functions
+	// one function for each consumed topic, return messages, an
+	// offset and an optional function that will in a transaction
+	Handlers map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func())
+
+	// maintains a mapping of keys (which correspond to triggers)
+	// to offsets, used to ensure triggers aren't invoked twice
+	checkpoints Checkpoints
 }
 
 type Checkpoints map[string]map[int32]*Checkpoint

@@ -23,17 +23,19 @@ type KafkaSensor struct {
 	*sync.Mutex
 	sensor *sensorv1alpha1.Sensor
 
-	// kafka
+	// kafka details
 	topics    *Topics
 	client    sarama.Client
 	consumer  sarama.ConsumerGroup
 	hostname  string
 	groupName string
 
-	// triggers
+	// triggers handlers
+	// holds the state of all sensor triggers
 	triggers Triggers
 
 	// kafka handler
+	// handles consuming from kafka, offsets, and transactions
 	kafkaHandler *KafkaHandler
 	connected    bool
 }
