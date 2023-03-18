@@ -60,7 +60,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/rabbitmq/amqp091-go v1.7.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/riferrei/srclient v0.5.4
+	github.com/riferrei/srclient v0.6.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/slack-go/slack v0.12.1
 	github.com/smartystreets/goconvey v1.7.2
