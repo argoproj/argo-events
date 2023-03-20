@@ -46,9 +46,7 @@ var (
 		},
 		Spec: v1alpha1.EventBusSpec{
 			Kafka: &v1alpha1.KafkaBus{
-				Exotic: &v1alpha1.KafkaConfig{
-					URL: "127.0.0.1:9092",
-				},
+				URL: "127.0.0.1:9092",
 			},
 		},
 	}
@@ -131,9 +129,9 @@ func TestValidate(t *testing.T) {
 
 	t.Run("test kafka eventbus no URL", func(t *testing.T) {
 		eb := testKafkaEventBus.DeepCopy()
-		eb.Spec.Kafka.Exotic.URL = ""
+		eb.Spec.Kafka.URL = ""
 		err := ValidateEventBus(eb)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "\"spec.kafka.exotic.url\" is missing")
+		assert.Contains(t, err.Error(), "\"spec.kafka.url\" is missing")
 	})
 }

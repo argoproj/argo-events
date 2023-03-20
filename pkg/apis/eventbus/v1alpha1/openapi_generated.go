@@ -39,7 +39,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamBus":        schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig":     schema_pkg_apis_eventbus_v1alpha1_JetStreamConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaBus":            schema_pkg_apis_eventbus_v1alpha1_KafkaBus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig":         schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConsumerGroup":  schema_pkg_apis_eventbus_v1alpha1_KafkaConsumerGroup(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSBus":             schema_pkg_apis_eventbus_v1alpha1_NATSBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig":          schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref),
@@ -67,14 +66,14 @@ func schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref common.ReferenceCallback) c
 					},
 					"kafka": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaBus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.JetStreamConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaBus", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"},
 	}
 }
 
@@ -497,26 +496,6 @@ func schema_pkg_apis_eventbus_v1alpha1_KafkaBus(ref common.ReferenceCallback) co
 			SchemaProps: spec.SchemaProps{
 				Description: "KafkaBus holds the KafkaBus EventBus information",
 				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"exotic": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Exotic holds an exotic Kafka config",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.KafkaConfig"},
-	}
-}
-
-func schema_pkg_apis_eventbus_v1alpha1_KafkaConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{

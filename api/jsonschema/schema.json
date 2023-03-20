@@ -288,7 +288,7 @@
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamConfig"
         },
         "kafka": {
-          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConfig"
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaBus"
         },
         "nats": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSConfig"
@@ -525,15 +525,6 @@
     },
     "io.argoproj.eventbus.v1alpha1.KafkaBus": {
       "description": "KafkaBus holds the KafkaBus EventBus information",
-      "properties": {
-        "exotic": {
-          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConfig",
-          "description": "Exotic holds an exotic Kafka config"
-        }
-      },
-      "type": "object"
-    },
-    "io.argoproj.eventbus.v1alpha1.KafkaConfig": {
       "properties": {
         "consumerGroup": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup",

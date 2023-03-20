@@ -40,7 +40,7 @@ type KafkaSensor struct {
 	connected    bool
 }
 
-func NewKafkaSensor(kafkaConfig *eventbusv1alpha1.KafkaConfig, sensor *sensorv1alpha1.Sensor, hostname string, logger *zap.SugaredLogger) *KafkaSensor {
+func NewKafkaSensor(kafkaConfig *eventbusv1alpha1.KafkaBus, sensor *sensorv1alpha1.Sensor, hostname string, logger *zap.SugaredLogger) *KafkaSensor {
 	topics := &Topics{
 		event:   kafkaConfig.Topic,
 		trigger: fmt.Sprintf("%s-%s-%s", kafkaConfig.Topic, sensor.Name, "trigger"),

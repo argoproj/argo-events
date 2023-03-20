@@ -11,10 +11,10 @@ import (
 
 type Kafka struct {
 	Logger *zap.SugaredLogger
-	config *eventbusv1alpha1.KafkaConfig
+	config *eventbusv1alpha1.KafkaBus
 }
 
-func NewKafka(config *eventbusv1alpha1.KafkaConfig, logger *zap.SugaredLogger) *Kafka {
+func NewKafka(config *eventbusv1alpha1.KafkaBus, logger *zap.SugaredLogger) *Kafka {
 	// set defaults
 	if config.ConsumerGroup == nil {
 		config.ConsumerGroup = &eventbusv1alpha1.KafkaConsumerGroup{}

@@ -6,11 +6,6 @@ import (
 
 // KafkaBus holds the KafkaBus EventBus information
 type KafkaBus struct {
-	// Exotic holds an exotic Kafka config
-	Exotic *KafkaConfig `json:"exotic,omitempty" protobuf:"bytes,1,opt,name=exotic"`
-}
-
-type KafkaConfig struct {
 	// URL to kafka cluster, multiple URLs separated by comma
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// Topic name, defaults to {namespace_name}-{eventbus_name}

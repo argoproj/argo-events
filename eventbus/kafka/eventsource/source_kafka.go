@@ -13,7 +13,7 @@ type KafkaSource struct {
 	topic string
 }
 
-func NewKafkaSource(config *eventbusv1alpha1.KafkaConfig, logger *zap.SugaredLogger) *KafkaSource {
+func NewKafkaSource(config *eventbusv1alpha1.KafkaBus, logger *zap.SugaredLogger) *KafkaSource {
 	return &KafkaSource{
 		Kafka: base.NewKafka(config, logger),
 		topic: config.Topic,

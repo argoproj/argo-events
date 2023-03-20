@@ -50,9 +50,7 @@ func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, kubeClient 
 	} else if js := eventBus.Spec.JetStream; js != nil {
 		return NewJetStreamInstaller(client, eventBus, config, getLabels(eventBus), kubeClient, logger), nil
 	} else if kafka := eventBus.Spec.Kafka; kafka != nil {
-		if kafka.Exotic != nil {
-			return NewExoticKafkaInstaller(eventBus, logger), nil
-		}
+		return NewExoticKafkaInstaller(eventBus, logger), nil
 	}
 	return nil, fmt.Errorf("invalid eventbus spec")
 }

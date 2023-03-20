@@ -39,7 +39,7 @@ message BusConfig {
   optional JetStreamConfig jetstream = 2;
 
   // +optional
-  optional KafkaConfig kafka = 3;
+  optional KafkaBus kafka = 3;
 }
 
 // ContainerTemplate defines customized spec for a container
@@ -210,11 +210,6 @@ message JetStreamConfig {
 
 // KafkaBus holds the KafkaBus EventBus information
 message KafkaBus {
-  // Exotic holds an exotic Kafka config
-  optional KafkaConfig exotic = 1;
-}
-
-message KafkaConfig {
   // URL to kafka cluster, multiple URLs separated by comma
   optional string url = 1;
 

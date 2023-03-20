@@ -76,8 +76,8 @@ NATSConfig </a> </em>
 </tr>
 <tr>
 <td>
-<code>kafka</code></br> <em>
-<a href="#argoproj.io/v1alpha1.KafkaConfig"> KafkaConfig </a> </em>
+<code>kafka</code></br> <em> <a href="#argoproj.io/v1alpha1.KafkaBus">
+KafkaBus </a> </em>
 </td>
 <td>
 <em>(Optional)</em>
@@ -673,47 +673,13 @@ KafkaBus
 </h3>
 <p>
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BusConfig">BusConfig</a>,
 <a href="#argoproj.io/v1alpha1.EventBusSpec">EventBusSpec</a>)
 </p>
 <p>
 <p>
 KafkaBus holds the KafkaBus EventBus information
 </p>
-</p>
-<table>
-<thead>
-<tr>
-<th>
-Field
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>exotic</code></br> <em>
-<a href="#argoproj.io/v1alpha1.KafkaConfig"> KafkaConfig </a> </em>
-</td>
-<td>
-<p>
-Exotic holds an exotic Kafka config
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.KafkaConfig">
-KafkaConfig
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.BusConfig">BusConfig</a>,
-<a href="#argoproj.io/v1alpha1.KafkaBus">KafkaBus</a>)
-</p>
-<p>
 </p>
 <table>
 <thead>
@@ -803,7 +769,7 @@ KafkaConsumerGroup
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.KafkaConfig">KafkaConfig</a>)
+<a href="#argoproj.io/v1alpha1.KafkaBus">KafkaBus</a>)
 </p>
 <p>
 </p>

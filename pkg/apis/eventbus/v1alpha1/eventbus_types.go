@@ -55,7 +55,7 @@ type BusConfig struct {
 	// +optional
 	JetStream *JetStreamConfig `json:"jetstream,omitempty" protobuf:"bytes,2,opt,name=jetstream"`
 	// +optional
-	Kafka *KafkaConfig `json:"kafka,omitempty" protobuf:"bytes,3,opt,name=kafka"`
+	Kafka *KafkaBus `json:"kafka,omitempty" protobuf:"bytes,3,opt,name=kafka"`
 }
 
 const (

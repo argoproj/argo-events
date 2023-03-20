@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	testExoticKafkaName = "test-kafka"
-	testExoticKafkaURL  = "kafka:9092"
+	testKafkaName = "test-kafka"
+	testKafkaURL  = "kafka:9092"
 )
 
 var (
@@ -24,13 +24,11 @@ var (
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
-			Name:      testExoticKafkaName,
+			Name:      testKafkaName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			Kafka: &v1alpha1.KafkaBus{
-				Exotic: &v1alpha1.KafkaConfig{
-					URL: testExoticKafkaURL,
-				},
+				URL: testKafkaURL,
 			},
 		},
 	}
@@ -42,7 +40,7 @@ func TestInstallationKafkaExotic(t *testing.T) {
 		conf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, conf.Kafka)
-		assert.Equal(t, conf.Kafka.URL, testExoticKafkaURL)
+		assert.Equal(t, conf.Kafka.URL, testKafkaURL)
 	})
 }
 
