@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - ../../manifests/cluster-install
   - ../../manifests/extensions/validating-webhook
-  - kafka
 
 patches:
   - patch: |-
