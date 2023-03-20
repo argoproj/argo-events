@@ -9,6 +9,10 @@ func EventKey(source string, subject string) string {
 	return fmt.Sprintf("%s.%s", source, subject)
 }
 
+// Batch returns a read only channel that receives values from the
+// input channel batched together into a slice. A value is sent to
+// the output channel when the slice reaches n elements, or d time
+// has elapsed, whichever happens first. Ordering is maintained.
 func Batch[T any](n int, d time.Duration, in <-chan T) <-chan []T {
 	out := make(chan []T, 1)
 
