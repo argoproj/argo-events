@@ -11,9 +11,11 @@ behaviors!**
 
 ## Kubernetes Leader Election
 
-By default, Argo Events will use NATS for the HA leader election. Alternatively,
-you can opt-in to a Kubernetes native leader election by specifying the following
-annotation.
+By default, Argo Events will use NATS for the HA leader election except when
+using a Kafka Eventbus, in which case a leader election is not required as a
+Sensor that uses a Kafka EventBus is capable of horizontally scaling. If using
+a different EventBus you can opt-in to a Kubernetes native leader election by
+specifying the following annotation.
 ```yaml
 annotations:
   events.argoproj.io/leader-election: k8s
