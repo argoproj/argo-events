@@ -90,7 +90,7 @@ The most important fields are,
 1. `parameters`: The parameters override the resource that is fetched by the trigger server.
     Read more info on parameters [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
 
-1. `payload`: Payload to send to the trigger server. Read more on payload [here](https://argoproj.github.io/argo-events/triggers/http-trigger/#request-payload).
+1. `payload`: Payload to send to the trigger server. Read more on payload [here](https://argoproj.github.io/argo-events/sensors/triggers/http-trigger/#request-payload).
 
 The complete spec for the custom trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#customtrigger).
 
