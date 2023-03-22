@@ -216,7 +216,6 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 
 	msg := &sarama.ProducerMessage{
 		Topic:     trigger.Topic,
-		Key:       sarama.StringEncoder(t.Trigger.Template.Name),
 		Value:     sarama.ByteEncoder(payload),
 		Timestamp: time.Now().UTC(),
 	}
