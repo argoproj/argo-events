@@ -13,7 +13,7 @@
     
     
       
-        <title>Eventbus - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>EventBus - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Eventbus
+              EventBus
             
           </span>
         </div>
@@ -672,7 +672,7 @@
       
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Eventbus
+        EventBus
       </a>
       
     </li>
@@ -763,6 +763,20 @@
     <li class="md-nav__item">
       <a href="../../eventbus/jetstream/" class="md-nav__link">
         Jetstream
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../eventbus/kafka/" class="md-nav__link">
+        Kafka
       </a>
     </li>
   
@@ -2006,10 +2020,10 @@
 
 
 
-<h1 id="eventbus">Eventbus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h1>
-<p>The eventbus acts as the transport layer of Argo-Events by connecting the event-sources and sensors.</p>
-<p>Event-Sources publish the events while the sensors subscribe to the events to execute triggers.</p>
-<p>There are two implementations of the eventbus: <a href="https://docs.nats.io/legacy/stan/intro#:~:text=NATS%20Streaming%20is%20a%20data,with%20the%20core%20NATS%20platform.">NATS streaming</a> and now <a href="https://docs.nats.io/nats-concepts/jetstream">NATS Jetstream</a> (which will replace the former, which will be deprecated).</p>
+<h1 id="eventbus">EventBus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h1>
+<p>The EventBus acts as the transport layer of Argo-Events by connecting the EventSources and Sensors.</p>
+<p>EventSources publish the events while the Sensors subscribe to the events to execute triggers.</p>
+<p>There are three implementations of the EventBus: <a href="https://docs.nats.io/legacy/stan/intro#:~:text=NATS%20Streaming%20is%20a%20data,with%20the%20core%20NATS%20platform.">NATS</a> (deprecated), <a href="https://docs.nats.io/nats-concepts/jetstream">Jetstream</a>, and <a href="https://kafka.apache.org">Kafka</a>.</p>
 
               
             </article>

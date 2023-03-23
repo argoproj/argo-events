@@ -661,7 +661,7 @@
   
     <li class="md-nav__item">
       <a href="../../concepts/eventbus/" class="md-nav__link">
-        Eventbus
+        EventBus
       </a>
     </li>
   
@@ -751,6 +751,20 @@
     <li class="md-nav__item">
       <a href="../../eventbus/jetstream/" class="md-nav__link">
         Jetstream
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../eventbus/kafka/" class="md-nav__link">
+        Kafka
       </a>
     </li>
   
@@ -2143,9 +2157,10 @@ old one is gone.</p>
 <li>Resource</li>
 </ul>
 <h2 id="kubernetes-leader-election">Kubernetes Leader Election<a class="headerlink" href="#kubernetes-leader-election" title="Permanent link">&para;</a></h2>
-<p>By default, Argo Events will use NATS for the HA leader election. Alternatively,
-you can opt-in to a Kubernetes native leader election by specifying the following
-annotation.
+<p>By default, Argo Events will use NATS for the HA leader election except when
+using a Kafka Eventbus, in which case a kubernetes leader election will be used.
+If using a different EventBus you can opt-in to a Kubernetes native leader
+election by specifying the following annotation.
 <div class="highlight"><pre><span></span><code><span class="nt">annotations</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">events.argoproj.io/leader-election</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s</span>
 </code></pre></div></p>
