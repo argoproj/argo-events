@@ -427,12 +427,21 @@ func TestResourceReconcile(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, testSensor.Status.IsReady())
 
-		deployList := &appv1.DeploymentList{}
-		err = cl.List(ctx, deployList, &client.ListOptions{
-			Namespace: testNamespace,
-		})
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(deployList.Items))
+		t.Run("test resource reconcile with eventbus", func(t *testing.T) {
+			ctx := context.TODO()
+			cl := fake.NewClientBuilder().Build()
+			testBus.Status.MarkDeployed("test", "test")
+			testBus.Status.MarkConfigured()
+			err := cl.Create(ctx, testBus)
+			assert.Nil(t, err)
+			args := &AdaptorArgs{
+				Image:  testImage,
+				Sensor: sensorObj,
+				Labels: testLabels,
+			}
+			err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
+			assert.Nil(t, err)
+			assert.True(t, sensorObj.Status.IsReady())
 
 		// Verify configmap created in sensor namespace and contents accurate
 		cmList := &corev1.ConfigMapList{}
