@@ -8,4 +8,4 @@ spec:
     serviceAccountName: argo-events-sa
   calendar:
     example:
-      interval: 2s
+      interval: 10s

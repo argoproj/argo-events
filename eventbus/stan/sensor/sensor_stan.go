@@ -1,6 +1,7 @@
 package sensor
 
 import (
+	"context"
 	"crypto/rand"
 	"fmt"
 	"math/big"
@@ -27,7 +28,7 @@ func (n *SensorSTAN) Initialize() error {
 	return nil
 }
 
-func (n *SensorSTAN) Connect(triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) (eventbuscommon.TriggerConnection, error) {
+func (n *SensorSTAN) Connect(ctx context.Context, triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency, atLeastOnce bool) (eventbuscommon.TriggerConnection, error) {
 	// Generate clientID with hash code
 	hashKey := fmt.Sprintf("%s-%s-%s", n.sensorName, triggerName, dependencyExpression)
 	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(100)))

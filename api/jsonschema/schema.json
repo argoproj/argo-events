@@ -287,6 +287,9 @@
         "jetstream": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamConfig"
         },
+        "kafka": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaBus"
+        },
         "nats": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSConfig"
         }
@@ -376,6 +379,10 @@
       "properties": {
         "jetstream": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamBus"
+        },
+        "kafka": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaBus",
+          "description": "Kafka eventbus"
         },
         "nats": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSBus",
@@ -512,6 +519,53 @@
         "url": {
           "description": "JetStream (Nats) URL",
           "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.eventbus.v1alpha1.KafkaBus": {
+      "description": "KafkaBus holds the KafkaBus EventBus information",
+      "properties": {
+        "consumerGroup": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup",
+          "description": "Consumer group for kafka client"
+        },
+        "sasl": {
+          "$ref": "#/definitions/io.argoproj.common.SASLConfig",
+          "description": "SASL configuration for the kafka client"
+        },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig",
+          "description": "TLS configuration for the kafka client."
+        },
+        "topic": {
+          "description": "Topic name, defaults to {namespace_name}-{eventbus_name}",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL to kafka cluster, multiple URLs separated by comma",
+          "type": "string"
+        },
+        "version": {
+          "description": "Kafka version, sarama defaults to the oldest supported stable version",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup": {
+      "properties": {
+        "groupName": {
+          "description": "Consumer group name, defaults to {namespace_name}-{sensor_name}",
+          "type": "string"
+        },
+        "rebalanceStrategy": {
+          "description": "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
+          "type": "string"
+        },
+        "startOldest": {
+          "description": "When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false",
+          "type": "boolean"
         }
       },
       "type": "object"
