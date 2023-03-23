@@ -3,6 +3,8 @@ kind: EventSource
 metadata:
   name: e2e-durable-consumer
 spec:
+  template:
+    serviceAccountName: argo-events-sa
   webhook:
     example1:
       port: "12000"

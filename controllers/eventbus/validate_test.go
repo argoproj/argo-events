@@ -38,6 +38,18 @@ var (
 			},
 		},
 	}
+
+	testKafkaEventBus = &v1alpha1.EventBus{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test-ns",
+			Name:      common.DefaultEventBusName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			Kafka: &v1alpha1.KafkaBus{
+				URL: "127.0.0.1:9092",
+			},
+		},
+	}
 )
 
 func TestValidate(t *testing.T) {
@@ -48,6 +60,11 @@ func TestValidate(t *testing.T) {
 
 	t.Run("test good js eventbus", func(t *testing.T) {
 		err := ValidateEventBus(testJetStreamEventBus)
+		assert.NoError(t, err)
+	})
+
+	t.Run("test good kafka eventbus", func(t *testing.T) {
+		err := ValidateEventBus(testKafkaEventBus)
 		assert.NoError(t, err)
 	})
 
@@ -108,5 +125,13 @@ func TestValidate(t *testing.T) {
 		eb.Spec.JetStream.Replicas = nil
 		err = ValidateEventBus(eb)
 		assert.NoError(t, err)
+	})
+
+	t.Run("test kafka eventbus no URL", func(t *testing.T) {
+		eb := testKafkaEventBus.DeepCopy()
+		eb.Spec.Kafka.URL = ""
+		err := ValidateEventBus(eb)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "\"spec.kafka.url\" is missing")
 	})
 }

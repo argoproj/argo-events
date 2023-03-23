@@ -4,6 +4,8 @@ metadata:
   name: e2e-log-ha
 spec:
   replicas: 2
+  template:
+    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       eventSourceName: e2e-calendar-ha

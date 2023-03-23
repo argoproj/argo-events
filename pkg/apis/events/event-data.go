@@ -202,6 +202,8 @@ type GitLabEventData struct {
 type KafkaEventData struct {
 	// Topic refers to the Kafka topic
 	Topic string `json:"topic"`
+	// Key refers to the Kafka key
+	Key string `json:"key"`
 	// Partition refers to the Kafka partition
 	Partition int `json:"partition"`
 	// Body refers to the message value

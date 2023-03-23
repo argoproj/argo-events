@@ -113,7 +113,7 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       KUBECONFIG: /home/runner/.kubeconfig
     strategy:
@@ -123,6 +123,7 @@ jobs:
         include:
           - driver: stan
           - driver: jetstream
+          - driver: kafka
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
