@@ -4,6 +4,7 @@
 .env
 vendor/
 dist/
+venv/
 # delve debug binaries
 cmd/**/debug
 hack/**/debug

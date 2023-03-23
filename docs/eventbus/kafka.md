@@ -13,7 +13,7 @@ spec:
     topic: "example"  # optional
 ```
 
-See [here](https://github.com/argoproj/argo-events/blob/develop/api/event-bus.md#kafkabus)
+See [here](https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#kafkabus)
 for the full specification.
 
 ## Topics
@@ -48,5 +48,5 @@ Sensors that use a Kafka EventBus can scale horizontally. Unlike NATs and
 Jetstream, specifiying a replicas value greater than 1 will result in all
 Sensor pods actively processing events. However, an EventSource that uses a
 Kafka EventBus cannot be horizontally scaled and a
-[kubernetes leader election](/eventsources/ha/#kubernetes-leader-election) is
+[kubernetes leader election](https://argoproj.github.io/argo-events/eventsources/ha/#kubernetes-leader-election) is
 used.
