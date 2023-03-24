@@ -2143,7 +2143,7 @@
 </li>
 <li>
 <p>Create the sensor.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/special-workflow-trigger-shortened.yaml
 </code></pre></div>
 
 </li>
@@ -2169,9 +2169,9 @@ you want to define a generic trigger template in the sensor and populate the wor
 <p>You can learn more about trigger parameterization <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
 <h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
 <p>Trigger policy helps you determine the status of the triggered Argo workflow object and decide whether to stop or continue sensor.</p>
-<p>Take a look at <a href="https://argoproj.github.io/argo-events/triggers/k8s-object-trigger/#policy">K8s Trigger Policy</a>.</p>
+<p>Take a look at <a href="https://argoproj.github.io/argo-events/sensors/triggers/k8s-object-trigger/#policy">K8s Trigger Policy</a>.</p>
 <h2 id="argo-cli">Argo CLI<a class="headerlink" href="#argo-cli" title="Permanent link">&para;</a></h2>
-<p>Although the sensor defined above lets you trigger an Argo workflow, it doesn't have the ability to leverage the functionality
+<p>In addition to the example above, you can leverage other functionalities
 provided by the Argo CLI such as,</p>
 <ol>
 <li>Submit</li>
@@ -2183,7 +2183,7 @@ provided by the Argo CLI such as,</p>
 <li>Terminate</li>
 <li>Stop</li>
 </ol>
-<p>To make use of Argo CLI operations, The sensor provides the <code>argoWorkflow</code> trigger template,</p>
+<p>To make use of Argo CLI operations in <code>argoWorkflow</code> trigger template,</p>
 <div class="codehilite"><pre><span></span><code>    argoWorkflow:
       operation: submit  # submit, submit-from, resubmit, resume, retry, suspend, terminate or stop
 </code></pre></div>
