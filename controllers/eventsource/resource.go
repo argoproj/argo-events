@@ -177,11 +177,15 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	if err != nil {
 		return nil, fmt.Errorf("failed marshal eventsource spec")
 	}
-	encodedEventSourceSpec := base64.StdEncoding.EncodeToString(eventSourceBytes)
-	envVars := []corev1.EnvVar{
+	busConfigBytes, err := json.Marshal(eventBus.Status.Config)
+	if err != nil {
+		return nil, fmt.Errorf("failed marshal event bus config: %v", err)
+	}
+
+	env := []corev1.EnvVar{
 		{
 			Name:  common.EnvVarEventSourceObject,
-			Value: encodedEventSourceSpec,
+			Value: base64.StdEncoding.EncodeToString(eventSourceBytes),
 		},
 		{
 			Name:  common.EnvVarEventBusSubject,
@@ -195,33 +199,41 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Name:  common.EnvVarLeaderElection,
 			Value: args.EventSource.Annotations[common.AnnotationLeaderElection],
 		},
+		{
+			Name:  common.EnvVarEventBusConfig,
+			Value: base64.StdEncoding.EncodeToString(busConfigBytes),
+		},
 	}
 
-	busConfigBytes, err := json.Marshal(eventBus.Status.Config)
-	if err != nil {
-		return nil, fmt.Errorf("failed marshal event bus config: %v", err)
+	volumes := []corev1.Volume{
+		{
+			Name:         "tmp",
+			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		},
 	}
-	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
-	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
+
+	volumeMounts := []corev1.VolumeMount{
+		{
+			Name:      "tmp",
+			MountPath: "/tmp",
+		},
+	}
+
+	var secretObjs []interface{}
 	var accessSecret *corev1.SecretKeySelector
 	switch {
 	case eventBus.Status.Config.NATS != nil:
-		natsConf := eventBus.Status.Config.NATS
-		accessSecret = natsConf.AccessSecret
+		accessSecret = eventBus.Status.Config.NATS.AccessSecret
+		secretObjs = []interface{}{eventSourceCopy}
 	case eventBus.Status.Config.JetStream != nil:
-		jsConf := eventBus.Status.Config.JetStream
-		accessSecret = jsConf.AccessSecret
+		accessSecret = eventBus.Status.Config.JetStream.AccessSecret
+		secretObjs = []interface{}{eventSourceCopy}
+	case eventBus.Status.Config.Kafka != nil:
+		accessSecret = nil
+		secretObjs = []interface{}{eventSourceCopy, eventBus} // kafka requires secrets for sasl and tls
 	default:
 		return nil, fmt.Errorf("unsupported event bus")
 	}
-
-	volumes := deploymentSpec.Template.Spec.Volumes
-	volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
-	emptyDirVolName := "tmp"
-	volumes = append(volumes, corev1.Volume{
-		Name: emptyDirVolName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-	})
-	volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: emptyDirVolName, MountPath: "/tmp"})
 
 	if accessSecret != nil {
 		// Mount the secret as volume instead of using envFrom to gain the ability
@@ -240,42 +252,25 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 				},
 			},
 		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
-	}
-	deploymentSpec.Template.Spec.Volumes = volumes
-	deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
-
-	envs := deploymentSpec.Template.Spec.Containers[0].Env
-	envs = append(envs, envVars...)
-	deploymentSpec.Template.Spec.Containers[0].Env = envs
-
-	vols := []corev1.Volume{}
-	volMounts := []corev1.VolumeMount{}
-	oldVols := deploymentSpec.Template.Spec.Volumes
-	oldVolMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
-	if len(oldVols) > 0 {
-		vols = append(vols, oldVols...)
-	}
-	if len(oldVolMounts) > 0 {
-		volMounts = append(volMounts, oldVolMounts...)
-	}
-	volSecrets, volSecretMounts := common.VolumesFromSecretsOrConfigMaps(eventSourceCopy, common.SecretKeySelectorType)
-	if len(volSecrets) > 0 {
-		vols = append(vols, volSecrets...)
-	}
-	if len(volSecretMounts) > 0 {
-		volMounts = append(volMounts, volSecretMounts...)
-	}
-	volConfigMaps, volCofigMapMounts := common.VolumesFromSecretsOrConfigMaps(eventSourceCopy, common.ConfigMapKeySelectorType)
-	if len(volConfigMaps) > 0 {
-		vols = append(vols, volConfigMaps...)
-	}
-	if len(volCofigMapMounts) > 0 {
-		volMounts = append(volMounts, volCofigMapMounts...)
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "auth-volume",
+			MountPath: common.EventBusAuthFileMountPath,
+		})
 	}
 
-	deploymentSpec.Template.Spec.Volumes = vols
-	deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volMounts
+	// secrets
+	volSecrets, volSecretMounts := common.VolumesFromSecretsOrConfigMaps(common.SecretKeySelectorType, secretObjs...)
+	volumes = append(volumes, volSecrets...)
+	volumeMounts = append(volumeMounts, volSecretMounts...)
+
+	// config maps
+	volConfigMaps, volCofigMapMounts := common.VolumesFromSecretsOrConfigMaps(common.ConfigMapKeySelectorType, eventSourceCopy)
+	volumeMounts = append(volumeMounts, volCofigMapMounts...)
+	volumes = append(volumes, volConfigMaps...)
+
+	deploymentSpec.Template.Spec.Containers[0].Env = append(deploymentSpec.Template.Spec.Containers[0].Env, env...)
+	deploymentSpec.Template.Spec.Containers[0].VolumeMounts = append(deploymentSpec.Template.Spec.Containers[0].VolumeMounts, volumeMounts...)
+	deploymentSpec.Template.Spec.Volumes = append(deploymentSpec.Template.Spec.Volumes, volumes...)
 
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -288,6 +283,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	if err := controllerscommon.SetObjectMeta(args.EventSource, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
+
 	return deployment, nil
 }
 

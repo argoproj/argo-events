@@ -5,6 +5,7 @@ metadata:
 spec:
   replicas: 1
   template:
+    serviceAccountName: argo-events-sa
     container:
       env:
         - name: DEBUG_LOG
@@ -16,4 +17,11 @@ spec:
   triggers:
     - template:
         name: trigger-atmostonce
-        log: {}
+        http:
+          # Expect to fail
+          url: https://not-existing.com/
+          method: GET
+      retryStrategy:
+        steps: 100
+        duration: 500s
+        factor: 5.0

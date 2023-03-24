@@ -55,6 +55,7 @@ nav:
           - "eventbus/eventbus.md"
           - "eventbus/stan.md"
           - "eventbus/jetstream.md"
+          - "eventbus/kafka.md"
           - "eventbus/antiaffinity.md"
       - EventSources:
           - Setup:

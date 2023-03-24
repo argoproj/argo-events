@@ -277,13 +277,18 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 
 // VolumesFromSecretsOrConfigMaps builds volumes and volumeMounts spec based on
 // the obj and its children's secretKeyselector or configMapKeySelector
-func VolumesFromSecretsOrConfigMaps(obj interface{}, t reflect.Type) ([]v1.Volume, []v1.VolumeMount) {
+func VolumesFromSecretsOrConfigMaps(t reflect.Type, objs ...interface{}) ([]v1.Volume, []v1.VolumeMount) {
 	resultVolumes := []v1.Volume{}
 	resultMounts := []v1.VolumeMount{}
-	values := findTypeValues(obj, t)
+	values := []interface{}{}
+
+	for _, obj := range objs {
+		values = append(values, findTypeValues(obj, t)...)
+	}
 	if len(values) == 0 {
 		return resultVolumes, resultMounts
 	}
+
 	switch t {
 	case SecretKeySelectorType:
 		for _, v := range values {

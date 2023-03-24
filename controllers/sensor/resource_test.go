@@ -29,6 +29,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -123,6 +124,52 @@ var (
 			},
 		},
 	}
+
+	fakeEventBusJetstream = &eventbusv1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      common.DefaultEventBusName,
+		},
+		Spec: eventbusv1alpha1.EventBusSpec{
+			JetStream: &eventbusv1alpha1.JetStreamBus{
+				Version: "x.x.x",
+			},
+		},
+		Status: eventbusv1alpha1.EventBusStatus{
+			Config: eventbusv1alpha1.BusConfig{
+				JetStream: &eventbusv1alpha1.JetStreamConfig{
+					URL: "nats://xxxx",
+				},
+			},
+		},
+	}
+
+	fakeEventBusKafka = &eventbusv1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      common.DefaultEventBusName,
+		},
+		Spec: eventbusv1alpha1.EventBusSpec{
+			Kafka: &eventbusv1alpha1.KafkaBus{
+				URL: "localhost:9092",
+			},
+		},
+		Status: eventbusv1alpha1.EventBusStatus{
+			Config: eventbusv1alpha1.BusConfig{
+				Kafka: &eventbusv1alpha1.KafkaBus{
+					URL: "localhost:9092",
+				},
+			},
+		},
+	}
 )
 
 func Test_BuildDeployment(t *testing.T) {
@@ -166,6 +213,55 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.NotNil(t, deployment)
 		assert.Equal(t, int32(3), *deployment.Spec.RevisionHistoryLimit)
 	})
+
+	t.Run("test kafka eventbus secrets attached", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
+		}
+
+		// add secrets to kafka eventbus
+		testBus := fakeEventBusKafka.DeepCopy()
+		testBus.Spec.Kafka.TLS = &apicommon.TLSConfig{
+			CACertSecret: &corev1.SecretKeySelector{Key: "cert", LocalObjectReference: corev1.LocalObjectReference{Name: "tls-secret"}},
+		}
+		testBus.Spec.Kafka.SASL = &apicommon.SASLConfig{
+			Mechanism:      "SCRAM-SHA-512",
+			UserSecret:     &corev1.SecretKeySelector{Key: "username", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
+			PasswordSecret: &corev1.SecretKeySelector{Key: "password", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
+		}
+
+		deployment, err := buildDeployment(args, testBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+
+		hasSASLSecretVolume := false
+		hasSASLSecretVolumeMount := false
+		hasTLSSecretVolume := false
+		hasTLSSecretVolumeMount := false
+		for _, volume := range deployment.Spec.Template.Spec.Volumes {
+			if volume.Name == "secret-sasl-secret" {
+				hasSASLSecretVolume = true
+			}
+			if volume.Name == "secret-tls-secret" {
+				hasTLSSecretVolume = true
+			}
+		}
+		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+			if volumeMount.Name == "secret-sasl-secret" {
+				hasSASLSecretVolumeMount = true
+			}
+			if volumeMount.Name == "secret-tls-secret" {
+				hasTLSSecretVolumeMount = true
+			}
+		}
+
+		assert.True(t, hasSASLSecretVolume)
+		assert.True(t, hasSASLSecretVolumeMount)
+		assert.True(t, hasTLSSecretVolume)
+		assert.True(t, hasTLSSecretVolumeMount)
+	})
 }
 
 func TestResourceReconcile(t *testing.T) {
@@ -181,35 +277,38 @@ func TestResourceReconcile(t *testing.T) {
 		assert.False(t, sensorObj.Status.IsReady())
 	})
 
-	t.Run("test resource reconcile with eventbus", func(t *testing.T) {
-		ctx := context.TODO()
-		cl := fake.NewClientBuilder().Build()
-		testBus := fakeEventBus.DeepCopy()
-		testBus.Status.MarkDeployed("test", "test")
-		testBus.Status.MarkConfigured()
-		err := cl.Create(ctx, testBus)
-		assert.Nil(t, err)
-		args := &AdaptorArgs{
-			Image:  testImage,
-			Sensor: sensorObj,
-			Labels: testLabels,
-		}
-		err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
-		assert.Nil(t, err)
-		assert.True(t, sensorObj.Status.IsReady())
+	for _, eb := range []*eventbusv1alpha1.EventBus{fakeEventBus, fakeEventBusJetstream, fakeEventBusKafka} {
+		testBus := eb.DeepCopy()
 
-		deployList := &appv1.DeploymentList{}
-		err = cl.List(ctx, deployList, &client.ListOptions{
-			Namespace: testNamespace,
-		})
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(deployList.Items))
+		t.Run("test resource reconcile with eventbus", func(t *testing.T) {
+			ctx := context.TODO()
+			cl := fake.NewClientBuilder().Build()
+			testBus.Status.MarkDeployed("test", "test")
+			testBus.Status.MarkConfigured()
+			err := cl.Create(ctx, testBus)
+			assert.Nil(t, err)
+			args := &AdaptorArgs{
+				Image:  testImage,
+				Sensor: sensorObj,
+				Labels: testLabels,
+			}
+			err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
+			assert.Nil(t, err)
+			assert.True(t, sensorObj.Status.IsReady())
 
-		svcList := &corev1.ServiceList{}
-		err = cl.List(ctx, svcList, &client.ListOptions{
-			Namespace: testNamespace,
+			deployList := &appv1.DeploymentList{}
+			err = cl.List(ctx, deployList, &client.ListOptions{
+				Namespace: testNamespace,
+			})
+			assert.NoError(t, err)
+			assert.Equal(t, 1, len(deployList.Items))
+
+			svcList := &corev1.ServiceList{}
+			err = cl.List(ctx, svcList, &client.ListOptions{
+				Namespace: testNamespace,
+			})
+			assert.NoError(t, err)
+			assert.Equal(t, 0, len(svcList.Items))
 		})
-		assert.NoError(t, err)
-		assert.Equal(t, 0, len(svcList.Items))
-	})
+	}
 }
