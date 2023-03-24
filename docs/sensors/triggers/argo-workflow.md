@@ -60,6 +60,17 @@ Take a look at [K8s Trigger Policy](https://argoproj.github.io/argo-events/senso
 In addition to the example above, you can leverage other functionalities
 provided by the Argo CLI such as,
 
+1. Submit
+1. Submit --from
+1. Resubmit
+1. Resume
+1. Retry
+1. Suspend
+1. Terminate
+1. Stop
+
+To make use of Argo CLI operations in `argoWorkflow` trigger template,
+
         argoWorkflow:
           operation: submit  # submit, submit-from, resubmit, resume, retry, suspend, terminate or stop
 
