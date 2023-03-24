@@ -2102,7 +2102,7 @@ EventBus.</p>
 <span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka:9092</span><span class="w">   </span><span class="c1"># must be deployed independently</span>
 <span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example&quot;</span><span class="w">  </span><span class="c1"># optional</span>
 </code></pre></div>
-<p>See <a href="https://github.com/argoproj/argo-events/blob/develop/api/event-bus.md#kafkabus">here</a>
+<p>See <a href="https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#kafkabus">here</a>
 for the full specification.</p>
 <h2 id="topics">Topics<a class="headerlink" href="#topics" title="Permanent link">&para;</a></h2>
 <p>The Kafka EventBus requires one event topic and two additional topics (trigger
@@ -2163,7 +2163,7 @@ named as follows.</p>
 Jetstream, specifiying a replicas value greater than 1 will result in all
 Sensor pods actively processing events. However, an EventSource that uses a
 Kafka EventBus cannot be horizontally scaled and a
-<a href="/eventsources/ha/#kubernetes-leader-election">kubernetes leader election</a> is
+<a href="https://argoproj.github.io/argo-events/eventsources/ha/#kubernetes-leader-election">kubernetes leader election</a> is
 used.</p>
 
               
