@@ -12,8 +12,8 @@ spec:
   triggers:
     - template:
         name: webhook-workflow-trigger
-        k8s:
-          operation: create
+        argoWorkflow:
+          operation: submit
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
