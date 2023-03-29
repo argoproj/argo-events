@@ -112,6 +112,6 @@ named as follows.
 Sensors that use a Kafka EventBus can scale horizontally. Specifiying replicas
 greater than one will result in all Sensor pods actively processing events.
 However, an EventSource that uses a Kafka EventBus cannot necessarily be
-horizontally scaled in an active-active manner, see [EventSource HA](https://argoproj.github.io/argo-events/eventsources/ha)
-for more details. In an active-passive scenario a [Kubernetes leader election](https://argoproj.github.io/argo-events/eventsources/ha/#kubernetes-leader-election)
+horizontally scaled in an active-active manner, see [EventSource HA](../eventsources/ha.md)
+for more details. In an active-passive scenario a [Kubernetes leader election](../eventsources/ha.md#kubernetes-leader-election)
 is used.
