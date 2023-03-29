@@ -3,6 +3,8 @@ kind: EventSource
 metadata:
   name: e2e-test-metrics-webhook
 spec:
+  template:
+    serviceAccountName: argo-events-sa
   webhook:
     example:
       port: "12000"

@@ -196,6 +196,29 @@
       },
       "type": "object"
     },
+    "io.argoproj.common.SchemaRegistryConfig": {
+      "description": "SchemaRegistryConfig refers to configuration for a client",
+      "properties": {
+        "auth": {
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth",
+          "description": "SchemaRegistry - basic authentication"
+        },
+        "schemaId": {
+          "description": "Schema ID",
+          "format": "int32",
+          "type": "integer"
+        },
+        "url": {
+          "description": "Schema Registry URL.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "schemaId"
+      ],
+      "type": "object"
+    },
     "io.argoproj.common.SecureHeader": {
       "description": "SecureHeader refers to HTTP Headers with auth tokens as values",
       "properties": {
@@ -263,6 +286,9 @@
       "properties": {
         "jetstream": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamConfig"
+        },
+        "kafka": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaBus"
         },
         "nats": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSConfig"
@@ -353,6 +379,10 @@
       "properties": {
         "jetstream": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamBus"
+        },
+        "kafka": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaBus",
+          "description": "Kafka eventbus"
         },
         "nats": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSBus",
@@ -489,6 +519,53 @@
         "url": {
           "description": "JetStream (Nats) URL",
           "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.eventbus.v1alpha1.KafkaBus": {
+      "description": "KafkaBus holds the KafkaBus EventBus information",
+      "properties": {
+        "consumerGroup": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup",
+          "description": "Consumer group for kafka client"
+        },
+        "sasl": {
+          "$ref": "#/definitions/io.argoproj.common.SASLConfig",
+          "description": "SASL configuration for the kafka client"
+        },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig",
+          "description": "TLS configuration for the kafka client."
+        },
+        "topic": {
+          "description": "Topic name, defaults to {namespace_name}-{eventbus_name}",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL to kafka cluster, multiple URLs separated by comma",
+          "type": "string"
+        },
+        "version": {
+          "description": "Kafka version, sarama defaults to the oldest supported stable version",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.eventbus.v1alpha1.KafkaConsumerGroup": {
+      "properties": {
+        "groupName": {
+          "description": "Consumer group name, defaults to {namespace_name}-{sensor_name}",
+          "type": "string"
+        },
+        "rebalanceStrategy": {
+          "description": "Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.",
+          "type": "string"
+        },
+        "startOldest": {
+          "description": "When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false",
+          "type": "boolean"
         }
       },
       "type": "object"
@@ -1752,6 +1829,13 @@
           "description": "GitlabBaseURL is the base URL for API requests to a custom endpoint",
           "type": "string"
         },
+        "groups": {
+          "description": "List of group IDs or group name like \"test\". Group level hook available in Premium and Ultimate Gitlab.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -1764,7 +1848,7 @@
           "type": "string"
         },
         "projects": {
-          "description": "List of project IDs or project namespace paths like \"whynowy/test\"",
+          "description": "List of project IDs or project namespace paths like \"whynowy/test\". Projects and groups cannot be empty at the same time.",
           "items": {
             "type": "string"
           },
@@ -3582,12 +3666,12 @@
           "type": "array"
         },
         "partition": {
-          "description": "Partition to write data to.",
+          "description": "DEPRECATED",
           "format": "int32",
           "type": "integer"
         },
         "partitioningKey": {
-          "description": "The partitioning key for the messages put on the Kafka topic. Defaults to broker url.",
+          "description": "The partitioning key for the messages put on the Kafka topic.",
           "type": "string"
         },
         "payload": {
@@ -3605,6 +3689,10 @@
         "sasl": {
           "$ref": "#/definitions/io.argoproj.common.SASLConfig",
           "description": "SASL configuration for the kafka client"
+        },
+        "schemaRegistry": {
+          "$ref": "#/definitions/io.argoproj.common.SchemaRegistryConfig",
+          "description": "Schema Registry configuration to producer message with avro format"
         },
         "tls": {
           "$ref": "#/definitions/io.argoproj.common.TLSConfig",
@@ -3626,7 +3714,6 @@
       "required": [
         "url",
         "topic",
-        "partition",
         "payload"
       ],
       "type": "object"
@@ -3940,11 +4027,45 @@
       },
       "type": "object"
     },
+    "io.argoproj.sensor.v1alpha1.SlackSender": {
+      "properties": {
+        "icon": {
+          "description": "Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png",
+          "type": "string"
+        },
+        "username": {
+          "description": "Username is the Slack application's username",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "io.argoproj.sensor.v1alpha1.SlackThread": {
+      "properties": {
+        "broadcastMessageToChannel": {
+          "description": "BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel",
+          "type": "boolean"
+        },
+        "messageAggregationKey": {
+          "description": "MessageAggregationKey allows to aggregate the messages to a thread by some key.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "io.argoproj.sensor.v1alpha1.SlackTrigger": {
       "description": "SlackTrigger refers to the specification of the slack notification trigger.",
       "properties": {
+        "attachments": {
+          "description": "Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .",
+          "type": "string"
+        },
+        "blocks": {
+          "description": "Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .",
+          "type": "string"
+        },
         "channel": {
-          "description": "Channel refers to which Slack channel to send slack message.",
+          "description": "Channel refers to which Slack channel to send Slack message.",
           "type": "string"
         },
         "message": {
@@ -3958,9 +4079,17 @@
           },
           "type": "array"
         },
+        "sender": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackSender",
+          "description": "Sender refers to additional configuration of the Slack application that sends the message."
+        },
         "slackToken": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "SlackToken refers to the Kubernetes secret that holds the slack token required to send messages."
+        },
+        "thread": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SlackThread",
+          "description": "Thread refers to additional options for sending messages to a Slack thread."
         }
       },
       "type": "object"
@@ -4098,6 +4227,10 @@
     "io.argoproj.sensor.v1alpha1.Trigger": {
       "description": "Trigger is an action taken, output produced, an event created, a message sent",
       "properties": {
+        "atLeastOnce": {
+          "description": "AtLeastOnce determines the trigger execution semantics. Defaults to false. Trigger execution will use at-most-once semantics. If set to true, Trigger execution will switch to at-least-once semantics.",
+          "type": "boolean"
+        },
         "parameters": {
           "description": "Parameters is the list of parameters applied to the trigger template definition",
           "items": {

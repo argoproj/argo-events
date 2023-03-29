@@ -1,8 +1,10 @@
 .vscode/
 .idea/
 .DS_Store
+.env
 vendor/
 dist/
+venv/
 # delve debug binaries
 cmd/**/debug
 hack/**/debug
@@ -12,3 +14,4 @@ debug.test
 *.out
 site/
 /go-diagrams/
+argo-events

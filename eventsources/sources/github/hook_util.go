@@ -1,7 +1,7 @@
 package github
 
 import (
-	gh "github.com/google/go-github/v31/github"
+	gh "github.com/google/go-github/v50/github"
 
 	"github.com/argoproj/argo-events/common"
 )

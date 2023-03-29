@@ -330,6 +330,12 @@ type Trigger struct {
 	// Rate limit, default unit is Second
 	// +optional
 	RateLimit *RateLimit `json:"rateLimit,omitempty" protobuf:"bytes,5,opt,name=rateLimit"`
+	// AtLeastOnce determines the trigger execution semantics.
+	// Defaults to false. Trigger execution will use at-most-once semantics.
+	// If set to true, Trigger execution will switch to at-least-once semantics.
+	// +kubebuilder:default=false
+	// +optional
+	AtLeastOnce bool `json:"atLeastOnce,omitempty" protobuf:"varint,6,opt,name=atLeastOnce"`
 }
 
 type RateLimiteUnit string
@@ -568,7 +574,8 @@ type KafkaTrigger struct {
 	// Name of the topic.
 	// More info at https://kafka.apache.org/documentation/#intro_topics
 	Topic string `json:"topic" protobuf:"bytes,2,opt,name=topic"`
-	// Partition to write data to.
+	// +optional
+	// DEPRECATED
 	Partition int32 `json:"partition" protobuf:"varint,3,opt,name=partition"`
 	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
@@ -591,15 +598,17 @@ type KafkaTrigger struct {
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
 	// The partitioning key for the messages put on the Kafka topic.
-	// Defaults to broker url.
 	// +optional.
-	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
+	PartitioningKey *string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
 	Version string `json:"version,omitempty" protobuf:"bytes,11,opt,name=version"`
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,12,opt,name=sasl"`
+	// Schema Registry configuration to producer message with avro format
+	// +optional
+	SchemaRegistry *apicommon.SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,13,opt,name=schemaRegistry"`
 }
 
 // PulsarTrigger refers to the specification of the Pulsar trigger.
@@ -677,12 +686,42 @@ type SlackTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
 	SlackToken *corev1.SecretKeySelector `json:"slackToken,omitempty" protobuf:"bytes,2,opt,name=slackToken"`
-	// Channel refers to which Slack channel to send slack message.
+	// Channel refers to which Slack channel to send Slack message.
 	// +optional
 	Channel string `json:"channel,omitempty" protobuf:"bytes,3,opt,name=channel"`
 	// Message refers to the message to send to the Slack channel.
 	// +optional
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
+	// Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .
+	// +optional
+	Attachments string `json:"attachments,omitempty" protobuf:"bytes,5,opt,name=attachments"`
+	// Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .
+	// +optional
+	Blocks string `json:"blocks,omitempty" protobuf:"bytes,6,opt,name=blocks"`
+	// Thread refers to additional options for sending messages to a Slack thread.
+	// +optional
+	Thread SlackThread `json:"thread,omitempty" protobuf:"bytes,7,opt,name=thread"`
+	// Sender refers to additional configuration of the Slack application that sends the message.
+	// +optional
+	Sender SlackSender `json:"sender,omitempty" protobuf:"bytes,8,opt,name=sender"`
+}
+
+type SlackSender struct {
+	// Username is the Slack application's username
+	// +optional
+	Username string `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
+	// Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png
+	// +optional
+	Icon string `json:"icon,omitempty" protobuf:"bytes,2,opt,name=icon"`
+}
+
+type SlackThread struct {
+	// MessageAggregationKey allows to aggregate the messages to a thread by some key.
+	// +optional
+	MessageAggregationKey string `json:"messageAggregationKey,omitempty" protobuf:"bytes,1,opt,name=messageAggregationKey"`
+	// BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel
+	// +optional
+	BroadcastMessageToChannel bool `json:"broadcastMessageToChannel,omitempty" protobuf:"bytes,2,opt,name=broadcastMessageToChannel"`
 }
 
 // OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.

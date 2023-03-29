@@ -460,7 +460,8 @@ message KafkaTrigger {
   // More info at https://kafka.apache.org/documentation/#intro_topics
   optional string topic = 2;
 
-  // Partition to write data to.
+  // +optional
+  // DEPRECATED
   optional int32 partition = 3;
 
   // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
@@ -490,7 +491,6 @@ message KafkaTrigger {
   repeated TriggerParameter payload = 9;
 
   // The partitioning key for the messages put on the Kafka topic.
-  // Defaults to broker url.
   // +optional.
   optional string partitioningKey = 10;
 
@@ -501,6 +501,10 @@ message KafkaTrigger {
   // SASL configuration for the kafka client
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 12;
+
+  // Schema Registry configuration to producer message with avro format
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.SchemaRegistryConfig schemaRegistry = 13;
 }
 
 message LogTrigger {
@@ -677,6 +681,26 @@ message SensorStatus {
   optional github.com.argoproj.argo_events.pkg.apis.common.Status status = 1;
 }
 
+message SlackSender {
+  // Username is the Slack application's username
+  // +optional
+  optional string username = 1;
+
+  // Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png
+  // +optional
+  optional string icon = 2;
+}
+
+message SlackThread {
+  // MessageAggregationKey allows to aggregate the messages to a thread by some key.
+  // +optional
+  optional string messageAggregationKey = 1;
+
+  // BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel
+  // +optional
+  optional bool broadcastMessageToChannel = 2;
+}
+
 // SlackTrigger refers to the specification of the slack notification trigger.
 message SlackTrigger {
   // Parameters is the list of key-value extracted from event's payload that are applied to
@@ -687,13 +711,29 @@ message SlackTrigger {
   // SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
   optional k8s.io.api.core.v1.SecretKeySelector slackToken = 2;
 
-  // Channel refers to which Slack channel to send slack message.
+  // Channel refers to which Slack channel to send Slack message.
   // +optional
   optional string channel = 3;
 
   // Message refers to the message to send to the Slack channel.
   // +optional
   optional string message = 4;
+
+  // Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .
+  // +optional
+  optional string attachments = 5;
+
+  // Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .
+  // +optional
+  optional string blocks = 6;
+
+  // Thread refers to additional options for sending messages to a Slack thread.
+  // +optional
+  optional SlackThread thread = 7;
+
+  // Sender refers to additional configuration of the Slack application that sends the message.
+  // +optional
+  optional SlackSender sender = 8;
 }
 
 // StandardK8STrigger is the standard Kubernetes resource trigger
@@ -839,6 +879,13 @@ message Trigger {
   // Rate limit, default unit is Second
   // +optional
   optional RateLimit rateLimit = 5;
+
+  // AtLeastOnce determines the trigger execution semantics.
+  // Defaults to false. Trigger execution will use at-most-once semantics.
+  // If set to true, Trigger execution will switch to at-least-once semantics.
+  // +kubebuilder:default=false
+  // +optional
+  optional bool atLeastOnce = 6;
 }
 
 // TriggerParameter indicates a passed parameter to a service template

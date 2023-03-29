@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: e2e-atmostonce-sensor
+spec:
+  replicas: 1
+  template:
+    serviceAccountName: argo-events-sa
+    container:
+      env:
+        - name: DEBUG_LOG
+          value: "true"
+  dependencies:
+    - name: test-dep-1
+      eventSourceName: e2e-webhook
+      eventName: example
+  triggers:
+    - template:
+        name: trigger-atmostonce
+        log: {}

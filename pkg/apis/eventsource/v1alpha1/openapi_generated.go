@@ -2143,7 +2143,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"projects": {
 						SchemaProps: spec.SchemaProps{
-							Description: "List of project IDs or project namespace paths like \"whynowy/test\"",
+							Description: "List of project IDs or project namespace paths like \"whynowy/test\". Projects and groups cannot be empty at the same time.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -2166,6 +2166,21 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"groups": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of group IDs or group name like \"test\". Group level hook available in Premium and Ultimate Gitlab.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
 						},
 					},
 				},

@@ -74,7 +74,8 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
 	if r.needsUpdate(sensor, sensorCopy) {
-		if err := r.client.Update(ctx, sensorCopy); err != nil {
+		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
+		if err := r.client.Update(ctx, sensorCopy.DeepCopy()); err != nil {
 			return reconcile.Result{}, err
 		}
 	}

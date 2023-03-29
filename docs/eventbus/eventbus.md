@@ -7,7 +7,9 @@
 EventBus is a Kubernetes
 [Custom Resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 which is used for event transmission from EventSources to Sensors. Currently,
-EventBus is backed by [NATS](https://docs.nats.io/), including both their NATS Streaming service and their newer Jetstream service. In the future, this can be expanded to support other technologies as well.
+EventBus is backed by [NATS](https://docs.nats.io/), including both their NATS
+Streaming service, their newer Jetstream service, and Kafka. In the future,
+this can be expanded to support other technologies as well.
 
 EventBus is namespaced; an EventBus object is required in a namespace to make
 EventSource and Sensor work.

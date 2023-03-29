@@ -30,7 +30,7 @@ Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-wor
 
 1. Create the sensor.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/special-workflow-trigger-shortened.yaml
 
 1. Let's expose the webhook event-source pod using `port-forward` so that we can make a request to it.
   
@@ -53,23 +53,23 @@ You can learn more about trigger parameterization [here](https://argoproj.github
 
 Trigger policy helps you determine the status of the triggered Argo workflow object and decide whether to stop or continue sensor.
 
-Take a look at [K8s Trigger Policy](https://argoproj.github.io/argo-events/triggers/k8s-object-trigger/#policy).
+Take a look at [K8s Trigger Policy](https://argoproj.github.io/argo-events/sensors/triggers/k8s-object-trigger/#policy).
 
 ## Argo CLI
 
-Although the sensor defined above lets you trigger an Argo workflow, it doesn't have the ability to leverage the functionality
+In addition to the example above, you can leverage other functionalities
 provided by the Argo CLI such as,
 
 1. Submit
-2. Submit --from
-3. Resubmit
-4. Resume
-5. Retry
-6. Suspend
-7. Terminate
-8. Stop
+1. Submit --from
+1. Resubmit
+1. Resume
+1. Retry
+1. Suspend
+1. Terminate
+1. Stop
 
-To make use of Argo CLI operations, The sensor provides the `argoWorkflow` trigger template,
+To make use of Argo CLI operations in `argoWorkflow` trigger template,
 
         argoWorkflow:
           operation: submit  # submit, submit-from, resubmit, resume, retry, suspend, terminate or stop

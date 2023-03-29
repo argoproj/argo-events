@@ -17,10 +17,14 @@ package kafka
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/hamba/avro"
+	"github.com/riferrei/srclient"
 
 	"github.com/Shopify/sarama"
 	"go.uber.org/zap"
@@ -42,6 +46,8 @@ type KafkaTrigger struct {
 	Producer sarama.AsyncProducer
 	// Logger to log stuff
 	Logger *zap.SugaredLogger
+	// Avro schema of message
+	schema *srclient.Schema
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
@@ -50,6 +56,8 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
 
 	producer, ok := kafkaProducers[trigger.Template.Name]
+	var schema *srclient.Schema
+
 	if !ok {
 		var err error
 		config := sarama.NewConfig()
@@ -75,13 +83,13 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.UserSecret)
 			if err != nil {
-				return nil, fmt.Errorf("Error getting user value from secret, %w", err)
+				return nil, fmt.Errorf("error getting user value from secret, %w", err)
 			}
 			config.Net.SASL.User = user
 
 			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.PasswordSecret)
 			if err != nil {
-				return nil, fmt.Errorf("Error getting password value from secret, %w", err)
+				return nil, fmt.Errorf("error getting password value from secret, %w", err)
 			}
 			config.Net.SASL.Password = password
 		}
@@ -128,11 +136,20 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		kafkaProducers[trigger.Template.Name] = producer
 	}
 
+	if kafkatrigger.SchemaRegistry != nil {
+		var err error
+		schema, err = getSchemaFromRegistry(kafkatrigger.SchemaRegistry)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &KafkaTrigger{
 		Sensor:   sensor,
 		Trigger:  trigger,
 		Producer: producer,
 		Logger:   triggerLogger,
+		schema:   schema,
 	}, nil
 }
 
@@ -189,20 +206,27 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, err
 	}
 
-	pk := trigger.PartitioningKey
-	if pk == "" {
-		pk = trigger.URL
+	// Producer with avro schema
+	if t.schema != nil {
+		payload, err = avroParser(t.schema.Schema(), t.schema.ID(), payload)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	t.Producer.Input() <- &sarama.ProducerMessage{
+	msg := &sarama.ProducerMessage{
 		Topic:     trigger.Topic,
-		Key:       sarama.StringEncoder(pk),
 		Value:     sarama.ByteEncoder(payload),
-		Partition: trigger.Partition,
 		Timestamp: time.Now().UTC(),
 	}
 
-	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic), zap.Any("partition", trigger.Partition))
+	if trigger.PartitioningKey != nil {
+		msg.Key = sarama.StringEncoder(*trigger.PartitioningKey)
+	}
+
+	t.Producer.Input() <- msg
+
+	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic))
 
 	return nil, nil
 }
@@ -210,4 +234,46 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 // ApplyPolicy applies policy on the trigger
 func (t *KafkaTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
 	return nil
+}
+
+func avroParser(schema string, schemaID int, payload []byte) ([]byte, error) {
+	var recordValue []byte
+	var payloadNative map[string]interface{}
+
+	schemaAvro, err := avro.Parse(schema)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(payload, &payloadNative)
+	if err != nil {
+		return nil, err
+	}
+	avroNative, err := avro.Marshal(schemaAvro, payloadNative)
+	if err != nil {
+		return nil, err
+	}
+
+	schemaIDBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(schemaIDBytes, uint32(schemaID))
+	recordValue = append(recordValue, byte(0))
+	recordValue = append(recordValue, schemaIDBytes...)
+	recordValue = append(recordValue, avroNative...)
+
+	return recordValue, nil
+}
+
+// getSchemaFromRegistry returns a schema from registry.
+func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
+	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
+	if sr.Auth.Username != nil && sr.Auth.Password != nil {
+		user, _ := common.GetSecretFromVolume(sr.Auth.Username)
+		password, _ := common.GetSecretFromVolume(sr.Auth.Password)
+		schemaRegistryClient.SetCredentials(user, password)
+	}
+	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaID))
+	if err != nil {
+		return nil, fmt.Errorf("error getting the schema with id '%d' %s", sr.SchemaID, err)
+	}
+	return schema, nil
 }

@@ -18,8 +18,9 @@ import (
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	apitypes "k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
@@ -54,20 +55,22 @@ const (
 )
 
 type jetStreamInstaller struct {
-	client   client.Client
-	eventBus *v1alpha1.EventBus
-	config   *controllers.GlobalConfig
-	labels   map[string]string
-	logger   *zap.SugaredLogger
+	client     client.Client
+	eventBus   *v1alpha1.EventBus
+	kubeClient kubernetes.Interface
+	config     *controllers.GlobalConfig
+	labels     map[string]string
+	logger     *zap.SugaredLogger
 }
 
-func NewJetStreamInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, logger *zap.SugaredLogger) Installer {
+func NewJetStreamInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, kubeClient kubernetes.Interface, logger *zap.SugaredLogger) Installer {
 	return &jetStreamInstaller{
-		client:   client,
-		eventBus: eventBus,
-		config:   config,
-		labels:   labels,
-		logger:   logger.With("eventbus", eventBus.Name),
+		client:     client,
+		kubeClient: kubeClient,
+		eventBus:   eventBus,
+		config:     config,
+		labels:     labels,
+		logger:     logger.With("eventbus", eventBus.Name),
 	}
 }
 
@@ -193,7 +196,7 @@ func (r *jetStreamInstaller) createStatefulSet(ctx context.Context) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: r.eventBus.Namespace,
 			Name:      generateJetStreamStatefulSetName(r.eventBus),
-			Labels:    r.labels,
+			Labels:    r.mergeEventBusLabels(r.labels),
 			Annotations: map[string]string{
 				common.AnnotationResourceSpecHash: hash,
 			},
@@ -488,12 +491,25 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 	return spec
 }
 
+func (r *jetStreamInstaller) getSecret(ctx context.Context, name string) (*corev1.Secret, error) {
+	sl, err := r.kubeClient.CoreV1().Secrets(r.eventBus.Namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	for _, s := range sl.Items {
+		if s.Name == name && metav1.IsControlledBy(&s, r.eventBus) {
+			return &s, nil
+		}
+	}
+	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
+}
+
 func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 	// first check to see if the secrets already exist
 	oldServerObjExisting, oldClientObjExisting := true, true
 
-	oldSObj := &corev1.Secret{}
-	if err := r.client.Get(ctx, apitypes.NamespacedName{Namespace: r.eventBus.Namespace, Name: generateJetStreamServerSecretName(r.eventBus)}, oldSObj); err != nil {
+	oldSObj, err := r.getSecret(ctx, generateJetStreamServerSecretName(r.eventBus))
+	if err != nil {
 		if apierrors.IsNotFound(err) {
 			oldServerObjExisting = false
 		} else {
@@ -501,8 +517,8 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 		}
 	}
 
-	oldCObj := &corev1.Secret{}
-	if err := r.client.Get(ctx, apitypes.NamespacedName{Namespace: r.eventBus.Namespace, Name: generateJetStreamClientAuthSecretName(r.eventBus)}, oldCObj); err != nil {
+	oldCObj, err := r.getSecret(ctx, generateJetStreamClientAuthSecretName(r.eventBus))
+	if err != nil {
 		if apierrors.IsNotFound(err) {
 			oldClientObjExisting = false
 		} else {
@@ -734,6 +750,19 @@ func (r *jetStreamInstaller) getPVCs(ctx context.Context) ([]corev1.PersistentVo
 
 func generateJetStreamServerSecretName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-js-server", eventBus.Name)
+}
+
+func (r *jetStreamInstaller) mergeEventBusLabels(given map[string]string) map[string]string {
+	result := map[string]string{}
+	if r.eventBus.Labels != nil {
+		for k, v := range r.eventBus.Labels {
+			result[k] = v
+		}
+	}
+	for k, v := range given {
+		result[k] = v
+	}
+	return result
 }
 
 func generateJetStreamClientAuthSecretName(eventBus *v1alpha1.EventBus) string {

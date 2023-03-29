@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -26,16 +27,17 @@ const (
 )
 
 type reconciler struct {
-	client client.Client
-	scheme *runtime.Scheme
+	client     client.Client
+	kubeClient kubernetes.Interface
+	scheme     *runtime.Scheme
 
 	config *controllers.GlobalConfig
 	logger *zap.SugaredLogger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, config *controllers.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, config: config, logger: logger}
+func NewReconciler(client client.Client, kubeClient kubernetes.Interface, scheme *runtime.Scheme, config *controllers.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, config: config, kubeClient: kubeClient, logger: logger}
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -56,7 +58,8 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
 	if r.needsUpdate(eventBus, busCopy) {
-		if err := r.client.Update(ctx, busCopy); err != nil {
+		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
+		if err := r.client.Update(ctx, busCopy.DeepCopy()); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
@@ -73,7 +76,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 		log.Info("deleting eventbus")
 		if controllerutil.ContainsFinalizer(eventBus, finalizerName) {
 			// Finalizer logic should be added here.
-			if err := installer.Uninstall(ctx, eventBus, r.client, r.config, log); err != nil {
+			if err := installer.Uninstall(ctx, eventBus, r.client, r.kubeClient, r.config, log); err != nil {
 				log.Errorw("failed to uninstall", zap.Error(err))
 				return err
 			}
@@ -91,7 +94,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	} else {
 		eventBus.Status.MarkConfigured()
 	}
-	return installer.Install(ctx, eventBus, r.client, r.config, log)
+	return installer.Install(ctx, eventBus, r.client, r.kubeClient, r.config, log)
 }
 
 func (r *reconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {

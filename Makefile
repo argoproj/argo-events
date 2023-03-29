@@ -77,7 +77,7 @@ image-linux-%: dist/$(BINARY_NAME)-linux-%
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$*; fi
 
 image-multi: set-qemu dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-amd64.gz
-	docker buildx build --tag $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --target $(BINARY_NAME) --platform linux/amd64,linux/arm64 --file ./Dockerfile ${PUSH_OPTION} .
+	docker buildx build --sbom=false --provenance=false --tag $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --target $(BINARY_NAME) --platform linux/amd64,linux/arm64 --file ./Dockerfile ${PUSH_OPTION} .
 
 set-qemu:
 	docker pull tonistiigi/binfmt:latest
@@ -87,7 +87,14 @@ test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
 test-functional:
-	go test -v -timeout 15m -count 1 --tags functional -p 1 ./test/e2e
+ifeq ($(EventBusDriver),kafka)
+	kubectl -n argo-events apply -k test/manifests/kafka
+	kubectl -n argo-events wait -l statefulset.kubernetes.io/pod-name=kafka-0 --for=condition=ready pod --timeout=60s
+endif
+	go test -v -timeout 20m -count 1 --tags functional -p 1 ./test/e2e
+ifeq ($(EventBusDriver),kafka)
+	kubectl -n argo-events delete -k test/manifests/kafka
+endif
 
 # to run just one of the functional e2e tests by name (i.e. 'make TestMetricsWithWebhook'):
 Test%:
@@ -144,7 +151,7 @@ start: image
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.49.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.52.1
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
@@ -185,4 +192,4 @@ update-manifests-version:
 
 .PHONY: checksums
 checksums:
-	for f in ./dist/$(BINARY_NAME)-*.gz; do openssl dgst -sha256 "$$f" | awk ' { print $$2 }' > "$$f".sha256 ; done
+	sha256sum ./dist/$(BINARY_NAME)-*.gz | awk -F './dist/' '{print $$1 $$2}' > ./dist/$(BINARY_NAME)-checksums.txt
