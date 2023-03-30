@@ -802,6 +802,82 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    Properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#url" class="md-nav__link">
+    url
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#topic" class="md-nav__link">
+    topic
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version" class="md-nav__link">
+    version
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tls" class="md-nav__link">
+    tls
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sasl" class="md-nav__link">
+    sasl
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consumergroupgroupname" class="md-nav__link">
+    consumerGroup.groupName
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consumergrouprebalancestrategy" class="md-nav__link">
+    consumerGroup.rebalanceStrategy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consumergroupstartoldest" class="md-nav__link">
+    consumerGroup.startOldest
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    Security
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#topics" class="md-nav__link">
     Topics
   </a>
@@ -2057,6 +2133,82 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    Properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#url" class="md-nav__link">
+    url
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#topic" class="md-nav__link">
+    topic
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version" class="md-nav__link">
+    version
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tls" class="md-nav__link">
+    tls
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sasl" class="md-nav__link">
+    sasl
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consumergroupgroupname" class="md-nav__link">
+    consumerGroup.groupName
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consumergrouprebalancestrategy" class="md-nav__link">
+    consumerGroup.rebalanceStrategy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consumergroupstartoldest" class="md-nav__link">
+    consumerGroup.startOldest
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    Security
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#topics" class="md-nav__link">
     Topics
   </a>
@@ -2090,20 +2242,71 @@
 
   <h1>Kafka</h1>
 
-<p>Kafka is a widely used event streaming platform. Unlike NATs and Jetstream, a
-Kafka cluster managed independently of Argo Events is required to use a Kafka
-EventBus.</p>
+<p>Kafka is a widely used event streaming platform. We recommend using Kafka if
+you have a lot of events and want to horizontally scale your Sensors. If you
+are looking to get started quickly with Argo Events we recommend using
+Jetstream instead.</p>
+<p>When using a Kafka EventBus you must already have a Kafka cluster set up and
+topics created (unless you have auto create enabled, see <a href="#topics">topics</a>
+below).</p>
 <h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span>
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">kafka</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka:9092</span><span class="w">   </span><span class="c1"># must be deployed independently</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka:9092</span><span class="w">   </span><span class="c1"># must be managed independently</span>
 <span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example&quot;</span><span class="w">  </span><span class="c1"># optional</span>
 </code></pre></div>
 <p>See <a href="https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#kafkabus">here</a>
 for the full specification.</p>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
+<h3 id="url">url<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
+<p>Comma seperated list of kafka broker urls, the kafka broker must be managed
+independently of Argo Events.</p>
+<h3 id="topic">topic<a class="headerlink" href="#topic" title="Permanent link">&para;</a></h3>
+<p>The topic name, defaults to <code>{namespace-name}-{eventbus-name}</code>. Two additional
+topics per Sensor are also required, see see <a href="#topics">topics</a> below for more
+information.</p>
+<h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
+<p>Kafka version, we recommend not manually setting this field in most
+circumstances. Defaults to the oldest supported stable version.</p>
+<h3 id="tls">tls<a class="headerlink" href="#tls" title="Permanent link">&para;</a></h3>
+<p>Enables TLS on the kafka connection.
+<div class="highlight"><pre><span></span><code>tls:
+  caCertSecret:
+    name: my-secret
+    key: ca-cert-key
+  clientCertSecret:
+    name: my-secret
+    key: client-cert-key
+  clientKeySecret:
+    name: my-secret
+    key: client-key-key
+</code></pre></div></p>
+<h3 id="sasl">sasl<a class="headerlink" href="#sasl" title="Permanent link">&para;</a></h3>
+<p>Enables SASL authentication on the kafka connection.
+<div class="highlight"><pre><span></span><code>sasl:
+  mechanism: PLAIN
+  passwordSecret:
+    key: password
+    name: my-user
+  userSecret:
+    key: user
+    name: my-user
+</code></pre></div></p>
+<h3 id="consumergroupgroupname">consumerGroup.groupName<a class="headerlink" href="#consumergroupgroupname" title="Permanent link">&para;</a></h3>
+<p>Consumer group name, defaults to <code>{namespace-name}-{sensor-name}</code>.</p>
+<h3 id="consumergrouprebalancestrategy">consumerGroup.rebalanceStrategy<a class="headerlink" href="#consumergrouprebalancestrategy" title="Permanent link">&para;</a></h3>
+<p>The kafka rebalance strategy, can be one of: sticky, roundrobin, range.
+Defaults to range.</p>
+<h3 id="consumergroupstartoldest">consumerGroup.startOldest<a class="headerlink" href="#consumergroupstartoldest" title="Permanent link">&para;</a></h3>
+<p>When starting up a new group do we want to start from the oldest event
+(true) or the newest event (false). Defaults to false</p>
+<h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
+<p>You can enable TLS or SASL authentication, see above for configuration
+details. You must enable these features in your Kafka Cluster and make
+the certifactes/credentials available in a Kubernetes secret.</p>
 <h2 id="topics">Topics<a class="headerlink" href="#topics" title="Permanent link">&para;</a></h2>
 <p>The Kafka EventBus requires one event topic and two additional topics (trigger
 and action) per Sensor. These topics will not be created automatically unless
@@ -2111,6 +2314,8 @@ the Kafka <code>auto.create.topics.enable</code> cluster configuration is set to
 otherwise it is your responsibility to create these topics. If a topic does
 not exist and cannot be automatically created, the EventSource and/or Sensor
 will exit with an error.</p>
+<p>If you want to take advantage of the horizontal scaling enabled by the Kafka
+EventBus be sure to create topics with more than one partition.</p>
 <p>By default the topics are named as follows.</p>
 <table>
 <thead>
@@ -2159,12 +2364,12 @@ named as follows.</p>
 </tbody>
 </table>
 <h2 id="horizontal-scaling-and-leader-election">Horizontal Scaling and Leader Election<a class="headerlink" href="#horizontal-scaling-and-leader-election" title="Permanent link">&para;</a></h2>
-<p>Sensors that use a Kafka EventBus can scale horizontally. Unlike NATs and
-Jetstream, specifiying a replicas value greater than 1 will result in all
-Sensor pods actively processing events. However, an EventSource that uses a
-Kafka EventBus cannot be horizontally scaled and a
-<a href="https://argoproj.github.io/argo-events/eventsources/ha/#kubernetes-leader-election">kubernetes leader election</a> is
-used.</p>
+<p>Sensors that use a Kafka EventBus can scale horizontally. Specifiying replicas
+greater than one will result in all Sensor pods actively processing events.
+However, an EventSource that uses a Kafka EventBus cannot necessarily be
+horizontally scaled in an active-active manner, see <a href="../../eventsources/ha/">EventSource HA</a>
+for more details. In an active-passive scenario a <a href="../../eventsources/ha/#kubernetes-leader-election">Kubernetes leader election</a>
+is used.</p>
 
               
             </article>
