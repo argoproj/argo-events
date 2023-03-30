@@ -1858,6 +1858,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
+					"liveReload": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LiveReload defines whether sensor pods should restart on changes to the deployment spec.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},

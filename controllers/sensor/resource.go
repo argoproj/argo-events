@@ -21,7 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-
+	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
@@ -30,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
@@ -64,6 +65,18 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
 		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName)
 		return fmt.Errorf("eventbus not ready")
+	}
+
+	if args.Sensor.Spec.LiveReload {
+
+		sensorConfigmMapName := fmt.Sprintf("sensor-cm-%s", args.Sensor.Name)
+		serializedBytes, err := yaml.Marshal(args.Sensor)
+		if err != nil {
+			//TODO: add a log error here
+			return err
+		}
+		sensorContent := map[string]string{"sensor.yaml": string(serializedBytes)}
+		updateOrCreateConfigMap(ctx, client, sensorConfigmMapName, sensor.Namespace, sensorContent)
 	}
 
 	expectedDeploy, err := buildDeployment(args, eventBus)
@@ -140,10 +153,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	encodedSensorSpec := base64.StdEncoding.EncodeToString(sensorBytes)
 	envVars := []corev1.EnvVar{
 		{
-			Name:  common.EnvVarSensorObject,
-			Value: encodedSensorSpec,
-		},
-		{
 			Name:  common.EnvVarEventBusSubject,
 			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
 		},
@@ -155,6 +164,12 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Name:  common.EnvVarLeaderElection,
 			Value: args.Sensor.Annotations[common.AnnotationLeaderElection],
 		},
+	}
+	if !args.Sensor.Spec.LiveReload {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  common.EnvVarSensorObject,
+			Value: encodedSensorSpec,
+		})
 	}
 
 	busConfigBytes, err := json.Marshal(eventBus.Status.Config)
@@ -203,6 +218,18 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		})
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: common.EventBusAuthFileMountPath})
 	}
+
+	if args.Sensor.Spec.LiveReload {
+		volumes = append(volumes, corev1.Volume{
+			Name: "sensor-config-volume",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{
+					Name: fmt.Sprintf("sensor-cm-%s", args.Sensor.Name),
+				}}},
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "sensor-config-volume", MountPath: "/sensor-definition"})
+	}
+
 	deploymentSpec.Template.Spec.Volumes = volumes
 	deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 
@@ -250,6 +277,22 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		return nil, err
 	}
 	return deployment, nil
+}
+func updateOrCreateConfigMap(ctx context.Context, client client.Client, name, namespace string, data map[string]string) error {
+	namespacedName := types.NamespacedName{Name: name, Namespace: namespace}
+	cm := corev1.ConfigMap{}
+
+	err := client.Get(ctx, namespacedName, &cm)
+	if err != nil && apierrors.IsNotFound(err) {
+		cm.Name = name
+		cm.Namespace = namespace
+		cm.Data = data
+		err = client.Create(ctx, &cm)
+	} else if err == nil {
+		cm.Data = data
+		err = client.Update(ctx, &cm)
+	}
+	return err
 }
 
 func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {

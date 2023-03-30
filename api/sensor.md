@@ -2566,6 +2566,18 @@ LoggingFields add additional key-value pairs when logging happens
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>liveReload</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LiveReload defines whether sensor pods should restart on changes to the
+deployment spec.
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2693,6 +2705,18 @@ retain
 <em>(Optional)</em>
 <p>
 LoggingFields add additional key-value pairs when logging happens
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>liveReload</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LiveReload defines whether sensor pods should restart on changes to the
+deployment spec.
 </p>
 </td>
 </tr>

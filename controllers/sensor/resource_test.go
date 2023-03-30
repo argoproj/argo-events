@@ -18,6 +18,7 @@ package sensor
 
 import (
 	"context"
+	"github.com/ghodss/yaml"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -139,6 +140,7 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, len(volumes) > 0)
 		hasAuthVolume := false
 		hasTmpVolume := false
+		hasTestDataVolume := false
 		for _, vol := range volumes {
 			if vol.Name == "auth-volume" {
 				hasAuthVolume = true
@@ -146,9 +148,14 @@ func Test_BuildDeployment(t *testing.T) {
 			if vol.Name == "tmp" {
 				hasTmpVolume = true
 			}
+			if vol.Name == "test-data" {
+				hasTestDataVolume = true
+			}
 		}
 		assert.True(t, hasAuthVolume)
 		assert.True(t, hasTmpVolume)
+		assert.True(t, hasTestDataVolume)
+		assert.Len(t, volumes, 3, "Verify unexpected volumes aren't defined")
 		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
 		assert.Nil(t, deployment.Spec.RevisionHistoryLimit)
@@ -165,6 +172,67 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 		assert.Equal(t, int32(3), *deployment.Spec.RevisionHistoryLimit)
+	})
+	t.Run("test liveReload", func(t *testing.T) {
+		sensorWithLiveReload := sensorObj.DeepCopy()
+		sensorWithLiveReload.Spec.LiveReload = true
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorWithLiveReload,
+			Labels: testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+
+		hasAuthVolume := false
+		hasTmpVolume := false
+		hasTestDataVolume := false
+		hasConfigMapVolume := false
+		for _, vol := range deployment.Spec.Template.Spec.Volumes {
+			if vol.Name == "auth-volume" {
+				hasAuthVolume = true
+			}
+			if vol.Name == "tmp" {
+				hasTmpVolume = true
+			}
+
+			if vol.Name == "test-data" {
+				hasTestDataVolume = true
+			}
+			if vol.Name == "sensor-config-volume" {
+				hasConfigMapVolume = true
+			}
+		}
+		assert.True(t, hasAuthVolume)
+		assert.True(t, hasTmpVolume)
+		assert.True(t, hasTestDataVolume)
+		assert.True(t, hasConfigMapVolume)
+		assert.Len(t, deployment.Spec.Template.Spec.Volumes, 4, "Verify unexpected volumes aren't defined")
+
+		hasAuthVolumeMount := false
+		hasTmpVolumeMount := false
+		hasTestDataVolumeMount := false
+		hasConfigMapVolumeMount := false
+		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+			if volumeMount.Name == "auth-volume" {
+				hasAuthVolumeMount = true
+			}
+			if volumeMount.Name == "tmp" {
+				hasTmpVolumeMount = true
+			}
+			if volumeMount.Name == "test-data" {
+				hasTestDataVolumeMount = true
+			}
+			if volumeMount.Name == "sensor-config-volume" {
+				hasConfigMapVolumeMount = true
+			}
+		}
+		assert.True(t, hasAuthVolumeMount)
+		assert.True(t, hasTmpVolumeMount)
+		assert.True(t, hasTestDataVolumeMount)
+		assert.True(t, hasConfigMapVolumeMount)
+		assert.Len(t, deployment.Spec.Template.Spec.Containers[0].VolumeMounts, 4, "Verify unexpected volumes aren't mounted")
 	})
 }
 
@@ -211,5 +279,71 @@ func TestResourceReconcile(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		assert.Equal(t, 0, len(svcList.Items))
+	})
+	t.Run("test resource reconcile with live reload (create/update)", func(t *testing.T) {
+		ctx := context.TODO()
+		cl := fake.NewClientBuilder().Build()
+		testBus := fakeEventBus.DeepCopy()
+		testBus.Status.MarkDeployed("test", "test")
+		testBus.Status.MarkConfigured()
+		err := cl.Create(ctx, testBus)
+		assert.Nil(t, err)
+		testSensor := sensorObj.DeepCopy()
+		testSensor.Spec.LiveReload = true
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: testSensor,
+			Labels: testLabels,
+		}
+		err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
+		assert.Nil(t, err)
+		assert.True(t, testSensor.Status.IsReady())
+
+		deployList := &appv1.DeploymentList{}
+		err = cl.List(ctx, deployList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(deployList.Items))
+
+		// Verify configmap created in sensor namespace and contents accurate
+		cmList := &corev1.ConfigMapList{}
+		err = cl.List(ctx, cmList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(cmList.Items))
+		liveReloadConfigMap := cmList.Items[0]
+		assert.Equal(t, "sensor-cm-fake-sensor", liveReloadConfigMap.Name)
+		var sensorFromConfigMap v1alpha1.Sensor
+		err = yaml.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
+		assert.Nil(t, err)
+		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
+		assert.Equal(t, "fake-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
+
+		//Update the sensor dependencies and re-reconcile the sensor
+		testSensor.Spec.Dependencies[0].Name = "updated-dep"
+		err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
+		assert.Nil(t, err)
+		assert.True(t, testSensor.Status.IsReady())
+
+		err = cl.List(ctx, deployList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(deployList.Items))
+
+		// Verify configmap has been updated with new dependency
+		err = cl.List(ctx, cmList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(cmList.Items))
+		liveReloadConfigMap = cmList.Items[0]
+		assert.Equal(t, "sensor-cm-fake-sensor", liveReloadConfigMap.Name)
+		err = yaml.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
+		assert.Nil(t, err)
+		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
+		assert.Equal(t, "updated-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
 	})
 }

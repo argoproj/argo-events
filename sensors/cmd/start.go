@@ -4,11 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
-
 	"go.uber.org/zap"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"log"
+	"os"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	argoevents "github.com/argoproj/argo-events"
@@ -16,7 +16,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors"
 )
 
@@ -30,7 +30,11 @@ func Start() {
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	encodedSensorSpec, defined := os.LookupEnv(common.EnvVarSensorObject)
 	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarSensorObject)
+		content, err := os.ReadFile("/sensor-definition/sensor.yaml")
+		fmt.Println("Content is...", string(content))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	sensorSpec, err := base64.StdEncoding.DecodeString(encodedSensorSpec)
 	if err != nil {

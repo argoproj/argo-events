@@ -3902,6 +3902,10 @@
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
         },
+        "liveReload": {
+          "description": "LiveReload defines whether sensor pods should restart on changes to the deployment spec.",
+          "type": "boolean"
+        },
         "loggingFields": {
           "description": "LoggingFields add additional key-value pairs when logging happens",
           "type": "object",
