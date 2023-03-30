@@ -674,6 +674,10 @@ message SensorSpec {
   // LoggingFields add additional key-value pairs when logging happens
   // +optional
   map<string, string> loggingFields = 8;
+
+  // LiveReload defines whether sensor pods should restart on changes to the deployment spec.
+  // +optional
+  optional bool liveReload = 9;
 }
 
 // SensorStatus contains information about the status of a sensor.
