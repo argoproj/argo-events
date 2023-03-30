@@ -1,10 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: e2e-atleastonce-sensor
+  name: e2e-atmostonce-sensor
 spec:
   replicas: 1
   template:
+    serviceAccountName: argo-events-sa
     container:
       env:
         - name: DEBUG_LOG
@@ -15,6 +16,5 @@ spec:
       eventName: example
   triggers:
     - template:
-        name: trigger-atleastonce
+        name: trigger-atmostonce
         log: {}
-      atLeastOnce: true

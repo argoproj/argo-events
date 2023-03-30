@@ -407,11 +407,10 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 	// Send an event to a sensor with a failing trigger and make sure it doesn't ACK it.
 	// Delete the sensor and launch sensor with same name and non-failing trigger so it ACKS it.
 
-	// Start EventSource
-
 	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
 		s.T().SkipNow() // Skipping because AtLeastOnce does not apply for NATS.
 	}
+
 	w1 := s.Given().EventSource("@testdata/es-webhook.yaml").
 		When().
 		CreateEventSource().
@@ -425,7 +424,7 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 	defer w1.Then().EventSourcePodPortForward(12006, 12000).
 		TerminateAllPodPortForwards()
 
-	w2 := s.Given().Sensor("@testdata/sensor-atleastonce-failing.yaml").
+	w2 := s.Given().Sensor("@testdata/sensor-atleastonce-fail.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady()
@@ -437,11 +436,13 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-	w2.Then().ExpectSensorPodLogContains("InProgess")
+	w2.Then().ExpectSensorPodLogContains("Making a http request...")
+	time.Sleep(5 * time.Second) // make sure we defintely attempt to trigger
+
 	w2.DeleteSensor()
 	time.Sleep(10 * time.Second)
 
-	w3 := s.Given().Sensor("@testdata/sensor-atleastonce-triggerable.yaml").
+	w3 := s.Given().Sensor("@testdata/sensor-atleastonce-succeed.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady()
@@ -459,7 +460,6 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 	// Delete the sensor and launch sensor with same name and non-failing trigger
 	// to see that the event doesn't come through.
 
-	// Start EventSource
 	w1 := s.Given().EventSource("@testdata/es-webhook.yaml").
 		When().
 		CreateEventSource().
@@ -471,7 +471,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 	defer w1.Then().EventSourcePodPortForward(12007, 12000).
 		TerminateAllPodPortForwards()
 
-	w2 := s.Given().Sensor("@testdata/sensor-atmostonce-failing.yaml").
+	w2 := s.Given().Sensor("@testdata/sensor-atmostonce-fail.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady()
@@ -483,13 +483,13 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 		Status(200)
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
-	w2.Then().ExpectSensorPodLogContains("Triggering actions")
-	time.Sleep(3 * time.Second)
+	w2.Then().ExpectSensorPodLogContains("Making a http request...")
+	time.Sleep(5 * time.Second) // make sure we defintely attempt to trigger
 
 	w2.DeleteSensor()
 	time.Sleep(10 * time.Second)
 
-	w3 := s.Given().Sensor("@testdata/sensor-atmostonce-triggerable.yaml").
+	w3 := s.Given().Sensor("@testdata/sensor-atmostonce-succeed.yaml").
 		When().
 		CreateSensor().
 		WaitForSensorReady()
@@ -506,8 +506,6 @@ func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
 	// With AtLeastOnce flag set.
-
-	// Start EventSource
 
 	w1 := s.Given().EventSource("@testdata/es-multi-sensor.yaml").
 		When().
@@ -562,7 +560,6 @@ func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
 	// Verify trigger occurs for first Sensor and not second
 	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1-atleastonce"))
 	w3.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1-atleastonce"), util.PodLogCheckOptionWithCount(0))
-
 }
 
 func (s *FunctionalSuite) TestTriggerSpecChange() {

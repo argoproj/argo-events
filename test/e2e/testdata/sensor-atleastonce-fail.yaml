@@ -1,10 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: e2e-atmostonce-sensor
+  name: e2e-atleastonce-sensor
 spec:
   replicas: 1
   template:
+    serviceAccountName: argo-events-sa
     container:
       env:
         - name: DEBUG_LOG
@@ -15,11 +16,12 @@ spec:
       eventName: example
   triggers:
     - template:
-        name: trigger-atmostonce
+        name: trigger-atleastonce
         http:
           # Expect to fail
           url: https://not-existing.com/
           method: GET
+      atLeastOnce: true
       retryStrategy:
         steps: 100
         duration: 500s

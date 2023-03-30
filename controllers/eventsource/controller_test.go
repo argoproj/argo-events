@@ -72,6 +72,52 @@ var (
 			},
 		},
 	}
+
+	fakeEventBusJetstream = &eventbusv1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      common.DefaultEventBusName,
+		},
+		Spec: eventbusv1alpha1.EventBusSpec{
+			JetStream: &eventbusv1alpha1.JetStreamBus{
+				Version: "x.x.x",
+			},
+		},
+		Status: eventbusv1alpha1.EventBusStatus{
+			Config: eventbusv1alpha1.BusConfig{
+				JetStream: &eventbusv1alpha1.JetStreamConfig{
+					URL: "nats://xxxx",
+				},
+			},
+		},
+	}
+
+	fakeEventBusKafka = &eventbusv1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      common.DefaultEventBusName,
+		},
+		Spec: eventbusv1alpha1.EventBusSpec{
+			Kafka: &eventbusv1alpha1.KafkaBus{
+				URL: "localhost:9092",
+			},
+		},
+		Status: eventbusv1alpha1.EventBusStatus{
+			Config: eventbusv1alpha1.BusConfig{
+				Kafka: &eventbusv1alpha1.KafkaBus{
+					URL: "localhost:9092",
+				},
+			},
+		},
+	}
 )
 
 func fakeEmptyEventSource() *v1alpha1.EventSource {

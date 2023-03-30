@@ -59,6 +59,12 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
 	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
 
+	// sensor for kafka eventbus can be scaled horizontally,
+	// therefore does not require an elector
+	if sensorCtx.eventBusConfig.Kafka != nil {
+		return sensorCtx.listenEvents(ctx)
+	}
+
 	elector, err := leaderelection.NewElector(ctx, *sensorCtx.eventBusConfig, clusterName, replicas, sensorCtx.sensor.Namespace, leasename, sensorCtx.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
@@ -106,7 +112,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor)
+	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor, sensorCtx.hostname)
 	if err != nil {
 		return err
 	}
@@ -156,7 +162,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			var conn eventbuscommon.TriggerConnection
 			err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 				var err error
-				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
+				conn, err = ebDriver.Connect(ctx, trigger.Template.Name, depExpression, deps, trigger.AtLeastOnce)
 				triggerLogger.Debugf("just created connection %v, %+v", &conn, conn)
 				return err
 			})
@@ -293,13 +299,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					return
 				case <-ticker.C:
 					if conn == nil || conn.IsClosed() {
-						triggerLogger.Info("NATS connection lost, reconnecting...")
-						conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
+						triggerLogger.Info("EventBus connection lost, reconnecting...")
+						conn, err = ebDriver.Connect(ctx, trigger.Template.Name, depExpression, deps, trigger.AtLeastOnce)
 						if err != nil {
 							triggerLogger.Errorw("failed to reconnect to eventbus", zap.Any("connection", conn), zap.Error(err))
 							continue
 						}
-						triggerLogger.Infow("reconnected to NATS server.", zap.Any("connection", conn))
+						triggerLogger.Infow("reconnected to EventBus.", zap.Any("connection", conn))
 
 						if atomic.LoadUint32(&subLock) == 1 {
 							triggerLogger.Debug("acquired sublock, instructing trigger to shutdown subscription")

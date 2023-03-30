@@ -21,7 +21,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v3.5.0
         with:
-          go-version: "1.19"
+          go-version: "1.20"
       - name: Restore go build cache
         uses: actions/cache@v3
         with:
@@ -70,7 +70,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v3.5.0
         with:
-          go-version: "1.19"
+          go-version: "1.20"
       - name: Restore go build cache
         uses: actions/cache@v3
         with:
@@ -97,7 +97,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v3.5.0
         with:
-          go-version: "1.19"
+          go-version: "1.20"
       - name: Restore go build cache
         uses: actions/cache@v3
         with:
@@ -113,7 +113,7 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       KUBECONFIG: /home/runner/.kubeconfig
     strategy:
@@ -123,13 +123,14 @@ jobs:
         include:
           - driver: stan
           - driver: jetstream
+          - driver: kafka
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Setup Golang
         uses: actions/setup-go@v3.5.0
         with:
-          go-version: "1.19"
+          go-version: "1.20"
       - name: Restore go build cache
         uses: actions/cache@v3
         with:

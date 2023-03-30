@@ -37,6 +37,9 @@ message BusConfig {
 
   // +optional
   optional JetStreamConfig jetstream = 2;
+
+  // +optional
+  optional KafkaBus kafka = 3;
 }
 
 // ContainerTemplate defines customized spec for a container
@@ -79,6 +82,10 @@ message EventBusSpec {
 
   // +optional
   optional JetStreamBus jetstream = 2;
+
+  // +optional
+  // Kafka eventbus
+  optional KafkaBus kafka = 3;
 }
 
 // EventBusStatus holds the status of the eventbus resource
@@ -199,6 +206,46 @@ message JetStreamConfig {
 
   // +optional
   optional string streamConfig = 3;
+}
+
+// KafkaBus holds the KafkaBus EventBus information
+message KafkaBus {
+  // URL to kafka cluster, multiple URLs separated by comma
+  optional string url = 1;
+
+  // Topic name, defaults to {namespace_name}-{eventbus_name}
+  // +optional
+  optional string topic = 2;
+
+  // Kafka version, sarama defaults to the oldest supported stable version
+  // +optional
+  optional string version = 3;
+
+  // TLS configuration for the kafka client.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 4;
+
+  // SASL configuration for the kafka client
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 5;
+
+  // Consumer group for kafka client
+  // +optional
+  optional KafkaConsumerGroup consumerGroup = 6;
+}
+
+message KafkaConsumerGroup {
+  // Consumer group name, defaults to {namespace_name}-{sensor_name}
+  // +optional
+  optional string groupName = 1;
+
+  // Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
+  // +optional
+  optional string rebalanceStrategy = 2;
+
+  // When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
+  // +optional
+  optional bool startOldest = 3;
 }
 
 // NATSBus holds the NATS eventbus information

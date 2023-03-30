@@ -36,6 +36,9 @@ type EventBusSpec struct {
 	NATS *NATSBus `json:"nats,omitempty" protobuf:"bytes,1,opt,name=nats"`
 	// +optional
 	JetStream *JetStreamBus `json:"jetstream,omitempty" protobuf:"bytes,2,opt,name=jetstream"`
+	// +optional
+	// Kafka eventbus
+	Kafka *KafkaBus `json:"kafka,omitempty" protobuf:"bytes,3,opt,name=kafka"`
 }
 
 // EventBusStatus holds the status of the eventbus resource
@@ -51,6 +54,8 @@ type BusConfig struct {
 	NATS *NATSConfig `json:"nats,omitempty" protobuf:"bytes,1,opt,name=nats"`
 	// +optional
 	JetStream *JetStreamConfig `json:"jetstream,omitempty" protobuf:"bytes,2,opt,name=jetstream"`
+	// +optional
+	Kafka *KafkaBus `json:"kafka,omitempty" protobuf:"bytes,3,opt,name=kafka"`
 }
 
 const (
