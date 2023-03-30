@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"context"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -167,8 +168,9 @@ func (m *Metrics) ActionDuration(sensorName, triggerName string, num float64) {
 func (m *Metrics) Run(ctx context.Context, addr string) {
 	log := logging.FromContext(ctx)
 	metricsRegistry := prometheus.NewRegistry()
-	metricsRegistry.MustRegister(m)
+	metricsRegistry.MustRegister(collectors.NewGoCollector(), m)
 	http.Handle("/metrics", promhttp.HandlerFor(metricsRegistry, promhttp.HandlerOpts{}))
+	
 	log.Info("starting metrics server")
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalw("failed to start metrics server", zap.Error(err))
