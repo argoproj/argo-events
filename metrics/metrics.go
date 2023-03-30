@@ -170,7 +170,7 @@ func (m *Metrics) Run(ctx context.Context, addr string) {
 	metricsRegistry := prometheus.NewRegistry()
 	metricsRegistry.MustRegister(collectors.NewGoCollector(), m)
 	http.Handle("/metrics", promhttp.HandlerFor(metricsRegistry, promhttp.HandlerOpts{}))
-	
+
 	log.Info("starting metrics server")
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalw("failed to start metrics server", zap.Error(err))
