@@ -223,6 +223,15 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 			Timestamp: msg.Timestamp.String(),
 			Metadata:  kafkaEventSource.Metadata,
 		}
+
+		var headers map[string]string
+
+		for _, recordHeader := range msg.Headers {
+			headers[string(recordHeader.Key)] = string(recordHeader.Value)
+		}
+
+		eventData.Headers = headers
+
 		if kafkaEventSource.JSONBody {
 			eventData.Body = (*json.RawMessage)(&msg.Value)
 		} else {
