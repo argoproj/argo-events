@@ -3978,7 +3978,7 @@
           "type": "string"
         },
         "liveReload": {
-          "description": "LiveReload defines whether sensor pods should restart on changes to the deployment spec.",
+          "description": "LiveReload propagates sensor changes to the sensor deployment without the need for recreating pods, defaults to false",
           "type": "boolean"
         },
         "loggingFields": {

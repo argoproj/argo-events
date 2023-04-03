@@ -113,7 +113,7 @@ type SensorSpec struct {
 	// LoggingFields add additional key-value pairs when logging happens
 	// +optional
 	LoggingFields map[string]string `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
-	// LiveReload defines whether sensor pods should restart on changes to the deployment spec.
+	// LiveReload propagates sensor changes to the sensor deployment without the need for recreating pods, defaults to false
 	// +optional
 	LiveReload bool `json:"liveReload,omitempty" protobuf:"varint,9,opt,name=liveReload"`
 }
