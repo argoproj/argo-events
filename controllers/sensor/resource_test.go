@@ -443,7 +443,7 @@ func TestResourceReconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		liveReloadConfigMap = cmList.Items[0]
-		assert.Equal(t, "sensor-cm-fake-sensor", liveReloadConfigMap.Name)
+		assert.Equal(t, "live-reload-fake-sensor", liveReloadConfigMap.Name)
 		err = yaml.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
 		assert.Nil(t, err)
 		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
