@@ -675,7 +675,7 @@ message SensorSpec {
   // +optional
   map<string, string> loggingFields = 8;
 
-  // LiveReload defines whether sensor pods should restart on changes to the deployment spec.
+  // LiveReload propagates sensor changes to the sensor deployment without the need for recreating pods, defaults to false
   // +optional
   optional bool liveReload = 9;
 }

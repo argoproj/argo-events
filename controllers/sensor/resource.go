@@ -68,15 +68,14 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 	}
 
 	if args.Sensor.Spec.LiveReload {
-
-		sensorConfigmMapName := fmt.Sprintf("sensor-cm-%s", args.Sensor.Name)
-		serializedBytes, err := yaml.Marshal(args.Sensor)
+		liveReloadConfigMap, err := buildLiveReloadConfigMap(args)
+		if err == nil {
+			err = createOrUpdateConfigMap(ctx, client, liveReloadConfigMap)
+		}
 		if err != nil {
-			//TODO: add a log error here
+			logger.Errorw("failed to build or create live reload liveReloadConfigMap", zap.Error(err))
 			return err
 		}
-		sensorContent := map[string]string{"sensor.yaml": string(serializedBytes)}
-		updateOrCreateConfigMap(ctx, client, sensorConfigmMapName, sensor.Namespace, sensorContent)
 	}
 
 	expectedDeploy, err := buildDeployment(args, eventBus)
@@ -241,7 +240,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 					Name: fmt.Sprintf("sensor-cm-%s", args.Sensor.Name),
 				}}},
 		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "sensor-config-volume", MountPath: "/sensor-definition"})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "sensor-config-volume", MountPath: common.SensorConfigMapMountPath})
 	}
 
 	// secrets
@@ -272,19 +271,27 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 
 	return deployment, nil
 }
-func updateOrCreateConfigMap(ctx context.Context, client client.Client, name, namespace string, data map[string]string) error {
-	namespacedName := types.NamespacedName{Name: name, Namespace: namespace}
-	cm := corev1.ConfigMap{}
 
-	err := client.Get(ctx, namespacedName, &cm)
+func buildLiveReloadConfigMap(args *AdaptorArgs) (*corev1.ConfigMap, error) {
+	cm := corev1.ConfigMap{}
+	serializedBytes, err := yaml.Marshal(args.Sensor)
+	if err != nil {
+		return nil, err
+	}
+	sensorContent := map[string]string{"sensor.yaml": string(serializedBytes)}
+	cm.Name = "live-reload-" + args.Sensor.Name
+	cm.Namespace = args.Sensor.Namespace
+	cm.Data = sensorContent
+	return &cm, nil
+}
+
+func createOrUpdateConfigMap(ctx context.Context, client client.Client, cm *corev1.ConfigMap) error {
+	namespacedName := types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}
+	err := client.Get(ctx, namespacedName, &corev1.ConfigMap{})
 	if err != nil && apierrors.IsNotFound(err) {
-		cm.Name = name
-		cm.Namespace = namespace
-		cm.Data = data
-		err = client.Create(ctx, &cm)
+		err = client.Create(ctx, cm)
 	} else if err == nil {
-		cm.Data = data
-		err = client.Update(ctx, &cm)
+		err = client.Update(ctx, cm)
 	}
 	return err
 }

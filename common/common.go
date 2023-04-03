@@ -45,6 +45,8 @@ const (
 	EnvVarEventBusSubject = "EVENTBUS_SUBJECT"
 	// volumeMount path for eventbus auth file
 	EventBusAuthFileMountPath = "/etc/eventbus/auth"
+	// volumeMount path for sensor configmap used by live reload feature
+	SensorConfigMapMountPath = "/etc/sensor"
 	// Default NATS Streaming messages max age
 	STANMaxAge = "72h"
 	// Default NATS Streaming max messages per channel
