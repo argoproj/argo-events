@@ -18,8 +18,9 @@ package sensor
 
 import (
 	"context"
-	"github.com/ghodss/yaml"
 	"testing"
+
+	"github.com/ghodss/yaml"
 
 	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
@@ -36,7 +37,10 @@ import (
 )
 
 const (
-	testNamespace = "test-ns"
+	testNamespace      = "test-ns"
+	authVolumeName     = "auth-volume"
+	tmpVolumeName      = "tmp"
+	testDataVolumeName = "test-data"
 )
 
 var (
@@ -189,13 +193,13 @@ func Test_BuildDeployment(t *testing.T) {
 		hasTmpVolume := false
 		hasTestDataVolume := false
 		for _, vol := range volumes {
-			if vol.Name == "auth-volume" {
+			if vol.Name == authVolumeName {
 				hasAuthVolume = true
 			}
-			if vol.Name == "tmp" {
+			if vol.Name == tmpVolumeName {
 				hasTmpVolume = true
 			}
-			if vol.Name == "test-data" {
+			if vol.Name == testDataVolumeName {
 				hasTestDataVolume = true
 			}
 		}
@@ -237,14 +241,13 @@ func Test_BuildDeployment(t *testing.T) {
 		hasTestDataVolume := false
 		hasConfigMapVolume := false
 		for _, vol := range deployment.Spec.Template.Spec.Volumes {
-			if vol.Name == "auth-volume" {
+			if vol.Name == authVolumeName {
 				hasAuthVolume = true
 			}
-			if vol.Name == "tmp" {
+			if vol.Name == tmpVolumeName {
 				hasTmpVolume = true
 			}
-
-			if vol.Name == "test-data" {
+			if vol.Name == testDataVolumeName {
 				hasTestDataVolume = true
 			}
 			if vol.Name == "sensor-config-volume" {
@@ -262,13 +265,13 @@ func Test_BuildDeployment(t *testing.T) {
 		hasTestDataVolumeMount := false
 		hasConfigMapVolumeMount := false
 		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
-			if volumeMount.Name == "auth-volume" {
+			if volumeMount.Name == authVolumeName {
 				hasAuthVolumeMount = true
 			}
-			if volumeMount.Name == "tmp" {
+			if volumeMount.Name == tmpVolumeName {
 				hasTmpVolumeMount = true
 			}
-			if volumeMount.Name == "test-data" {
+			if volumeMount.Name == testDataVolumeName {
 				hasTestDataVolumeMount = true
 			}
 			if volumeMount.Name == "sensor-config-volume" {
@@ -414,14 +417,14 @@ func TestResourceReconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		liveReloadConfigMap := cmList.Items[0]
-		assert.Equal(t, "sensor-cm-fake-sensor", liveReloadConfigMap.Name)
+		assert.Equal(t, "live-reload-fake-sensor", liveReloadConfigMap.Name)
 		var sensorFromConfigMap v1alpha1.Sensor
 		err = yaml.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
 		assert.Nil(t, err)
 		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
 		assert.Equal(t, "fake-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
 
-		//Update the sensor dependencies and re-reconcile the sensor
+		// Update the sensor dependencies and re-reconcile the sensor
 		testSensor.Spec.Dependencies[0].Name = "updated-dep"
 		err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
 		assert.Nil(t, err)
