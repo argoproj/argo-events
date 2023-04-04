@@ -224,7 +224,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 			Metadata:  kafkaEventSource.Metadata,
 		}
 
-		var headers map[string]string
+		headers := make(map[string]string)
 
 		for _, recordHeader := range msg.Headers {
 			headers[string(recordHeader.Key)] = string(recordHeader.Value)
