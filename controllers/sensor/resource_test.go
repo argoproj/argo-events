@@ -220,7 +220,6 @@ func Test_BuildDeployment(t *testing.T) {
 			if env.Name == common.EnvVarSensorObject {
 				hasSensorObjectEnvVar = true
 			}
-
 		}
 		assert.True(t, hasSensorObjectEnvVar)
 		assert.False(t, hasSensorLiveReloadEnvVar)
@@ -259,7 +258,6 @@ func Test_BuildDeployment(t *testing.T) {
 			if env.Name == common.EnvVarSensorObject {
 				hasSensorObjectEnvVar = true
 			}
-
 		}
 		assert.False(t, hasSensorObjectEnvVar)
 		assert.True(t, hasSensorLiveReloadEnvVar)
