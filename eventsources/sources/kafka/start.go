@@ -399,6 +399,15 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 		Timestamp: message.Timestamp.String(),
 		Metadata:  consumer.kafkaEventSource.Metadata,
 	}
+
+	headers := make(map[string]string)
+
+	for _, recordHeader := range message.Headers {
+		headers[string(recordHeader.Key)] = string(recordHeader.Value)
+	}
+
+	eventData.Headers = headers
+
 	if consumer.kafkaEventSource.JSONBody {
 		eventData.Body = (*json.RawMessage)(&message.Value)
 	} else {
