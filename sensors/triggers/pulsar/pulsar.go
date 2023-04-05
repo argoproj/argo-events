@@ -73,6 +73,17 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
 		}
 
+		if pulsarTrigger.AuthAthenzParams != nil && pulsarTrigger.AuthAthenzSecret != nil {
+			logger.Info("setting athenz auth option...")
+			authAthenzFilePath, err := common.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
+			if err != nil {
+				logger.Errorw("failed to get authAthenzSecret from the volume", "error", err)
+				return nil, err
+			}
+			pulsarTrigger.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
+			clientOpt.Authentication = pulsar.NewAuthenticationAthenz(pulsarTrigger.AuthAthenzParams)
+		}
+
 		if pulsarTrigger.TLS != nil {
 			logger.Info("setting tls auth option...")
 			var clientCertPath, clientKeyPath string

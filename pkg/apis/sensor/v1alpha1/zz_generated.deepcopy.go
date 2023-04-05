@@ -846,6 +846,18 @@ func (in *PulsarTrigger) DeepCopyInto(out *PulsarTrigger) {
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.AuthAthenzParams != nil {
+		in, out := &in.AuthAthenzParams, &out.AuthAthenzParams
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.AuthAthenzSecret != nil {
+		in, out := &in.AuthAthenzSecret, &out.AuthAthenzSecret
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.ConnectionBackoff != nil {
 		in, out := &in.ConnectionBackoff, &out.ConnectionBackoff
 		*out = new(common.Backoff)

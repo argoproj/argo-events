@@ -107,6 +107,17 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
 	}
 
+	if pulsarEventSource.AuthAthenzParams != nil && pulsarEventSource.AuthAthenzSecret != nil {
+		log.Info("setting athenz auth option...")
+		authAthenzFilePath, err := common.GetSecretVolumePath(pulsarEventSource.AuthAthenzSecret)
+		if err != nil {
+			log.Errorw("failed to get authAthenzSecret from the volume", "error", err)
+			return err
+		}
+		pulsarEventSource.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
+		clientOpt.Authentication = pulsar.NewAuthenticationAthenz(pulsarEventSource.AuthAthenzParams)
+	}
+
 	if pulsarEventSource.TLS != nil {
 		log.Info("setting tls auth option...")
 		var clientCertPath, clientKeyPath string
