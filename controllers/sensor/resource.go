@@ -173,12 +173,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Value: base64.StdEncoding.EncodeToString(busConfigBytes),
 		},
 	}
-	if !args.Sensor.Spec.LiveReload {
-		env = append(env, corev1.EnvVar{
-			Name:  common.EnvVarSensorObject,
-			Value: base64.StdEncoding.EncodeToString(sensorBytes),
-		})
-	}
 
 	volumes := []corev1.Volume{
 		{
@@ -192,6 +186,26 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Name:      "tmp",
 			MountPath: "/tmp",
 		},
+	}
+
+	if args.Sensor.Spec.LiveReload {
+		env = append(env, corev1.EnvVar{
+			Name:  common.SensorLiveReloadMountPath,
+			Value: common.SensorConfigMapMountPath,
+		})
+		volumes = append(volumes, corev1.Volume{
+			Name: "sensor-config-volume",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{
+					Name: fmt.Sprintf("sensor-cm-%s", args.Sensor.Name),
+				}}},
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "sensor-config-volume", MountPath: common.SensorConfigMapMountPath})
+	} else {
+		env = append(env, corev1.EnvVar{
+			Name:  common.EnvVarSensorObject,
+			Value: base64.StdEncoding.EncodeToString(sensorBytes),
+		})
 	}
 
 	var secretObjs []interface{}
@@ -231,17 +245,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Name:      "auth-volume",
 			MountPath: common.EventBusAuthFileMountPath,
 		})
-	}
-
-	if args.Sensor.Spec.LiveReload {
-		volumes = append(volumes, corev1.Volume{
-			Name: "sensor-config-volume",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{
-					Name: fmt.Sprintf("sensor-cm-%s", args.Sensor.Name),
-				}}},
-		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "sensor-config-volume", MountPath: common.SensorConfigMapMountPath})
 	}
 
 	// secrets
