@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
@@ -278,7 +277,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 
 func buildLiveReloadConfigMap(args *AdaptorArgs) (*corev1.ConfigMap, error) {
 	cm := corev1.ConfigMap{}
-	serializedBytes, err := yaml.Marshal(args.Sensor)
+	serializedBytes, err := json.Marshal(args.Sensor)
 	if err != nil {
 		return nil, err
 	}

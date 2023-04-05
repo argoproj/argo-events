@@ -18,9 +18,8 @@ package sensor
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
-
-	"github.com/ghodss/yaml"
 
 	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
@@ -445,7 +444,7 @@ func TestResourceReconcile(t *testing.T) {
 		liveReloadConfigMap := cmList.Items[0]
 		assert.Equal(t, "live-reload-fake-sensor", liveReloadConfigMap.Name)
 		var sensorFromConfigMap v1alpha1.Sensor
-		err = yaml.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
+		err = json.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
 		assert.Nil(t, err)
 		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
 		assert.Equal(t, "fake-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
@@ -470,7 +469,7 @@ func TestResourceReconcile(t *testing.T) {
 		assert.Equal(t, 1, len(cmList.Items))
 		liveReloadConfigMap = cmList.Items[0]
 		assert.Equal(t, "live-reload-fake-sensor", liveReloadConfigMap.Name)
-		err = yaml.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
+		err = json.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
 		assert.Nil(t, err)
 		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
 		assert.Equal(t, "updated-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
