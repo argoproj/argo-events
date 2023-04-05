@@ -101,6 +101,8 @@ const (
 	EnvVarSensorObject = "SENSOR_OBJECT"
 	// SensorNamespace is used to get namespace where sensors are deployed
 	SensorNamespace = "SENSOR_NAMESPACE"
+	// SensorLiveReloadMountPath refers to the path the live reload config is located at
+	SensorLiveReloadMountPath = "SENSOR_LIVE_RELOAD_MOUNT_PATH"
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
 )

@@ -210,6 +210,20 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
 		assert.Nil(t, deployment.Spec.RevisionHistoryLimit)
+
+		hasSensorLiveReloadEnvVar := false
+		hasSensorObjectEnvVar := false
+		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if env.Name == common.SensorLiveReloadMountPath && env.Value == common.SensorConfigMapMountPath {
+				hasSensorLiveReloadEnvVar = true
+			}
+			if env.Name == common.EnvVarSensorObject {
+				hasSensorObjectEnvVar = true
+			}
+
+		}
+		assert.True(t, hasSensorObjectEnvVar)
+		assert.False(t, hasSensorLiveReloadEnvVar)
 	})
 	t.Run("test revisionHistoryLimit", func(t *testing.T) {
 		sensorWithRevisionHistoryLimit := sensorObj.DeepCopy()
@@ -235,6 +249,20 @@ func Test_BuildDeployment(t *testing.T) {
 		deployment, err := buildDeployment(args, fakeEventBus)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
+
+		hasSensorLiveReloadEnvVar := false
+		hasSensorObjectEnvVar := false
+		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if env.Name == common.SensorLiveReloadMountPath && env.Value == common.SensorConfigMapMountPath {
+				hasSensorLiveReloadEnvVar = true
+			}
+			if env.Name == common.EnvVarSensorObject {
+				hasSensorObjectEnvVar = true
+			}
+
+		}
+		assert.False(t, hasSensorObjectEnvVar)
+		assert.True(t, hasSensorLiveReloadEnvVar)
 
 		hasAuthVolume := false
 		hasTmpVolume := false
