@@ -99,9 +99,9 @@ func NewSensorContextManager(logger *zap.SugaredLogger, kubeClient kubernetes.In
 }
 
 func (scm *SensorContextManager) Start(ctx context.Context) error {
-	// SENSOR_PATH env variable is used to indicate if this sensor definition
-	// has opted in to live reload
-	path, liveReload := os.LookupEnv("SENSOR_PATH")
+	// This env var is used to indicate if this sensor definition has opted in
+	// to live reload
+	path, liveReload := os.LookupEnv(common.EnvVarSensorFilePath)
 
 	switch liveReload {
 	case true:
