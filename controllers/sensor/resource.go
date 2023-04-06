@@ -67,18 +67,23 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 		return fmt.Errorf("eventbus not ready")
 	}
 
+	var configMap *corev1.ConfigMap
 	if args.Sensor.Spec.LiveReload {
-		liveReloadConfigMap, err := buildLiveReloadConfigMap(args)
-		if err == nil {
-			err = createOrUpdateConfigMap(ctx, client, liveReloadConfigMap)
-		}
+		liveReloadConfigMap, err := buildConfigMap(args)
 		if err != nil {
-			logger.Errorw("failed to build or create live reload liveReloadConfigMap", zap.Error(err))
+			logger.Errorw("failed to build live reload config map", zap.Error(err))
 			return err
 		}
+
+		if err := createOrUpdateConfigMap(ctx, client, liveReloadConfigMap); err != nil {
+			logger.Errorw("failed to create/update live reload config map", zap.Error(err))
+			return err
+		}
+
+		configMap = liveReloadConfigMap
 	}
 
-	expectedDeploy, err := buildDeployment(args, eventBus)
+	expectedDeploy, err := buildDeployment(args, eventBus, configMap)
 	if err != nil {
 		sensor.Status.MarkDeployFailed("BuildDeploymentSpecFailed", "Failed to build Deployment spec.")
 		logger.Errorw("failed to build deployment spec", "error", err)
@@ -133,7 +138,7 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*appv1.Deployment, error) {
+func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, configMap *corev1.ConfigMap) (*appv1.Deployment, error) {
 	deploymentSpec, err := buildDeploymentSpec(args)
 	if err != nil {
 		return nil, err
@@ -187,19 +192,20 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		},
 	}
 
-	if args.Sensor.Spec.LiveReload {
+	if configMap != nil {
+		const volumeName = "sensor-config-volume"
 		env = append(env, corev1.EnvVar{
-			Name:  common.SensorLiveReloadMountPath,
-			Value: common.SensorConfigMapMountPath,
+			Name:  common.EnvVarSensorFilePath,
+			Value: fmt.Sprintf("%s/%s", common.SensorConfigMapMountPath, common.SensorConfigMapFilename),
 		})
 		volumes = append(volumes, corev1.Volume{
-			Name: "sensor-config-volume",
+			Name: volumeName,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{
-					Name: fmt.Sprintf("sensor-cm-%s", args.Sensor.Name),
+					Name: configMap.Name,
 				}}},
 		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "sensor-config-volume", MountPath: common.SensorConfigMapMountPath})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: volumeName, MountPath: common.SensorConfigMapMountPath})
 	} else {
 		env = append(env, corev1.EnvVar{
 			Name:  common.EnvVarSensorObject,
@@ -275,26 +281,28 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	return deployment, nil
 }
 
-func buildLiveReloadConfigMap(args *AdaptorArgs) (*corev1.ConfigMap, error) {
-	cm := corev1.ConfigMap{}
+func buildConfigMap(args *AdaptorArgs) (*corev1.ConfigMap, error) {
 	serializedBytes, err := json.Marshal(args.Sensor)
 	if err != nil {
 		return nil, err
 	}
-	sensorContent := map[string]string{"sensor.yaml": string(serializedBytes)}
-	cm.Name = "live-reload-" + args.Sensor.Name
-	cm.Namespace = args.Sensor.Namespace
-	cm.Data = sensorContent
-	return &cm, nil
+
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("sensor-%s", args.Sensor.Name),
+			Namespace: args.Sensor.Namespace,
+		},
+		Data: map[string]string{common.SensorConfigMapFilename: string(serializedBytes)},
+	}, nil
 }
 
-func createOrUpdateConfigMap(ctx context.Context, client client.Client, cm *corev1.ConfigMap) error {
-	namespacedName := types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}
+func createOrUpdateConfigMap(ctx context.Context, client client.Client, configMap *corev1.ConfigMap) error {
+	namespacedName := types.NamespacedName{Name: configMap.Name, Namespace: configMap.Namespace}
 	err := client.Get(ctx, namespacedName, &corev1.ConfigMap{})
 	if err != nil && apierrors.IsNotFound(err) {
-		err = client.Create(ctx, cm)
+		err = client.Create(ctx, configMap)
 	} else if err == nil {
-		err = client.Update(ctx, cm)
+		err = client.Update(ctx, configMap)
 	}
 	return err
 }

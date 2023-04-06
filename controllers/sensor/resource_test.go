@@ -183,7 +183,7 @@ func Test_BuildDeployment(t *testing.T) {
 			Sensor: sensorObj,
 			Labels: testLabels,
 		}
-		deployment, err := buildDeployment(args, fakeEventBus)
+		deployment, err := buildDeployment(args, fakeEventBus, nil)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 		volumes := deployment.Spec.Template.Spec.Volumes
@@ -213,7 +213,7 @@ func Test_BuildDeployment(t *testing.T) {
 		hasSensorLiveReloadEnvVar := false
 		hasSensorObjectEnvVar := false
 		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
-			if env.Name == common.SensorLiveReloadMountPath && env.Value == common.SensorConfigMapMountPath {
+			if env.Name == common.EnvVarSensorFilePath {
 				hasSensorLiveReloadEnvVar = true
 			}
 			if env.Name == common.EnvVarSensorObject {
@@ -231,7 +231,7 @@ func Test_BuildDeployment(t *testing.T) {
 			Sensor: sensorWithRevisionHistoryLimit,
 			Labels: testLabels,
 		}
-		deployment, err := buildDeployment(args, fakeEventBus)
+		deployment, err := buildDeployment(args, fakeEventBus, nil)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 		assert.Equal(t, int32(3), *deployment.Spec.RevisionHistoryLimit)
@@ -244,14 +244,14 @@ func Test_BuildDeployment(t *testing.T) {
 			Sensor: sensorWithLiveReload,
 			Labels: testLabels,
 		}
-		deployment, err := buildDeployment(args, fakeEventBus)
+		deployment, err := buildDeployment(args, fakeEventBus, &corev1.ConfigMap{})
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 
 		hasSensorLiveReloadEnvVar := false
 		hasSensorObjectEnvVar := false
 		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
-			if env.Name == common.SensorLiveReloadMountPath && env.Value == common.SensorConfigMapMountPath {
+			if env.Name == common.EnvVarSensorFilePath {
 				hasSensorLiveReloadEnvVar = true
 			}
 			if env.Name == common.EnvVarSensorObject {
@@ -327,7 +327,7 @@ func Test_BuildDeployment(t *testing.T) {
 			PasswordSecret: &corev1.SecretKeySelector{Key: "password", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
 		}
 
-		deployment, err := buildDeployment(args, testBus)
+		deployment, err := buildDeployment(args, testBus, nil)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 
@@ -442,9 +442,9 @@ func TestResourceReconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		liveReloadConfigMap := cmList.Items[0]
-		assert.Equal(t, "live-reload-fake-sensor", liveReloadConfigMap.Name)
+		assert.Equal(t, "sensor-fake-sensor", liveReloadConfigMap.Name)
 		var sensorFromConfigMap v1alpha1.Sensor
-		err = json.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
+		err = json.Unmarshal([]byte(liveReloadConfigMap.Data[common.SensorConfigMapFilename]), &sensorFromConfigMap)
 		assert.Nil(t, err)
 		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
 		assert.Equal(t, "fake-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
@@ -468,8 +468,8 @@ func TestResourceReconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		liveReloadConfigMap = cmList.Items[0]
-		assert.Equal(t, "live-reload-fake-sensor", liveReloadConfigMap.Name)
-		err = json.Unmarshal([]byte(liveReloadConfigMap.Data["sensor.yaml"]), &sensorFromConfigMap)
+		assert.Equal(t, "sensor-fake-sensor", liveReloadConfigMap.Name)
+		err = json.Unmarshal([]byte(liveReloadConfigMap.Data[common.SensorConfigMapFilename]), &sensorFromConfigMap)
 		assert.Nil(t, err)
 		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
 		assert.Equal(t, "updated-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)

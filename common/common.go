@@ -45,8 +45,6 @@ const (
 	EnvVarEventBusSubject = "EVENTBUS_SUBJECT"
 	// volumeMount path for eventbus auth file
 	EventBusAuthFileMountPath = "/etc/eventbus/auth"
-	// volumeMount path for sensor configmap used by live reload feature
-	SensorConfigMapMountPath = "/etc/sensor"
 	// Default NATS Streaming messages max age
 	STANMaxAge = "72h"
 	// Default NATS Streaming max messages per channel
@@ -99,10 +97,14 @@ const (
 const (
 	// EnvVarSensorObject refers to the env of based64 encoded sensor spec
 	EnvVarSensorObject = "SENSOR_OBJECT"
+	// EnvVarSensorConfigMap refers to the path the sensor config is located at
+	EnvVarSensorFilePath = "SENSOR_FILE_PATH"
 	// SensorNamespace is used to get namespace where sensors are deployed
 	SensorNamespace = "SENSOR_NAMESPACE"
-	// SensorLiveReloadMountPath refers to the path the live reload config is located at
-	SensorLiveReloadMountPath = "SENSOR_LIVE_RELOAD_MOUNT_PATH"
+	// VolumeMount path for sensor configmap used by live reload feature
+	SensorConfigMapMountPath = "/etc/sensor"
+	// VolumeMount path for sensor configmap used by live reload feature
+	SensorConfigMapFilename = "sensor.json"
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
 )
