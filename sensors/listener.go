@@ -120,6 +120,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 		return ebDriver.Initialize()
 	})
 	if err != nil {
+		logger.Errorw("failed to initialize eventbus", zap.Error(err))
 		return err
 	}
 
