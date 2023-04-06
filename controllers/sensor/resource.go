@@ -287,13 +287,19 @@ func buildConfigMap(args *AdaptorArgs) (*corev1.ConfigMap, error) {
 		return nil, err
 	}
 
-	return &corev1.ConfigMap{
+	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("sensor-%s", args.Sensor.Name),
 			Namespace: args.Sensor.Namespace,
 		},
 		Data: map[string]string{common.SensorConfigMapFilename: string(serializedBytes)},
-	}, nil
+	}
+
+	if err := controllerscommon.SetObjectMeta(args.Sensor, configMap, v1alpha1.SchemaGroupVersionKind); err != nil {
+		return nil, err
+	}
+
+	return configMap, nil
 }
 
 func createOrUpdateConfigMap(ctx context.Context, client client.Client, configMap *corev1.ConfigMap) error {
