@@ -1453,6 +1453,11 @@ func (in *PulsarEventSource) DeepCopyInto(out *PulsarEventSource) {
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Filter != nil {
+		in, out := &in.Filter, &out.Filter
+		*out = new(EventSourceFilter)
+		**out = **in
+	}
 	if in.AuthAthenzParams != nil {
 		in, out := &in.AuthAthenzParams, &out.AuthAthenzParams
 		*out = make(map[string]string, len(*in))
@@ -1464,11 +1469,6 @@ func (in *PulsarEventSource) DeepCopyInto(out *PulsarEventSource) {
 		in, out := &in.AuthAthenzSecret, &out.AuthAthenzSecret
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
-	}
-	if in.Filter != nil {
-		in, out := &in.Filter, &out.Filter
-		*out = new(EventSourceFilter)
-		**out = **in
 	}
 	return
 }

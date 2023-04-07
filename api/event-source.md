@@ -4481,6 +4481,19 @@ be set to use auth.
 </tr>
 <tr>
 <td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>authAthenzParams</code></br> <em> map\[string\]string </em>
 </td>
 <td>
@@ -4503,19 +4516,6 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 Authentication athenz privateKey secret for the pulsar client.
 AuthAthenzSecret must be set if AuthAthenzParams is used.
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>filter</code></br> <em>
-<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
-</a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-Filter
 </p>
 </td>
 </tr>

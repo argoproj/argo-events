@@ -1636,6 +1636,12 @@ func schema_pkg_apis_sensor_v1alpha1_PulsarTrigger(ref common.ReferenceCallback)
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
+					"connectionBackoff": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Backoff holds parameters applied to connection.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
+						},
+					},
 					"authAthenzParams": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Authentication athenz parameters for the pulsar client. Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go Either token or athenz can be set to use auth.",
@@ -1656,12 +1662,6 @@ func schema_pkg_apis_sensor_v1alpha1_PulsarTrigger(ref common.ReferenceCallback)
 						SchemaProps: spec.SchemaProps{
 							Description: "Authentication athenz privateKey secret for the pulsar client. AuthAthenzSecret must be set if AuthAthenzParams is used.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"connectionBackoff": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Backoff holds parameters applied to connection.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
 						},
 					},
 				},
