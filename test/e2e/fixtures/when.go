@@ -106,6 +106,31 @@ func (w *When) CreateSensor() *When {
 	return w
 }
 
+func (w *When) UpdateSensor(g *Given) *When {
+	w.t.Helper()
+	if w.sensor == nil {
+		w.t.Fatal("No sensor to update")
+	}
+	w.t.Log("Update sensor", w.sensor.Name)
+	ctx := context.Background()
+
+	sensor, err := w.sensorClient.Get(ctx, w.sensor.Name, metav1.GetOptions{})
+	if err != nil {
+		w.t.Fatal(err)
+	}
+
+	// update spec only
+	sensor.Spec = g.sensor.Spec
+
+	s, err := w.sensorClient.Update(ctx, sensor, metav1.UpdateOptions{})
+	if err != nil {
+		w.t.Fatal(err)
+	} else {
+		w.sensor = s
+	}
+	return w
+}
+
 func (w *When) DeleteSensor() *When {
 	w.t.Helper()
 	if w.sensor == nil {

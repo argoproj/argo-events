@@ -622,6 +622,36 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 }
 
+func (s *FunctionalSuite) TestSensorLiveReload() {
+	w1 := s.Given().EventSource("@testdata/es-calendar.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady()
+	defer w1.DeleteEventSource()
+
+	w1.Then().
+		ExpectEventSourcePodLogContains(LogEventSourceStarted)
+
+	t1 := s.Given().Sensor("@testdata/sensor-live-reload.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady()
+
+	defer t1.DeleteSensor()
+
+	// first sensor iteration contains only "log-trigger-a"
+	t1.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-a"))
+	t1.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-b"), util.PodLogCheckOptionWithCount(0))
+
+	t1.UpdateSensor(s.Given().Sensor("@testdata/sensor-live-reload-2.yaml"))
+	time.Sleep(1 * time.Minute) // live update can take a while
+
+	// second sensor iteration contains "log-trigger-a" and "log-trigger-b",
+	// the presence of a proves the pod is the same as before
+	t1.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-a"))
+	t1.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-b"))
+}
+
 func TestFunctionalSuite(t *testing.T) {
 	suite.Run(t, new(FunctionalSuite))
 }
