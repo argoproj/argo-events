@@ -73,7 +73,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
 		}
 
-		if pulsarTrigger.AuthAthenzParams != nil && pulsarTrigger.AuthAthenzSecret != nil {
+		if len(pulsarTrigger.AuthAthenzParams) > 0 && pulsarTrigger.AuthAthenzSecret != nil {
 			logger.Info("setting athenz auth option...")
 			authAthenzFilePath, err := common.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
 			if err != nil {
