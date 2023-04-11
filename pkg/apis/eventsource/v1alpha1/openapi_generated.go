@@ -2981,7 +2981,7 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 					},
 					"authTokenSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Authentication token for the pulsar client.",
+							Description: "Authentication token for the pulsar client. Either token or athenz can be set to use auth.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -2989,6 +2989,28 @@ func schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref common.Reference
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"authAthenzParams": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Authentication athenz parameters for the pulsar client. Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go Either token or athenz can be set to use auth.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"authAthenzSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Authentication athenz privateKey secret for the pulsar client. AuthAthenzSecret must be set if AuthAthenzParams is used.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 				},
