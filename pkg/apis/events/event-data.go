@@ -210,6 +210,8 @@ type KafkaEventData struct {
 	Body interface{} `json:"body"`
 	// Timestamp of the message
 	Timestamp string `json:"timestamp"`
+	// Headers refers to the message headers
+	Headers map[string]string `json:"headers"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
