@@ -2128,24 +2128,24 @@
 <p>Resource event-source watches change notifications for K8s object and helps sensor trigger the workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;time&quot;: &quot;event_time&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
-        },
-        &quot;data&quot;: {
-          &quot;type&quot;: &quot;type_of_the_event&quot;, // ADD, UPDATE or DELETE
-          &quot;body&quot;: &quot;resource_body&quot;, // JSON format
-          &quot;group&quot;: &quot;resource_group_name&quot;,
-          &quot;version&quot;: &quot;resource_version_name&quot;,
-          &quot;resource&quot;: &quot;resource_name&quot;
-        }
-    }
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_the_event&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// ADD, UPDATE or DELETE</span>
+<span class="w">          </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_body&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// JSON format</span>
+<span class="w">          </span><span class="s">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_group_name&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_version_name&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_name&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>

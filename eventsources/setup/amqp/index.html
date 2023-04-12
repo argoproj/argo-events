@@ -2100,33 +2100,33 @@
 <p>AMQP event-source listens to messages on the MQ and helps sensor trigger the workloads.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;time&quot;: &quot;event_time&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
-        },
-        &quot;data&quot;: {
-           &quot;contentType&quot;: &quot;ContentType is the MIME content type&quot;,
-           &quot;contentEncoding&quot;: &quot;ContentEncoding is the MIME content encoding&quot;,
-           &quot;deliveryMode&quot;: &quot;Delivery mode can be either - non-persistent (1) or persistent (2)&quot;,
-           &quot;priority&quot;: &quot;Priority refers to the use - 0 to 9&quot;,
-           &quot;correlationId&quot;: &quot;CorrelationId is the correlation identifier&quot;,
-           &quot;replyTo&quot;: &quot;ReplyTo is the address to reply to (ex: RPC)&quot;,
-           &quot;expiration&quot;: &quot;Expiration refers to message expiration spec&quot;,
-           &quot;messageId&quot;: &quot;MessageId is message identifier&quot;,
-           &quot;timestamp&quot;: &quot;Timestamp refers to the message timestamp&quot;,
-           &quot;type&quot;: &quot;Type refers to the message type name&quot;,
-           &quot;appId&quot;: &quot;AppId refers to the application id&quot;,
-           &quot;exchange&quot;: &quot;Exchange is basic.publish exchange&quot;,
-           &quot;routingKey&quot;: &quot;RoutingKey is basic.publish routing key&quot;,
-           &quot;body&quot;: &quot;Body represents the message body&quot;,
-        }
-    }
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">           </span><span class="s">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ContentType is the MIME content type&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;contentEncoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ContentEncoding is the MIME content encoding&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;deliveryMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Delivery mode can be either - non-persistent (1) or persistent (2)&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;priority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Priority refers to the use - 0 to 9&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;correlationId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CorrelationId is the correlation identifier&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;replyTo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ReplyTo is the address to reply to (ex: RPC)&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Expiration refers to message expiration spec&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;messageId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MessageId is message identifier&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Timestamp refers to the message timestamp&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Type refers to the message type name&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;appId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AppId refers to the application id&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;exchange&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Exchange is basic.publish exchange&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;routingKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RoutingKey is basic.publish routing key&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Body represents the message body&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <p><br/></p>

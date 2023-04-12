@@ -2117,41 +2117,41 @@
 <p>The consumer group is never deleted automatically. If you want a completely fresh setup again, you must delete the consumer group from the streams.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;context&quot;: {
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;,
-          &quot;time&quot;: &quot;event_time&quot;
-        },
-        &quot;data&quot;: {
-           &quot;stream&quot;: &quot;Name of the Redis stream&quot;,
-           &quot;message_id&quot;: &quot;Message Id&quot;,
-           &quot;values&quot;: &quot;message body&quot;
-        }
-    }
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">           </span><span class="s">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Name of the Redis stream&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;message_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Message Id&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="s">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;message body&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <p>Example:</p>
-<div class="codehilite"><pre><span></span><code>    {
-      &quot;context&quot;: {
-        &quot;id&quot;: &quot;64313638396337352d623565612d343639302d383262362d306630333562333437363637&quot;,
-        &quot;source&quot;: &quot;redis-stream&quot;,
-        &quot;specversion&quot;: &quot;1.0&quot;,
-        &quot;type&quot;: &quot;redisStream&quot;,
-        &quot;datacontenttype&quot;: &quot;application/json&quot;,
-        &quot;subject&quot;: &quot;example&quot;,
-        &quot;time&quot;: &quot;2022-03-17T04:47:42Z&quot;
-      },
-      &quot;data&quot;: {
-              &quot;stream&quot;:&quot;FOO&quot;,
-              &quot;message_id&quot;:&quot;1647495121754-0&quot;,
-              &quot;values&quot;: {&quot;key-1&quot;:&quot;val-1&quot;, &quot;key-2&quot;:&quot;val-2&quot;}
-      }
-    }
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;64313638396337352d623565612d343639302d383262362d306630333562333437363637&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis-stream&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.0&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redisStream&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2022-03-17T04:47:42Z&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="s">&quot;stream&quot;</span><span class="p">:</span><span class="s">&quot;FOO&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s">&quot;message_id&quot;</span><span class="p">:</span><span class="s">&quot;1647495121754-0&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="s">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;key-1&quot;</span><span class="p">:</span><span class="s">&quot;val-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;key-2&quot;</span><span class="p">:</span><span class="s">&quot;val-2&quot;</span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>

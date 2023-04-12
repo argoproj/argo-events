@@ -2207,21 +2207,21 @@ with the event payload.</p>
 <h3 id="webhook-event-payload">Webhook Event Payload<a class="headerlink" href="#webhook-event-payload" title="Permanent link">&para;</a></h3>
 <p>Webhook event-source consumes events through HTTP requests and transforms them into CloudEvents.
 The structure of the event the Webhook sensor receives from the event-source over the eventbus looks like following,</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;time&quot;: &quot;event_time&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
-        },
-        &quot;data&quot;: {
-          &quot;header&quot;: {},
-          &quot;body&quot;: {},
-        }
-    }
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">          </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <ol>
@@ -2398,23 +2398,23 @@ as follows,</p>
 </code></pre></div>
 
 <p>Consider the event the sensor received has format like,</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;context&quot;: {
-          &quot;type&quot;: &quot;type_of_event_source&quot;,
-          &quot;specversion&quot;: &quot;cloud_events_version&quot;,
-          &quot;source&quot;: &quot;name_of_the_event_source&quot;,
-          &quot;id&quot;: &quot;unique_event_id&quot;,
-          &quot;time&quot;: &quot;event_time&quot;,
-          &quot;datacontenttype&quot;: &quot;type_of_data&quot;,
-          &quot;subject&quot;: &quot;name_of_the_configuration_within_event_source&quot;
-        },
-        &quot;data&quot;: {
-          &quot;body&quot;: {
-            &quot;name&quot;: &quot;foo bar&quot;,
-            &quot;message&quot;: &quot;hello there!!&quot;
-          },
-        }
-    }
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foo bar&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hello there!!&quot;</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <p>The parameters are transformed as,</p>

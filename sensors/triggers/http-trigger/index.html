@@ -2244,8 +2244,8 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 </li>
 <li>
 <p>The sensor has triggered a http request to the http server. Take a look at the logs.</p>
-<div class="codehilite"><pre><span></span><code>server is listening on 8090
-{&quot;type&quot;:&quot;minio&quot;,&quot;bucket&quot;:&quot;input&quot;}
+<div class="codehilite"><pre><span></span><code><span class="nx">server</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">listening</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="mi">8090</span>
+<span class="p">{</span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;minio&quot;</span><span class="p">,</span><span class="s">&quot;bucket&quot;</span><span class="p">:</span><span class="s">&quot;input&quot;</span><span class="p">}</span>
 </code></pre></div>
 
 </li>
@@ -2273,10 +2273,10 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a request payload like below,</p>
-<div class="codehilite"><pre><span></span><code>    {
-      &quot;type&quot;: &quot;type of event from event&#39;s context&quot;
-      &quot;bucket&quot;: &quot;bucket name from event data&quot;
-    }
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type of event from event&#39;s context&quot;</span>
+<span class="w">      </span><span class="s">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bucket name from event data&quot;</span>
+<span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
 <p>The above payload will be passed in the HTTP request. You can add however many number of <code>src</code> and <code>dest</code> under <code>payload</code>.</p>
@@ -2441,7 +2441,7 @@ to invoke OpenFaaS function.</p>
 </li>
 <li>
 <p>It will invoke Kubeless function <code>hello</code>.</p>
-<div class="codehilite"><pre><span></span><code>{&#39;event-time&#39;: None, &#39;extensions&#39;: {&#39;request&#39;: &lt;LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/&gt; }, &#39;event-type&#39;: None, &#39;event-namespace&#39;: None, &#39;data&#39;: &#39;{&quot;first_name&quot;:&quot;foo&quot;,&quot;last_name&quot;:&quot;bar&quot;}&#39;, &#39;event-id&#39;: None}
+<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="err">&#39;</span><span class="nx">event</span><span class="o">-</span><span class="nx">time</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="nx">None</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="nx">extensions</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">&#39;</span><span class="nx">request</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">LocalRequest</span><span class="p">:</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="nx">http</span><span class="p">:</span><span class="c1">//hello.kubeless.svc.cluster.local:8080/&gt; }, &#39;event-type&#39;: None, &#39;event-namespace&#39;: None, &#39;data&#39;: &#39;{&quot;first_name&quot;:&quot;foo&quot;,&quot;last_name&quot;:&quot;bar&quot;}&#39;, &#39;event-id&#39;: None}</span>
 </code></pre></div>
 
 </li>
