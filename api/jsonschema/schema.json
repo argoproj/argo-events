@@ -2258,9 +2258,20 @@
     "io.argoproj.eventsource.v1alpha1.PulsarEventSource": {
       "description": "PulsarEventSource describes the event source for Apache Pulsar",
       "properties": {
+        "authAthenzParams": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Authentication athenz parameters for the pulsar client. Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go Either token or athenz can be set to use auth.",
+          "type": "object"
+        },
+        "authAthenzSecret": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Authentication athenz privateKey secret for the pulsar client. AuthAthenzSecret must be set if AuthAthenzParams is used."
+        },
         "authTokenSecret": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
-          "description": "Authentication token for the pulsar client."
+          "description": "Authentication token for the pulsar client. Either token or athenz can be set to use auth."
         },
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.common.Backoff",
@@ -3829,9 +3840,20 @@
     "io.argoproj.sensor.v1alpha1.PulsarTrigger": {
       "description": "PulsarTrigger refers to the specification of the Pulsar trigger.",
       "properties": {
+        "authAthenzParams": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Authentication athenz parameters for the pulsar client. Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go Either token or athenz can be set to use auth.",
+          "type": "object"
+        },
+        "authAthenzSecret": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Authentication athenz privateKey secret for the pulsar client. AuthAthenzSecret must be set if AuthAthenzParams is used."
+        },
         "authTokenSecret": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
-          "description": "Authentication token for the pulsar client."
+          "description": "Authentication token for the pulsar client. Either token or athenz can be set to use auth."
         },
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.common.Backoff",

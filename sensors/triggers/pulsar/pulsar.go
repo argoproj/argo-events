@@ -53,7 +53,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		if pulsarTrigger.TLSTrustCertsSecret != nil {
 			tlsTrustCertsFilePath, err = common.GetSecretVolumePath(pulsarTrigger.TLSTrustCertsSecret)
 			if err != nil {
-				logger.Errorw("failed to get TLSTrustCertsFilePath from the volume", "error", err)
+				logger.Errorw("failed to get TLSTrustCertsFilePath from the volume", zap.Error(err))
 				return nil, err
 			}
 		}
@@ -67,10 +67,21 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		if pulsarTrigger.AuthTokenSecret != nil {
 			token, err := common.GetSecretFromVolume(pulsarTrigger.AuthTokenSecret)
 			if err != nil {
-				logger.Errorw("failed to get AuthTokenSecret from the volume", "error", err)
+				logger.Errorw("failed to get AuthTokenSecret from the volume", zap.Error(err))
 				return nil, err
 			}
 			clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
+		}
+
+		if len(pulsarTrigger.AuthAthenzParams) > 0 && pulsarTrigger.AuthAthenzSecret != nil {
+			logger.Info("setting athenz auth option...")
+			authAthenzFilePath, err := common.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
+			if err != nil {
+				logger.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
+				return nil, err
+			}
+			pulsarTrigger.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
+			clientOpt.Authentication = pulsar.NewAuthenticationAthenz(pulsarTrigger.AuthAthenzParams)
 		}
 
 		if pulsarTrigger.TLS != nil {
@@ -80,12 +91,12 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			case pulsarTrigger.TLS.ClientCertSecret != nil && pulsarTrigger.TLS.ClientKeySecret != nil:
 				clientCertPath, err = common.GetSecretVolumePath(pulsarTrigger.TLS.ClientCertSecret)
 				if err != nil {
-					logger.Errorw("failed to get ClientCertPath from the volume", "error", err)
+					logger.Errorw("failed to get ClientCertPath from the volume", zap.Error(err))
 					return nil, err
 				}
 				clientKeyPath, err = common.GetSecretVolumePath(pulsarTrigger.TLS.ClientKeySecret)
 				if err != nil {
-					logger.Errorw("failed to get ClientKeyPath from the volume", "error", err)
+					logger.Errorw("failed to get ClientKeyPath from the volume", zap.Error(err))
 					return nil, err
 				}
 			default:

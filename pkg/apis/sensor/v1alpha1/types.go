@@ -639,11 +639,21 @@ type PulsarTrigger struct {
 	// +optional
 	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
 	// Authentication token for the pulsar client.
+	// Either token or athenz can be set to use auth.
 	// +optional
 	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,9,opt,name=authTokenSecret"`
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,10,opt,name=connectionBackoff"`
+	// Authentication athenz parameters for the pulsar client.
+	// Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go
+	// Either token or athenz can be set to use auth.
+	// +optional
+	AuthAthenzParams map[string]string `json:"authAthenzParams,omitempty" protobuf:"bytes,11,rep,name=authAthenzParams"`
+	// Authentication athenz privateKey secret for the pulsar client.
+	// AuthAthenzSecret must be set if AuthAthenzParams is used.
+	// +optional
+	AuthAthenzSecret *corev1.SecretKeySelector `json:"authAthenzSecret,omitempty" protobuf:"bytes,12,opt,name=authAthenzSecret"`
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.

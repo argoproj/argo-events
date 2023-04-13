@@ -229,6 +229,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				return fmt.Errorf("failed to retrieve secret token. err: %w", err)
 			}
 			opt.Token = &token
+			groupHookOpt.Token = &token
 			router.secretToken = token
 		}
 

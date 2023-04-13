@@ -223,6 +223,15 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 			Timestamp: msg.Timestamp.String(),
 			Metadata:  kafkaEventSource.Metadata,
 		}
+
+		headers := make(map[string]string)
+
+		for _, recordHeader := range msg.Headers {
+			headers[string(recordHeader.Key)] = string(recordHeader.Value)
+		}
+
+		eventData.Headers = headers
+
 		if kafkaEventSource.JSONBody {
 			eventData.Body = (*json.RawMessage)(&msg.Value)
 		} else {
@@ -390,6 +399,15 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 		Timestamp: message.Timestamp.String(),
 		Metadata:  consumer.kafkaEventSource.Metadata,
 	}
+
+	headers := make(map[string]string)
+
+	for _, recordHeader := range message.Headers {
+		headers[string(recordHeader.Key)] = string(recordHeader.Value)
+	}
+
+	eventData.Headers = headers
+
 	if consumer.kafkaEventSource.JSONBody {
 		eventData.Body = (*json.RawMessage)(&message.Value)
 	} else {

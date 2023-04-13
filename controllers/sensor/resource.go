@@ -205,7 +205,10 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, con
 					Name: configMap.Name,
 				}}},
 		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: volumeName, MountPath: common.SensorConfigMapMountPath})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      volumeName,
+			MountPath: common.SensorConfigMapMountPath,
+		})
 	} else {
 		env = append(env, corev1.EnvVar{
 			Name:  common.EnvVarSensorObject,

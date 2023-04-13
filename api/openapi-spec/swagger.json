@@ -2246,8 +2246,19 @@
         "url"
       ],
       "properties": {
+        "authAthenzParams": {
+          "description": "Authentication athenz parameters for the pulsar client. Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go Either token or athenz can be set to use auth.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "authAthenzSecret": {
+          "description": "Authentication athenz privateKey secret for the pulsar client. AuthAthenzSecret must be set if AuthAthenzParams is used.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "authTokenSecret": {
-          "description": "Authentication token for the pulsar client.",
+          "description": "Authentication token for the pulsar client. Either token or athenz can be set to use auth.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "connectionBackoff": {
@@ -3818,8 +3829,19 @@
         "payload"
       ],
       "properties": {
+        "authAthenzParams": {
+          "description": "Authentication athenz parameters for the pulsar client. Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go Either token or athenz can be set to use auth.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "authAthenzSecret": {
+          "description": "Authentication athenz privateKey secret for the pulsar client. AuthAthenzSecret must be set if AuthAthenzParams is used.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "authTokenSecret": {
-          "description": "Authentication token for the pulsar client.",
+          "description": "Authentication token for the pulsar client. Either token or athenz can be set to use auth.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "connectionBackoff": {

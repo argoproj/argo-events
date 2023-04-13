@@ -2364,7 +2364,8 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 <em>(Optional)</em>
 <p>
-Authentication token for the pulsar client.
+Authentication token for the pulsar client. Either token or athenz can
+be set to use auth.
 </p>
 </td>
 </tr>
@@ -2377,6 +2378,33 @@ github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 <em>(Optional)</em>
 <p>
 Backoff holds parameters applied to connection.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authAthenzParams</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication athenz parameters for the pulsar client. Refer
+<a href="https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go">https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go</a>
+Either token or athenz can be set to use auth.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authAthenzSecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication athenz privateKey secret for the pulsar client.
+AuthAthenzSecret must be set if AuthAthenzParams is used.
 </p>
 </td>
 </tr>

@@ -1374,11 +1374,21 @@ type PulsarEventSource struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
 	// Authentication token for the pulsar client.
+	// Either token or athenz can be set to use auth.
 	// +optional
 	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,11,opt,name=authTokenSecret"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
+	// Authentication athenz parameters for the pulsar client.
+	// Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go
+	// Either token or athenz can be set to use auth.
+	// +optional
+	AuthAthenzParams map[string]string `json:"authAthenzParams,omitempty" protobuf:"bytes,13,rep,name=authAthenzParams"`
+	// Authentication athenz privateKey secret for the pulsar client.
+	// AuthAthenzSecret must be set if AuthAthenzParams is used.
+	// +optional
+	AuthAthenzSecret *corev1.SecretKeySelector `json:"authAthenzSecret,omitempty" protobuf:"bytes,14,opt,name=authAthenzSecret"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
