@@ -65,7 +65,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		log.Info("connecting to azure queue storage with connection string...")
 		client, err = azqueue.NewServiceClientFromConnectionString(connStr, nil)
 		if err != nil {
-			log.Errorw("failed to create a queue storage client", zap.Error(err))
+			log.Errorw("failed to create a service client", zap.Error(err))
 			return err
 		}
 	} else {
@@ -78,7 +78,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		serviceURL := fmt.Sprintf("https://%s.queue.core.windows.net/", queueStorageEventSource.StorageAccountName)
 		client, err = azqueue.NewServiceClient(serviceURL, cred, nil)
 		if err != nil {
-			log.Errorw("failed to create a queue storage client", zap.Error(err))
+			log.Errorw("failed to create a service client", zap.Error(err))
 			return err
 		}
 	}
