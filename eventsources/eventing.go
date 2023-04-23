@@ -25,6 +25,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
+	"github.com/argoproj/argo-events/eventsources/sources/azurequeuestorage"
 	"github.com/argoproj/argo-events/eventsources/sources/azureservicebus"
 	"github.com/argoproj/argo-events/eventsources/sources/bitbucket"
 	"github.com/argoproj/argo-events/eventsources/sources/bitbucketserver"
@@ -94,6 +95,16 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AzureEventsHub] = servers
+	}
+	if len(eventSource.Spec.AzureQueueStorage) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.AzureQueueStorage {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &azurequeuestorage.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureQueueStorageEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.AzureQueueStorage] = servers
 	}
 	if len(eventSource.Spec.AzureServiceBus) != 0 {
 		servers := []EventingServer{}
