@@ -776,8 +776,11 @@ Description
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-ConnectionString is the connection string for the Azure Service Bus
+ConnectionString is the connection string for the Azure Service Bus. If
+this fields is not provided it will try to access via Azure AD with
+DefaultAzureCredential and FullyQualifiedNamespace.
 </p>
 </td>
 </tr>
@@ -857,6 +860,20 @@ event payload.
 <em>(Optional)</em>
 <p>
 Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>fullyQualifiedNamespace</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+FullyQualifiedNamespace is the Service Bus namespace name (ex:
+myservicebus.servicebus.windows.net). This field is necessary to access
+via Azure AD (managed identity) and it is ignored if ConnectionString is
+set.
 </p>
 </td>
 </tr>

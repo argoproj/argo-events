@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"go.uber.org/zap"
 
@@ -57,13 +58,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	servicebusEventSource := &el.AzureServiceBusEventSource
-	connStr, err := common.GetSecretFromVolume(servicebusEventSource.ConnectionString)
-	if err != nil {
-		log.With("connection-string", servicebusEventSource.ConnectionString.Name).Errorw("failed to retrieve connection string from secret", zap.Error(err))
-		return err
-	}
-
-	log.Info("connecting to the service bus...")
 	clientOptions := servicebus.ClientOptions{}
 	if servicebusEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(servicebusEventSource.TLS)
@@ -73,15 +67,36 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		clientOptions.TLSConfig = tlsConfig
 	}
-
-	client, err := servicebus.NewClientFromConnectionString(connStr, &clientOptions)
-	if err != nil {
-		log.Errorw("failed to create a service bus client", zap.Error(err))
-		return err
+	var client *servicebus.Client
+	if servicebusEventSource.ConnectionString != nil {
+		log.Info("connecting to the service bus using connection string...")
+		connStr, err := common.GetSecretFromVolume(servicebusEventSource.ConnectionString)
+		if err != nil {
+			log.With("connection-string", servicebusEventSource.ConnectionString.Name).Errorw("failed to retrieve connection string from secret", zap.Error(err))
+			return err
+		}
+		client, err = servicebus.NewClientFromConnectionString(connStr, &clientOptions)
+		if err != nil {
+			log.Errorw("failed to create a service bus client", zap.Error(err))
+			return err
+		}
+	} else {
+		log.Info("connecting to azure queue storage with AAD credentials...")
+		cred, err := azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			log.Errorw("failed to create DefaultAzureCredential", zap.Error(err))
+			return err
+		}
+		client, err = servicebus.NewClient(servicebusEventSource.FullyQualifiedNamespace, cred, &clientOptions)
+		if err != nil {
+			log.Errorw("failed to create a service bus client", zap.Error(err))
+			return err
+		}
 	}
 
 	var receiver *servicebus.Receiver
 	var receiverType ReceiverType
+	var err error
 
 	if servicebusEventSource.QueueName != "" {
 		log.Info("creating a queue receiver...")

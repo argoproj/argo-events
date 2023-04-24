@@ -1166,7 +1166,9 @@ type AzureEventsHubEventSource struct {
 // AzureServiceBusEventSource describes the event source for azure service bus
 // More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/
 type AzureServiceBusEventSource struct {
-	// ConnectionString is the connection string for the Azure Service Bus
+	// ConnectionString is the connection string for the Azure Service Bus. If this fields is not provided
+	// it will try to access via Azure AD with DefaultAzureCredential and FullyQualifiedNamespace.
+	// +optional
 	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,1,opt,name=connectionString"`
 	// QueueName is the name of the Azure Service Bus Queue
 	QueueName string `json:"queueName" protobuf:"bytes,2,opt,name=queueName"`
@@ -1187,6 +1189,10 @@ type AzureServiceBusEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	// FullyQualifiedNamespace is the Service Bus namespace name (ex: myservicebus.servicebus.windows.net). This field is necessary to
+	// access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
+	// +optional
+	FullyQualifiedNamespace string `json:"fullyQualifiedNamespace,omitempty" protobuf:"bytes,9,opt,name=fullyQualifiedNamespace"`
 }
 
 // AzureQueueStorageEventSource describes the event source for azure queue storage

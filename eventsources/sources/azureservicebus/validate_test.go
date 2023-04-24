@@ -34,7 +34,7 @@ func TestValidateEventSource(t *testing.T) {
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "ConnectionString is not specified", err.Error())
+	assert.Equal(t, "ConnectionString or fullyQualifiedNamespace must be specified", err.Error())
 
 	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "azure-service-bus.yaml"))
 	assert.Nil(t, err)
