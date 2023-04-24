@@ -9,6 +9,7 @@ Available event-sources:
 1. AWS SNS
 1. AWS SQS
 1. Azure Events Hub
+1. Azure Queue Storage
 1. Bitbucket
 1. Bitbucket Server
 1. Calendar

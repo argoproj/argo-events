@@ -118,6 +118,8 @@ type EventSourceSpec struct {
 	RedisStream map[string]RedisStreamEventSource `json:"redisStream,omitempty" protobuf:"bytes,31,rep,name=redisStream"`
 	// Azure Service Bus event source
 	AzureServiceBus map[string]AzureServiceBusEventSource `json:"azureServiceBus,omitempty" protobuf:"bytes,32,rep,name=azureServiceBus"`
+	// AzureQueueStorage event source
+	AzureQueueStorage map[string]AzureQueueStorageEventSource `json:"azureQueueStorage,omitempty" protobuf:"bytes,33,rep,name=azureQueueStorage"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -1185,6 +1187,36 @@ type AzureServiceBusEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+}
+
+// AzureQueueStorageEventSource describes the event source for azure queue storage
+// more info at https://learn.microsoft.com/en-us/azure/storage/queues/
+type AzureQueueStorageEventSource struct {
+	// StorageAccountName is the name of the storage account where the queue is. This field is necessary to
+	// access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
+	// +optional
+	StorageAccountName string `json:"storageAccountName,omitempty" protobuf:"bytes,1,opt,name=cstorageAccountName"`
+	// ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided
+	// it will try to access via Azure AD with StorageAccountName.
+	// +optional
+	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,2,opt,name=connectionString"`
+	// QueueName is the name of the queue
+	QueueName string `json:"queueName" protobuf:"bytes,3,opt,name=queueName"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,4,opt,name=jsonBody"`
+	// DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully.
+	// If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue.
+	// The default value is false.
+	// +optional
+	DLQ bool `json:"dlq,omitempty" protobuf:"varint,5,opt,name=dlq"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications

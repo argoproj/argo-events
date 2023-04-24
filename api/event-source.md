@@ -626,6 +626,123 @@ Filter
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.AzureQueueStorageEventSource">
+AzureQueueStorageEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+AzureQueueStorageEventSource describes the event source for azure queue
+storage more info at
+<a href="https://learn.microsoft.com/en-us/azure/storage/queues/">https://learn.microsoft.com/en-us/azure/storage/queues/</a>
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>storageAccountName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+StorageAccountName is the name of the storage account where the queue
+is. This field is necessary to access via Azure AD (managed identity)
+and it is ignored if ConnectionString is set.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>connectionString</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ConnectionString is the connection string to access Azure Queue Storage.
+If this fields is not provided it will try to access via Azure AD with
+StorageAccountName.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+QueueName is the name of the queue
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dlq</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DLQ specifies if a dead-letter queue is configured for messages that
+can’t be processed successfully. If set to true, messages with invalid
+payload won’t be acknowledged to allow to forward them farther to the
+dead-letter queue. The default value is false.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.AzureServiceBusEventSource">
 AzureServiceBusEventSource
 </h3>
@@ -2087,6 +2204,19 @@ Azure Service Bus event source
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>azureQueueStorage</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureQueueStorageEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQueueStorageEventSource
+</a> </em>
+</td>
+<td>
+<p>
+AzureQueueStorage event source
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2109,6 +2239,7 @@ EventSourceFilter
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
 <a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">AzureEventsHubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.AzureQueueStorageEventSource">AzureQueueStorageEventSource</a>,
 <a href="#argoproj.io/v1alpha1.AzureServiceBusEventSource">AzureServiceBusEventSource</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
@@ -2584,6 +2715,19 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Azure
 <td>
 <p>
 Azure Service Bus event source
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureQueueStorage</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureQueueStorageEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQueueStorageEventSource
+</a> </em>
+</td>
+<td>
+<p>
+AzureQueueStorage event source
 </p>
 </td>
 </tr>

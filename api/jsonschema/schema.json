@@ -934,6 +934,46 @@
       ],
       "type": "object"
     },
+    "io.argoproj.eventsource.v1alpha1.AzureQueueStorageEventSource": {
+      "description": "AzureQueueStorageEventSource describes the event source for azure queue storage more info at https://learn.microsoft.com/en-us/azure/storage/queues/",
+      "properties": {
+        "connectionString": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided it will try to access via Azure AD with StorageAccountName."
+        },
+        "dlq": {
+          "description": "DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully. If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue. The default value is false.",
+          "type": "boolean"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object"
+        },
+        "queueName": {
+          "description": "QueueName is the name of the queue",
+          "type": "string"
+        },
+        "storageAccountName": {
+          "description": "StorageAccountName is the name of the storage account where the queue is. This field is necessary to access via Azure AD (managed identity) and it is ignored if ConnectionString is set.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "queueName"
+      ],
+      "type": "object"
+    },
     "io.argoproj.eventsource.v1alpha1.AzureServiceBusEventSource": {
       "description": "AzureServiceBusEventSource describes the event source for azure service bus More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/",
       "properties": {
@@ -1388,6 +1428,13 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureEventsHubEventSource"
           },
           "description": "AzureEventsHub event sources",
+          "type": "object"
+        },
+        "azureQueueStorage": {
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.AzureQueueStorageEventSource"
+          },
+          "description": "AzureQueueStorage event source",
           "type": "object"
         },
         "azureServiceBus": {

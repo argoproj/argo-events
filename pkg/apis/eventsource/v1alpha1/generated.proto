@@ -206,6 +206,42 @@ message AzureEventsHubEventSource {
   optional EventSourceFilter filter = 6;
 }
 
+// AzureQueueStorageEventSource describes the event source for azure queue storage
+// more info at https://learn.microsoft.com/en-us/azure/storage/queues/
+message AzureQueueStorageEventSource {
+  // StorageAccountName is the name of the storage account where the queue is. This field is necessary to
+  // access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
+  // +optional
+  optional string cstorageAccountName = 1;
+
+  // ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided
+  // it will try to access via Azure AD with StorageAccountName.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 2;
+
+  // QueueName is the name of the queue
+  optional string queueName = 3;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 4;
+
+  // DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully.
+  // If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue.
+  // The default value is false.
+  // +optional
+  optional bool dlq = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 7;
+}
+
 // AzureServiceBusEventSource describes the event source for azure service bus
 // More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/
 message AzureServiceBusEventSource {
@@ -585,6 +621,9 @@ message EventSourceSpec {
 
   // Azure Service Bus event source
   map<string, AzureServiceBusEventSource> azureServiceBus = 32;
+
+  // AzureQueueStorage event source
+  map<string, AzureQueueStorageEventSource> azureQueueStorage = 33;
 }
 
 // EventSourceStatus holds the status of the event-source resource
