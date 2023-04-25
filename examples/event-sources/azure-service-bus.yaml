@@ -16,3 +16,13 @@ spec:
         key: connectionstring
         # Name of the K8s secret that contains the access key
         name: azure-secret
+    
+    # example-managed-identity:
+    #   # queueName is the name of the queue to listen to
+    #   queueName: test
+    #   # jsonBody specifies that all event body payload coming from this
+    #   # source will be JSON
+    #   jsonBody: true
+    #   # fullyQualifiedNamespace is the Service Bus namespace name. This field is necessary to access via 
+    #   # Azure AD (managed identity) and it is ignored if ConnectionString is set
+    #   fullyQualifiedNamespace: myservicebus.servicebus.windows.net

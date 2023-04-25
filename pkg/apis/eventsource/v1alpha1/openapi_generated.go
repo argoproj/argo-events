@@ -524,7 +524,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureServiceBusEventSource(ref common.
 				Properties: map[string]spec.Schema{
 					"connectionString": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ConnectionString is the connection string for the Azure Service Bus",
+							Description: "ConnectionString is the connection string for the Azure Service Bus. If this fields is not provided it will try to access via Azure AD with DefaultAzureCredential and FullyQualifiedNamespace.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -585,6 +585,13 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureServiceBusEventSource(ref common.
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"fullyQualifiedNamespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "FullyQualifiedNamespace is the Service Bus namespace name (ex: myservicebus.servicebus.windows.net). This field is necessary to access via Azure AD (managed identity) and it is ignored if ConnectionString is set.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},

@@ -33,8 +33,8 @@ func validate(eventSource *v1alpha1.AzureServiceBusEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.ConnectionString == nil {
-		return fmt.Errorf("ConnectionString is not specified")
+	if eventSource.ConnectionString == nil && eventSource.FullyQualifiedNamespace == "" {
+		return fmt.Errorf("ConnectionString or fullyQualifiedNamespace must be specified")
 	}
 	if eventSource.QueueName == "" && (eventSource.TopicName == "" || eventSource.SubscriptionName == "") {
 		return fmt.Errorf("QueueName or TopicName/SubscriptionName must be specified")

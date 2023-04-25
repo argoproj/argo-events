@@ -976,12 +976,16 @@
       ],
       "properties": {
         "connectionString": {
-          "description": "ConnectionString is the connection string for the Azure Service Bus",
+          "description": "ConnectionString is the connection string for the Azure Service Bus. If this fields is not provided it will try to access via Azure AD with DefaultAzureCredential and FullyQualifiedNamespace.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "filter": {
           "description": "Filter",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
+        "fullyQualifiedNamespace": {
+          "description": "FullyQualifiedNamespace is the Service Bus namespace name (ex: myservicebus.servicebus.windows.net). This field is necessary to access via Azure AD (managed identity) and it is ignored if ConnectionString is set.",
+          "type": "string"
         },
         "jsonBody": {
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
