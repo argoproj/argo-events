@@ -337,7 +337,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 
 	if !filter(depName, *event) {
 		// message not interested
-		log.Debugf("not interested in dependency %s (didn't pass filter)", depName)
+		log.Infof("not interested in dependency %s (didn't pass filter)", depName)
 		return
 	}
 
@@ -365,7 +365,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 			parameters[prevDep] = true
 		}
 		parameters[depName] = true
-		log.Debugf("Current state of dependencies: %v", parameters)
+		log.Infof("Current state of dependencies: %v", parameters)
 
 		// evaluate the filter expression
 		result, err := conn.evaluableExpression.Evaluate(parameters)
