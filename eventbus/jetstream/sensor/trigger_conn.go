@@ -63,7 +63,7 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		sourceDepMap:         sourceDepMap,
 		recentMsgsByID:       make(map[string]*msg),
 		recentMsgsByTime:     make([]*msg, 0)}
-	connection.Logger = connection.Logger.With("triggerName", connection.triggerName)
+	connection.Logger = connection.Logger.With("triggerName", connection.triggerName, "sensorName", connection.sensorName)
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
 	if err != nil {
