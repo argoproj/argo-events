@@ -63,7 +63,7 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		sourceDepMap:         sourceDepMap,
 		recentMsgsByID:       make(map[string]*msg),
 		recentMsgsByTime:     make([]*msg, 0)}
-	connection.Logger = connection.Logger.With("triggerName", connection.triggerName)
+	connection.Logger = connection.Logger.With("triggerName", connection.triggerName, "sensorName", connection.sensorName)
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
 	if err != nil {
@@ -337,7 +337,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 
 	if !filter(depName, *event) {
 		// message not interested
-		log.Debugf("not interested in dependency %s (didn't pass filter)", depName)
+		log.Infof("not interested in dependency %s (didn't pass filter)", depName)
 		return
 	}
 
@@ -365,7 +365,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 			parameters[prevDep] = true
 		}
 		parameters[depName] = true
-		log.Debugf("Current state of dependencies: %v", parameters)
+		log.Infof("Current state of dependencies: %v", parameters)
 
 		// evaluate the filter expression
 		result, err := conn.evaluableExpression.Evaluate(parameters)
