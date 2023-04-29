@@ -77,7 +77,7 @@ require (
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.8.0
-	google.golang.org/api v0.119.0
+	google.golang.org/api v0.120.0
 	google.golang.org/grpc v1.54.0
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.24.3
