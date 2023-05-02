@@ -2,6 +2,7 @@ package expr
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -60,4 +61,45 @@ func TestEvalBool(t *testing.T) {
 	pass, err = EvalBool("(uuid == 'test-case-hyphen')", env)
 	assert.NoError(t, err)
 	assert.True(t, pass)
+}
+
+func TestRemoveConflictingKeys(t *testing.T) {
+	testCases := []struct {
+		name   string
+		input  map[string]interface{}
+		output map[string]interface{}
+	}{
+		{
+			name: "remove conflicting keys",
+			input: map[string]interface{}{
+				"a.b": 1,
+				"a":   2,
+			},
+			output: map[string]interface{}{
+				"a.b": 1,
+			},
+		},
+		{
+			name: "no conflicts",
+			input: map[string]interface{}{
+				"a":   1,
+				"b":   2,
+				"c.d": 3,
+			},
+			output: map[string]interface{}{
+				"a":   1,
+				"b":   2,
+				"c.d": 3,
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := removeConflicts(tc.input)
+			if !reflect.DeepEqual(result, tc.output) {
+				t.Errorf("expected %v, but got %v", tc.output, result)
+			}
+		})
+	}
 }

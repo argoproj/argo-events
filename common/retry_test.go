@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
@@ -116,4 +117,24 @@ func TestRetryFailure(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "after retries")
 	assert.Contains(t, err.Error(), "this is an error")
+}
+
+func TestConvert2WaitBackoff(t *testing.T) {
+	factor := apicommon.NewAmount("1.0")
+	jitter := apicommon.NewAmount("1")
+	duration := apicommon.FromString("1s")
+	backoff := apicommon.Backoff{
+		Duration: &duration,
+		Factor:   &factor,
+		Jitter:   &jitter,
+		Steps:    2,
+	}
+	waitBackoff, err := Convert2WaitBackoff(&backoff)
+	assert.NoError(t, err)
+	assert.Equal(t, wait.Backoff{
+		Duration: 1 * time.Second,
+		Factor:   1.0,
+		Jitter:   1.0,
+		Steps:    2,
+	}, *waitBackoff)
 }
