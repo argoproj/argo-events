@@ -7,6 +7,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Adobe](https://adobe.com/)
 1. [Akuity](https://akuity.io/)
 1. [Alibaba Group](https://www.alibabagroup.com/)
+1. [Anova](https://www.anova.com/)
 1. [Ant Group](https://www.antgroup.com/)
 1. [ArthurAI](https://arthur.ai/)
 1. [BioBox Analytics](https://biobox.io)

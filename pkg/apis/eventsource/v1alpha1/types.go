@@ -1201,7 +1201,7 @@ type AzureQueueStorageEventSource struct {
 	// StorageAccountName is the name of the storage account where the queue is. This field is necessary to
 	// access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
 	// +optional
-	StorageAccountName string `json:"storageAccountName,omitempty" protobuf:"bytes,1,opt,name=cstorageAccountName"`
+	StorageAccountName string `json:"storageAccountName,omitempty" protobuf:"bytes,1,opt,name=storageAccountName"`
 	// ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided
 	// it will try to access via Azure AD with StorageAccountName.
 	// +optional

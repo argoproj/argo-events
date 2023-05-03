@@ -212,7 +212,7 @@ message AzureQueueStorageEventSource {
   // StorageAccountName is the name of the storage account where the queue is. This field is necessary to
   // access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
   // +optional
-  optional string cstorageAccountName = 1;
+  optional string storageAccountName = 1;
 
   // ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided
   // it will try to access via Azure AD with StorageAccountName.
