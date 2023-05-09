@@ -14,6 +14,7 @@ type KafkaTriggerHandler interface {
 	common.TriggerConnection
 	Name() string
 	Ready() bool
+	Reset()
 	OneAndDone() bool
 	DependsOn(*cloudevents.Event) (string, bool)
 	Transform(string, *cloudevents.Event) (*cloudevents.Event, error)
@@ -90,7 +91,7 @@ func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int3
 	// all events and reset the trigger
 	var events []*cloudevents.Event
 	if satisfied == true {
-		defer c.reset()
+		defer c.Reset()
 		for _, event := range c.events {
 			events = append(events, event.Event)
 		}
@@ -144,7 +145,7 @@ func (c *KafkaTriggerConnection) satisfied() (interface{}, error) {
 	return c.depExpression.Eval(parameters)
 }
 
-func (c *KafkaTriggerConnection) reset() {
+func (c *KafkaTriggerConnection) Reset() {
 	c.events = nil
 }
 

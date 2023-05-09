@@ -141,6 +141,7 @@ func (s *KafkaSensor) Initialize() error {
 		Producer:      producer,
 		OffsetManager: offsetManager,
 		TriggerTopic:  s.topics.trigger,
+		Reset:         s.Reset,
 		Handlers: map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()){
 			s.topics.event:   s.Event,
 			s.topics.trigger: s.Trigger,
@@ -366,4 +367,12 @@ func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMes
 	}
 
 	return nil, msg.Offset + 1, f
+}
+
+func (s *KafkaSensor) Reset() error {
+	for _, trigger := range s.triggers {
+		trigger.Reset()
+	}
+
+	return nil
 }
