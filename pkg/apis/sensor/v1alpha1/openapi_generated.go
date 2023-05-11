@@ -1880,6 +1880,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
+					"loadSensorDefinitionInConfigMap": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LoadSensorDefinitionInConfigMap indicates if the sensor definition should be loaded in a configmap.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},

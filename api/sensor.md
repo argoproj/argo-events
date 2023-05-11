@@ -2594,6 +2594,18 @@ LoggingFields add additional key-value pairs when logging happens
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>loadSensorDefinitionInConfigMap</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoadSensorDefinitionInConfigMap indicates if the sensor definition
+should be loaded in a configmap.
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2721,6 +2733,18 @@ retain
 <em>(Optional)</em>
 <p>
 LoggingFields add additional key-value pairs when logging happens
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>loadSensorDefinitionInConfigMap</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoadSensorDefinitionInConfigMap indicates if the sensor definition
+should be loaded in a configmap.
 </p>
 </td>
 </tr>

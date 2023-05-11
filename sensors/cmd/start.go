@@ -28,11 +28,17 @@ func Start() {
 		logger.Fatalw("failed to get kubeconfig", zap.Error(err))
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
-	encodedSensorSpec, defined := os.LookupEnv(common.EnvVarSensorObject)
-	if !defined {
+	encodedSensorSpec, hasSensorSpecDefinedAsEnvVar := os.LookupEnv(common.EnvVarSensorObject)
+	sensorSpecFilePath, hasSensorSpecFilePath := os.LookupEnv(common.EnvVarSensorFilePath)
+	if !hasSensorSpecDefinedAsEnvVar && !hasSensorSpecFilePath {
 		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarSensorObject)
 	}
-	sensorSpec, err := base64.StdEncoding.DecodeString(encodedSensorSpec)
+	var sensorSpec []byte
+	if hasSensorSpecDefinedAsEnvVar {
+		sensorSpec, err = base64.StdEncoding.DecodeString(encodedSensorSpec)
+	} else {
+		sensorSpec, err = os.ReadFile(sensorSpecFilePath)
+	}
 	if err != nil {
 		logger.Fatalw("failed to decode sensor string", zap.Error(err))
 	}

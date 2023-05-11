@@ -18,7 +18,13 @@ package sensor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	controllerscommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -40,7 +46,8 @@ const (
 	// ControllerName is name of the controller
 	ControllerName = "sensor-controller"
 
-	finalizerName = ControllerName
+	CongigMapControllerName = "sensor-config-mapcontroller"
+	finalizerName           = ControllerName
 )
 
 type reconciler struct {
@@ -141,4 +148,95 @@ func (r *reconciler) needsUpdate(old, new *v1alpha1.Sensor) bool {
 		return true
 	}
 	return false
+}
+
+type congigmapReconciler struct {
+	client client.Client
+	scheme *runtime.Scheme
+
+	sensorImage string
+	logger      *zap.SugaredLogger
+}
+
+func NewConfigMapReconciler(client client.Client, scheme *runtime.Scheme, sensorImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
+	return &congigmapReconciler{client: client, scheme: scheme, sensorImage: sensorImage, logger: logger}
+}
+func (r *congigmapReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+	r.logger.Info(fmt.Sprintf("Reconciling ConfigMap: %s/%s", request.Namespace, request.Name))
+
+	configMap := &corev1.ConfigMap{}
+
+	// Get the ConfigMap object
+	if err := r.client.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, configMap); err != nil {
+		if apierrors.IsNotFound(err) {
+			r.logger.Warnw("WARNING: configmap not found", "request", request)
+			return reconcile.Result{}, nil
+		}
+		r.logger.Errorw("unable to get configmap", zap.Any("request", request), zap.Error(err))
+		return ctrl.Result{}, err
+	}
+	sensorName, hasSensorName := extractSensorName(request.Name)
+	if !hasSensorName {
+		r.logger.Info("Unable to extract sensor name from configmap, not a managed configmap")
+		return ctrl.Result{}, nil
+	}
+	var sensor *v1alpha1.Sensor
+	if err := r.client.Get(ctx, types.NamespacedName{Name: sensorName, Namespace: request.Namespace}, sensor); err != nil {
+		if apierrors.IsNotFound(err) {
+			r.logger.Warnw("WARNING: associated sensor not found", "request", request)
+			return reconcile.Result{}, nil
+		}
+		r.logger.Errorw("unable to get sensor", zap.Any("request", request), zap.Error(err))
+		return ctrl.Result{}, err
+	}
+
+	// Check if the ConfigMap has the expected owner reference
+	if !metav1.IsControlledBy(configMap, sensor) {
+		// ConfigMap does not have the expected owner reference, skip reconciliation
+		r.logger.Info(fmt.Sprintf("Skipping ConfigMap %s/%s, owner reference does not match", request.Namespace, request.Name))
+		return reconcile.Result{}, nil
+	}
+	updatedConfigMap, err := getUpdatedConfigMap(configMap, sensor)
+	if err != nil {
+		r.logger.Errorw("Error updating configmap", zap.Error(err))
+		return reconcile.Result{}, err
+	}
+	if updatedConfigMap != nil {
+		// Update the ConfigMap object
+		if err := controllerscommon.SetObjectMeta(sensor, configMap, v1alpha1.SchemaGroupVersionKind); err != nil {
+			return reconcile.Result{}, err
+		}
+		if err := r.client.Update(ctx, configMap); err != nil {
+			return reconcile.Result{}, errors.Wrap(err, "failed to update ConfigMap")
+		}
+
+		r.logger.Info(fmt.Sprintf("ConfigMap updated: %s/%s", request.Namespace, request.Name))
+	}
+
+	return reconcile.Result{}, nil
+}
+
+func extractSensorName(configMapName string) (string, bool) {
+	if !strings.HasPrefix(configMapName, "sensor-") {
+		return "", false
+	}
+	startIndex := len("sensor-") + 1
+	lastIndex := strings.LastIndex(configMapName, "-")
+	if startIndex >= lastIndex {
+		return "", false
+	}
+	return configMapName[startIndex:lastIndex], true
+}
+
+func getUpdatedConfigMap(configMap *corev1.ConfigMap, sensor *v1alpha1.Sensor) (*corev1.ConfigMap, error) {
+	serializedCRD, err := json.Marshal(sensor)
+	if err != nil {
+		return nil, err
+	}
+	serialziedCRDFromConfigMap, serialziedCRDFromConfigMapExists := configMap.Data[common.SensorConfigMapFilename]
+	if !serialziedCRDFromConfigMapExists || serialziedCRDFromConfigMap != string(serializedCRD) {
+		configMap.Data[common.SensorConfigMapFilename] = string(serializedCRD)
+		return configMap, nil
+	}
+	return nil, nil
 }

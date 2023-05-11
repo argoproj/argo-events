@@ -18,6 +18,7 @@ package sensor
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,10 @@ import (
 )
 
 const (
-	testNamespace = "test-ns"
+	testNamespace      = "test-ns"
+	authVolumeName     = "auth-volume"
+	tmpVolumeName      = "tmp"
+	testDataVolumeName = "test-data"
 )
 
 var (
@@ -179,26 +183,45 @@ func Test_BuildDeployment(t *testing.T) {
 			Sensor: sensorObj,
 			Labels: testLabels,
 		}
-		deployment, err := buildDeployment(args, fakeEventBus)
+		deployment, err := buildDeployment(args, fakeEventBus, nil)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 		volumes := deployment.Spec.Template.Spec.Volumes
 		assert.True(t, len(volumes) > 0)
 		hasAuthVolume := false
 		hasTmpVolume := false
+		hasTestDataVolume := false
 		for _, vol := range volumes {
-			if vol.Name == "auth-volume" {
+			if vol.Name == authVolumeName {
 				hasAuthVolume = true
 			}
-			if vol.Name == "tmp" {
+			if vol.Name == tmpVolumeName {
 				hasTmpVolume = true
+			}
+			if vol.Name == testDataVolumeName {
+				hasTestDataVolume = true
 			}
 		}
 		assert.True(t, hasAuthVolume)
 		assert.True(t, hasTmpVolume)
+		assert.True(t, hasTestDataVolume)
+		assert.Len(t, volumes, 3, "Verify unexpected volumes aren't defined")
 		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
 		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
 		assert.Nil(t, deployment.Spec.RevisionHistoryLimit)
+
+		hasSensorLoadConfigMapEnvVar := false
+		hasSensorObjectEnvVar := false
+		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if env.Name == common.EnvVarSensorFilePath {
+				hasSensorLoadConfigMapEnvVar = true
+			}
+			if env.Name == common.EnvVarSensorObject {
+				hasSensorObjectEnvVar = true
+			}
+		}
+		assert.True(t, hasSensorObjectEnvVar)
+		assert.False(t, hasSensorLoadConfigMapEnvVar)
 	})
 	t.Run("test revisionHistoryLimit", func(t *testing.T) {
 		sensorWithRevisionHistoryLimit := sensorObj.DeepCopy()
@@ -208,12 +231,84 @@ func Test_BuildDeployment(t *testing.T) {
 			Sensor: sensorWithRevisionHistoryLimit,
 			Labels: testLabels,
 		}
-		deployment, err := buildDeployment(args, fakeEventBus)
+		deployment, err := buildDeployment(args, fakeEventBus, nil)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 		assert.Equal(t, int32(3), *deployment.Spec.RevisionHistoryLimit)
 	})
+	t.Run("test load sensor from configmap", func(t *testing.T) {
+		sensorWithConfigMap := sensorObj.DeepCopy()
+		sensorWithConfigMap.Spec.LoadSensorDefinitionInConfigMap = true
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorWithConfigMap,
+			Labels: testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus, &corev1.ConfigMap{})
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
 
+		hasSensorLoadFromConfigEnvVar := false
+		hasSensorObjectEnvVar := false
+		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if env.Name == common.EnvVarSensorFilePath {
+				hasSensorLoadFromConfigEnvVar = true
+			}
+			if env.Name == common.EnvVarSensorObject {
+				hasSensorObjectEnvVar = true
+			}
+		}
+		assert.False(t, hasSensorObjectEnvVar)
+		assert.True(t, hasSensorLoadFromConfigEnvVar)
+
+		hasAuthVolume := false
+		hasTmpVolume := false
+		hasTestDataVolume := false
+		hasConfigMapVolume := false
+		for _, vol := range deployment.Spec.Template.Spec.Volumes {
+			if vol.Name == authVolumeName {
+				hasAuthVolume = true
+			}
+			if vol.Name == tmpVolumeName {
+				hasTmpVolume = true
+			}
+			if vol.Name == testDataVolumeName {
+				hasTestDataVolume = true
+			}
+			if vol.Name == "sensor-config-volume" {
+				hasConfigMapVolume = true
+			}
+		}
+		assert.True(t, hasAuthVolume)
+		assert.True(t, hasTmpVolume)
+		assert.True(t, hasTestDataVolume)
+		assert.True(t, hasConfigMapVolume)
+		assert.Len(t, deployment.Spec.Template.Spec.Volumes, 4, "Verify unexpected volumes aren't defined")
+
+		hasAuthVolumeMount := false
+		hasTmpVolumeMount := false
+		hasTestDataVolumeMount := false
+		hasConfigMapVolumeMount := false
+		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+			if volumeMount.Name == authVolumeName {
+				hasAuthVolumeMount = true
+			}
+			if volumeMount.Name == tmpVolumeName {
+				hasTmpVolumeMount = true
+			}
+			if volumeMount.Name == testDataVolumeName {
+				hasTestDataVolumeMount = true
+			}
+			if volumeMount.Name == "sensor-config-volume" {
+				hasConfigMapVolumeMount = true
+			}
+		}
+		assert.True(t, hasAuthVolumeMount)
+		assert.True(t, hasTmpVolumeMount)
+		assert.True(t, hasTestDataVolumeMount)
+		assert.True(t, hasConfigMapVolumeMount)
+		assert.Len(t, deployment.Spec.Template.Spec.Containers[0].VolumeMounts, 4, "Verify unexpected volumes aren't mounted")
+	})
 	t.Run("test kafka eventbus secrets attached", func(t *testing.T) {
 		args := &AdaptorArgs{
 			Image:  testImage,
@@ -232,7 +327,7 @@ func Test_BuildDeployment(t *testing.T) {
 			PasswordSecret: &corev1.SecretKeySelector{Key: "password", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
 		}
 
-		deployment, err := buildDeployment(args, testBus)
+		deployment, err := buildDeployment(args, testBus, nil)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
 
@@ -311,4 +406,70 @@ func TestResourceReconcile(t *testing.T) {
 			assert.Equal(t, 0, len(svcList.Items))
 		})
 	}
+	t.Run("test resource reconcile with sensor from configmap (create/update)", func(t *testing.T) {
+		ctx := context.TODO()
+		cl := fake.NewClientBuilder().Build()
+		testBus := fakeEventBus.DeepCopy()
+		testBus.Status.MarkDeployed("test", "test")
+		testBus.Status.MarkConfigured()
+		err := cl.Create(ctx, testBus)
+		assert.Nil(t, err)
+		testSensor := sensorObj.DeepCopy()
+		testSensor.Spec.LoadSensorDefinitionInConfigMap = true
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: testSensor,
+			Labels: testLabels,
+		}
+		err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
+		assert.Nil(t, err)
+		assert.True(t, testSensor.Status.IsReady())
+
+		deployList := &appv1.DeploymentList{}
+		err = cl.List(ctx, deployList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(deployList.Items))
+
+		// Verify configmap created in sensor namespace and contents accurate
+		cmList := &corev1.ConfigMapList{}
+		err = cl.List(ctx, cmList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(cmList.Items))
+		loadFromConfigMap := cmList.Items[0]
+		assert.Equal(t, "sensor-fake-sensor", loadFromConfigMap.Name)
+		var sensorFromConfigMap v1alpha1.Sensor
+		err = json.Unmarshal([]byte(loadFromConfigMap.Data[common.SensorConfigMapFilename]), &sensorFromConfigMap)
+		assert.Nil(t, err)
+		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
+		assert.Equal(t, "fake-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
+
+		// Update the sensor dependencies and re-reconcile the sensor
+		testSensor.Spec.Dependencies[0].Name = "updated-dep"
+		err = Reconcile(cl, testBus, args, logging.NewArgoEventsLogger())
+		assert.Nil(t, err)
+		assert.True(t, testSensor.Status.IsReady())
+
+		err = cl.List(ctx, deployList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(deployList.Items))
+
+		// Verify configmap has been updated with new dependency
+		err = cl.List(ctx, cmList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(cmList.Items))
+		loadFromConfigMap = cmList.Items[0]
+		assert.Equal(t, "sensor-fake-sensor", loadFromConfigMap.Name)
+		err = json.Unmarshal([]byte(loadFromConfigMap.Data[common.SensorConfigMapFilename]), &sensorFromConfigMap)
+		assert.Nil(t, err)
+		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)
+		assert.Equal(t, "updated-dep", sensorFromConfigMap.Spec.Dependencies[0].Name)
+	})
 }

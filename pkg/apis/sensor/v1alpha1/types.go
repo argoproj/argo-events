@@ -113,6 +113,9 @@ type SensorSpec struct {
 	// LoggingFields add additional key-value pairs when logging happens
 	// +optional
 	LoggingFields map[string]string `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
+	// LoadSensorDefinitionInConfigMap indicates if the sensor definition should be loaded in a configmap.
+	// +optional
+	LoadSensorDefinitionInConfigMap bool `json:"loadSensorDefinitionInConfigMap,omitempty" protobuf:"varint,9,opt,name=loadSensorDefinitionInConfigMap"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {

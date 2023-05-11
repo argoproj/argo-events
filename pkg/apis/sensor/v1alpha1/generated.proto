@@ -686,6 +686,10 @@ message SensorSpec {
   // LoggingFields add additional key-value pairs when logging happens
   // +optional
   map<string, string> loggingFields = 8;
+
+  // LoadSensorDefinitionInConfigMap indicates if the sensor definition should be loaded in a configmap.
+  // +optional
+  optional bool loadSensorDefinitionInConfigMap = 9;
 }
 
 // SensorStatus contains information about the status of a sensor.

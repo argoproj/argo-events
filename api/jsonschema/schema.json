@@ -4050,6 +4050,10 @@
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
         },
+        "loadSensorDefinitionInConfigMap": {
+          "description": "LoadSensorDefinitionInConfigMap indicates if the sensor definition should be loaded in a configmap.",
+          "type": "boolean"
+        },
         "loggingFields": {
           "additionalProperties": {
             "type": "string"
