@@ -73,8 +73,8 @@ github.com/Azure/azure-sdk-for-go/sdk/internal v1.2.0 h1:leh5DwKv6Ihwi+h60uHtn6U
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.2.0/go.mod h1:eWRD7oawr1Mu1sLCawqVc0CUiF43ia3qQMxLscsKQ9w=
 github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.2.1 h1:ryVRjO3SrGrSM8PNlLuMbMYFz9vexPzvenNUEBfsgCo=
 github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.2.1/go.mod h1:R6+0udeRV8iYSTVuT5RT7If4sc46K5Bz3ZKrmvZQF7U=
-github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v0.1.0 h1:TOtQFiO403wClfrZId/EKvlKOfUhL0mWgvWgZ0FNn8I=
-github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v0.1.0/go.mod h1:U0IH4deB/maBcagR9SiNeIfgZ1BY/zYCq8SOiQ4vfRc=
+github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.0 h1:lJwNFV+xYjHREUTHJKx/ZF6CJSt9znxmLw9DqSTvyRU=
+github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.0/go.mod h1:GfT0aGew8Qj5yiQVqOO5v7N8fanbJGyUoHqXg56qcVY=
 github.com/Azure/go-amqp v0.19.1 h1:S1l3HiSMU7Rhko2f70lBH6Vd0mLj5UZiTWC6xKY5Kho=
 github.com/Azure/go-amqp v0.19.1/go.mod h1:+bg0x3ce5+Q3ahCEXnCsGG3ETpDQe3MEVnOuT2ywPwc=
 github.com/Azure/go-ansiterm v0.0.0-20210608223527-2377c96fe795/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
