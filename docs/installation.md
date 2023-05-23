@@ -105,8 +105,6 @@ Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/stab
 
 Make sure you have helm client installed. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a>
 
-1. Create namespace called argo-events.
-
 1. Add `argoproj` repository.
 
         helm repo add argo https://argoproj.github.io/argo-helm
@@ -116,7 +114,11 @@ Make sure you have helm client installed. To install helm, follow <a href="https
 
 1. Install `argo-events` chart.
 
-        helm install argo-events argo/argo-events
+        helm install argo-events argo/argo-events -n argo-events --create-namespace
+
+1. Deploy the eventbus.
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
 ### Migrate to v1.0.0
 
