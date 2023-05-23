@@ -2290,9 +2290,6 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
 <p>Make sure you have helm client installed. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a></p>
 <ol>
 <li>
-<p>Create namespace called argo-events.</p>
-</li>
-<li>
 <p>Add <code>argoproj</code> repository.</p>
 <div class="codehilite"><pre><span></span><code>helm repo add argo https://argoproj.github.io/argo-helm
 </code></pre></div>
@@ -2304,7 +2301,13 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
 </li>
 <li>
 <p>Install <code>argo-events</code> chart.</p>
-<div class="codehilite"><pre><span></span><code>helm install argo-events argo/argo-events
+<div class="codehilite"><pre><span></span><code>helm install argo-events argo/argo-events -n argo-events --create-namespace
+</code></pre></div>
+
+</li>
+<li>
+<p>Deploy the eventbus.</p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </code></pre></div>
 
 </li>
