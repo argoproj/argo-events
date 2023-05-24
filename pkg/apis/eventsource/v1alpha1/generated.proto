@@ -240,6 +240,11 @@ message AzureQueueStorageEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 7;
+
+  // DecodeMessage specifies if all the messages should be base64 decoded
+  // if set to true the decoding is done before the evaluation of JSONBody
+  // +optional
+  optional bool decodeMessage = 8;
 }
 
 // AzureServiceBusEventSource describes the event source for azure service bus
