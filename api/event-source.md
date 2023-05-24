@@ -748,7 +748,7 @@ Filter
 <td>
 <em>(Optional)</em>
 <p>
-DecodeMessage specifies if all the messages should be base64 decoded if
+DecodeMessage specifies if all the messages should be base64 decoded. If
 set to true the decoding is done before the evaluation of JSONBody
 </p>
 </td>

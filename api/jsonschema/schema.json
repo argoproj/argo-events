@@ -942,7 +942,7 @@
           "description": "ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided it will try to access via Azure AD with StorageAccountName."
         },
         "decodeMessage": {
-          "description": "DecodeMessage specifies if all the messages should be base64 decoded if set to true the decoding is done before the evaluation of JSONBody",
+          "description": "DecodeMessage specifies if all the messages should be base64 decoded. If set to true the decoding is done before the evaluation of JSONBody",
           "type": "boolean"
         },
         "dlq": {

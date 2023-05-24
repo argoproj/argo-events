@@ -508,7 +508,7 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureQueueStorageEventSource(ref commo
 					},
 					"decodeMessage": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DecodeMessage specifies if all the messages should be base64 decoded if set to true the decoding is done before the evaluation of JSONBody",
+							Description: "DecodeMessage specifies if all the messages should be base64 decoded. If set to true the decoding is done before the evaluation of JSONBody",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
