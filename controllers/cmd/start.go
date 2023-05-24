@@ -179,16 +179,12 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 
 	// Watch configmaps for changes
 	congigMapController, err := controller.New(sensor.CongigMapControllerName, mgr, controller.Options{
-		Reconciler: sensor.NewConfigMapReconciler(mgr.GetClient(), mgr.GetScheme(), imageName, logger),
+		Reconciler: sensor.NewConfigMapReconciler(mgr.GetClient(), mgr.GetScheme(), logger),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up configmap controller", zap.Error(err))
 	}
-	if err := congigMapController.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForObject{},
-		predicate.Or(
-			predicate.GenerationChangedPredicate{},
-			predicate.LabelChangedPredicate{},
-		)); err != nil {
+	if err := congigMapController.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		logger.Fatalw("unable to watch configmaps", zap.Error(err))
 	}
 

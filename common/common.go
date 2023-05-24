@@ -97,13 +97,13 @@ const (
 const (
 	// EnvVarSensorObject refers to the env of based64 encoded sensor spec
 	EnvVarSensorObject = "SENSOR_OBJECT"
-	// EnvVarSensorFilePath refers to the path of the sensor config file
+	// EnvVarSensorFilePath refers to the path of the sensor config file used by load sensor definition in configmap feature
 	EnvVarSensorFilePath = "SENSOR_FILE_PATH"
 	// SensorNamespace is used to get namespace where sensors are deployed
 	SensorNamespace = "SENSOR_NAMESPACE"
-	// VolumeMount path for sensor configmap used by configmap feature
+	// VolumeMount path for sensor definition configmap used by load sensor definition in configmap feature
 	SensorConfigMapMountPath = "/etc/sensor"
-	// File name for the sensor configmap used by configmap feature
+	// File name for the sensor definition configmap used by load sensor definition in configmap feature
 	SensorConfigMapFilename = "sensor.json"
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"

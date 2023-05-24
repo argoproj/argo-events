@@ -18,9 +18,11 @@ package sensor
 
 import (
 	"context"
+	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/types"
 
@@ -284,23 +286,35 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, con
 	return deployment, nil
 }
 
-func GetConfigMapData(sensor *v1alpha1.Sensor) (map[string]string, error) {
+func GetConfigMapDataAndUUID(sensor *v1alpha1.Sensor) (map[string]string, string, error) {
 	serializedBytes, err := json.Marshal(sensor)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return map[string]string{common.SensorConfigMapFilename: string(serializedBytes)}, nil
+	hashInputBytes, err := json.Marshal(sensor.Spec)
+	if err != nil {
+		return nil, "", err
+	}
+
+	hash := md5.New()
+	hash.Write(hashInputBytes)
+	hashedBytes := hash.Sum(nil)
+	base64Hash := base64.RawURLEncoding.EncodeToString(hashedBytes)
+	base64Hash = strings.Replace(base64Hash, "_", "", -1)
+	base64Hash = strings.ToLower(base64Hash)
+
+	return map[string]string{common.SensorConfigMapFilename: string(serializedBytes)}, base64Hash, nil
 }
 
 func buildConfigMap(args *AdaptorArgs) (*corev1.ConfigMap, error) {
-	configMapData, err := GetConfigMapData(args.Sensor)
+	configMapData, configMapHash, err := GetConfigMapDataAndUUID(args.Sensor)
 	if err != nil {
 		return nil, err
 	}
 
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("sensor-%s", args.Sensor.Name),
+			Name:      fmt.Sprintf("sensor-%s-%s", args.Sensor.Name, configMapHash),
 			Namespace: args.Sensor.Namespace,
 		},
 		Data: configMapData,

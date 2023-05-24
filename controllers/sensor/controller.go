@@ -20,14 +20,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -47,7 +46,7 @@ const (
 	// ControllerName is name of the controller
 	ControllerName = "sensor-controller"
 
-	CongigMapControllerName = "sensor-config-mapcontroller"
+	CongigMapControllerName = "sensor-config-map-controller"
 	finalizerName           = ControllerName
 )
 
@@ -155,78 +154,95 @@ type congigmapReconciler struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	sensorImage string
-	logger      *zap.SugaredLogger
+	logger *zap.SugaredLogger
 }
 
-func NewConfigMapReconciler(client client.Client, scheme *runtime.Scheme, sensorImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
-	return &congigmapReconciler{client: client, scheme: scheme, sensorImage: sensorImage, logger: logger}
+func NewConfigMapReconciler(client client.Client, scheme *runtime.Scheme, logger *zap.SugaredLogger) reconcile.Reconciler {
+	return &congigmapReconciler{client: client, scheme: scheme, logger: logger}
 }
 func (r *congigmapReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
-	r.logger.Info(fmt.Sprintf("Reconciling ConfigMap: %s/%s", request.Namespace, request.Name))
+	log := r.logger.With("namespace", request.Namespace).With("configmap", request.Name)
+	log.Info(fmt.Sprintf("Reconciling ConfigMap: %s/%s", request.Namespace, request.Name))
 
 	configMap := &corev1.ConfigMap{}
-
+	configMapFound := true
 	// Get the ConfigMap object
 	if err := r.client.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, configMap); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.logger.Warnw("WARNING: configmap not found", "request", request)
-			return reconcile.Result{}, nil
+			log.Warnw("WARNING: configmap not found, delete event", "request", request)
+			configMapFound = false
+		} else {
+			log.Errorw("unable to get configmap", zap.Any("request", request), zap.Error(err))
+			return ctrl.Result{}, err
 		}
-		r.logger.Errorw("unable to get configmap", zap.Any("request", request), zap.Error(err))
-		return ctrl.Result{}, err
+
 	}
 	sensorName, hasSensorName := extractSensorName(request.Name)
 	if !hasSensorName {
-		r.logger.Info("Unable to extract sensor name from configmap, not a managed configmap")
+		log.Info("Unable to extract sensor name from configmap, configmap not associated with a sensor")
 		return ctrl.Result{}, nil
 	}
-	var sensor *v1alpha1.Sensor
+
+	sensor := &v1alpha1.Sensor{}
+	//Get the sensor associated with configmap
 	if err := r.client.Get(ctx, types.NamespacedName{Name: sensorName, Namespace: request.Namespace}, sensor); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.logger.Warnw("WARNING: associated sensor not found", "request", request)
+			log.Warnw("WARNING: associated sensor not found", "request", request)
 			return reconcile.Result{}, nil
 		}
-		r.logger.Errorw("unable to get sensor", zap.Any("request", request), zap.Error(err))
+		log.Errorw("unable to get sensor", zap.Any("request", request), zap.Error(err))
 		return ctrl.Result{}, err
 	}
 
 	// Check if the ConfigMap has the expected owner reference
-	if !metav1.IsControlledBy(configMap, sensor) {
+	if configMapFound && !metav1.IsControlledBy(configMap, sensor) {
 		// ConfigMap does not have the expected owner reference, skip reconciliation
-		r.logger.Info(fmt.Sprintf("Skipping ConfigMap %s/%s, owner reference does not match", request.Namespace, request.Name))
+		log.Info(fmt.Sprintf("Skipping ConfigMap %s/%s, owner reference does not match", request.Namespace, request.Name))
 		return reconcile.Result{}, nil
 	}
+
+	// Case: configmap deleted, recreate it
+	if !configMapFound || !configMap.DeletionTimestamp.IsZero() {
+		configMap.Name = request.Name
+		configMap.Namespace = request.Namespace
+		log.Info("recreating deleted configmap")
+		err := r.client.Create(ctx, configMap)
+		if err != nil {
+			log.Errorw("Failed to recreate configmap", zap.Error(err))
+			return reconcile.Result{}, err
+		}
+	}
+
 	updatedConfigMap, err := getUpdatedConfigMap(configMap, sensor)
 	if err != nil {
-		r.logger.Errorw("Error updating configmap", zap.Error(err))
+		log.Errorw("Error updating configmap", zap.Error(err))
 		return reconcile.Result{}, err
 	}
 	if updatedConfigMap != nil {
 		// Update the ConfigMap object
-		if err := controllerscommon.SetObjectMeta(sensor, configMap, v1alpha1.SchemaGroupVersionKind); err != nil {
+		if err := controllerscommon.SetObjectMeta(sensor, updatedConfigMap, v1alpha1.SchemaGroupVersionKind); err != nil {
+			log.Errorw("Error setting configmap owner reference", zap.Error(err))
 			return reconcile.Result{}, err
 		}
-		if err := r.client.Update(ctx, configMap); err != nil {
+		if err := r.client.Update(ctx, updatedConfigMap); err != nil {
+			log.Errorw("Error updating configmap", zap.Error(err))
 			return reconcile.Result{}, errors.Wrap(err, "failed to update ConfigMap")
 		}
 
-		r.logger.Info(fmt.Sprintf("ConfigMap updated: %s/%s", request.Namespace, request.Name))
+		log.Info(fmt.Sprintf("ConfigMap updated: %s/%s", request.Namespace, request.Name))
 	}
 
 	return reconcile.Result{}, nil
 }
 
 func extractSensorName(configMapName string) (string, bool) {
-	if !strings.HasPrefix(configMapName, "sensor-") {
+	configMapPrefix := "sensor-"
+	if !strings.HasPrefix(configMapName, configMapPrefix) {
 		return "", false
 	}
-	startIndex := len("sensor-") + 1
+	// volume name suffixed with -(md5)
 	lastIndex := strings.LastIndex(configMapName, "-")
-	if startIndex >= lastIndex {
-		return "", false
-	}
-	return configMapName[startIndex:lastIndex], true
+	return configMapName[len(configMapPrefix):lastIndex], true
 }
 
 func getUpdatedConfigMap(configMap *corev1.ConfigMap, sensor *v1alpha1.Sensor) (*corev1.ConfigMap, error) {
@@ -235,7 +251,9 @@ func getUpdatedConfigMap(configMap *corev1.ConfigMap, sensor *v1alpha1.Sensor) (
 		return nil, err
 	}
 	serialziedCRDFromConfigMap, serialziedCRDFromConfigMapExists := configMap.Data[common.SensorConfigMapFilename]
-	if !serialziedCRDFromConfigMapExists || serialziedCRDFromConfigMap != string(serializedCRD) {
+	// Update cases: sensor file content has been modified or additional keys have been added
+	if !serialziedCRDFromConfigMapExists || serialziedCRDFromConfigMap != string(serializedCRD) || len(configMap.Data) > 1 {
+		configMap.Data = make(map[string]string)
 		configMap.Data[common.SensorConfigMapFilename] = string(serializedCRD)
 		return configMap, nil
 	}
