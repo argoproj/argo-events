@@ -1,8 +1,8 @@
 package fsevent
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestOpString(t *testing.T) {
