@@ -506,6 +506,13 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureQueueStorageEventSource(ref commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
 						},
 					},
+					"decodeMessage": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DecodeMessage specifies if all the messages should be base64 decoded. If set to true the decoding is done before the evaluation of JSONBody",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"queueName"},
 			},
