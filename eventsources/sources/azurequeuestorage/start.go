@@ -2,6 +2,7 @@ package azurequeuestorage
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -126,11 +127,23 @@ func (el *EventListener) processMessage(message *azqueue.DequeuedMessage, dispat
 		InsertionTime: *message.InsertionTime,
 		Metadata:      el.AzureQueueStorageEventSource.Metadata,
 	}
+	body := []byte(*message.MessageText)
+	if el.AzureQueueStorageEventSource.DecodeMessage {
+		rawDecodedText, err := base64.RawURLEncoding.DecodeString(*message.MessageText)
+		if err != nil {
+			log.Errorw("failed to base64 decode message...", zap.Error(err))
+			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+			if !el.AzureQueueStorageEventSource.DLQ {
+				ack()
+			}
+			return
+		}
+		body = rawDecodedText
+	}
 	if el.AzureQueueStorageEventSource.JSONBody {
-		body := []byte(*message.MessageText)
 		data.Body = (*json.RawMessage)(&body)
 	} else {
-		data.Body = []byte(*message.MessageText)
+		data.Body = body
 	}
 	eventBytes, err := json.Marshal(data)
 	if err != nil {
