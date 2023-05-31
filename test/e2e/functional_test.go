@@ -622,7 +622,7 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 }
 
-func (s *FunctionalSuite) TestSensorLoadAsConfigMap) {
+func (s *FunctionalSuite) TestSensorLoadAsConfigMap() {
 	t1 := s.Given().EventSource("@testdata/es-calendar.yaml").
 		When().
 		CreateEventSource().

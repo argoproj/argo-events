@@ -70,10 +70,16 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 		return fmt.Errorf("eventbus not ready")
 	}
 	var configMap *corev1.ConfigMap
+	var existingConfigMapsForSensor []corev1.ConfigMap
 	if args.Sensor.Spec.LoadSensorDefinitionInConfigMap {
 		sensorDefinitionConfigMap, err := buildConfigMap(args)
 		if err != nil {
 			logger.Errorw("failed to build sensor definition config map", zap.Error(err))
+			return err
+		}
+		existingConfigMapsForSensor, err = getExistingConfigMapsForSensor(ctx, client, args)
+		if err != nil {
+			logger.Errorw("failed to get existing configmaps", zap.Error(err))
 			return err
 		}
 
@@ -119,6 +125,13 @@ func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *
 		}
 		logger.Infow("deployment is created", "deploymentName", expectedDeploy.Name)
 	}
+
+	if args.Sensor.Spec.LoadSensorDefinitionInConfigMap {
+		if err := removeExistingConfigMaps(ctx, client, existingConfigMapsForSensor); err != nil {
+			logger.Errorw("failed to remove previous config maps", zap.Error(err))
+			return err
+		}
+	}
 	sensor.Status.MarkDeployed()
 	return nil
 }
@@ -138,6 +151,36 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 		}
 	}
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
+}
+
+func getExistingConfigMapsForSensor(ctx context.Context, cl client.Client, args *AdaptorArgs) ([]corev1.ConfigMap, error) {
+	namespaceCmList := &corev1.ConfigMapList{}
+	existingCms := make([]corev1.ConfigMap, 0)
+	err := cl.List(ctx, namespaceCmList, &client.ListOptions{
+		Namespace: args.Sensor.Namespace,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, cm := range namespaceCmList.Items {
+		if metav1.IsControlledBy(&cm, args.Sensor) {
+			existingCms = append(existingCms, cm)
+		}
+	}
+	return existingCms, nil
+}
+
+func removeExistingConfigMaps(ctx context.Context, cl client.Client, configmaps []corev1.ConfigMap) error {
+	if configmaps == nil {
+		return nil
+	}
+	for _, cm := range configmaps {
+		err := cl.Delete(ctx, &cm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, configMap *corev1.ConfigMap) (*appv1.Deployment, error) {
@@ -301,6 +344,7 @@ func GetConfigMapDataAndUUID(sensor *v1alpha1.Sensor) (map[string]string, string
 	hashedBytes := hash.Sum(nil)
 	base64Hash := base64.RawURLEncoding.EncodeToString(hashedBytes)
 	base64Hash = strings.ReplaceAll(base64Hash, "_", "")
+	base64Hash = strings.ReplaceAll(base64Hash, "-", "")
 	base64Hash = strings.ToLower(base64Hash)
 
 	return map[string]string{common.SensorConfigMapFilename: string(serializedBytes)}, base64Hash, nil

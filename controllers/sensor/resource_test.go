@@ -19,6 +19,7 @@ package sensor
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -440,7 +441,7 @@ func TestResourceReconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		loadFromConfigMap := cmList.Items[0]
-		assert.Equal(t, "sensor-fake-sensor", loadFromConfigMap.Name)
+		assert.True(t, strings.HasPrefix(loadFromConfigMap.Name, "sensor-fake-sensor-"))
 		var sensorFromConfigMap v1alpha1.Sensor
 		err = json.Unmarshal([]byte(loadFromConfigMap.Data[common.SensorConfigMapFilename]), &sensorFromConfigMap)
 		assert.Nil(t, err)
@@ -466,7 +467,7 @@ func TestResourceReconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		loadFromConfigMap = cmList.Items[0]
-		assert.Equal(t, "sensor-fake-sensor", loadFromConfigMap.Name)
+		assert.True(t, strings.HasPrefix(loadFromConfigMap.Name, "sensor-fake-sensor-"))
 		err = json.Unmarshal([]byte(loadFromConfigMap.Data[common.SensorConfigMapFilename]), &sensorFromConfigMap)
 		assert.Nil(t, err)
 		assert.Equal(t, "fake-sensor", sensorFromConfigMap.Name)

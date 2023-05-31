@@ -201,8 +201,18 @@ func (r *congigmapReconciler) Reconcile(ctx context.Context, request reconcile.R
 		return reconcile.Result{}, nil
 	}
 
+	_, uuid, err := GetConfigMapDataAndUUID(sensor)
+	if err != nil {
+		log.Errorw("Failed to generated uuid from sensor", zap.Error(err))
+		return reconcile.Result{}, err
+	}
 	// Case: configmap deleted, recreate it
 	if !configMapFound || !configMap.DeletionTimestamp.IsZero() {
+		//Only recreate the configmap if the uuid matches the request suffix
+		if !strings.HasSuffix(request.Name, "-"+uuid) {
+			log.Errorw("Configmap is obsolete and can be safely deleted", zap.Error(err))
+			return reconcile.Result{}, nil
+		}
 		configMap.Name = request.Name
 		configMap.Namespace = request.Namespace
 		log.Info("recreating deleted configmap")
