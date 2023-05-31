@@ -300,7 +300,7 @@ func GetConfigMapDataAndUUID(sensor *v1alpha1.Sensor) (map[string]string, string
 	hash.Write(hashInputBytes)
 	hashedBytes := hash.Sum(nil)
 	base64Hash := base64.RawURLEncoding.EncodeToString(hashedBytes)
-	base64Hash = strings.Replace(base64Hash, "_", "", -1)
+	base64Hash = strings.ReplaceAll(base64Hash, "_", "")
 	base64Hash = strings.ToLower(base64Hash)
 
 	return map[string]string{common.SensorConfigMapFilename: string(serializedBytes)}, base64Hash, nil

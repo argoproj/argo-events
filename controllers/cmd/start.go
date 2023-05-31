@@ -184,7 +184,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	if err != nil {
 		logger.Fatalw("unable to set up configmap controller", zap.Error(err))
 	}
-	if err := congigMapController.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err := congigMapController.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForObject{}, predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("unable to watch configmaps", zap.Error(err))
 	}
 
