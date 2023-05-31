@@ -20,8 +20,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/pkg/errors"
@@ -175,7 +176,6 @@ func (r *congigmapReconciler) Reconcile(ctx context.Context, request reconcile.R
 			log.Errorw("unable to get configmap", zap.Any("request", request), zap.Error(err))
 			return ctrl.Result{}, err
 		}
-
 	}
 	sensorName, hasSensorName := extractSensorName(request.Name)
 	if !hasSensorName {
@@ -184,7 +184,7 @@ func (r *congigmapReconciler) Reconcile(ctx context.Context, request reconcile.R
 	}
 
 	sensor := &v1alpha1.Sensor{}
-	//Get the sensor associated with configmap
+	// Get the sensor associated with configmap
 	if err := r.client.Get(ctx, types.NamespacedName{Name: sensorName, Namespace: request.Namespace}, sensor); err != nil {
 		if apierrors.IsNotFound(err) {
 			log.Warnw("WARNING: associated sensor not found", "request", request)
@@ -208,7 +208,7 @@ func (r *congigmapReconciler) Reconcile(ctx context.Context, request reconcile.R
 	}
 	// Case: configmap deleted, recreate it
 	if !configMapFound || !configMap.DeletionTimestamp.IsZero() {
-		//Only recreate the configmap if the uuid matches the request suffix
+		// Only recreate the configmap if the uuid matches the request suffix
 		if !strings.HasSuffix(request.Name, "-"+uuid) {
 			log.Errorw("Configmap is obsolete and can be safely deleted", zap.Error(err))
 			return reconcile.Result{}, nil
