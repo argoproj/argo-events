@@ -27,9 +27,9 @@
                 kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
 
          * On OpenShift:
-             - Make sure to grant `anyuid` scc to the service account.
+             - Make sure to grant `anyuid` scc to the service accounts.
 
-                oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:argo-events-sa
+                oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:argo-events-sa system:serviceaccount:argo-events:argo-events-webhook-sa
 
              - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the validating admission controller)
 
