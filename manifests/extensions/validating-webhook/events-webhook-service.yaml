@@ -5,6 +5,7 @@ metadata:
 spec:
   ports:
     - port: 443
-      targetPort: 443
+      # For Openshift compatibility (no root means no port < 1024).
+      targetPort: 9443
   selector:
     app: events-webhook
