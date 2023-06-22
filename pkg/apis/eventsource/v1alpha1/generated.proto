@@ -401,6 +401,10 @@ message BitbucketServerEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 11;
+
+  // TLS configuration for the bitbucketserver client.
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 12;
 }
 
 message BitbucketServerRepository {

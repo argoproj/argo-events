@@ -1349,6 +1349,18 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the bitbucketserver client.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.BitbucketServerRepository">
