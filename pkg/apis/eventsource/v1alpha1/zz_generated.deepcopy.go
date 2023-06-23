@@ -424,6 +424,11 @@ func (in *BitbucketServerEventSource) DeepCopyInto(out *BitbucketServerEventSour
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.TLS != nil {
+		in, out := &in.TLS, &out.TLS
+		*out = new(common.TLSConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

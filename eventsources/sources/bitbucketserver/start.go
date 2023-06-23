@@ -137,6 +137,19 @@ func (router *Router) PostInactivate() error {
 		bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
 		bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
 
+		if bitbucketserverEventSource.TLS != nil {
+			tlsConfig, err := common.GetTLSConfig(router.bitbucketserverEventSource.TLS)
+			if err != nil {
+				return fmt.Errorf("failed to get the tls configuration, %w", err)
+			}
+
+			bitbucketConfig.HTTPClient = &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: tlsConfig,
+				},
+			}
+		}
+
 		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
 			id, ok := router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug]
 			if !ok {
@@ -210,6 +223,19 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
 	bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
 	bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
+
+	if bitbucketserverEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(router.bitbucketserverEventSource.TLS)
+		if err != nil {
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
+		}
+
+		bitbucketConfig.HTTPClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConfig,
+			},
+		}
+	}
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

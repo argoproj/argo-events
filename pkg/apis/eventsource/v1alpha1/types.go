@@ -1023,6 +1023,9 @@ type BitbucketServerEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
+	// TLS configuration for the bitbucketserver client.
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,12,opt,name=tls"`
 }
 
 type BitbucketServerRepository struct {
