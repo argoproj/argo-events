@@ -1182,6 +1182,10 @@
           "description": "DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up Deprecated: use Repositories instead. Will be unsupported in v1.8",
           "type": "string"
         },
+        "tls": {
+          "description": "TLS configuration for the bitbucketserver client.",
+          "$ref": "#/definitions/io.argoproj.common.TLSConfig"
+        },
         "webhook": {
           "description": "Webhook holds configuration to run a http server",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
