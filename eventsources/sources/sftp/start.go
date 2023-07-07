@@ -173,12 +173,12 @@ func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Clie
 		return nil
 	}
 
-	pollIntervalSeconds := sftpEventSource.PollIntervalSeconds
-	if pollIntervalSeconds == 0 {
-		pollIntervalSeconds = 10
+	pollIntervalDuration := time.Second * 10
+	if d, err := time.ParseDuration(sftpEventSource.PollIntervalDuration); err != nil {
+		pollIntervalDuration = d
+	} else {
+		log.Errorw("failed parsing poll interval duration.. falling back to %s: %w", pollIntervalDuration.String(), err)
 	}
-
-	pollIntervalDuration := time.Second * time.Duration(pollIntervalSeconds)
 
 	log.Info("listening to sftp notifications... polling interval %s", pollIntervalDuration.String())
 	for {

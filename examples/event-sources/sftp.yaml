@@ -27,6 +27,7 @@ spec:
         directory: /test-data/
         # path to watch
         path: x.txt
+      pollIntervalDuration: 10s
       # type of the event
       # supported types are: CREATE, REMOVE, RENAME, CHMOD
       eventType: CREATE

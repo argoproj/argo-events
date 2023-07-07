@@ -309,10 +309,10 @@ type SFTPEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
-	// PollIntervalSeconds the interval at which to poll the SFTP server
+	// PollIntervalDuration the interval at which to poll the SFTP server
 	// defaults to 10 seconds
 	// +optional
-	PollIntervalSeconds int64 `json:"pollIntervalSeconds" protobuf:"varint,8,opt,name=pollIntervalSeconds"`
+	PollIntervalDuration string `json:"pollIntervalDuration" protobuf:"varint,8,opt,name=pollIntervalDuration"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation
