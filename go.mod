@@ -59,6 +59,7 @@ require (
 	github.com/nats-io/nats.go v1.25.0
 	github.com/nats-io/stan.go v0.10.4
 	github.com/nsqio/go-nsq v1.1.0
+	github.com/pkg/sftp v1.13.5
 	github.com/prometheus/client_golang v1.15.1
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/radovskyb/watcher v1.0.7
@@ -126,6 +127,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/kr/fs v0.1.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/linkedin/goavro/v2 v2.11.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

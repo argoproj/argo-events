@@ -120,6 +120,8 @@ type EventSourceSpec struct {
 	AzureServiceBus map[string]AzureServiceBusEventSource `json:"azureServiceBus,omitempty" protobuf:"bytes,32,rep,name=azureServiceBus"`
 	// AzureQueueStorage event source
 	AzureQueueStorage map[string]AzureQueueStorageEventSource `json:"azureQueueStorage,omitempty" protobuf:"bytes,33,rep,name=azureQueueStorage"`
+	// SFTP event sources
+	SFTP map[string]SFTPEventSource `json:"sftp,omitempty" protobuf:"bytes,34,rep,name=sftp"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -286,6 +288,27 @@ type FileEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,5,opt,name=filter"`
+}
+
+// SFTPEventSource describes an event-source for sftp related events.
+type SFTPEventSource struct {
+	// Type of file operations to watch
+	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
+	EventType string `json:"eventType" protobuf:"bytes,1,opt,name=eventType"`
+	// WatchPathConfig contains configuration about the file path to watch
+	WatchPathConfig WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,2,opt,name=watchPathConfig"`
+	// Username required for authentication if any.
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,3,opt,name=username"`
+	// Password required for authentication if any.
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
+	// Address sftp address.
+	Address *corev1.SecretKeySelector `json:"address,omitempty" protobuf:"bytes,5,opt,name=address"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation
