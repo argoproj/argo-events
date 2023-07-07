@@ -173,10 +173,17 @@ func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Clie
 		return nil
 	}
 
-	log.Info("listening to sftp notifications...")
+	pollIntervalSeconds := sftpEventSource.PollIntervalSeconds
+	if pollIntervalSeconds == 0 {
+		pollIntervalSeconds = 10
+	}
+
+	pollIntervalDuration := time.Second * time.Duration(pollIntervalSeconds)
+
+	log.Info("listening to sftp notifications... polling interval %s", pollIntervalDuration.String())
 	for {
 		select {
-		case <-time.After(time.Second * 10): // TODO: make poll interval configurable
+		case <-time.After(pollIntervalDuration):
 
 			files, err := sftpNonDirFiles(sftpClient, sftpEventSource.WatchPathConfig.Directory)
 			if err != nil {
@@ -184,6 +191,10 @@ func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Clie
 			}
 
 			fileDiff := diffFiles(startingFiles, files)
+			if fileDiff.isEmpty() {
+				continue
+			}
+
 			log.Infof("found %d new files and %d removed files", len(fileDiff.new), len(fileDiff.removed))
 
 			for _, fi := range fileDiff.removed {
@@ -235,6 +246,10 @@ func sftpNonDirFiles(sftpClient *sftp.Client, dir string) ([]fs.FileInfo, error)
 type fileDiff struct {
 	new     []fs.FileInfo
 	removed []fs.FileInfo
+}
+
+func (f fileDiff) isEmpty() bool {
+	return (len(f.new) + len(f.removed)) == 0
 }
 
 func diffFiles(startingFiles, currentFiles []fs.FileInfo) fileDiff {
