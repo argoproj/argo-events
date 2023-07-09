@@ -640,6 +640,9 @@ message EventSourceSpec {
 
   // AzureQueueStorage event source
   map<string, AzureQueueStorageEventSource> azureQueueStorage = 33;
+
+  // SFTP event sources
+  map<string, SFTPEventSource> sftp = 34;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -1338,6 +1341,38 @@ message ResourceFilter {
   // If the resource is created after the start time then the event is treated as valid.
   // +optional
   optional bool afterStart = 5;
+}
+
+// SFTPEventSource describes an event-source for sftp related events.
+message SFTPEventSource {
+  // Type of file operations to watch
+  // Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
+  optional string eventType = 1;
+
+  // WatchPathConfig contains configuration about the file path to watch
+  optional WatchPathConfig watchPathConfig = 2;
+
+  // Username required for authentication if any.
+  optional k8s.io.api.core.v1.SecretKeySelector username = 3;
+
+  // Password required for authentication if any.
+  optional k8s.io.api.core.v1.SecretKeySelector password = 4;
+
+  // Address sftp address.
+  optional k8s.io.api.core.v1.SecretKeySelector address = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 7;
+
+  // PollIntervalDuration the interval at which to poll the SFTP server
+  // defaults to 10 seconds
+  // +optional
+  optional string pollIntervalDuration = 8;
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events

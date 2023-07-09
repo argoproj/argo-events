@@ -1602,6 +1602,13 @@
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Service",
           "description": "Service is the specifications of the service to expose the event source"
         },
+        "sftp": {
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.SFTPEventSource"
+          },
+          "description": "SFTP event sources",
+          "type": "object"
+        },
         "slack": {
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.SlackEventSource"
@@ -2577,6 +2584,51 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "io.argoproj.eventsource.v1alpha1.SFTPEventSource": {
+      "description": "SFTPEventSource describes an event-source for sftp related events.",
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Address sftp address."
+        },
+        "eventType": {
+          "description": "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
+          "type": "string"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object"
+        },
+        "password": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Password required for authentication if any."
+        },
+        "pollIntervalDuration": {
+          "description": "PollIntervalDuration the interval at which to poll the SFTP server defaults to 10 seconds",
+          "type": "string"
+        },
+        "username": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "Username required for authentication if any."
+        },
+        "watchPathConfig": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WatchPathConfig",
+          "description": "WatchPathConfig contains configuration about the file path to watch"
+        }
+      },
+      "required": [
+        "eventType",
+        "watchPathConfig"
+      ],
       "type": "object"
     },
     "io.argoproj.eventsource.v1alpha1.SNSEventSource": {
