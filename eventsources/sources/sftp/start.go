@@ -263,10 +263,14 @@ func diffFiles(startingFiles, currentFiles []fs.FileInfo) fileDiff {
 	for _, startingFile := range startingFiles {
 		name := startingFile.Name()
 
-		if _, ok := fileMap[name]; !ok {
+		if newFile, ok := fileMap[name]; !ok {
 			diff.removed = append(diff.removed, startingFile)
 		} else {
 			delete(fileMap, name)
+
+			if newFile.Size() != startingFile.Size() || newFile.ModTime() != startingFile.ModTime() {
+				diff.new = append(diff.new, newFile)
+			}
 		}
 	}
 
