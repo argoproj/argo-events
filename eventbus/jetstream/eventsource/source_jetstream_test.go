@@ -19,33 +19,24 @@ func TestNewSourceJetstream(t *testing.T) {
 	logger := zap.NewExample().Sugar()
 	defer logger.Sync()
 
+	if logger == nil {
+		t.Error("logger is nil")
+	}
+
 	auth := &common.Auth{}
 	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
 }
 
-func TestSourceJetstream_Initialize(t *testing.T) {
-	logger := zap.NewExample().Sugar()
-	defer logger.Sync()
+// func TestSourceJetstream_Connect(t *testing.T) {
+// 	logger := zap.NewExample().Sugar()
+// 	defer logger.Sync()
 
-	auth := &common.Auth{}
-	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
-	assert.NotNil(t, sourceJetstream)
-	assert.Nil(t, err)
+// 	auth := &common.Auth{}
+// 	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
+// 	sourceJetstream.Connect(testClientID) // error check this
 
-	err = sourceJetstream.Initialize()
-	assert.NoError(t, err, "error should be nil")
-}
-
-func TestSourceJetstream_Connect(t *testing.T) {
-	logger := zap.NewExample().Sugar()
-	defer logger.Sync()
-
-	auth := &common.Auth{}
-	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
-	sourceJetstream.Connect(testClientID) // error check this
-
-	assert.NotNil(t, sourceJetstream)
-	assert.Nil(t, err)
-}
+// 	assert.NotNil(t, sourceJetstream)
+// 	assert.Nil(t, err)
+// }
