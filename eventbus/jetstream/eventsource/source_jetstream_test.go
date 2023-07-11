@@ -8,15 +8,19 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	testURL          = "test-url"
+	testEventSource  = "test-event-source-name"
+	testStreamConfig = "test-stream-config"
+	testClientID     = "test-client-id"
+)
+
 func TestNewSourceJetstream(t *testing.T) {
 	logger := zap.NewExample().Sugar()
 	defer logger.Sync()
 
-	url := "test-url"
-	eventSourceName := "test-event-source-name"
-	streamConfig := "test-stream-config"
 	auth := &common.Auth{}
-	sourceJetstream, err := NewSourceJetstream(url, eventSourceName, streamConfig, auth, logger)
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
 }
@@ -25,11 +29,8 @@ func TestSourceJetstream_Initialize(t *testing.T) {
 	logger := zap.NewExample().Sugar()
 	defer logger.Sync()
 
-	url := "test-url"
-	eventSourceName := "test-event-source-name"
-	streamConfig := "test-stream-config"
 	auth := &common.Auth{}
-	sourceJetstream, err := NewSourceJetstream(url, eventSourceName, streamConfig, auth, logger)
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
 	sourceJetstream.Initialize()
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
@@ -39,12 +40,9 @@ func TestSourceJetstream_Connect(t *testing.T) {
 	logger := zap.NewExample().Sugar()
 	defer logger.Sync()
 
-	url := "test-url"
-	eventSourceName := "test-event-source-name"
-	streamConfig := "test-stream-config"
 	auth := &common.Auth{}
-	sourceJetstream, err := NewSourceJetstream(url, eventSourceName, streamConfig, auth, logger)
-	sourceJetstream.Connect("test-client-id")
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
+	sourceJetstream.Connect(testClientID)
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
 }
