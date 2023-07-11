@@ -214,7 +214,7 @@ func (stream *SensorJetstream) getChangedTriggers(sensorSpec *v1alpha1.Sensor) (
 		errStr := SensorNilError
 		stream.Logger.Errorf(errStr)
 		err = fmt.Errorf(errStr)
-		return
+		return nil, nil, nil, err
 	}
 
 	mappedSpecTriggers := make(map[string]v1alpha1.Trigger, len(sensorSpec.Spec.Triggers))
@@ -250,7 +250,7 @@ func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (chan
 		errStr := SensorNilError
 		stream.Logger.Errorf(errStr)
 		err = fmt.Errorf(errStr)
-		return
+		return nil, nil, nil, err
 	}
 
 	specDependencies := sensorSpec.Spec.Dependencies
