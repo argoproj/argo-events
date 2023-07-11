@@ -17,13 +17,7 @@ const (
 
 func TestNewSourceJetstream(t *testing.T) {
 	logger := zap.NewExample().Sugar()
-
-	defer func() {
-		logger.Sync()
-		if r := recover(); r != nil {
-			assert.Equal(t, "runtime error: invalid memory address or nil pointer dereference", r)
-		}
-	}()
+	defer logger.Sync()
 
 	auth := &common.Auth{}
 	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
@@ -33,30 +27,20 @@ func TestNewSourceJetstream(t *testing.T) {
 
 func TestSourceJetstream_Initialize(t *testing.T) {
 	logger := zap.NewExample().Sugar()
-
-	defer func() {
-		logger.Sync()
-		if r := recover(); r != nil {
-			assert.Equal(t, "runtime error: invalid memory address or nil pointer dereference", r)
-		}
-	}()
+	defer logger.Sync()
 
 	auth := &common.Auth{}
 	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
-	sourceJetstream.Initialize()
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
+
+	err = sourceJetstream.Initialize()
+	assert.NoError(t, err, "error should be nil")
 }
 
 func TestSourceJetstream_Connect(t *testing.T) {
 	logger := zap.NewExample().Sugar()
-
-	defer func() {
-		logger.Sync()
-		if r := recover(); r != nil {
-			assert.Equal(t, "runtime error: invalid memory address or nil pointer dereference", r)
-		}
-	}()
+	defer logger.Sync()
 
 	auth := &common.Auth{}
 	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
