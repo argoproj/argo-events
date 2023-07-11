@@ -22,3 +22,16 @@ func TestNewSourceJetstream(t *testing.T) {
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
 }
+
+func TestSourceJetstream_Connect(t *testing.T) {
+	logger := zap.NewExample().Sugar()
+
+	auth := &common.Auth{}
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
+	assert.NotNil(t, sourceJetstream)
+	assert.Nil(t, err)
+
+	conn, err := sourceJetstream.Connect("test-client-id")
+	assert.Nil(t, conn)
+	assert.NotNil(t, err)
+}
