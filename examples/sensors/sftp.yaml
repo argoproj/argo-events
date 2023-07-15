@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: sftp
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: sftp
+      eventName: example
+  triggers:
+    - template:
+        name: sftp-workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: sftp-watcher-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello" # it will get replaced by the event payload
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: name
+              dest: spec.templates.0.container.args.0
+      retryStrategy:
+        steps: 3

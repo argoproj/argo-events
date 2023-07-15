@@ -29,7 +29,7 @@ spec:
         path: x.txt
       pollIntervalDuration: 10s
       # type of the event
-      # supported types are: CREATE, REMOVE, RENAME, CHMOD
+      # supported types are: CREATE, REMOVE
       eventType: CREATE
 
 #    example-with-path-regex:
