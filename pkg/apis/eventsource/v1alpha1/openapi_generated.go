@@ -73,6 +73,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource":       schema_pkg_apis_eventsource_v1alpha1_RedisStreamEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource":          schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceFilter":               schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEventSource":              schema_pkg_apis_eventsource_v1alpha1_SFTPEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource":               schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource":               schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector":                     schema_pkg_apis_eventsource_v1alpha1_Selector(ref),
@@ -1785,11 +1786,26 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 							},
 						},
 					},
+					"sftp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SFTP event sources",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEventSource"),
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookEventSource"},
+			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookEventSource"},
 	}
 }
 
@@ -3475,6 +3491,85 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_eventsource_v1alpha1_SFTPEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SFTPEventSource describes an event-source for sftp related events.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"eventType": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"watchPathConfig": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WatchPathConfig contains configuration about the file path to watch",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig"),
+						},
+					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username required for authentication if any.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password required for authentication if any.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"address": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Address sftp address.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filter",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"pollIntervalDuration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PollIntervalDuration the interval at which to poll the SFTP server defaults to 10 seconds",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"eventType", "watchPathConfig"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WatchPathConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

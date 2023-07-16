@@ -28,6 +28,7 @@ var (
 	MinioEvent           EventSourceType = "minio"
 	CalendarEvent        EventSourceType = "calendar"
 	FileEvent            EventSourceType = "file"
+	SFTPEvent            EventSourceType = "sftp"
 	ResourceEvent        EventSourceType = "resource"
 	WebhookEvent         EventSourceType = "webhook"
 	AMQPEvent            EventSourceType = "amqp"
@@ -77,6 +78,7 @@ var (
 		ResourceEvent,
 		HDFSEvent,
 		FileEvent,
+		SFTPEvent,
 		GenericEvent,
 	}
 )

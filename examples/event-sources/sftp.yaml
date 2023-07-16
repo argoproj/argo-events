@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: sftp
+spec:
+  template:
+    container:
+      volumeMounts:
+        - mountPath: /test-data
+          name: test-data
+    volumes:
+      - name: test-data
+        emptyDir: {}
+  sftp:
+    example:
+      username:
+        key: username
+        name: username
+      password:
+        key: password
+        name: password
+      address:
+        key: address
+        name: address
+      watchPathConfig:
+        # directory to watch
+        directory: /test-data/
+        # path to watch
+        path: x.txt
+      pollIntervalDuration: 10s
+      # type of the event
+      # supported types are: CREATE, REMOVE
+      eventType: CREATE
+
+#    example-with-path-regex:
+#      watchPathConfig:
+#        directory: "/bin/"
+#        # the eventsource will watch events for path that matches following regex
+#        pathRegexp: "([a-z]+).txt"
+#      eventType: "CREATE"
