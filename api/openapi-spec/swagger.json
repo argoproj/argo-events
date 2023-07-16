@@ -1586,6 +1586,13 @@
           "description": "Service is the specifications of the service to expose the event source",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Service"
         },
+        "sftp": {
+          "description": "SFTP event sources",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.SFTPEventSource"
+          }
+        },
         "slack": {
           "description": "Slack event sources",
           "type": "object",
@@ -2559,6 +2566,51 @@
         "prefix": {
           "description": "Prefix filter is applied on the resource name.",
           "type": "string"
+        }
+      }
+    },
+    "io.argoproj.eventsource.v1alpha1.SFTPEventSource": {
+      "description": "SFTPEventSource describes an event-source for sftp related events.",
+      "type": "object",
+      "required": [
+        "eventType",
+        "watchPathConfig"
+      ],
+      "properties": {
+        "address": {
+          "description": "Address sftp address.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "eventType": {
+          "description": "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
+          "type": "string"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "password": {
+          "description": "Password required for authentication if any.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "pollIntervalDuration": {
+          "description": "PollIntervalDuration the interval at which to poll the SFTP server defaults to 10 seconds",
+          "type": "string"
+        },
+        "username": {
+          "description": "Username required for authentication if any.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "watchPathConfig": {
+          "description": "WatchPathConfig contains configuration about the file path to watch",
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WatchPathConfig"
         }
       }
     },

@@ -2179,6 +2179,19 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQu
 <p>AzureQueueStorage event source</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>sftp</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEventSource
+</a>
+</em>
+</td>
+<td>
+<p>SFTP event sources</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2222,6 +2235,7 @@ EventSourceStatus
 <a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.RedisStreamEventSource">RedisStreamEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">SFTPEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.SQSEventSource">SQSEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>, 
@@ -2689,6 +2703,19 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQu
 </td>
 <td>
 <p>AzureQueueStorage event source</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sftp</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEventSource
+</a>
+</em>
+</td>
+<td>
+<p>SFTP event sources</p>
 </td>
 </tr>
 </tbody>
@@ -5087,6 +5114,128 @@ bool
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.SFTPEventSource">SFTPEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>SFTPEventSource describes an event-source for sftp related events.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>eventType</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Type of file operations to watch
+Refer <a href="https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go">https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go</a> for more information</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>watchPathConfig</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.WatchPathConfig">
+WatchPathConfig
+</a>
+</em>
+</td>
+<td>
+<p>WatchPathConfig contains configuration about the file path to watch</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>username</code></br>
+<em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>Username required for authentication if any.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>password</code></br>
+<em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>Password required for authentication if any.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>address</code></br>
+<em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>Address sftp address.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter">
+EventSourceFilter
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Filter</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>pollIntervalDuration</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>PollIntervalDuration the interval at which to poll the SFTP server
+defaults to 10 seconds</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.SNSEventSource">SNSEventSource
 </h3>
 <p>
@@ -6034,7 +6183,8 @@ More info: <a href="https://kubernetes.io/docs/concepts/configuration/pod-priori
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>, 
-<a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>)
+<a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">SFTPEventSource</a>)
 </p>
 <p>
 </p>

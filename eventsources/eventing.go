@@ -46,6 +46,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
 	redisstream "github.com/argoproj/argo-events/eventsources/sources/redis_stream"
 	"github.com/argoproj/argo-events/eventsources/sources/resource"
+	"github.com/argoproj/argo-events/eventsources/sources/sftp"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
@@ -165,6 +166,16 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &file.EventListener{EventSourceName: eventSource.Name, EventName: k, FileEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.FileEvent] = servers
+	}
+	if len(eventSource.Spec.SFTP) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.SFTP {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &sftp.EventListener{EventSourceName: eventSource.Name, EventName: k, SFTPEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.SFTPEvent] = servers
 	}
 	if len(eventSource.Spec.Github) != 0 {
 		servers := []EventingServer{}
