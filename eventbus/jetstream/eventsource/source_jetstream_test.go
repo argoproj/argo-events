@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/eventbus/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -33,5 +34,19 @@ func TestSourceJetstream_Connect(t *testing.T) {
 
 	conn, err := sourceJetstream.Connect("test-client-id")
 	assert.Nil(t, conn)
+	assert.NotNil(t, err)
+}
+
+func TestSourceJetstream_Initialize_Failure(t *testing.T) {
+	logger := zap.NewExample().Sugar()
+
+	auth := &common.Auth{
+		Strategy: v1alpha1.AuthStrategyNone,
+	}
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
+	assert.NotNil(t, sourceJetstream)
+	assert.Nil(t, err)
+
+	err = sourceJetstream.Initialize()
 	assert.NotNil(t, err)
 }
