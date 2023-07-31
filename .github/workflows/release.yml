@@ -83,7 +83,8 @@ jobs:
     needs: [ build-push-linux-multi ]
     steps:
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
-      - run: |
+      - id: version
+        run: |
           if [ ${GITHUB_REF##*/} = master ]; then
            echo "VERSION=latest" >> $GITHUB_ENV
           else
@@ -98,7 +99,10 @@ jobs:
       - run: mkdir -p dist
       - run: generator -o dist -p .
       # do not scan images, this is only supported for debian-based images. See: https://github.com/kubernetes-sigs/bom#usage
-      - run: bom generate --scan-images=false --image quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION -o dist/argo-events.spdx
+      - env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+        run:
+          bom generate --scan-images=false --image quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION -o dist/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: tar -zcf sbom.tar.gz dist/*.spdx
       - uses: actions/upload-artifact@v3
