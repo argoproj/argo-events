@@ -145,9 +145,9 @@ jobs:
       - name: Get digests of container images
         id: get-digest
         run: |
-          echo "IMAGE_DIGEST=$(crane digest quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION)" >> $GITHUB_ENV
+          echo "digest=$(crane digest quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION)" >> $GITHUB_OUTPUT
 
-      - name: Sign Argo Events container images and assets
+      - name: Sign Argo Events container image and assets
         env:
           IMAGE_DIGEST: ${{ steps.get-digest.outputs.digest }}
         run: |
