@@ -44,6 +44,8 @@ jobs:
     strategy:
       matrix:
         target: [ argo-events ]
+    outputs:
+      VERSION: ${{ steps.version.outputs.VERSION }}
     steps:
       - uses: actions/checkout@v3
 
@@ -144,6 +146,8 @@ jobs:
 
       - name: Get digests of container images
         id: get-digest
+        env:
+          VERSION: ${{ needs.build-push-linux-multi.outputs.VERSION }}
         run: |
           echo "digest=$(crane digest quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION)" >> $GITHUB_OUTPUT
 
