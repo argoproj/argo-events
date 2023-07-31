@@ -155,9 +155,9 @@ jobs:
         env:
           IMAGE_DIGEST: ${{ steps.get-digest.outputs.digest }}
         run: |
-          cosign sign quay.io/${{ secrets.QUAYIO_ORG }}/argo-events@$IMAGE_DIGEST
-          cosign sign-blob ./dist/argo-events-checksums.txt > ./dist/argo-events-checksums.sig
-          cosign sign-blob ./dist/sbom.tar.gz > /tmp/sbom.tar.gz.sig
+          cosign sign -y quay.io/${{ secrets.QUAYIO_ORG }}/argo-events@$IMAGE_DIGEST
+          cosign sign-blob -y ./dist/argo-events-checksums.txt > ./dist/argo-events-checksums.sig
+          cosign sign-blob -y ./dist/sbom.tar.gz > /tmp/sbom.tar.gz.sig
 
       - name: Release binaries
         uses: softprops/action-gh-release@v1
