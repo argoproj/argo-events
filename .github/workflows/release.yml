@@ -97,6 +97,7 @@ jobs:
       - run: go install github.com/spdx/spdx-sbom-generator/cmd/generator@v0.0.13
       - run: mkdir -p dist
       - run: generator -o dist -p .
+      # do not scan images, this is only supported for debian-based images. See: https://github.com/kubernetes-sigs/bom#usage
       - run: bom generate --scan-images=false --image quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION -o dist/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: tar -zcf sbom.tar.gz dist/*.spdx
@@ -108,6 +109,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: [ build-push-linux-multi, bom ]
+    permissions:
+      contents: read
+      id-token: write # Needed to create an OIDC token for keyless signing
     steps:
       - name: Download binaries
         uses: actions/download-artifact@v3
@@ -118,14 +122,41 @@ jobs:
         with:
           name: sbom.tar.gz
           path: sbom.tar.gz
+
+      - name: Registry Login
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 # v3.1.1
+        with:
+          cosign-release: 'v2.1.1'
+
+      - name: Install crane to get digest of image
+        uses: imjasonh/setup-crane@e82f1b9a8007d399333baba4d75915558e9fb6a4 # v0.2
+
+      - name: Get digests of container images
+        run: |
+          echo "IMAGE_DIGEST=$(crane digest quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION)" >> $GITHUB_ENV
+
+      - name: Sign Argo Events container images and assets
+        run: |
+          cosign sign quay.io/${{ secrets.QUAYIO_ORG }}/argo-events@${{ env.IMAGE_DIGEST }}
+          cosign sign-blob ./dist/argo-events-checksums.txt > ./dist/argo-events-checksums.sig
+          cosign sign-blob ./dist/sbom.tar.gz > /tmp/sbom.tar.gz.sig
+
       - name: Release binaries
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             dist/*.gz
-            dist/*.gz.sha256
+            dist/argo-events-checksums.txt
+            dist/argo-events-checksums.sig
             manifests/*.yaml
-            sbom.tar.gz
+            dist/sbom.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
