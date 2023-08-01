@@ -127,7 +127,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: sbom.tar.gz
-          path: sbom.tar.gz
+          path: dist/
 
       - name: Registry Login
         uses: docker/login-action@v2
@@ -157,7 +157,7 @@ jobs:
         run: |
           cosign sign -y quay.io/${{ secrets.QUAYIO_ORG }}/argo-events@$IMAGE_DIGEST
           cosign sign-blob -y ./dist/argo-events-checksums.txt > ./dist/argo-events-checksums.sig
-          cosign sign-blob -y sbom.tar.gz > /tmp/sbom.tar.gz.sig
+          cosign sign-blob -y ./dist/sbom.tar.gz > ./dist/sbom.tar.gz.sig
 
       - name: Release binaries
         uses: softprops/action-gh-release@v1
@@ -168,7 +168,7 @@ jobs:
             dist/argo-events-checksums.txt
             dist/argo-events-checksums.sig
             manifests/*.yaml
-            sbom.tar.gz
-            /tmp/sbom.tar.gz.sig
+            dist/sbom.tar.gz
+            dist/sbom.tar.gz.sig
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
