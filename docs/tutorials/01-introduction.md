@@ -12,7 +12,7 @@ to any type of event-source.
   (See [this](https://github.com/argoproj/argo-workflows/blob/master/docs/managed-namespace.md) link.)
   The Workflow Controller will need to be installed either in a cluster-scope configuration (i.e. no "--namespaced" argument) so that it has visibility to all namespaces, or with "--managed-namespace" set to define "argo-events" as a namespace it has visibility to. To deploy Argo Workflows with a cluster-scope configuration you can use this installation yaml file:
 
-        kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml
+        kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/latest/download/install.yaml
 
 - Make sure to read the concepts behind
   [eventbus](https://argoproj.github.io/argo-events/concepts/eventbus/).
