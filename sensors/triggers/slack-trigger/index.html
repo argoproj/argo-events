@@ -2314,7 +2314,7 @@ the <code>dataKey</code> takes the precedence.</p>
 generate complex event payloads, take a look at <a href="https://github.com/tidwall/sjson">this library</a>.</p>
 <h2 id="other-capabilities">Other Capabilities<a class="headerlink" href="#other-capabilities" title="Permanent link">&para;</a></h2>
 <h4 id="configuring-the-sender-of-the-slack-message">Configuring the sender of the Slack message:<a class="headerlink" href="#configuring-the-sender-of-the-slack-message" title="Permanent link">&para;</a></h4>
-<div class="codehilite"><pre><span></span><code>     - template:
+<div class="codehilite"><pre><span></span><code>     <span class="k">-</span> template:
           name: slack-trigger
           slack:
             sender:
@@ -2332,7 +2332,7 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
 </code></pre></div>
 
 <h4 id="sending-attachments-using-slack-attachments-api">Sending attachments using <a href="https://api.slack.com/reference/messaging/attachments">Slack Attachments API</a>:<a class="headerlink" href="#sending-attachments-using-slack-attachments-api" title="Permanent link">&para;</a></h4>
-<div class="codehilite"><pre><span></span><code>     - template:
+<div class="codehilite"><pre><span></span><code>     <span class="k">-</span> template:
           name: slack-trigger
           slack:
             message: &quot;hello world!&quot;
