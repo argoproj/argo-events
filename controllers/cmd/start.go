@@ -97,7 +97,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
-	cfClient, err := codefresh.NewClient(logging.WithLogger(signals.SetupSignalHandler(), logger), managedNamespace)
+	cfClient, err := codefresh.NewClient(logging.WithLogger(signals.SetupSignalHandler(), logger), eventsOpts.ManagedNamespace)
 	if err != nil {
 		logger.Fatalw("unable to initialise Codefresh Client", zap.Error(err))
 	}
