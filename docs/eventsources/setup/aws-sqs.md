@@ -17,13 +17,13 @@ The structure of an event dispatched by the event-source over the eventbus looks
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
-                	"messageId": "message id",
-                	// Each message attribute consists of a Name, Type, and Value. For more information,
-                	// see Amazon SQS Message Attributes
-                	// (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html)
-                	// in the Amazon Simple Queue Service Developer Guide.
-                	"messageAttributes": "message attributes", 
-                  	"body": "Body is the message data",
+                 "messageId": "message id",
+                 // Each message attribute consists of a Name, Type, and Value. For more information,
+                 // see Amazon SQS Message Attributes
+                 // (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html)
+                 // in the Amazon Simple Queue Service Developer Guide.
+                 "messageAttributes": "message attributes", 
+                   "body": "Body is the message data",
                 }
             }
 
@@ -64,7 +64,8 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
         aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/XXXXX/test --message-body '{"message": "hello"}'
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

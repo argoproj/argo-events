@@ -17,9 +17,9 @@ The structure of an event dispatched by the event-source over the eventbus looks
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
-                  	"body": "Body is the message data",
-                  	"timestamp": "timestamp of the message",
-                  	"nsqdAddress": "NSQDAddress is the address of the nsq host"
+                   "body": "Body is the message data",
+                   "timestamp": "timestamp of the message",
+                   "nsqdAddress": "NSQDAddress is the address of the nsq host"
                 }
             }
 
@@ -239,7 +239,7 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
         curl -X POST 'http://localhost:4151/topic/create?topic=hello'
 
         curl -X POST 'http://localhost:4151/channel/create?topic=hello&channel=my-channel'
-        
+
 1. Create the event source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nsq.yaml
@@ -252,7 +252,8 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
 
         curl -d '{"message": "hello"}' 'http://localhost:4151/pub?topic=hello&channel=my-channel'
 
-9. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+9. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

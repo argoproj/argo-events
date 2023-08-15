@@ -3,6 +3,8 @@ kind: Sensor
 metadata:
   name: e2e-resource-log
 spec:
+  template:
+    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       eventSourceName: test-resource

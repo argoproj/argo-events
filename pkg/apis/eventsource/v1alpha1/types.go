@@ -116,6 +116,10 @@ type EventSourceSpec struct {
 	Bitbucket map[string]BitbucketEventSource `json:"bitbucket,omitempty" protobuf:"bytes,30,rep,name=bitbucket"`
 	// Redis stream source
 	RedisStream map[string]RedisStreamEventSource `json:"redisStream,omitempty" protobuf:"bytes,31,rep,name=redisStream"`
+	// Azure Service Bus event source
+	AzureServiceBus map[string]AzureServiceBusEventSource `json:"azureServiceBus,omitempty" protobuf:"bytes,32,rep,name=azureServiceBus"`
+	// AzureQueueStorage event source
+	AzureQueueStorage map[string]AzureQueueStorageEventSource `json:"azureQueueStorage,omitempty" protobuf:"bytes,33,rep,name=azureQueueStorage"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -483,6 +487,7 @@ type KafkaEventSource struct {
 	// URL to kafka cluster, multiple URLs separated by comma
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 	// Partition name
+	// +optional
 	Partition string `json:"partition" protobuf:"bytes,2,opt,name=partition"`
 	// Topic name
 	Topic string `json:"topic" protobuf:"bytes,3,opt,name=topic"`
@@ -564,6 +569,9 @@ type MQTTEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	// Auth hosts secret selectors for username and password
+	// +optional
+	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,9,opt,name=auth"`
 }
 
 // NATSEventsSource refers to event-source for NATS related events
@@ -863,13 +871,18 @@ type GitlabEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
-	// List of project IDs or project namespace paths like "whynowy/test"
+	// List of project IDs or project namespace paths like "whynowy/test". Projects and groups cannot be empty at the same time.
+	// +optional
 	Projects []string `json:"projects,omitempty" protobuf:"bytes,10,rep,name=projects"`
 	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
 	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,11,opt,name=secretToken"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
+	// List of group IDs or group name like "test".
+	// Group level hook available in Premium and Ultimate Gitlab.
+	// +optional
+	Groups []string `json:"groups,omitempty" protobuf:"bytes,13,rep,name=groups"`
 }
 
 func (g GitlabEventSource) GetProjects() []string {
@@ -878,6 +891,13 @@ func (g GitlabEventSource) GetProjects() []string {
 	}
 	if g.DeprecatedProjectID != "" {
 		return []string{g.DeprecatedProjectID}
+	}
+	return []string{}
+}
+
+func (g GitlabEventSource) GetGroups() []string {
+	if len(g.Groups) > 0 {
+		return g.Groups
 	}
 	return []string{}
 }
@@ -1156,6 +1176,68 @@ type AzureEventsHubEventSource struct {
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,6,opt,name=filter"`
 }
 
+// AzureServiceBusEventSource describes the event source for azure service bus
+// More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/
+type AzureServiceBusEventSource struct {
+	// ConnectionString is the connection string for the Azure Service Bus. If this fields is not provided
+	// it will try to access via Azure AD with DefaultAzureCredential and FullyQualifiedNamespace.
+	// +optional
+	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,1,opt,name=connectionString"`
+	// QueueName is the name of the Azure Service Bus Queue
+	QueueName string `json:"queueName" protobuf:"bytes,2,opt,name=queueName"`
+	// TopicName is the name of the Azure Service Bus Topic
+	TopicName string `json:"topicName" protobuf:"bytes,3,opt,name=topicName"`
+	// SubscriptionName is the name of the Azure Service Bus Topic Subscription
+	SubscriptionName string `json:"subscriptionName" protobuf:"bytes,4,opt,name=subscriptionName"`
+	// TLS configuration for the service bus client
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,6,opt,name=jsonBody"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	// FullyQualifiedNamespace is the Service Bus namespace name (ex: myservicebus.servicebus.windows.net). This field is necessary to
+	// access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
+	// +optional
+	FullyQualifiedNamespace string `json:"fullyQualifiedNamespace,omitempty" protobuf:"bytes,9,opt,name=fullyQualifiedNamespace"`
+}
+
+// AzureQueueStorageEventSource describes the event source for azure queue storage
+// more info at https://learn.microsoft.com/en-us/azure/storage/queues/
+type AzureQueueStorageEventSource struct {
+	// StorageAccountName is the name of the storage account where the queue is. This field is necessary to
+	// access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
+	// +optional
+	StorageAccountName string `json:"storageAccountName,omitempty" protobuf:"bytes,1,opt,name=storageAccountName"`
+	// ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided
+	// it will try to access via Azure AD with StorageAccountName.
+	// +optional
+	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,2,opt,name=connectionString"`
+	// QueueName is the name of the queue
+	QueueName string `json:"queueName" protobuf:"bytes,3,opt,name=queueName"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,4,opt,name=jsonBody"`
+	// DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully.
+	// If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue.
+	// The default value is false.
+	// +optional
+	DLQ bool `json:"dlq,omitempty" protobuf:"varint,5,opt,name=dlq"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
+}
+
 // StripeEventSource describes the event source for stripe webhook notifications
 // More info at https://stripe.com/docs/webhooks
 type StripeEventSource struct {
@@ -1343,11 +1425,21 @@ type PulsarEventSource struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
 	// Authentication token for the pulsar client.
+	// Either token or athenz can be set to use auth.
 	// +optional
 	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,11,opt,name=authTokenSecret"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
+	// Authentication athenz parameters for the pulsar client.
+	// Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go
+	// Either token or athenz can be set to use auth.
+	// +optional
+	AuthAthenzParams map[string]string `json:"authAthenzParams,omitempty" protobuf:"bytes,13,rep,name=authAthenzParams"`
+	// Authentication athenz privateKey secret for the pulsar client.
+	// AuthAthenzSecret must be set if AuthAthenzParams is used.
+	// +optional
+	AuthAthenzSecret *corev1.SecretKeySelector `json:"authAthenzSecret,omitempty" protobuf:"bytes,14,opt,name=authAthenzSecret"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

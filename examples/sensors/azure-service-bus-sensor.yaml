@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: azure-service-bus
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: azure-service-bus-trigger
+        azureServiceBus:
+          queueName: queue
+          connectionString:
+            name: azure-service-bus
+            key: connectionString
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.message
+              dest: message

@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -107,10 +108,11 @@ func TestReconcileNative(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
-			client: cl,
-			scheme: scheme.Scheme,
-			config: fakeConfig,
-			logger: zaptest.NewLogger(t).Sugar(),
+			client:     cl,
+			kubeClient: k8sfake.NewSimpleClientset(),
+			scheme:     scheme.Scheme,
+			config:     fakeConfig,
+			logger:     zaptest.NewLogger(t).Sugar(),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -127,10 +129,11 @@ func TestReconcileExotic(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
-			client: cl,
-			scheme: scheme.Scheme,
-			config: fakeConfig,
-			logger: zaptest.NewLogger(t).Sugar(),
+			client:     cl,
+			kubeClient: k8sfake.NewSimpleClientset(),
+			scheme:     scheme.Scheme,
+			config:     fakeConfig,
+			logger:     zaptest.NewLogger(t).Sugar(),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -144,10 +147,11 @@ func TestNeedsUpdate(t *testing.T) {
 		testBus := nativeBus.DeepCopy()
 		cl := fake.NewClientBuilder().Build()
 		r := &reconciler{
-			client: cl,
-			scheme: scheme.Scheme,
-			config: fakeConfig,
-			logger: zaptest.NewLogger(t).Sugar(),
+			client:     cl,
+			kubeClient: k8sfake.NewSimpleClientset(),
+			scheme:     scheme.Scheme,
+			config:     fakeConfig,
+			logger:     zaptest.NewLogger(t).Sugar(),
 		}
 		assert.False(t, r.needsUpdate(nativeBus, testBus))
 		controllerutil.AddFinalizer(testBus, finalizerName)

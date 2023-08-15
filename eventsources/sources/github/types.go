@@ -18,7 +18,7 @@ package github
 import (
 	"net/http"
 
-	"github.com/google/go-github/v31/github"
+	"github.com/google/go-github/v50/github"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/metrics"

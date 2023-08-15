@@ -12,6 +12,7 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -122,9 +123,10 @@ func TestBadInstallation(t *testing.T) {
 }
 
 func TestInstallationAuthtoken(t *testing.T) {
+	kubeClient := k8sfake.NewSimpleClientset()
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
-		installer := NewNATSInstaller(cl, testNatsEventBus, fakeConfig, testLabels, zaptest.NewLogger(t).Sugar())
+		installer := NewNATSInstaller(cl, testNatsEventBus, fakeConfig, testLabels, kubeClient, zaptest.NewLogger(t).Sugar())
 		busconf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -171,9 +173,10 @@ func TestInstallationAuthtoken(t *testing.T) {
 }
 
 func TestInstallationAuthNone(t *testing.T) {
+	kubeClient := k8sfake.NewSimpleClientset()
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewClientBuilder().Build()
-		installer := NewNATSInstaller(cl, testEventBusAuthNone, fakeConfig, testLabels, zaptest.NewLogger(t).Sugar())
+		installer := NewNATSInstaller(cl, testEventBusAuthNone, fakeConfig, testLabels, kubeClient, zaptest.NewLogger(t).Sugar())
 		busconf, err := installer.Install(context.TODO())
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)

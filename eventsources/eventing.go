@@ -26,6 +26,8 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
+	"github.com/argoproj/argo-events/eventsources/sources/azurequeuestorage"
+	"github.com/argoproj/argo-events/eventsources/sources/azureservicebus"
 	"github.com/argoproj/argo-events/eventsources/sources/bitbucket"
 	"github.com/argoproj/argo-events/eventsources/sources/bitbucketserver"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
@@ -95,6 +97,26 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AzureEventsHub] = servers
+	}
+	if len(eventSource.Spec.AzureQueueStorage) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.AzureQueueStorage {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &azurequeuestorage.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureQueueStorageEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.AzureQueueStorage] = servers
+	}
+	if len(eventSource.Spec.AzureServiceBus) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.AzureServiceBus {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &azureservicebus.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureServiceBusEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.AzureServiceBus] = servers
 	}
 	if len(eventSource.Spec.Bitbucket) != 0 {
 		servers := []EventingServer{}
@@ -371,26 +393,31 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	for _, esType := range apicommon.RecreateStrategyEventSources {
 		recreateTypes[esType] = true
 	}
-	isRecreatType := false
+	isRecreateType := false
 	servers, filters := GetEventingServers(e.eventSource, e.metrics)
 	for k := range servers {
 		if _, ok := recreateTypes[k]; ok {
-			isRecreatType = true
+			isRecreateType = true
 		}
 		// This is based on the presumption that all the events in one
 		// EventSource object use the same type of deployment strategy
 		break
 	}
-	if !isRecreatType {
+
+	if !isRecreateType {
 		return e.run(ctx, servers, filters)
 	}
 
-	custerName := fmt.Sprintf("%s-eventsource-%s", e.eventSource.Namespace, e.eventSource.Name)
-	elector, err := leaderelection.NewEventBusElector(ctx, *e.eventBusConfig, custerName, int(e.eventSource.Spec.GetReplicas()))
+	clusterName := fmt.Sprintf("%s-eventsource-%s", e.eventSource.Namespace, e.eventSource.Name)
+	replicas := int(e.eventSource.Spec.GetReplicas())
+	leasename := fmt.Sprintf("eventsource-%s", e.eventSource.Name)
+
+	elector, err := leaderelection.NewElector(ctx, *e.eventBusConfig, clusterName, replicas, e.eventSource.Namespace, leasename, e.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
 		return err
 	}
+
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
 			if err := e.run(ctx, servers, filters); err != nil {

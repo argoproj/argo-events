@@ -43,6 +43,8 @@ var (
 	SlackEvent           EventSourceType = "slack"
 	StorageGridEvent     EventSourceType = "storagegrid"
 	AzureEventsHub       EventSourceType = "azureEventsHub"
+	AzureQueueStorage    EventSourceType = "azureQueueStorage"
+	AzureServiceBus      EventSourceType = "azureServiceBus"
 	StripeEvent          EventSourceType = "stripe"
 	EmitterEvent         EventSourceType = "emitter"
 	RedisEvent           EventSourceType = "redis"
@@ -63,6 +65,7 @@ var (
 		KafkaEvent,
 		PubSubEvent,
 		AzureEventsHub,
+		AzureServiceBus,
 		NATSEvent,
 		MQTTEvent,
 		MinioEvent,
@@ -83,18 +86,19 @@ type TriggerType string
 
 // possible trigger types
 var (
-	OpenWhiskTrigger      TriggerType = "OpenWhisk"
-	ArgoWorkflowTrigger   TriggerType = "ArgoWorkflow"
-	LambdaTrigger         TriggerType = "Lambda"
-	CustomTrigger         TriggerType = "Custom"
-	HTTPTrigger           TriggerType = "HTTP"
-	KafkaTrigger          TriggerType = "Kafka"
-	PulsarTrigger         TriggerType = "Pulsar"
-	LogTrigger            TriggerType = "Log"
-	NATSTrigger           TriggerType = "NATS"
-	SlackTrigger          TriggerType = "Slack"
-	K8sTrigger            TriggerType = "Kubernetes"
-	AzureEventHubsTrigger TriggerType = "AzureEventHubs"
+	OpenWhiskTrigger       TriggerType = "OpenWhisk"
+	ArgoWorkflowTrigger    TriggerType = "ArgoWorkflow"
+	LambdaTrigger          TriggerType = "Lambda"
+	CustomTrigger          TriggerType = "Custom"
+	HTTPTrigger            TriggerType = "HTTP"
+	KafkaTrigger           TriggerType = "Kafka"
+	PulsarTrigger          TriggerType = "Pulsar"
+	LogTrigger             TriggerType = "Log"
+	NATSTrigger            TriggerType = "NATS"
+	SlackTrigger           TriggerType = "Slack"
+	K8sTrigger             TriggerType = "Kubernetes"
+	AzureEventHubsTrigger  TriggerType = "AzureEventHubs"
+	AzureServiceBusTrigger TriggerType = "AzureServiceBus"
 )
 
 // EventBusType is the type of event bus
@@ -104,6 +108,7 @@ type EventBusType string
 var (
 	EventBusNATS      EventBusType = "nats"
 	EventBusJetStream EventBusType = "jetstream"
+	EventBusKafka     EventBusType = "kafka"
 )
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password
@@ -148,9 +153,20 @@ type SASLConfig struct {
 	Mechanism string `json:"mechanism,omitempty" protobuf:"bytes,1,opt,name=mechanism"`
 	// User is the authentication identity (authcid) to present for
 	// SASL/PLAIN or SASL/SCRAM authentication
-	UserSecret *corev1.SecretKeySelector `json:"userSecret,omitempty" protobuf:"bytes,2,opt,name=user"`
+	UserSecret *corev1.SecretKeySelector `json:"userSecret,omitempty" protobuf:"bytes,2,opt,name=userSecret"`
 	// Password for SASL/PLAIN authentication
-	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=password"`
+	PasswordSecret *corev1.SecretKeySelector `json:"passwordSecret,omitempty" protobuf:"bytes,3,opt,name=passwordSecret"`
+}
+
+// SchemaRegistryConfig refers to configuration for a client
+type SchemaRegistryConfig struct {
+	// Schema Registry URL.
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// Schema ID
+	SchemaID int32 `json:"schemaId" protobuf:"varint,2,name=schemaId"`
+	// +optional
+	// SchemaRegistry - basic authentication
+	Auth BasicAuth `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
 }
 
 // Backoff for an operation

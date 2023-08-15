@@ -21,9 +21,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
-	"github.com/slack-go/slack"
+	notifications "github.com/argoproj/notifications-engine/pkg/services"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -42,15 +41,30 @@ type SlackTrigger struct {
 	Logger *zap.SugaredLogger
 	// http client to invoke function.
 	httpClient *http.Client
+	// slackSvc refers to the Slack notification service.
+	slackSvc notifications.NotificationService
 }
 
 // NewSlackTrigger returns a new Slack trigger context
 func NewSlackTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, httpClient *http.Client) (*SlackTrigger, error) {
+	slackTrigger := trigger.Template.Slack
+	slackToken, err := common.GetSecretFromVolume(slackTrigger.SlackToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve the slack token, %w", err)
+	}
+
+	slackSvc := notifications.NewSlackService(notifications.SlackOptions{
+		Token:    slackToken,
+		Username: slackTrigger.Sender.Username,
+		Icon:     slackTrigger.Sender.Icon,
+	})
+
 	return &SlackTrigger{
 		Sensor:     sensor,
 		Trigger:    trigger,
 		Logger:     logger.With(logging.LabelTriggerType, apicommon.SlackTrigger),
 		httpClient: httpClient,
+		slackSvc:   slackSvc,
 	}, nil
 }
 
@@ -95,85 +109,45 @@ func (t *SlackTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, fmt.Errorf("failed to marshal the Slack trigger resource")
 	}
 
-	slacktrigger := t.Trigger.Template.Slack
+	slackTrigger := t.Trigger.Template.Slack
 
-	channel := slacktrigger.Channel
+	channel := slackTrigger.Channel
 	if channel == "" {
 		return nil, fmt.Errorf("no slack channel provided")
 	}
 	channel = strings.TrimPrefix(channel, "#")
 
-	message := slacktrigger.Message
-	if message == "" {
-		return nil, fmt.Errorf("no slack message to post")
+	message := slackTrigger.Message
+	attachments := slackTrigger.Attachments
+	blocks := slackTrigger.Blocks
+	if message == "" && attachments == "" && blocks == "" {
+		return nil, fmt.Errorf("no text to post: At least one of message/attachments/blocks should be provided")
 	}
-
-	slackToken, err := common.GetSecretFromVolume(slacktrigger.SlackToken)
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve the slack token, %w", err)
-	}
-
-	api := slack.New(slackToken, slack.OptionDebug(false))
 
 	t.Logger.Infow("posting to channel...", zap.Any("channelName", channel))
-	for {
-		channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
-		if err != nil {
-			if err.Error() == "not_in_channel" {
-				isPrivateChannel := false
-				params := &slack.GetConversationsParameters{
-					Limit:           200,
-					Types:           []string{"public_channel", "private_channel"},
-					ExcludeArchived: true,
-				}
 
-				for {
-					channels, nextCursor, err := api.GetConversations(params)
-					if err != nil {
-						switch e := err.(type) {
-						case *slack.RateLimitedError:
-							<-time.After(e.RetryAfter)
-							continue
-						default:
-							t.Logger.Errorw("unable to list channels", zap.Error(err))
-							return nil, fmt.Errorf("failed to list channels, %w", err)
-						}
-					}
-					for _, c := range channels {
-						if c.Name == channel {
-							channelID = c.ID
-							isPrivateChannel = c.IsPrivate
-							break
-						}
-					}
-					if nextCursor == "" || channelID != "" {
-						break
-					}
-					params.Cursor = nextCursor
-				}
-				if channelID == "" {
-					return nil, fmt.Errorf("failed to get channelID of %s", channel)
-				}
-				if isPrivateChannel {
-					return nil, fmt.Errorf("cannot join private channel %s", channel)
-				}
-
-				c, _, _, err := api.JoinConversation(channelID)
-				if err != nil {
-					t.Logger.Errorw("unable to join channel...", zap.Any("channelName", channel), zap.Any("channelID", channelID), zap.Error(err))
-					return nil, fmt.Errorf("failed to join channel %s, %w", channel, err)
-				}
-				t.Logger.Debugw("successfully joined channel", zap.Any("channel", c))
-				continue
-			} else {
-				t.Logger.Errorw("unable to post to channel...", zap.Any("channelName", channel), zap.Error(err))
-				return nil, fmt.Errorf("failed to post to channel %s, %w", channel, err)
-			}
-		}
-		t.Logger.Infow("message successfully sent to channelID with timestamp", zap.Any("message", message), zap.Any("channelID", channelID), zap.Any("timestamp", timestamp))
-		t.Logger.Info("finished executing SlackTrigger")
-		return nil, nil
+	notification := notifications.Notification{
+		Message: message,
+		Slack: &notifications.SlackNotification{
+			GroupingKey:     slackTrigger.Thread.MessageAggregationKey,
+			NotifyBroadcast: slackTrigger.Thread.BroadcastMessageToChannel,
+			Blocks:          blocks,
+			Attachments:     attachments,
+		},
 	}
+	destination := notifications.Destination{
+		Service:   "slack",
+		Recipient: channel,
+	}
+	err := t.slackSvc.Send(notification, destination)
+	if err != nil {
+		t.Logger.Errorw("unable to post to channel", zap.Any("channelName", channel), zap.Error(err))
+		return nil, fmt.Errorf("failed to post to channel %s, %w", channel, err)
+	}
+
+	t.Logger.Infow("message successfully sent to channel", zap.Any("message", message), zap.Any("channelName", channel))
+	t.Logger.Info("finished executing SlackTrigger")
+	return nil, nil
 }
 
 // No Policies for SlackTrigger

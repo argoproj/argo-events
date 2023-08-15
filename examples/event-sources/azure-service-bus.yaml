@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: azure-service-bus
+spec:
+  azureServiceBus:
+    example:
+      # queueName is the name of the queue to listen to
+      queueName: test
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
+      # connection string contains information about K8s secret that stores the connection string
+      connectionString:
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
+        key: connectionstring
+        # Name of the K8s secret that contains the access key
+        name: azure-secret
+    
+    # example-managed-identity:
+    #   # queueName is the name of the queue to listen to
+    #   queueName: test
+    #   # jsonBody specifies that all event body payload coming from this
+    #   # source will be JSON
+    #   jsonBody: true
+    #   # fullyQualifiedNamespace is the Service Bus namespace name. This field is necessary to access via 
+    #   # Azure AD (managed identity) and it is ignored if ConnectionString is set
+    #   fullyQualifiedNamespace: myservicebus.servicebus.windows.net

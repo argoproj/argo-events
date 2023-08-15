@@ -12,4 +12,4 @@ namespace: argo-events
 images:
   - name: quay.io/argoproj/argo-events
     newName: quay.io/codefresh/argo-events
-    newTag: v1.7.3-cap-CR-19893
+    newTag: v1.8.0-cap-CR-19893

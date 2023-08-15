@@ -14,7 +14,6 @@ that are not native to AWS.
 <br/>
 <br/>
 
-
 ## Trigger A Simple Lambda
 
 1. Make sure to have eventbus deployed in the namespace.
@@ -100,6 +99,7 @@ The above payload will be passed in the request to invoke the AWS lambda. You ca
 **Note**: Take a look at [Parameterization](https://argoproj.github.io/argo-events/tutorials/02-parameterization/) in order to understand how to extract particular key-value from event data.
 
 ## Parameterization
+
 Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
 you want to define a generic trigger template in the sensor and populate values like function name, payload values on the fly.
 
@@ -131,6 +131,7 @@ With `parameters` the sensor will replace the function name `hello` with the val
 You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
 
 ## Policy
+
 Trigger policy helps you determine the status of the lambda invocation and decide whether to stop or continue sensor.
 
 To determine whether the lambda was successful or not, Lambda trigger provides a `Status` policy.

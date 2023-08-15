@@ -74,6 +74,15 @@ NATSConfig </a> </em>
 <em>(Optional)</em>
 </td>
 </tr>
+<tr>
+<td>
+<code>kafka</code></br> <em> <a href="#argoproj.io/v1alpha1.KafkaBus">
+KafkaBus </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.ContainerTemplate">
@@ -190,6 +199,18 @@ NATS eventbus
 <em>(Optional)</em>
 </td>
 </tr>
+<tr>
+<td>
+<code>kafka</code></br> <em> <a href="#argoproj.io/v1alpha1.KafkaBus">
+KafkaBus </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Kafka eventbus
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -248,6 +269,18 @@ NATS eventbus
 </td>
 <td>
 <em>(Optional)</em>
+</td>
+</tr>
+<tr>
+<td>
+<code>kafka</code></br> <em> <a href="#argoproj.io/v1alpha1.KafkaBus">
+KafkaBus </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Kafka eventbus
+</p>
 </td>
 </tr>
 </tbody>
@@ -631,6 +664,160 @@ Secret for auth
 </td>
 <td>
 <em>(Optional)</em>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.KafkaBus">
+KafkaBus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.BusConfig">BusConfig</a>,
+<a href="#argoproj.io/v1alpha1.EventBusSpec">EventBusSpec</a>)
+</p>
+<p>
+<p>
+KafkaBus holds the KafkaBus EventBus information
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>url</code></br> <em> string </em>
+</td>
+<td>
+<p>
+URL to kafka cluster, multiple URLs separated by comma
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topic</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Topic name, defaults to {namespace_name}-{eventbus_name}
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Kafka version, sarama defaults to the oldest supported stable version
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the kafka client.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sasl</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.SASLConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SASL configuration for the kafka client
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>consumerGroup</code></br> <em>
+<a href="#argoproj.io/v1alpha1.KafkaConsumerGroup"> KafkaConsumerGroup
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Consumer group for kafka client
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.KafkaConsumerGroup">
+KafkaConsumerGroup
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.KafkaBus">KafkaBus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>groupName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Consumer group name, defaults to {namespace_name}-{sensor_name}
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>rebalanceStrategy</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Rebalance strategy can be one of: sticky, roundrobin, range. Range is
+the default.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>startOldest</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+When starting up a new group do we want to start from the oldest event
+(true) or the newest event (false), defaults to false
+</p>
 </td>
 </tr>
 </tbody>

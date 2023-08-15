@@ -5,20 +5,25 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
+    permissions:
+      contents: write  # for peaceiris/actions-gh-pages to push pages branch
     if: github.repository == 'argoproj/argo-events'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.6.0
         with:
           python-version: 3.9
       - name: Setup Golang
-        uses: actions/setup-go@v3.2.0
+        uses: actions/setup-go@v3.5.0
         with:
-          go-version: '1.19'
+          go-version: '1.20'
       - name: build
         run: |
           pip install mkdocs==1.3.0 mkdocs_material==8.2.9

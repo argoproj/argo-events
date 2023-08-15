@@ -23,10 +23,10 @@ import (
 	"math/big"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
-	gh "github.com/google/go-github/v31/github"
-	"github.com/pkg/errors"
+	gh "github.com/google/go-github/v50/github"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 
@@ -92,6 +92,7 @@ func (router *Router) getGithubAppAuthStrategy() (*AppsAuthStrategy, error) {
 
 	return &AppsAuthStrategy{
 		AppID:          appCreds.AppID,
+		BaseURL:        router.githubEventSource.GithubBaseURL,
 		InstallationID: appCreds.InstallationID,
 		PrivateKey:     githubAppPrivateKey.secret,
 	}, nil
@@ -305,11 +306,21 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		// create webhooks
 
 		// In order to successfully setup a GitHub hook for the given repository,
-		// 1. Get the GitHub auth credentials and Webhook secret from K8s secrets
-		// 2. Configure the hook with url, content type, ssl etc.
-		// 3. Set up a GitHub client
-		// 4. Set the base and upload url for the client
-		// 5. Create the hook if one doesn't exist already. If exists already, then use that one.
+		// 1. Parse and validate base and upload url if provided
+		// 2. Get the GitHub auth credentials and Webhook secret from K8s secrets
+		// 3. Configure the hook with url, content type, ssl etc.
+		// 4. Set up a GitHub client
+		// 5. Set the base and upload url for the client
+		// 6. Create the hook if one doesn't exist already. If exists already, then use that one.
+
+		baseURL, err := parseUrlWithSlash(&githubEventSource.GithubBaseURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github base url. err: %v", err)
+		}
+		uploadURL, err := parseUrlWithSlash(&githubEventSource.GithubUploadURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github upload url. err: %v", err)
+		}
 
 		logger.Info("choosing github auth strategy...")
 		authStrategy, err := router.chooseAuthStrategy()
@@ -342,24 +353,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		logger.Info("setting up client for GitHub...")
 		client := gh.NewClient(&http.Client{Transport: authTransport})
-
-		logger.Info("setting up base url for GitHub client...")
-		if githubEventSource.GithubBaseURL != "" {
-			baseURL, err := url.Parse(githubEventSource.GithubBaseURL)
-			if err != nil {
-				return fmt.Errorf("failed to parse github base url. err: %v", err)
-			}
+		if baseURL != nil && uploadURL != nil {
+			logger.Info("setting up client for GitHub Enterprise...")
 			client.BaseURL = baseURL
-		}
-
-		logger.Info("setting up the upload url for GitHub client...")
-		if githubEventSource.GithubUploadURL != "" {
-			uploadURL, err := url.Parse(githubEventSource.GithubUploadURL)
-			if err != nil {
-				return fmt.Errorf("failed to parse github upload url. err: %v", err)
-			}
 			client.UploadURL = uploadURL
 		}
+		logger.Infof("client set for baseURL=[%s] uploadURL=[%s]", client.BaseURL, client.UploadURL)
+
 		router.githubClient = client
 		router.repoHookIDs = make(map[string]int64)
 		router.orgHookIDs = make(map[string]int64)
@@ -462,4 +462,15 @@ func parseValidateRequest(r *http.Request, secret []byte) (map[string]interface{
 		payload[h] = r.Header.Get(h)
 	}
 	return payload, nil
+}
+
+// parseUrlWithSlash parses URL and enforces trailing slash expected by GitHub client
+func parseUrlWithSlash(urlStr *string) (*url.URL, error) {
+	if *urlStr == "" {
+		return nil, nil
+	}
+	if !strings.HasSuffix(*urlStr, "/") {
+		*urlStr += "/"
+	}
+	return url.Parse(*urlStr)
 }

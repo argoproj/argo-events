@@ -24,8 +24,11 @@ import (
 )
 
 const (
-	namespaceEnvVar = "NAMESPACE"
-	portEnvVar      = "PORT"
+	serviceNameEnvVar     = "SERVICE_NAME"
+	deploymentNameEnvVar  = "DEPLOYMENT_NAME"
+	clusterRoleNameEnvVar = "CLUSTER_ROLE_NAME"
+	namespaceEnvVar       = "NAMESPACE"
+	portEnvVar            = "PORT"
 )
 
 func Start() {
@@ -52,9 +55,9 @@ func Start() {
 	}
 
 	options := webhook.Options{
-		ServiceName:     "events-webhook",
-		DeploymentName:  "events-webhook",
-		ClusterRoleName: "argo-events-webhook",
+		ServiceName:     envpkg.LookupEnvStringOr(serviceNameEnvVar, "events-webhook"),
+		DeploymentName:  envpkg.LookupEnvStringOr(deploymentNameEnvVar, "events-webhook"),
+		ClusterRoleName: envpkg.LookupEnvStringOr(clusterRoleNameEnvVar, "argo-events-webhook"),
 		Namespace:       namespace,
 		Port:            port,
 		SecretName:      "events-webhook-certs",

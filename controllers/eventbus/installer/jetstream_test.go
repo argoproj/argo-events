@@ -14,6 +14,7 @@ import (
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -40,11 +41,12 @@ func TestJetStreamBadInstallation(t *testing.T) {
 		badEventBus := testJetStreamEventBus.DeepCopy()
 		badEventBus.Spec.JetStream = nil
 		installer := &jetStreamInstaller{
-			client:   fake.NewClientBuilder().Build(),
-			eventBus: badEventBus,
-			config:   fakeConfig,
-			labels:   testLabels,
-			logger:   zaptest.NewLogger(t).Sugar(),
+			client:     fake.NewClientBuilder().Build(),
+			kubeClient: k8sfake.NewSimpleClientset(),
+			eventBus:   badEventBus,
+			config:     fakeConfig,
+			labels:     testLabels,
+			logger:     zaptest.NewLogger(t).Sugar(),
 		}
 		_, err := installer.Install(context.TODO())
 		assert.Error(t, err)
@@ -70,11 +72,12 @@ func TestJetStreamCreateObjects(t *testing.T) {
 	cl := fake.NewClientBuilder().Build()
 	ctx := context.TODO()
 	i := &jetStreamInstaller{
-		client:   cl,
-		eventBus: testJetStreamEventBus,
-		config:   fakeConfig,
-		labels:   testLabels,
-		logger:   zaptest.NewLogger(t).Sugar(),
+		client:     cl,
+		kubeClient: k8sfake.NewSimpleClientset(),
+		eventBus:   testJetStreamEventBus,
+		config:     fakeConfig,
+		labels:     testLabels,
+		logger:     zaptest.NewLogger(t).Sugar(),
 	}
 
 	t.Run("test create sts", func(t *testing.T) {

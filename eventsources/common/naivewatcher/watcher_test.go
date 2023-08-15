@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/argoproj/argo-events/eventsources/common/fsevent"
+	"github.com/stretchr/testify/assert"
 )
 
 type WatchableTestFS struct {
@@ -51,7 +50,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = watcher.Start(100 * time.Millisecond)
+	err = watcher.Start(50 * time.Millisecond)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +65,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 	events := readEvents(t, watcher)
 	assert.Equal(t, []fsevent.Event{
 		{Op: fsevent.Create, Name: filepath.Join(tmpdir, "foo")},
@@ -77,7 +76,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 	events = readEvents(t, watcher)
 	assert.Equal(t, []fsevent.Event{
 		{Op: fsevent.Rename, Name: filepath.Join(tmpdir, "bar")},
@@ -88,7 +87,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 	events = readEvents(t, watcher)
 	assert.Equal(t, []fsevent.Event{
 		{Op: fsevent.Write, Name: filepath.Join(tmpdir, "bar")},
@@ -99,7 +98,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 	events = readEvents(t, watcher)
 	assert.Equal(t, []fsevent.Event{
 		{Op: fsevent.Chmod, Name: filepath.Join(tmpdir, "bar")},
@@ -119,7 +118,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	var actualOps fsevent.Op
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 	events = readEvents(t, watcher)
 	for _, event := range events {
 		if event.Name == filepath.Join(tmpdir, "foo") {
@@ -133,7 +132,7 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 	events = readEvents(t, watcher)
 	assert.Equal(t, []fsevent.Event{
 		{Op: fsevent.Remove, Name: filepath.Join(tmpdir, "foo")},

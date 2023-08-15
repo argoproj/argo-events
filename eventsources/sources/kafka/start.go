@@ -96,14 +96,14 @@ func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.Sug
 
 	switch kafkaEventSource.ConsumerGroup.RebalanceStrategy {
 	case "sticky":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategySticky}
 	case "roundrobin":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRoundRobin}
 	case "range":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRange}
 	default:
 		log.Info("Invalid rebalance strategy, using default: range")
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRange}
 	}
 
 	consumer := Consumer{
@@ -218,10 +218,20 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		log.Info("dispatching event on the data channel...")
 		eventData := &events.KafkaEventData{
 			Topic:     msg.Topic,
+			Key:       string(msg.Key),
 			Partition: int(msg.Partition),
 			Timestamp: msg.Timestamp.String(),
 			Metadata:  kafkaEventSource.Metadata,
 		}
+
+		headers := make(map[string]string)
+
+		for _, recordHeader := range msg.Headers {
+			headers[string(recordHeader.Key)] = string(recordHeader.Value)
+		}
+
+		eventData.Headers = headers
+
 		if kafkaEventSource.JSONBody {
 			eventData.Body = (*json.RawMessage)(&msg.Value)
 		} else {
@@ -384,10 +394,20 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 	consumer.logger.Info("dispatching event on the data channel...")
 	eventData := &events.KafkaEventData{
 		Topic:     message.Topic,
+		Key:       string(message.Key),
 		Partition: int(message.Partition),
 		Timestamp: message.Timestamp.String(),
 		Metadata:  consumer.kafkaEventSource.Metadata,
 	}
+
+	headers := make(map[string]string)
+
+	for _, recordHeader := range message.Headers {
+		headers[string(recordHeader.Key)] = string(recordHeader.Value)
+	}
+
+	eventData.Headers = headers
+
 	if consumer.kafkaEventSource.JSONBody {
 		eventData.Body = (*json.RawMessage)(&message.Value)
 	} else {

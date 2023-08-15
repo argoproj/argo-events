@@ -29,25 +29,25 @@ We will set up a basic go http server and connect it with the Minio events.
         package main
 
         import (
-        	"fmt"
-        	"io"
-        	"net/http"
+         "fmt"
+         "io"
+         "net/http"
         )
 
         func hello(w http.ResponseWriter, req *http.Request) {
-        	body, err := io.ReadAll(req.Body)
-        	if err != nil {
-        		fmt.Printf("%+v\n", err)
-        		return
-        	}
-        	fmt.Println(string(body))
-        	fmt.Fprintf(w, "hello\n")
+         body, err := io.ReadAll(req.Body)
+         if err != nil {
+          fmt.Printf("%+v\n", err)
+          return
+         }
+         fmt.Println(string(body))
+         fmt.Fprintf(w, "hello\n")
         }
 
         func main() {
-        	http.HandleFunc("/hello", hello)
-        	fmt.Println("server is listening on 8090")
-        	http.ListenAndServe(":8090", nil)
+         http.HandleFunc("/hello", hello)
+         fmt.Println("server is listening on 8090")
+         http.ListenAndServe(":8090", nil)
         }
 
 2.  Deploy the HTTP server.
@@ -62,7 +62,7 @@ We will set up a basic go http server and connect it with the Minio events.
 
         kubectl -n argo-events port-forward <http-server-pod-name> 8090:8090
 
-5.  Our goals is to seamlessly integrate Minio S3 bucket notifications with REST API server created in previous step. So,
+5. Our goals is to seamlessly integrate Minio S3 bucket notifications with REST API server created in previous step. So,
     lets set up the Minio event-source available [here](https://argoproj.github.io/argo-events/setup/minio/).
     Don't create the sensor as we will be deploying it in next step.
 
@@ -72,7 +72,7 @@ We will set up a basic go http server and connect it with the Minio events.
 
 7.  Now, drop a file onto `input` bucket in Minio server.
 
-8.  The sensor has triggered a http request to the http server. Take a look at the logs.
+8. The sensor has triggered a http request to the http server. Take a look at the logs.
 
         server is listening on 8090
         {"type":"minio","bucket":"input"}
@@ -157,28 +157,29 @@ to invoke OpenFaaS function.
 
 1.  If you don't have OpenFaaS installed, follow the [instructions](https://docs.openfaas.com/deployment/kubernetes/).
 
-2.  Let's create a basic function. You can follow the [steps](https://blog.alexellis.io/serverless-golang-with-openfaas/).
+2. Let's create a basic function. You can follow the [steps](https://blog.alexellis.io/serverless-golang-with-openfaas/).
     to set up the function.
 
          package function
 
          import (
-         	"fmt"
+          "fmt"
          )
 
          // Handle a serverless request
          func Handle(req []byte) string {
-         	return fmt.Sprintf("Hello, Go. You said: %s", string(req))
+          return fmt.Sprintf("Hello, Go. You said: %s", string(req))
          }
-
-3.  Make sure the function pod is up and running.
-
-4.  We are going to invoke OpenFaaS function on a message on Redis Subscriber.
 
 5.  Let's set up the Redis Database, Redis PubSub event-source as specified [here](https://argoproj.github.io/argo-events/setup/redis/).
     Do not create the Redis sensor, we are going to create it in next step.
 
-6.  Let's create the sensor with OpenFaaS trigger.
+4. We are going to invoke OpenFaaS function on a message on Redis Subscriber.
+
+5. Let's set up the Redis Database, Redis PubSub event-source as specified [here](https://argoproj.github.io/argo-events/setup/redis/).
+    Do not create the Redis sensor, we are going to create it in next step.
+
+6. Let's create the sensor with OpenFaaS trigger.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -222,7 +223,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
 
 4.  Now, we are going to invoke the Kubeless function when a message is placed on a NATS queue.
 
-5.  Let's set up the NATS event-source. Follow [instructions](https://argoproj.github.io/argo-events/setup/nats/#setup) for details.
+5. Let's set up the NATS event-source. Follow [instructions](https://argoproj.github.io/argo-events/setup/nats/#setup) for details.
     Do not create the NATS sensor, we are going to create it in next step.
 
 6.  Let's create NATS sensor with HTTP trigger.

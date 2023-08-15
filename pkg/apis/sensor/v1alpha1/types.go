@@ -107,6 +107,12 @@ type SensorSpec struct {
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,5,opt,name=eventBusName"`
 	// Replicas is the sensor deployment replicas
 	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,6,opt,name=replicas"`
+	// RevisionHistoryLimit specifies how many old deployment revisions to retain
+	// +optional
+	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty" protobuf:"varint,7,opt,name=revisionHistoryLimit"`
+	// LoggingFields add additional key-value pairs when logging happens
+	// +optional
+	LoggingFields map[string]string `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {
@@ -324,6 +330,12 @@ type Trigger struct {
 	// Rate limit, default unit is Second
 	// +optional
 	RateLimit *RateLimit `json:"rateLimit,omitempty" protobuf:"bytes,5,opt,name=rateLimit"`
+	// AtLeastOnce determines the trigger execution semantics.
+	// Defaults to false. Trigger execution will use at-most-once semantics.
+	// If set to true, Trigger execution will switch to at-least-once semantics.
+	// +kubebuilder:default=false
+	// +optional
+	AtLeastOnce bool `json:"atLeastOnce,omitempty" protobuf:"varint,6,opt,name=atLeastOnce"`
 }
 
 type RateLimiteUnit string
@@ -387,6 +399,9 @@ type TriggerTemplate struct {
 	// Criteria to reset the conditons
 	// +optional
 	ConditionsReset []ConditionsResetCriteria `json:"conditionsReset,omitempty" protobuf:"bytes,15,rep,name=conditionsReset"`
+	// AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus
+	// +optional
+	AzureServiceBus *AzureServiceBusTrigger `json:"azureServiceBus,omitempty" protobuf:"bytes,16,opt,name=azureServiceBus"`
 }
 
 type ConditionsResetCriteria struct {
@@ -532,6 +547,26 @@ type AzureEventHubsTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 }
 
+type AzureServiceBusTrigger struct {
+	// ConnectionString is the connection string for the Azure Service Bus
+	ConnectionString *corev1.SecretKeySelector `json:"connectionString,omitempty" protobuf:"bytes,1,opt,name=connectionString"`
+	// QueueName is the name of the Azure Service Bus Queue
+	QueueName string `json:"queueName" protobuf:"bytes,2,opt,name=queueName"`
+	// TopicName is the name of the Azure Service Bus Topic
+	TopicName string `json:"topicName" protobuf:"bytes,3,opt,name=topicName"`
+	// SubscriptionName is the name of the Azure Service Bus Topic Subscription
+	SubscriptionName string `json:"subscriptionName" protobuf:"bytes,4,opt,name=subscriptionName"`
+	// TLS configuration for the service bus client
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
+}
+
 // KafkaTrigger refers to the specification of the Kafka trigger.
 type KafkaTrigger struct {
 	// URL of the Kafka broker, multiple URLs separated by comma.
@@ -539,7 +574,8 @@ type KafkaTrigger struct {
 	// Name of the topic.
 	// More info at https://kafka.apache.org/documentation/#intro_topics
 	Topic string `json:"topic" protobuf:"bytes,2,opt,name=topic"`
-	// Partition to write data to.
+	// +optional
+	// DEPRECATED
 	Partition int32 `json:"partition" protobuf:"varint,3,opt,name=partition"`
 	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
@@ -562,15 +598,17 @@ type KafkaTrigger struct {
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
 	// The partitioning key for the messages put on the Kafka topic.
-	// Defaults to broker url.
 	// +optional.
-	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
+	PartitioningKey *string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
 	// Specify what kafka version is being connected to enables certain features in sarama, defaults to 1.0.0
 	// +optional
 	Version string `json:"version,omitempty" protobuf:"bytes,11,opt,name=version"`
 	// SASL configuration for the kafka client
 	// +optional
 	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,12,opt,name=sasl"`
+	// Schema Registry configuration to producer message with avro format
+	// +optional
+	SchemaRegistry *apicommon.SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,13,opt,name=schemaRegistry"`
 }
 
 // PulsarTrigger refers to the specification of the Pulsar trigger.
@@ -598,11 +636,21 @@ type PulsarTrigger struct {
 	// +optional
 	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
 	// Authentication token for the pulsar client.
+	// Either token or athenz can be set to use auth.
 	// +optional
 	AuthTokenSecret *corev1.SecretKeySelector `json:"authTokenSecret,omitempty" protobuf:"bytes,9,opt,name=authTokenSecret"`
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,10,opt,name=connectionBackoff"`
+	// Authentication athenz parameters for the pulsar client.
+	// Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go
+	// Either token or athenz can be set to use auth.
+	// +optional
+	AuthAthenzParams map[string]string `json:"authAthenzParams,omitempty" protobuf:"bytes,11,rep,name=authAthenzParams"`
+	// Authentication athenz privateKey secret for the pulsar client.
+	// AuthAthenzSecret must be set if AuthAthenzParams is used.
+	// +optional
+	AuthAthenzSecret *corev1.SecretKeySelector `json:"authAthenzSecret,omitempty" protobuf:"bytes,12,opt,name=authAthenzSecret"`
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.
@@ -648,12 +696,42 @@ type SlackTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
 	SlackToken *corev1.SecretKeySelector `json:"slackToken,omitempty" protobuf:"bytes,2,opt,name=slackToken"`
-	// Channel refers to which Slack channel to send slack message.
+	// Channel refers to which Slack channel to send Slack message.
 	// +optional
 	Channel string `json:"channel,omitempty" protobuf:"bytes,3,opt,name=channel"`
 	// Message refers to the message to send to the Slack channel.
 	// +optional
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
+	// Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .
+	// +optional
+	Attachments string `json:"attachments,omitempty" protobuf:"bytes,5,opt,name=attachments"`
+	// Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .
+	// +optional
+	Blocks string `json:"blocks,omitempty" protobuf:"bytes,6,opt,name=blocks"`
+	// Thread refers to additional options for sending messages to a Slack thread.
+	// +optional
+	Thread SlackThread `json:"thread,omitempty" protobuf:"bytes,7,opt,name=thread"`
+	// Sender refers to additional configuration of the Slack application that sends the message.
+	// +optional
+	Sender SlackSender `json:"sender,omitempty" protobuf:"bytes,8,opt,name=sender"`
+}
+
+type SlackSender struct {
+	// Username is the Slack application's username
+	// +optional
+	Username string `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
+	// Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png
+	// +optional
+	Icon string `json:"icon,omitempty" protobuf:"bytes,2,opt,name=icon"`
+}
+
+type SlackThread struct {
+	// MessageAggregationKey allows to aggregate the messages to a thread by some key.
+	// +optional
+	MessageAggregationKey string `json:"messageAggregationKey,omitempty" protobuf:"bytes,1,opt,name=messageAggregationKey"`
+	// BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel
+	// +optional
+	BroadcastMessageToChannel bool `json:"broadcastMessageToChannel,omitempty" protobuf:"bytes,2,opt,name=broadcastMessageToChannel"`
 }
 
 // OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
@@ -749,6 +827,12 @@ type TriggerParameterSource struct {
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.
 	Value *string `json:"value,omitempty" protobuf:"bytes,6,opt,name=value"`
+	// UseRawData indicates if the value in an event at data key should be used without converting to string.
+	// When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
+	// false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter
+	// 123 will resolve to the numerical type, but when false, or not provided, the string "123" will be resolved)
+	// +optional
+	UseRawData bool `json:"useRawData,omitempty" protobuf:"bytes,7,opt,name=useRawData"`
 }
 
 // TriggerPolicy dictates the policy for the trigger retries

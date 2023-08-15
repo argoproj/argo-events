@@ -29,7 +29,7 @@ func fakeOptions() Options {
 		DeploymentName:  "events-webhook",
 		ClusterRoleName: "argo-events-webhook",
 		ServiceName:     "webhook",
-		Port:            443,
+		Port:            8443,
 		SecretName:      "webhook-certs",
 		WebhookName:     "webhook.argo-events.argoproj.io",
 	}

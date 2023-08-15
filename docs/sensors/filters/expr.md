@@ -30,7 +30,7 @@ An expr filter has following fields:
 ```yaml
 filters:
   exprLogicalOperator: logical_operator_applied
-  expr:
+  exprs:
     - expr: expression_to_evaluate
       fields:
         - name: parameter_name
@@ -124,7 +124,6 @@ To discover all options offered by govaluate, take a look at its [manual](https:
         curl -d '{ "a": "b", "c": 11, "d": { "e": false } }' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 1. Look for a workflow with name starting with `expr-workflow-`
-
 
 ## Further examples
 

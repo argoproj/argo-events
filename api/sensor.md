@@ -454,6 +454,110 @@ are applied to the trigger resource.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.AzureServiceBusTrigger">
+AzureServiceBusTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>connectionString</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+ConnectionString is the connection string for the Azure Service Bus
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+QueueName is the name of the Azure Service Bus Queue
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topicName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+TopicName is the name of the Azure Service Bus Topic
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subscriptionName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+SubscriptionName is the name of the Azure Service Bus Topic Subscription
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the service bus client
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<p>
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.Comparator">
 Comparator (<code>string</code> alias)
 </p>
@@ -1709,8 +1813,9 @@ Name of the topic. More info at
 <code>partition</code></br> <em> int32 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-Partition to write data to.
+DEPRECATED
 </p>
 </td>
 </tr>
@@ -1793,8 +1898,7 @@ construct the request payload.
 </td>
 <td>
 <p>
-The partitioning key for the messages put on the Kafka topic. Defaults
-to broker url.
+The partitioning key for the messages put on the Kafka topic.
 </p>
 </td>
 </tr>
@@ -1819,6 +1923,19 @@ github.com/argoproj/argo-events/pkg/apis/common.SASLConfig </em>
 <em>(Optional)</em>
 <p>
 SASL configuration for the kafka client
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>schemaRegistry</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Schema Registry configuration to producer message with avro format
 </p>
 </td>
 </tr>
@@ -2247,7 +2364,8 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 <em>(Optional)</em>
 <p>
-Authentication token for the pulsar client.
+Authentication token for the pulsar client. Either token or athenz can
+be set to use auth.
 </p>
 </td>
 </tr>
@@ -2260,6 +2378,33 @@ github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 <em>(Optional)</em>
 <p>
 Backoff holds parameters applied to connection.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authAthenzParams</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication athenz parameters for the pulsar client. Refer
+<a href="https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go">https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go</a>
+Either token or athenz can be set to use auth.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authAthenzSecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication athenz privateKey secret for the pulsar client.
+AuthAthenzSecret must be set if AuthAthenzParams is used.
 </p>
 </td>
 </tr>
@@ -2426,6 +2571,29 @@ Replicas is the sensor deployment replicas
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>revisionHistoryLimit</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+RevisionHistoryLimit specifies how many old deployment revisions to
+retain
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>loggingFields</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoggingFields add additional key-value pairs when logging happens
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2533,6 +2701,29 @@ Replicas is the sensor deployment replicas
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>revisionHistoryLimit</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+RevisionHistoryLimit specifies how many old deployment revisions to
+retain
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>loggingFields</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LoggingFields add additional key-value pairs when logging happens
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.SensorStatus">
@@ -2566,6 +2757,99 @@ github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 <td>
 <p>
 (Members of <code>Status</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.SlackSender">
+SlackSender
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>username</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Username is the Slack application’s username
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>icon</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Icon is the Slack application’s icon, e.g. :robot_face: or
+<a href="https://example.com/image.png">https://example.com/image.png</a>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.SlackThread">
+SlackThread
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>messageAggregationKey</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+MessageAggregationKey allows to aggregate the messages to a thread by
+some key.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>broadcastMessageToChannel</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+BroadcastMessageToChannel allows to also broadcast the message from the
+thread to the channel
 </p>
 </td>
 </tr>
@@ -2630,7 +2914,7 @@ required to send messages.
 <td>
 <em>(Optional)</em>
 <p>
-Channel refers to which Slack channel to send slack message.
+Channel refers to which Slack channel to send Slack message.
 </p>
 </td>
 </tr>
@@ -2642,6 +2926,60 @@ Channel refers to which Slack channel to send slack message.
 <em>(Optional)</em>
 <p>
 Message refers to the message to send to the Slack channel.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>attachments</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Attachments is a JSON format string that represents an array of Slack
+attachments according to the attachments API:
+<a href="https://api.slack.com/reference/messaging/attachments">https://api.slack.com/reference/messaging/attachments</a>
+.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>blocks</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Blocks is a JSON format string that represents an array of Slack blocks
+according to the blocks API:
+<a href="https://api.slack.com/reference/block-kit/blocks">https://api.slack.com/reference/block-kit/blocks</a>
+.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>thread</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackThread"> SlackThread </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Thread refers to additional options for sending messages to a Slack
+thread.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sender</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackSender"> SlackSender </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Sender refers to additional configuration of the Slack application that
+sends the message.
 </p>
 </td>
 </tr>
@@ -3099,6 +3437,19 @@ Rate limit, default unit is Second
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>atLeastOnce</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AtLeastOnce determines the trigger execution semantics. Defaults to
+false. Trigger execution will use at-most-once semantics. If set to
+true, Trigger execution will switch to at-least-once semantics.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.TriggerParameter">
@@ -3109,6 +3460,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.AWSLambdaTrigger">AWSLambdaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
 <a href="#argoproj.io/v1alpha1.AzureEventHubsTrigger">AzureEventHubsTrigger</a>,
+<a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">AzureServiceBusTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
@@ -3303,6 +3655,23 @@ and
 Value is the default literal value to use for this parameter source This
 is only used if the DataKey is invalid. If the DataKey is invalid and
 this is not defined, this param source will produce an error.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>useRawData</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+UseRawData indicates if the value in an event at data key should be used
+without converting to string. When true, a number, boolean, json or
+string parameter may be extracted. When the field is unspecified, or
+explicitly false, the behavior is to turn the extracted field into a
+string. (e.g. when set to true, the parameter 123 will resolve to the
+numerical type, but when false, or not provided, the string “123” will
+be resolved)
 </p>
 </td>
 </tr>
@@ -3568,6 +3937,20 @@ Pulsar refers to the trigger designed to place messages on Pulsar topic.
 <em>(Optional)</em>
 <p>
 Criteria to reset the conditons
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureServiceBus</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">
+AzureServiceBusTrigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+AzureServiceBus refers to the trigger designed to place messages on
+Azure Service Bus
 </p>
 </td>
 </tr>
