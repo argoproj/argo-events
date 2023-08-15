@@ -14,8 +14,8 @@ GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ;
 EXECUTABLES = curl docker gzip go
 
 #  docker image publishing options
-DOCKER_PUSH?=false
-IMAGE_NAMESPACE?=quay.io/argoproj
+DOCKER_PUSH?=true
+IMAGE_NAMESPACE?=quay.io/denis_codefresh
 VERSION?=v1.7.3-cap-CR-19893
 BASE_VERSION:=v1.7.3-cap-CR-19893
 
@@ -140,7 +140,7 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 .PHONY: start
 start: image
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kubectl kustomize test/manifests | sed 's@quay.io/codefresh/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune=false --force -f -
+	kubectl kustomize test/manifests | sed 's@quay.io/denis_codefresh/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune=false --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
@@ -176,7 +176,7 @@ check-version-warning:
 
 .PHONY: update-manifests-version
 update-manifests-version:
-	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: quay.io/codefresh/argo-events:.*@value: quay.io/codefresh/argo-events:$(VERSION)@' > /tmp/base_kustomization.yaml
+	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: quay.io/denis_codefresh/argo-events:.*@value: quay.io/denis_codefresh/argo-events:$(VERSION)@' > /tmp/base_kustomization.yaml
 	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
 	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
