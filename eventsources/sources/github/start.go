@@ -26,6 +26,7 @@ import (
 	"time"
 
 	gh "github.com/google/go-github/v31/github"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 

@@ -37,6 +37,7 @@ import (
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron/v3"
 	"go.uber.org/ratelimit"
 	"go.uber.org/zap"

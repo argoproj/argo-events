@@ -53,6 +53,7 @@ require (
 	github.com/nats-io/nats.go v1.17.0
 	github.com/nats-io/stan.go v0.10.3
 	github.com/nsqio/go-nsq v1.1.0
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/rabbitmq/amqp091-go v1.4.0
 	github.com/radovskyb/watcher v1.0.7
@@ -113,7 +114,6 @@ require (
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	sigs.k8s.io/json v0.0.0-20211208200746-9f7c6b3444d2 // indirect

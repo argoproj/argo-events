@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
