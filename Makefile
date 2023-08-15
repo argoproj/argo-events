@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
-VERSION?=v1.7.3
-BASE_VERSION:=v1.7.3
+VERSION?=v1.7.3-cap-CR-19893
+BASE_VERSION:=v1.7.3-cap-CR-19893
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
