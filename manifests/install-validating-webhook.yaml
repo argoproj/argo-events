@@ -123,7 +123,7 @@ spec:
               fieldPath: metadata.namespace
         - name: PORT
           value: "443"
-        image: quay.io/denis_codefresh/argo-events:v1.7.3-cap-CR-19893
+        image: quay.io/codefresh/argo-events:v1.7.3-cap-CR-19893
         imagePullPolicy: Always
         name: webhook
       serviceAccountName: argo-events-webhook-sa
