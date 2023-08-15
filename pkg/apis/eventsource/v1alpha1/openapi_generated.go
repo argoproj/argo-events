@@ -67,6 +67,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource":             schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource":               schema_pkg_apis_eventsource_v1alpha1_NSQEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.OwnedRepositories":            schema_pkg_apis_eventsource_v1alpha1_OwnedRepositories(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PayloadEnrichmentFlags":       schema_pkg_apis_eventsource_v1alpha1_PayloadEnrichmentFlags(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource":            schema_pkg_apis_eventsource_v1alpha1_PubSubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PulsarEventSource":            schema_pkg_apis_eventsource_v1alpha1_PulsarEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource":             schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref),
