@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/eventsources/sources/alibabacloudmns"
 	"math/big"
 	"strings"
 	"sync"
@@ -303,6 +304,16 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &awssqs.EventListener{EventSourceName: eventSource.Name, EventName: k, SQSEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SQSEvent] = servers
+	}
+	if len(eventSource.Spec.MNS) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.MNS {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &alibabacloudmns.EventListener{EventSourceName: eventSource.Name, EventName: k, MNSEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.MNSEvent] = servers
 	}
 	if len(eventSource.Spec.Slack) != 0 {
 		servers := []EventingServer{}

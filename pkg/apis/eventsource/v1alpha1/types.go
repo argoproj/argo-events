@@ -122,6 +122,8 @@ type EventSourceSpec struct {
 	AzureQueueStorage map[string]AzureQueueStorageEventSource `json:"azureQueueStorage,omitempty" protobuf:"bytes,33,rep,name=azureQueueStorage"`
 	// SFTP event sources
 	SFTP map[string]SFTPEventSource `json:"sftp,omitempty" protobuf:"bytes,34,rep,name=sftp"`
+	// MNS event sources
+	MNS map[string]MNSEventSource `json:"mns,omitempty" protobuf:"bytes,35,rep,name=mns"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -710,6 +712,24 @@ type SQSEventSource struct {
 	// SessionToken refers to K8s secret containing AWS temporary credentials(STS) session token
 	// +optional
 	SessionToken *corev1.SecretKeySelector `json:"sessionToken,omitempty" protobuf:"bytes,13,opt,name=sessionToken"`
+}
+
+// MNSEventSource refers to event-source for AlibabaCloud MNS related events
+type MNSEventSource struct {
+	// AccessKey refers K8s secret containing AlibabaCloud access key
+	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,1,opt,name=accessKey"`
+	// SecretKey refers K8s secret containing AlibabaCloud secret key
+	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,2,opt,name=secretKey"`
+	// Queue is AlibabaCloud MNS queue to listen to for messages
+	Queue string `json:"queue" protobuf:"bytes,3,opt,name=queue"`
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,4,opt,name=jsonBody"`
+	// Endpoint configures connection to a specific AlibabaCloud MNS endpoint
+	// +optional
+	Endpoint string `json:"endpoint" protobuf:"bytes,5,opt,name=endpoint"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,6,opt,name=filter"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.

@@ -104,6 +104,7 @@ require (
 	github.com/DataDog/zstd v1.5.0 // indirect
 	github.com/PagerDuty/go-pagerduty v1.6.0 // indirect
 	github.com/RocketChat/Rocket.Chat.Go.SDK v0.0.0-20210112200207-10ab4d695d60 // indirect
+	github.com/aliyun/aliyun-mns-go-sdk v1.0.2 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/bits-and-blooms/bitset v1.4.0 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
@@ -116,6 +117,8 @@ require (
 	github.com/go-openapi/spec v0.20.8 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
+	github.com/gogap/errors v0.0.0-20210818113853-edfbba0ddea9 // indirect
+	github.com/gogap/stack v0.0.0-20150131034635-fef68dddd4f8 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-github/v41 v41.0.0 // indirect
