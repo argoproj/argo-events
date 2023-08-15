@@ -17,7 +17,8 @@ limitations under the License.
 package triggers
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -26,7 +27,7 @@ import (
 
 func FetchKubernetesResource(source *v1alpha1.ArtifactLocation) (*unstructured.Unstructured, error) {
 	if source == nil {
-		return nil, errors.Errorf("trigger source for k8s is empty")
+		return nil, fmt.Errorf("trigger source for k8s is empty")
 	}
 	creds, err := artifacts.GetCredentials(source)
 	if err != nil {

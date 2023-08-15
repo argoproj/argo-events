@@ -9,7 +9,6 @@ import (
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	nats "github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -41,7 +40,7 @@ func (stream *Jetstream) Init() error {
 	if err != nil {
 		errStr := fmt.Sprintf("error creating Management Connection for Jetstream stream %+v: %v", stream, err)
 		stream.Logger.Error(errStr)
-		return errors.New(errStr)
+		return fmt.Errorf(errStr)
 	}
 	err = stream.CreateStream(mgmtConnection)
 	if err != nil {
@@ -83,7 +82,7 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	case eventbusv1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:
-		return nil, errors.New("unsupported auth strategy")
+		return nil, fmt.Errorf("unsupported auth strategy")
 	}
 	nc, err := nats.Connect(stream.url, opts...)
 	if err != nil {
@@ -106,7 +105,7 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 
 func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	if conn == nil {
-		return errors.New("Can't create Stream on nil connection")
+		return fmt.Errorf("Can't create Stream on nil connection")
 	}
 	var err error
 
@@ -142,12 +141,12 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
 
-	connectErr := common.Connect(nil, func() error { // exponential backoff if it fails the first time
+	connectErr := common.DoWithRetry(nil, func() error { // exponential backoff if it fails the first time
 		_, err = conn.JSContext.AddStream(&streamConfig)
 		if err != nil {
 			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v`,
 				common.JetStreamStreamName, conn, err)
-			return errors.New(errStr)
+			return fmt.Errorf(errStr)
 		} else {
 			return nil
 		}

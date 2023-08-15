@@ -17,11 +17,12 @@ limitations under the License.
 package aws
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/common"
@@ -31,11 +32,11 @@ import (
 func GetAWSCredFromEnvironment(access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector) (*credentials.Credentials, error) {
 	accessKey, ok := common.GetEnvFromSecret(access)
 	if !ok {
-		return nil, errors.Errorf("can not find envFrom %v", access)
+		return nil, fmt.Errorf("can not find envFrom %v", access)
 	}
 	secretKey, ok := common.GetEnvFromSecret(secret)
 	if !ok {
-		return nil, errors.Errorf("can not find envFrom %v", secret)
+		return nil, fmt.Errorf("can not find envFrom %v", secret)
 	}
 	return credentials.NewStaticCredentialsFromCreds(credentials.Value{
 		AccessKeyID:     accessKey,
@@ -47,18 +48,18 @@ func GetAWSCredFromEnvironment(access *corev1.SecretKeySelector, secret *corev1.
 func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector, sessionToken *corev1.SecretKeySelector) (*credentials.Credentials, error) {
 	accessKey, err := common.GetSecretFromVolume(access)
 	if err != nil {
-		return nil, errors.Wrap(err, "can not find access key")
+		return nil, fmt.Errorf("can not find access key, %w", err)
 	}
 	secretKey, err := common.GetSecretFromVolume(secret)
 	if err != nil {
-		return nil, errors.Wrap(err, "can not find secret key")
+		return nil, fmt.Errorf("can not find secret key, %w", err)
 	}
 
 	var token string
 	if sessionToken != nil {
 		token, err = common.GetSecretFromVolume(sessionToken)
 		if err != nil {
-			return nil, errors.Wrap(err, "can not find session token")
+			return nil, fmt.Errorf("can not find session token, %w", err)
 		}
 	}
 

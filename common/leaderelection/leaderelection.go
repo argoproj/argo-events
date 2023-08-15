@@ -3,11 +3,11 @@ package leaderelection
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/nats-io/graft"
 	nats "github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
@@ -40,7 +40,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		eventBusType = apicommon.EventBusJetStream
 		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
 	default:
-		return nil, errors.New("invalid event bus")
+		return nil, fmt.Errorf("invalid event bus")
 	}
 
 	var auth *eventbuscommon.Auth
@@ -56,7 +56,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 		v.AddConfigPath(common.EventBusAuthFileMountPath)
 		err := v.ReadInConfig()
 		if err != nil {
-			return nil, errors.Errorf("failed to load auth.yaml. err: %+v", err)
+			return nil, fmt.Errorf("failed to load auth.yaml. err: %w", err)
 		}
 		err = v.Unmarshal(cred)
 		if err != nil {
@@ -91,7 +91,7 @@ func NewEventBusElector(ctx context.Context, eventBusConfig eventbusv1alpha1.Bus
 			auth:        auth,
 		}
 	default:
-		return nil, errors.New("invalid eventbus type")
+		return nil, fmt.Errorf("invalid eventbus type")
 	}
 	return elector, nil
 }

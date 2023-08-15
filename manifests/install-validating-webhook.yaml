@@ -121,7 +121,9 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: quay.io/codefresh/argo-events:v1.7.2-cap-CR-14600
+        - name: PORT
+          value: "443"
+        image: quay.io/codefresh/argo-events:v1.7.3-cap-CR-19893
         imagePullPolicy: Always
         name: webhook
       serviceAccountName: argo-events-webhook-sa

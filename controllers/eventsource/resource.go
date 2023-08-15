@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/imdario/mergo"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -47,7 +46,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 		if apierrors.IsNotFound(err) {
 			eventSource.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
 			logger.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
-			return errors.Errorf("eventbus %s not found", eventBusName)
+			return fmt.Errorf("eventbus %s not found", eventBusName)
 		}
 		eventSource.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
 		logger.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)
@@ -56,7 +55,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 	if !eventBus.Status.IsReady() {
 		eventSource.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
 		logger.Errorw("event bus is not in ready status", "eventBusName", eventBusName, "error", err)
-		return errors.New("eventbus not ready")
+		return fmt.Errorf("eventbus not ready")
 	}
 
 	expectedDeploy, err := buildDeployment(args, eventBus)
@@ -183,7 +182,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	}
 	eventSourceBytes, err := json.Marshal(eventSourceCopy)
 	if err != nil {
-		return nil, errors.New("failed marshal eventsource spec")
+		return nil, fmt.Errorf("failed marshal eventsource spec")
 	}
 	encodedEventSourceSpec := base64.StdEncoding.EncodeToString(eventSourceBytes)
 	envVars := []corev1.EnvVar{
@@ -207,7 +206,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 
 	busConfigBytes, err := json.Marshal(eventBus.Status.Config)
 	if err != nil {
-		return nil, errors.Errorf("failed marshal event bus config: %v", err)
+		return nil, fmt.Errorf("failed marshal event bus config: %v", err)
 	}
 	encodedBusConfig := base64.StdEncoding.EncodeToString(busConfigBytes)
 	envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
@@ -220,7 +219,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		jsConf := eventBus.Status.Config.JetStream
 		accessSecret = jsConf.AccessSecret
 	default:
-		return nil, errors.New("unsupported event bus")
+		return nil, fmt.Errorf("unsupported event bus")
 	}
 
 	volumes := deploymentSpec.Template.Spec.Volumes

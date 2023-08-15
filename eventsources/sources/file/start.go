@@ -19,12 +19,12 @@ package file
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/pkg/errors"
 	watcherpkg "github.com/radovskyb/watcher"
 	"go.uber.org/zap"
 
@@ -89,7 +89,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 	log.Info("setting up a new file watcher...")
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return errors.Wrapf(err, "failed to set up a file watcher for %s", el.GetEventName())
+		return fmt.Errorf("failed to set up a file watcher for %s, %w", el.GetEventName(), err)
 	}
 	defer watcher.Close()
 
@@ -97,7 +97,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 	log.Info("adding directory to monitor for the watcher...")
 	err = watcher.Add(fileEventSource.WatchPathConfig.Directory)
 	if err != nil {
-		return errors.Wrapf(err, "failed to add directory %s to the watcher for %s", fileEventSource.WatchPathConfig.Directory, el.GetEventName())
+		return fmt.Errorf("failed to add directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
 	}
 
 	var pathRegexp *regexp.Regexp
@@ -105,7 +105,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 		log.Infow("matching file path with configured regex...", zap.Any("regex", fileEventSource.WatchPathConfig.PathRegexp))
 		pathRegexp, err = regexp.Compile(fileEventSource.WatchPathConfig.PathRegexp)
 		if err != nil {
-			return errors.Wrapf(err, "failed to match file path with configured regex %s for %s", fileEventSource.WatchPathConfig.PathRegexp, el.GetEventName())
+			return fmt.Errorf("failed to match file path with configured regex %s for %s, %w", fileEventSource.WatchPathConfig.PathRegexp, el.GetEventName(), err)
 		}
 	}
 
@@ -120,11 +120,11 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 		fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String()), Metadata: el.FileEventSource.Metadata}
 		payload, err := json.Marshal(fileEvent)
 		if err != nil {
-			return errors.Wrap(err, "failed to marshal the event to the fs event")
+			return fmt.Errorf("failed to marshal the event to the fs event, %w", err)
 		}
 		log.Infow("dispatching file event on data channel...", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
 		if err = dispatch(payload); err != nil {
-			return errors.Wrap(err, "failed to dispatch a file event")
+			return fmt.Errorf("failed to dispatch a file event, %w", err)
 		}
 		return nil
 	}
@@ -136,7 +136,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 			if !ok {
 				log.Info("fs watcher has stopped")
 				// watcher stopped watching file events
-				return errors.Errorf("fs watcher stopped for %s", el.GetEventName())
+				return fmt.Errorf("fs watcher stopped for %s", el.GetEventName())
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			matched := false
@@ -153,7 +153,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 				}
 			}
 		case err := <-watcher.Errors:
-			return errors.Wrapf(err, "failed to process %s", el.GetEventName())
+			return fmt.Errorf("failed to process %s, %w", el.GetEventName(), err)
 		case <-ctx.Done():
 			log.Info("event source has been stopped")
 			return nil
@@ -174,7 +174,7 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 	log.Info("adding directory to monitor for the watcher...")
 	err := watcher.Add(fileEventSource.WatchPathConfig.Directory)
 	if err != nil {
-		return errors.Wrapf(err, "failed to add directory %s to the watcher for %s", fileEventSource.WatchPathConfig.Directory, el.GetEventName())
+		return fmt.Errorf("failed to add directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
 	}
 
 	var pathRegexp *regexp.Regexp
@@ -182,7 +182,7 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 		log.Infow("matching file path with configured regex...", zap.Any("regex", fileEventSource.WatchPathConfig.PathRegexp))
 		pathRegexp, err = regexp.Compile(fileEventSource.WatchPathConfig.PathRegexp)
 		if err != nil {
-			return errors.Wrapf(err, "failed to match file path with configured regex %s for %s", fileEventSource.WatchPathConfig.PathRegexp, el.GetEventName())
+			return fmt.Errorf("failed to match file path with configured regex %s for %s, %w", fileEventSource.WatchPathConfig.PathRegexp, el.GetEventName(), err)
 		}
 	}
 
@@ -197,11 +197,11 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 		fileEvent := fsevent.Event{Name: event.Name(), Op: fsevent.NewOp(event.Op.String()), Metadata: el.FileEventSource.Metadata}
 		payload, err := json.Marshal(fileEvent)
 		if err != nil {
-			return errors.Wrap(err, "failed to marshal the event to the fs event")
+			return fmt.Errorf("failed to marshal the event to the fs event, %w", err)
 		}
 		log.Infow("dispatching file event on data channel...", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
 		if err = dispatch(payload); err != nil {
-			return errors.Wrap(err, "failed to dispatch file event")
+			return fmt.Errorf("failed to dispatch file event, %w", err)
 		}
 		return nil
 	}
@@ -242,7 +242,7 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 	}()
 	log.Info("Starting watcher...")
 	if err = watcher.Start(time.Millisecond * 100); err != nil {
-		return errors.Wrapf(err, "Failed to start watcher for %s", el.GetEventName())
+		return fmt.Errorf("Failed to start watcher for %s, %w", el.GetEventName(), err)
 	}
 	return nil
 }

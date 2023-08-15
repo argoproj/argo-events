@@ -13,7 +13,6 @@ import (
 	"github.com/gobwas/glob"
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
@@ -64,7 +63,7 @@ func (n *STANTriggerConn) Subscribe(
 	action func(map[string]cloudevents.Event),
 	defaultSubject *string) error {
 	if n == nil {
-		return errors.New("Subscribe() failed; STANTriggerConn is nil")
+		return fmt.Errorf("Subscribe() failed; STANTriggerConn is nil")
 	}
 
 	log := n.Logger
@@ -282,7 +281,7 @@ func (n *STANTriggerConn) getGroupNameFromClientID(clientID string) (string, err
 	// take off the last part: clientID should have a dash at the end and we can remove that part
 	strs := strings.Split(clientID, "-")
 	if len(strs) < 2 {
-		err := errors.Errorf("Expected client ID to contain dash: %s", clientID)
+		err := fmt.Errorf("Expected client ID to contain dash: %s", clientID)
 		log.Error(err)
 		return "", err
 	}
@@ -327,7 +326,7 @@ func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr strin
 	}
 	deps := unique(expression.Vars())
 	if len(dependencyExpr) == 0 {
-		return nil, errors.Errorf("no dependencies found: %s", dependencyExpr)
+		return nil, fmt.Errorf("no dependencies found: %s", dependencyExpr)
 	}
 
 	srcDepMap := make(map[string]string)

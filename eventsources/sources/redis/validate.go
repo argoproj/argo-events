@@ -17,8 +17,7 @@ package redis
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -35,13 +34,13 @@ func validate(eventSource *v1alpha1.RedisEventSource) error {
 		return common.ErrNilEventSource
 	}
 	if eventSource.HostAddress == "" {
-		return errors.New("host address must be specified")
+		return fmt.Errorf("host address must be specified")
 	}
 	if eventSource.Channels == nil {
-		return errors.New("channel/s must be specified")
+		return fmt.Errorf("channel/s must be specified")
 	}
 	if eventSource.Password != nil && eventSource.Namespace == "" {
-		return errors.New("namespace must be defined in order to retrieve the password from the secret")
+		return fmt.Errorf("namespace must be defined in order to retrieve the password from the secret")
 	}
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)

@@ -17,8 +17,7 @@ package redisstream
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -35,10 +34,10 @@ func validate(eventSource *v1alpha1.RedisStreamEventSource) error {
 		return common.ErrNilEventSource
 	}
 	if eventSource.HostAddress == "" {
-		return errors.New("host address must be specified")
+		return fmt.Errorf("host address must be specified")
 	}
 	if eventSource.Streams == nil {
-		return errors.New("stream/streams must be specified")
+		return fmt.Errorf("stream/streams must be specified")
 	}
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)

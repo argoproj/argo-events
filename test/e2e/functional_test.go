@@ -22,12 +22,12 @@ type FunctionalSuite struct {
 const (
 	LogEventSourceStarted     = "Eventing server started."
 	LogSensorStarted          = "Sensor started."
-	LogPublishEventSuccessful = "succeeded to publish an event"
-	LogTriggerActionFailed    = "failed to execute a trigger"
+	LogPublishEventSuccessful = "Succeeded to publish an event"
+	LogTriggerActionFailed    = "Failed to execute a trigger"
 )
 
 func LogTriggerActionSuccessful(triggerName string) string {
-	return fmt.Sprintf("successfully processed trigger '%s'", triggerName)
+	return fmt.Sprintf("Successfully processed trigger '%s'", triggerName)
 }
 
 func (s *FunctionalSuite) e(baseURL string) *httpexpect.Expect {

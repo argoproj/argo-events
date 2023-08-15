@@ -26,7 +26,6 @@ import (
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/pubsub"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
@@ -82,7 +81,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	err := el.fillDefault(logger)
 	if err != nil {
-		return errors.Wrapf(err, "failed to fill default values for %s", el.GetEventName())
+		return fmt.Errorf("failed to fill default values for %s, %w", el.GetEventName(), err)
 	}
 
 	pubsubEventSource := &el.PubSubEventSource
@@ -100,7 +99,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("setting up a client to connect to PubSub...")
 	client, subscription, err := el.prepareSubscription(ctx, log)
 	if err != nil {
-		return errors.Wrapf(err, "failed to prepare client or subscription for %s", el.GetEventName())
+		return fmt.Errorf("failed to prepare client or subscription for %s, %w", el.GetEventName(), err)
 	}
 
 	log.Info("listening for messages from PubSub...")
@@ -138,7 +137,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		m.Ack()
 	})
 	if err != nil {
-		return errors.Wrapf(err, "failed to receive the messages for subscription %s for %s", subscription, el.GetEventName())
+		return fmt.Errorf("failed to receive the messages for subscription %s for %s, %w", subscription, el.GetEventName(), err)
 	}
 
 	<-ctx.Done()
@@ -171,7 +170,7 @@ func (el *EventListener) fillDefault(logger *zap.SugaredLogger) error {
 		logger.Debug("determine project ID from GCP metadata server")
 		proj, err := metadata.ProjectID()
 		if err != nil {
-			return errors.Wrap(err, "project ID is not given and couldn't determine from GCP metadata server")
+			return fmt.Errorf("project ID is not given and couldn't determine from GCP metadata server, %w", err)
 		}
 		el.PubSubEventSource.ProjectID = proj
 	}
@@ -184,7 +183,7 @@ func (el *EventListener) fillDefault(logger *zap.SugaredLogger) error {
 		logger.Debug("auto generate subscription ID")
 		hashcode, err := el.hash()
 		if err != nil {
-			return errors.Wrap(err, "failed get hashcode")
+			return fmt.Errorf("failed get hashcode, %w", err)
 		}
 		el.PubSubEventSource.SubscriptionID = fmt.Sprintf("%s-%s", el.GetEventName(), hashcode)
 	}
@@ -208,7 +207,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 		logger.Debug("using credentials from secret")
 		jsonCred, err := common.GetSecretFromVolume(secret)
 		if err != nil {
-			return nil, nil, errors.Wrap(err, "could not find credentials")
+			return nil, nil, fmt.Errorf("could not find credentials, %w", err)
 		}
 		opts = append(opts, option.WithCredentialsJSON([]byte(jsonCred)))
 	} else {
@@ -216,7 +215,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	}
 	client, err := pubsub.NewClient(ctx, pubsubEventSource.ProjectID, opts...)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to set up client for %s", el.GetEventName())
+		return nil, nil, fmt.Errorf("failed to set up client for %s, %w", el.GetEventName(), err)
 	}
 	logger.Debug("set up pubsub client")
 
@@ -238,7 +237,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 		subscExists, err = subscription.Exists(ctx)
 		if err != nil {
 			client.Close()
-			return nil, nil, errors.Errorf("failed to check if subscription %s exists", subscription)
+			return nil, nil, fmt.Errorf("failed to check if subscription %s exists", subscription)
 		}
 	} else {
 		// trick: you don't need to have get permission to check only whether it exists
@@ -248,13 +247,13 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 			switch status.Code(err) {
 			case codes.OK:
 				client.Close()
-				return nil, nil, errors.Errorf("you lack permission to pull from %s", subscription)
+				return nil, nil, fmt.Errorf("you lack permission to pull from %s", subscription)
 			case codes.NotFound:
 				// OK, maybe the subscription doesn't exist yet, so create it later
 				// (it possibly means project itself doesn't exist, but it's ok because we'll see an error later in such case)
 			default:
 				client.Close()
-				return nil, nil, errors.Wrapf(err, "failed to test permission for subscription %s", subscription)
+				return nil, nil, fmt.Errorf("failed to test permission for subscription %s, %w", subscription, err)
 			}
 		}
 		logger.Debug("checked if subscription exists and you have right permission")
@@ -267,7 +266,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	if pubsubEventSource.Topic == "" {
 		if !subscExists {
 			client.Close()
-			return nil, nil, errors.Errorf("you need to specify topicID to create missing subscription %s", subscription)
+			return nil, nil, fmt.Errorf("you need to specify topicID to create missing subscription %s", subscription)
 		}
 		logger.Debug("subscription exists and no topic given, fine")
 		return client, subscription, nil
@@ -282,18 +281,18 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 		subscConfig, err := subscription.Config(ctx)
 		if err != nil {
 			client.Close()
-			return nil, nil, errors.Wrapf(err, "failed to get subscription's config for verifying topic")
+			return nil, nil, fmt.Errorf("failed to get subscription's config for verifying topic, %w", err)
 		}
 		switch actualTopic := subscConfig.Topic.String(); actualTopic {
 		case "_deleted-topic_":
 			client.Close()
-			return nil, nil, errors.New("the topic for the subscription has been deleted")
+			return nil, nil, fmt.Errorf("the topic for the subscription has been deleted")
 		case topic.String():
 			logger.Debug("subscription exists and its topic matches given one, fine")
 			return client, subscription, nil
 		default:
 			client.Close()
-			return nil, nil, errors.Errorf("this subscription belongs to wrong topic %s", actualTopic)
+			return nil, nil, fmt.Errorf("this subscription belongs to wrong topic %s", actualTopic)
 		}
 	}
 
@@ -312,7 +311,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 		// (it possibly means project itself doesn't exist, but it's ok because we'll see an error later in such case)
 	default:
 		client.Close()
-		return nil, nil, errors.Wrapf(err, "failed to create %s for %s", subscription, topic)
+		return nil, nil, fmt.Errorf("failed to create %s for %s, %w", subscription, topic, err)
 	}
 
 	// subsc. exists | topic given | topic exists | action                | required permissions
@@ -323,20 +322,20 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	topicClient, err := pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID, opts...)
 	if err != nil {
 		client.Close()
-		return nil, nil, errors.Wrapf(err, "failed to create client to create %s", topic)
+		return nil, nil, fmt.Errorf("failed to create client to create %s, %w", topic, err)
 	}
 	defer topicClient.Close()
 
 	_, err = topicClient.CreateTopic(ctx, topic.ID())
 	if err != nil {
 		client.Close()
-		return nil, nil, errors.Wrapf(err, "failed to create %s", topic)
+		return nil, nil, fmt.Errorf("failed to create %s, %w", topic, err)
 	}
 	logger.Debug("topic created")
 	_, err = client.CreateSubscription(ctx, subscription.ID(), pubsub.SubscriptionConfig{Topic: topic})
 	if err != nil {
 		client.Close()
-		return nil, nil, errors.Wrapf(err, "failed to create %s for %s", subscription, topic)
+		return nil, nil, fmt.Errorf("failed to create %s for %s, %w", subscription, topic, err)
 	}
 	logger.Debug("subscription created")
 	return client, subscription, nil

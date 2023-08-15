@@ -2,7 +2,6 @@ package installer
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -67,7 +66,7 @@ func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config 
 func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error) {
 	natsObj := i.eventBus.Spec.NATS
 	if natsObj == nil || natsObj.Native == nil {
-		return nil, errors.New("invalid request")
+		return nil, fmt.Errorf("invalid request")
 	}
 
 	svc, err := i.createStanService(ctx)
@@ -355,7 +354,7 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		return returnedSSecret, returnedCSecret, nil
 	default:
 		i.eventBus.Status.MarkDeployFailed("UnsupportedAuthStrategy", "Unsupported auth strategy")
-		return nil, nil, errors.New("unsupported auth strategy")
+		return nil, nil, fmt.Errorf("unsupported auth strategy")
 	}
 }
 

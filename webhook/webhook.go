@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/go-openapi/inflect"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
@@ -122,7 +121,7 @@ func (ac *AdmissionController) Run(ctx context.Context) error {
 	case <-ctx.Done():
 		return server.Close()
 	case <-serverStartErrCh:
-		return errors.New("webhook server failed to start")
+		return fmt.Errorf("webhook server failed to start")
 	}
 }
 
@@ -186,7 +185,7 @@ func (ac *AdmissionController) register(
 	}
 	clusterRole, err := ac.Client.RbacV1().ClusterRoles().Get(ctx, ac.Options.ClusterRoleName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "failed to fetch webhook cluster role")
+		return fmt.Errorf("failed to fetch webhook cluster role, %w", err)
 	}
 	clusterRoleRef := metav1.NewControllerRef(clusterRole, rbacv1.SchemeGroupVersion.WithKind("ClusterRole"))
 	webhook.OwnerReferences = append(webhook.OwnerReferences, *clusterRoleRef)
@@ -194,19 +193,19 @@ func (ac *AdmissionController) register(
 	_, err = client.Create(ctx, webhook, metav1.CreateOptions{})
 	if err != nil {
 		if !apierrors.IsAlreadyExists(err) {
-			return errors.Wrap(err, "failed to create a webhook")
+			return fmt.Errorf("failed to create a webhook, %w", err)
 		}
 		ac.Logger.Info("Webhook already exists")
 		configuredWebhook, err := client.Get(ctx, ac.Options.WebhookName, metav1.GetOptions{})
 		if err != nil {
-			return errors.Wrap(err, "failed to retrieve webhook")
+			return fmt.Errorf("failed to retrieve webhook, %w", err)
 		}
 		if !reflect.DeepEqual(configuredWebhook.Webhooks, webhook.Webhooks) {
 			ac.Logger.Info("Updating webhook")
 			// Set the ResourceVersion as required by update.
 			webhook.ObjectMeta.ResourceVersion = configuredWebhook.ObjectMeta.ResourceVersion
 			if _, err := client.Update(ctx, webhook, metav1.UpdateOptions{}); err != nil {
-				return errors.Wrap(err, "failed to update webhook")
+				return fmt.Errorf("failed to update webhook, %w", err)
 			}
 		} else {
 			ac.Logger.Info("Webhook is valid")
@@ -298,7 +297,7 @@ func (ac *AdmissionController) generateSecret(ctx context.Context) (*corev1.Secr
 	}
 	deployment, err := ac.Client.AppsV1().Deployments(ac.Options.Namespace).Get(ctx, ac.Options.DeploymentName, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to fetch webhook deployment")
+		return nil, fmt.Errorf("Failed to fetch webhook deployment, %w", err)
 	}
 	deploymentRef := metav1.NewControllerRef(deployment, appsv1.SchemeGroupVersion.WithKind("Deployment"))
 	secret := &corev1.Secret{
@@ -341,13 +340,13 @@ func (ac *AdmissionController) getOrGenerateKeyCertsFromSecret(ctx context.Conte
 
 	var ok bool
 	if serverKey, ok = secret.Data[secretServerKey]; !ok {
-		return nil, nil, nil, errors.New("server key missing")
+		return nil, nil, nil, fmt.Errorf("server key missing")
 	}
 	if serverCert, ok = secret.Data[secretServerCert]; !ok {
-		return nil, nil, nil, errors.New("server cert missing")
+		return nil, nil, nil, fmt.Errorf("server cert missing")
 	}
 	if caCert, ok = secret.Data[secretCACert]; !ok {
-		return nil, nil, nil, errors.New("ca cert missing")
+		return nil, nil, nil, fmt.Errorf("ca cert missing")
 	}
 	return serverKey, serverCert, caCert, nil
 }
@@ -364,7 +363,7 @@ func (ac *AdmissionController) getAPIServerExtensionCACert(ctx context.Context) 
 	const caFileName = "requestheader-client-ca-file"
 	pem, ok := c.Data[caFileName]
 	if !ok {
-		return nil, errors.Errorf("cannot find %s in ConfigMap %s", caFileName, name)
+		return nil, fmt.Errorf("cannot find %s in ConfigMap %s", caFileName, name)
 	}
 	return []byte(pem), nil
 }

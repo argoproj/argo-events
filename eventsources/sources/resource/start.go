@@ -19,12 +19,12 @@ package resource
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -88,7 +88,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get a K8s rest config for the event source %s", el.GetEventName())
+		return fmt.Errorf("failed to get a K8s rest config for the event source %s, %w", el.GetEventName(), err)
 	}
 
 	resourceEventSource := &el.ResourceEventSource
@@ -114,7 +114,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	client, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
-		return errors.Wrapf(err, "failed to set up a dynamic K8s client for the event source %s", el.GetEventName())
+		return fmt.Errorf("failed to set up a dynamic K8s client for the event source %s, %w", el.GetEventName(), err)
 	}
 
 	gvr := schema.GroupVersionResource{
@@ -131,7 +131,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Labels != nil {
 		sel, err := LabelSelector(resourceEventSource.Filter.Labels)
 		if err != nil {
-			return errors.Wrapf(err, "failed to create the label selector for the event source %s", el.GetEventName())
+			return fmt.Errorf("failed to create the label selector for the event source %s, %w", el.GetEventName(), err)
 		}
 		options.LabelSelector = sel.String()
 	}
@@ -160,14 +160,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		objBody, err := json.Marshal(event.Obj)
 		if err != nil {
-			return errors.Wrap(err, "failed to marshal the resource, rejecting the event...")
+			return fmt.Errorf("failed to marshal the resource, rejecting the event, %w", err)
 		}
 
 		var oldObjBody []byte
 		if event.OldObj != nil {
 			oldObjBody, err = json.Marshal(event.OldObj)
 			if err != nil {
-				return errors.Wrap(err, "failed to marshal the resource, rejecting the event...")
+				return fmt.Errorf("failed to marshal the resource, rejecting the event, %w", err)
 			}
 		}
 
@@ -184,11 +184,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			return errors.Wrap(err, "failed to marshal the event. rejecting the event...")
+			return fmt.Errorf("failed to marshal the event. rejecting the event, %w", err)
 		}
 
 		if err = dispatch(eventBody); err != nil {
-			return errors.Wrap(err, "failed to dispatch a resource event")
+			return fmt.Errorf("failed to dispatch a resource event, %w", err)
 		}
 		return nil
 	}
@@ -248,7 +248,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 		default:
 			stopCh <- struct{}{}
-			return errors.Errorf("unknown event type: %s", string(eventType))
+			return fmt.Errorf("unknown event type: %s", string(eventType))
 		}
 	}
 

@@ -28,7 +28,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -132,7 +131,7 @@ func GetSecretValue(ctx context.Context, client kubernetes.Interface, namespace 
 	}
 	val, ok := secret.Data[selector.Key]
 	if !ok {
-		return "", errors.Errorf("secret '%s' does not have the key '%s'", selector.Name, selector.Key)
+		return "", fmt.Errorf("secret '%s' does not have the key '%s'", selector.Name, selector.Key)
 	}
 	return string(val), nil
 }
@@ -164,7 +163,7 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 	}
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to get secret value of name: %s, key: %s", selector.Name, selector.Key)
+		return "", fmt.Errorf("failed to get secret value of name: %s, key: %s, %w", selector.Name, selector.Key, err)
 	}
 	// Secrets edited by tools like "vim" always have an extra invisible "\n" in the end,
 	// and it's often neglected, but it makes differences for some of the applications.
@@ -174,7 +173,7 @@ func GetSecretFromVolume(selector *v1.SecretKeySelector) (string, error) {
 // GetSecretVolumePath returns the path of the mounted secret
 func GetSecretVolumePath(selector *v1.SecretKeySelector) (string, error) {
 	if selector == nil {
-		return "", errors.New("secret key selector is nil")
+		return "", fmt.Errorf("secret key selector is nil")
 	}
 	return fmt.Sprintf("/argo-events/secrets/%s/%s", selector.Name, selector.Key), nil
 }
@@ -188,7 +187,7 @@ func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
 	}
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to get configMap value of name: %s, key: %s", selector.Name, selector.Key)
+		return "", fmt.Errorf("failed to get configMap value of name: %s, key: %s, %w", selector.Name, selector.Key, err)
 	}
 	// Contents edied by tools like "vim" always have an extra invisible "\n" in the end,
 	// and it's often negleted, but it makes differences for some of the applications.
@@ -198,7 +197,7 @@ func GetConfigMapFromVolume(selector *v1.ConfigMapKeySelector) (string, error) {
 // GetConfigMapVolumePath returns the path of the mounted configmap
 func GetConfigMapVolumePath(selector *v1.ConfigMapKeySelector) (string, error) {
 	if selector == nil {
-		return "", errors.New("configmap key selector is nil")
+		return "", fmt.Errorf("configmap key selector is nil")
 	}
 	return fmt.Sprintf("/argo-events/config/%s/%s", selector.Name, selector.Key), nil
 }
@@ -236,7 +235,7 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 // GetTLSConfig returns a tls configuration for given cert and key or skips the certs if InsecureSkipVerify is true.
 func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 	if config == nil {
-		return nil, errors.New("TLSConfig is nil")
+		return nil, fmt.Errorf("TLSConfig is nil")
 	}
 
 	if config.InsecureSkipVerify {
@@ -272,19 +271,19 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 
 	if len(caCertPath)+len(clientCertPath)+len(clientKeyPath) == 0 {
 		// None of 3 is configured
-		return nil, errors.New("invalid tls config, neither of caCertSecret, clientCertSecret and clientKeySecret is configured")
+		return nil, fmt.Errorf("invalid tls config, neither of caCertSecret, clientCertSecret and clientKeySecret is configured")
 	}
 
 	if len(clientCertPath)+len(clientKeyPath) > 0 && len(clientCertPath)*len(clientKeyPath) == 0 {
 		// Only one of clientCertSecret and clientKeySecret is configured
-		return nil, errors.New("invalid tls config, both of clientCertSecret and clientKeySecret need to be configured")
+		return nil, fmt.Errorf("invalid tls config, both of clientCertSecret and clientKeySecret need to be configured")
 	}
 
 	c := &tls.Config{}
 	if len(caCertPath) > 0 {
 		caCert, err := os.ReadFile(caCertPath)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to read ca cert file %s", caCertPath)
+			return nil, fmt.Errorf("failed to read ca cert file %s, %w", caCertPath, err)
 		}
 		pool := x509.NewCertPool()
 		pool.AppendCertsFromPEM(caCert)
@@ -294,7 +293,7 @@ func GetTLSConfig(config *apicommon.TLSConfig) (*tls.Config, error) {
 	if len(clientCertPath) > 0 && len(clientKeyPath) > 0 {
 		clientCert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to load client cert key pair %s", caCertPath)
+			return nil, fmt.Errorf("failed to load client cert key pair %s, %w", caCertPath, err)
 		}
 		c.Certificates = []tls.Certificate{clientCert}
 	}

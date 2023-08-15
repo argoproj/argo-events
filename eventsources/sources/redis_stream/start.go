@@ -19,10 +19,10 @@ package redisstream
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -76,7 +76,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if redisEventSource.Password != nil {
 		password, err := common.GetSecretFromVolume(redisEventSource.Password)
 		if err != nil {
-			return errors.Wrapf(err, "failed to find the secret password %s", redisEventSource.Password.Name)
+			return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
 		}
 		opt.Password = password
 	}
@@ -88,7 +88,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if redisEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS)
 		if err != nil {
-			return errors.Wrap(err, "failed to get the tls configuration")
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
 		opt.TLSConfig = tlsConfig
 	}
@@ -97,7 +97,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	client := redis.NewClient(opt)
 
 	if status := client.Ping(ctx); status.Err() != nil {
-		return errors.Wrapf(status.Err(), "failed to connect to host %s and db %d for event source %s", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName())
+		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName(), status.Err())
 	}
 	log.Infof("connected to redis server %s", redisEventSource.HostAddress)
 
@@ -112,7 +112,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if err := client.XGroupCreate(ctx, stream, consumersGroup, "$").Err(); err != nil {
 			// redis package doesn't seem to expose concrete error types
 			if err.Error() != "BUSYGROUP Consumer Group name already exists" {
-				return errors.Wrapf(err, "creating consumer group %s for stream %s on host %s for event source %s", consumersGroup, stream, redisEventSource.HostAddress, el.GetEventName())
+				return fmt.Errorf("creating consumer group %s for stream %s on host %s for event source %s, %w", consumersGroup, stream, redisEventSource.HostAddress, el.GetEventName(), err)
 			}
 			log.Infof("Consumer group %q already exists in stream %q", consumersGroup, stream)
 		}
@@ -208,11 +208,11 @@ func (el *EventListener) handleOne(stream string, message redis.XMessage, dispat
 	}
 	eventBody, err := json.Marshal(&eventData)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+		return fmt.Errorf("failed to marshal the event data, rejecting the event, %w", err)
 	}
 	log.With("stream", stream).Info("dispatching the event on the data channel...")
 	if err = dispatch(eventBody); err != nil {
-		return errors.Wrap(err, "failed dispatch a Redis stream event")
+		return fmt.Errorf("failed dispatch a Redis stream event, %w", err)
 	}
 	return nil
 }

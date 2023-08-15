@@ -18,9 +18,9 @@ package nats
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	natslib "github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -55,7 +55,7 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 		if natstrigger.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(natstrigger.TLS)
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to get the tls configuration")
+				return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
 			tlsConfig.InsecureSkipVerify = true
 			opts.Secure = true
@@ -93,12 +93,12 @@ func (t *NATSTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 func (t *NATSTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.NATSTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the fetched trigger resource")
+		return nil, fmt.Errorf("failed to interpret the fetched trigger resource")
 	}
 
 	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the nats trigger resource")
+		return nil, fmt.Errorf("failed to marshal the nats trigger resource, %w", err)
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
@@ -108,7 +108,7 @@ func (t *NATSTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 		}
 		var ht *v1alpha1.NATSTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated nats trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated nats trigger resource after applying resource parameters, %w", err)
 		}
 		return ht, nil
 	}
@@ -119,11 +119,11 @@ func (t *NATSTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 func (t *NATSTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.NATSTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	if trigger.Payload == nil {
-		return nil, errors.New("payload parameters are not specified")
+		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)

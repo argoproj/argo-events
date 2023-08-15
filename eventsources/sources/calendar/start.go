@@ -24,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
@@ -75,11 +74,11 @@ func (el *EventListener) initializePersistence(ctx context.Context, persistence 
 
 		restConfig, err := common.GetClientConfig(kubeConfig)
 		if err != nil {
-			return errors.Wrapf(err, "failed to get a K8s rest config for the event source %s", el.GetEventName())
+			return fmt.Errorf("failed to get a K8s rest config for the event source %s, %w", el.GetEventName(), err)
 		}
 		kubeClientset, err := kubernetes.NewForConfig(restConfig)
 		if err != nil {
-			return errors.Wrapf(err, "failed to set up a K8s client for the event source %s", el.GetEventName())
+			return fmt.Errorf("failed to set up a K8s client for the event source %s, %w", el.GetEventName(), err)
 		}
 
 		el.eventPersistence, err = persist.NewConfigMapPersist(ctx, kubeClientset, persistence.ConfigMap, el.Namespace)
@@ -101,20 +100,20 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 		lastEvent, err := el.eventPersistence.Get(el.getPersistenceKey())
 		if err != nil {
 			el.log.Errorw("failed to get last persisted event.", zap.Error(err))
-			return lastT, errors.Wrap(err, "failed to get last persisted event.")
+			return lastT, fmt.Errorf("failed to get last persisted event, , %w", err)
 		}
 		if lastEvent != nil && lastEvent.EventPayload != "" {
 			var eventData events.CalendarEventData
 			err := json.Unmarshal([]byte(lastEvent.EventPayload), &eventData)
 			if err != nil {
 				el.log.Errorw("failed to marshal last persisted event.", zap.Error(err))
-				return lastT, errors.Wrap(err, "failed to marshal last persisted event.")
+				return lastT, fmt.Errorf("failed to marshal last persisted event, , %w", err)
 			}
 			eventTime := strings.Split(eventData.EventTime, " m=")
 			lastT, err = time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", eventTime[0])
 			if err != nil {
 				el.log.Errorw("failed to parse the persisted last event timestamp", zap.Error(err))
-				return lastT, errors.Wrap(err, "failed to parse the persisted last event timestamp.")
+				return lastT, fmt.Errorf("failed to parse the persisted last event timestamp, %w", err)
 			}
 		}
 
@@ -187,7 +186,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		el.log.Infow("loading location for the schedule...", zap.Any("location", calendarEventSource.Timezone))
 		location, err = time.LoadLocation(calendarEventSource.Timezone)
 		if err != nil {
-			return errors.Wrapf(err, "failed to load location for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
+			return fmt.Errorf("failed to load location for event source %s / %s, , %w", el.GetEventSourceName(), el.GetEventName(), err)
 		}
 		lastT = lastT.In(location)
 	}
@@ -204,13 +203,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if err != nil {
 			el.log.Errorw("failed to marshal the event data", zap.Error(err))
 			// no need to continue as further event payloads will suffer same fate as this one.
-			return errors.Wrapf(err, "failed to marshal the event data for event source %s / %s", el.GetEventSourceName(), el.GetEventName())
+			return fmt.Errorf("failed to marshal the event data for event source %s / %s, %w", el.GetEventSourceName(), el.GetEventName(), err)
 		}
 		el.log.Info("dispatching calendar event...")
 		err = dispatch(payload)
 		if err != nil {
 			el.log.Errorw("failed to dispatch calendar event", zap.Error(err))
-			return errors.Wrapf(err, "failed to dispatch calendar event")
+			return fmt.Errorf("failed to dispatch calendar event, %w", err)
 		}
 		if el.eventPersistence != nil && el.eventPersistence.IsEnabled() {
 			event := persist.Event{EventKey: el.getPersistenceKey(), EventPayload: string(payload)}
@@ -278,17 +277,17 @@ func resolveSchedule(cal *v1alpha1.CalendarEventSource) (cronlib.Schedule, error
 		specParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
 		schedule, err := specParser.Parse(cal.Schedule)
 		if err != nil {
-			return nil, errors.Errorf("failed to parse schedule %s from calendar event. Cause: %+v", cal.Schedule, err.Error())
+			return nil, fmt.Errorf("failed to parse schedule %s from calendar event. Cause: %w", cal.Schedule, err)
 		}
 		return schedule, nil
 	}
 	if cal.Interval != "" {
 		intervalDuration, err := time.ParseDuration(cal.Interval)
 		if err != nil {
-			return nil, errors.Errorf("failed to parse interval %s from calendar event. Cause: %+v", cal.Interval, err.Error())
+			return nil, fmt.Errorf("failed to parse interval %s from calendar event. Cause: %w", cal.Interval, err)
 		}
 		schedule := cronlib.ConstantDelaySchedule{Delay: intervalDuration}
 		return schedule, nil
 	}
-	return nil, errors.New("calendar event must contain either a schedule or interval")
+	return nil, fmt.Errorf("calendar event must contain either a schedule or interval")
 }
