@@ -12,7 +12,7 @@ resources:
 
 images:
   - name: quay.io/argoproj/argo-events
-    newName: quay.io/denis_codefresh/argo-events
+    newName: quay.io/codefresh/argo-events
     newTag: v1.8.0-cap-CR-19893
 
 patchesStrategicMerge:
@@ -28,5 +28,4 @@ patchesStrategicMerge:
             - name: controller-manager
               env:
                 - name: ARGO_EVENTS_IMAGE
-                  value: quay.io/denis_codefresh/argo-events:v1.8.0-cap-CR-19893
-                      
+                  value: quay.io/argoproj/argo-events:v1.8.0-cap-CR-19893
