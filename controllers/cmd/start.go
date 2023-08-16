@@ -97,7 +97,9 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
-	cfClient, err := codefresh.NewClient(logging.WithLogger(signals.SetupSignalHandler(), logger), eventsOpts.ManagedNamespace)
+	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+
+	cfClient, err := codefresh.NewClient(ctx, eventsOpts.ManagedNamespace)
 	if err != nil {
 		logger.Fatalw("unable to initialise Codefresh Client", zap.Error(err))
 	}
@@ -184,7 +186,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	logger.Infow("starting controller manager", "version", argoevents.GetVersion())
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		logger.Fatalw("unable to run eventbus controller", zap.Error(err))
 	}
 }
