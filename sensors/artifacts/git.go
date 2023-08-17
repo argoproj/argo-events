@@ -28,7 +28,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	go_git_ssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 
 	"github.com/argoproj/argo-events/common"
@@ -60,7 +59,10 @@ func NewGitReader(gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error)
 	}
 	for _, na := range notAllowedInPath {
 		if strings.Contains(gitArtifact.FilePath, na) {
-			return nil, fmt.Errorf("%q is not allowed in the filepath", na)
+			return nil, fmt.Errorf("%q is not allowed in the filePath", na)
+		}
+		if strings.Contains(gitArtifact.CloneDirectory, na) {
+			return nil, fmt.Errorf("%q is not allowed in the cloneDirectory", na)
 		}
 	}
 
@@ -96,11 +98,11 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	if g.artifact.Creds != nil {
 		username, err := common.GetSecretFromVolume(g.artifact.Creds.Username)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to retrieve username")
+			return nil, fmt.Errorf("failed to retrieve username, %w", err)
 		}
 		password, err := common.GetSecretFromVolume(g.artifact.Creds.Password)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to retrieve password")
+			return nil, fmt.Errorf("failed to retrieve password, %w", err)
 		}
 		return &http.BasicAuth{
 			Username: username,
@@ -110,7 +112,7 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	if g.artifact.SSHKeySecret != nil {
 		sshKeyPath, err := common.GetSecretVolumePath(g.artifact.SSHKeySecret)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to get SSH key from mounted volume")
+			return nil, fmt.Errorf("failed to get SSH key from mounted volume, %w", err)
 		}
 		return getSSHKeyAuth(sshKeyPath, g.artifact.InsecureIgnoreHostKey)
 	}
@@ -129,7 +131,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 			URLs: g.artifact.Remote.URLS,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("failed to create remote. err: %+v", err)
+			return nil, fmt.Errorf("failed to create remote. err: %w", err)
 		}
 
 		fetchOptions := &git.FetchOptions{
@@ -142,13 +144,13 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository, dir string) ([
 		}
 
 		if err := r.Fetch(fetchOptions); err != nil {
-			return nil, fmt.Errorf("failed to fetch remote %s. err: %+v", g.artifact.Remote.Name, err)
+			return nil, fmt.Errorf("failed to fetch remote %s. err: %w", g.artifact.Remote.Name, err)
 		}
 	}
 
 	w, err := r.Worktree()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get working tree. err: %+v", err)
+		return nil, fmt.Errorf("failed to get working tree. err: %w", err)
 	}
 
 	fetchOptions := &git.FetchOptions{
@@ -225,7 +227,7 @@ func (g *GitArtifactReader) Read() ([]byte, error) {
 	if cloneDir == "" {
 		tempDir, err := os.MkdirTemp("", "git-tmp")
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to create a temp file to clone the repository")
+			return nil, fmt.Errorf("failed to create a temp file to clone the repository, %w", err)
 		}
 		defer os.Remove(tempDir)
 		cloneDir = tempDir
@@ -234,7 +236,7 @@ func (g *GitArtifactReader) Read() ([]byte, error) {
 	r, err := git.PlainOpen(cloneDir)
 	if err != nil {
 		if err != git.ErrRepositoryNotExists {
-			return nil, fmt.Errorf("failed to open repository. err: %+v", err)
+			return nil, fmt.Errorf("failed to open repository. err: %w", err)
 		}
 
 		cloneOpt := &git.CloneOptions{

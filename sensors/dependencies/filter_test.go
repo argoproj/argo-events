@@ -17,6 +17,7 @@ limitations under the License.
 package dependencies
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -621,6 +622,68 @@ func TestFilter(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.True(t, pass)
+	})
+
+	t.Run("filtersLogicalOperator == 'or' with only a subset of filters specified", func(t *testing.T) {
+		filter := &v1alpha1.EventDependencyFilter{
+			Exprs: []v1alpha1.ExprFilter{
+				{
+					Expr: `A == "not-valid"`, // this will evaluate to false
+					Fields: []v1alpha1.PayloadField{
+						{
+							Path: "a.b",
+							Name: "A",
+						},
+					},
+				},
+			},
+			Data: []v1alpha1.DataFilter{ // these evaluate to false
+				{
+					Path:  "a.d.e.f",
+					Type:  "string",
+					Value: []string{"not-valid"},
+				},
+				{
+					Path:  "a.h.i",
+					Type:  "string",
+					Value: []string{"not-valid", "not-valid-2"},
+				},
+			},
+		}
+
+		eventDataBytes, err := json.Marshal(map[string]interface{}{
+			"a": map[string]interface{}{
+				"b": "c",
+				"d": map[string]interface{}{
+					"e": map[string]interface{}{
+						"f": "g",
+					},
+				},
+				"h": map[string]interface{}{
+					"i": "j",
+				},
+			},
+		})
+
+		assert.NoError(t, err)
+
+		// should return false because the two filters above evaluate to false
+		filtersLogicalOperator := v1alpha1.OrLogicalOperator
+
+		now := time.Now().UTC()
+		event := &v1alpha1.Event{
+			Context: &v1alpha1.EventContext{
+				Time: metav1.Time{
+					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
+				},
+			},
+			Data: eventDataBytes,
+		}
+
+		pass, err := filterEvent(filter, filtersLogicalOperator, event)
+
+		assert.NoError(t, err)
+		assert.False(t, pass)
 	})
 
 	t.Run("test advanced logic: (A || B) || (C || D)", func(t *testing.T) {

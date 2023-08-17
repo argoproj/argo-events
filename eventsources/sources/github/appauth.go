@@ -21,6 +21,7 @@ import (
 
 type AppsAuthStrategy struct {
 	AppID          int64
+	BaseURL        string
 	InstallationID int64
 	PrivateKey     string
 	Transport      http.RoundTripper
@@ -28,7 +29,11 @@ type AppsAuthStrategy struct {
 
 // AuthTransport implements the AuthStrategy interface.
 func (t *AppsAuthStrategy) AuthTransport() (http.RoundTripper, error) {
-	return ghinstallation.New(t.transport(), t.AppID, t.InstallationID, []byte(t.PrivateKey))
+	appTransport, err := ghinstallation.New(t.transport(), t.AppID, t.InstallationID, []byte(t.PrivateKey))
+	if appTransport != nil && t.BaseURL != "" {
+		appTransport.BaseURL = t.BaseURL
+	}
+	return appTransport, err
 }
 
 func (t *AppsAuthStrategy) transport() http.RoundTripper {

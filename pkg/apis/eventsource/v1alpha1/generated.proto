@@ -206,6 +206,82 @@ message AzureEventsHubEventSource {
   optional EventSourceFilter filter = 6;
 }
 
+// AzureQueueStorageEventSource describes the event source for azure queue storage
+// more info at https://learn.microsoft.com/en-us/azure/storage/queues/
+message AzureQueueStorageEventSource {
+  // StorageAccountName is the name of the storage account where the queue is. This field is necessary to
+  // access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
+  // +optional
+  optional string storageAccountName = 1;
+
+  // ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided
+  // it will try to access via Azure AD with StorageAccountName.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 2;
+
+  // QueueName is the name of the queue
+  optional string queueName = 3;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 4;
+
+  // DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully.
+  // If set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the dead-letter queue.
+  // The default value is false.
+  // +optional
+  optional bool dlq = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 7;
+}
+
+// AzureServiceBusEventSource describes the event source for azure service bus
+// More info at https://docs.microsoft.com/en-us/azure/service-bus-messaging/
+message AzureServiceBusEventSource {
+  // ConnectionString is the connection string for the Azure Service Bus. If this fields is not provided
+  // it will try to access via Azure AD with DefaultAzureCredential and FullyQualifiedNamespace.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
+
+  // QueueName is the name of the Azure Service Bus Queue
+  optional string queueName = 2;
+
+  // TopicName is the name of the Azure Service Bus Topic
+  optional string topicName = 3;
+
+  // SubscriptionName is the name of the Azure Service Bus Topic Subscription
+  optional string subscriptionName = 4;
+
+  // TLS configuration for the service bus client
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 5;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 8;
+
+  // FullyQualifiedNamespace is the Service Bus namespace name (ex: myservicebus.servicebus.windows.net). This field is necessary to
+  // access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
+  // +optional
+  optional string fullyQualifiedNamespace = 9;
+}
+
 // BitbucketAuth holds the different auth strategies for connecting to Bitbucket
 message BitbucketAuth {
   // Basic is BasicAuth auth strategy.
@@ -549,6 +625,12 @@ message EventSourceSpec {
 
   // Redis stream source
   map<string, RedisStreamEventSource> redisStream = 31;
+
+  // Azure Service Bus event source
+  map<string, AzureServiceBusEventSource> azureServiceBus = 32;
+
+  // AzureQueueStorage event source
+  map<string, AzureQueueStorageEventSource> azureQueueStorage = 33;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -729,7 +811,8 @@ message GitlabEventSource {
   // +optional
   map<string, string> metadata = 9;
 
-  // List of project IDs or project namespace paths like "whynowy/test"
+  // List of project IDs or project namespace paths like "whynowy/test". Projects and groups cannot be empty at the same time.
+  // +optional
   repeated string projects = 10;
 
   // SecretToken references to k8 secret which holds the Secret Token used by webhook config
@@ -738,6 +821,11 @@ message GitlabEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 12;
+
+  // List of group IDs or group name like "test".
+  // Group level hook available in Premium and Ultimate Gitlab.
+  // +optional
+  repeated string groups = 13;
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
@@ -808,6 +896,7 @@ message KafkaEventSource {
   optional string url = 1;
 
   // Partition name
+  // +optional
   optional string partition = 2;
 
   // Topic name
@@ -893,6 +982,10 @@ message MQTTEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 8;
+
+  // Auth hosts secret selectors for username and password
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.BasicAuth auth = 9;
 }
 
 // NATSAuth refers to the auth info for NATS EventSource
@@ -1093,12 +1186,24 @@ message PulsarEventSource {
   map<string, string> metadata = 10;
 
   // Authentication token for the pulsar client.
+  // Either token or athenz can be set to use auth.
   // +optional
   optional k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 11;
 
   // Filter
   // +optional
   optional EventSourceFilter filter = 12;
+
+  // Authentication athenz parameters for the pulsar client.
+  // Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go
+  // Either token or athenz can be set to use auth.
+  // +optional
+  map<string, string> authAthenzParams = 13;
+
+  // Authentication athenz privateKey secret for the pulsar client.
+  // AuthAthenzSecret must be set if AuthAthenzParams is used.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector authAthenzSecret = 14;
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.

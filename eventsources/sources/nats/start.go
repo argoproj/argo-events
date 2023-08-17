@@ -19,10 +19,10 @@ package nats
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	natslib "github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -70,7 +70,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if natsEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(natsEventSource.TLS)
 		if err != nil {
-			return errors.Wrap(err, "failed to get the tls configuration")
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
 		opt = append(opt, natslib.Secure(tlsConfig))
 	}
@@ -100,7 +100,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			o, err := natslib.NkeyOptionFromSeed(nkeyFile)
 			if err != nil {
-				return errors.Wrap(err, "failed to get NKey")
+				return fmt.Errorf("failed to get NKey, %w", err)
 			}
 			opt = append(opt, o)
 		case natsEventSource.Auth.Credential != nil:
@@ -114,14 +114,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var conn *natslib.Conn
 	log.Info("connecting to nats cluster...")
-	if err := common.Connect(natsEventSource.ConnectionBackoff, func() error {
+	if err := common.DoWithRetry(natsEventSource.ConnectionBackoff, func() error {
 		var err error
 		if conn, err = natslib.Connect(natsEventSource.URL, opt...); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrapf(err, "failed to connect to the nats server for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to connect to the nats server for event source %s, %w", el.GetEventName(), err)
 	}
 	defer conn.Close()
 
@@ -137,6 +137,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		eventData := &events.NATSEventData{
 			Subject:  msg.Subject,
+			Header:   msg.Header,
 			Metadata: natsEventSource.Metadata,
 		}
 		if natsEventSource.JSONBody {
@@ -158,12 +159,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	})
 	if err != nil {
-		return errors.Wrapf(err, "failed to subscribe to the subject %s for event source %s", natsEventSource.Subject, el.GetEventName())
+		return fmt.Errorf("failed to subscribe to the subject %s for event source %s, %w", natsEventSource.Subject, el.GetEventName(), err)
 	}
 
 	conn.Flush()
 	if err := conn.LastError(); err != nil {
-		return errors.Wrapf(err, "connection failure for event source %s", el.GetEventName())
+		return fmt.Errorf("connection failure for event source %s, %w", el.GetEventName(), err)
 	}
 
 	<-ctx.Done()

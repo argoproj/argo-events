@@ -53,7 +53,14 @@ func Start() {
 			logger.Fatalw("failed to unmarshal bus config object", zap.Error(err))
 		}
 	}
-
+	if busConfig.NATS != nil {
+		for _, trigger := range sensor.Spec.Triggers {
+			if trigger.AtLeastOnce {
+				logger.Warn("ignoring atLeastOnce when using NATS")
+				trigger.AtLeastOnce = false
+			}
+		}
+	}
 	ebSubject, defined := os.LookupEnv(common.EnvVarEventBusSubject)
 	if !defined {
 		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarEventBusSubject)
@@ -67,6 +74,10 @@ func Start() {
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
 	logger = logger.With("sensorName", sensor.Name)
+	for name, value := range sensor.Spec.LoggingFields {
+		logger.With(name, value)
+	}
+
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
 	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))

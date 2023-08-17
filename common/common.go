@@ -17,9 +17,9 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"reflect"
 
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -29,6 +29,10 @@ const (
 	EnvVarKubeConfig = "KUBECONFIG"
 	// EnvVarDebugLog is the env var to turn on the debug mode for logging
 	EnvVarDebugLog = "DEBUG_LOG"
+	// ENVVarPodName should be set to the name of the pod
+	EnvVarPodName = "POD_NAME"
+	// ENVVarLeaderElection sets the leader election mode
+	EnvVarLeaderElection = "LEADER_ELECTION"
 	// EnvImagePullPolicy is the env var to set container's ImagePullPolicy
 	EnvImagePullPolicy = "IMAGE_PULL_POLICY"
 )
@@ -110,7 +114,7 @@ const (
 )
 
 var (
-	ErrNilEventSource = errors.New("event source can't be nil")
+	ErrNilEventSource = fmt.Errorf("event source can't be nil")
 )
 
 // Miscellaneous Labels
@@ -119,6 +123,8 @@ const (
 	LabelOwnerName = "owner-name"
 	// AnnotationResourceSpecHash is the annotation of a K8s resource spec hash
 	AnnotationResourceSpecHash = "resource-spec-hash"
+	// AnnotationLeaderElection is the annotation for leader election
+	AnnotationLeaderElection = "events.argoproj.io/leader-election"
 )
 
 // various supported media types
@@ -133,6 +139,7 @@ const (
 	SensorMetricsPort      = 7777
 	ControllerMetricsPort  = 7777
 	EventBusMetricsPort    = 7777
+	ControllerHealthPort   = 8081
 )
 
 var (

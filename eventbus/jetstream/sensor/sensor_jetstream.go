@@ -1,11 +1,10 @@
 package sensor
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
-
-	"errors"
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusjetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
@@ -36,7 +35,7 @@ func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, streamConfig st
 	if sensorSpec == nil {
 		errStr := SensorNilError
 		logger.Errorf(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 
 	baseJetstream, err := eventbusjetstreambase.NewJetstream(url, streamConfig, auth, logger)
@@ -55,14 +54,21 @@ func (stream *SensorJetstream) Initialize() error {
 	if err != nil {
 		return err
 	}
-	// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
-	stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
-	if err != nil {
-		errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
-		stream.Logger.Error(errStr)
-		return err
+
+	// see if there's an existing one
+	stream.keyValueStore, _ = stream.MgmtConnection.JSContext.KeyValue(stream.sensorName)
+	if stream.keyValueStore == nil {
+		// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
+		stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
+		if err != nil {
+			errStr := fmt.Sprintf("failed to Create Key/Value Store for sensor %s, err: %v", stream.sensorName, err)
+			stream.Logger.Error(errStr)
+			return err
+		}
+	} else {
+		stream.Logger.Infof("found existing K/V store for sensor %s, using that", stream.sensorName)
 	}
-	stream.Logger.Infof("successfully created K/V store for sensor %s (if it doesn't already exist)", stream.sensorName)
+	stream.Logger.Infof("successfully created/located K/V store for sensor %s", stream.sensorName)
 
 	// Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)
@@ -70,7 +76,7 @@ func (stream *SensorJetstream) Initialize() error {
 	return err
 }
 
-func (stream *SensorJetstream) Connect(triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) (eventbuscommon.TriggerConnection, error) {
+func (stream *SensorJetstream) Connect(ctx context.Context, triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency, atLeastOnce bool) (eventbuscommon.TriggerConnection, error) {
 	conn, err := stream.MakeConnection()
 	if err != nil {
 		return nil, err
@@ -89,7 +95,7 @@ func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error
 	if sensorSpec == nil {
 		errStr := SensorNilError
 		log.Error(errStr)
-		return errors.New(errStr)
+		return fmt.Errorf(errStr)
 	}
 
 	log.Infof("Comparing previous Spec stored in k/v store for sensor %s to new Spec", sensorSpec.Name)
@@ -160,7 +166,7 @@ func (stream *SensorJetstream) saveSpec(sensorSpec *v1alpha1.Sensor, removedTrig
 		if err != nil {
 			errStr := fmt.Sprintf("error deleting key %s: %v", key, err)
 			stream.Logger.Error(errStr)
-			return errors.New(errStr)
+			return fmt.Errorf(errStr)
 		}
 		stream.Logger.Debugf("successfully removed Trigger expression at key %s", key)
 	}
@@ -172,7 +178,7 @@ func (stream *SensorJetstream) saveSpec(sensorSpec *v1alpha1.Sensor, removedTrig
 		if err != nil {
 			errStr := fmt.Sprintf("failed to hash dependency %+v", dep)
 			stream.Logger.Errorf(errStr)
-			err = errors.New(errStr)
+			err = fmt.Errorf(errStr)
 			return err
 		}
 		depMap[dep.Name] = hash
@@ -207,7 +213,7 @@ func (stream *SensorJetstream) getChangedTriggers(sensorSpec *v1alpha1.Sensor) (
 	if sensorSpec == nil {
 		errStr := SensorNilError
 		stream.Logger.Errorf(errStr)
-		err = errors.New(errStr)
+		err = fmt.Errorf(errStr)
 		return
 	}
 
@@ -243,7 +249,7 @@ func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (chan
 	if sensorSpec == nil {
 		errStr := SensorNilError
 		stream.Logger.Errorf(errStr)
-		err = errors.New(errStr)
+		err = fmt.Errorf(errStr)
 		return
 	}
 
@@ -266,7 +272,7 @@ func (stream *SensorJetstream) getChangedDeps(sensorSpec *v1alpha1.Sensor) (chan
 			if err != nil {
 				errStr := fmt.Sprintf("failed to hash dependency %+v", currDep)
 				stream.Logger.Errorf(errStr)
-				err = errors.New(errStr)
+				err = fmt.Errorf(errStr)
 				return nil, nil, nil, err
 			}
 			if hash == hashedDep {
@@ -288,7 +294,7 @@ func (stream *SensorJetstream) getDependencyDefinitions() (DependencyDefinitionV
 		}
 		errStr := fmt.Sprintf("error getting key %s: %v", DependencyDefsKey, err)
 		stream.Logger.Error(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 	stream.Logger.Debugf("Value of key %s: %s", DependencyDefsKey, string(depDefs.Value()))
 
@@ -297,7 +303,7 @@ func (stream *SensorJetstream) getDependencyDefinitions() (DependencyDefinitionV
 	if err != nil {
 		errStr := fmt.Sprintf("error unmarshalling value %s of key %s: %v", string(depDefs.Value()), DependencyDefsKey, err)
 		stream.Logger.Error(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 
 	return depDefMap, nil
@@ -308,13 +314,13 @@ func (stream *SensorJetstream) storeDependencyDefinitions(depDef DependencyDefin
 	if err != nil {
 		errStr := fmt.Sprintf("error marshalling %+v: %v", depDef, err)
 		stream.Logger.Error(errStr)
-		return errors.New(errStr)
+		return fmt.Errorf(errStr)
 	}
 	_, err = stream.keyValueStore.Put(DependencyDefsKey, bytes)
 	if err != nil {
 		errStr := fmt.Sprintf("error storing %s under key %s: %v", string(bytes), DependencyDefsKey, err)
 		stream.Logger.Error(errStr)
-		return errors.New(errStr)
+		return fmt.Errorf(errStr)
 	}
 	stream.Logger.Debugf("successfully stored dependency definition under key %s: %s", DependencyDefsKey, string(bytes))
 	return nil
@@ -328,7 +334,7 @@ func (stream *SensorJetstream) getTriggerList() (TriggerValue, error) {
 		}
 		errStr := fmt.Sprintf("error getting key %s: %v", TriggersKey, err)
 		stream.Logger.Error(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 	stream.Logger.Debugf("Value of key %s: %s", TriggersKey, string(triggerListJson.Value()))
 
@@ -337,7 +343,7 @@ func (stream *SensorJetstream) getTriggerList() (TriggerValue, error) {
 	if err != nil {
 		errStr := fmt.Sprintf("error unmarshalling value %s of key %s: %v", string(triggerListJson.Value()), TriggersKey, err)
 		stream.Logger.Error(errStr)
-		return nil, errors.New(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 
 	return triggerList, nil
@@ -348,13 +354,13 @@ func (stream *SensorJetstream) storeTriggerList(triggerList TriggerValue) error 
 	if err != nil {
 		errStr := fmt.Sprintf("error marshalling %+v: %v", triggerList, err)
 		stream.Logger.Error(errStr)
-		return errors.New(errStr)
+		return fmt.Errorf(errStr)
 	}
 	_, err = stream.keyValueStore.Put(TriggersKey, bytes)
 	if err != nil {
 		errStr := fmt.Sprintf("error storing %s under key %s: %v", string(bytes), TriggersKey, err)
 		stream.Logger.Error(errStr)
-		return errors.New(errStr)
+		return fmt.Errorf(errStr)
 	}
 	stream.Logger.Debugf("successfully stored trigger list under key %s: %s", TriggersKey, string(bytes))
 	return nil
@@ -369,7 +375,7 @@ func (stream *SensorJetstream) getTriggerExpression(triggerName string) (string,
 		}
 		errStr := fmt.Sprintf("error getting key %s: %v", key, err)
 		stream.Logger.Error(errStr)
-		return "", errors.New(errStr)
+		return "", fmt.Errorf(errStr)
 	}
 	stream.Logger.Debugf("Value of key %s: %s", key, string(expr.Value()))
 
@@ -382,7 +388,7 @@ func (stream *SensorJetstream) storeTriggerExpression(triggerName string, condit
 	if err != nil {
 		errStr := fmt.Sprintf("error storing %s under key %s: %v", conditionExpression, key, err)
 		stream.Logger.Error(errStr)
-		return errors.New(errStr)
+		return fmt.Errorf(errStr)
 	}
 	stream.Logger.Debugf("successfully stored trigger expression under key %s: %s", key, conditionExpression)
 	return nil

@@ -33,7 +33,6 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -210,7 +209,7 @@ func getRequestBody(request *http.Request) ([]byte, error) {
 	// Reset request.Body ReadCloser to prevent side-effect if re-read
 	request.Body = io.NopCloser(bytes.NewBuffer(body))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse request body")
+		return nil, fmt.Errorf("failed to parse request body, %w", err)
 	}
 	return body, nil
 }

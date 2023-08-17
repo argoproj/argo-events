@@ -23,9 +23,10 @@ import (
 	"math/big"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
-	gh "github.com/google/go-github/v31/github"
+	gh "github.com/google/go-github/v50/github"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -60,7 +61,7 @@ func init() {
 func (router *Router) getCredentials(keySelector *corev1.SecretKeySelector) (*cred, error) {
 	token, err := common.GetSecretFromVolume(keySelector)
 	if err != nil {
-		return nil, errors.Wrap(err, "secret not found")
+		return nil, fmt.Errorf("secret not found, %w", err)
 	}
 
 	return &cred{
@@ -73,7 +74,7 @@ func (router *Router) getCredentials(keySelector *corev1.SecretKeySelector) (*cr
 func (router *Router) getAPITokenAuthStrategy() (*TokenAuthStrategy, error) {
 	apiTokenCreds, err := router.getCredentials(router.githubEventSource.APIToken)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve api token credentials")
+		return nil, fmt.Errorf("failed to retrieve api token credentials, %w", err)
 	}
 
 	return &TokenAuthStrategy{
@@ -87,11 +88,12 @@ func (router *Router) getGithubAppAuthStrategy() (*AppsAuthStrategy, error) {
 	appCreds := router.githubEventSource.GithubApp
 	githubAppPrivateKey, err := router.getCredentials(appCreds.PrivateKey)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve github app credentials")
+		return nil, fmt.Errorf("failed to retrieve github app credentials, %w", err)
 	}
 
 	return &AppsAuthStrategy{
 		AppID:          appCreds.AppID,
+		BaseURL:        router.githubEventSource.GithubBaseURL,
 		InstallationID: appCreds.InstallationID,
 		PrivateKey:     githubAppPrivateKey.secret,
 	}, nil
@@ -106,7 +108,7 @@ func (router *Router) chooseAuthStrategy() (AuthStrategy, error) {
 	case es.HasGithubAppCreds():
 		return router.getGithubAppAuthStrategy()
 	default:
-		return nil, errors.New("none of the supported auth options were provided")
+		return nil, fmt.Errorf("none of the supported auth options were provided")
 	}
 }
 
@@ -250,12 +252,12 @@ func (router *Router) PostInactivate() error {
 		for _, org := range githubEventSource.Organizations {
 			id, ok := router.orgHookIDs[org]
 			if !ok {
-				return errors.Errorf("can not find hook ID for organization %s", org)
+				return fmt.Errorf("can not find hook ID for organization %s", org)
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			if _, err := router.githubClient.Organizations.DeleteHook(ctx, org, id); err != nil {
-				return errors.Errorf("failed to delete hook for organization %s. err: %+v", org, err)
+				return fmt.Errorf("failed to delete hook for organization %s. err: %w", org, err)
 			}
 			logger.Infof("GitHub hook deleted for organization %s", org)
 		}
@@ -266,12 +268,12 @@ func (router *Router) PostInactivate() error {
 			for _, n := range r.Names {
 				id, ok := router.repoHookIDs[r.Owner+","+n]
 				if !ok {
-					return errors.Errorf("can not find hook ID for repo %s/%s", r.Owner, n)
+					return fmt.Errorf("can not find hook ID for repo %s/%s", r.Owner, n)
 				}
 				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 				defer cancel()
 				if _, err := router.githubClient.Repositories.DeleteHook(ctx, r.Owner, n, id); err != nil {
-					return errors.Errorf("failed to delete hook for repo %s/%s. err: %+v", r.Owner, n, err)
+					return fmt.Errorf("failed to delete hook for repo %s/%s. err: %w", r.Owner, n, err)
 				}
 				logger.Infof("GitHub hook deleted for repo %s/%s", r.Owner, n)
 			}
@@ -296,7 +298,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if githubEventSource.WebhookSecret != nil {
 		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret)
 		if err != nil {
-			return errors.Errorf("failed to retrieve webhook secret. err: %+v", err)
+			return fmt.Errorf("failed to retrieve webhook secret. err: %w", err)
 		}
 		router.hookSecret = webhookSecretCreds.secret
 	}
@@ -305,22 +307,32 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		// create webhooks
 
 		// In order to successfully setup a GitHub hook for the given repository,
-		// 1. Get the GitHub auth credentials and Webhook secret from K8s secrets
-		// 2. Configure the hook with url, content type, ssl etc.
-		// 3. Set up a GitHub client
-		// 4. Set the base and upload url for the client
-		// 5. Create the hook if one doesn't exist already. If exists already, then use that one.
+		// 1. Parse and validate base and upload url if provided
+		// 2. Get the GitHub auth credentials and Webhook secret from K8s secrets
+		// 3. Configure the hook with url, content type, ssl etc.
+		// 4. Set up a GitHub client
+		// 5. Set the base and upload url for the client
+		// 6. Create the hook if one doesn't exist already. If exists already, then use that one.
+
+		baseURL, err := parseUrlWithSlash(&githubEventSource.GithubBaseURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github base url. err: %v", err)
+		}
+		uploadURL, err := parseUrlWithSlash(&githubEventSource.GithubUploadURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github upload url. err: %v", err)
+		}
 
 		logger.Info("choosing github auth strategy...")
 		authStrategy, err := router.chooseAuthStrategy()
 		if err != nil {
-			return errors.Wrap(err, "failed to get github auth strategy")
+			return fmt.Errorf("failed to get github auth strategy, %w", err)
 		}
 
 		logger.Info("setting up auth transport for http client with the chosen strategy...")
 		authTransport, err := authStrategy.AuthTransport()
 		if err != nil {
-			return errors.Wrap(err, "failed to set up auth transport for http client")
+			return fmt.Errorf("failed to set up auth transport for http client, %w", err)
 		}
 
 		logger.Info("configuring GitHub hook...")
@@ -342,24 +354,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		logger.Info("setting up client for GitHub...")
 		client := gh.NewClient(&http.Client{Transport: authTransport})
-
-		logger.Info("setting up base url for GitHub client...")
-		if githubEventSource.GithubBaseURL != "" {
-			baseURL, err := url.Parse(githubEventSource.GithubBaseURL)
-			if err != nil {
-				return fmt.Errorf("failed to parse github base url. err: %v", err)
-			}
+		if baseURL != nil && uploadURL != nil {
+			logger.Info("setting up client for GitHub Enterprise...")
 			client.BaseURL = baseURL
-		}
-
-		logger.Info("setting up the upload url for GitHub client...")
-		if githubEventSource.GithubUploadURL != "" {
-			uploadURL, err := url.Parse(githubEventSource.GithubUploadURL)
-			if err != nil {
-				return fmt.Errorf("failed to parse github upload url. err: %v", err)
-			}
 			client.UploadURL = uploadURL
 		}
+		logger.Infof("client set for baseURL=[%s] uploadURL=[%s]", client.BaseURL, client.UploadURL)
+
 		router.githubClient = client
 		router.repoHookIDs = make(map[string]int64)
 		router.orgHookIDs = make(map[string]int64)
@@ -462,4 +463,15 @@ func parseValidateRequest(r *http.Request, secret []byte) (map[string]interface{
 		payload[h] = r.Header.Get(h)
 	}
 	return payload, nil
+}
+
+// parseUrlWithSlash parses URL and enforces trailing slash expected by GitHub client
+func parseUrlWithSlash(urlStr *string) (*url.URL, error) {
+	if *urlStr == "" {
+		return nil, nil
+	}
+	if !strings.HasSuffix(*urlStr, "/") {
+		*urlStr += "/"
+	}
+	return url.Parse(*urlStr)
 }

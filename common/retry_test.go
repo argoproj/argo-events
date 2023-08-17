@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
@@ -43,13 +44,13 @@ func TestRetryableKubeAPIError(t *testing.T) {
 }
 
 func TestConnect(t *testing.T) {
-	err := Connect(nil, func() error {
+	err := DoWithRetry(nil, func() error {
 		return fmt.Errorf("new error")
 	})
 	assert.NotNil(t, err)
 	assert.True(t, strings.Contains(err.Error(), "new error"))
 
-	err = Connect(nil, func() error {
+	err = DoWithRetry(nil, func() error {
 		return nil
 	})
 	assert.Nil(t, err)
@@ -58,7 +59,7 @@ func TestConnect(t *testing.T) {
 func TestConnectDurationString(t *testing.T) {
 	start := time.Now()
 	count := 2
-	err := Connect(nil, func() error {
+	err := DoWithRetry(nil, func() error {
 		if count == 0 {
 			return nil
 		} else {
@@ -85,7 +86,7 @@ func TestConnectRetry(t *testing.T) {
 	}
 	count := 2
 	start := time.Now()
-	err := Connect(&backoff, func() error {
+	err := DoWithRetry(&backoff, func() error {
 		if count == 0 {
 			return nil
 		} else {
@@ -110,10 +111,30 @@ func TestRetryFailure(t *testing.T) {
 		Jitter:   &jitter,
 		Steps:    2,
 	}
-	err := Connect(&backoff, func() error {
+	err := DoWithRetry(&backoff, func() error {
 		return fmt.Errorf("this is an error")
 	})
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "after retries")
 	assert.Contains(t, err.Error(), "this is an error")
+}
+
+func TestConvert2WaitBackoff(t *testing.T) {
+	factor := apicommon.NewAmount("1.0")
+	jitter := apicommon.NewAmount("1")
+	duration := apicommon.FromString("1s")
+	backoff := apicommon.Backoff{
+		Duration: &duration,
+		Factor:   &factor,
+		Jitter:   &jitter,
+		Steps:    2,
+	}
+	waitBackoff, err := Convert2WaitBackoff(&backoff)
+	assert.NoError(t, err)
+	assert.Equal(t, wait.Backoff{
+		Duration: 1 * time.Second,
+		Factor:   1.0,
+		Jitter:   1.0,
+		Steps:    2,
+	}, *waitBackoff)
 }

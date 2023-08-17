@@ -34,6 +34,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger":        schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":           schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger":      schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureServiceBusTrigger":     schema_pkg_apis_sensor_v1alpha1_AzureServiceBusTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetByTime":      schema_pkg_apis_sensor_v1alpha1_ConditionsResetByTime(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria":    schema_pkg_apis_sensor_v1alpha1_ConditionsResetCriteria(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":              schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
@@ -61,6 +62,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":                 schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":                 schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":               schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackSender":                schema_pkg_apis_sensor_v1alpha1_SlackSender(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackThread":                schema_pkg_apis_sensor_v1alpha1_SlackThread(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger":               schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger":         schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":               schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
@@ -345,6 +348,85 @@ func schema_pkg_apis_sensor_v1alpha1_AzureEventHubsTrigger(ref common.ReferenceC
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_AzureServiceBusTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"connectionString": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ConnectionString is the connection string for the Azure Service Bus",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"queueName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "QueueName is the name of the Azure Service Bus Queue",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"topicName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TopicName is the name of the Azure Service Bus Topic",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"subscriptionName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SubscriptionName is the name of the Azure Service Bus Topic Subscription",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the service bus client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
+						},
+					},
+					"payload": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"parameters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"queueName", "topicName", "subscriptionName", "payload"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1182,7 +1264,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					},
 					"partition": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Partition to write data to.",
+							Description: "DEPRECATED",
 							Default:     0,
 							Type:        []string{"integer"},
 							Format:      "int32",
@@ -1245,7 +1327,7 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 					},
 					"partitioningKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The partitioning key for the messages put on the Kafka topic. Defaults to broker url.",
+							Description: "The partitioning key for the messages put on the Kafka topic.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1263,12 +1345,18 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SASLConfig"),
 						},
 					},
+					"schemaRegistry": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schema Registry configuration to producer message with avro format",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig"),
+						},
+					},
 				},
-				Required: []string{"url", "topic", "partition", "payload"},
+				Required: []string{"url", "topic", "payload"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/common.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/common.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -1544,7 +1632,7 @@ func schema_pkg_apis_sensor_v1alpha1_PulsarTrigger(ref common.ReferenceCallback)
 					},
 					"authTokenSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Authentication token for the pulsar client.",
+							Description: "Authentication token for the pulsar client. Either token or athenz can be set to use auth.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -1552,6 +1640,28 @@ func schema_pkg_apis_sensor_v1alpha1_PulsarTrigger(ref common.ReferenceCallback)
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff holds parameters applied to connection.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Backoff"),
+						},
+					},
+					"authAthenzParams": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Authentication athenz parameters for the pulsar client. Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go Either token or athenz can be set to use auth.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"authAthenzSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Authentication athenz privateKey secret for the pulsar client. AuthAthenzSecret must be set if AuthAthenzParams is used.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 				},
@@ -1747,6 +1857,29 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "int32",
 						},
 					},
+					"revisionHistoryLimit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RevisionHistoryLimit specifies how many old deployment revisions to retain",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"loggingFields": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LoggingFields add additional key-value pairs when logging happens",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},
@@ -1791,6 +1924,58 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_SlackSender(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username is the Slack application's username",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"icon": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_SlackThread(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"messageAggregationKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MessageAggregationKey allows to aggregate the messages to a thread by some key.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"broadcastMessageToChannel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1820,7 +2005,7 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 					},
 					"channel": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Channel refers to which Slack channel to send slack message.",
+							Description: "Channel refers to which Slack channel to send Slack message.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1832,11 +2017,39 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"attachments": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"blocks": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"thread": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Thread refers to additional options for sending messages to a Slack thread.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackThread"),
+						},
+					},
+					"sender": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Sender refers to additional configuration of the Slack application that sends the message.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackSender"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackSender", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackThread", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2129,6 +2342,13 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit"),
 						},
 					},
+					"atLeastOnce": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AtLeastOnce determines the trigger execution semantics. Defaults to false. Trigger execution will use at-most-once semantics. If set to true, Trigger execution will switch to at-least-once semantics.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -2221,6 +2441,13 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 						SchemaProps: spec.SchemaProps{
 							Description: "Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
 							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"useRawData": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UseRawData indicates if the value in an event at data key should be used without converting to string. When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter 123 will resolve to the numerical type, but when false, or not provided, the string \"123\" will be resolved)",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
@@ -2366,12 +2593,18 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							},
 						},
 					},
+					"azureServiceBus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureServiceBusTrigger"),
+						},
+					},
 				},
 				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureServiceBusTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"},
 	}
 }
 

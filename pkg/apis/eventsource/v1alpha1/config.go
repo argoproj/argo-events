@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	"errors"
+	fmt "fmt"
 	"path"
 	"regexp"
 )
@@ -18,19 +18,19 @@ type WatchPathConfig struct {
 // Validate validates WatchPathConfig
 func (c *WatchPathConfig) Validate() error {
 	if c.Directory == "" {
-		return errors.New("directory is required")
+		return fmt.Errorf("directory is required")
 	}
 	if !path.IsAbs(c.Directory) {
-		return errors.New("directory must be an absolute file path")
+		return fmt.Errorf("directory must be an absolute file path")
 	}
 	if c.Path == "" && c.PathRegexp == "" {
-		return errors.New("either path or pathRegexp must be specified")
+		return fmt.Errorf("either path or pathRegexp must be specified")
 	}
 	if c.Path != "" && c.PathRegexp != "" {
-		return errors.New("path and pathRegexp cannot be specified together")
+		return fmt.Errorf("path and pathRegexp cannot be specified together")
 	}
 	if c.Path != "" && path.IsAbs(c.Path) {
-		return errors.New("path must be a relative file path")
+		return fmt.Errorf("path must be a relative file path")
 	}
 	if c.PathRegexp != "" {
 		_, err := regexp.Compile(c.PathRegexp)

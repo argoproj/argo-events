@@ -52,6 +52,14 @@ metadata:
 spec:
   jetstream:
     version: latest`
+
+	E2EEventBusKafka = `apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+spec:
+  kafka:
+    url: kafka:9092`
 )
 
 type E2ESuite struct {
@@ -170,6 +178,8 @@ func GetBusDriverSpec() string {
 	x := strings.ToUpper(os.Getenv("EventBusDriver"))
 	if x == "JETSTREAM" {
 		return E2EEventBusJetstream
+	} else if x == "KAFKA" {
+		return E2EEventBusKafka
 	}
 	return E2EEventBusSTAN
 }

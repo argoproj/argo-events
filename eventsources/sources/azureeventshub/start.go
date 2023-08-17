@@ -23,7 +23,6 @@ import (
 	"time"
 
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -70,13 +69,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("retrieving the shared access key name...")
 	sharedAccessKeyName, err := common.GetSecretFromVolume(hubEventSource.SharedAccessKeyName)
 	if err != nil {
-		return errors.Wrapf(err, "failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
+		return fmt.Errorf("failed to retrieve the shared access key name from secret %s, %w", hubEventSource.SharedAccessKeyName.Name, err)
 	}
 
 	log.Info("retrieving the shared access key...")
 	sharedAccessKey, err := common.GetSecretFromVolume(hubEventSource.SharedAccessKey)
 	if err != nil {
-		return errors.Wrapf(err, "failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
+		return fmt.Errorf("failed to retrieve the shared access key from secret %s, %w", hubEventSource.SharedAccessKey.Name, err)
 	}
 
 	endpoint := fmt.Sprintf("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", hubEventSource.FQDN, sharedAccessKeyName, sharedAccessKey, hubEventSource.HubName)
@@ -84,7 +83,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("connecting to the hub...")
 	hub, err := eventhub.NewHubFromConnectionString(endpoint)
 	if err != nil {
-		return errors.Wrapf(err, "failed to connect to the hub %s", hubEventSource.HubName)
+		return fmt.Errorf("failed to connect to the hub %s, %w", hubEventSource.HubName, err)
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
@@ -106,7 +105,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-			return errors.Wrapf(err, "failed to marshal the event data for event source %s and message id %s", el.GetEventName(), event.ID)
+			return fmt.Errorf("failed to marshal the event data for event source %s and message id %s, %w", el.GetEventName(), event.ID, err)
 		}
 
 		log.Info("dispatching the event to eventbus...")
@@ -122,21 +121,21 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("gathering the hub runtime information...")
 	runtimeInfo, err := hub.GetRuntimeInformation(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get the hub runtime information for %s", el.GetEventName())
+		return fmt.Errorf("failed to get the hub runtime information for %s, %w", el.GetEventName(), err)
 	}
 
 	if runtimeInfo == nil {
-		return errors.Wrapf(err, "runtime information is not available for %s", el.GetEventName())
+		return fmt.Errorf("runtime information is not available for %s, %w", el.GetEventName(), err)
 	}
 
 	if runtimeInfo.PartitionIDs == nil {
-		return errors.Wrapf(err, "no partition ids are available for %s", el.GetEventName())
+		return fmt.Errorf("no partition ids are available for %s, %w", el.GetEventName(), err)
 	}
 
 	log.Info("handling the partitions...")
 	for _, partitionID := range runtimeInfo.PartitionIDs {
 		if _, err := hub.Receive(ctx, partitionID, handler, eventhub.ReceiveWithLatestOffset()); err != nil {
-			return errors.Wrapf(err, "failed to receive events from partition %s", partitionID)
+			return fmt.Errorf("failed to receive events from partition %s, %w", partitionID, err)
 		}
 	}
 

@@ -12,7 +12,6 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/codefresh"
@@ -27,6 +26,8 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/eventsources/sources/awssqs"
 	"github.com/argoproj/argo-events/eventsources/sources/azureeventshub"
+	"github.com/argoproj/argo-events/eventsources/sources/azurequeuestorage"
+	"github.com/argoproj/argo-events/eventsources/sources/azureservicebus"
 	"github.com/argoproj/argo-events/eventsources/sources/bitbucket"
 	"github.com/argoproj/argo-events/eventsources/sources/bitbucketserver"
 	"github.com/argoproj/argo-events/eventsources/sources/calendar"
@@ -44,7 +45,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/nsq"
 	"github.com/argoproj/argo-events/eventsources/sources/pulsar"
 	"github.com/argoproj/argo-events/eventsources/sources/redis"
-	redisstream "github.com/argoproj/argo-events/eventsources/sources/redisStream"
+	redisstream "github.com/argoproj/argo-events/eventsources/sources/redis_stream"
 	"github.com/argoproj/argo-events/eventsources/sources/resource"
 	"github.com/argoproj/argo-events/eventsources/sources/slack"
 	"github.com/argoproj/argo-events/eventsources/sources/storagegrid"
@@ -54,6 +55,7 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 // EventingServer is the server API for Eventing service.
@@ -95,6 +97,26 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.AzureEventsHub] = servers
+	}
+	if len(eventSource.Spec.AzureQueueStorage) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.AzureQueueStorage {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &azurequeuestorage.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureQueueStorageEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.AzureQueueStorage] = servers
+	}
+	if len(eventSource.Spec.AzureServiceBus) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.AzureServiceBus {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &azureservicebus.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureServiceBusEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.AzureServiceBus] = servers
 	}
 	if len(eventSource.Spec.Bitbucket) != 0 {
 		servers := []EventingServer{}
@@ -371,26 +393,31 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	for _, esType := range apicommon.RecreateStrategyEventSources {
 		recreateTypes[esType] = true
 	}
-	isRecreatType := false
+	isRecreateType := false
 	servers, filters := GetEventingServers(e.eventSource, e.metrics)
 	for k := range servers {
 		if _, ok := recreateTypes[k]; ok {
-			isRecreatType = true
+			isRecreateType = true
 		}
 		// This is based on the presumption that all the events in one
 		// EventSource object use the same type of deployment strategy
 		break
 	}
-	if !isRecreatType {
+
+	if !isRecreateType {
 		return e.run(ctx, servers, filters)
 	}
 
-	custerName := fmt.Sprintf("%s-eventsource-%s", e.eventSource.Namespace, e.eventSource.Name)
-	elector, err := leaderelection.NewEventBusElector(ctx, *e.eventBusConfig, custerName, int(e.eventSource.Spec.GetReplicas()))
+	clusterName := fmt.Sprintf("%s-eventsource-%s", e.eventSource.Namespace, e.eventSource.Name)
+	replicas := int(e.eventSource.Spec.GetReplicas())
+	leasename := fmt.Sprintf("eventsource-%s", e.eventSource.Name)
+
+	elector, err := leaderelection.NewElector(ctx, *e.eventBusConfig, clusterName, replicas, e.eventSource.Namespace, leasename, e.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
 		return err
 	}
+
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
 			if err := e.run(ctx, servers, filters); err != nil {
@@ -418,7 +445,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 		})
 		return err
 	}
-	if err = common.Connect(&common.DefaultBackoff, func() error {
+	if err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 		err = driver.Initialize()
 		if err != nil {
 			return err
@@ -501,7 +528,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					Factor:   &factor,
 					Jitter:   &jitter,
 				}
-				if err = common.Connect(&backoff, func() error {
+				if err = common.DoWithRetry(&backoff, func() error {
 					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) error {
 						if filter, ok := filters[s.GetEventName()]; ok {
 							proceed, err := filterEvent(data, filter)
@@ -510,7 +537,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 								return nil
 							}
 							if !proceed {
-								logger.Debug("Do not publish event, filter condition not met")
+								logger.Info("Filter condition not met, skip dispatching")
 								return nil
 							}
 						}
@@ -537,7 +564,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						}
 
 						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
-							return errors.New("failed to publish event, eventbus connection closed")
+							return eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
 						}
 
 						msg := eventbuscommon.Message{
@@ -549,10 +576,10 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							Body: eventBody,
 						}
 
-						if err = common.Connect(&common.DefaultBackoff, func() error {
+						if err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 							return e.eventBusConn.Publish(ctx, msg)
 						}); err != nil {
-							logger.Errorw("failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
+							logger.Errorw("Failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							e.cfClient.ReportError(
@@ -563,9 +590,9 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 									TypeMeta:   e.eventSource.TypeMeta,
 								},
 							)
-							return err
+							return eventbuscommon.NewEventBusError(err)
 						}
-						logger.Infow("succeeded to publish an event", zap.String(logging.LabelEventName,
+						logger.Infow("Succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 
@@ -574,7 +601,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						return nil
 					})
 				}); err != nil {
-					logger.Errorw("failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
+					logger.Errorw("Failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
 						s.GetEventSourceType()), zap.Any(logging.LabelEventName, s.GetEventName()), zap.Error(err))
 				}
 			}(server)
@@ -600,7 +627,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 			logger.Error("Erroring out, no active event server running")
 			cancel()
 			connWG.Wait()
-			return errors.New("no active event server running")
+			return fmt.Errorf("no active event server running")
 		}
 	}
 }

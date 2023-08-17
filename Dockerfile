@@ -2,13 +2,13 @@ ARG ARCH=$TARGETARCH
 ####################################################################################################
 # base
 ####################################################################################################
-FROM alpine:3.12.3 as base
+FROM alpine:3.16.2 as base
 ARG ARCH
 RUN apk update && apk upgrade && \
     apk add ca-certificates && \
     apk --no-cache add tzdata
 
-ENV ARGO_VERSION=v3.3.2
+ENV ARGO_VERSION=v3.4.1
 
 RUN wget -q https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-${ARCH}.gz
 RUN gunzip -f argo-linux-${ARCH}.gz

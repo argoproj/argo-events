@@ -17,7 +17,7 @@ limitations under the License.
 package artifacts
 
 import (
-	"errors"
+	"fmt"
 	"os"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -33,7 +33,7 @@ type FileReader struct {
 func NewFileReader(fileArtifact *v1alpha1.FileArtifact) (ArtifactReader, error) {
 	// This should never happen!
 	if fileArtifact == nil {
-		return nil, errors.New("FileArtifact cannot be empty")
+		return nil, fmt.Errorf("FileArtifact cannot be empty")
 	}
 	return &FileReader{fileArtifact}, nil
 }

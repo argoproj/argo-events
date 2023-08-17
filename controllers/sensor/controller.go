@@ -18,7 +18,9 @@ package sensor
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -34,7 +36,6 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -81,7 +82,8 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		})
 	}
 	if r.needsUpdate(sensor, sensorCopy) {
-		if err := r.client.Update(ctx, sensorCopy); err != nil {
+		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
+		if err := r.client.Update(ctx, sensorCopy.DeepCopy()); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
@@ -116,7 +118,7 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		if apierrors.IsNotFound(err) {
 			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
 			log.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
-			return errors.Errorf("eventbus %s not found", eventBusName)
+			return fmt.Errorf("eventbus %s not found", eventBusName)
 		}
 		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
 		log.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)

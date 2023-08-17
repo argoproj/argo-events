@@ -137,6 +137,32 @@ message AzureEventHubsTrigger {
   repeated TriggerParameter parameters = 6;
 }
 
+message AzureServiceBusTrigger {
+  // ConnectionString is the connection string for the Azure Service Bus
+  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
+
+  // QueueName is the name of the Azure Service Bus Queue
+  optional string queueName = 2;
+
+  // TopicName is the name of the Azure Service Bus Topic
+  optional string topicName = 3;
+
+  // SubscriptionName is the name of the Azure Service Bus Topic Subscription
+  optional string subscriptionName = 4;
+
+  // TLS configuration for the service bus client
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 5;
+
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
+  repeated TriggerParameter payload = 6;
+
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the trigger resource.
+  // +optional
+  repeated TriggerParameter parameters = 7;
+}
+
 message ConditionsResetByTime {
   // Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
   optional string cron = 1;
@@ -434,7 +460,8 @@ message KafkaTrigger {
   // More info at https://kafka.apache.org/documentation/#intro_topics
   optional string topic = 2;
 
-  // Partition to write data to.
+  // +optional
+  // DEPRECATED
   optional int32 partition = 3;
 
   // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
@@ -464,7 +491,6 @@ message KafkaTrigger {
   repeated TriggerParameter payload = 9;
 
   // The partitioning key for the messages put on the Kafka topic.
-  // Defaults to broker url.
   // +optional.
   optional string partitioningKey = 10;
 
@@ -475,6 +501,10 @@ message KafkaTrigger {
   // SASL configuration for the kafka client
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.SASLConfig sasl = 12;
+
+  // Schema Registry configuration to producer message with avro format
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.SchemaRegistryConfig schemaRegistry = 13;
 }
 
 message LogTrigger {
@@ -576,12 +606,24 @@ message PulsarTrigger {
   optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 8;
 
   // Authentication token for the pulsar client.
+  // Either token or athenz can be set to use auth.
   // +optional
   optional k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 9;
 
   // Backoff holds parameters applied to connection.
   // +optional
   optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 10;
+
+  // Authentication athenz parameters for the pulsar client.
+  // Refer https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go
+  // Either token or athenz can be set to use auth.
+  // +optional
+  map<string, string> authAthenzParams = 11;
+
+  // Authentication athenz privateKey secret for the pulsar client.
+  // AuthAthenzSecret must be set if AuthAthenzParams is used.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector authAthenzSecret = 12;
 }
 
 message RateLimit {
@@ -636,11 +678,39 @@ message SensorSpec {
 
   // Replicas is the sensor deployment replicas
   optional int32 replicas = 6;
+
+  // RevisionHistoryLimit specifies how many old deployment revisions to retain
+  // +optional
+  optional int32 revisionHistoryLimit = 7;
+
+  // LoggingFields add additional key-value pairs when logging happens
+  // +optional
+  map<string, string> loggingFields = 8;
 }
 
 // SensorStatus contains information about the status of a sensor.
 message SensorStatus {
   optional github.com.argoproj.argo_events.pkg.apis.common.Status status = 1;
+}
+
+message SlackSender {
+  // Username is the Slack application's username
+  // +optional
+  optional string username = 1;
+
+  // Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png
+  // +optional
+  optional string icon = 2;
+}
+
+message SlackThread {
+  // MessageAggregationKey allows to aggregate the messages to a thread by some key.
+  // +optional
+  optional string messageAggregationKey = 1;
+
+  // BroadcastMessageToChannel allows to also broadcast the message from the thread to the channel
+  // +optional
+  optional bool broadcastMessageToChannel = 2;
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
@@ -653,13 +723,29 @@ message SlackTrigger {
   // SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
   optional k8s.io.api.core.v1.SecretKeySelector slackToken = 2;
 
-  // Channel refers to which Slack channel to send slack message.
+  // Channel refers to which Slack channel to send Slack message.
   // +optional
   optional string channel = 3;
 
   // Message refers to the message to send to the Slack channel.
   // +optional
   optional string message = 4;
+
+  // Attachments is a JSON format string that represents an array of Slack attachments according to the attachments API: https://api.slack.com/reference/messaging/attachments .
+  // +optional
+  optional string attachments = 5;
+
+  // Blocks is a JSON format string that represents an array of Slack blocks according to the blocks API: https://api.slack.com/reference/block-kit/blocks .
+  // +optional
+  optional string blocks = 6;
+
+  // Thread refers to additional options for sending messages to a Slack thread.
+  // +optional
+  optional SlackThread thread = 7;
+
+  // Sender refers to additional configuration of the Slack application that sends the message.
+  // +optional
+  optional SlackSender sender = 8;
 }
 
 // StandardK8STrigger is the standard Kubernetes resource trigger
@@ -805,6 +891,13 @@ message Trigger {
   // Rate limit, default unit is Second
   // +optional
   optional RateLimit rateLimit = 5;
+
+  // AtLeastOnce determines the trigger execution semantics.
+  // Defaults to false. Trigger execution will use at-most-once semantics.
+  // If set to true, Trigger execution will switch to at-least-once semantics.
+  // +kubebuilder:default=false
+  // +optional
+  optional bool atLeastOnce = 6;
 }
 
 // TriggerParameter indicates a passed parameter to a service template
@@ -857,6 +950,13 @@ message TriggerParameterSource {
   // This is only used if the DataKey is invalid.
   // If the DataKey is invalid and this is not defined, this param source will produce an error.
   optional string value = 6;
+
+  // UseRawData indicates if the value in an event at data key should be used without converting to string.
+  // When true, a number, boolean, json or string parameter may be extracted. When the field is unspecified, or explicitly
+  // false, the behavior is to turn the extracted field into a string. (e.g. when set to true, the parameter
+  // 123 will resolve to the numerical type, but when false, or not provided, the string "123" will be resolved)
+  // +optional
+  optional bool useRawData = 7;
 }
 
 // TriggerPolicy dictates the policy for the trigger retries
@@ -929,6 +1029,10 @@ message TriggerTemplate {
   // Criteria to reset the conditons
   // +optional
   repeated ConditionsResetCriteria conditionsReset = 15;
+
+  // AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus
+  // +optional
+  optional AzureServiceBusTrigger azureServiceBus = 16;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

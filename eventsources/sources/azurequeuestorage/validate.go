@@ -1,5 +1,5 @@
 /*
-Copyright 2020 BlackRock, Inc.
+Copyright 2018 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,35 +13,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package redisstream
+
+package azurequeuestorage
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
-// ValidateEventSource validates nats event source
-func (el *EventListener) ValidateEventSource(ctx context.Context) error {
-	return validate(&el.EventSource)
+// ValidateEventSource validates azure queue storage event source
+func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
+	return validate(&listener.AzureQueueStorageEventSource)
 }
 
-func validate(eventSource *v1alpha1.RedisStreamEventSource) error {
+func validate(eventSource *v1alpha1.AzureQueueStorageEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.HostAddress == "" {
-		return errors.New("host address must be specified")
+	if eventSource.ConnectionString == nil && eventSource.StorageAccountName == "" {
+		return fmt.Errorf("must specify connection string or storageAccountName")
 	}
-	if eventSource.Streams == nil {
-		return errors.New("stream/streams must be specified")
-	}
-	if eventSource.TLS != nil {
-		return apicommon.ValidateTLSConfig(eventSource.TLS)
+	if eventSource.QueueName == "" {
+		return fmt.Errorf("must specify queue name")
 	}
 	return nil
 }

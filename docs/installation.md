@@ -29,7 +29,7 @@
          * On OpenShift:
              - Make sure to grant `anyuid` scc to the service account.
 
-                oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
+                oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:argo-events-sa
 
              - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the validating admission controller)
 
@@ -45,7 +45,6 @@
                   - deployments/finalizers
                   verbs:
                   - update
-
 
 3. Deploy the eventbus.
 
@@ -90,7 +89,6 @@
 3. Deploy the eventbus.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
-
 
 ### Using Kustomize
 

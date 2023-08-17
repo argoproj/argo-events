@@ -1,0 +1,12 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: e2e-webhook
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  webhook:
+    example:
+      port: "12000"
+      endpoint: /example
+      method: POST

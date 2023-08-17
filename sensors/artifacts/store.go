@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/common"
@@ -37,12 +36,12 @@ type ArtifactReader interface {
 func FetchArtifact(reader ArtifactReader) (*unstructured.Unstructured, error) {
 	var obj []byte
 
-	if err := common.Connect(&common.DefaultBackoff, func() error {
+	if err := common.DoWithRetry(&common.DefaultBackoff, func() error {
 		var e error
 		obj, e = reader.Read()
 		return e
 	}); err != nil {
-		return nil, errors.Wrap(err, "failed to fetch artifact")
+		return nil, fmt.Errorf("failed to fetch artifact, %w", err)
 	}
 	return decodeAndUnstructure(obj)
 }
@@ -57,11 +56,11 @@ func GetCredentials(art *v1alpha1.ArtifactLocation) (*Credentials, error) {
 	if art.S3 != nil {
 		accessKey, err := common.GetSecretFromVolume(art.S3.AccessKey)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to retrieve accessKey")
+			return nil, fmt.Errorf("failed to retrieve accessKey, %w", err)
 		}
 		secretKey, err := common.GetSecretFromVolume(art.S3.SecretKey)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to retrieve secretKey")
+			return nil, fmt.Errorf("failed to retrieve secretKey, %w", err)
 		}
 		return &Credentials{
 			accessKey: strings.TrimSpace(accessKey),

@@ -57,12 +57,22 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 
 func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	log := logging.FromContext(ctx)
-	custerName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
-	elector, err := leaderelection.NewEventBusElector(ctx, *sensorCtx.eventBusConfig, custerName, int(sensorCtx.sensor.Spec.GetReplicas()))
+	clusterName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
+	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
+	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
+
+	// sensor for kafka eventbus can be scaled horizontally,
+	// therefore does not require an elector
+	if sensorCtx.eventBusConfig.Kafka != nil {
+		return sensorCtx.listenEvents(ctx)
+	}
+
+	elector, err := leaderelection.NewElector(ctx, *sensorCtx.eventBusConfig, clusterName, replicas, sensorCtx.sensor.Namespace, leasename, sensorCtx.hostname)
 	if err != nil {
 		log.Errorw("failed to get an elector", zap.Error(err))
 		return err
 	}
+
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
 			if err := sensorCtx.listenEvents(ctx); err != nil {
@@ -73,6 +83,7 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 			log.Fatalf("leader lost: %s", sensorCtx.hostname)
 		},
 	})
+
 	return nil
 }
 
@@ -103,11 +114,11 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor)
+	ebDriver, err := eventbus.GetSensorDriver(logging.WithLogger(ctx, logger), *sensorCtx.eventBusConfig, sensorCtx.sensor, sensorCtx.hostname)
 	if err != nil {
 		return err
 	}
-	err = common.Connect(&common.DefaultBackoff, func() error {
+	err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 		return ebDriver.Initialize()
 	})
 	if err != nil {
@@ -172,9 +183,9 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 
 			var conn eventbuscommon.TriggerConnection
-			err = common.Connect(&common.DefaultBackoff, func() error {
+			err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 				var err error
-				conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
+				conn, err = ebDriver.Connect(ctx, trigger.Template.Name, depExpression, deps, trigger.AtLeastOnce)
 				triggerLogger.Debugf("just created connection %v, %+v", &conn, conn)
 				return err
 			})
@@ -331,13 +342,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					return
 				case <-ticker.C:
 					if conn == nil || conn.IsClosed() {
-						triggerLogger.Info("NATS connection lost, reconnecting...")
-						conn, err = ebDriver.Connect(trigger.Template.Name, depExpression, deps)
+						triggerLogger.Info("EventBus connection lost, reconnecting...")
+						conn, err = ebDriver.Connect(ctx, trigger.Template.Name, depExpression, deps, trigger.AtLeastOnce)
 						if err != nil {
 							triggerLogger.Errorw("failed to reconnect to eventbus", zap.Any("connection", conn), zap.Error(err))
 							continue
 						}
-						triggerLogger.Infow("reconnected to NATS server.", zap.Any("connection", conn))
+						triggerLogger.Infow("reconnected to EventBus.", zap.Any("connection", conn))
 
 						if atomic.LoadUint32(&subLock) == 1 {
 							triggerLogger.Debug("acquired sublock, instructing trigger to shutdown subscription")
@@ -374,7 +385,13 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		depNames = append(depNames, k)
 		eventIDs = append(eventIDs, v.ID())
 	}
-	go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	if trigger.AtLeastOnce {
+		// By making this a blocking call, wait to Ack the message
+		// until this trigger is executed.
+		sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	} else {
+		go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+	}
 }
 
 func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) {
@@ -385,7 +402,7 @@ func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor
 	log := logging.FromContext(ctx)
 	if err := sensorCtx.triggerOne(ctx, sensor, trigger, eventsMapping, depNames, eventIDs, log); err != nil {
 		// Log the error, and let it continue
-		log.Errorw("failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
+		log.Errorw("Failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
 			zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		sensorCtx.cfClient.ReportError(
@@ -416,7 +433,7 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	logger.Debugw("resolving the trigger implementation")
 	triggerImpl := sensorCtx.GetTrigger(ctx, &trigger)
 	if triggerImpl == nil {
-		return errors.Errorf("invalid trigger %s, could not find an implementation", trigger.Template.Name)
+		return fmt.Errorf("invalid trigger %s, could not find an implementation", trigger.Template.Name)
 	}
 
 	logger = logger.With(logging.LabelTriggerType, triggerImpl.GetTriggerType())
@@ -426,7 +443,7 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		return err
 	}
 	if obj == nil {
-		return errors.Errorf("invalid trigger %s, could not fetch the trigger resource", trigger.Template.Name)
+		return fmt.Errorf("invalid trigger %s, could not fetch the trigger resource", trigger.Template.Name)
 	}
 
 	logger.Debug("applying resource parameters if any")
@@ -441,12 +458,12 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		retryStrategy = &apicommon.Backoff{Steps: 1}
 	}
 	var newObj interface{}
-	if err := common.Connect(retryStrategy, func() error {
+	if err := common.DoWithRetry(retryStrategy, func() error {
 		var e error
 		newObj, e = triggerImpl.Execute(ctx, eventsMapping, updatedObj)
 		return e
 	}); err != nil {
-		return errors.Wrap(err, "failed to execute trigger")
+		return fmt.Errorf("failed to execute trigger, %w", err)
 	}
 	logger.Debug("trigger resource successfully executed")
 
@@ -454,7 +471,7 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
 		return err
 	}
-	logger.Infow(fmt.Sprintf("successfully processed trigger '%s'", trigger.Template.Name),
+	logger.Infow(fmt.Sprintf("Successfully processed trigger '%s'", trigger.Template.Name),
 		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 	return nil
 }

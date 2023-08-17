@@ -107,8 +107,6 @@ for the full spec of `native`.
   [Affinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
   settings for the StatefulSet PODs.
 
- 
-
 #### More About Native NATS EventBus
 
 - Messages limit per channel defaults to 1,000,000. It could be customized by

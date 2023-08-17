@@ -19,6 +19,7 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -26,11 +27,11 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
@@ -95,14 +96,14 @@ func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.Sug
 
 	switch kafkaEventSource.ConsumerGroup.RebalanceStrategy {
 	case "sticky":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategySticky}
 	case "roundrobin":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRoundRobin}
 	case "range":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRange}
 	default:
 		log.Info("Invalid rebalance strategy, using default: range")
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.BalanceStrategyRange}
 	}
 
 	consumer := Consumer{
@@ -165,7 +166,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	var consumer sarama.Consumer
 
 	log.Info("connecting to Kafka cluster...")
-	if err := common.Connect(kafkaEventSource.ConnectionBackoff, func() error {
+	if err := common.DoWithRetry(kafkaEventSource.ConnectionBackoff, func() error {
 		var err error
 
 		config, err := getSaramaConfig(kafkaEventSource, log)
@@ -180,7 +181,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrapf(err, "failed to connect to Kafka broker for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to connect to Kafka broker for event source %s, %w", el.GetEventName(), err)
 	}
 
 	log = log.With("partition-id", kafkaEventSource.Partition)
@@ -188,25 +189,25 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	log.Info("parsing the partition value...")
 	pInt, err := strconv.ParseInt(kafkaEventSource.Partition, 10, 32)
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse Kafka partition %s for event source %s", kafkaEventSource.Partition, el.GetEventName())
+		return fmt.Errorf("failed to parse Kafka partition %s for event source %s, %w", kafkaEventSource.Partition, el.GetEventName(), err)
 	}
 	partition := int32(pInt)
 
 	log.Info("getting available partitions...")
 	availablePartitions, err := consumer.Partitions(kafkaEventSource.Topic)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get the available partitions for topic %s and event source %s", kafkaEventSource.Topic, el.GetEventName())
+		return fmt.Errorf("failed to get the available partitions for topic %s and event source %s, %w", kafkaEventSource.Topic, el.GetEventName(), err)
 	}
 
 	log.Info("verifying the partition exists within available partitions...")
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
-		return errors.Wrapf(err, "partition %d is not available. event source %s", partition, el.GetEventName())
+		return fmt.Errorf("partition %d is not available. event source %s, %w", partition, el.GetEventName(), err)
 	}
 
 	log.Info("getting partition consumer...")
 	partitionConsumer, err := consumer.ConsumePartition(kafkaEventSource.Topic, partition, sarama.OffsetNewest)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create consumer partition for event source %s", el.GetEventName())
+		return fmt.Errorf("failed to create consumer partition for event source %s, %w", el.GetEventName(), err)
 	}
 
 	processOne := func(msg *sarama.ConsumerMessage) error {
@@ -217,10 +218,20 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		log.Info("dispatching event on the data channel...")
 		eventData := &events.KafkaEventData{
 			Topic:     msg.Topic,
+			Key:       string(msg.Key),
 			Partition: int(msg.Partition),
 			Timestamp: msg.Timestamp.String(),
 			Metadata:  kafkaEventSource.Metadata,
 		}
+
+		headers := make(map[string]string)
+
+		for _, recordHeader := range msg.Headers {
+			headers[string(recordHeader.Key)] = string(recordHeader.Value)
+		}
+
+		eventData.Headers = headers
+
 		if kafkaEventSource.JSONBody {
 			eventData.Body = (*json.RawMessage)(&msg.Value)
 		} else {
@@ -228,13 +239,13 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		}
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
-			return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+			return fmt.Errorf("failed to marshal the event data, rejecting the event, %w", err)
 		}
 
 		kafkaID := genUniqueID(el.GetEventSourceName(), el.GetEventName(), kafkaEventSource.URL, msg.Topic, msg.Partition, msg.Offset)
 
 		if err = dispatch(eventBody, eventsourcecommon.WithID(kafkaID)); err != nil {
-			return errors.Wrap(err, "failed to dispatch a Kafka event...")
+			return fmt.Errorf("failed to dispatch a Kafka event, %w", err)
 		}
 		return nil
 	}
@@ -248,7 +259,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			}
 		case err := <-partitionConsumer.Errors():
-			return errors.Wrapf(err, "failed to consume messages for event source %s", el.GetEventName())
+			return fmt.Errorf("failed to consume messages for event source %s, %w", el.GetEventName(), err)
 
 		case <-ctx.Done():
 			log.Info("event source is stopped, closing partition consumer")
@@ -306,7 +317,7 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 	if kafkaEventSource.TLS != nil {
 		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to get the tls configuration")
+			return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
 		config.Net.TLS.Config = tlsConfig
 		config.Net.TLS.Enable = true
@@ -343,6 +354,10 @@ func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
+var (
+	eventBusErr *eventbuscommon.EventBusError
+)
+
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	// NOTE:
@@ -351,14 +366,19 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 	// https://github.com/Shopify/sarama/blob/master/consumer_group.go#L27-L29
 	for message := range claim.Messages() {
 		if err := consumer.processOne(session, message); err != nil {
-			consumer.logger.Errorw("failed to process a Kafka message", zap.Error(err))
 			consumer.metrics.EventProcessingFailed(consumer.eventSourceName, consumer.eventName)
-			continue
+			if errors.As(err, &eventBusErr) { // EventBus error, do not continue.
+				consumer.logger.Errorw("failed to process a Kafka message due to event bus issue", zap.Error(err))
+				break
+			} else {
+				consumer.logger.Errorw("failed to process a Kafka message, skip it", zap.Error(err))
+				continue
+			}
 		}
 		if consumer.kafkaEventSource.LimitEventsPerSecond > 0 {
 			// 1000000000 is 1 second in nanoseconds
 			d := (1000000000 / time.Duration(consumer.kafkaEventSource.LimitEventsPerSecond) * time.Nanosecond) * time.Nanosecond
-			consumer.logger.Infof("Sleeping for: %v.", d)
+			consumer.logger.Debugf("Sleeping for: %v.", d)
 			time.Sleep(d)
 		}
 	}
@@ -374,10 +394,20 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 	consumer.logger.Info("dispatching event on the data channel...")
 	eventData := &events.KafkaEventData{
 		Topic:     message.Topic,
+		Key:       string(message.Key),
 		Partition: int(message.Partition),
 		Timestamp: message.Timestamp.String(),
 		Metadata:  consumer.kafkaEventSource.Metadata,
 	}
+
+	headers := make(map[string]string)
+
+	for _, recordHeader := range message.Headers {
+		headers[string(recordHeader.Key)] = string(recordHeader.Value)
+	}
+
+	eventData.Headers = headers
+
 	if consumer.kafkaEventSource.JSONBody {
 		eventData.Body = (*json.RawMessage)(&message.Value)
 	} else {
@@ -385,13 +415,13 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 	}
 	eventBody, err := json.Marshal(eventData)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal the event data, rejecting the event...")
+		return fmt.Errorf("failed to marshal the event data, rejecting the event, %w", err)
 	}
 
 	messageID := genUniqueID(consumer.eventSourceName, consumer.eventName, consumer.kafkaEventSource.URL, message.Topic, message.Partition, message.Offset)
 
 	if err = consumer.dispatch(eventBody, eventsourcecommon.WithID(messageID)); err != nil {
-		return errors.Wrap(err, "failed to dispatch a kafka event...")
+		return fmt.Errorf("failed to dispatch a kafka event, %w", err)
 	}
 	session.MarkMessage(message, "")
 	return nil

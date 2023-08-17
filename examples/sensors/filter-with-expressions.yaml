@@ -2,9 +2,13 @@
 #
 #  {
 #    "a": "b",
-#    "c": 10,
-#    "d": {
-#      "e": false
+#    "a-longer-name": 10,
+#    "nested": {
+#      "path": {
+#        "can-get": {
+#          "longer": false
+#        }
+#      }
 #    }
 #  }
 #
@@ -22,15 +26,17 @@ spec:
         # If event payload passes ALL following expr filters, the event is considered a valid event.
         exprs:   # result: EVENT PASS
           - expr: a == "b" || c == 10   # true
+            # In 'fields', 'name' works as a small alias used inside 'expr' above,
+            # while 'path' refers to a potentially-long JSON path in the payload.
             fields:
               - name: a
                 path: a
               - name: c
-                path: c
+                path: a-longer-name
           - expr: e == false   # true
             fields:
               - name: e
-                path: d.e
+                path: nested.path.can-get.longer
   triggers:
     - template:
         name: workflow

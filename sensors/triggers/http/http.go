@@ -19,10 +19,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -56,7 +56,7 @@ func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor
 		if httptrigger.TLS != nil {
 			tlsConfig, err := common.GetTLSConfig(httptrigger.TLS)
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to get the tls configuration")
+				return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
 			client.Transport = &http.Transport{
 				TLSClientConfig: tlsConfig,
@@ -98,12 +98,12 @@ func (t *HTTPTrigger) FetchResource(ctx context.Context) (interface{}, error) {
 func (t *HTTPTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.HTTPTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the fetched trigger resource")
+		return nil, fmt.Errorf("failed to interpret the fetched trigger resource")
 	}
 
 	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the http trigger resource")
+		return nil, fmt.Errorf("failed to marshal the http trigger resource, %w", err)
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
@@ -113,7 +113,7 @@ func (t *HTTPTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 		}
 		var ht *v1alpha1.HTTPTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated http trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated http trigger resource after applying resource parameters, %w", err)
 		}
 		return ht, nil
 	}
@@ -127,7 +127,7 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 
 	trigger, ok := resource.(*v1alpha1.HTTPTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	if (trigger.Method == http.MethodPost || trigger.Method == http.MethodPatch || trigger.Method == http.MethodPut) && trigger.Payload == nil {
@@ -143,7 +143,7 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 
 	request, err := http.NewRequest(trigger.Method, trigger.URL, bytes.NewReader(payload))
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to construct request for %s", trigger.URL)
+		return nil, fmt.Errorf("failed to construct request for %s, %w", trigger.URL, err)
 	}
 
 	if trigger.Headers != nil {
@@ -162,7 +162,7 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 				value, err = common.GetConfigMapFromVolume(secure.ValueFrom.ConfigMapKeyRef)
 			}
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to retrieve the value for secureHeader")
+				return nil, fmt.Errorf("failed to retrieve the value for secureHeader, %w", err)
 			}
 			request.Header[secure.Name] = []string{value}
 		}
@@ -177,21 +177,21 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		if basicAuth.Username != nil {
 			username, err = common.GetSecretFromVolume(basicAuth.Username)
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to retrieve the username")
+				return nil, fmt.Errorf("failed to retrieve the username, %w", err)
 			}
 		}
 
 		if basicAuth.Password != nil {
 			password, err = common.GetSecretFromVolume(basicAuth.Password)
 			if !ok {
-				return nil, errors.Wrap(err, "failed to retrieve the password")
+				return nil, fmt.Errorf("failed to retrieve the password, %w", err)
 			}
 		}
 
 		request.SetBasicAuth(username, password)
 	}
 
-	t.Logger.Infow("making a http request...", zap.Any("url", trigger.URL))
+	t.Logger.Infow("Making a http request...", zap.Any("url", trigger.URL))
 
 	return t.Client.Do(request)
 }
@@ -203,7 +203,7 @@ func (t *HTTPTrigger) ApplyPolicy(ctx context.Context, resource interface{}) err
 	}
 	response, ok := resource.(*http.Response)
 	if !ok {
-		return errors.New("failed to interpret the trigger execution response")
+		return fmt.Errorf("failed to interpret the trigger execution response")
 	}
 
 	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.GetAllow())

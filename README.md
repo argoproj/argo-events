@@ -6,6 +6,7 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3832/badge)](https://bestpractices.coreinfrastructure.org/projects/3832)
 [![GoDoc](https://godoc.org/github.com/argoproj/argo-events?status.svg)](https://godoc.org/github.com/argoproj/argo-events/pkg/apis)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/argo-events)](https://artifacthub.io/packages/helm/argo/argo-events)
 
 ## What is Argo Events?
 
@@ -65,8 +66,8 @@ The Argo Workflows has an API and user interface support Argo Events.
 Participation in the Argo Events project is governed by
 the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
 
-[Contributions](https://github.com/codefresh-io/argo-events/issues) are more than welcome, if you are interested take a look
-at our [Contributing Guidelines](./CONTRIBUTING.md).
+[Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested take a look
+at our [Contributing Guidelines](./docs/CONTRIBUTING.md).
 
 ## License
 

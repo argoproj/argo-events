@@ -626,6 +626,259 @@ Filter
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.AzureQueueStorageEventSource">
+AzureQueueStorageEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+AzureQueueStorageEventSource describes the event source for azure queue
+storage more info at
+<a href="https://learn.microsoft.com/en-us/azure/storage/queues/">https://learn.microsoft.com/en-us/azure/storage/queues/</a>
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>storageAccountName</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+StorageAccountName is the name of the storage account where the queue
+is. This field is necessary to access via Azure AD (managed identity)
+and it is ignored if ConnectionString is set.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>connectionString</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ConnectionString is the connection string to access Azure Queue Storage.
+If this fields is not provided it will try to access via Azure AD with
+StorageAccountName.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+QueueName is the name of the queue
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dlq</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DLQ specifies if a dead-letter queue is configured for messages that
+can’t be processed successfully. If set to true, messages with invalid
+payload won’t be acknowledged to allow to forward them farther to the
+dead-letter queue. The default value is false.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.AzureServiceBusEventSource">
+AzureServiceBusEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+AzureServiceBusEventSource describes the event source for azure service
+bus More info at
+<a href="https://docs.microsoft.com/en-us/azure/service-bus-messaging/">https://docs.microsoft.com/en-us/azure/service-bus-messaging/</a>
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>connectionString</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+ConnectionString is the connection string for the Azure Service Bus. If
+this fields is not provided it will try to access via Azure AD with
+DefaultAzureCredential and FullyQualifiedNamespace.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>queueName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+QueueName is the name of the Azure Service Bus Queue
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topicName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+TopicName is the name of the Azure Service Bus Topic
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subscriptionName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+SubscriptionName is the name of the Azure Service Bus Topic Subscription
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the service bus client
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>fullyQualifiedNamespace</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+FullyQualifiedNamespace is the Service Bus namespace name (ex:
+myservicebus.servicebus.windows.net). This field is necessary to access
+via Azure AD (managed identity) and it is ignored if ConnectionString is
+set.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.BitbucketAuth">
 BitbucketAuth
 </h3>
@@ -1955,6 +2208,32 @@ Redis stream source
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>azureServiceBus</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureServiceBusEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Azure Service Bus event source
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureQueueStorage</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureQueueStorageEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQueueStorageEventSource
+</a> </em>
+</td>
+<td>
+<p>
+AzureQueueStorage event source
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1977,6 +2256,8 @@ EventSourceFilter
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
 <a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">AzureEventsHubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.AzureQueueStorageEventSource">AzureQueueStorageEventSource</a>,
+<a href="#argoproj.io/v1alpha1.AzureServiceBusEventSource">AzureServiceBusEventSource</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
 <a href="#argoproj.io/v1alpha1.CalendarEventSource">CalendarEventSource</a>,
@@ -2438,6 +2719,32 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Redis
 <td>
 <p>
 Redis stream source
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureServiceBus</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureServiceBusEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureServiceBusEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Azure Service Bus event source
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureQueueStorage</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AzureQueueStorageEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureQueueStorageEventSource
+</a> </em>
+</td>
+<td>
+<p>
+AzureQueueStorage event source
 </p>
 </td>
 </tr>
@@ -3105,8 +3412,10 @@ event payload.
 <code>projects</code></br> <em> \[\]string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
-List of project IDs or project namespace paths like “whynowy/test”
+List of project IDs or project namespace paths like “whynowy/test”.
+Projects and groups cannot be empty at the same time.
 </p>
 </td>
 </tr>
@@ -3133,6 +3442,18 @@ webhook config
 <em>(Optional)</em>
 <p>
 Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>groups</code></br> <em> \[\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+List of group IDs or group name like “test”. Group level hook available
+in Premium and Ultimate Gitlab.
 </p>
 </td>
 </tr>
@@ -3408,6 +3729,7 @@ URL to kafka cluster, multiple URLs separated by comma
 <code>partition</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Partition name
 </p>
@@ -3661,6 +3983,18 @@ event payload.
 <em>(Optional)</em>
 <p>
 Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>auth</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.BasicAuth </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Auth hosts secret selectors for username and password
 </p>
 </td>
 </tr>
@@ -4351,7 +4685,8 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 <em>(Optional)</em>
 <p>
-Authentication token for the pulsar client.
+Authentication token for the pulsar client. Either token or athenz can
+be set to use auth.
 </p>
 </td>
 </tr>
@@ -4365,6 +4700,33 @@ Authentication token for the pulsar client.
 <em>(Optional)</em>
 <p>
 Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authAthenzParams</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication athenz parameters for the pulsar client. Refer
+<a href="https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go">https://github.com/apache/pulsar-client-go/blob/master/pulsar/auth/athenz.go</a>
+Either token or athenz can be set to use auth.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authAthenzSecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Authentication athenz privateKey secret for the pulsar client.
+AuthAthenzSecret must be set if AuthAthenzParams is used.
 </p>
 </td>
 </tr>

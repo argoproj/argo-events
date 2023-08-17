@@ -1,11 +1,12 @@
 package base
 
 import (
+	"fmt"
+
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -49,7 +50,7 @@ func (n *STAN) MakeConnection(clientID string) (*STANConnection, error) {
 	case eventbusv1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:
-		return nil, errors.New("unsupported auth strategy")
+		return nil, fmt.Errorf("unsupported auth strategy")
 	}
 	nc, err := nats.Connect(n.url, opts...)
 	if err != nil {

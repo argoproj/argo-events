@@ -18,10 +18,10 @@ package pulsar
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -87,7 +87,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if pulsarEventSource.TLSTrustCertsSecret != nil {
 		tlsTrustCertsFilePath, err = common.GetSecretVolumePath(pulsarEventSource.TLSTrustCertsSecret)
 		if err != nil {
-			log.Errorw("failed to get TLSTrustCertsFilePath from the volume", "error", err)
+			log.Errorw("failed to get TLSTrustCertsFilePath from the volume", zap.Error(err))
 			return err
 		}
 	}
@@ -101,10 +101,21 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if pulsarEventSource.AuthTokenSecret != nil {
 		token, err := common.GetSecretFromVolume(pulsarEventSource.AuthTokenSecret)
 		if err != nil {
-			log.Errorw("failed to get AuthTokenSecret from the volume", "error", err)
+			log.Errorw("failed to get AuthTokenSecret from the volume", zap.Error(err))
 			return err
 		}
 		clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
+	}
+
+	if len(pulsarEventSource.AuthAthenzParams) > 0 && pulsarEventSource.AuthAthenzSecret != nil {
+		log.Info("setting athenz auth option...")
+		authAthenzFilePath, err := common.GetSecretVolumePath(pulsarEventSource.AuthAthenzSecret)
+		if err != nil {
+			log.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
+			return err
+		}
+		pulsarEventSource.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
+		clientOpt.Authentication = pulsar.NewAuthenticationAthenz(pulsarEventSource.AuthAthenzParams)
 	}
 
 	if pulsarEventSource.TLS != nil {
@@ -114,36 +125,36 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case pulsarEventSource.TLS.ClientCertSecret != nil && pulsarEventSource.TLS.ClientKeySecret != nil:
 			clientCertPath, err = common.GetSecretVolumePath(pulsarEventSource.TLS.ClientCertSecret)
 			if err != nil {
-				log.Errorw("failed to get ClientCertPath from the volume", "error", err)
+				log.Errorw("failed to get ClientCertPath from the volume", zap.Error(err))
 				return err
 			}
 			clientKeyPath, err = common.GetSecretVolumePath(pulsarEventSource.TLS.ClientKeySecret)
 			if err != nil {
-				log.Errorw("failed to get ClientKeyPath from the volume", "error", err)
+				log.Errorw("failed to get ClientKeyPath from the volume", zap.Error(err))
 				return err
 			}
 		default:
-			return errors.New("invalid TLS config")
+			return fmt.Errorf("invalid TLS config")
 		}
 		clientOpt.Authentication = pulsar.NewAuthenticationTLS(clientCertPath, clientKeyPath)
 	}
 
 	var client pulsar.Client
 
-	if err := common.Connect(pulsarEventSource.ConnectionBackoff, func() error {
+	if err := common.DoWithRetry(pulsarEventSource.ConnectionBackoff, func() error {
 		var err error
 		if client, err = pulsar.NewClient(clientOpt); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrapf(err, "failed to connect to %s for event source %s", pulsarEventSource.URL, el.GetEventName())
+		return fmt.Errorf("failed to connect to %s for event source %s, %w", pulsarEventSource.URL, el.GetEventName(), err)
 	}
 
 	log.Info("subscribing to messages on the topic...")
 	consumer, err := client.Subscribe(consumerOpt)
 	if err != nil {
-		return errors.Wrapf(err, "failed to connect to topic %+v for event source %s", pulsarEventSource.Topics, el.GetEventName())
+		return fmt.Errorf("failed to connect to topic %+v for event source %s, %w", pulsarEventSource.Topics, el.GetEventName(), err)
 	}
 
 consumeMessages:
@@ -152,7 +163,7 @@ consumeMessages:
 		case msg, ok := <-msgChannel:
 			if !ok {
 				log.Error("failed to read a message, channel might have been closed")
-				return errors.New("channel might have been closed")
+				return fmt.Errorf("channel might have been closed")
 			}
 
 			if err := el.handleOne(msg, dispatch, log); err != nil {
@@ -191,12 +202,12 @@ func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte, ...
 
 	eventBody, err := json.Marshal(eventData)
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal the event data. rejecting the event...")
+		return fmt.Errorf("failed to marshal the event data. rejecting the event, %w", err)
 	}
 
 	log.Infof("dispatching the message received on the topic %s to eventbus", msg.Topic())
 	if err = dispatch(eventBody); err != nil {
-		return errors.Wrap(err, "failed to dispatch a Pulsar event")
+		return fmt.Errorf("failed to dispatch a Pulsar event, %w", err)
 	}
 	return nil
 }

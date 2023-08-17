@@ -46,5 +46,16 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
+
+	// in order to avoid requests ending accidentally to public GitHub,
+	// make sure that both are set if either one is provided
+	if githubEventSource.GithubBaseURL != "" || githubEventSource.GithubUploadURL != "" {
+		if githubEventSource.GithubBaseURL == "" {
+			return fmt.Errorf("githubBaseURL is required when githubUploadURL is set")
+		}
+		if githubEventSource.GithubUploadURL == "" {
+			return fmt.Errorf("githubUploadURL is required when githubBaseURL is set")
+		}
+	}
 	return webhook.ValidateWebhookContext(githubEventSource.Webhook)
 }

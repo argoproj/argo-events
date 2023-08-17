@@ -6,17 +6,16 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 func certTemplate(org string, hosts []string, notAfter time.Time) (*x509.Certificate, error) {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to generate serial number")
+		return nil, fmt.Errorf("failed to generate serial number, %w", err)
 	}
 	return &x509.Certificate{
 		SerialNumber: serialNumber,
@@ -61,17 +60,17 @@ func createCert(template, parent *x509.Certificate, pub, parentPriv interface{})
 func createCA(org string, hosts []string, notAfter time.Time) (*rsa.PrivateKey, *x509.Certificate, []byte, error) {
 	rootKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to generate random key")
+		return nil, nil, nil, fmt.Errorf("failed to generate random key, %w", err)
 	}
 
 	rootCertTmpl, err := createCACertTemplate(org, hosts, notAfter)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to generate CA cert")
+		return nil, nil, nil, fmt.Errorf("failed to generate CA cert, %w", err)
 	}
 
 	rootCert, rootCertPEM, err := createCert(rootCertTmpl, rootCertTmpl, &rootKey.PublicKey, rootKey)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to sign CA cert")
+		return nil, nil, nil, fmt.Errorf("failed to sign CA cert, %w", err)
 	}
 	return rootKey, rootCert, rootCertPEM, nil
 }
@@ -82,7 +81,7 @@ func createCA(org string, hosts []string, notAfter time.Time) (*rsa.PrivateKey, 
 // can generate for both server and client but at least one must be specified
 func CreateCerts(org string, hosts []string, notAfter time.Time, server bool, client bool) (serverKey, serverCert, caCert []byte, err error) {
 	if !server && !client {
-		return nil, nil, nil, errors.Wrap(err, "CreateCerts() must specify either server or client")
+		return nil, nil, nil, fmt.Errorf("CreateCerts() must specify either server or client")
 	}
 
 	// Create a CA certificate and private key
@@ -94,7 +93,7 @@ func CreateCerts(org string, hosts []string, notAfter time.Time, server bool, cl
 	// Create the private key
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to generate random key")
+		return nil, nil, nil, fmt.Errorf("failed to generate random key, %w", err)
 	}
 	var cert *x509.Certificate
 
@@ -113,7 +112,7 @@ func CreateCerts(org string, hosts []string, notAfter time.Time, server bool, cl
 	// create a certificate wrapping the public key, sign it with the CA private key
 	_, certPEM, err := createCert(cert, caCertificate, &privateKey.PublicKey, caKey)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to sign server cert")
+		return nil, nil, nil, fmt.Errorf("failed to sign server cert, %w", err)
 	}
 	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
 		Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey),

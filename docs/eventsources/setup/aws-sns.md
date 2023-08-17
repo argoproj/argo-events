@@ -3,6 +3,7 @@
 SNS event-source subscribes to AWS SNS topics, listens events and helps sensor trigger the workloads.
 
 ## Event Structure
+
 The structure of an event dispatched by the event-source over eventbus looks like following,
 
             {
@@ -16,8 +17,8 @@ The structure of an event dispatched by the event-source over eventbus looks lik
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
-                	"header": "sns headers",
-                  	"body": "body refers to the sns notification data",
+                 "header": "sns headers",
+                   "body": "body refers to the sns notification data",
                 }
             }
 
@@ -62,4 +63,5 @@ The structure of an event dispatched by the event-source over eventbus looks lik
 1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

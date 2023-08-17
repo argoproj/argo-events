@@ -5,16 +5,13 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"sync"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
 	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
@@ -23,127 +20,66 @@ import (
 func WaitForEventBusReady(ctx context.Context, eventBusClient eventbuspkg.EventBusInterface, eventBusName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + eventBusName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	watch, err := eventBusClient.Watch(ctx, opts)
-	if err != nil {
-		return err
-	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	for {
 		select {
-		case event := <-watch.ResultChan():
-			eb, ok := event.Object.(*eventbusv1alpha1.EventBus)
-			if ok {
-				if eb.Status.IsReady() {
-					return nil
-				}
-			} else {
-				return fmt.Errorf("not eventbus")
-			}
-		case <-timeoutCh:
+		case <-ctx.Done():
 			return fmt.Errorf("timeout after %v waiting for EventBus ready", timeout)
+		default:
 		}
+		ebList, err := eventBusClient.List(ctx, opts)
+		if err != nil {
+			return fmt.Errorf("error getting EventBus list: %w", err)
+		}
+		if len(ebList.Items) > 0 && ebList.Items[0].Status.IsReady() {
+			return nil
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
 func WaitForEventBusStatefulSetReady(ctx context.Context, kubeClient kubernetes.Interface, namespace, eventBusName string, timeout time.Duration) error {
 	labelSelector := fmt.Sprintf("controller=eventbus-controller,eventbus-name=%s", eventBusName)
 	opts := metav1.ListOptions{LabelSelector: labelSelector}
-	watch, err := kubeClient.AppsV1().StatefulSets(namespace).Watch(ctx, opts)
-	if err != nil {
-		return err
-	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
-
-statefulSetWatch:
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	for {
 		select {
-		case event := <-watch.ResultChan():
-			ss, ok := event.Object.(*appsv1.StatefulSet)
-			if ok {
-				if ss.Status.Replicas == ss.Status.ReadyReplicas {
-					break statefulSetWatch
-				}
-			} else {
-				return fmt.Errorf("not statefulset")
-			}
-		case <-timeoutCh:
+		case <-ctx.Done():
 			return fmt.Errorf("timeout after %v waiting for EventBus StatefulSet ready", timeout)
+		default:
 		}
-	}
-
-	// POD
-	podWatch, err := kubeClient.CoreV1().Pods(namespace).Watch(ctx, opts)
-	if err != nil {
-		return err
-	}
-	defer podWatch.Stop()
-	podTimeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		podTimeoutCh <- true
-	}()
-
-	podNames := make(map[string]bool)
-	for {
-		if len(podNames) == 3 {
-			// defaults to 3 Pods
+		stsList, err := kubeClient.AppsV1().StatefulSets(namespace).List(ctx, opts)
+		if err != nil {
+			return fmt.Errorf("error getting EventBus StatefulSet list: %w", err)
+		}
+		if len(stsList.Items) > 0 && stsList.Items[0].Status.Replicas == stsList.Items[0].Status.ReadyReplicas {
 			return nil
 		}
-		select {
-		case event := <-podWatch.ResultChan():
-			p, ok := event.Object.(*corev1.Pod)
-			if ok {
-				if p.Status.Phase == corev1.PodRunning {
-					if _, existing := podNames[p.GetName()]; !existing {
-						podNames[p.GetName()] = true
-					}
-				}
-			} else {
-				return fmt.Errorf("not pod")
-			}
-		case <-podTimeoutCh:
-			return fmt.Errorf("timeout after %v waiting for event bus Pod ready", timeout)
-		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
 func WaitForEventSourceReady(ctx context.Context, eventSourceClient eventsourcepkg.EventSourceInterface, eventSourceName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + eventSourceName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	watch, err := eventSourceClient.Watch(ctx, opts)
-	if err != nil {
-		return err
-	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	for {
 		select {
-		case event := <-watch.ResultChan():
-			es, ok := event.Object.(*eventsourcev1alpha1.EventSource)
-			if ok {
-				if es.Status.IsReady() {
-					return nil
-				}
-			} else {
-				return fmt.Errorf("not eventsource")
-			}
-		case <-timeoutCh:
+		case <-ctx.Done():
 			return fmt.Errorf("timeout after %v waiting for EventSource ready", timeout)
+		default:
 		}
+		esList, err := eventSourceClient.List(ctx, opts)
+		if err != nil {
+			return fmt.Errorf("error getting EventSource list: %w", err)
+		}
+		if len(esList.Items) > 0 && esList.Items[0].Status.IsReady() {
+			return nil
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -155,30 +91,22 @@ func WaitForEventSourceDeploymentReady(ctx context.Context, kubeClient kubernete
 func WaitForSensorReady(ctx context.Context, sensorClient sensorpkg.SensorInterface, sensorName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + sensorName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
-	watch, err := sensorClient.Watch(ctx, opts)
-	if err != nil {
-		return err
-	}
-	defer watch.Stop()
-	timeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		timeoutCh <- true
-	}()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	for {
 		select {
-		case event := <-watch.ResultChan():
-			s, ok := event.Object.(*sensorv1alpha1.Sensor)
-			if ok {
-				if s.Status.IsReady() {
-					return nil
-				}
-			} else {
-				return fmt.Errorf("not sensor")
-			}
-		case <-timeoutCh:
+		case <-ctx.Done():
 			return fmt.Errorf("timeout after %v waiting for Sensor ready", timeout)
+		default:
 		}
+		sensorList, err := sensorClient.List(ctx, opts)
+		if err != nil {
+			return fmt.Errorf("error getting Sensor list: %w", err)
+		}
+		if len(sensorList.Items) > 0 && sensorList.Items[0].Status.IsReady() {
+			return nil
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -189,59 +117,35 @@ func WaitForSensorDeploymentReady(ctx context.Context, kubeClient kubernetes.Int
 
 func waitForDeploymentAndPodReady(ctx context.Context, kubeClient kubernetes.Interface, namespace, objectType, labelSelector string, timeout time.Duration) error {
 	opts := metav1.ListOptions{LabelSelector: labelSelector}
-	deployWatch, err := kubeClient.AppsV1().Deployments(namespace).Watch(ctx, opts)
-	if err != nil {
-		return err
-	}
-	defer deployWatch.Stop()
-	deployTimeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		deployTimeoutCh <- true
-	}()
-
-deployWatch:
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	for {
 		select {
-		case event := <-deployWatch.ResultChan():
-			ss, ok := event.Object.(*appsv1.Deployment)
-			if ok {
-				if ss.Status.Replicas == ss.Status.AvailableReplicas {
-					break deployWatch
-				}
-			} else {
-				return fmt.Errorf("not deployment")
-			}
-		case <-deployTimeoutCh:
-			return fmt.Errorf("timeout after %v waiting for %s Deployment ready", timeout, objectType)
+		case <-ctx.Done():
+			return fmt.Errorf("timeout after %v waiting for deployment ready", timeout)
+		default:
 		}
-	}
-
-	// POD
-	podWatch, err := kubeClient.CoreV1().Pods(namespace).Watch(ctx, opts)
-	if err != nil {
-		return err
-	}
-	defer podWatch.Stop()
-	podTimeoutCh := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeout)
-		podTimeoutCh <- true
-	}()
-	for {
-		select {
-		case event := <-podWatch.ResultChan():
-			p, ok := event.Object.(*corev1.Pod)
-			if ok {
-				if p.Status.Phase == corev1.PodRunning {
-					return nil
-				}
-			} else {
-				return fmt.Errorf("not Pod")
-			}
-		case <-podTimeoutCh:
-			return fmt.Errorf("timeout after %v waiting for %s Pod ready", timeout, objectType)
+		deployList, err := kubeClient.AppsV1().Deployments(namespace).List(ctx, opts)
+		if err != nil {
+			return fmt.Errorf("error getting deployment list: %w", err)
 		}
+		ok := len(deployList.Items) == 1
+		if !ok {
+			continue
+		}
+		ok = ok && deployList.Items[0].Status.Replicas == deployList.Items[0].Status.ReadyReplicas
+		podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+		if err != nil {
+			return fmt.Errorf("error getting deployment pod list: %w", err)
+		}
+		ok = ok && len(podList.Items) > 0 && len(podList.Items) == int(*deployList.Items[0].Spec.Replicas)
+		for _, p := range podList.Items {
+			ok = ok && p.Status.Phase == corev1.PodRunning
+		}
+		if ok {
+			return nil
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -252,7 +156,7 @@ type podLogCheckOptions struct {
 
 func defaultPodLogCheckOptions() *podLogCheckOptions {
 	return &podLogCheckOptions{
-		timeout: 10 * time.Second,
+		timeout: 15 * time.Second,
 		count:   -1,
 	}
 }
@@ -304,8 +208,11 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 	defer cancel()
 	errChan := make(chan error)
 	resultChan := make(chan bool)
+	wg := &sync.WaitGroup{}
 	for _, p := range podList.Items {
+		wg.Add(1)
 		go func(podName string) {
+			defer wg.Done()
 			fmt.Printf("Watching POD: %s\n", podName)
 			var contains bool
 			var err error
@@ -323,7 +230,11 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 			}
 		}(p.Name)
 	}
-
+	allDone := make(chan bool)
+	go func() {
+		wg.Wait()
+		close(allDone)
+	}()
 	for {
 		select {
 		case result := <-resultChan:
@@ -334,6 +245,13 @@ func PodsLogContains(ctx context.Context, kubeClient kubernetes.Interface, names
 			}
 		case err := <-errChan:
 			fmt.Printf("error: %v", err)
+		case <-allDone:
+			for len(resultChan) > 0 {
+				if x := <-resultChan; x {
+					return true
+				}
+			}
+			return false
 		}
 	}
 }

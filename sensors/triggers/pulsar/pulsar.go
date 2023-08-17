@@ -18,9 +18,9 @@ package pulsar
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -53,7 +53,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		if pulsarTrigger.TLSTrustCertsSecret != nil {
 			tlsTrustCertsFilePath, err = common.GetSecretVolumePath(pulsarTrigger.TLSTrustCertsSecret)
 			if err != nil {
-				logger.Errorw("failed to get TLSTrustCertsFilePath from the volume", "error", err)
+				logger.Errorw("failed to get TLSTrustCertsFilePath from the volume", zap.Error(err))
 				return nil, err
 			}
 		}
@@ -67,10 +67,21 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		if pulsarTrigger.AuthTokenSecret != nil {
 			token, err := common.GetSecretFromVolume(pulsarTrigger.AuthTokenSecret)
 			if err != nil {
-				logger.Errorw("failed to get AuthTokenSecret from the volume", "error", err)
+				logger.Errorw("failed to get AuthTokenSecret from the volume", zap.Error(err))
 				return nil, err
 			}
 			clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
+		}
+
+		if len(pulsarTrigger.AuthAthenzParams) > 0 && pulsarTrigger.AuthAthenzSecret != nil {
+			logger.Info("setting athenz auth option...")
+			authAthenzFilePath, err := common.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
+			if err != nil {
+				logger.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
+				return nil, err
+			}
+			pulsarTrigger.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
+			clientOpt.Authentication = pulsar.NewAuthenticationAthenz(pulsarTrigger.AuthAthenzParams)
 		}
 
 		if pulsarTrigger.TLS != nil {
@@ -80,30 +91,30 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			case pulsarTrigger.TLS.ClientCertSecret != nil && pulsarTrigger.TLS.ClientKeySecret != nil:
 				clientCertPath, err = common.GetSecretVolumePath(pulsarTrigger.TLS.ClientCertSecret)
 				if err != nil {
-					logger.Errorw("failed to get ClientCertPath from the volume", "error", err)
+					logger.Errorw("failed to get ClientCertPath from the volume", zap.Error(err))
 					return nil, err
 				}
 				clientKeyPath, err = common.GetSecretVolumePath(pulsarTrigger.TLS.ClientKeySecret)
 				if err != nil {
-					logger.Errorw("failed to get ClientKeyPath from the volume", "error", err)
+					logger.Errorw("failed to get ClientKeyPath from the volume", zap.Error(err))
 					return nil, err
 				}
 			default:
-				return nil, errors.New("invalid TLS config")
+				return nil, fmt.Errorf("invalid TLS config")
 			}
 			clientOpt.Authentication = pulsar.NewAuthenticationTLS(clientCertPath, clientKeyPath)
 		}
 
 		var client pulsar.Client
 
-		if err := common.Connect(pulsarTrigger.ConnectionBackoff, func() error {
+		if err := common.DoWithRetry(pulsarTrigger.ConnectionBackoff, func() error {
 			var err error
 			if client, err = pulsar.NewClient(clientOpt); err != nil {
 				return err
 			}
 			return nil
 		}); err != nil {
-			return nil, errors.Wrapf(err, "failed to connect to %s for sensor %s", pulsarTrigger.URL, trigger.Template.Name)
+			return nil, fmt.Errorf("failed to connect to %s for sensor %s, %w", pulsarTrigger.URL, trigger.Template.Name, err)
 		}
 
 		producer, err = client.CreateProducer(pulsar.ProducerOptions{
@@ -139,12 +150,12 @@ func (t *PulsarTrigger) FetchResource(ctx context.Context) (interface{}, error) 
 func (t *PulsarTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	fetchedResource, ok := resource.(*v1alpha1.PulsarTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the fetched trigger resource")
+		return nil, fmt.Errorf("failed to interpret the fetched trigger resource")
 	}
 
 	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the pulsar trigger resource")
+		return nil, fmt.Errorf("failed to marshal the pulsar trigger resource, %w", err)
 	}
 
 	parameters := fetchedResource.Parameters
@@ -155,7 +166,7 @@ func (t *PulsarTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Even
 		}
 		var ht *v1alpha1.PulsarTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated pulsar trigger resource after applying resource parameters")
+			return nil, fmt.Errorf("failed to unmarshal the updated pulsar trigger resource after applying resource parameters, %w", err)
 		}
 		return ht, nil
 	}
@@ -166,11 +177,11 @@ func (t *PulsarTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Even
 func (t *PulsarTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.PulsarTrigger)
 	if !ok {
-		return nil, errors.New("failed to interpret the trigger resource")
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
 	}
 
 	if trigger.Payload == nil {
-		return nil, errors.New("payload parameters are not specified")
+		return nil, fmt.Errorf("payload parameters are not specified")
 	}
 
 	payload, err := triggers.ConstructPayload(events, trigger.Payload)
@@ -182,7 +193,7 @@ func (t *PulsarTrigger) Execute(ctx context.Context, events map[string]*v1alpha1
 		Payload: payload,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to send message to pulsar")
+		return nil, fmt.Errorf("failed to send message to pulsar, %w", err)
 	}
 
 	t.Logger.Infow("successfully produced a message", zap.Any("topic", trigger.Topic))

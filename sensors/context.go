@@ -21,6 +21,7 @@ import (
 	"time"
 
 	eventhubs "github.com/Azure/azure-event-hubs-go/v3"
+	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/Shopify/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/apache/pulsar-client-go/pulsar"
@@ -68,9 +69,10 @@ type SensorContext struct {
 	openwhiskClients map[string]*whisk.Client
 	// azureEventHubsClients holds the references to active Azure Event Hub clients.
 	azureEventHubsClients map[string]*eventhubs.Hub
-	metrics               *sensormetrics.Metrics
-
-	cfClient *codefresh.Client
+	// azureServiceBusClients holds the references to active Azure Service Bus clients.
+	azureServiceBusClients map[string]*servicebus.Sender
+	metrics                *sensormetrics.Metrics
+	cfClient               *codefresh.Client
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -87,13 +89,14 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		slackHTTPClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers:        make(map[string]sarama.AsyncProducer),
-		pulsarProducers:       make(map[string]pulsar.Producer),
-		natsConnections:       make(map[string]*natslib.Conn),
-		awsLambdaClients:      make(map[string]*lambda.Lambda),
-		openwhiskClients:      make(map[string]*whisk.Client),
-		azureEventHubsClients: make(map[string]*eventhubs.Hub),
-		metrics:               metrics,
-		cfClient:              cfClient,
+		kafkaProducers:         make(map[string]sarama.AsyncProducer),
+		pulsarProducers:        make(map[string]pulsar.Producer),
+		natsConnections:        make(map[string]*natslib.Conn),
+		awsLambdaClients:       make(map[string]*lambda.Lambda),
+		openwhiskClients:       make(map[string]*whisk.Client),
+		azureEventHubsClients:  make(map[string]*eventhubs.Hub),
+		azureServiceBusClients: make(map[string]*servicebus.Sender),
+		metrics:                metrics,
+		cfClient:               cfClient,
 	}
 }

@@ -2,9 +2,10 @@ package installer
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
@@ -23,8 +24,8 @@ type Installer interface {
 }
 
 // Install function installs the event bus
-func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
-	installer, err := getInstaller(eventBus, client, config, logger)
+func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
+	installer, err := getInstaller(eventBus, client, kubeClient, config, logger)
 	if err != nil {
 		logger.Errorw("failed to an installer", zap.Error(err))
 		return err
@@ -39,17 +40,19 @@ func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Cli
 }
 
 // GetInstaller returns Installer implementation
-func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, config *controllers.GlobalConfig, logger *zap.SugaredLogger) (Installer, error) {
+func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) (Installer, error) {
 	if nats := eventBus.Spec.NATS; nats != nil {
 		if nats.Exotic != nil {
 			return NewExoticNATSInstaller(eventBus, logger), nil
 		} else if nats.Native != nil {
-			return NewNATSInstaller(client, eventBus, config, getLabels(eventBus), logger), nil
+			return NewNATSInstaller(client, eventBus, config, getLabels(eventBus), kubeClient, logger), nil
 		}
 	} else if js := eventBus.Spec.JetStream; js != nil {
-		return NewJetStreamInstaller(client, eventBus, config, getLabels(eventBus), logger), nil
+		return NewJetStreamInstaller(client, eventBus, config, getLabels(eventBus), kubeClient, logger), nil
+	} else if kafka := eventBus.Spec.Kafka; kafka != nil {
+		return NewExoticKafkaInstaller(eventBus, logger), nil
 	}
-	return nil, errors.New("invalid eventbus spec")
+	return nil, fmt.Errorf("invalid eventbus spec")
 }
 
 func getLabels(bus *v1alpha1.EventBus) map[string]string {
@@ -68,26 +71,26 @@ func getLabels(bus *v1alpha1.EventBus) map[string]string {
 // separately.
 //
 // It could also be used to check if the EventBus object can be safely deleted.
-func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
+func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
 	linkedEventSources, err := linkedEventSources(ctx, eventBus.Namespace, eventBus.Name, client)
 	if err != nil {
 		logger.Errorw("failed to query linked EventSources", zap.Error(err))
-		return errors.Wrap(err, "failed to check if there is any EventSource linked")
+		return fmt.Errorf("failed to check if there is any EventSource linked, %w", err)
 	}
 	if linkedEventSources > 0 {
-		return errors.Errorf("Can not delete an EventBus with %v EventSources connected", linkedEventSources)
+		return fmt.Errorf("can not delete an EventBus with %v EventSources connected", linkedEventSources)
 	}
 
 	linkedSensors, err := linkedSensors(ctx, eventBus.Namespace, eventBus.Name, client)
 	if err != nil {
 		logger.Errorw("failed to query linked Sensors", zap.Error(err))
-		return errors.Wrap(err, "failed to check if there is any Sensor linked")
+		return fmt.Errorf("failed to check if there is any Sensor linked, %w", err)
 	}
 	if linkedSensors > 0 {
-		return errors.Errorf("Can not delete an EventBus with %v Sensors connected", linkedSensors)
+		return fmt.Errorf("can not delete an EventBus with %v Sensors connected", linkedSensors)
 	}
 
-	installer, err := getInstaller(eventBus, client, config, logger)
+	installer, err := getInstaller(eventBus, client, kubeClient, config, logger)
 	if err != nil {
 		logger.Errorw("failed to get an installer", zap.Error(err))
 		return err

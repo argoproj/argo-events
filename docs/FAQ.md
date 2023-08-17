@@ -10,7 +10,7 @@
 
 **Q. Can I deploy event-source and sensor in a namespace different than `argo-events`?**
 
-**A**. Yes. If you want to deploy the event-source in a different namespace than `argo-events`, please update the event-source definition 
+**A**. Yes. If you want to deploy the event-source in a different namespace than `argo-events`, please update the event-source definition
 with the desired namespace and service account. Make sure to grant the service account the [necessary roles](https://github.com/argoproj/argo-events/blob/master/manifests/namespace-install.yaml).
 
 **Q. How to debug Argo-Events.**
@@ -29,7 +29,7 @@ Note: You can set the environment variable `DEBUG_LOG:true` in any of the contai
 
 **Q. The event-source pod is receiving events but nothing happens.**
 
-**A**. 
+**A**.
 
 1. Check the sensor resource is deployed and a pod is running for the resource.
 If the sensor pod is running, check for `Started to subscribe events for triggers` in the logs.
@@ -39,7 +39,7 @@ If the sensor has subscribed to the event-bus but is unable to create the trigge
 
 **Q. Helm chart installation does not work.**
 
-**A.** The Helm chart for argo events is maintained by the community and can be out of sync with latest release version. 
+**A.** The Helm chart for argo events is maintained by the community and can be out of sync with latest release version.
 The official installation file is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml).
 If you notice the Helm chart is outdated, we encourage you to contribute to the [argo-helm](https://github.com/argoproj/argo-helm) repository on GitHub.
 
@@ -64,5 +64,5 @@ set up the AWS SNS event-source.
 
 **Q. Where can I find the event structure for a particular event-source?**
 
-**A.** Please refer to [this file](https://github.com/argoproj/argo-events/blob/master/pkg/apis/eventsource/v1alpha1/types.go) to understand the structure 
+**A.** Please refer to [this file](https://github.com/argoproj/argo-events/blob/master/pkg/apis/eventsource/v1alpha1/types.go) to understand the structure
 of different types of events dispatched by the event-source pod.

@@ -5,7 +5,7 @@ TektonCD or AirFlow pipelines on GitHub events.
 
 ## Custom Trigger
 
-In order to plug your own implementation for a trigger with Argo Events Sensor, you need to 
+In order to plug your own implementation for a trigger with Argo Events Sensor, you need to
 run a gRPC server that implements the interface that the sensor expects.
 
 ### Interface
@@ -36,7 +36,6 @@ Let's walk through the contract,
 3. `ApplyPolicy`: This is where your trigger implementation can check whether the triggered resource transitioned into the success state.
    Depending upon the response from the trigger server, the sensor will either stop processing subsequent triggers, or it will continue to
    process them.
-   
 
 ### How to define the Custom Trigger in a sensor?
 
@@ -91,7 +90,7 @@ The most important fields are,
 1. `parameters`: The parameters override the resource that is fetched by the trigger server.
     Read more info on parameters [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
 
-1. `payload`: Payload to send to the trigger server. Read more on payload [here](https://argoproj.github.io/argo-events/triggers/http-trigger/#request-payload).
+1. `payload`: Payload to send to the trigger server. Read more on payload [here](https://argoproj.github.io/argo-events/sensors/triggers/http-trigger/#request-payload).
 
 The complete spec for the custom trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#customtrigger).
 

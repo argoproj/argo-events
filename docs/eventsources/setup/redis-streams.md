@@ -2,7 +2,7 @@
 
 Redis stream event-source listens to messages on Redis streams and helps sensor trigger workloads.
 
-Messages from the stream are read using the Redis consumer group. The main reason for using consumer group is to resume from the last read upon pod restarts. A common consumer group (defaults to "argo-events-cg") is created (if not already exists) on all specified streams. When using consumer group, each read through a consumer group is a write operation, because Redis needs to update the last retrieved message id and the pending entries list(PEL) of that specific user in the consumer group. So it can only work with the master Redis instance and not replicas (https://redis.io/topics/streams-intro).
+Messages from the stream are read using the Redis consumer group. The main reason for using consumer group is to resume from the last read upon pod restarts. A common consumer group (defaults to "argo-events-cg") is created (if not already exists) on all specified streams. When using consumer group, each read through a consumer group is a write operation, because Redis needs to update the last retrieved message id and the pending entries list(PEL) of that specific user in the consumer group. So it can only work with the master Redis instance and not replicas (<https://redis.io/topics/streams-intro>).
 
 Redis stream event source expects all the streams to be present on the Redis server. This event source only starts pulling messages from the streams when all of the specified streams exist on the Redis server. On the initial setup, the consumer group is created on all the specified streams to start reading from the latest message (not necessarily the beginning of the stream). On subsequent setups (the consumer group already exists on the streams) or during pod restarts, messages are pulled from the last unacknowledged message in the stream.
 
@@ -23,9 +23,9 @@ The structure of an event dispatched by the event-source over the eventbus looks
               "time": "event_time"
             },
             "data": {
-              	"stream": "Name of the Redis stream",
-              	"message_id": "Message Id",
-              	"values": "message body"
+               "stream": "Name of the Redis stream",
+               "message_id": "Message Id",
+               "values": "message body"
             }
         }
 
@@ -72,7 +72,7 @@ Redis stream event-source specification is available [here](https://github.com/a
 
         XADD FOO * message hello
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
+1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 

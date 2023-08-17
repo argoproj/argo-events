@@ -63,7 +63,8 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		})
 	}
 	if r.needsUpdate(eventSource, esCopy) {
-		if err := r.client.Update(ctx, esCopy); err != nil {
+		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
+		if err := r.client.Update(ctx, esCopy.DeepCopy()); err != nil {
 			return reconcile.Result{}, err
 		}
 	}

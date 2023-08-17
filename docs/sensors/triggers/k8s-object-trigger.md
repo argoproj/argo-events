@@ -1,6 +1,6 @@
 # Kubernetes Object Trigger
 
-Apart from Argo workflow objects, the sensor lets you trigger any Kubernetes objects including Custom Resources 
+Apart from Argo workflow objects, the sensor lets you trigger any Kubernetes objects including Custom Resources
 such as Pod, Deployment, Job, CronJob, etc.
 Having the ability to trigger Kubernetes objects is quite powerful as providing an avenue to
 set up event-driven pipelines for existing workloads.
@@ -100,7 +100,6 @@ set up event-driven pipelines for existing workloads.
               \    \        __/             
                 \____\______/   
 
-
 ## Operation
 
 You can specify the operation for the trigger using the `operation` key under triggers->template->k8s.
@@ -123,7 +122,7 @@ You can learn more about trigger parameterization [here](https://argoproj.github
 
 ## Policy
 
-Trigger policy helps you determine the status of the triggered K8s object and decide whether to stop or continue sensor. 
+Trigger policy helps you determine the status of the triggered K8s object and decide whether to stop or continue sensor.
 
 To determine whether the K8s object was successful or not, the K8s trigger provides a `Resource Labels` policy.
 The `Resource Labels` holds a list of labels which are checked against the triggered K8s object to determine the status of the object.
@@ -149,4 +148,4 @@ The `Resource Labels` holds a list of labels which are checked against the trigg
                     # defaults to false
                     errorOnBackoffTimeout: true
 
-Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-with-policy.yaml). 
+Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-with-policy.yaml).

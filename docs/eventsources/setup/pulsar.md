@@ -17,9 +17,9 @@ The structure of an event dispatched by the event-source over the eventbus looks
                   "subject": "name_of_the_configuration_within_event_source"
                 },
                 "data": {
-                  	"body": "body is the message data",
-                  	"publishTime": "timestamp of the message",
-                  	"key": "message key"
+                   "body": "body is the message data",
+                   "publishTime": "timestamp of the message",
+                   "key": "message key"
                 }
             }
 
@@ -88,12 +88,13 @@ Pulsar event-source is available [here](https://github.com/argoproj/argo-events/
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/pulsar.yaml
 
 1. Deploy the sensor.
-        
+
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/pulsar.yaml
 
 1. Publish a message on topic `test`.
 
-1. Run `argo list` to find the workflow. 
+1. Run `argo list` to find the workflow.
 
 ## Troubleshoot
+
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

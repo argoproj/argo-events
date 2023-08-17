@@ -11,9 +11,9 @@ spec:
       eventName: example
       filters:
         data:
-          # Name of the event that triggered the delivery: [pull_request, push, yadayadayada]
+          # Type of Github event that triggered the delivery: [pull_request, push, issues, label, ...]
           # https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads
-          - path: body.X-GitHub-Event
+          - path: headers.X-Github-Event
             type: string
             value:
               - pull_request
@@ -42,7 +42,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                name: github-
+                generateName: github-
               spec:
                 entrypoint: whalesay
                 arguments:

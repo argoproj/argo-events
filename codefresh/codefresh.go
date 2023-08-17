@@ -32,7 +32,7 @@ const (
 	cfAuthSecretKey       = "token"
 )
 
-var withRetry = common.Connect // alias
+var withRetry = common.DoWithRetry // alias
 
 var eventTypesToReportWhitelist = map[apicommon.EventSourceType]bool{
 	apicommon.GithubEvent:          true,
