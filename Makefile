@@ -73,7 +73,7 @@ image: clean $(BUILD_DIST)
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)  --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
 ifeq ($(K3D),true)
-	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --cluster $(shell kubectl config current-context | sed 's/k3d-//')
+	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)
 endif
 
 image-linux-%: dist/$(BINARY_NAME)-linux-%
@@ -103,12 +103,6 @@ endif
 # to run just one of the functional e2e tests by name (i.e. 'make TestMetricsWithWebhook'):
 Test%:
 	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e  -run='.*/$*'
-
-
-# to run just one of the functional e2e tests by name (i.e. 'make TestMetricsWithWebhook'):
-Test%:
-	go test -v -timeout 10m -count 1 --tags functional -p 1 ./test/e2e  -run='.*/$*'
-
 
 coverage:
 	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/)
