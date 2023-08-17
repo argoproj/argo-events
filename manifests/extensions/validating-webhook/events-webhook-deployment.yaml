@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: webhook
-        image: quay.io/codefresh/argo-events:latest
+        image: quay.io/codefresh/argo-events:v1.8.0-cap-CR-19893
         imagePullPolicy: Always
         args:
         - webhook-service

@@ -28,4 +28,4 @@ patchesStrategicMerge:
             - name: controller-manager
               env:
                 - name: ARGO_EVENTS_IMAGE
-                  value: quay.io/argoproj/argo-events:v1.8.0-cap-CR-19893
+                  value: quay.io/codefresh/argo-events:v1.8.0-cap-CR-19893

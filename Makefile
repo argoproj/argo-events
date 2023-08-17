@@ -15,7 +15,7 @@ EXECUTABLES = curl docker gzip go
 
 #  docker image publishing options
 DOCKER_PUSH?=false
-IMAGE_NAMESPACE?=quay.io/argoproj
+IMAGE_NAMESPACE?=quay.io/codefresh
 VERSION?=v1.8.0-cap-CR-19893
 BASE_VERSION:=v1.8.0-cap-CR-19893
 
@@ -73,7 +73,7 @@ image: clean $(BUILD_DIST)
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)  --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
 ifeq ($(K3D),true)
-	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)
+	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --cluster $(shell kubectl config current-context | sed 's/k3d-//')
 endif
 
 image-linux-%: dist/$(BINARY_NAME)-linux-%
