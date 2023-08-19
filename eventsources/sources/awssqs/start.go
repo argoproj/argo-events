@@ -137,6 +137,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					}
 				}
 			}, log)
+			time.Sleep(50 * time.Millisecond)
 		}
 	}
 }
