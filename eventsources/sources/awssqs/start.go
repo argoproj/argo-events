@@ -100,7 +100,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		default:
 		}
-		messages, err := fetchMessages(ctx, sqsClient, *queueURL.QueueUrl, 10, sqsEventSource.WaitTimeSeconds)
+		messages, err := fetchMessages(ctx, sqsClient, *queueURL.QueueUrl, 1, sqsEventSource.WaitTimeSeconds)
 		if err != nil {
 			log.Errorw("failed to get messages from SQS", zap.Error(err))
 			awsError, ok := err.(awserr.Error)
