@@ -119,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build-push-linux-multi, bom ]
     permissions:
-      contents: read
+      contents: write  # for softprops/action-gh-release to create GitHub release
       id-token: write # Needed to create an OIDC token for keyless signing
     steps:
       - name: Checkout
