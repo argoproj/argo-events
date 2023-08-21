@@ -107,7 +107,7 @@ jobs:
       - env:
           VERSION: ${{ steps.version.outputs.VERSION }}
         run:
-          bom generate --scan-images=false --image quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION -o dist/argo-events.spdx
+          bom generate --scan-images=false --image quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION -o /tmp/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: cd /tmp && tar -zcf sbom.tar.gz *.spdx
       - uses: actions/upload-artifact@v3
