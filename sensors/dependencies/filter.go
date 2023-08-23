@@ -238,7 +238,7 @@ filterData:
 		}
 
 		if f.Template != "" {
-			tpl, tplErr := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(f.Template)
+			tpl, tplErr := template.New("param").Funcs(sprig.FuncMap()).Parse(f.Template)
 			if tplErr != nil {
 				if operator == v1alpha1.OrLogicalOperator {
 					errMessages = append(errMessages, tplErr.Error())
