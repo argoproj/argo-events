@@ -1,5 +1,57 @@
 # Changelog
 
+## v1.8.1 (2023-08-31)
+
+ * [325d4385](https://github.com/argoproj/argo-events/commit/325d4385ae25ca66ddfa7c0ac8c0adb22d5dc5f4) Update manifests to v1.8.1
+ * [ee3303e3](https://github.com/argoproj/argo-events/commit/ee3303e38b483595ae92665b0a369eab420d129a) chore(deps): bump github.com/antonmedv/expr from 1.14.0 to 1.14.3 (#2774)
+ * [442a0178](https://github.com/argoproj/argo-events/commit/442a0178632a03745fb61e1fe7ffde8ec881ba91) chore(deps): bump github.com/antonmedv/expr from 1.13.0 to 1.14.0 (#2760)
+ * [f7216dfa](https://github.com/argoproj/argo-events/commit/f7216dfa9b59234da2f83647945dc63f5df627bb) chore(deps): bump github.com/ktrysmt/go-bitbucket from 0.9.58 to 0.9.66 (#2748)
+ * [00aced42](https://github.com/argoproj/argo-events/commit/00aced42740d9be6721c7f106778b8a6cc073a8e) chore(deps): bump actions/setup-go from 3.5.0 to 4.1.0 (#2749)
+ * [14eeaf62](https://github.com/argoproj/argo-events/commit/14eeaf624ce4cf872be917c797de3cda4a0024de) chore(deps): bump github.com/tidwall/gjson from 1.14.4 to 1.16.0 (#2745)
+ * [a2683682](https://github.com/argoproj/argo-events/commit/a268368260d7f85aa8c99727cce809442312d656) chore(deps): bump github.com/pkg/sftp from 1.13.5 to 1.13.6 (#2746)
+ * [61ae42ab](https://github.com/argoproj/argo-events/commit/61ae42ab7e36ba3751352a91e436b2a6c9dec75b) chore(deps): bump github.com/antonmedv/expr from 1.12.5 to 1.13.0 (#2747)
+ * [e620f03c](https://github.com/argoproj/argo-events/commit/e620f03cd848b8ded1d8731301dd24bb2dfb7cdd) chore(deps): bump google.golang.org/api from 0.124.0 to 0.136.0 (#2744)
+ * [cd081b19](https://github.com/argoproj/argo-events/commit/cd081b1908f38d2d80f030219187409477461a7b) fix: Doc: Argo Workflow apply command link 404 #2737 (#2739)
+ * [029b6453](https://github.com/argoproj/argo-events/commit/029b645321d7bb5bdb22a6b8bc32c7e3c1d95fab) chore(deps): bump golang.org/x/crypto from 0.9.0 to 0.12.0 (#2735)
+ * [3a76997a](https://github.com/argoproj/argo-events/commit/3a76997aa9ab3ef521b68417e7da440afed50846) chore(deps): bump github.com/xanzy/go-gitlab from 0.83.0 to 0.90.0 (#2734)
+ * [f6eba926](https://github.com/argoproj/argo-events/commit/f6eba926e91066f18a850ca7e8389d40dd2ac6c5) SFTP event source (#2693)
+ * [2fbbd725](https://github.com/argoproj/argo-events/commit/2fbbd7254ff6644bcce6b65d4aec19a8774be574) chore(deps): bump github.com/eclipse/paho.mqtt.golang from 1.4.1 to 1.4.3 (#2694)
+ * [d5d7ccf4](https://github.com/argoproj/argo-events/commit/d5d7ccf417fc52d224e36c8250b3a937af5c7903) chore(deps): bump google.golang.org/grpc from 1.55.0 to 1.56.2 (#2696)
+ * [34a70aaa](https://github.com/argoproj/argo-events/commit/34a70aaa1d85f204e72e792f8c6cd2e6fbed0a10) chore(deps): bump sigstore/cosign-installer from 3.0.5 to 3.1.1 (#2691)
+ * [8e3209f2](https://github.com/argoproj/argo-events/commit/8e3209f26b4886b2d51ddd8699f17a32d8ce0052) chore(deps): bump dependabot/fetch-metadata from 1.4.0 to 1.6.0 (#2690)
+ * [8500ed98](https://github.com/argoproj/argo-events/commit/8500ed98f8b264f457650824e2633221e932ee8d) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.57 to 7.0.58 (#2678)
+ * [54c9d401](https://github.com/argoproj/argo-events/commit/54c9d401f00c1a47336fb16f0c4ea8fe6d3b8634) feat(eventsource): add tls configuration for bitbucketserver (#2674)
+ * [be473375](https://github.com/argoproj/argo-events/commit/be4733752883d5ff35ba21d7b4a2baba1488f291) fix: use cluster domain neutral svc dns (#2655)
+ * [efcbd108](https://github.com/argoproj/argo-events/commit/efcbd108a4c53e5aadb4ddeb2b480f3c314bca21) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.52 to 7.0.57 (#2661)
+ * [5989233d](https://github.com/argoproj/argo-events/commit/5989233de0dcf4b4dab3bc707d9602d65d865054) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus from 1.3.0 to 1.4.0 (#2652)
+ * [0eb721b5](https://github.com/argoproj/argo-events/commit/0eb721b5a645823e5dfa207431eb7365e680c314) chore(deps): bump github.com/spf13/viper from 1.15.0 to 1.16.0 (#2643)
+ * [44328eb7](https://github.com/argoproj/argo-events/commit/44328eb7a24cf957ce7ed2f18c2f18694a79fa34) chore(deps): bump github.com/go-git/go-git/v5 from 5.6.1 to 5.7.0 (#2634)
+ * [5e076efb](https://github.com/argoproj/argo-events/commit/5e076efbf25b4ee009a4cd75575cc9fe7ce4616d) chore(deps): bump github.com/Azure/azure-event-hubs-go/v3 from 3.5.0 to 3.6.0 (#2633)
+ * [2aa2632e](https://github.com/argoproj/argo-events/commit/2aa2632e01cb5e461d3df0ef5394e150b47e9625) chore(deps): bump cloud.google.com/go/pubsub from 1.30.1 to 1.31.0 (#2632)
+ * [adfa18dc](https://github.com/argoproj/argo-events/commit/adfa18dc37b4681af1c657c6f6d0a967922a42ea) chore(deps): bump actions/setup-python from 4.6.0 to 4.6.1 (#2631)
+ * [4847b820](https://github.com/argoproj/argo-events/commit/4847b820e3d6f286d61d0cb86d0d7132348093fa) feat: Allow to base64 decode messages  from Azure Queue Storage (#2627)
+ * [553d1a17](https://github.com/argoproj/argo-events/commit/553d1a17406151370af4f4f4931d8dfef639137e) chore(deps): bump github.com/ktrysmt/go-bitbucket from 0.9.55 to 0.9.58 (#2624)
+ * [e077a22f](https://github.com/argoproj/argo-events/commit/e077a22f7da1fde14c4cb337da4fca6d21896168) chore(deps): bump google.golang.org/api from 0.120.0 to 0.123.0 (#2626)
+ * [2bf9f7b7](https://github.com/argoproj/argo-events/commit/2bf9f7b7f23ec0a89972aee1469c0a158e2aa0c3) chore(deps): bump sigstore/cosign-installer from 3.0.3 to 3.0.5 (#2623)
+ * [23056868](https://github.com/argoproj/argo-events/commit/2305686841d1ee709f84260f58aceae0af851b12) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity from 1.2.2 to 1.3.0 (#2618)
+ * [94c7dcc7](https://github.com/argoproj/argo-events/commit/94c7dcc742e3a21132c98522deb7ba12a6522bea) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus from 1.2.1 to 1.3.0 (#2615)
+ * [bdf593a2](https://github.com/argoproj/argo-events/commit/bdf593a25d444659db070ce70828583882d80708) chore(deps): bump golang.org/x/crypto from 0.8.0 to 0.9.0 (#2619)
+ * [e705449b](https://github.com/argoproj/argo-events/commit/e705449bef68960852f3e9a484e4f14a7ae2e9c1) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue from 0.1.0 to 1.0.0 (#2617)
+ * [cc9fa2de](https://github.com/argoproj/argo-events/commit/cc9fa2de6d195ce24471ffeb811b554a29a3be21) Upgrade nats image to 2.9.16 (#2609)
+ * [407fe433](https://github.com/argoproj/argo-events/commit/407fe43314ffd498d40a694dc857e0f6e47f860c) fix(kafkaEventBus): Reset kafka consumer on cleanup (#2611)
+
+### Contributors
+
+ * David Farr
+ * Derek Wang
+ * Eduardo Rodrigues
+ * Maksym Verbovyi
+ * Robert Deusser
+ * Son Bui
+ * dependabot[bot]
+ * dillonstreator
+ * igor-enso
+
 ## v1.8.0 (2023-05-07)
 
  * [57376875](https://github.com/argoproj/argo-events/commit/57376875fb47ab3f5d0960591c29a50b7b372748) Update manifests to v1.8.0
