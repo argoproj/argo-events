@@ -702,17 +702,17 @@ type EmailTrigger struct {
 	// Host refers to the smtp host url to which email is send
 	Host string `json:"host,omitempty" protobuf:"bytes,3,opt,name=host"`
 	// Port refers to the smtp server port to which email is send
-	Port int `json:"port,omitempty" portobuf:"bytes,4,opt,name=port"`
+	Port int32 `json:"port,omitempty" protobuf:"varint,4,opt,name=port"`
 	// Username refers to the username for the smtp server
 	Username string `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`
 	// To refers to the list of email addresses to which email is send
-	To []string `json:"to,omitempty" protobuff:"bytes,6,opt,name=to"`
+	To []string `json:"to,omitempty" protobuf:"bytes,6,rep,name=to"`
 	// From refers to the address from which the email is send from
-	From string `json:"from,omitempty" protobuff:"bytes,7,opt,name=from"`
+	From string `json:"from,omitempty" protobuf:"bytes,7,opt,name=from"`
 	// Subject refers to the subject line for the email send
-	Subject string `json:"subject,omitempty" protobuff:"bytes,8,opt,name=subject"`
+	Subject string `json:"subject,omitempty" protobuf:"bytes,8,opt,name=subject"`
 	// Body refers to the body/content of the email send
-	Body string `json:"body,omitempty" protobuff:"bytes,9,opt,name=body"`
+	Body string `json:"body,omitempty" protobuf:"bytes,9,opt,name=body"`
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
