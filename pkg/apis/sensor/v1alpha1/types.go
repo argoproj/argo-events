@@ -402,6 +402,9 @@ type TriggerTemplate struct {
 	// AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus
 	// +optional
 	AzureServiceBus *AzureServiceBusTrigger `json:"azureServiceBus,omitempty" protobuf:"bytes,16,opt,name=azureServiceBus"`
+	// Email refers to the trigger designed to send an email notification
+	// +optional
+	Email *EmailTrigger `json:"email,omitempty" protobuf:"bytes,17,opt,name=email"`
 }
 
 type ConditionsResetCriteria struct {
@@ -686,6 +689,30 @@ type CustomTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
+}
+
+// EmailTrigger refers to the specification of the email notification trigger.
+type EmailTrigger struct {
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
+	// SMTPPassword refers to the Kubernetes secret that holds the smtp password required to connect to smtp server
+	SMTPPassword *corev1.SecretKeySelector `json:"smtpPassword,omitempty" protobuf:"bytes,2,opt,name=smtpPassword"`
+	// Host refers to the smtp host url to which email is send
+	Host string `json:"host,omitempty" protobuf:"bytes,3,opt,name=host"`
+	// Port refers to the smtp server port to which email is send
+	Port int `json:"port,omitempty" portobuf:"bytes,4,opt,name=port"`
+	// Username refers to the username for the smtp server
+	Username string `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`
+	// To refers to the list of email addresses to which email is send
+	To []string `json:"to,omitempty" protobuff:"bytes,6,opt,name=to"`
+	// From refers to the address from which the email is send from
+	From string `json:"from,omitempty" protobuff:"bytes,7,opt,name=from"`
+	// Subject refers to the subject line for the email send
+	Subject string `json:"subject,omitempty" protobuff:"bytes,8,opt,name=subject"`
+	// Body refers to the body/content of the email send
+	Body string `json:"body,omitempty" protobuff:"bytes,9,opt,name=body"`
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
