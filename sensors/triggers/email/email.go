@@ -52,7 +52,7 @@ func NewEmailTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger 
 	emailSvc := notifications.NewEmailService(
 		notifications.EmailOptions{
 			Host:     emailTrigger.Host,
-			Port:     emailTrigger.Port,
+			Port:     int(emailTrigger.Port),
 			Username: emailTrigger.Username,
 			Password: smtpPassword,
 			From:     emailTrigger.From,
