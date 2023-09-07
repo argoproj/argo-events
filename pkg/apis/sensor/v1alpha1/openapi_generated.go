@@ -39,6 +39,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria":    schema_pkg_apis_sensor_v1alpha1_ConditionsResetCriteria(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":              schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":                 schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EmailTrigger":               schema_pkg_apis_sensor_v1alpha1_EmailTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                      schema_pkg_apis_sensor_v1alpha1_Event(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":               schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":            schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
@@ -620,6 +621,98 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 				Required: []string{"path", "type", "value"},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_EmailTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EmailTrigger refers to the specification of the email notification trigger.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"parameters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"smtpPassword": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SMTPPassword refers to the Kubernetes secret that holds the smtp password required to connect to smtp server",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"host": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Host refers to the smtp host url to which email is send",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"port": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Port refers to the smtp server port to which email is send",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username refers to the username for the smtp server",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"to": {
+						SchemaProps: spec.SchemaProps{
+							Description: "To refers to the list of email addresses to which email is send",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"from": {
+						SchemaProps: spec.SchemaProps{
+							Description: "From refers to the address from which the email is send from",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"subject": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Subject refers to the subject line for the email send",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"body": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Body refers to the body/content of the email send",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -2599,12 +2692,18 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureServiceBusTrigger"),
 						},
 					},
+					"email": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Email refers to the trigger designed to send an email notification",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EmailTrigger"),
+						},
+					},
 				},
 				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureServiceBusTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AzureServiceBusTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EmailTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"},
 	}
 }
 
