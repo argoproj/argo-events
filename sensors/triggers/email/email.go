@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"regexp"
 
 	notifications "github.com/argoproj/notifications-engine/pkg/services"
 	"go.uber.org/zap"
@@ -109,47 +108,26 @@ func (t *EmailTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 
 	emailTrigger := t.Trigger.Template.Email
 
-	to := emailTrigger.To
-	if len(to) == 0 {
-		return nil, fmt.Errorf("no receiver emails provided")
-	}
-	// check if to emails are valid
-	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
-	for _, email := range to {
-		if !validEmail.MatchString(email) {
-			return nil, fmt.Errorf("receiver email is not valid %v", email)
-		}
-	}
-
-	body := emailTrigger.Body
-	if body == "" {
-		return nil, fmt.Errorf("Body cannot be empty")
-	}
-	subject := emailTrigger.Subject
-	if subject == "" {
-		return nil, fmt.Errorf("Subject cannot be empty")
-	}
-
-	t.Logger.Infow("sending emails...", zap.Any("to", to))
+	t.Logger.Infow("sending emails...", zap.Any("to", emailTrigger.To))
 
 	notification := notifications.Notification{
-		Message: body,
+		Message: emailTrigger.Body,
 		Email: &notifications.EmailNotification{
-			Subject: subject,
-			Body:    body,
+			Subject: emailTrigger.Subject,
+			Body:    emailTrigger.Body,
 		},
 	}
 	destination := notifications.Destination{
 		Service:   "email",
-		Recipient: fmt.Sprint(to),
+		Recipient: fmt.Sprint(emailTrigger.To),
 	}
 	err := t.emailSvc.Send(notification, destination)
 	if err != nil {
-		t.Logger.Errorw("unable to send emails to emailIds", zap.Any("to", to), zap.Error(err))
-		return nil, fmt.Errorf("failed to send emails to emailIds %v, %w", to, err)
+		t.Logger.Errorw("unable to send emails to emailIds", zap.Any("to", emailTrigger.To), zap.Error(err))
+		return nil, fmt.Errorf("failed to send emails to emailIds %v, %w", emailTrigger.To, err)
 	}
 
-	t.Logger.Infow("message successfully sent to emailIds", zap.Any("message", body), zap.Any("to", to))
+	t.Logger.Infow("message successfully sent to emailIds", zap.Any("message", emailTrigger.Body), zap.Any("to", emailTrigger.To))
 	t.Logger.Info("finished executing EmailTrigger")
 	return nil, nil
 }

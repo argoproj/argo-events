@@ -19,6 +19,7 @@ package sensor
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"time"
 
 	cronlib "github.com/robfig/cron/v3"
@@ -145,6 +146,11 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	}
 	if template.CustomTrigger != nil {
 		if err := validateCustomTrigger(template.CustomTrigger); err != nil {
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
+		}
+	}
+	if template.Email != nil {
+		if err := validateEmailTrigger(template.Email); err != nil {
 			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
@@ -354,6 +360,42 @@ func validateSlackTrigger(trigger *v1alpha1.SlackTrigger) error {
 	}
 	if trigger.SlackToken == nil {
 		return fmt.Errorf("slack token can't be empty")
+	}
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
+			}
+		}
+	}
+	return nil
+}
+
+// validateEmailTrigger validates the Email trigger
+func validateEmailTrigger(trigger *v1alpha1.EmailTrigger) error {
+	if trigger == nil {
+		return fmt.Errorf("trigger can't be nil")
+	}
+	if trigger.SMTPPassword == nil {
+		return fmt.Errorf("smtp password can't be empty")
+	}
+	if len(trigger.To) == 0 {
+		return fmt.Errorf("to can't be empty")
+	}
+	// check if to emails are valid
+	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
+	for _, emailId := range trigger.To {
+		if !validEmail.MatchString(emailId) {
+			return fmt.Errorf("to emailId can't be invalid %v", emailId)
+		}
+	}
+	body := trigger.Body
+	if body == "" {
+		return fmt.Errorf("body can't be empty")
+	}
+	subject := trigger.Subject
+	if subject == "" {
+		return fmt.Errorf("subject can't be empty")
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
