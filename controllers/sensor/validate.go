@@ -384,10 +384,8 @@ func validateEmailTrigger(trigger *v1alpha1.EmailTrigger) error {
 	}
 	// check if to emails are valid
 	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
-	for _, emailId := range trigger.To {
-		if !validEmail.MatchString(emailId) {
-			return fmt.Errorf("to emailId can't be invalid %v", emailId)
-		}
+	if !validEmail.MatchString(trigger.To) {
+		return fmt.Errorf("to emailId can't be invalid %v", trigger.To)
 	}
 	body := trigger.Body
 	if body == "" {

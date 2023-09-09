@@ -705,8 +705,8 @@ type EmailTrigger struct {
 	Port int32 `json:"port,omitempty" protobuf:"varint,4,opt,name=port"`
 	// Username refers to the username for the smtp server
 	Username string `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`
-	// To refers to the list of email addresses to which email is send
-	To []string `json:"to,omitempty" protobuf:"bytes,6,rep,name=to"`
+	// To refers to the email address to which email is send
+	To string `json:"to,omitempty" protobuf:"bytes,6,opt,name=to"`
 	// From refers to the address from which the email is send from
 	From string `json:"from,omitempty" protobuf:"bytes,7,opt,name=from"`
 	// Subject refers to the subject line for the email send

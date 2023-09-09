@@ -119,12 +119,12 @@ func (t *EmailTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 	}
 	destination := notifications.Destination{
 		Service:   "email",
-		Recipient: fmt.Sprint(emailTrigger.To),
+		Recipient: emailTrigger.To,
 	}
 	err := t.emailSvc.Send(notification, destination)
 	if err != nil {
-		t.Logger.Errorw("unable to send emails to emailIds", zap.Any("to", emailTrigger.To), zap.Error(err))
-		return nil, fmt.Errorf("failed to send emails to emailIds %v, %w", emailTrigger.To, err)
+		t.Logger.Errorw("unable to send emails to emailId", zap.Any("to", emailTrigger.To), zap.Error(err))
+		return nil, fmt.Errorf("failed to send emails to emailId %v, %w", emailTrigger.To, err)
 	}
 
 	t.Logger.Infow("message successfully sent to emailIds", zap.Any("message", emailTrigger.Body), zap.Any("to", emailTrigger.To))
