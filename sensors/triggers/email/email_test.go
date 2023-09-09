@@ -147,13 +147,12 @@ func (m *MockNotificationServiceError) Send(n services.Notification, d services.
 // Mock Notification Service that returns nil on Send
 type MockNotificationService struct{}
 
-// Mocks a successfull send
+// Mocks a successful send
 func (m *MockNotificationService) Send(n services.Notification, d services.Destination) error {
 	return nil
 }
 
 func TestEmailTrigger_Execute(t *testing.T) {
-
 	t.Run("Unmarshallable resource", func(t *testing.T) {
 		trigger := getEmailTrigger(&MockNotificationService{})
 		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, nil)
