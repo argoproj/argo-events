@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 
 	notifications "github.com/argoproj/notifications-engine/pkg/services"
 	"go.uber.org/zap"
@@ -108,6 +109,22 @@ func (t *EmailTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 
 	emailTrigger := t.Trigger.Template.Email
 
+	if emailTrigger.To == "" {
+		return nil, fmt.Errorf("to can't be empty")
+	}
+	// check if to emails are valid
+	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
+	if !validEmail.MatchString(emailTrigger.To) {
+		return nil, fmt.Errorf("to emailId can't be invalid %v", emailTrigger.To)
+	}
+	body := emailTrigger.Body
+	if body == "" {
+		return nil, fmt.Errorf("body can't be empty")
+	}
+	subject := emailTrigger.Subject
+	if subject == "" {
+		return nil, fmt.Errorf("subject can't be empty")
+	}
 	t.Logger.Infow("sending emails...", zap.Any("to", emailTrigger.To))
 
 	notification := notifications.Notification{

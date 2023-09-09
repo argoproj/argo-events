@@ -19,7 +19,6 @@ package sensor
 import (
 	"fmt"
 	"net/http"
-	"regexp"
 	"time"
 
 	cronlib "github.com/robfig/cron/v3"
@@ -378,22 +377,6 @@ func validateEmailTrigger(trigger *v1alpha1.EmailTrigger) error {
 	}
 	if trigger.SMTPPassword == nil {
 		return fmt.Errorf("smtp password can't be empty")
-	}
-	if len(trigger.To) == 0 {
-		return fmt.Errorf("to can't be empty")
-	}
-	// check if to emails are valid
-	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
-	if !validEmail.MatchString(trigger.To) {
-		return fmt.Errorf("to emailId can't be invalid %v", trigger.To)
-	}
-	body := trigger.Body
-	if body == "" {
-		return fmt.Errorf("body can't be empty")
-	}
-	subject := trigger.Subject
-	if subject == "" {
-		return fmt.Errorf("subject can't be empty")
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
