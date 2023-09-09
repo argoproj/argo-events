@@ -378,6 +378,15 @@ func validateEmailTrigger(trigger *v1alpha1.EmailTrigger) error {
 	if trigger.SMTPPassword == nil {
 		return fmt.Errorf("smtp password can't be empty")
 	}
+	if trigger.Username == "" {
+		return fmt.Errorf("username can't be empty")
+	}
+	if trigger.Host == "" {
+		return fmt.Errorf("host can't be empty")
+	}
+	if 0 > trigger.Port || trigger.Port > 65535 {
+		return fmt.Errorf("port: %v, port should be between 0-65535", trigger.Port)
+	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
