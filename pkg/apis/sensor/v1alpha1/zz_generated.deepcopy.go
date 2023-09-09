@@ -351,11 +351,6 @@ func (in *EmailTrigger) DeepCopyInto(out *EmailTrigger) {
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.To != nil {
-		in, out := &in.To, &out.To
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
 	return
 }
 

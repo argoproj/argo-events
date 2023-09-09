@@ -3428,15 +3428,15 @@
       "description": "EmailTrigger refers to the specification of the email notification trigger.",
       "properties": {
         "body": {
-          "description": "Body refers to the body/content of the email send",
+          "description": "Body refers to the body/content of the email send.",
           "type": "string"
         },
         "from": {
-          "description": "From refers to the address from which the email is send from",
+          "description": "From refers to the address from which the email is send from.",
           "type": "string"
         },
         "host": {
-          "description": "Host refers to the smtp host url to which email is send",
+          "description": "Host refers to the smtp host url to which email is send.",
           "type": "string"
         },
         "parameters": {
@@ -3447,27 +3447,24 @@
           "type": "array"
         },
         "port": {
-          "description": "Port refers to the smtp server port to which email is send",
+          "description": "Port refers to the smtp server port to which email is send. Defaults to 0.",
           "format": "int32",
           "type": "integer"
         },
         "smtpPassword": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
-          "description": "SMTPPassword refers to the Kubernetes secret that holds the smtp password required to connect to smtp server"
+          "description": "SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server."
         },
         "subject": {
-          "description": "Subject refers to the subject line for the email send",
+          "description": "Subject refers to the subject line for the email send.",
           "type": "string"
         },
         "to": {
-          "description": "To refers to the list of email addresses to which email is send",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+          "description": "To refers to the email address to which email is send.",
+          "type": "string"
         },
         "username": {
-          "description": "Username refers to the username for the smtp server",
+          "description": "Username refers to the username used to connect to the smtp server.",
           "type": "string"
         }
       },

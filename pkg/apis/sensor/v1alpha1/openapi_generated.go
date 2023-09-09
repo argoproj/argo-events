@@ -645,65 +645,57 @@ func schema_pkg_apis_sensor_v1alpha1_EmailTrigger(ref common.ReferenceCallback) 
 							},
 						},
 					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username refers to the username used to connect to the smtp server.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"smtpPassword": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SMTPPassword refers to the Kubernetes secret that holds the smtp password required to connect to smtp server",
+							Description: "SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"host": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Host refers to the smtp host url to which email is send",
+							Description: "Host refers to the smtp host url to which email is send.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"port": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Port refers to the smtp server port to which email is send",
+							Description: "Port refers to the smtp server port to which email is send. Defaults to 0.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
-					"username": {
+					"to": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Username refers to the username for the smtp server",
+							Description: "To refers to the email address to which email is send.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"to": {
-						SchemaProps: spec.SchemaProps{
-							Description: "To refers to the list of email addresses to which email is send",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
 					"from": {
 						SchemaProps: spec.SchemaProps{
-							Description: "From refers to the address from which the email is send from",
+							Description: "From refers to the address from which the email is send from.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"subject": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Subject refers to the subject line for the email send",
+							Description: "Subject refers to the subject line for the email send.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"body": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Body refers to the body/content of the email send",
+							Description: "Body refers to the body/content of the email send.",
 							Type:        []string{"string"},
 							Format:      "",
 						},

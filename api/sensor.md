@@ -1689,6 +1689,26 @@ are applied to the trigger resource.
 
 <td>
 
+<code>username</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Username refers to the username used to connect to the smtp server.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>smtpPassword</code></br> <em>
 <a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
@@ -1700,7 +1720,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 
 SMTPPassword refers to the Kubernetes secret that holds the smtp
-password required to connect to smtp server
+password used to connect to smtp server.
 
 </p>
 
@@ -1720,7 +1740,7 @@ password required to connect to smtp server
 
 <p>
 
-Host refers to the smtp host url to which email is send
+Host refers to the smtp host url to which email is send.
 
 </p>
 
@@ -1738,9 +1758,12 @@ Host refers to the smtp host url to which email is send
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Port refers to the smtp server port to which email is send
+Port refers to the smtp server port to which email is send. Defaults to
+0.
 
 </p>
 
@@ -1752,35 +1775,17 @@ Port refers to the smtp server port to which email is send
 
 <td>
 
-<code>username</code></br> <em> string </em>
+<code>to</code></br> <em> string </em>
 
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
-Username refers to the username for the smtp server
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>to</code></br> <em> \[\]string </em>
-
-</td>
-
-<td>
-
-<p>
-
-To refers to the list of email addresses to which email is send
+To refers to the email address to which email is send.
 
 </p>
 
@@ -1798,9 +1803,11 @@ To refers to the list of email addresses to which email is send
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-From refers to the address from which the email is send from
+From refers to the address from which the email is send from.
 
 </p>
 
@@ -1818,9 +1825,11 @@ From refers to the address from which the email is send from
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Subject refers to the subject line for the email send
+Subject refers to the subject line for the email send.
 
 </p>
 
@@ -1838,9 +1847,11 @@ Subject refers to the subject line for the email send
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Body refers to the body/content of the email send
+Body refers to the body/content of the email send.
 
 </p>
 
