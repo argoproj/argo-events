@@ -697,14 +697,14 @@ type EmailTrigger struct {
 	// the trigger resource.
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
-	// SMTPPassword refers to the Kubernetes secret that holds the smtp password required to connect to smtp server
-	SMTPPassword *corev1.SecretKeySelector `json:"smtpPassword,omitempty" protobuf:"bytes,2,opt,name=smtpPassword"`
+	// Username refers to the username used to connect to the smtp server
+	Username string `json:"username,omitempty" protobuf:"bytes,2,opt,name=username"`
+	// SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server
+	SMTPPassword *corev1.SecretKeySelector `json:"smtpPassword,omitempty" protobuf:"bytes,3,opt,name=smtpPassword"`
 	// Host refers to the smtp host url to which email is send
-	Host string `json:"host,omitempty" protobuf:"bytes,3,opt,name=host"`
+	Host string `json:"host,omitempty" protobuf:"bytes,4,opt,name=host"`
 	// Port refers to the smtp server port to which email is send
-	Port int32 `json:"port,omitempty" protobuf:"varint,4,opt,name=port"`
-	// Username refers to the username for the smtp server
-	Username string `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`
+	Port int32 `json:"port,omitempty" protobuf:"varint,5,opt,name=port"`
 	// To refers to the email address to which email is send
 	To string `json:"to,omitempty" protobuf:"bytes,6,opt,name=to"`
 	// From refers to the address from which the email is send from
