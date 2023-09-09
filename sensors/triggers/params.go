@@ -275,7 +275,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*
 // the raw json bytes and then returns the result or any error
 func getValueWithTemplate(value []byte, templString string) (string, error) {
 	res := gjson.ParseBytes(value)
-	tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(templString)
+	tpl, err := template.New("param").Funcs(sprig.FuncMap()).Parse(templString)
 	if err != nil {
 		return "", err
 	}

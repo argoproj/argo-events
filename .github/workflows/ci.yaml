@@ -14,10 +14,10 @@ jobs:
   codegen:
     name: Codegen
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Golang
         uses: actions/setup-go@v4.1.0
         with:
@@ -66,7 +66,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Golang
         uses: actions/setup-go@v4.1.0
         with:
@@ -93,7 +93,7 @@ jobs:
       GOPATH: /home/runner/go
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Golang
         uses: actions/setup-go@v4.1.0
         with:
@@ -126,7 +126,7 @@ jobs:
           - driver: kafka
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Golang
         uses: actions/setup-go@v4.1.0
         with:
