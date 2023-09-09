@@ -154,9 +154,6 @@ func (m *MockNotificationService) Send(n services.Notification, d services.Desti
 
 func TestEmailTrigger_Execute(t *testing.T) {
 
-	var trigger *EmailTrigger
-	var err error
-
 	t.Run("Unmarshallable resource", func(t *testing.T) {
 		trigger := getEmailTrigger(&MockNotificationService{})
 		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, nil)
@@ -178,28 +175,28 @@ func TestEmailTrigger_Execute(t *testing.T) {
 	})
 
 	t.Run("Empty subject scenario", func(t *testing.T) {
-		trigger = getEmailTrigger(&MockNotificationService{})
+		trigger := getEmailTrigger(&MockNotificationService{})
 		trigger.Trigger.Template.Email.Subject = ""
-		_, err = trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
+		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
 		assert.NotNil(t, err)
 	})
 
 	t.Run("Empty body scenario", func(t *testing.T) {
-		trigger = getEmailTrigger(&MockNotificationService{})
+		trigger := getEmailTrigger(&MockNotificationService{})
 		trigger.Trigger.Template.Email.Body = ""
-		_, err = trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
+		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
 		assert.NotNil(t, err)
 	})
 
 	t.Run("Error when sending email", func(t *testing.T) {
-		trigger = getEmailTrigger(&MockNotificationServiceError{})
-		_, err = trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
+		trigger := getEmailTrigger(&MockNotificationServiceError{})
+		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
 		assert.NotNil(t, err)
 	})
 
 	t.Run("Email send successfully", func(t *testing.T) {
-		trigger = getEmailTrigger(&MockNotificationService{})
-		_, err = trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
+		trigger := getEmailTrigger(&MockNotificationService{})
+		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
 		assert.Nil(t, err)
 	})
 }
