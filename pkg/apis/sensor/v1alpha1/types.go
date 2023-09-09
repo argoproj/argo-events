@@ -704,6 +704,8 @@ type EmailTrigger struct {
 	// Host refers to the smtp host url to which email is send
 	Host string `json:"host,omitempty" protobuf:"bytes,4,opt,name=host"`
 	// Port refers to the smtp server port to which email is send
+	// Defaults to 0
+	// +optional
 	Port int32 `json:"port,omitempty" protobuf:"varint,5,opt,name=port"`
 	// To refers to the email address to which email is send
 	// +optional
