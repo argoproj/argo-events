@@ -22,7 +22,7 @@ jobs:
     name: Build binaries
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v4.1.0
@@ -50,7 +50,7 @@ jobs:
       matrix:
         target: [ argo-events ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/setup-go@v4.1.0
         with:
           go-version: "1.20"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: go install sigs.k8s.io/bom/cmd/bom@v0.2.0
       - run: go install github.com/spdx/spdx-sbom-generator/cmd/generator@v0.0.13
       - run: mkdir -p dist
@@ -117,7 +117,7 @@ jobs:
     needs: [ build-push-linux-multi, bom ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Version
         run: |
