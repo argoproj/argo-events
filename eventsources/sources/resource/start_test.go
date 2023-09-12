@@ -19,6 +19,7 @@ package resource
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/argoproj/argo-events/common/logging"
@@ -103,5 +105,176 @@ func TestFilter(t *testing.T) {
 			Type: "ADD",
 		}, resourceEventSource.Filter, time.Now(), logging.NewArgoEventsLogger())
 		convey.So(pass, convey.ShouldBeTrue)
+	})
+}
+
+func TestLabelSelector(t *testing.T) {
+	// Test equality operators =, == and in
+	for _, op := range []string{"==", "=", "in"} {
+		t.Run(fmt.Sprintf("Test operator %v", op), func(t *testing.T) {
+			r, err := LabelSelector([]v1alpha1.Selector{{
+				Key:       "key",
+				Operation: op,
+				Value:     "1",
+			}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			validL := &labels.Set{"key": "1"}
+			if !r.Matches(validL) {
+				t.Errorf("didnot match %v", validL)
+			}
+			invalidL := &labels.Set{"key": "2"}
+			if r.Matches(invalidL) {
+				t.Errorf("matched %v", invalidL)
+			}
+		})
+	}
+	// Test inequality operators != and notin
+	for _, op := range []string{"!=", "notin"} {
+		t.Run(fmt.Sprintf("Test operator %v", op), func(t *testing.T) {
+			r, err := LabelSelector([]v1alpha1.Selector{{
+				Key:       "key",
+				Operation: op,
+				Value:     "1",
+			}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			validL := &labels.Set{"key": "2"}
+			if !r.Matches(validL) {
+				t.Errorf("didnot match %v", validL)
+			}
+			invalidL := &labels.Set{"key": "1"}
+			if r.Matches(invalidL) {
+				t.Errorf("matched %v", invalidL)
+			}
+		})
+	}
+	// Test greater than operator
+	t.Run("Test operator gt", func(t *testing.T) {
+		r, err := LabelSelector([]v1alpha1.Selector{{
+			Key:       "key",
+			Operation: "gt",
+			Value:     "1",
+		}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		validL := &labels.Set{"key": "2"}
+		if !r.Matches(validL) {
+			t.Errorf("didnot match %v", validL)
+		}
+		invalidL := &labels.Set{"key": "1"}
+		if r.Matches(invalidL) {
+			t.Errorf("matched %v", invalidL)
+		}
+	})
+	// Test lower than operator
+	t.Run("Test operator lt", func(t *testing.T) {
+		r, err := LabelSelector([]v1alpha1.Selector{{
+			Key:       "key",
+			Operation: "lt",
+			Value:     "2",
+		}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		validL := &labels.Set{"key": "1"}
+		if !r.Matches(validL) {
+			t.Errorf("didnot match %v", validL)
+		}
+		invalidL := &labels.Set{"key": "2"}
+		if r.Matches(invalidL) {
+			t.Errorf("matched %v", invalidL)
+		}
+	})
+	// Test exists operator
+	t.Run("Test operator exists", func(t *testing.T) {
+		r, err := LabelSelector([]v1alpha1.Selector{{
+			Key:       "key",
+			Operation: "exists",
+		}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		validL := &labels.Set{"key": "something"}
+		if !r.Matches(validL) {
+			t.Errorf("didnot match %v", validL)
+		}
+		invalidL := &labels.Set{"notkey": "something"}
+		if r.Matches(invalidL) {
+			t.Errorf("matched %v", invalidL)
+		}
+	})
+	// Test doesnot exist operator
+	t.Run("Test operator !", func(t *testing.T) {
+		r, err := LabelSelector([]v1alpha1.Selector{{
+			Key:       "key",
+			Operation: "!",
+		}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		validL := &labels.Set{"notkey": "something"}
+		if !r.Matches(validL) {
+			t.Errorf("didnot match %v", validL)
+		}
+		invalidL := &labels.Set{"key": "something"}
+		if r.Matches(invalidL) {
+			t.Errorf("matched %v", invalidL)
+		}
+	})
+	// Test default operator
+	t.Run("Test default operator", func(t *testing.T) {
+		r, err := LabelSelector([]v1alpha1.Selector{{
+			Key:       "key",
+			Operation: "",
+			Value:     "something",
+		}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		validL := &labels.Set{"key": "something"}
+		if !r.Matches(validL) {
+			t.Errorf("didnot match %v", validL)
+		}
+		invalidL := &labels.Set{"key": "not something"}
+		if r.Matches(invalidL) {
+			t.Errorf("matched %v", invalidL)
+		}
+	})
+	// Test invalid operators <= and >=
+	for _, op := range []string{"<=", ">="} {
+		t.Run(fmt.Sprintf("Invalid operator %v", op), func(t *testing.T) {
+			_, err := LabelSelector([]v1alpha1.Selector{{
+				Key:       "workflows.argoproj.io/phase",
+				Operation: op,
+				Value:     "1",
+			}})
+			if err == nil {
+				t.Errorf("Invalid operator should throw error")
+			}
+		})
+	}
+	// Test comma separated values for in
+	t.Run("Comma separated values", func(t *testing.T) {
+		r, err := LabelSelector([]v1alpha1.Selector{{
+			Key:       "key",
+			Operation: "in",
+			Value:     "a,b,",
+		}})
+		if err != nil {
+			t.Fatal("valid value threw error, value %w", err)
+		}
+		for _, validL := range []labels.Set{{"key": "a"}, {"key": "b"}, {"key": ""}} {
+			if !r.Matches(validL) {
+				t.Errorf("didnot match %v", validL)
+			}
+		}
+		invalidL := &labels.Set{"key": "c"}
+		if r.Matches(invalidL) {
+			t.Errorf("matched %v", invalidL)
+		}
 	})
 }
