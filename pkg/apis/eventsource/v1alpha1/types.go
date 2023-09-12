@@ -350,6 +350,10 @@ type ResourceFilter struct {
 	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
 	// Labels provide listing options to K8s API to watch resource/s.
 	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.
+	// Unlike K8s field selector, multiple values are passed as comma separated values instead of list of values.
+	// Eg: value: value1,value2.
+	// Same as K8s label selector, operator "=", "==", "!=", "exists", "!", "notin", "in", "gt" and "lt"
+	// are supported
 	// +optional
 	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 	// Fields provide field filters similar to K8s field selector
@@ -371,7 +375,7 @@ type ResourceFilter struct {
 type Selector struct {
 	// Key name
 	Key string `json:"key" protobuf:"bytes,1,opt,name=key"`
-	// Supported operations like ==, !=, <=, >= etc.
+	// Supported operations like ==, != etc.
 	// Defaults to ==.
 	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
 	// +optional

@@ -250,7 +250,16 @@ func LabelReq(sel v1alpha1.Selector) (*labels.Requirement, error) {
 	if sel.Operation != "" {
 		op = selection.Operator(sel.Operation)
 	}
-	req, err := labels.NewRequirement(sel.Key, op, []string{sel.Value})
+	var values []string
+	switch {
+	case (op == selection.Exists || op == selection.DoesNotExist) && sel.Value == "":
+		values = []string{}
+	case op == selection.In || op == selection.NotIn:
+		values = strings.Split(sel.Value, ",")
+	default:
+		values = []string{sel.Value}
+	}
+	req, err := labels.NewRequirement(sel.Key, op, values)
 	if err != nil {
 		return nil, err
 	}

@@ -5176,7 +5176,10 @@ Prefix filter is applied on the resource name.
 <p>
 Labels provide listing options to K8s API to watch resource/s. Refer
 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/</a>
-for more info.
+for more info. Unlike K8s field selector, multiple values are passed as
+comma separated values instead of list of values. Eg: value:
+value1,value2. Same as K8s label selector, operator “=”, “==”, “!=”,
+“exists”, “!”, “notin”, “in”, “gt” and “lt” are supported
 </p>
 </td>
 </tr>
@@ -5711,7 +5714,7 @@ Key name
 <td>
 <em>(Optional)</em>
 <p>
-Supported operations like ==, !=, \<=, \>= etc. Defaults to ==. Refer
+Supported operations like ==, != etc. Defaults to ==. Refer
 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors</a>
 for more info.
 </p>
