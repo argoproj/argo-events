@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	"os"
 
 	"go.uber.org/zap"
@@ -41,16 +44,6 @@ type ArgoEventsControllerOpts struct {
 
 func Start(eventsOpts ArgoEventsControllerOpts) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
-	config, err := controllers.LoadConfig(func(err error) {
-		logger.Errorw("Failed to reload global configuration file", zap.Error(err))
-	})
-	if err != nil {
-		logger.Fatalw("Failed to load global configuration file", zap.Error(err))
-	}
-
-	if err = controllers.ValidateConfig(config); err != nil {
-		logger.Fatalw("Global configuration file validation failed", zap.Error(err))
-	}
 
 	imageName, defined := os.LookupEnv(imageEnvVar)
 	if !defined {
@@ -73,6 +66,27 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 		logger.Fatalw("unable to get a controller-runtime manager", zap.Error(err))
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
+
+	config, err := controllers.LoadConfig(func(err error) {
+		logger.Errorw("Failed to  reload global configuration file", zap.Error(err))
+	})
+	if err != nil {
+		eventbusInfo, err := kubeClient.CoreV1().ConfigMaps("default").Get(context.Background(), "argo-events-controller-config", metav1.GetOptions{})
+		eventbusConfig, ok := eventbusInfo.Data["controller-config.yaml"]
+		if !ok {
+			logger.Fatalw("Failed to load global configuration file", zap.Error(err))
+		}
+		r := &controllers.GlobalConfig{}
+		err = yaml.Unmarshal([]byte(eventbusConfig), r)
+		if err != nil {
+			logger.Fatalw("Failed to unmarshal configuration file", zap.Error(err))
+		}
+		config = r
+	}
+
+	if err = controllers.ValidateConfig(config); err != nil {
+		logger.Fatalw("Global configuration file validation failed", zap.Error(err))
+	}
 
 	// Readyness probe
 	if err := mgr.AddReadyzCheck("readiness", healthz.Ping); err != nil {

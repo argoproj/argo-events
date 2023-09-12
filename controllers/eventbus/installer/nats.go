@@ -98,7 +98,8 @@ func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error
 	clusterID := generateClusterID(i.eventBus)
 	busConfig := &v1alpha1.BusConfig{
 		NATS: &v1alpha1.NATSConfig{
-			URL:       fmt.Sprintf("nats://%s:%s", generateServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
+			//URL: fmt.Sprintf("nats://%s:%s", generateServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
+			URL:       fmt.Sprintf("nats://%s:%s", "eventbus-default-stan-0.eventbus-default-stan-svc.default", strconv.Itoa(int(clientPort))),
 			ClusterID: &clusterID,
 			Auth:      authStrategy,
 		},
