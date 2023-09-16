@@ -62,7 +62,7 @@ jobs:
           path: dist/
 
       - name: Registry Login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAYIO_USERNAME }}
@@ -139,7 +139,7 @@ jobs:
           path: /tmp
 
       - name: Registry Login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAYIO_USERNAME }}
