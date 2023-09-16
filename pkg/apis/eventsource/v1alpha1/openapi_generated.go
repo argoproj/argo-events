@@ -3446,7 +3446,7 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 					},
 					"labels": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Labels provide listing options to K8s API to watch resource/s. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.",
+							Description: "Labels provide listing options to K8s API to watch resource/s. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info. Unlike K8s field selector, multiple values are passed as comma separated values instead of list of values. Eg: value: value1,value2. Same as K8s label selector, operator \"=\", \"==\", \"!=\", \"exists\", \"!\", \"notin\", \"in\", \"gt\" and \"lt\" are supported",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -3800,7 +3800,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Selector(ref common.ReferenceCallback)
 					},
 					"operation": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Supported operations like ==, !=, <=, >= etc. Defaults to ==. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.",
+							Description: "Supported operations like ==, != etc. Defaults to ==. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
