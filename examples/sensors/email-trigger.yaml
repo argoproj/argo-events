@@ -15,7 +15,7 @@ spec:
           dest: email.to.-1
         - src:
             dependencyName: test-dep
-            DataTemplate: "Hi {{.Input.body.name}},\n\n\tHello There.\n\nThanks,\nObi"
+            dataTemplate: "Hi {{.Input.body.name}},\n\n\tHello There.\n\nThanks,\nObi"
           dest: email.body
       template:
         name: email-trigger
