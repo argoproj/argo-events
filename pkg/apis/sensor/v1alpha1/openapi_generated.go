@@ -674,9 +674,17 @@ func schema_pkg_apis_sensor_v1alpha1_EmailTrigger(ref common.ReferenceCallback) 
 					},
 					"to": {
 						SchemaProps: spec.SchemaProps{
-							Description: "To refers to the email address to which email is send.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "To refers to the email addresses to which the emails are send.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
 						},
 					},
 					"from": {

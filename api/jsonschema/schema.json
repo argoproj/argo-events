@@ -3460,8 +3460,11 @@
           "type": "string"
         },
         "to": {
-          "description": "To refers to the email address to which email is send.",
-          "type": "string"
+          "description": "To refers to the email addresses to which the emails are send.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "username": {
           "description": "Username refers to the username used to connect to the smtp server.",

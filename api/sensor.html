@@ -843,6 +843,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Username refers to the username used to connect to the smtp server.</p>
 </td>
 </tr>
@@ -856,6 +857,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server.</p>
 </td>
 </tr>
@@ -887,12 +889,12 @@ Defaults to 0.</p>
 <td>
 <code>to</code></br>
 <em>
-string
+[]string
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>To refers to the email address to which email is send.</p>
+<p>To refers to the email addresses to which the emails are send.</p>
 </td>
 </tr>
 <tr>

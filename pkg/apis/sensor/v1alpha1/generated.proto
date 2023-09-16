@@ -240,9 +240,11 @@ message EmailTrigger {
   repeated TriggerParameter parameters = 1;
 
   // Username refers to the username used to connect to the smtp server.
+  // +optional
   optional string username = 2;
 
   // SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server.
+  // +optional
   optional k8s.io.api.core.v1.SecretKeySelector smtpPassword = 3;
 
   // Host refers to the smtp host url to which email is send.
@@ -253,9 +255,9 @@ message EmailTrigger {
   // +optional
   optional int32 port = 5;
 
-  // To refers to the email address to which email is send.
+  // To refers to the email addresses to which the emails are send.
   // +optional
-  optional string to = 6;
+  repeated string to = 6;
 
   // From refers to the address from which the email is send from.
   // +optional

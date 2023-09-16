@@ -900,6 +900,7 @@ are applied to the trigger resource.
 <code>username</code></br> <em> string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Username refers to the username used to connect to the smtp server.
 </p>
@@ -912,6 +913,7 @@ Username refers to the username used to connect to the smtp server.
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 SMTPPassword refers to the Kubernetes secret that holds the smtp
 password used to connect to smtp server.
@@ -942,12 +944,12 @@ Port refers to the smtp server port to which email is send. Defaults to
 </tr>
 <tr>
 <td>
-<code>to</code></br> <em> string </em>
+<code>to</code></br> <em> \[\]string </em>
 </td>
 <td>
 <em>(Optional)</em>
 <p>
-To refers to the email address to which email is send.
+To refers to the email addresses to which the emails are send.
 </p>
 </td>
 </tr>
