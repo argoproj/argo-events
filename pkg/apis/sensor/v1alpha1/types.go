@@ -707,9 +707,9 @@ type EmailTrigger struct {
 	// Defaults to 0.
 	// +optional
 	Port int32 `json:"port,omitempty" protobuf:"varint,5,opt,name=port"`
-	// To refers to the email address to which email is send.
+	// To refers to the email addresses to which the emails are send.
 	// +optional
-	To string `json:"to,omitempty" protobuf:"bytes,6,opt,name=to"`
+	To []string `json:"to,omitempty" protobuf:"bytes,6,rep,name=to"`
 	// From refers to the address from which the email is send from.
 	// +optional
 	From string `json:"from,omitempty" protobuf:"bytes,7,opt,name=from"`

@@ -49,7 +49,7 @@ var sensorObj = &v1alpha1.Sensor{
 						Host:     "fake-host",
 						Port:     468,
 						Username: "fake-username",
-						To:       "fake@email.com",
+						To:       []string{"fake1@email.com", "fake2@email.com"},
 						From:     "fake-email",
 						Subject:  "fake-subject",
 						Body:     "fake-body",
@@ -80,7 +80,7 @@ func TestEmailTrigger_FetchResource(t *testing.T) {
 	assert.Equal(t, "fake-host", ot.Host)
 	assert.Equal(t, int32(468), ot.Port)
 	assert.Equal(t, "fake-username", ot.Username)
-	assert.Equal(t, "fake@email.com", ot.To)
+	assert.Equal(t, []string{"fake1@email.com", "fake2@email.com"}, ot.To)
 	assert.Equal(t, "fake-email", ot.From)
 	assert.Equal(t, "fake-subject", ot.Subject)
 	assert.Equal(t, "fake-body", ot.Body)
@@ -109,7 +109,7 @@ func TestEmailTrigger_ApplyResourceParameters(t *testing.T) {
 				DependencyName: "fake-dependency",
 				DataKey:        "to",
 			},
-			Dest: "to",
+			Dest: "to.0",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
@@ -130,7 +130,7 @@ func TestEmailTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Equal(t, "fake-host", ot.Host)
 	assert.Equal(t, int32(468), ot.Port)
 	assert.Equal(t, "fake-username", ot.Username)
-	assert.Equal(t, "real@email.com", ot.To)
+	assert.Equal(t, []string{"real@email.com", "fake2@email.com"}, ot.To)
 	assert.Equal(t, "fake-email", ot.From)
 	assert.Equal(t, "fake-subject", ot.Subject)
 	assert.Equal(t, "Hi Luke,\n\tHello There.\nThanks,\nObi", ot.Body)
@@ -161,14 +161,14 @@ func TestEmailTrigger_Execute(t *testing.T) {
 
 	t.Run("Empty to scenario", func(t *testing.T) {
 		trigger := getEmailTrigger(&MockNotificationService{})
-		trigger.Trigger.Template.Email.To = ""
+		trigger.Trigger.Template.Email.To = make([]string, 0)
 		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
 		assert.NotNil(t, err)
 	})
 
 	t.Run("Invalid to scenario", func(t *testing.T) {
 		trigger := getEmailTrigger(&MockNotificationService{})
-		trigger.Trigger.Template.Email.To = "not@a@valid.email"
+		trigger.Trigger.Template.Email.To = []string{"not@a@valid.email"}
 		_, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trigger.Trigger.Template.Email)
 		assert.NotNil(t, err)
 	})

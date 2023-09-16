@@ -18,6 +18,7 @@ package email
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -109,13 +110,8 @@ func (t *EmailTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 
 	emailTrigger := t.Trigger.Template.Email
 
-	if emailTrigger.To == "" {
+	if len(emailTrigger.To) == 0 {
 		return nil, fmt.Errorf("to can't be empty")
-	}
-	// check if to emails are valid
-	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
-	if !validEmail.MatchString(emailTrigger.To) {
-		return nil, fmt.Errorf("to emailId can't be invalid %v", emailTrigger.To)
 	}
 	body := emailTrigger.Body
 	if body == "" {
@@ -126,24 +122,34 @@ func (t *EmailTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		return nil, fmt.Errorf("subject can't be empty")
 	}
 	t.Logger.Infow("sending emails...", zap.Any("to", emailTrigger.To))
-
-	notification := notifications.Notification{
-		Message: emailTrigger.Body,
-		Email: &notifications.EmailNotification{
-			Subject: emailTrigger.Subject,
-			Body:    emailTrigger.Body,
-		},
+	var errs error
+	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
+	for _, addr := range emailTrigger.To {
+		if !validEmail.MatchString(addr) {
+			t.Logger.Error("invalid emailId", zap.Any("to", addr))
+			errs = errors.Join(errs, fmt.Errorf("to emailId can't be invalid %v", addr))
+			continue
+		}
+		notification := notifications.Notification{
+			Message: emailTrigger.Body,
+			Email: &notifications.EmailNotification{
+				Subject: emailTrigger.Subject,
+				Body:    emailTrigger.Body,
+			},
+		}
+		destination := notifications.Destination{
+			Service:   "email",
+			Recipient: addr,
+		}
+		err := t.emailSvc.Send(notification, destination)
+		if err != nil {
+			t.Logger.Errorw("unable to send emails to emailId", zap.Any("to", addr), zap.Error(err))
+			errs = errors.Join(errs, fmt.Errorf("failed to send emails to emailId %v, %w", addr, err))
+		}
 	}
-	destination := notifications.Destination{
-		Service:   "email",
-		Recipient: emailTrigger.To,
+	if errs != nil {
+		return nil, errs
 	}
-	err := t.emailSvc.Send(notification, destination)
-	if err != nil {
-		t.Logger.Errorw("unable to send emails to emailId", zap.Any("to", emailTrigger.To), zap.Error(err))
-		return nil, fmt.Errorf("failed to send emails to emailId %v, %w", emailTrigger.To, err)
-	}
-
 	t.Logger.Infow("message successfully sent to emailIds", zap.Any("message", emailTrigger.Body), zap.Any("to", emailTrigger.To))
 	t.Logger.Info("finished executing EmailTrigger")
 	return nil, nil
