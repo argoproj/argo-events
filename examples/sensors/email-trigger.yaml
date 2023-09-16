@@ -11,10 +11,6 @@ spec:
     - parameters:
         - src:
             dependencyName: test-dep
-            dataKey: body.to
-          dest: email.to
-        - src:
-            dependencyName: test-dep
             DataTemplate: "Hi {{.Input.body.name}},\n\n\tHello There.\n\nThanks,\nObi"
           dest: email.body
       template:
@@ -26,5 +22,8 @@ spec:
             name: smtp-secret
           host: smtp.example.net
           port: 587
+          to:
+            - email1@email.com
+            - email2@email.com
           from: example@email.com
           subject: Hello There
