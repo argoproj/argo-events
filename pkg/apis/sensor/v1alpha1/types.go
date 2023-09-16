@@ -698,8 +698,10 @@ type EmailTrigger struct {
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// Username refers to the username used to connect to the smtp server.
+	// +optional
 	Username string `json:"username,omitempty" protobuf:"bytes,2,opt,name=username"`
 	// SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server.
+	// +optional
 	SMTPPassword *corev1.SecretKeySelector `json:"smtpPassword,omitempty" protobuf:"bytes,3,opt,name=smtpPassword"`
 	// Host refers to the smtp host url to which email is send.
 	Host string `json:"host,omitempty" protobuf:"bytes,4,opt,name=host"`

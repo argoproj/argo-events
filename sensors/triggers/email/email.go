@@ -46,9 +46,13 @@ type EmailTrigger struct {
 // NewEmailTrigger returns a new Email trigger context
 func NewEmailTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*EmailTrigger, error) {
 	emailTrigger := trigger.Template.Email
-	smtpPassword, err := common.GetSecretFromVolume(emailTrigger.SMTPPassword)
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve the smtp password, %w", err)
+	var smtpPassword string
+	if emailTrigger.SMTPPassword != nil {
+		var err error
+		smtpPassword, err = common.GetSecretFromVolume(emailTrigger.SMTPPassword)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve the smtp password, %w", err)
+		}
 	}
 	emailSvc := notifications.NewEmailService(
 		notifications.EmailOptions{
