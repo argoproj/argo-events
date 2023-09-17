@@ -29,6 +29,7 @@ import (
 	eventhubs "github.com/argoproj/argo-events/sensors/triggers/azure-event-hubs"
 	servicebus "github.com/argoproj/argo-events/sensors/triggers/azure-service-bus"
 	customtrigger "github.com/argoproj/argo-events/sensors/triggers/custom-trigger"
+	"github.com/argoproj/argo-events/sensors/triggers/email"
 	"github.com/argoproj/argo-events/sensors/triggers/http"
 	"github.com/argoproj/argo-events/sensors/triggers/kafka"
 	logtrigger "github.com/argoproj/argo-events/sensors/triggers/log"
@@ -161,5 +162,13 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 		return result
 	}
 
+	if trigger.Template.Email != nil {
+		result, err := email.NewEmailTrigger(sensorCtx.sensor, trigger, log)
+		if err != nil {
+			log.Errorw("failed to new a Email trigger", zap.Error(err))
+			return nil
+		}
+		return result
+	}
 	return nil
 }
