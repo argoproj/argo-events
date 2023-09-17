@@ -101,6 +101,7 @@ var (
 	K8sTrigger             TriggerType = "Kubernetes"
 	AzureEventHubsTrigger  TriggerType = "AzureEventHubs"
 	AzureServiceBusTrigger TriggerType = "AzureServiceBus"
+	EmailTrigger           TriggerType = "Email"
 )
 
 // EventBusType is the type of event bus

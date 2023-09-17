@@ -3407,6 +3407,55 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.EmailTrigger": {
+      "description": "EmailTrigger refers to the specification of the email notification trigger.",
+      "type": "object",
+      "properties": {
+        "body": {
+          "description": "Body refers to the body/content of the email send.",
+          "type": "string"
+        },
+        "from": {
+          "description": "From refers to the address from which the email is send from.",
+          "type": "string"
+        },
+        "host": {
+          "description": "Host refers to the smtp host url to which email is send.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          }
+        },
+        "port": {
+          "description": "Port refers to the smtp server port to which email is send. Defaults to 0.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "smtpPassword": {
+          "description": "SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "subject": {
+          "description": "Subject refers to the subject line for the email send.",
+          "type": "string"
+        },
+        "to": {
+          "description": "To refers to the email addresses to which the emails are send.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "username": {
+          "description": "Username refers to the username used to connect to the smtp server.",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.Event": {
       "description": "Event represents the cloudevent received from an event source.",
       "type": "object",
@@ -4473,6 +4522,10 @@
         "custom": {
           "description": "CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom trigger.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.CustomTrigger"
+        },
+        "email": {
+          "description": "Email refers to the trigger designed to send an email notification",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EmailTrigger"
         },
         "http": {
           "description": "HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.",

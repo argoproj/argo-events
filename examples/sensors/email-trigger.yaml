@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - parameters:
+        - src:
+            dependencyName: test-dep
+            dataKey: body.to
+          dest: email.to.-1
+        - src:
+            dependencyName: test-dep
+            dataTemplate: "Hi {{.Input.body.name}},\n\n\tHello There.\n\nThanks,\nObi"
+          dest: email.body
+      template:
+        name: email-trigger
+        email:
+          username: username
+          smtpPassword:
+            key: password
+            name: smtp-secret
+          # to:
+          #   - target1@email.com
+          #   - target2@email.com
+          host: smtp.example.net
+          port: 587
+          from: example@email.com
+          subject: Hello There
