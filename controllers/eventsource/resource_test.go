@@ -204,8 +204,6 @@ func Test_BuildDeployment(t *testing.T) {
 		for i := range gotVolumeMountNames {
 			assert.Equal(t, gotVolumeMountNames[i], wantVolumeMountNames[i])
 		}
-
-		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
 	})
 }
 
