@@ -55,7 +55,7 @@ type CustomTriggerClientMap struct {
 }
 
 func NewCustomTriggerClientMap() *CustomTriggerClientMap {
-	return &CustomTriggerClientMap{}
+	return &CustomTriggerClientMap{m: make(map[string]*grpc.ClientConn)}
 }
 
 func (cm *CustomTriggerClientMap) Load(key string) (*grpc.ClientConn, bool) {

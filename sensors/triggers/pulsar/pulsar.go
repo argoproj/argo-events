@@ -50,7 +50,7 @@ type AsyncProducerMap struct {
 }
 
 func NewAsyncProducerMap() *AsyncProducerMap {
-	return &AsyncProducerMap{}
+	return &AsyncProducerMap{m: make(map[string]pulsar.Producer)}
 }
 
 func (pm *AsyncProducerMap) Load(key string) (pulsar.Producer, bool) {

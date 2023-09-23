@@ -52,7 +52,7 @@ type OpenWhiskClientMap struct {
 }
 
 func NewOpenWhiskClientMap() *OpenWhiskClientMap {
-	return &OpenWhiskClientMap{}
+	return &OpenWhiskClientMap{m: make(map[string]*whisk.Client)}
 }
 
 func (cm *OpenWhiskClientMap) Load(key string) (*whisk.Client, bool) {

@@ -58,7 +58,7 @@ type AsyncProducerMap struct {
 }
 
 func NewAsyncProducerMap() *AsyncProducerMap {
-	return &AsyncProducerMap{}
+	return &AsyncProducerMap{m: make(map[string]sarama.AsyncProducer)}
 }
 
 func (pm *AsyncProducerMap) Load(key string) (sarama.AsyncProducer, bool) {

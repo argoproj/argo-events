@@ -52,7 +52,7 @@ type LambdaClientMap struct {
 }
 
 func NewLambdaClientMap() *LambdaClientMap {
-	return &LambdaClientMap{}
+	return &LambdaClientMap{m: make(map[string]*lambda.Lambda)}
 }
 
 func (cm *LambdaClientMap) Load(key string) (*lambda.Lambda, bool) {

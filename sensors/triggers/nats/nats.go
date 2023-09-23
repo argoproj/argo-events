@@ -50,7 +50,7 @@ type NATSConnectionMap struct {
 }
 
 func NewNATSConnectionMap() *NATSConnectionMap {
-	return &NATSConnectionMap{}
+	return &NATSConnectionMap{m: make(map[string]*natslib.Conn)}
 }
 
 func (cm *NATSConnectionMap) Load(key string) (*natslib.Conn, bool) {

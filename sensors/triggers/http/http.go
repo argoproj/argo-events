@@ -53,7 +53,7 @@ type HTTPClientMap struct {
 }
 
 func NewHTTPClientMap() *HTTPClientMap {
-	return &HTTPClientMap{}
+	return &HTTPClientMap{m: make(map[string]*http.Client)}
 }
 
 func (cm *HTTPClientMap) Load(key string) (*http.Client, bool) {

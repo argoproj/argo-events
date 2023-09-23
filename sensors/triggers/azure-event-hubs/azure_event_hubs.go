@@ -50,7 +50,7 @@ type EventhubClientMap struct {
 }
 
 func NewEventhubClientMap() *EventhubClientMap {
-	return &EventhubClientMap{}
+	return &EventhubClientMap{m: make(map[string]*eventhub.Hub)}
 }
 
 func (cm *EventhubClientMap) Load(key string) (*eventhub.Hub, bool) {

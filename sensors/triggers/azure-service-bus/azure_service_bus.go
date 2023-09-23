@@ -50,7 +50,7 @@ type ServicebusSenderMap struct {
 }
 
 func NewServicebusSenderMap() *ServicebusSenderMap {
-	return &ServicebusSenderMap{}
+	return &ServicebusSenderMap{m: make(map[string]*servicebus.Sender)}
 }
 
 func (sm *ServicebusSenderMap) Load(key string) (*servicebus.Sender, bool) {
