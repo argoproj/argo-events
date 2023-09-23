@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -44,18 +45,47 @@ type AWSLambdaTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
+// Concurrent safe map for *lambda.Lambda clients
+type LambdaClientMap struct {
+	m  map[string]*lambda.Lambda
+	mu sync.RWMutex
+}
+
+func NewLambdaClientMap() *LambdaClientMap {
+	return &LambdaClientMap{}
+}
+
+func (cm *LambdaClientMap) Load(key string) (*lambda.Lambda, bool) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	c, ok := cm.m[key]
+	return c, ok
+}
+
+func (cm *LambdaClientMap) Store(key string, c *lambda.Lambda) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	cm.m[key] = c
+}
+
+func (cm *LambdaClientMap) Delete(key string) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	delete(cm.m, key)
+}
+
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients *LambdaClientMap, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
-	lambdaClient, ok := lambdaClients[trigger.Template.Name]
+	lambdaClient, ok := lambdaClients.Load(trigger.Template.Name)
 	if !ok {
 		awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(lambdatrigger.Region, lambdatrigger.RoleARN, lambdatrigger.AccessKey, lambdatrigger.SecretKey, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create a AWS session, %w", err)
 		}
 		lambdaClient = lambda.New(awsSession, &aws.Config{Region: &lambdatrigger.Region})
-		lambdaClients[trigger.Template.Name] = lambdaClient
+		lambdaClients.Store(trigger.Template.Name, lambdaClient)
 	}
 
 	return &AWSLambdaTrigger{

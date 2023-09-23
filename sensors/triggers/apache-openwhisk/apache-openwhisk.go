@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/apache/openwhisk-client-go/whisk"
 	"go.uber.org/zap"
@@ -44,11 +45,40 @@ type TriggerImpl struct {
 	Logger *zap.SugaredLogger
 }
 
+// Concurrent safe map for *whisk.Client
+type OpenWhiskClientMap struct {
+	m  map[string]*whisk.Client
+	mu sync.RWMutex
+}
+
+func NewOpenWhiskClientMap() *OpenWhiskClientMap {
+	return &OpenWhiskClientMap{}
+}
+
+func (cm *OpenWhiskClientMap) Load(key string) (*whisk.Client, bool) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	c, ok := cm.m[key]
+	return c, ok
+}
+
+func (cm *OpenWhiskClientMap) Store(key string, c *whisk.Client) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	cm.m[key] = c
+}
+
+func (cm *OpenWhiskClientMap) Delete(key string) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	delete(cm.m, key)
+}
+
 // NewTriggerImpl returns a new TriggerImpl
-func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients map[string]*whisk.Client, logger *zap.SugaredLogger) (*TriggerImpl, error) {
+func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients *OpenWhiskClientMap, logger *zap.SugaredLogger) (*TriggerImpl, error) {
 	openwhisktrigger := trigger.Template.OpenWhisk
 
-	client, ok := openWhiskClients[trigger.Template.Name]
+	client, ok := openWhiskClients.Load(trigger.Template.Name)
 	if !ok {
 		logger.Debugw("OpenWhisk trigger value", zap.Any("name", trigger.Template.Name), zap.Any("trigger", *trigger.Template.OpenWhisk))
 		logger.Infow("instantiating OpenWhisk client", zap.Any("trigger-name", trigger.Template.Name))
@@ -82,7 +112,7 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 			return nil, fmt.Errorf("failed to instantiate OpenWhisk client, %w", err)
 		}
 
-		openWhiskClients[trigger.Template.Name] = client
+		openWhiskClients.Store(trigger.Template.Name, client)
 	}
 
 	return &TriggerImpl{

@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	natslib "github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -42,11 +43,40 @@ type NATSTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
+// Concurrent safe map for *natslib.Conn
+type NATSConnectionMap struct {
+	m  map[string]*natslib.Conn
+	mu sync.RWMutex
+}
+
+func NewNATSConnectionMap() *NATSConnectionMap {
+	return &NATSConnectionMap{}
+}
+
+func (cm *NATSConnectionMap) Load(key string) (*natslib.Conn, bool) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	c, ok := cm.m[key]
+	return c, ok
+}
+
+func (cm *NATSConnectionMap) Store(key string, c *natslib.Conn) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	cm.m[key] = c
+}
+
+func (cm *NATSConnectionMap) Delete(key string) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	delete(cm.m, key)
+}
+
 // NewNATSTrigger returns new nats trigger.
-func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections map[string]*natslib.Conn, logger *zap.SugaredLogger) (*NATSTrigger, error) {
+func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections *NATSConnectionMap, logger *zap.SugaredLogger) (*NATSTrigger, error) {
 	natstrigger := trigger.Template.NATS
 
-	conn, ok := natsConnections[trigger.Template.Name]
+	conn, ok := natsConnections.Load(trigger.Template.Name)
 	if !ok {
 		var err error
 		opts := natslib.GetDefaultOptions()
@@ -67,7 +97,7 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 			return nil, err
 		}
 
-		natsConnections[trigger.Template.Name] = conn
+		natsConnections.Store(trigger.Template.Name, conn)
 	}
 
 	return &NATSTrigger{

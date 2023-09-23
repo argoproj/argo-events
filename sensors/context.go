@@ -20,20 +20,21 @@ import (
 	"net/http"
 	"time"
 
-	eventhubs "github.com/Azure/azure-event-hubs-go/v3"
-	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
-	"github.com/Shopify/sarama"
-	"github.com/apache/openwhisk-client-go/whisk"
-	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/aws/aws-sdk-go/service/lambda"
-	natslib "github.com/nats-io/nats.go"
-	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
 	sensormetrics "github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	openwhisk "github.com/argoproj/argo-events/sensors/triggers/apache-openwhisk"
+	lambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
+	azureeventhub "github.com/argoproj/argo-events/sensors/triggers/azure-event-hubs"
+	azureservicebus "github.com/argoproj/argo-events/sensors/triggers/azure-service-bus"
+	customtrigger "github.com/argoproj/argo-events/sensors/triggers/custom-trigger"
+	httptrigger "github.com/argoproj/argo-events/sensors/triggers/http"
+	"github.com/argoproj/argo-events/sensors/triggers/kafka"
+	"github.com/argoproj/argo-events/sensors/triggers/nats"
+	"github.com/argoproj/argo-events/sensors/triggers/pulsar"
 )
 
 // SensorContext contains execution context for Sensor
@@ -51,25 +52,25 @@ type SensorContext struct {
 	hostname        string
 
 	// httpClients holds the reference to HTTP clients for HTTP triggers.
-	httpClients map[string]*http.Client
+	httpClients *httptrigger.HTTPClientMap
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
-	customTriggerClients map[string]*grpc.ClientConn
+	customTriggerClients *customtrigger.CustomTriggerClientMap
 	// http client to send slack messages.
 	slackHTTPClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
-	kafkaProducers map[string]sarama.AsyncProducer
+	kafkaProducers *kafka.AsyncProducerMap
 	// pulsarProducers holds references to the active pulsar producers
-	pulsarProducers map[string]pulsar.Producer
+	pulsarProducers *pulsar.AsyncProducerMap
 	// natsConnections holds the references to the active nats connections.
-	natsConnections map[string]*natslib.Conn
+	natsConnections *nats.NATSConnectionMap
 	// awsLambdaClients holds the references to active AWS Lambda clients.
-	awsLambdaClients map[string]*lambda.Lambda
+	awsLambdaClients *lambda.LambdaClientMap
 	// openwhiskClients holds the references to active OpenWhisk clients.
-	openwhiskClients map[string]*whisk.Client
+	openwhiskClients *openwhisk.OpenWhiskClientMap
 	// azureEventHubsClients holds the references to active Azure Event Hub clients.
-	azureEventHubsClients map[string]*eventhubs.Hub
+	azureEventHubsClients *azureeventhub.EventhubClientMap
 	// azureServiceBusClients holds the references to active Azure Service Bus clients.
-	azureServiceBusClients map[string]*servicebus.Sender
+	azureServiceBusClients *azureservicebus.ServicebusSenderMap
 	metrics                *sensormetrics.Metrics
 }
 
@@ -82,18 +83,18 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		eventBusConfig:       eventBusConfig,
 		eventBusSubject:      eventBusSubject,
 		hostname:             hostname,
-		httpClients:          make(map[string]*http.Client),
-		customTriggerClients: make(map[string]*grpc.ClientConn),
+		httpClients:          httptrigger.NewHTTPClientMap(),
+		customTriggerClients: customtrigger.NewCustomTriggerClientMap(),
 		slackHTTPClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers:         make(map[string]sarama.AsyncProducer),
-		pulsarProducers:        make(map[string]pulsar.Producer),
-		natsConnections:        make(map[string]*natslib.Conn),
-		awsLambdaClients:       make(map[string]*lambda.Lambda),
-		openwhiskClients:       make(map[string]*whisk.Client),
-		azureEventHubsClients:  make(map[string]*eventhubs.Hub),
-		azureServiceBusClients: make(map[string]*servicebus.Sender),
+		kafkaProducers:         kafka.NewAsyncProducerMap(),
+		pulsarProducers:        pulsar.NewAsyncProducerMap(),
+		natsConnections:        nats.NewNATSConnectionMap(),
+		awsLambdaClients:       lambda.NewLambdaClientMap(),
+		openwhiskClients:       openwhisk.NewOpenWhiskClientMap(),
+		azureEventHubsClients:  azureeventhub.NewEventhubClientMap(),
+		azureServiceBusClients: azureservicebus.NewServicebusSenderMap(),
 		metrics:                metrics,
 	}
 }

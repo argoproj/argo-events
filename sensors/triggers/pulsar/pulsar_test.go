@@ -86,7 +86,7 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getFakePulsarTrigger(producers map[string]pulsar.Producer) (*PulsarTrigger, error) {
+func getFakePulsarTrigger(producers *AsyncProducerMap) (*PulsarTrigger, error) {
 	return NewPulsarTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 }
 
@@ -95,9 +95,10 @@ func TestNewPulsarTrigger(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	producers := map[string]pulsar.Producer{
-		"fake-trigger": producer,
-	}
+	producers := &AsyncProducerMap{
+		m: map[string]pulsar.Producer{
+			"fake-trigger": producer,
+		}}
 	trigger, err := NewPulsarTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 	assert.Nil(t, err)
 	assert.Equal(t, trigger.Trigger.Template.Pulsar.URL, "fake-pulsar-url")
@@ -109,9 +110,11 @@ func TestPulsarTrigger_FetchResource(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	trigger, err := getFakePulsarTrigger(map[string]pulsar.Producer{
-		"fake-trigger": producer,
-	})
+	producers := &AsyncProducerMap{
+		m: map[string]pulsar.Producer{
+			"fake-trigger": producer,
+		}}
+	trigger, err := getFakePulsarTrigger(producers)
 	assert.Nil(t, err)
 	obj, err := trigger.FetchResource(context.TODO())
 	assert.Nil(t, err)
@@ -126,9 +129,11 @@ func TestPulsarTrigger_ApplyResourceParameters(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	trigger, err := getFakePulsarTrigger(map[string]pulsar.Producer{
-		"fake-trigger": producer,
-	})
+	producers := &AsyncProducerMap{
+		m: map[string]pulsar.Producer{
+			"fake-trigger": producer,
+		}}
+	trigger, err := getFakePulsarTrigger(producers)
 	assert.Nil(t, err)
 
 	testEvents := map[string]*v1alpha1.Event{
@@ -173,9 +178,11 @@ func TestPulsarTrigger_Execute(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	trigger, err := getFakePulsarTrigger(map[string]pulsar.Producer{
-		"fake-trigger": producer,
-	})
+	producers := &AsyncProducerMap{
+		m: map[string]pulsar.Producer{
+			"fake-trigger": producer,
+		}}
+	trigger, err := getFakePulsarTrigger(producers)
 	assert.Nil(t, err)
 
 	testEvents := map[string]*v1alpha1.Event{

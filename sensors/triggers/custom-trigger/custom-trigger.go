@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/ghodss/yaml"
 	"go.uber.org/zap"
@@ -47,8 +48,37 @@ type CustomTrigger struct {
 	triggerClient triggers.TriggerClient
 }
 
+// Concurrent safe map for *grpc.ClientConn
+type CustomTriggerClientMap struct {
+	m  map[string]*grpc.ClientConn
+	mu sync.RWMutex
+}
+
+func NewCustomTriggerClientMap() *CustomTriggerClientMap {
+	return &CustomTriggerClientMap{}
+}
+
+func (cm *CustomTriggerClientMap) Load(key string) (*grpc.ClientConn, bool) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	c, ok := cm.m[key]
+	return c, ok
+}
+
+func (cm *CustomTriggerClientMap) Store(key string, c *grpc.ClientConn) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	cm.m[key] = c
+}
+
+func (cm *CustomTriggerClientMap) Delete(key string) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	delete(cm.m, key)
+}
+
 // NewCustomTrigger returns a new custom trigger
-func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients map[string]*grpc.ClientConn) (*CustomTrigger, error) {
+func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients *CustomTriggerClientMap) (*CustomTrigger, error) {
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,
@@ -57,7 +87,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 
 	ct := trigger.Template.CustomTrigger
 
-	if conn, ok := customTriggerClients[trigger.Template.Name]; ok {
+	if conn, ok := customTriggerClients.Load(trigger.Template.Name); ok {
 		if conn.GetState() == connectivity.Ready {
 			logger.Info("trigger client connection is ready...")
 			customTrigger.triggerClient = triggers.NewTriggerClient(conn)
@@ -65,7 +95,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		}
 
 		logger.Info("trigger client connection is closed, creating new one...")
-		delete(customTriggerClients, trigger.Template.Name)
+		customTriggerClients.Delete(trigger.Template.Name)
 	}
 
 	logger.Infow("instantiating trigger client...", zap.Any("server-url", ct.ServerURL))
@@ -117,7 +147,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 	}
 
 	customTrigger.triggerClient = triggers.NewTriggerClient(conn)
-	customTriggerClients[trigger.Template.Name] = conn
+	customTriggerClients.Store(trigger.Template.Name, conn)
 
 	logger.Info("successfully setup the trigger client...")
 	return customTrigger, nil

@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hamba/avro"
@@ -50,12 +51,41 @@ type KafkaTrigger struct {
 	schema *srclient.Schema
 }
 
+// Concurrent safe map for sarama.AsyncProducer
+type AsyncProducerMap struct {
+	m  map[string]sarama.AsyncProducer
+	mu sync.RWMutex
+}
+
+func NewAsyncProducerMap() *AsyncProducerMap {
+	return &AsyncProducerMap{}
+}
+
+func (pm *AsyncProducerMap) Load(key string) (sarama.AsyncProducer, bool) {
+	pm.mu.RLock()
+	defer pm.mu.RUnlock()
+	p, ok := pm.m[key]
+	return p, ok
+}
+
+func (pm *AsyncProducerMap) Store(key string, p sarama.AsyncProducer) {
+	pm.mu.Lock()
+	defer pm.mu.Unlock()
+	pm.m[key] = p
+}
+
+func (pm *AsyncProducerMap) Delete(key string) {
+	pm.mu.Lock()
+	defer pm.mu.Unlock()
+	delete(pm.m, key)
+}
+
 // NewKafkaTrigger returns a new kafka trigger context.
-func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger) (*KafkaTrigger, error) {
+func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers *AsyncProducerMap, logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
 
-	producer, ok := kafkaProducers[trigger.Template.Name]
+	producer, ok := kafkaProducers.Load(trigger.Template.Name)
 	var schema *srclient.Schema
 
 	if !ok {
@@ -133,7 +163,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 			}
 		}()
 
-		kafkaProducers[trigger.Template.Name] = producer
+		kafkaProducers.Store(trigger.Template.Name, producer)
 	}
 
 	if kafkatrigger.SchemaRegistry != nil {
