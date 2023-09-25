@@ -436,7 +436,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	ssName := generateStatefulSetName(i.eventBus)
 	replicas := i.eventBus.Spec.NATS.Native.GetReplicas()
 	if replicas < 3 {
-		replicas = 3
+		i.logger.Errorw("streaming recommends a replica size >= 3, '%v'", replicas)
 	}
 	maxAge := common.STANMaxAge
 	if i.eventBus.Spec.NATS.Native.MaxAge != nil {
@@ -619,10 +619,10 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 	if err != nil {
 		return nil, fmt.Errorf("failed to get nats streaming version, err: %w", err)
 	}
-	// Streaming requires minimal size 3.
+	//
 	replicas := i.eventBus.Spec.NATS.Native.Replicas
 	if replicas < 3 {
-		replicas = 3
+		i.logger.Errorw("streaming recommends a replica >= 3, '%v'", replicas)
 	}
 	var stanContainerPullPolicy, metricsContainerPullPolicy corev1.PullPolicy
 	var stanContainerSecurityContext, metricsContainerSecurityContext *corev1.SecurityContext

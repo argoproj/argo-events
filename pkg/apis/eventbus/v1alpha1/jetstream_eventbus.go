@@ -88,12 +88,7 @@ type JetStreamBus struct {
 }
 
 func (j JetStreamBus) GetReplicas() int {
-	if j.Replicas == nil {
-		return 3
-	}
-	if *j.Replicas < 3 {
-		return 3
-	}
+
 	return int(*j.Replicas)
 }
 

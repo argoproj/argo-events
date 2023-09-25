@@ -120,6 +120,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		is trying to create the Stream at the same time): %v`, common.JetStreamStreamName, err)
 	}
 
+	stream.Logger.Infof("received stream settings:\n '%v'", stream.streamSettings)
 	// unmarshal settings
 	v := viper.New()
 	v.SetConfigType("yaml")

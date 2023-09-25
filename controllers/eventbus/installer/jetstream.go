@@ -5,6 +5,8 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -634,9 +636,37 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	svcName := generateJetStreamServiceName(r.eventBus)
 	ssName := generateJetStreamStatefulSetName(r.eventBus)
 	replicas := r.eventBus.Spec.JetStream.GetReplicas()
-	if replicas < 3 {
-		replicas = 3
+	if replicas > 2 {
+		f, err := os.OpenFile("assets/jetstream/nats.conf",
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Println(err)
+		}
+		if _, err := f.WriteString(
+			`
+				###################################
+				#                                 #
+				# NATS Cluster                    #
+				#                                 #
+				###################################
+				cluster {
+				  port: {{.ClusterPort}}
+				  name: {{.ClusterName}}
+				  routes: [{{.Routes}}]
+				  cluster_advertise: $CLUSTER_ADVERTISE
+				  connect_retries: 120
+
+				  tls {
+					cert_file: "/etc/nats-config/cluster-server-cert.pem"
+					key_file:  "/etc/nats-config/cluster-server-key.pem"
+					ca_file:   "/etc/nats-config/cluster-ca-cert.pem"
+				  }
+				}
+			`); err != nil {
+			log.Println(err)
+		}
 	}
+
 	routes := []string{}
 	for j := 0; j < replicas; j++ {
 		routes = append(routes, fmt.Sprintf("nats://%s-%s.%s.%s.svc:%s", ssName, strconv.Itoa(j), svcName, r.eventBus.Namespace, strconv.Itoa(int(jsClusterPort))))
