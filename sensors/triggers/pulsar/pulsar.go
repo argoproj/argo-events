@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"go.uber.org/zap"
@@ -43,37 +42,8 @@ type PulsarTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-// Concurrent safe map for *pulsar.Producer
-type AsyncProducerMap struct {
-	m  map[string]pulsar.Producer
-	mu sync.RWMutex
-}
-
-func NewAsyncProducerMap() *AsyncProducerMap {
-	return &AsyncProducerMap{m: make(map[string]pulsar.Producer)}
-}
-
-func (pm *AsyncProducerMap) Load(key string) (pulsar.Producer, bool) {
-	pm.mu.RLock()
-	defer pm.mu.RUnlock()
-	p, ok := pm.m[key]
-	return p, ok
-}
-
-func (pm *AsyncProducerMap) Store(key string, p pulsar.Producer) {
-	pm.mu.Lock()
-	defer pm.mu.Unlock()
-	pm.m[key] = p
-}
-
-func (pm *AsyncProducerMap) Delete(key string) {
-	pm.mu.Lock()
-	defer pm.mu.Unlock()
-	delete(pm.m, key)
-}
-
 // NewPulsarTrigger returns a new Pulsar trigger context.
-func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers *AsyncProducerMap, logger *zap.SugaredLogger) (*PulsarTrigger, error) {
+func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers *common.StringKeyedMap[pulsar.Producer], logger *zap.SugaredLogger) (*PulsarTrigger, error) {
 	pulsarTrigger := trigger.Template.Pulsar
 
 	producer, ok := pulsarProducers.Load(trigger.Template.Name)

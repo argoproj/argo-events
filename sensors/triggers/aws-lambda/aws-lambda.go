@@ -19,12 +19,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -45,37 +45,8 @@ type AWSLambdaTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-// Concurrent safe map for *lambda.Lambda clients
-type LambdaClientMap struct {
-	m  map[string]*lambda.Lambda
-	mu sync.RWMutex
-}
-
-func NewLambdaClientMap() *LambdaClientMap {
-	return &LambdaClientMap{m: make(map[string]*lambda.Lambda)}
-}
-
-func (cm *LambdaClientMap) Load(key string) (*lambda.Lambda, bool) {
-	cm.mu.RLock()
-	defer cm.mu.RUnlock()
-	c, ok := cm.m[key]
-	return c, ok
-}
-
-func (cm *LambdaClientMap) Store(key string, c *lambda.Lambda) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	cm.m[key] = c
-}
-
-func (cm *LambdaClientMap) Delete(key string) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	delete(cm.m, key)
-}
-
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients *LambdaClientMap, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients *common.StringKeyedMap[*lambda.Lambda], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
 	lambdaClient, ok := lambdaClients.Load(trigger.Template.Name)

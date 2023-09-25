@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	"github.com/ghodss/yaml"
 	"go.uber.org/zap"
@@ -48,37 +47,8 @@ type CustomTrigger struct {
 	triggerClient triggers.TriggerClient
 }
 
-// Concurrent safe map for *grpc.ClientConn
-type CustomTriggerClientMap struct {
-	m  map[string]*grpc.ClientConn
-	mu sync.RWMutex
-}
-
-func NewCustomTriggerClientMap() *CustomTriggerClientMap {
-	return &CustomTriggerClientMap{m: make(map[string]*grpc.ClientConn)}
-}
-
-func (cm *CustomTriggerClientMap) Load(key string) (*grpc.ClientConn, bool) {
-	cm.mu.RLock()
-	defer cm.mu.RUnlock()
-	c, ok := cm.m[key]
-	return c, ok
-}
-
-func (cm *CustomTriggerClientMap) Store(key string, c *grpc.ClientConn) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	cm.m[key] = c
-}
-
-func (cm *CustomTriggerClientMap) Delete(key string) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	delete(cm.m, key)
-}
-
 // NewCustomTrigger returns a new custom trigger
-func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients *CustomTriggerClientMap) (*CustomTrigger, error) {
+func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients *common.StringKeyedMap[*grpc.ClientConn]) (*CustomTrigger, error) {
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,

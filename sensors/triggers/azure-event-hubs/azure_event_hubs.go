@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
 	"go.uber.org/zap"
@@ -43,37 +42,8 @@ type AzureEventHubsTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-// Concurrent safe map for *eventhub.Hub clients
-type EventhubClientMap struct {
-	m  map[string]*eventhub.Hub
-	mu sync.RWMutex
-}
-
-func NewEventhubClientMap() *EventhubClientMap {
-	return &EventhubClientMap{m: make(map[string]*eventhub.Hub)}
-}
-
-func (cm *EventhubClientMap) Load(key string) (*eventhub.Hub, bool) {
-	cm.mu.RLock()
-	defer cm.mu.RUnlock()
-	c, ok := cm.m[key]
-	return c, ok
-}
-
-func (cm *EventhubClientMap) Store(key string, c *eventhub.Hub) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	cm.m[key] = c
-}
-
-func (cm *EventhubClientMap) Delete(key string) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	delete(cm.m, key)
-}
-
 // NewAzureEventHubsTrigger returns a new azure event hubs context.
-func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureEventHubsClient *EventhubClientMap, logger *zap.SugaredLogger) (*AzureEventHubsTrigger, error) {
+func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureEventHubsClient *common.StringKeyedMap[*eventhub.Hub], logger *zap.SugaredLogger) (*AzureEventHubsTrigger, error) {
 	azureEventHubsTrigger := trigger.Template.AzureEventHubs
 
 	hub, ok := azureEventHubsClient.Load(trigger.Template.Name)

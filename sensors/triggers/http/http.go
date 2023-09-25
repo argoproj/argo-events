@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -46,37 +45,8 @@ type HTTPTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-// Concurrent safe map for *http.Client
-type HTTPClientMap struct {
-	m  map[string]*http.Client
-	mu sync.RWMutex
-}
-
-func NewHTTPClientMap() *HTTPClientMap {
-	return &HTTPClientMap{m: make(map[string]*http.Client)}
-}
-
-func (cm *HTTPClientMap) Load(key string) (*http.Client, bool) {
-	cm.mu.RLock()
-	defer cm.mu.RUnlock()
-	c, ok := cm.m[key]
-	return c, ok
-}
-
-func (cm *HTTPClientMap) Store(key string, c *http.Client) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	cm.m[key] = c
-}
-
-func (cm *HTTPClientMap) Delete(key string) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	delete(cm.m, key)
-}
-
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(httpClients *HTTPClientMap, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
+func NewHTTPTrigger(httpClients *common.StringKeyedMap[*http.Client], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
 	httptrigger := trigger.Template.HTTP
 
 	client, ok := httpClients.Load(trigger.Template.Name)

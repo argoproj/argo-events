@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"go.uber.org/zap"
@@ -43,36 +42,7 @@ type AzureServiceBusTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-// Concurrent safe map for *servicebus.Sender
-type ServicebusSenderMap struct {
-	m  map[string]*servicebus.Sender
-	mu sync.RWMutex
-}
-
-func NewServicebusSenderMap() *ServicebusSenderMap {
-	return &ServicebusSenderMap{m: make(map[string]*servicebus.Sender)}
-}
-
-func (sm *ServicebusSenderMap) Load(key string) (*servicebus.Sender, bool) {
-	sm.mu.RLock()
-	defer sm.mu.RUnlock()
-	s, ok := sm.m[key]
-	return s, ok
-}
-
-func (sm *ServicebusSenderMap) Store(key string, s *servicebus.Sender) {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
-	sm.m[key] = s
-}
-
-func (sm *ServicebusSenderMap) Delete(key string) {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
-	delete(sm.m, key)
-}
-
-func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients *ServicebusSenderMap, logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
+func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients *common.StringKeyedMap[*servicebus.Sender], logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.AzureServiceBusTrigger)
 	azureServiceBusTrigger := trigger.Template.AzureServiceBus
 
