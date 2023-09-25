@@ -300,7 +300,6 @@ func Test_BuildDeployment(t *testing.T) {
 			assert.Equal(t, gotVolumeMountNames[i], wantVolumeMountNames[i])
 		}
 	})
-
 }
 
 func TestResourceReconcile(t *testing.T) {
