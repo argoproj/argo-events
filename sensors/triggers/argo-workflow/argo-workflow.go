@@ -17,6 +17,7 @@ package argo_workflow
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -28,6 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
@@ -39,6 +41,18 @@ import (
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
+
+// ArgoWorkflow Object Metadata
+type ObjectMeta struct {
+	Name      string
+	Namespace string
+	Uid       string
+}
+
+// ArgoWorkflow type
+type Workflow struct {
+	Metadata *ObjectMeta
+}
 
 // ArgoWorkflowTrigger implements Trigger interface for Argo workflow
 type ArgoWorkflowTrigger struct {
@@ -210,6 +224,28 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 	if len(l.Items) == 0 {
 		return nil, fmt.Errorf("failed to list created workflows for unknown reason")
 	}
+
+	//Parsing the first item in argo workflows list response
+	var workflow *Workflow
+	workflowUnstrucutred := l.Items[0]
+	workflow, err = FromUnstructured(workflowUnstrucutred)
+	if err != nil {
+		fmt.Errorf("failed to parse the list workflows response for unknown reason")
+	}
+
+	//Fetching the workflow name
+	var workflowName = workflow.Metadata.Name
+	depNames := make([]string, 0, len(events))
+	eventIDs := make([]string, 0, len(events))
+	for dependencyName, event := range events {
+		eventIDs = append(eventIDs, event.Context.ID)
+		depNames = append(depNames, dependencyName)
+	}
+
+	//Capturing the workflow name,  event ids and depdendecy names in the log
+	t.Logger.Infow(fmt.Sprintf("Successfully submitted workflow '%s'", workflowName),
+		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
+
 	return l.Items[0], nil
 }
 
@@ -244,5 +280,26 @@ func (t *ArgoWorkflowTrigger) ApplyPolicy(ctx context.Context, resource interfac
 		}
 	}
 
+	return nil
+}
+
+func FromUnstructured(un unstructured.Unstructured) (*Workflow, error) {
+	var wf Workflow
+	err := FromUnstructuredObj(un, &wf)
+	return &wf, err
+}
+
+func FromUnstructuredObj(un unstructured.Unstructured, v interface{}) error {
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(un.Object, v)
+	if err != nil {
+		if err.Error() == "cannot convert int64 to v1alpha1.AnyString" {
+			data, err := json.Marshal(un)
+			if err != nil {
+				return err
+			}
+			return json.Unmarshal(data, v)
+		}
+		return err
+	}
 	return nil
 }
