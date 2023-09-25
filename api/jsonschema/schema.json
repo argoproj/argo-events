@@ -2035,7 +2035,7 @@
       "description": "KafkaEventSource refers to event-source for Kafka related events",
       "properties": {
         "config": {
-          "description": "Yaml format Sarama config for Kafka connection. It follows the struct of sarama.Config. See https://github.com/Shopify/sarama/blob/main/config.go e.g.\n\nconsumer:\n  fetch:\n    min: 1\nnet:\n  MaxOpenRequests: 5",
+          "description": "Yaml format Sarama config for Kafka connection. It follows the struct of sarama.Config. See https://github.com/IBM/sarama/blob/main/config.go e.g.\n\nconsumer:\n  fetch:\n    min: 1\nnet:\n  MaxOpenRequests: 5",
           "type": "string"
         },
         "connectionBackoff": {

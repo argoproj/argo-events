@@ -3899,7 +3899,7 @@ Filter
 <p>
 Yaml format Sarama config for Kafka connection. It follows the struct of
 sarama.Config. See
-<a href="https://github.com/Shopify/sarama/blob/main/config.go">https://github.com/Shopify/sarama/blob/main/config.go</a>
+<a href="https://github.com/IBM/sarama/blob/main/config.go">https://github.com/IBM/sarama/blob/main/config.go</a>
 e.g.
 </p>
 <p>
