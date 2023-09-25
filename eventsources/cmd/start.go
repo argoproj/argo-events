@@ -60,7 +60,7 @@ func Start() {
 	m := metrics.NewMetrics(eventSource.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.EventSourceMetricsPort))
 
-	logger.Infow("starting eventsource server", "version", argoevents.GetVersion(), "busConfig", busConfig)
+	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
 	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m)
 
 	if err := adaptor.Start(ctx); err != nil {
