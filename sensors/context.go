@@ -20,21 +20,21 @@ import (
 	"net/http"
 	"time"
 
-	"google.golang.org/grpc"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
-
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/Shopify/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/aws/aws-sdk-go/service/lambda"
+	natslib "github.com/nats-io/nats.go"
+	"google.golang.org/grpc"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
+
 	"github.com/argoproj/argo-events/common"
 	sensormetrics "github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/aws/aws-sdk-go/service/lambda"
-	natslib "github.com/nats-io/nats.go"
 )
 
 // SensorContext contains execution context for Sensor
