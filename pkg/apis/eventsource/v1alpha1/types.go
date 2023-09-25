@@ -551,7 +551,7 @@ type KafkaEventSource struct {
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
 	// Yaml format Sarama config for Kafka connection.
-	// It follows the struct of sarama.Config. See https://github.com/Shopify/sarama/blob/main/config.go
+	// It follows the struct of sarama.Config. See https://github.com/IBM/sarama/blob/main/config.go
 	// e.g.
 	//
 	// consumer:
