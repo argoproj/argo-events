@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	eventhub "github.com/Azure/azure-event-hubs-go/v3"
+	eventhubs "github.com/Azure/azure-event-hubs-go/v3"
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/Shopify/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
@@ -68,7 +68,7 @@ type SensorContext struct {
 	// openwhiskClients holds the references to active OpenWhisk clients.
 	openwhiskClients *common.StringKeyedMap[*whisk.Client]
 	// azureEventHubsClients holds the references to active Azure Event Hub clients.
-	azureEventHubsClients *common.StringKeyedMap[*eventhub.Hub]
+	azureEventHubsClients *common.StringKeyedMap[*eventhubs.Hub]
 	// azureServiceBusClients holds the references to active Azure Service Bus clients.
 	azureServiceBusClients *common.StringKeyedMap[*servicebus.Sender]
 	metrics                *sensormetrics.Metrics
@@ -93,7 +93,7 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		natsConnections:        common.NewStringKeyedMap[*natslib.Conn](),
 		awsLambdaClients:       common.NewStringKeyedMap[*lambda.Lambda](),
 		openwhiskClients:       common.NewStringKeyedMap[*whisk.Client](),
-		azureEventHubsClients:  common.NewStringKeyedMap[*eventhub.Hub](),
+		azureEventHubsClients:  common.NewStringKeyedMap[*eventhubs.Hub](),
 		azureServiceBusClients: common.NewStringKeyedMap[*servicebus.Sender](),
 		metrics:                metrics,
 	}
