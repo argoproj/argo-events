@@ -120,6 +120,91 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, hasTLSSecretVolume)
 		assert.True(t, hasTLSSecretVolumeMount)
 	})
+
+	t.Run("test secret volume and volumemount order deterministic", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:       testImage,
+			EventSource: testEventSource,
+			Labels:      testLabels,
+		}
+
+		webhooksWithSecrets := map[string]v1alpha1.WebhookEventSource{
+			"webhook4": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook4",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook4"},
+						Key:                  "secret",
+					},
+				},
+			},
+			"webhook3": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook3",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook3"},
+						Key:                  "secret",
+					},
+				},
+			},
+			"webhook1": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook1",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook1"},
+						Key:                  "secret",
+					},
+				},
+			},
+			"webhook2": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook2",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook2"},
+						Key:                  "secret",
+					},
+				},
+			},
+		}
+		args.EventSource.Spec.Webhook = webhooksWithSecrets
+
+		wantVolumeNames := []string{"auth-volume", "cm-test-cm", "secret-test-secret", "secret-webhook1", "secret-webhook2", "secret-webhook3", "secret-webhook4", "tmp"}
+		wantVolumeMountNames := []string{"auth-volume", "cm-test-cm", "secret-test-secret", "secret-webhook1", "secret-webhook2", "secret-webhook3", "secret-webhook4", "tmp"}
+
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		gotVolumes := deployment.Spec.Template.Spec.Volumes
+		gotVolumeMounts := deployment.Spec.Template.Spec.Containers[0].VolumeMounts
+
+		var gotVolumeNames []string
+		var gotVolumeMountNames []string
+
+		for _, v := range gotVolumes {
+			gotVolumeNames = append(gotVolumeNames, v.Name)
+		}
+		for _, v := range gotVolumeMounts {
+			gotVolumeMountNames = append(gotVolumeMountNames, v.Name)
+		}
+
+		assert.Equal(t, len(gotVolumes), len(wantVolumeNames))
+		assert.Equal(t, len(gotVolumeMounts), len(wantVolumeMountNames))
+
+		for i := range gotVolumeNames {
+			assert.Equal(t, gotVolumeNames[i], wantVolumeNames[i])
+		}
+		for i := range gotVolumeMountNames {
+			assert.Equal(t, gotVolumeMountNames[i], wantVolumeMountNames[i])
+		}
+	})
 }
 
 func TestResourceReconcile(t *testing.T) {
