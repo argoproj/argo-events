@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -363,7 +363,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 	// NOTE:
 	// Do not move the code below to a goroutine.
 	// The `ConsumeClaim` itself is called within a goroutine, see:
-	// https://github.com/Shopify/sarama/blob/master/consumer_group.go#L27-L29
+	// https://github.com/IBM/sarama/blob/master/consumer_group.go#L27-L29
 	for message := range claim.Messages() {
 		if err := consumer.processOne(session, message); err != nil {
 			consumer.metrics.EventProcessingFailed(consumer.eventSourceName, consumer.eventName)

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	"go.uber.org/zap"
 )

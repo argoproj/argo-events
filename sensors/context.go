@@ -22,7 +22,7 @@ import (
 
 	eventhubs "github.com/Azure/azure-event-hubs-go/v3"
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/aws/aws-sdk-go/service/lambda"

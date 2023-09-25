@@ -3,7 +3,7 @@ package base
 import (
 	"strings"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"github.com/argoproj/argo-events/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"go.uber.org/zap"
