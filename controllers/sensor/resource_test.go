@@ -264,7 +264,6 @@ func Test_BuildDeployment(t *testing.T) {
 	})
 
 	t.Run("test secret volume and volumemount order determinisitc", func(t *testing.T) {
-
 		args := &AdaptorArgs{
 			Image:  testImage,
 			Sensor: sensorObj,
