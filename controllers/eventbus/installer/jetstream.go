@@ -5,8 +5,6 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"log"
-	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -637,34 +635,6 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	ssName := generateJetStreamStatefulSetName(r.eventBus)
 	replicas := r.eventBus.Spec.JetStream.GetReplicas()
 	if replicas > 2 {
-		f, err := os.OpenFile("assets/jetstream/nats.conf",
-			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Println(err)
-		}
-		if _, err := f.WriteString(
-			`
-				###################################
-				#                                 #
-				# NATS Cluster                    #
-				#                                 #
-				###################################
-				cluster {
-				  port: {{.ClusterPort}}
-				  name: {{.ClusterName}}
-				  routes: [{{.Routes}}]
-				  cluster_advertise: $CLUSTER_ADVERTISE
-				  connect_retries: 120
-
-				  tls {
-					cert_file: "/etc/nats-config/cluster-server-cert.pem"
-					key_file:  "/etc/nats-config/cluster-server-key.pem"
-					ca_file:   "/etc/nats-config/cluster-ca-cert.pem"
-				  }
-				}
-			`); err != nil {
-			log.Println(err)
-		}
 	}
 
 	routes := []string{}
@@ -679,8 +649,12 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	if r.eventBus.Spec.JetStream.MaxPayload != nil {
 		maxPayload = *r.eventBus.Spec.JetStream.MaxPayload
 	}
-
-	confTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats.conf"))
+	var confTpl *template.Template
+	if replicas > 2 {
+		confTpl = template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats-cluster.conf"))
+	} else {
+		confTpl = template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats.conf"))
+	}
 	var confTplOutput bytes.Buffer
 	if err := confTpl.Execute(&confTplOutput, struct {
 		MaxPayloadSize string

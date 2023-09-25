@@ -32,9 +32,6 @@ func ValidateEventBus(eb *v1alpha1.EventBus) error {
 		if x.Version == "" {
 			return fmt.Errorf("invalid spec: a version for jetstream needs to be specified")
 		}
-		if x.Replicas != nil && *x.Replicas < 3 {
-			fmt.Errorf("Jetstream replicas is %d. There is no fault-tolerance with replicas < 3.", x.Replicas)
-		}
 	}
 	if x := eb.Spec.Kafka; x != nil {
 		if x.URL == "" {
