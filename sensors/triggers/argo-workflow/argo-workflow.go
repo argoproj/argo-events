@@ -225,7 +225,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		return nil, fmt.Errorf("failed to list created workflows for unknown reason")
 	}
 
-	//Parsing the first item in argo workflows list response
+	// Parsing the first item in argo workflows list response
 	var workflow *Workflow
 	workflowUnstrucutred := l.Items[0]
 	workflow, err = FromUnstructured(workflowUnstrucutred)
@@ -233,7 +233,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		return nil, fmt.Errorf("failed to parse the workflows list response for unknown reason")
 	}
 
-	//Fetching the workflow name
+	// Fetching the workflow name
 	var workflowName = workflow.Metadata.Name
 	var workflowNamespace = workflow.Metadata.Namespace
 	var workflowUid = workflow.Metadata.Uid
@@ -245,7 +245,7 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		depNames = append(depNames, dependencyName)
 	}
 
-	//Capturing the workflow name,  event ids and depdendecy names in the log
+	// Capturing the workflow name,  event ids and depdendecy names in the log
 	t.Logger.Infow(fmt.Sprintf("Successfully submitted workflow '%s'", workflowName),
 		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs), zap.Any("argoWorkflowName", workflowName),
 		zap.Any("argoWorkflowNamespace", workflowNamespace), zap.Any("argoWorkflowUid", workflowUid))
