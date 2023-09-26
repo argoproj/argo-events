@@ -43,7 +43,7 @@ type PulsarTrigger struct {
 }
 
 // NewPulsarTrigger returns a new Pulsar trigger context.
-func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers *common.StringKeyedMap[pulsar.Producer], logger *zap.SugaredLogger) (*PulsarTrigger, error) {
+func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers common.StringKeyedMap[pulsar.Producer], logger *zap.SugaredLogger) (*PulsarTrigger, error) {
 	pulsarTrigger := trigger.Template.Pulsar
 
 	producer, ok := pulsarProducers.Load(trigger.Template.Name)

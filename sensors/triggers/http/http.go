@@ -46,7 +46,7 @@ type HTTPTrigger struct {
 }
 
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(httpClients *common.StringKeyedMap[*http.Client], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
+func NewHTTPTrigger(httpClients common.StringKeyedMap[*http.Client], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
 	httptrigger := trigger.Template.HTTP
 
 	client, ok := httpClients.Load(trigger.Template.Name)

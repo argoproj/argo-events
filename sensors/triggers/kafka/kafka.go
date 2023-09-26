@@ -51,7 +51,7 @@ type KafkaTrigger struct {
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
-func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers *common.StringKeyedMap[sarama.AsyncProducer], logger *zap.SugaredLogger) (*KafkaTrigger, error) {
+func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers common.StringKeyedMap[sarama.AsyncProducer], logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
 

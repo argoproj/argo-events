@@ -48,7 +48,7 @@ type CustomTrigger struct {
 }
 
 // NewCustomTrigger returns a new custom trigger
-func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients *common.StringKeyedMap[*grpc.ClientConn]) (*CustomTrigger, error) {
+func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients common.StringKeyedMap[*grpc.ClientConn]) (*CustomTrigger, error) {
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,

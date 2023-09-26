@@ -87,7 +87,7 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getFakePulsarTrigger(producers *common.StringKeyedMap[pulsar.Producer]) (*PulsarTrigger, error) {
+func getFakePulsarTrigger(producers common.StringKeyedMap[pulsar.Producer]) (*PulsarTrigger, error) {
 	return NewPulsarTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 }
 

@@ -46,7 +46,7 @@ type AWSLambdaTrigger struct {
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients *common.StringKeyedMap[*lambda.Lambda], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients common.StringKeyedMap[*lambda.Lambda], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
 	lambdaClient, ok := lambdaClients.Load(trigger.Template.Name)

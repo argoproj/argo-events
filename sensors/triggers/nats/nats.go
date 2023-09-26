@@ -43,7 +43,7 @@ type NATSTrigger struct {
 }
 
 // NewNATSTrigger returns new nats trigger.
-func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections *common.StringKeyedMap[*natslib.Conn], logger *zap.SugaredLogger) (*NATSTrigger, error) {
+func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections common.StringKeyedMap[*natslib.Conn], logger *zap.SugaredLogger) (*NATSTrigger, error) {
 	natstrigger := trigger.Template.NATS
 
 	conn, ok := natsConnections.Load(trigger.Template.Name)

@@ -8,8 +8,8 @@ type StringKeyedMap[T any] struct {
 	lock  *sync.RWMutex
 }
 
-func NewStringKeyedMap[T any]() *StringKeyedMap[T] {
-	return &StringKeyedMap[T]{
+func NewStringKeyedMap[T any]() StringKeyedMap[T] {
+	return StringKeyedMap[T]{
 		items: make(map[string]T, 0),
 		lock:  &sync.RWMutex{},
 	}

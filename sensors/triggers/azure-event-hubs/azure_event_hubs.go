@@ -43,7 +43,7 @@ type AzureEventHubsTrigger struct {
 }
 
 // NewAzureEventHubsTrigger returns a new azure event hubs context.
-func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureEventHubsClient *common.StringKeyedMap[*eventhub.Hub], logger *zap.SugaredLogger) (*AzureEventHubsTrigger, error) {
+func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureEventHubsClient common.StringKeyedMap[*eventhub.Hub], logger *zap.SugaredLogger) (*AzureEventHubsTrigger, error) {
 	azureEventHubsTrigger := trigger.Template.AzureEventHubs
 
 	hub, ok := azureEventHubsClient.Load(trigger.Template.Name)

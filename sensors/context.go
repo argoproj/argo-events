@@ -52,25 +52,25 @@ type SensorContext struct {
 	hostname        string
 
 	// httpClients holds the reference to HTTP clients for HTTP triggers.
-	httpClients *common.StringKeyedMap[*http.Client]
+	httpClients common.StringKeyedMap[*http.Client]
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
-	customTriggerClients *common.StringKeyedMap[*grpc.ClientConn]
+	customTriggerClients common.StringKeyedMap[*grpc.ClientConn]
 	// http client to send slack messages.
 	slackHTTPClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
-	kafkaProducers *common.StringKeyedMap[sarama.AsyncProducer]
+	kafkaProducers common.StringKeyedMap[sarama.AsyncProducer]
 	// pulsarProducers holds references to the active pulsar producers
-	pulsarProducers *common.StringKeyedMap[pulsar.Producer]
+	pulsarProducers common.StringKeyedMap[pulsar.Producer]
 	// natsConnections holds the references to the active nats connections.
-	natsConnections *common.StringKeyedMap[*natslib.Conn]
+	natsConnections common.StringKeyedMap[*natslib.Conn]
 	// awsLambdaClients holds the references to active AWS Lambda clients.
-	awsLambdaClients *common.StringKeyedMap[*lambda.Lambda]
+	awsLambdaClients common.StringKeyedMap[*lambda.Lambda]
 	// openwhiskClients holds the references to active OpenWhisk clients.
-	openwhiskClients *common.StringKeyedMap[*whisk.Client]
+	openwhiskClients common.StringKeyedMap[*whisk.Client]
 	// azureEventHubsClients holds the references to active Azure Event Hub clients.
-	azureEventHubsClients *common.StringKeyedMap[*eventhubs.Hub]
+	azureEventHubsClients common.StringKeyedMap[*eventhubs.Hub]
 	// azureServiceBusClients holds the references to active Azure Service Bus clients.
-	azureServiceBusClients *common.StringKeyedMap[*servicebus.Sender]
+	azureServiceBusClients common.StringKeyedMap[*servicebus.Sender]
 	metrics                *sensormetrics.Metrics
 }
 

@@ -42,7 +42,7 @@ type AzureServiceBusTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients *common.StringKeyedMap[*servicebus.Sender], logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
+func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients common.StringKeyedMap[*servicebus.Sender], logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.AzureServiceBusTrigger)
 	azureServiceBusTrigger := trigger.Template.AzureServiceBus
 
