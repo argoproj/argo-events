@@ -262,6 +262,43 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, hasTLSSecretVolume)
 		assert.True(t, hasTLSSecretVolumeMount)
 	})
+
+	t.Run("test secret volume and volumemount order deterministic", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
+		}
+
+		wantVolumeNames := []string{"test-data", "auth-volume", "tmp"}
+		wantVolumeMountNames := []string{"test-data", "auth-volume", "tmp"}
+
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		gotVolumes := deployment.Spec.Template.Spec.Volumes
+		gotVolumeMounts := deployment.Spec.Template.Spec.Containers[0].VolumeMounts
+
+		var gotVolumeNames []string
+		var gotVolumeMountNames []string
+
+		for _, v := range gotVolumes {
+			gotVolumeNames = append(gotVolumeNames, v.Name)
+		}
+		for _, v := range gotVolumeMounts {
+			gotVolumeMountNames = append(gotVolumeMountNames, v.Name)
+		}
+
+		assert.Equal(t, len(gotVolumes), len(wantVolumeNames))
+		assert.Equal(t, len(gotVolumeMounts), len(wantVolumeMountNames))
+
+		for i := range gotVolumeNames {
+			assert.Equal(t, gotVolumeNames[i], wantVolumeNames[i])
+		}
+		for i := range gotVolumeMountNames {
+			assert.Equal(t, gotVolumeMountNames[i], wantVolumeMountNames[i])
+		}
+	})
 }
 
 func TestResourceReconcile(t *testing.T) {

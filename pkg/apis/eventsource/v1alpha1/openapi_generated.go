@@ -2589,7 +2589,7 @@ func schema_pkg_apis_eventsource_v1alpha1_KafkaEventSource(ref common.ReferenceC
 					},
 					"config": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Yaml format Sarama config for Kafka connection. It follows the struct of sarama.Config. See https://github.com/Shopify/sarama/blob/main/config.go e.g.\n\nconsumer:\n  fetch:\n    min: 1\nnet:\n  MaxOpenRequests: 5",
+							Description: "Yaml format Sarama config for Kafka connection. It follows the struct of sarama.Config. See https://github.com/IBM/sarama/blob/main/config.go e.g.\n\nconsumer:\n  fetch:\n    min: 1\nnet:\n  MaxOpenRequests: 5",
 							Type:        []string{"string"},
 							Format:      "",
 						},

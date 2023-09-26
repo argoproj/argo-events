@@ -26,7 +26,7 @@ import (
 	"github.com/hamba/avro"
 	"github.com/riferrei/srclient"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
