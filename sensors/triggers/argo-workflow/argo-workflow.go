@@ -235,6 +235,9 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	//Fetching the workflow name
 	var workflowName = workflow.Metadata.Name
+	var workflowNamespace = workflow.Metadata.Namespace
+	var workflowUid = workflow.Metadata.Uid
+
 	depNames := make([]string, 0, len(events))
 	eventIDs := make([]string, 0, len(events))
 	for dependencyName, event := range events {
@@ -244,7 +247,8 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	//Capturing the workflow name,  event ids and depdendecy names in the log
 	t.Logger.Infow(fmt.Sprintf("Successfully submitted workflow '%s'", workflowName),
-		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs), zap.Any("argoWorkflowName", workflowName))
+		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs), zap.Any("argoWorkflowName", workflowName),
+		zap.Any("argoWorkflowNamespace", workflowNamespace), zap.Any("argoWorkflowUid", workflowUid))
 
 	return l.Items[0], nil
 }
