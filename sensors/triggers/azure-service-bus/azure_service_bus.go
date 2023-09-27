@@ -42,11 +42,11 @@ type AzureServiceBusTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients map[string]*servicebus.Sender, logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
+func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients common.StringKeyedMap[*servicebus.Sender], logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.AzureServiceBusTrigger)
 	azureServiceBusTrigger := trigger.Template.AzureServiceBus
 
-	sender, ok := azureServiceBusClients[trigger.Template.Name]
+	sender, ok := azureServiceBusClients.Load(trigger.Template.Name)
 
 	if !ok {
 		connStr, err := common.GetSecretFromVolume(azureServiceBusTrigger.ConnectionString)
@@ -91,7 +91,7 @@ func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigge
 			return nil, err
 		}
 
-		azureServiceBusClients[trigger.Template.Name] = sender
+		azureServiceBusClients.Store(trigger.Template.Name, sender)
 	}
 
 	return &AzureServiceBusTrigger{
