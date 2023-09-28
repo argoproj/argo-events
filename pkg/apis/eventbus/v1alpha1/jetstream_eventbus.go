@@ -9,7 +9,7 @@ import (
 type JetStreamBus struct {
 	// JetStream version, such as "2.7.3"
 	Version string `json:"version,omitempty" protobuf:"bytes,1,opt,name=version"`
-	// Redis StatefulSet size
+	// JetStream StatefulSet size
 	// +kubebuilder:default=3
 	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,2,opt,name=replicas"`
 	// ContainerTemplate contains customized spec for Nats JetStream container

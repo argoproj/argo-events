@@ -296,7 +296,7 @@ func schema_pkg_apis_eventbus_v1alpha1_JetStreamBus(ref common.ReferenceCallback
 					},
 					"replicas": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Redis StatefulSet size",
+							Description: "JetStream StatefulSet size",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
