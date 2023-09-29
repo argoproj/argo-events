@@ -77,7 +77,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening watches resource updates and consume those events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
@@ -164,7 +164,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return fmt.Errorf("failed to marshal the event. rejecting the event, %w", err)
 		}
 
-		if err = dispatch(eventBody); err != nil {
+		if _, err = dispatch(eventBody); err != nil {
 			return fmt.Errorf("failed to dispatch a resource event, %w", err)
 		}
 		return nil

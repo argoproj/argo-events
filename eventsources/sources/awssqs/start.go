@@ -62,7 +62,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the AWS SQS event source...")
@@ -141,7 +141,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) processMessage(message *sqslib.Message, dispatch func([]byte, ...eventsourcecommon.Option) error, ack func(), log *zap.SugaredLogger) {
+func (el *EventListener) processMessage(message *sqslib.Message, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error), ack func(), log *zap.SugaredLogger) {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
@@ -167,10 +167,15 @@ func (el *EventListener) processMessage(message *sqslib.Message, dispatch func([
 		}
 		return
 	}
-	if err = dispatch(eventBytes); err != nil {
+	dispatched := false
+	dispatched, err = dispatch(eventBytes)
+	if err != nil {
 		log.Errorw("failed to dispatch SQS event", zap.Error(err))
 		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 	} else {
+		if dispatched == true {
+			log.Infow("Successfully dispatched SQS Event", zap.Any("triggeredByEvent", data.MessageId), zap.Any("sqsMessageAttributes", data.MessageAttributes))
+		}
 		ack()
 	}
 }

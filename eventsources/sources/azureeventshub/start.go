@@ -59,7 +59,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Azure Events Hub event source...")
@@ -109,7 +109,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		log.Info("dispatching the event to eventbus...")
-		if err = dispatch(eventBytes); err != nil {
+		if _, err = dispatch(eventBytes); err != nil {
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			log.Errorw("failed to dispatch Azure EventHub event", zap.Error(err))
 			return err

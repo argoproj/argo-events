@@ -70,7 +70,7 @@ type EventingServer interface {
 	GetEventSourceType() apicommon.EventSourceType
 
 	// Function to start listening events.
-	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error
+	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
@@ -522,16 +522,16 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 					Jitter:   &jitter,
 				}
 				if err = common.DoWithRetry(&backoff, func() error {
-					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) error {
+					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) (bool, error) {
 						if filter, ok := filters[s.GetEventName()]; ok {
 							proceed, err := filterEvent(data, filter)
 							if err != nil {
 								logger.Errorw("Failed to filter event", zap.Error(err))
-								return nil
+								return false, nil
 							}
 							if !proceed {
 								logger.Info("Filter condition not met, skip dispatching")
-								return nil
+								return false, nil
 							}
 						}
 
@@ -544,20 +544,20 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						for _, opt := range opts {
 							err := opt(&event)
 							if err != nil {
-								return err
+								return false, err
 							}
 						}
 						err := event.SetData(cloudevents.ApplicationJSON, data)
 						if err != nil {
-							return err
+							return false, err
 						}
 						eventBody, err := json.Marshal(event)
 						if err != nil {
-							return err
+							return false, err
 						}
 
 						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
-							return eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
+							return false, eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
 						}
 
 						msg := eventbuscommon.Message{
@@ -575,12 +575,12 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							logger.Errorw("Failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
-							return eventbuscommon.NewEventBusError(err)
+							return false, eventbuscommon.NewEventBusError(err)
 						}
 						logger.Infow("Succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
-						return nil
+						return true, nil
 					})
 				}); err != nil {
 					logger.Errorw("Failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,

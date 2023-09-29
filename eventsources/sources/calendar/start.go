@@ -134,7 +134,7 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
 	el.log = logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	el.log.Info("started processing the calendar event source...")
@@ -206,7 +206,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return fmt.Errorf("failed to marshal the event data for event source %s / %s, %w", el.GetEventSourceName(), el.GetEventName(), err)
 		}
 		el.log.Info("dispatching calendar event...")
-		err = dispatch(payload)
+		_, err = dispatch(payload)
 		if err != nil {
 			el.log.Errorw("failed to dispatch calendar event", zap.Error(err))
 			return fmt.Errorf("failed to dispatch calendar event, %w", err)

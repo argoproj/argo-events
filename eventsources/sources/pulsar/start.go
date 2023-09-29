@@ -58,7 +58,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening listens Pulsar events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Pulsar event source...")
@@ -185,7 +185,7 @@ consumeMessages:
 	return nil
 }
 
-func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error), log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
@@ -208,7 +208,7 @@ func (el *EventListener) handleOne(msg pulsar.Message, dispatch func([]byte, ...
 	}
 
 	log.Infof("dispatching the message received on the topic %s to eventbus", msg.Topic())
-	if err = dispatch(eventBody); err != nil {
+	if _, err = dispatch(eventBody); err != nil {
 		return fmt.Errorf("failed to dispatch a Pulsar event, %w", err)
 	}
 	return nil
