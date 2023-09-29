@@ -28,8 +28,8 @@ func Test_HandleOne(t *testing.T) {
 		Payload: `{"a": "b"}`,
 	}
 
-	getDispatcher := func(isJson bool) func(d []byte, opts ...eventsourcecommon.Option) error {
-		return func(d []byte, opts ...eventsourcecommon.Option) error {
+	getDispatcher := func(isJson bool) func(d []byte, opts ...eventsourcecommon.Option) (bool, error) {
+		return func(d []byte, opts ...eventsourcecommon.Option) (bool, error) {
 			eventData := &events.RedisEventData{}
 			err := json.Unmarshal(d, eventData)
 			assert.NoError(t, err)
@@ -44,7 +44,7 @@ func Test_HandleOne(t *testing.T) {
 				assert.True(t, ok)
 				assert.Equal(t, "b", s["a"])
 			}
-			return nil
+			return true, nil
 		}
 	}
 
