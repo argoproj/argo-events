@@ -173,7 +173,7 @@ func (el *EventListener) processMessage(message *sqslib.Message, dispatch func([
 		log.Errorw("failed to dispatch SQS event", zap.Error(err))
 		el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 	} else {
-		if dispatched == true {
+		if dispatched {
 			log.Infow("Successfully dispatched SQS Event", zap.Any("triggeredByEvent", data.MessageId), zap.Any("sqsMessageAttributes", data.MessageAttributes))
 		}
 		ack()
