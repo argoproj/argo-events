@@ -43,10 +43,10 @@ type PulsarTrigger struct {
 }
 
 // NewPulsarTrigger returns a new Pulsar trigger context.
-func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers map[string]pulsar.Producer, logger *zap.SugaredLogger) (*PulsarTrigger, error) {
+func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers common.StringKeyedMap[pulsar.Producer], logger *zap.SugaredLogger) (*PulsarTrigger, error) {
 	pulsarTrigger := trigger.Template.Pulsar
 
-	producer, ok := pulsarProducers[trigger.Template.Name]
+	producer, ok := pulsarProducers.Load(trigger.Template.Name)
 	if !ok {
 		var err error
 		tlsTrustCertsFilePath := ""
@@ -124,7 +124,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			return nil, err
 		}
 
-		pulsarProducers[trigger.Template.Name] = producer
+		pulsarProducers.Store(trigger.Template.Name, producer)
 	}
 
 	return &PulsarTrigger{

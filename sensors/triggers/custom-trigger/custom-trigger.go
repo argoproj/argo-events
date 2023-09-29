@@ -48,7 +48,7 @@ type CustomTrigger struct {
 }
 
 // NewCustomTrigger returns a new custom trigger
-func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients map[string]*grpc.ClientConn) (*CustomTrigger, error) {
+func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients common.StringKeyedMap[*grpc.ClientConn]) (*CustomTrigger, error) {
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,
@@ -57,7 +57,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 
 	ct := trigger.Template.CustomTrigger
 
-	if conn, ok := customTriggerClients[trigger.Template.Name]; ok {
+	if conn, ok := customTriggerClients.Load(trigger.Template.Name); ok {
 		if conn.GetState() == connectivity.Ready {
 			logger.Info("trigger client connection is ready...")
 			customTrigger.triggerClient = triggers.NewTriggerClient(conn)
@@ -65,7 +65,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		}
 
 		logger.Info("trigger client connection is closed, creating new one...")
-		delete(customTriggerClients, trigger.Template.Name)
+		customTriggerClients.Delete(trigger.Template.Name)
 	}
 
 	logger.Infow("instantiating trigger client...", zap.Any("server-url", ct.ServerURL))
@@ -117,7 +117,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 	}
 
 	customTrigger.triggerClient = triggers.NewTriggerClient(conn)
-	customTriggerClients[trigger.Template.Name] = conn
+	customTriggerClients.Store(trigger.Template.Name, conn)
 
 	logger.Info("successfully setup the trigger client...")
 	return customTrigger, nil
