@@ -581,7 +581,6 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
 						return msg.MsgHeader.ID, nil
 					})
-
 				}); err != nil {
 					logger.Errorw("Failed to start listening eventsource", zap.Any(logging.LabelEventSourceType,
 						s.GetEventSourceType()), zap.Any(logging.LabelEventName, s.GetEventName()), zap.Error(err))
