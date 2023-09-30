@@ -134,7 +134,7 @@ func (el *EventListener) getExecutionTime() (time.Time, error) {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	el.log = logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	el.log.Info("started processing the calendar event source...")

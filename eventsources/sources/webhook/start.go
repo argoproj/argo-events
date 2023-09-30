@@ -151,7 +151,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the webhook event source...")

@@ -64,7 +64,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
@@ -112,7 +112,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 // listenEvents listen to sftp related events.
-func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Client, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error), log *zap.SugaredLogger) error {
+func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Client, dispatch func([]byte, ...eventsourcecommon.Option) (string, error), log *zap.SugaredLogger) error {
 	sftpEventSource := &el.SFTPEventSource
 
 	log.Info("identifying new files in sftp...")

@@ -178,7 +178,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	defer sources.Recover(el.GetEventName())
 
 	bitbucketserverEventSource := &el.BitbucketServerEventSource

@@ -45,7 +45,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 
@@ -118,7 +118,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) processMessage(message *azqueue.DequeuedMessage, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error), ack func(), log *zap.SugaredLogger) {
+func (el *EventListener) processMessage(message *azqueue.DequeuedMessage, dispatch func([]byte, ...eventsourcecommon.Option) (string, error), ack func(), log *zap.SugaredLogger) {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())

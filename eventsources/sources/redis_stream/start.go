@@ -59,7 +59,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening listens for new data on specified redis streams
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Redis stream event source...")
@@ -194,7 +194,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) handleOne(stream string, message redis.XMessage, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error), log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(stream string, message redis.XMessage, dispatch func([]byte, ...eventsourcecommon.Option) (string, error), log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())

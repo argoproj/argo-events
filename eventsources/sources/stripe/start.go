@@ -190,7 +190,7 @@ func filterEvent(event *stripe.Event, filters []string) bool {
 }
 
 // StartListening starts an event source
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (bool, error)) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Stripe event source...")
