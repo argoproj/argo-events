@@ -26,7 +26,7 @@ import (
 	"github.com/hamba/avro"
 	"github.com/riferrei/srclient"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
@@ -51,11 +51,11 @@ type KafkaTrigger struct {
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
-func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers map[string]sarama.AsyncProducer, logger *zap.SugaredLogger) (*KafkaTrigger, error) {
+func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers common.StringKeyedMap[sarama.AsyncProducer], logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
 	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
 
-	producer, ok := kafkaProducers[trigger.Template.Name]
+	producer, ok := kafkaProducers.Load(trigger.Template.Name)
 	var schema *srclient.Schema
 
 	if !ok {
@@ -133,7 +133,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 			}
 		}()
 
-		kafkaProducers[trigger.Template.Name] = producer
+		kafkaProducers.Store(trigger.Template.Name, producer)
 	}
 
 	if kafkatrigger.SchemaRegistry != nil {

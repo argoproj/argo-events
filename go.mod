@@ -14,9 +14,9 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.4.1
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.0
+	github.com/IBM/sarama v1.41.2
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/Shopify/sarama v1.38.0
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
 	github.com/antonmedv/expr v1.15.2
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
@@ -37,7 +37,7 @@ require (
 	github.com/go-git/go-git/v5 v5.9.0
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-resty/resty/v2 v2.7.0
+	github.com/go-resty/resty/v2 v2.8.0
 	github.com/go-swagger/go-swagger v0.30.4
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
 	github.com/gogo/protobuf v1.3.2
@@ -51,16 +51,16 @@ require (
 	github.com/imdario/mergo v0.3.15
 	github.com/itchyny/gojq v0.12.12
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
-	github.com/ktrysmt/go-bitbucket v0.9.66
+	github.com/ktrysmt/go-bitbucket v0.9.68
 	github.com/minio/minio-go/v7 v7.0.58
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nats-io/graft v0.0.0-20220215174245-93d18541496f
-	github.com/nats-io/nats.go v1.29.0
+	github.com/nats-io/nats.go v1.30.2
 	github.com/nats-io/stan.go v0.10.4
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/sftp v1.13.6
-	github.com/prometheus/client_golang v1.15.1
+	github.com/prometheus/client_golang v1.17.0
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/radovskyb/watcher v1.0.7
 	github.com/riferrei/srclient v0.5.4
@@ -71,15 +71,15 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/tidwall/gjson v1.16.0
+	github.com/tidwall/gjson v1.17.0
 	github.com/tidwall/sjson v1.2.4
-	github.com/xanzy/go-gitlab v0.91.1
+	github.com/xanzy/go-gitlab v0.92.3
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.13.0
-	google.golang.org/api v0.141.0
-	google.golang.org/grpc v1.58.1
+	google.golang.org/api v0.142.0
+	google.golang.org/grpc v1.58.2
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3
@@ -138,7 +138,7 @@ require (
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
 	github.com/opsgenie/opsgenie-go-sdk-v2 v1.0.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
-	github.com/pierrec/lz4/v4 v4.1.17 // indirect
+	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -151,7 +151,7 @@ require (
 	gomodules.xyz/envconfig v1.3.1-0.20190308184047-426f31af0d45 // indirect
 	gomodules.xyz/notify v0.1.1 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230803162519-f966b187b2e5 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230911183012-2d3300fd4832 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230913181813-007df8e322eb // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
@@ -188,8 +188,8 @@ require (
 	github.com/devigned/tab v0.1.1 // indirect
 	github.com/doublerebel/bellows v0.0.0-20160303004610-f177d92a03d3
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/eapache/go-resiliency v1.3.0 // indirect
-	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
+	github.com/eapache/go-resiliency v1.4.0 // indirect
+	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
@@ -231,7 +231,7 @@ require (
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect
-	github.com/jcmturner/gokrb5/v8 v8.4.3 // indirect
+	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -240,7 +240,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.16.5 // indirect
+	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -257,15 +257,15 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nats-io/nats-server/v2 v2.8.1 // indirect
 	github.com/nats-io/nats-streaming-server v0.24.3 // indirect
-	github.com/nats-io/nkeys v0.4.4 // indirect
+	github.com/nats-io/nkeys v0.4.5 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.42.0 // indirect
-	github.com/prometheus/procfs v0.9.0 // indirect
+	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
+	github.com/prometheus/common v0.44.0 // indirect
+	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/rs/xid v1.5.0 // indirect
