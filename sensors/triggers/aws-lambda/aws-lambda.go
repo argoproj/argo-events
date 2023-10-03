@@ -24,6 +24,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"go.uber.org/zap"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -45,17 +46,17 @@ type AWSLambdaTrigger struct {
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients common.StringKeyedMap[*lambda.Lambda], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
-	lambdaClient, ok := lambdaClients[trigger.Template.Name]
+	lambdaClient, ok := lambdaClients.Load(trigger.Template.Name)
 	if !ok {
 		awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(lambdatrigger.Region, lambdatrigger.RoleARN, lambdatrigger.AccessKey, lambdatrigger.SecretKey, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create a AWS session, %w", err)
 		}
 		lambdaClient = lambda.New(awsSession, &aws.Config{Region: &lambdatrigger.Region})
-		lambdaClients[trigger.Template.Name] = lambdaClient
+		lambdaClients.Store(trigger.Template.Name, lambdaClient)
 	}
 
 	return &AWSLambdaTrigger{

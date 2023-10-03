@@ -946,7 +946,7 @@ message KafkaEventSource {
   optional EventSourceFilter filter = 12;
 
   // Yaml format Sarama config for Kafka connection.
-  // It follows the struct of sarama.Config. See https://github.com/Shopify/sarama/blob/main/config.go
+  // It follows the struct of sarama.Config. See https://github.com/IBM/sarama/blob/main/config.go
   // e.g.
   //
   // consumer:

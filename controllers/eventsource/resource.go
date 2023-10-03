@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/imdario/mergo"
 	"go.uber.org/zap"
@@ -267,6 +268,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 	volConfigMaps, volCofigMapMounts := common.VolumesFromSecretsOrConfigMaps(common.ConfigMapKeySelectorType, eventSourceCopy)
 	volumeMounts = append(volumeMounts, volCofigMapMounts...)
 	volumes = append(volumes, volConfigMaps...)
+
+	// Order volumes and volumemounts based on name to make the order deterministic
+	sort.Slice(volumes, func(i, j int) bool {
+		return volumes[i].Name < volumes[j].Name
+	})
+	sort.Slice(volumeMounts, func(i, j int) bool {
+		return volumeMounts[i].Name < volumeMounts[j].Name
+	})
 
 	deploymentSpec.Template.Spec.Containers[0].Env = append(deploymentSpec.Template.Spec.Containers[0].Env, env...)
 	deploymentSpec.Template.Spec.Containers[0].VolumeMounts = append(deploymentSpec.Template.Spec.Containers[0].VolumeMounts, volumeMounts...)

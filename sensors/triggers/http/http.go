@@ -46,10 +46,10 @@ type HTTPTrigger struct {
 }
 
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
+func NewHTTPTrigger(httpClients common.StringKeyedMap[*http.Client], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
 	httptrigger := trigger.Template.HTTP
 
-	client, ok := httpClients[trigger.Template.Name]
+	client, ok := httpClients.Load(trigger.Template.Name)
 	if !ok {
 		client = &http.Client{}
 
@@ -69,7 +69,7 @@ func NewHTTPTrigger(httpClients map[string]*http.Client, sensor *v1alpha1.Sensor
 		}
 		client.Timeout = timeout
 
-		httpClients[trigger.Template.Name] = client
+		httpClients.Store(trigger.Template.Name, client)
 	}
 
 	return &HTTPTrigger{
