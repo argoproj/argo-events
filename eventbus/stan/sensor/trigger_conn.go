@@ -42,6 +42,17 @@ func (n *STANTriggerConn) String() string {
 	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.ClientID, n.sensorName, n.triggerName)
 }
 
+func (conn *STANTriggerConn) IsClosed() bool {
+	return conn == nil || conn.STANConnection.IsClosed()
+}
+
+func (conn *STANTriggerConn) Close() error {
+	if conn == nil {
+		return fmt.Errorf("can't close STAN trigger connection, STANTriggerConn is nil")
+	}
+	return conn.STANConnection.Close()
+}
+
 // Subscribe is used to subscribe to multiple event source dependencies
 // Parameter - ctx, context
 // Parameter - conn, eventbus connection
