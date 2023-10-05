@@ -634,9 +634,6 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	svcName := generateJetStreamServiceName(r.eventBus)
 	ssName := generateJetStreamStatefulSetName(r.eventBus)
 	replicas := r.eventBus.Spec.JetStream.GetReplicas()
-	if replicas < 3 {
-		replicas = 3
-	}
 	routes := []string{}
 	for j := 0; j < replicas; j++ {
 		routes = append(routes, fmt.Sprintf("nats://%s-%s.%s.%s.svc:%s", ssName, strconv.Itoa(j), svcName, r.eventBus.Namespace, strconv.Itoa(int(jsClusterPort))))
@@ -649,8 +646,12 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	if r.eventBus.Spec.JetStream.MaxPayload != nil {
 		maxPayload = *r.eventBus.Spec.JetStream.MaxPayload
 	}
-
-	confTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats.conf"))
+	var confTpl *template.Template
+	if replicas > 2 {
+		confTpl = template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats-cluster.conf"))
+	} else {
+		confTpl = template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats.conf"))
+	}
 	var confTplOutput bytes.Buffer
 	if err := confTpl.Execute(&confTplOutput, struct {
 		MaxPayloadSize string

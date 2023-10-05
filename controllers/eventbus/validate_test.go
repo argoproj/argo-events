@@ -115,12 +115,8 @@ func TestValidate(t *testing.T) {
 
 	t.Run("test js eventbus replica", func(t *testing.T) {
 		eb := testJetStreamEventBus.DeepCopy()
-		eb.Spec.JetStream.Replicas = pointer.Int32(2)
-		err := ValidateEventBus(eb)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid spec: a jetstream eventbus requires at least 3 replicas")
 		eb.Spec.JetStream.Replicas = pointer.Int32(3)
-		err = ValidateEventBus(eb)
+		err := ValidateEventBus(eb)
 		assert.NoError(t, err)
 		eb.Spec.JetStream.Replicas = nil
 		err = ValidateEventBus(eb)
