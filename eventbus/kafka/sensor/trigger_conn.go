@@ -53,11 +53,14 @@ func (c *KafkaTriggerConnection) String() string {
 }
 
 func (c *KafkaTriggerConnection) Close() error {
+	if c.close == nil {
+		return fmt.Errorf("can't close Kafka trigger connection, close function is nil")
+	}
 	return c.close()
 }
 
 func (c *KafkaTriggerConnection) IsClosed() bool {
-	return c.isClosed()
+	return c.isClosed == nil || c.isClosed()
 }
 
 func (c *KafkaTriggerConnection) Subscribe(

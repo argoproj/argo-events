@@ -83,6 +83,17 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 	return connection, nil
 }
 
+func (conn *JetstreamTriggerConn) IsClosed() bool {
+	return conn == nil || conn.JetstreamConnection.IsClosed()
+}
+
+func (conn *JetstreamTriggerConn) Close() error {
+	if conn == nil {
+		return fmt.Errorf("can't close Jetstream trigger connection, JetstreamTriggerConn is nil")
+	}
+	return conn.JetstreamConnection.Close()
+}
+
 func (conn *JetstreamTriggerConn) String() string {
 	if conn == nil {
 		return ""
