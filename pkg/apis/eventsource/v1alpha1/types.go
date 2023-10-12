@@ -450,7 +450,7 @@ type AMQPExchangeDeclareConfig struct {
 	// Internal when true does not accept publishings
 	// +optional
 	Internal bool `json:"internal,omitempty" protobuf:"varint,3,opt,name=internal"`
-	// NowWait when true does not wait for a confirmation from the server
+	// NoWait when true does not wait for a confirmation from the server
 	// +optional
 	NoWait bool `json:"noWait,omitempty" protobuf:"varint,4,opt,name=noWait"`
 }
@@ -473,7 +473,7 @@ type AMQPQueueDeclareConfig struct {
 	// deleted wgen the connection closes
 	// +optional
 	Exclusive bool `json:"exclusive,omitempty" protobuf:"varint,4,opt,name=exclusive"`
-	// NowWait when true, the queue assumes to be declared on the server
+	// NoWait when true, the queue assumes to be declared on the server
 	// +optional
 	NoWait bool `json:"noWait,omitempty" protobuf:"varint,5,opt,name=noWait"`
 	// Arguments of a queue (also known as "x-arguments") used for optional features and plugins
@@ -485,7 +485,7 @@ type AMQPQueueDeclareConfig struct {
 // exchange will be routed to the queue when the publishing routing key matches the binding routing key
 // +k8s:openapi-gen=true
 type AMQPQueueBindConfig struct {
-	// NowWait false and the queue could not be bound, the channel will be closed with an error
+	// NoWait false and the queue could not be bound, the channel will be closed with an error
 	// +optional
 	NoWait bool `json:"noWait,omitempty" protobuf:"varint,1,opt,name=noWait"`
 }
@@ -506,7 +506,7 @@ type AMQPConsumeConfig struct {
 	// NoLocal flag is not supported by RabbitMQ
 	// +optional
 	NoLocal bool `json:"noLocal,omitempty" protobuf:"varint,4,opt,name=noLocal"`
-	// NowWait when true, do not wait for the server to confirm the request and immediately begin deliveries
+	// NoWait when true, do not wait for the server to confirm the request and immediately begin deliveries
 	// +optional
 	NoWait bool `json:"noWait,omitempty" protobuf:"varint,5,opt,name=noWait"`
 }
