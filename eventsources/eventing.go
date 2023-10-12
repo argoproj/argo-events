@@ -34,6 +34,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/file"
 	"github.com/argoproj/argo-events/eventsources/sources/gcppubsub"
 	"github.com/argoproj/argo-events/eventsources/sources/generic"
+	"github.com/argoproj/argo-events/eventsources/sources/gerrit"
 	"github.com/argoproj/argo-events/eventsources/sources/github"
 	"github.com/argoproj/argo-events/eventsources/sources/gitlab"
 	"github.com/argoproj/argo-events/eventsources/sources/hdfs"
@@ -176,6 +177,16 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			servers = append(servers, &sftp.EventListener{EventSourceName: eventSource.Name, EventName: k, SFTPEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.SFTPEvent] = servers
+	}
+	if len(eventSource.Spec.Gerrit) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.Gerrit {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &gerrit.EventListener{EventSourceName: eventSource.Name, EventName: k, GerritEventSource: v, Metrics: metrics})
+		}
+		result[apicommon.GerritEvent] = servers
 	}
 	if len(eventSource.Spec.Github) != 0 {
 		servers := []EventingServer{}

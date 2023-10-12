@@ -38,6 +38,7 @@ var (
 	SNSEvent             EventSourceType = "sns"
 	SQSEvent             EventSourceType = "sqs"
 	PubSubEvent          EventSourceType = "pubsub"
+	GerritEvent          EventSourceType = "gerrit"
 	GithubEvent          EventSourceType = "github"
 	GitlabEvent          EventSourceType = "gitlab"
 	HDFSEvent            EventSourceType = "hdfs"

@@ -643,6 +643,9 @@ message EventSourceSpec {
 
   // SFTP event sources
   map<string, SFTPEventSource> sftp = 34;
+
+  // Gerrit event source
+  map<string, GerritEventSource> gerrit = 35;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -698,6 +701,45 @@ message GenericEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 7;
+}
+
+// GerritEventSource refers to event-source related to gerrit events
+message GerritEventSource {
+  // Webhook holds configuration to run a http server
+  optional WebhookContext webhook = 1;
+
+  // HookName is the name of the webhook
+  optional string hookName = 2;
+
+  // Events are gerrit event to listen to.
+  // Refer https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events
+  repeated string events = 3;
+
+  // Auth hosts secret selectors for username and password
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.BasicAuth auth = 4;
+
+  // GerritBaseURL is the base URL for API requests to a custom endpoint
+  optional string gerritBaseURL = 5;
+
+  // DeleteHookOnFinish determines whether to delete the Gerrit hook for the project once the event source is stopped.
+  // +optional
+  optional bool deleteHookOnFinish = 6;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 7;
+
+  // List of project namespace paths like "whynowy/test".
+  repeated string projects = 8;
+
+  // SslVerify to enable ssl verification
+  // +optional
+  optional bool sslVerify = 9;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 10;
 }
 
 message GithubAppCreds {
