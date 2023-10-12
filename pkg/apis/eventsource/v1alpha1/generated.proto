@@ -49,7 +49,7 @@ message AMQPConsumeConfig {
   // +optional
   optional bool noLocal = 4;
 
-  // NowWait when true, do not wait for the server to confirm the request and immediately begin deliveries
+  // NoWait when true, do not wait for the server to confirm the request and immediately begin deliveries
   // +optional
   optional bool noWait = 5;
 }
@@ -136,7 +136,7 @@ message AMQPExchangeDeclareConfig {
   // +optional
   optional bool internal = 3;
 
-  // NowWait when true does not wait for a confirmation from the server
+  // NoWait when true does not wait for a confirmation from the server
   // +optional
   optional bool noWait = 4;
 }
@@ -145,7 +145,7 @@ message AMQPExchangeDeclareConfig {
 // exchange will be routed to the queue when the publishing routing key matches the binding routing key
 // +k8s:openapi-gen=true
 message AMQPQueueBindConfig {
-  // NowWait false and the queue could not be bound, the channel will be closed with an error
+  // NoWait false and the queue could not be bound, the channel will be closed with an error
   // +optional
   optional bool noWait = 1;
 }
@@ -172,7 +172,7 @@ message AMQPQueueDeclareConfig {
   // +optional
   optional bool exclusive = 4;
 
-  // NowWait when true, the queue assumes to be declared on the server
+  // NoWait when true, the queue assumes to be declared on the server
   // +optional
   optional bool noWait = 5;
 
