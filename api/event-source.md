@@ -95,7 +95,7 @@ NoLocal flag is not supported by RabbitMQ
 <td>
 <em>(Optional)</em>
 <p>
-NowWait when true, do not wait for the server to confirm the request and
+NoWait when true, do not wait for the server to confirm the request and
 immediately begin deliveries
 </p>
 </td>
@@ -383,7 +383,7 @@ Internal when true does not accept publishings
 <td>
 <em>(Optional)</em>
 <p>
-NowWait when true does not wait for a confirmation from the server
+NoWait when true does not wait for a confirmation from the server
 </p>
 </td>
 </tr>
@@ -422,7 +422,7 @@ Description
 <td>
 <em>(Optional)</em>
 <p>
-NowWait false and the queue could not be bound, the channel will be
+NoWait false and the queue could not be bound, the channel will be
 closed with an error
 </p>
 </td>
@@ -509,7 +509,7 @@ declares them and will be deleted wgen the connection closes
 <td>
 <em>(Optional)</em>
 <p>
-NowWait when true, the queue assumes to be declared on the server
+NoWait when true, the queue assumes to be declared on the server
 </p>
 </td>
 </tr>
