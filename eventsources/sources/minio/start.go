@@ -60,7 +60,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName(),
 			zap.String("bucketName", el.MinioEventSource.Bucket.Name))
@@ -106,7 +106,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	return nil
 }
 
-func (el *EventListener) handleOne(notification notification.Info, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(notification notification.Info, dispatch func([]byte, ...eventsourcecommon.Option) (string, error), log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
@@ -118,7 +118,7 @@ func (el *EventListener) handleOne(notification notification.Info, dispatch func
 	}
 
 	log.Info("dispatching the event on data channel...")
-	if err = dispatch(eventBytes); err != nil {
+	if _, err = dispatch(eventBytes); err != nil {
 		return fmt.Errorf("failed to dispatch minio event, %w", err)
 	}
 	return nil

@@ -64,7 +64,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
@@ -112,7 +112,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 // listenEvents listen to sftp related events.
-func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Client, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
+func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Client, dispatch func([]byte, ...eventsourcecommon.Option) (string, error), log *zap.SugaredLogger) error {
 	sftpEventSource := &el.SFTPEventSource
 
 	log.Info("identifying new files in sftp...")
@@ -146,7 +146,7 @@ func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Clie
 			return fmt.Errorf("failed to marshal the event to the fs event, %w", err)
 		}
 		log.Infow("dispatching sftp event on data channel...", zap.Any("event-type", event.Op.String()), zap.Any("descriptor-name", event.Name))
-		if err = dispatch(payload); err != nil {
+		if _, err = dispatch(payload); err != nil {
 			return fmt.Errorf("failed to dispatch an sftp event, %w", err)
 		}
 		return nil

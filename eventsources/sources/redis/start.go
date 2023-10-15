@@ -59,7 +59,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening listens events published by redis
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Redis event source...")
@@ -130,7 +130,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) handleOne(message *redis.Message, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(message *redis.Message, dispatch func([]byte, ...eventsourcecommon.Option) (string, error), log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
@@ -152,7 +152,7 @@ func (el *EventListener) handleOne(message *redis.Message, dispatch func([]byte,
 		return fmt.Errorf("failed to marshal the event data, rejecting the event, %w", err)
 	}
 	log.With("channel", message.Channel).Info("dispatching the event on the data channel...")
-	if err = dispatch(eventBody); err != nil {
+	if _, err = dispatch(eventBody); err != nil {
 		return fmt.Errorf("failed dispatch a Redis event, %w", err)
 	}
 	return nil

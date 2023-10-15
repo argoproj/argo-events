@@ -59,7 +59,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening starts listening events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	log.Info("started processing the Emitter event source...")
@@ -131,7 +131,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return
 		}
 		log.Info("dispatching event on data channel...")
-		if err = dispatch(eventBytes); err != nil {
+		if _, err = dispatch(eventBytes); err != nil {
 			log.Errorw("failed to dispatch event", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}

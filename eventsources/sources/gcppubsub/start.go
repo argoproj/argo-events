@@ -65,7 +65,7 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 }
 
 // StartListening listens to GCP PubSub events
-func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
+func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) (string, error)) error {
 	// In order to listen events from GCP PubSub,
 	// 1. Parse the event source that contains configuration to connect to GCP PubSub
 	// 2. Create a new PubSub client
@@ -128,7 +128,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		log.Info("dispatching event...")
-		if err = dispatch(eventBytes); err != nil {
+		if _, err = dispatch(eventBytes); err != nil {
 			log.Errorw("failed to dispatch GCP PubSub event", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			m.Nack()
