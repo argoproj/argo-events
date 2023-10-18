@@ -1502,6 +1502,13 @@
           "description": "Generic event source",
           "type": "object"
         },
+        "gerrit": {
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.GerritEventSource"
+          },
+          "description": "Gerrit event source",
+          "type": "object"
+        },
         "github": {
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.GithubEventSource"
@@ -1744,6 +1751,66 @@
       "required": [
         "url",
         "config"
+      ],
+      "type": "object"
+    },
+    "io.argoproj.eventsource.v1alpha1.GerritEventSource": {
+      "description": "GerritEventSource refers to event-source related to gerrit events",
+      "properties": {
+        "auth": {
+          "$ref": "#/definitions/io.argoproj.common.BasicAuth",
+          "description": "Auth hosts secret selectors for username and password"
+        },
+        "deleteHookOnFinish": {
+          "description": "DeleteHookOnFinish determines whether to delete the Gerrit hook for the project once the event source is stopped.",
+          "type": "boolean"
+        },
+        "events": {
+          "description": "Events are gerrit event to listen to. Refer https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
+        "gerritBaseURL": {
+          "description": "GerritBaseURL is the base URL for API requests to a custom endpoint",
+          "type": "string"
+        },
+        "hookName": {
+          "description": "HookName is the name of the webhook",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object"
+        },
+        "projects": {
+          "description": "List of project namespace paths like \"whynowy/test\".",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "sslVerify": {
+          "description": "SslVerify to enable ssl verification",
+          "type": "boolean"
+        },
+        "webhook": {
+          "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext",
+          "description": "Webhook holds configuration to run a http server"
+        }
+      },
+      "required": [
+        "hookName",
+        "events",
+        "gerritBaseURL"
       ],
       "type": "object"
     },

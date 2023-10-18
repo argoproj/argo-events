@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: gerrit
+spec:
+  service:
+    ports:
+      - port: 13000
+        targetPort: 13000
+  gerrit:
+    example:
+      projects:
+        - "argo-webhook"
+        - "argo/webhook"
+      hookName: "argo-webhook-example"
+      # Gerrit will send events to following port and endpoint
+      webhook:
+        # endpoint to listen to events on
+        endpoint: /push
+        # port to run internal HTTP server on
+        port: "13000"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: POST
+        # url the event-source will use to register at Gerrit.
+        # This url must be reachable from outside the cluster.
+        # The name for the service is in `<event-source-name>-eventsource-svc` format.
+        # You will need to create an Ingress or Openshift Route for the event-source service so that it can be reached from Gerrit.
+        url: http://url-that-is-reachable-from-Gerrit
+      # events to listen to
+      # Visit https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events
+      events:
+        - patchset-created
+      auth:
+        # username refers to K8s secret that stores the bitbucket username
+        username:
+          # Name of the K8s secret that contains the username
+          name: gerrit-access
+          # Key within the K8s secret whose corresponding value (must be base64 encoded) is username
+          key: username
+        # password refers to K8s secret that stores the bitbucket password (including App passwords)
+        password:
+          # Name of the K8s secret that contains the password
+          name: gerrit-access
+          # Key within the K8s secret whose corresponding value (must be base64 encoded) is password
+          key: password
+      # Do SSL verification when triggering the hook
+      sslVerify: false
+      # Gerrit Base url.
+      # Change it to your private Gerrit instance url if you have one.
+      gerritBaseURL: http://10.0.71.100:58080/
+      deleteHookOnFinish: true
+
