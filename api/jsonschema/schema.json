@@ -380,6 +380,10 @@
         "jetstream": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamBus"
         },
+        "jetstreamExotic": {
+          "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.JetStreamConfig",
+          "description": "Exotic JetStream"
+        },
         "kafka": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.KafkaBus",
           "description": "Kafka eventbus"

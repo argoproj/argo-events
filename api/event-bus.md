@@ -211,6 +211,19 @@ Kafka eventbus
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>jetstreamExotic</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamConfig"> JetStreamConfig </a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Exotic JetStream
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -280,6 +293,19 @@ KafkaBus </a> </em>
 <em>(Optional)</em>
 <p>
 Kafka eventbus
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jetstreamExotic</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamConfig"> JetStreamConfig </a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Exotic JetStream
 </p>
 </td>
 </tr>
@@ -619,7 +645,8 @@ JetStreamConfig
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.BusConfig">BusConfig</a>)
+<a href="#argoproj.io/v1alpha1.BusConfig">BusConfig</a>,
+<a href="#argoproj.io/v1alpha1.EventBusSpec">EventBusSpec</a>)
 </p>
 <p>
 </p>
