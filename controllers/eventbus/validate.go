@@ -41,5 +41,10 @@ func ValidateEventBus(eb *v1alpha1.EventBus) error {
 			return fmt.Errorf("\"spec.kafka.url\" is missing")
 		}
 	}
+	if x := eb.Spec.JetStreamExotic; x != nil {
+		if x.URL == "" {
+			return fmt.Errorf("\"spec.jetstreamExotic.url\" is missing")
+		}
+	}
 	return nil
 }
