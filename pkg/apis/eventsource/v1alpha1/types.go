@@ -122,6 +122,8 @@ type EventSourceSpec struct {
 	AzureQueueStorage map[string]AzureQueueStorageEventSource `json:"azureQueueStorage,omitempty" protobuf:"bytes,33,rep,name=azureQueueStorage"`
 	// SFTP event sources
 	SFTP map[string]SFTPEventSource `json:"sftp,omitempty" protobuf:"bytes,34,rep,name=sftp"`
+	// Gerrit event source
+	Gerrit map[string]GerritEventSource `json:"gerrit,omitempty" protobuf:"bytes,35,rep,name=gerrit"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -757,6 +759,40 @@ type PubSubEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
+}
+
+// GerritEventSource refers to event-source related to gerrit events
+type GerritEventSource struct {
+	// Webhook holds configuration to run a http server
+	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
+	// HookName is the name of the webhook
+	HookName string `json:"hookName" protobuf:"bytes,2,opt,name=hookName"`
+	// Events are gerrit event to listen to.
+	// Refer https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events
+	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`
+	// Auth hosts secret selectors for username and password
+	// +optional
+	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,4,opt,name=auth"`
+	// GerritBaseURL is the base URL for API requests to a custom endpoint
+	GerritBaseURL string `json:"gerritBaseURL" protobuf:"bytes,5,opt,name=gerritBaseURL"`
+	// DeleteHookOnFinish determines whether to delete the Gerrit hook for the project once the event source is stopped.
+	// +optional
+	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,6,opt,name=deleteHookOnFinish"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// List of project namespace paths like "whynowy/test".
+	Projects []string `json:"projects,omitempty" protobuf:"bytes,8,rep,name=projects"`
+	// SslVerify to enable ssl verification
+	// +optional
+	SslVerify bool `json:"sslVerify,omitempty" protobuf:"varint,9,opt,name=sslVerify"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,10,opt,name=filter"`
+}
+
+func (g GerritEventSource) NeedToCreateHooks() bool {
+	return g.Auth != nil && g.Webhook != nil && g.Webhook.URL != ""
 }
 
 type OwnedRepositories struct {

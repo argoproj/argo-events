@@ -2192,6 +2192,19 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEve
 <p>SFTP event sources</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>gerrit</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.GerritEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GerritEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Gerrit event source</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2224,6 +2237,7 @@ EventSourceStatus
 <a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.GenericEventSource">GenericEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.GerritEventSource">GerritEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>, 
@@ -2718,6 +2732,19 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEve
 <p>SFTP event sources</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>gerrit</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.GerritEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GerritEventSource
+</a>
+</em>
+</td>
+<td>
+<p>Gerrit event source</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventSourceStatus">EventSourceStatus
@@ -2920,6 +2947,145 @@ Kubernetes core/v1.SecretKeySelector
 <td>
 <em>(Optional)</em>
 <p>AuthSecret holds a secret selector that contains a bearer token for authentication</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter">
+EventSourceFilter
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Filter</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.GerritEventSource">GerritEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>GerritEventSource refers to event-source related to gerrit events</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>webhook</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.WebhookContext">
+WebhookContext
+</a>
+</em>
+</td>
+<td>
+<p>Webhook holds configuration to run a http server</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hookName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>HookName is the name of the webhook</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>events</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Events are gerrit event to listen to.
+Refer <a href="https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events">https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>auth</code></br>
+<em>
+github.com/argoproj/argo-events/pkg/apis/common.BasicAuth
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Auth hosts secret selectors for username and password</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>gerritBaseURL</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>GerritBaseURL is the base URL for API requests to a custom endpoint</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>deleteHookOnFinish</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>DeleteHookOnFinish determines whether to delete the Gerrit hook for the project once the event source is stopped.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Metadata holds the user defined metadata which will passed along the event payload.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projects</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>List of project namespace paths like &ldquo;whynowy/test&rdquo;.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sslVerify</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>SslVerify to enable ssl verification</p>
 </td>
 </tr>
 <tr>
@@ -6241,6 +6407,7 @@ string
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>, 
+<a href="#argoproj.io/v1alpha1.GerritEventSource">GerritEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>, 
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>, 

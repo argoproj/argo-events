@@ -21,3 +21,14 @@ func (n *STANSourceConn) Publish(ctx context.Context,
 	}
 	return n.STANConn.Publish(n.subject, msg.Body)
 }
+
+func (conn *STANSourceConn) IsClosed() bool {
+	return conn == nil || conn.STANConnection.IsClosed()
+}
+
+func (conn *STANSourceConn) Close() error {
+	if conn == nil {
+		return fmt.Errorf("can't close STAN source connection, STANSourceConn is nil")
+	}
+	return conn.STANConnection.Close()
+}

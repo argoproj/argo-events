@@ -35,3 +35,14 @@ func (jsc *JetstreamSourceConn) Publish(ctx context.Context,
 	jsc.Logger.Debugf("published message to subject %s", subject)
 	return err
 }
+
+func (conn *JetstreamSourceConn) IsClosed() bool {
+	return conn == nil || conn.JetstreamConnection.IsClosed()
+}
+
+func (conn *JetstreamSourceConn) Close() error {
+	if conn == nil {
+		return fmt.Errorf("can't close Jetstream source connection, JetstreamSourceConn is nil")
+	}
+	return conn.JetstreamConnection.Close()
+}
