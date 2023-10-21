@@ -50,4 +50,16 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		r := v.ValidateUpdate(contextWithLogger(t))
 		assert.False(t, r.Allowed)
 	})
+
+	t.Run("test update native nats to exotic js", func(t *testing.T) {
+		newEb := eb.DeepCopy()
+		newEb.Generation++
+		newEb.Spec.NATS = nil
+		newEb.Spec.JetStreamExotic = &eventbusv1alpha1.JetStreamConfig{
+			URL: "nats://nats:4222",
+		}
+		v := NewEventBusValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, eb, newEb)
+		r := v.ValidateUpdate(contextWithLogger(t))
+		assert.False(t, r.Allowed)
+	})
 }

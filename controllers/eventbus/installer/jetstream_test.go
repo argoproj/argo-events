@@ -34,6 +34,22 @@ var (
 			},
 		},
 	}
+
+	testJetStreamExoticBus = &v1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      testName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			JetStreamExotic: &v1alpha1.JetStreamConfig{
+				URL: "nats://nats:4222",
+			},
+		},
+	}
 )
 
 func TestJetStreamBadInstallation(t *testing.T) {
