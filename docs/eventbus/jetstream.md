@@ -75,7 +75,7 @@ kind: EventBus
 metadata:
   name: default
 spec:
-  exoticJetstream:
+  jetstreamExotic:
       url: nats://xxxxx:xxx
       accessSecret:
         name: my-secret-name
