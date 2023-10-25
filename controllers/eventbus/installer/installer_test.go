@@ -70,6 +70,12 @@ func TestGetInstaller(t *testing.T) {
 		assert.NotNil(t, installer)
 		_, ok := installer.(*jetStreamInstaller)
 		assert.True(t, ok)
+
+		installer, err = getInstaller(testJetStreamExoticBus, nil, nil, fakeConfig, zaptest.NewLogger(t).Sugar())
+		assert.NoError(t, err)
+		assert.NotNil(t, installer)
+		_, ok = installer.(*exoticJetStreamInstaller)
+		assert.True(t, ok)
 	})
 }
 

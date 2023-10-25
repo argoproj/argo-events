@@ -8,8 +8,8 @@ import (
 
 // ValidateEventBus accepts an EventBus and performs validation against it
 func ValidateEventBus(eb *v1alpha1.EventBus) error {
-	if eb.Spec.NATS == nil && eb.Spec.JetStream == nil && eb.Spec.Kafka == nil {
-		return fmt.Errorf("invalid spec: either \"nats\", \"jetstream\", or \"kafka\" needs to be specified")
+	if eb.Spec.NATS == nil && eb.Spec.JetStream == nil && eb.Spec.Kafka == nil && eb.Spec.JetStreamExotic == nil {
+		return fmt.Errorf("invalid spec: either \"nats\", \"jetstream\", \"jetstreamExotic\", or \"kafka\" needs to be specified")
 	}
 	if x := eb.Spec.NATS; x != nil {
 		if x.Native != nil && x.Exotic != nil {
@@ -39,6 +39,11 @@ func ValidateEventBus(eb *v1alpha1.EventBus) error {
 	if x := eb.Spec.Kafka; x != nil {
 		if x.URL == "" {
 			return fmt.Errorf("\"spec.kafka.url\" is missing")
+		}
+	}
+	if x := eb.Spec.JetStreamExotic; x != nil {
+		if x.URL == "" {
+			return fmt.Errorf("\"spec.jetstreamExotic.url\" is missing")
 		}
 	}
 	return nil

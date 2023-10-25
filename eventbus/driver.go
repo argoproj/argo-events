@@ -117,7 +117,11 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 	case eventBusConfig.NATS != nil:
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
-		eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
+		if eventBusConfig.JetStream.AccessSecret != nil {
+			eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
+		} else {
+			eventBusAuth = nil
+		}
 	case eventBusConfig.Kafka != nil:
 		eventBusAuth = nil
 	default:

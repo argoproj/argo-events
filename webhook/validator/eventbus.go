@@ -79,6 +79,10 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 		if oldJs.StreamConfig != nil && newJs.StreamConfig != nil && *oldJs.StreamConfig != *newJs.StreamConfig {
 			return DeniedResponse("\"spec.jetstream.streamConfig\" is immutable, can not be updated, old value='%s', new value='%s'", *oldJs.StreamConfig, *newJs.StreamConfig)
 		}
+	case eb.neweb.Spec.JetStreamExotic != nil:
+		if eb.oldeb.Spec.JetStreamExotic == nil {
+			return DeniedResponse("Can not change event bus implementation")
+		}
 	}
 
 	return AllowedResponse()
