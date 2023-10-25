@@ -45,7 +45,11 @@ func NewElector(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, 
 	case eventBusConfig.NATS != nil:
 		return newEventBusElector(ctx, eventBusConfig.NATS.Auth, clusterName, clusterSize, eventBusConfig.NATS.URL)
 	case eventBusConfig.JetStream != nil:
-		return newEventBusElector(ctx, &eventbusv1alpha1.AuthStrategyBasic, clusterName, clusterSize, eventBusConfig.JetStream.URL)
+		if eventBusConfig.JetStream.AccessSecret != nil {
+			return newEventBusElector(ctx, &eventbusv1alpha1.AuthStrategyBasic, clusterName, clusterSize, eventBusConfig.JetStream.URL)
+		} else {
+			return newEventBusElector(ctx, &eventbusv1alpha1.AuthStrategyNone, clusterName, clusterSize, eventBusConfig.JetStream.URL)
+		}
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}

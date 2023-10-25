@@ -8,12 +8,14 @@ import (
 	"github.com/argoproj/argo-events/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
 )
 
 var (
 	configs = []eventbusv1alpha1.BusConfig{
 		{NATS: &eventbusv1alpha1.NATSConfig{}},
 		{JetStream: &eventbusv1alpha1.JetStreamConfig{}},
+		{JetStream: &eventbusv1alpha1.JetStreamConfig{AccessSecret: &v1.SecretKeySelector{}}},
 	}
 )
 

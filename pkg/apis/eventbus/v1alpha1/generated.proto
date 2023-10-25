@@ -86,6 +86,10 @@ message EventBusSpec {
   // +optional
   // Kafka eventbus
   optional KafkaBus kafka = 3;
+
+  // Exotic JetStream
+  // +optional
+  optional JetStreamConfig jetstreamExotic = 4;
 }
 
 // EventBusStatus holds the status of the eventbus resource

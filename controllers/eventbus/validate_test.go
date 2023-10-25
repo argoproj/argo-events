@@ -39,6 +39,18 @@ var (
 		},
 	}
 
+	testJetStreamExoticBus = &v1alpha1.EventBus{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test-ns",
+			Name:      common.DefaultEventBusName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			JetStreamExotic: &v1alpha1.JetStreamConfig{
+				URL: "nats://nats:4222",
+			},
+		},
+	}
+
 	testKafkaEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test-ns",
@@ -65,6 +77,11 @@ func TestValidate(t *testing.T) {
 
 	t.Run("test good kafka eventbus", func(t *testing.T) {
 		err := ValidateEventBus(testKafkaEventBus)
+		assert.NoError(t, err)
+	})
+
+	t.Run("test good js exotic eventbus", func(t *testing.T) {
+		err := ValidateEventBus(testJetStreamExoticBus)
 		assert.NoError(t, err)
 	})
 
@@ -129,5 +146,13 @@ func TestValidate(t *testing.T) {
 		err := ValidateEventBus(eb)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "\"spec.kafka.url\" is missing")
+	})
+
+	t.Run("test exotic js eventbus empty URL", func(t *testing.T) {
+		eb := testJetStreamExoticBus.DeepCopy()
+		eb.Spec.JetStreamExotic.URL = ""
+		err := ValidateEventBus(eb)
+		assert.Error(t, err)
+		assert.True(t, strings.Contains(err.Error(), "\"spec.jetstreamExotic.url\" is missing"))
 	})
 }
