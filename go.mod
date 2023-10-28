@@ -90,7 +90,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8
 	sigs.k8s.io/controller-runtime v0.11.2
 	sigs.k8s.io/controller-tools v0.8.0
-	sigs.k8s.io/yaml v1.3.0
+	sigs.k8s.io/yaml v1.4.0
 )
 
 require (
