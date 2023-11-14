@@ -322,6 +322,11 @@ func schema_argo_events_pkg_apis_common_S3Artifact(ref common.ReferenceCallback)
 							},
 						},
 					},
+					"caCertificate": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 				Required: []string{"endpoint", "bucket", "accessKey", "secretKey"},
 			},

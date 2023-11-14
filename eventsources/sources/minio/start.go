@@ -18,8 +18,11 @@ package minio
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -80,10 +83,35 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return fmt.Errorf("failed to retrieve the secret key for event source %s, %w", el.GetEventName(), err)
 	}
 
-	log.Info("setting up a minio client...")
-	minioClient, err := minio.New(minioEventSource.Endpoint, &minio.Options{
-		Creds: credentials.NewStaticV4(accessKey, secretKey, ""), Secure: !minioEventSource.Insecure})
-	if err != nil {
+	var minioClient *minio.Client
+	var clientErr error
+	if minioEventSource.CACertificate != nil {
+		log.Info("retrieving CA certificate...")
+		caCertificate, err := common.GetSecretFromVolume(minioEventSource.CACertificate)
+		if err != nil {
+			return fmt.Errorf("failed to get the CA certificate for event source %s, %w", el.GetEventName(), err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM([]byte(caCertificate))
+		tlsConfig := &tls.Config{
+			RootCAs: caCertPool,
+		}
+		log.Info("setting up a minio client with custom CA...")
+		minioClient, clientErr = minio.New(minioEventSource.Endpoint, &minio.Options{
+			Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+			Secure: !minioEventSource.Insecure,
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConfig,
+			},
+		})
+	} else {
+		log.Info("setting up a minio client...")
+		minioClient, clientErr = minio.New(minioEventSource.Endpoint, &minio.Options{
+			Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+			Secure: !minioEventSource.Insecure,
+		})
+	}
+	if clientErr != nil {
 		return fmt.Errorf("failed to create a client for event source %s, %w", el.GetEventName(), err)
 	}
 
