@@ -122,6 +122,8 @@ message S3Artifact {
   optional S3Filter filter = 8;
 
   map<string, string> metadata = 9;
+
+  optional k8s.io.api.core.v1.SecretKeySelector caCertificate = 10;
 }
 
 // S3Bucket contains information to describe an S3 Bucket

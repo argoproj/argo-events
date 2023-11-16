@@ -119,6 +119,9 @@
         "bucket": {
           "$ref": "#/definitions/io.argoproj.common.S3Bucket"
         },
+        "caCertificate": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "endpoint": {
           "type": "string"
         },
