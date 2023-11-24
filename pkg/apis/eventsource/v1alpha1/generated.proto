@@ -1404,21 +1404,24 @@ message SFTPEventSource {
   // Password required for authentication if any.
   optional k8s.io.api.core.v1.SecretKeySelector password = 4;
 
+  // SSHKeySecret refers to the secret that contains SSH key
+  optional k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 5;
+
   // Address sftp address.
-  optional k8s.io.api.core.v1.SecretKeySelector address = 5;
+  optional k8s.io.api.core.v1.SecretKeySelector address = 6;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
-  map<string, string> metadata = 6;
+  map<string, string> metadata = 7;
 
   // Filter
   // +optional
-  optional EventSourceFilter filter = 7;
+  optional EventSourceFilter filter = 8;
 
   // PollIntervalDuration the interval at which to poll the SFTP server
   // defaults to 10 seconds
   // +optional
-  optional string pollIntervalDuration = 8;
+  optional string pollIntervalDuration = 9;
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events

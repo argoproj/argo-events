@@ -3654,6 +3654,12 @@ func schema_pkg_apis_eventsource_v1alpha1_SFTPEventSource(ref common.ReferenceCa
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
+					"sshKeySecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SSHKeySecret refers to the secret that contains SSH key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 					"address": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Address sftp address.",
