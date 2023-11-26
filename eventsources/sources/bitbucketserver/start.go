@@ -26,10 +26,14 @@ import (
 	"io"
 	"math/big"
 	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 	"time"
 
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/exp/slices"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
@@ -64,6 +68,7 @@ func (router *Router) GetRoute() *webhook.Route {
 
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
+	bitbucketserverEventSource := router.bitbucketserverEventSource
 	route := router.GetRoute()
 
 	logger := route.Logger.With(
@@ -93,6 +98,40 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	// When SkipBranchRefsChangedOnOpenPR is enabled and webhook event type is repo:refs_changed,
+	// check if a Pull Request is opened for the commit, if one is opened the event will be skipped.
+	if bitbucketserverEventSource.SkipBranchRefsChangedOnOpenPR && slices.Contains(bitbucketserverEventSource.Events, "repo:refs_changed") {
+		refsChanged := refsChangedWebhookEvent{}
+		err := json.Unmarshal(body, &refsChanged)
+		if err != nil {
+			logger.Errorf("reading webhook body", zap.Error(err))
+			common.SendErrorResponse(writer, err.Error())
+			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
+			return
+		}
+
+		if refsChanged.EventKey == "repo:refs_changed" &&
+			len(refsChanged.Changes) > 0 && // Note refsChanged.Changes never has more or less than one change, not sure why Atlassian made it a list.
+			strings.EqualFold(refsChanged.Changes[0].Ref.Type, "BRANCH") &&
+			!strings.EqualFold(refsChanged.Changes[0].Type, "DELETE") {
+			// Check if commit is associated to an open PR.
+			hasOpenPR, err := router.refsChangedHasOpenPullRequest(refsChanged.Repository.Project.Key, refsChanged.Repository.Slug, refsChanged.Changes[0].ToHash)
+			if err != nil {
+				logger.Errorf("checking if changed branch ref has an open pull request", zap.Error(err))
+				common.SendErrorResponse(writer, err.Error())
+				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
+				return
+			}
+
+			// Do not publish this Branch repo:refs_changed event if a related Pull Request is already opened for the commit.
+			if hasOpenPR {
+				logger.Info("skipping publishing event, commit has an open pull request")
+				common.SendSuccessResponse(writer, "success")
+				return
+			}
+		}
+	}
+
 	event := &events.BitbucketServerEventData{
 		Headers:  request.Header,
 		Body:     (*json.RawMessage)(&body),
@@ -101,7 +140,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	eventBody, err := json.Marshal(event)
 	if err != nil {
-		logger.Info("failed to marshal event")
+		logger.Errorw("failed to parse event", zap.Error(err))
 		common.SendErrorResponse(writer, "invalid event")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
@@ -125,53 +164,42 @@ func (router *Router) PostInactivate() error {
 	route := router.route
 	logger := route.Logger
 
-	if bitbucketserverEventSource.DeleteHookOnFinish && len(router.hookIDs) > 0 {
-		logger.Info("deleting webhooks from bitbucket")
+	if !bitbucketserverEventSource.DeleteHookOnFinish {
+		logger.Info("not configured to delete webhooks, skipping")
+		return nil
+	}
 
-		bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
+	if len(router.hookIDs) == 0 {
+		logger.Info("no need to delete webhooks, skipping")
+		return nil
+	}
+
+	logger.Info("deleting webhooks from bitbucket")
+
+	bitbucketRepositories := bitbucketserverEventSource.GetBitbucketServerRepositories()
+
+	if len(bitbucketserverEventSource.Projects) > 0 {
+		bitbucketProjectRepositories, err := getProjectRepositories(router.deleteClient, bitbucketserverEventSource.Projects)
 		if err != nil {
-			return fmt.Errorf("failed to get bitbucketserver token. err: %w", err)
+			return err
 		}
 
-		bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
-		bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
-		bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
+		bitbucketRepositories = append(bitbucketRepositories, bitbucketProjectRepositories...)
+	}
 
-		if bitbucketserverEventSource.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(router.bitbucketserverEventSource.TLS)
-			if err != nil {
-				return fmt.Errorf("failed to get the tls configuration, %w", err)
-			}
-
-			bitbucketConfig.HTTPClient = &http.Client{
-				Transport: &http.Transport{
-					TLSClientConfig: tlsConfig,
-				},
-			}
+	for _, repo := range bitbucketRepositories {
+		id, ok := router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug]
+		if !ok {
+			return fmt.Errorf("can not find hook ID for project-key: %s, repository-slug: %s", repo.ProjectKey, repo.RepositorySlug)
 		}
 
-		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
-			id, ok := router.hookIDs[repo.ProjectKey+","+repo.RepositorySlug]
-			if !ok {
-				return fmt.Errorf("can not find hook ID for project-key: %s, repository-slug: %s", repo.ProjectKey, repo.RepositorySlug)
-			}
-
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-
-			ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
-			bitbucketClient := bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
-
-			_, err = bitbucketClient.DefaultApi.DeleteWebhook(repo.ProjectKey, repo.RepositorySlug, int32(id))
-			if err != nil {
-				return fmt.Errorf("failed to delete bitbucketserver webhook. err: %w", err)
-			}
-
-			logger.Infow("bitbucket server webhook deleted",
-				zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug))
+		_, err := router.deleteClient.DefaultApi.DeleteWebhook(repo.ProjectKey, repo.RepositorySlug, int32(id))
+		if err != nil {
+			return fmt.Errorf("failed to delete bitbucketserver webhook. err: %w", err)
 		}
-	} else {
-		logger.Info("no need to delete webhooks, skipping.")
+
+		logger.Infow("bitbucket server webhook deleted",
+			zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug))
 	}
 
 	return nil
@@ -191,9 +219,40 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	logger.Info("started processing the Bitbucket Server event source...")
 
+	logger.Info("retrieving the access token credentials...")
+	bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
+	if err != nil {
+		return fmt.Errorf("getting bitbucketserver token. err: %w", err)
+	}
+
+	logger.Info("setting up the client to connect to Bitbucket Server...")
+	bitbucketConfig, err := newBitbucketServerClientCfg(bitbucketserverEventSource)
+	if err != nil {
+		return fmt.Errorf("initializing bitbucketserver client config. err: %w", err)
+	}
+
+	bitbucketURL, err := url.Parse(bitbucketserverEventSource.BitbucketServerBaseURL)
+	if err != nil {
+		return fmt.Errorf("parsing bitbucketserver url. err: %w", err)
+	}
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	bitbucketClient := newBitbucketServerClient(ctx, bitbucketConfig, bitbucketToken)
+	bitbucketDeleteClient := newBitbucketServerClient(context.Background(), bitbucketConfig, bitbucketToken)
+
 	route := webhook.NewRoute(bitbucketserverEventSource.Webhook, logger, el.GetEventSourceName(), el.GetEventName(), el.Metrics)
 	router := &Router{
-		route:                      route,
+		route:  route,
+		client: bitbucketClient,
+		customClient: &customBitbucketClient{
+			client: bitbucketConfig.HTTPClient,
+			ctx:    ctx,
+			token:  bitbucketToken,
+			url:    bitbucketURL,
+		},
+		deleteClient:               bitbucketDeleteClient,
 		bitbucketserverEventSource: bitbucketserverEventSource,
 		hookIDs:                    make(map[string]int),
 	}
@@ -203,48 +262,30 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return webhook.ManageRoute(ctx, router, controller, dispatch)
 	}
 
-	logger.Info("retrieving the access token credentials...")
-	bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
-	if err != nil {
-		return fmt.Errorf("failed to get bitbucketserver token. err: %w", err)
-	}
-
 	if bitbucketserverEventSource.WebhookSecret != nil {
 		logger.Info("retrieving the webhook secret...")
 		webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
 		if err != nil {
-			return fmt.Errorf("failed to get bitbucketserver webhook secret. err: %w", err)
+			return fmt.Errorf("getting bitbucketserver webhook secret. err: %w", err)
 		}
 
 		router.hookSecret = webhookSecret
 	}
 
-	logger.Info("setting up the client to connect to Bitbucket Server...")
-	bitbucketConfig := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
-	bitbucketConfig.AddDefaultHeader("x-atlassian-token", "no-check")
-	bitbucketConfig.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
-
-	if bitbucketserverEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(router.bitbucketserverEventSource.TLS)
-		if err != nil {
-			return fmt.Errorf("failed to get the tls configuration, %w", err)
-		}
-
-		bitbucketConfig.HTTPClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
-			},
-		}
-	}
-
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
-
 	applyWebhooks := func() {
-		for _, repo := range bitbucketserverEventSource.GetBitbucketServerRepositories() {
-			if err = router.applyBitbucketServerWebhook(ctx, bitbucketConfig, repo); err != nil {
+		bitbucketRepositories := bitbucketserverEventSource.GetBitbucketServerRepositories()
+
+		if len(bitbucketserverEventSource.Projects) > 0 {
+			bitbucketProjectRepositories, err := getProjectRepositories(router.client, bitbucketserverEventSource.Projects)
+			if err != nil {
+				logger.Errorw("failed to apply Bitbucket webhook", zap.Error(err))
+			}
+
+			bitbucketRepositories = append(bitbucketRepositories, bitbucketProjectRepositories...)
+		}
+
+		for _, repo := range bitbucketRepositories {
+			if err = router.applyBitbucketServerWebhook(repo); err != nil {
 				logger.Errorw("failed to apply Bitbucket webhook",
 					zap.String("project-key", repo.ProjectKey), zap.String("repository-slug", repo.RepositorySlug), zap.Error(err))
 				continue
@@ -254,18 +295,29 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
-	// When running multiple replicas of the eventsource, they will all try to create the webhook.
-	// Randomly sleep some time to mitigate the issue.
+	// When running multiple replicas of this event source, they will try to create webhooks at the same time.
+	// Randomly delay running the initial apply webhooks func to mitigate the issue.
 	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
 	time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 	applyWebhooks()
+
+	var checkInterval time.Duration
+	if bitbucketserverEventSource.CheckInterval == "" {
+		checkInterval = 60 * time.Second
+	} else {
+		checkInterval, err = time.ParseDuration(bitbucketserverEventSource.CheckInterval)
+		if err != nil {
+			return err
+		}
+	}
 
 	go func() {
 		// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
 		// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from Bitbucket.
 		// This is a workaround to mitigate the race conditions.
 		logger.Info("starting bitbucket hooks manager daemon")
-		ticker := time.NewTicker(60 * time.Second)
+
+		ticker := time.NewTicker(checkInterval)
 		defer ticker.Stop()
 		for {
 			select {
@@ -282,7 +334,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 }
 
 // applyBitbucketServerWebhook creates or updates the configured webhook in Bitbucket
-func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration, repo v1alpha1.BitbucketServerRepository) error {
+func (router *Router) applyBitbucketServerWebhook(repo v1alpha1.BitbucketServerRepository) error {
 	bitbucketserverEventSource := router.bitbucketserverEventSource
 	route := router.route
 
@@ -295,10 +347,9 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 		"base-url", bitbucketserverEventSource.BitbucketServerBaseURL,
 	)
 
-	bitbucketClient := bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
 	formattedURL := common.FormattedURL(bitbucketserverEventSource.Webhook.URL, bitbucketserverEventSource.Webhook.Endpoint)
 
-	hooks, err := router.listWebhooks(bitbucketClient, repo)
+	hooks, err := router.listWebhooks(repo)
 	if err != nil {
 		return fmt.Errorf("failed to list existing hooks to check for duplicates for repository %s/%s, %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
@@ -333,7 +384,7 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 		logger.Info("webhook already exists")
 		if router.shouldUpdateWebhook(existingHook, newHook) {
 			logger.Info("webhook requires an update")
-			err = router.updateWebhook(bitbucketClient, existingHook.ID, requestBody, repo)
+			err = router.updateWebhook(existingHook.ID, requestBody, repo)
 			if err != nil {
 				return fmt.Errorf("failed to update webhook. err: %w", err)
 			}
@@ -345,7 +396,7 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 	}
 
 	// Create the webhook when it doesn't exist yet
-	createdHook, err := router.createWebhook(bitbucketClient, requestBody, repo)
+	createdHook, err := router.createWebhook(requestBody, repo)
 	if err != nil {
 		return fmt.Errorf("failed to create webhook. err: %w", err)
 	}
@@ -357,8 +408,8 @@ func (router *Router) applyBitbucketServerWebhook(ctx context.Context, bitbucket
 	return nil
 }
 
-func (router *Router) listWebhooks(bitbucketClient *bitbucketv1.APIClient, repo v1alpha1.BitbucketServerRepository) ([]bitbucketv1.Webhook, error) {
-	apiResponse, err := bitbucketClient.DefaultApi.FindWebhooks(repo.ProjectKey, repo.RepositorySlug, nil)
+func (router *Router) listWebhooks(repo v1alpha1.BitbucketServerRepository) ([]bitbucketv1.Webhook, error) {
+	apiResponse, err := router.client.DefaultApi.FindWebhooks(repo.ProjectKey, repo.RepositorySlug, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list existing hooks to check for duplicates for repository %s/%s, %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
@@ -371,8 +422,8 @@ func (router *Router) listWebhooks(bitbucketClient *bitbucketv1.APIClient, repo 
 	return hooks, nil
 }
 
-func (router *Router) createWebhook(bitbucketClient *bitbucketv1.APIClient, requestBody []byte, repo v1alpha1.BitbucketServerRepository) (*bitbucketv1.Webhook, error) {
-	apiResponse, err := bitbucketClient.DefaultApi.CreateWebhook(repo.ProjectKey, repo.RepositorySlug, requestBody, []string{"application/json"})
+func (router *Router) createWebhook(requestBody []byte, repo v1alpha1.BitbucketServerRepository) (*bitbucketv1.Webhook, error) {
+	apiResponse, err := router.client.DefaultApi.CreateWebhook(repo.ProjectKey, repo.RepositorySlug, requestBody, []string{"application/json"})
 	if err != nil {
 		return nil, fmt.Errorf("failed to add webhook. err: %w", err)
 	}
@@ -386,8 +437,8 @@ func (router *Router) createWebhook(bitbucketClient *bitbucketv1.APIClient, requ
 	return createdHook, nil
 }
 
-func (router *Router) updateWebhook(bitbucketClient *bitbucketv1.APIClient, hookID int, requestBody []byte, repo v1alpha1.BitbucketServerRepository) error {
-	_, err := bitbucketClient.DefaultApi.UpdateWebhook(repo.ProjectKey, repo.RepositorySlug, int32(hookID), requestBody, []string{"application/json"})
+func (router *Router) updateWebhook(hookID int, requestBody []byte, repo v1alpha1.BitbucketServerRepository) error {
+	_, err := router.client.DefaultApi.UpdateWebhook(repo.ProjectKey, repo.RepositorySlug, int32(hookID), requestBody, []string{"application/json"})
 
 	return err
 }
@@ -445,4 +496,216 @@ func (router *Router) parseAndValidateBitbucketServerRequest(request *http.Reque
 	}
 
 	return body, nil
+}
+
+// refsChangedHasOpenPullRequest returns true if the changed commit has an open pull request
+func (router *Router) refsChangedHasOpenPullRequest(project, repository, commit string) (bool, error) {
+	bitbucketPullRequests, err := router.customClient.GetCommitPullRequests(project, repository, commit)
+	if err != nil {
+		return false, fmt.Errorf("getting commit pull requests for project %s, repository %s and commit %s: %w",
+			project, repository, commit, err)
+	}
+
+	for _, bitbucketPullRequest := range bitbucketPullRequests {
+		if strings.EqualFold(bitbucketPullRequest.State, "OPEN") {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+type bitbucketServerReposPager struct {
+	Size          int                      `json:"size"`
+	Limit         int                      `json:"limit"`
+	Start         int                      `json:"start"`
+	NextPageStart int                      `json:"nextPageStart"`
+	IsLastPage    bool                     `json:"isLastPage"`
+	Values        []bitbucketv1.Repository `json:"values"`
+}
+
+// getProjectRepositories returns all the Bitbucket Server repositories in the provided projects
+func getProjectRepositories(client *bitbucketv1.APIClient, projects []string) ([]v1alpha1.BitbucketServerRepository, error) {
+	var bitbucketRepos []bitbucketv1.Repository
+	for _, project := range projects {
+		paginationOptions := map[string]interface{}{"start": 0, "limit": 500}
+		for {
+			response, err := client.DefaultApi.GetRepositoriesWithOptions(project, paginationOptions)
+			if err != nil {
+				return nil, fmt.Errorf("unable to list repositories for project %s: %w", project, err)
+			}
+
+			var reposPager bitbucketServerReposPager
+			err = mapstructure.Decode(response.Values, &reposPager)
+			if err != nil {
+				return nil, fmt.Errorf("unable to decode repositories for project %s: %w", project, err)
+			}
+
+			bitbucketRepos = append(bitbucketRepos, reposPager.Values...)
+
+			if reposPager.IsLastPage {
+				break
+			}
+
+			paginationOptions["start"] = reposPager.NextPageStart
+		}
+	}
+
+	var repositories []v1alpha1.BitbucketServerRepository
+	for n := range bitbucketRepos {
+		repositories = append(repositories, v1alpha1.BitbucketServerRepository{
+			ProjectKey:     bitbucketRepos[n].Project.Key,
+			RepositorySlug: bitbucketRepos[n].Slug,
+		})
+	}
+
+	return repositories, nil
+}
+
+func newBitbucketServerClientCfg(bitbucketserverEventSource *v1alpha1.BitbucketServerEventSource) (*bitbucketv1.Configuration, error) {
+	bitbucketCfg := bitbucketv1.NewConfiguration(bitbucketserverEventSource.BitbucketServerBaseURL)
+	bitbucketCfg.AddDefaultHeader("x-atlassian-token", "no-check")
+	bitbucketCfg.AddDefaultHeader("x-requested-with", "XMLHttpRequest")
+	bitbucketCfg.HTTPClient = &http.Client{}
+
+	if bitbucketserverEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(bitbucketserverEventSource.TLS)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get the tls configuration. err: %w", err)
+		}
+
+		bitbucketCfg.HTTPClient.Transport = &http.Transport{
+			TLSClientConfig: tlsConfig,
+		}
+	}
+
+	return bitbucketCfg, nil
+}
+
+func newBitbucketServerClient(ctx context.Context, bitbucketConfig *bitbucketv1.Configuration, bitbucketToken string) *bitbucketv1.APIClient {
+	ctx = context.WithValue(ctx, bitbucketv1.ContextAccessToken, bitbucketToken)
+	return bitbucketv1.NewAPIClient(ctx, bitbucketConfig)
+}
+
+type refsChangedWebhookEvent struct {
+	EventKey   string `json:"eventKey"`
+	Repository struct {
+		Slug    string `json:"slug"`
+		Project struct {
+			Key string `json:"key"`
+		} `json:"project"`
+	} `json:"repository"`
+	Changes []struct {
+		Ref struct {
+			Type string `json:"type"`
+		} `json:"ref"`
+		ToHash string `json:"toHash"`
+		Type   string `json:"type"`
+	} `json:"changes"`
+}
+
+// customBitbucketClient returns a Bitbucket HTTP client that implements methods that gfleury/go-bitbucket-v1 does not.
+// Specifically getting Pull Requests associated to a commit is not supported by gfleury/go-bitbucket-v1.
+type customBitbucketClient struct {
+	client *http.Client
+	ctx    context.Context
+	token  string
+	url    *url.URL
+}
+
+type pagination struct {
+	Start int
+	Limit int
+}
+
+func (p *pagination) StartStr() string {
+	return strconv.Itoa(p.Start)
+}
+
+func (p *pagination) LimitStr() string {
+	return strconv.Itoa(p.Limit)
+}
+
+func (c *customBitbucketClient) authHeader(req *http.Request) {
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
+}
+
+func (c *customBitbucketClient) get(u string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(c.ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	c.authHeader(req)
+
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	if res.StatusCode > 299 {
+		resBody, readErr := io.ReadAll(res.Body)
+		if readErr != nil {
+			return nil, readErr
+		}
+
+		return nil, fmt.Errorf("calling endpoint '%s' failed: status %d: response body: %s", u, res.StatusCode, resBody)
+	}
+
+	return io.ReadAll(res.Body)
+}
+
+// pullRequestRes is a struct containing information about the Pull Request.
+type pullRequestRes struct {
+	ID    int    `json:"id"`
+	State string `json:"state"`
+}
+
+// pagedPullRequestsRes is a paged response with values of pullRequestRes.
+type pagedPullRequestsRes struct {
+	Size          int              `json:"size"`
+	Limit         int              `json:"limit"`
+	IsLastPage    bool             `json:"isLastPage"`
+	Values        []pullRequestRes `json:"values"`
+	Start         int              `json:"start"`
+	NextPageStart int              `json:"nextPageStart"`
+}
+
+// GetCommitPullRequests returns all the Pull Requests associated to the commit id.
+func (c *customBitbucketClient) GetCommitPullRequests(project, repository, commit string) ([]pullRequestRes, error) {
+	p := pagination{Start: 0, Limit: 500}
+
+	commitsURL := c.url.JoinPath(fmt.Sprintf("api/1.0/projects/%s/repos/%s/commits/%s/pull-requests", project, repository, commit))
+	query := commitsURL.Query()
+	query.Set("limit", p.LimitStr())
+
+	var pullRequests []pullRequestRes
+	for {
+		query.Set("start", p.StartStr())
+		commitsURL.RawQuery = query.Encode()
+
+		body, err := c.get(commitsURL.String())
+		if err != nil {
+			return nil, err
+		}
+
+		var pagedPullRequests pagedPullRequestsRes
+		err = json.Unmarshal(body, &pagedPullRequests)
+		if err != nil {
+			return nil, err
+		}
+
+		pullRequests = append(pullRequests, pagedPullRequests.Values...)
+
+		if pagedPullRequests.IsLastPage {
+			break
+		}
+
+		p.Start = pagedPullRequests.NextPageStart
+	}
+
+	return pullRequests, nil
 }

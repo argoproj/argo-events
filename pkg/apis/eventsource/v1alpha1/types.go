@@ -1061,47 +1061,58 @@ type BitbucketBasicAuth struct {
 
 // BitbucketServerEventSource refers to event-source related to Bitbucket Server events
 type BitbucketServerEventSource struct {
-	// Webhook holds configuration to run a http server
+	// Webhook holds configuration to run a http server.
 	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
-	// DeprecatedProjectKey is the key of project for which integration needs to set up
-	// Deprecated: use Repositories instead. Will be unsupported in v1.8
+	// DeprecatedProjectKey is the key of project for which integration needs to set up.
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8.
 	// +optional
 	DeprecatedProjectKey string `json:"projectKey,omitempty" protobuf:"bytes,2,opt,name=projectKey"`
-	// DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up
-	// Deprecated: use Repositories instead. Will be unsupported in v1.8
+	// DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up.
+	// Deprecated: use Repositories instead. Will be unsupported in v1.8.
 	// +optional
 	DeprecatedRepositorySlug string `json:"repositorySlug,omitempty" protobuf:"bytes,3,opt,name=repositorySlug"`
-	// Repositories holds a list of repositories for which integration needs to set up
+	// Projects holds a list of projects for which integration needs to set up, this will add the webhook to all repositories in the project.
 	// +optional
-	Repositories []BitbucketServerRepository `json:"repositories,omitempty" protobuf:"bytes,4,rep,name=repositories"`
+	Projects []string `json:"projects,omitempty" protobuf:"bytes,4,rep,name=projects"`
+	// Repositories holds a list of repositories for which integration needs to set up.
+	// +optional
+	Repositories []BitbucketServerRepository `json:"repositories,omitempty" protobuf:"bytes,5,rep,name=repositories"`
 	// Events are bitbucket event to listen to.
 	// Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
-	Events []string `json:"events" protobuf:"bytes,5,opt,name=events"`
-	// AccessToken is reference to K8s secret which holds the bitbucket api access information
-	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,6,opt,name=accessToken"`
-	// WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
-	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,7,opt,name=webhookSecret"`
-	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
-	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,8,opt,name=bitbucketserverBaseURL"`
+	// +optional
+	Events []string `json:"events" protobuf:"bytes,6,rep,name=events"`
+	// SkipBranchRefsChangedOnOpenPR bypasses the event repo:refs_changed for branches whenever there's an associated open pull request.
+	// This helps in optimizing the event handling process by avoiding unnecessary triggers for branch reference changes that are already part of a pull request under review.
+	// +optional
+	SkipBranchRefsChangedOnOpenPR bool `json:"skipBranchRefsChangedOnOpenPR,omitempty" protobuf:"varint,7,opt,name=skipBranchRefsChangedOnOpenPR"`
+	// AccessToken is reference to K8s secret which holds the bitbucket api access information.
+	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,8,opt,name=accessToken"`
+	// WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).
+	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,9,opt,name=webhookSecret"`
+	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.
+	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,10,opt,name=bitbucketserverBaseURL"`
 	// DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
 	// +optional
-	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,9,opt,name=deleteHookOnFinish"`
+	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,11,opt,name=deleteHookOnFinish"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,10,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,12,rep,name=metadata"`
 	// Filter
 	// +optional
-	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,13,opt,name=filter"`
 	// TLS configuration for the bitbucketserver client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,12,opt,name=tls"`
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,14,opt,name=tls"`
+	// CheckInterval is a duration in which to wait before checking that the webhooks exist, e.g. 1s, 30m, 2h... (defaults to 1m)
+	// +optional
+	CheckInterval string `json:"checkInterval" protobuf:"bytes,15,opt,name=checkInterval"`
 }
 
 type BitbucketServerRepository struct {
-	// ProjectKey is the key of project for which integration needs to set up
+	// ProjectKey is the key of project for which integration needs to set up.
 	ProjectKey string `json:"projectKey" protobuf:"bytes,1,opt,name=projectKey"`
-	// RepositorySlug is the slug of the repository for which integration needs to set up
-	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,2,rep,name=repositorySlug"`
+	// RepositorySlug is the slug of the repository for which integration needs to set up.
+	RepositorySlug string `json:"repositorySlug" protobuf:"bytes,2,opt,name=repositorySlug"`
 }
 
 func (b BitbucketServerEventSource) ShouldCreateWebhooks() bool {

@@ -1233,7 +1233,7 @@ Description
 </td>
 <td>
 <p>
-Webhook holds configuration to run a http server
+Webhook holds configuration to run a http server.
 </p>
 </td>
 </tr>
@@ -1245,8 +1245,8 @@ Webhook holds configuration to run a http server
 <em>(Optional)</em>
 <p>
 DeprecatedProjectKey is the key of project for which integration needs
-to set up Deprecated: use Repositories instead. Will be unsupported in
-v1.8
+to set up. Deprecated: use Repositories instead. Will be unsupported in
+v1.8.
 </p>
 </td>
 </tr>
@@ -1258,8 +1258,20 @@ v1.8
 <em>(Optional)</em>
 <p>
 DeprecatedRepositorySlug is the slug of the repository for which
-integration needs to set up Deprecated: use Repositories instead. Will
-be unsupported in v1.8
+integration needs to set up. Deprecated: use Repositories instead. Will
+be unsupported in v1.8.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projects</code></br> <em> \[\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Projects holds a list of projects for which integration needs to set up,
+this will add the webhook to all repositories in the project.
 </p>
 </td>
 </tr>
@@ -1273,7 +1285,7 @@ be unsupported in v1.8
 <em>(Optional)</em>
 <p>
 Repositories holds a list of repositories for which integration needs to
-set up
+set up.
 </p>
 </td>
 </tr>
@@ -1282,9 +1294,25 @@ set up
 <code>events</code></br> <em> \[\]string </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 Events are bitbucket event to listen to. Refer
 <a href="https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html">https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>skipBranchRefsChangedOnOpenPR</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SkipBranchRefsChangedOnOpenPR bypasses the event repo:refs_changed for
+branches whenever there’s an associated open pull request. This helps in
+optimizing the event handling process by avoiding unnecessary triggers
+for branch reference changes that are already part of a pull request
+under review.
 </p>
 </td>
 </tr>
@@ -1297,7 +1325,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 <p>
 AccessToken is reference to K8s secret which holds the bitbucket api
-access information
+access information.
 </p>
 </td>
 </tr>
@@ -1310,7 +1338,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 <p>
 WebhookSecret is reference to K8s secret which holds the bitbucket
-webhook secret (for HMAC validation)
+webhook secret (for HMAC validation).
 </p>
 </td>
 </tr>
@@ -1321,7 +1349,7 @@ webhook secret (for HMAC validation)
 <td>
 <p>
 BitbucketServerBaseURL is the base URL for API requests to a custom
-endpoint
+endpoint.
 </p>
 </td>
 </tr>
@@ -1374,6 +1402,18 @@ TLS configuration for the bitbucketserver client.
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>checkInterval</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+CheckInterval is a duration in which to wait before checking that the
+webhooks exist, e.g. 1s, 30m, 2h… (defaults to 1m)
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.BitbucketServerRepository">
@@ -1403,7 +1443,7 @@ Description
 </td>
 <td>
 <p>
-ProjectKey is the key of project for which integration needs to set up
+ProjectKey is the key of project for which integration needs to set up.
 </p>
 </td>
 </tr>
@@ -1414,7 +1454,7 @@ ProjectKey is the key of project for which integration needs to set up
 <td>
 <p>
 RepositorySlug is the slug of the repository for which integration needs
-to set up
+to set up.
 </p>
 </td>
 </tr>

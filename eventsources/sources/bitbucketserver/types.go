@@ -20,6 +20,7 @@ import (
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 )
 
 // EventListener implements ConfigExecutor
@@ -49,6 +50,12 @@ func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
 type Router struct {
 	// route contains information about a API endpoint
 	route *webhook.Route
+	// client is the bitbucket server client
+	client *bitbucketv1.APIClient
+	// customClient is a custom bitbucket server client which implements a method the gfleury/go-bitbucket-v1 client is missing
+	customClient *customBitbucketClient
+	// deleteClient is used to delete webhooks. This client does not contain the cancelable context of the default client
+	deleteClient *bitbucketv1.APIClient
 	// hookIDs is a map of webhook IDs
 	// (projectKey + "," + repoSlug) -> hook ID
 	// Bitbucket Server API docs:

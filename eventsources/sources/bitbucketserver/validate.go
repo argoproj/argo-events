@@ -18,6 +18,7 @@ package bitbucketserver
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
@@ -33,14 +34,19 @@ func validate(eventSource *v1alpha1.BitbucketServerEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.GetBitbucketServerRepositories() == nil {
-		return fmt.Errorf("at least one repository is required")
+	if eventSource.GetBitbucketServerRepositories() == nil && len(eventSource.Projects) == 0 {
+		return fmt.Errorf("at least one project or repository configuration is required")
 	}
 	if eventSource.ShouldCreateWebhooks() && len(eventSource.Events) == 0 {
 		return fmt.Errorf("events must be defined to create a bitbucket server webhook")
 	}
 	if eventSource.BitbucketServerBaseURL == "" {
 		return fmt.Errorf("bitbucket server base url can't be empty")
+	}
+	if eventSource.CheckInterval != "" {
+		if _, err := time.ParseDuration(eventSource.CheckInterval); err != nil {
+			return fmt.Errorf("failed to parse webhook check interval duration: %w", err)
+		}
 	}
 	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }
