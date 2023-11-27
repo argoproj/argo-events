@@ -303,18 +303,20 @@ type SFTPEventSource struct {
 	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,3,opt,name=username"`
 	// Password required for authentication if any.
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
+	// SSHKeySecret refers to the secret that contains SSH key
+	SSHKeySecret *corev1.SecretKeySelector `json:"sshKeySecret,omitempty" protobuf:"bytes,5,opt,name=sshKeySecret"`
 	// Address sftp address.
-	Address *corev1.SecretKeySelector `json:"address,omitempty" protobuf:"bytes,5,opt,name=address"`
+	Address *corev1.SecretKeySelector `json:"address,omitempty" protobuf:"bytes,6,opt,name=address"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
 	// Filter
 	// +optional
-	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 	// PollIntervalDuration the interval at which to poll the SFTP server
 	// defaults to 10 seconds
 	// +optional
-	PollIntervalDuration string `json:"pollIntervalDuration" protobuf:"varint,8,opt,name=pollIntervalDuration"`
+	PollIntervalDuration string `json:"pollIntervalDuration" protobuf:"varint,9,opt,name=pollIntervalDuration"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation

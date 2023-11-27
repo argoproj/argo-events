@@ -2690,6 +2690,10 @@
           "description": "PollIntervalDuration the interval at which to poll the SFTP server defaults to 10 seconds",
           "type": "string"
         },
+        "sshKeySecret": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "SSHKeySecret refers to the secret that contains SSH key"
+        },
         "username": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "Username required for authentication if any."

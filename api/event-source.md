@@ -5467,6 +5467,18 @@ Password required for authentication if any.
 </tr>
 <tr>
 <td>
+<code>sshKeySecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+SSHKeySecret refers to the secret that contains SSH key
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>address</code></br> <em>
 <a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>

@@ -1751,6 +1751,11 @@ func (in *SFTPEventSource) DeepCopyInto(out *SFTPEventSource) {
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.SSHKeySecret != nil {
+		in, out := &in.SSHKeySecret, &out.SSHKeySecret
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Address != nil {
 		in, out := &in.Address, &out.Address
 		*out = new(v1.SecretKeySelector)

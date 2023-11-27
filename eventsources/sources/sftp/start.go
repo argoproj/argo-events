@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -73,19 +74,46 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if err != nil {
 		return fmt.Errorf("username not found, %w", err)
 	}
-	password, err := common.GetSecretFromVolume(el.SFTPEventSource.Password)
-	if err != nil {
-		return fmt.Errorf("password not found, %w", err)
-	}
 	address, err := common.GetSecretFromVolume(el.SFTPEventSource.Address)
 	if err != nil {
 		return fmt.Errorf("address not found, %w", err)
 	}
 
+	var authMethod ssh.AuthMethod
+	var hostKeyCallback ssh.HostKeyCallback
+
+	if el.SFTPEventSource.SSHKeySecret != nil {
+		sshKeyPath, err := common.GetSecretVolumePath(el.SFTPEventSource.SSHKeySecret)
+		if err != nil {
+			return fmt.Errorf("failed to get SSH key from mounted volume, %w", err)
+		}
+		sshKey, err := os.ReadFile(sshKeyPath)
+		if err != nil {
+			return fmt.Errorf("failed to read ssh key file. err: %+v", err)
+		}
+		signer, err := ssh.ParsePrivateKey(sshKey)
+		if err != nil {
+			return fmt.Errorf("failed to parse private ssh key. err: %+v", err)
+		}
+		publicKey, err := ssh.ParsePublicKey(sshKey)
+		if err != nil {
+			return fmt.Errorf("failed to parse public ssh key. err: %+v", err)
+		}
+		authMethod = ssh.PublicKeys(signer)
+		hostKeyCallback = ssh.FixedHostKey(publicKey)
+	} else {
+		password, err := common.GetSecretFromVolume(el.SFTPEventSource.Password)
+		if err != nil {
+			return fmt.Errorf("password not found, %w", err)
+		}
+		authMethod = ssh.Password(password)
+		hostKeyCallback = ssh.InsecureIgnoreHostKey()
+	}
+
 	sftpConfig := &ssh.ClientConfig{
 		User:            username,
-		Auth:            []ssh.AuthMethod{ssh.Password(password)},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // TODO: enable host key callback
+		Auth:            []ssh.AuthMethod{authMethod},
+		HostKeyCallback: hostKeyCallback,
 	}
 
 	var sshClient *ssh.Client
