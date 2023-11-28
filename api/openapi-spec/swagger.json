@@ -466,7 +466,7 @@
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.ContainerTemplate"
         },
         "replicas": {
-          "description": "Redis StatefulSet size",
+          "description": "JetStream StatefulSet size",
           "type": "integer",
           "format": "int32"
         },

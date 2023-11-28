@@ -557,7 +557,10 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 		}
 
 		// Generate TLS self signed certificate for Jetstream cluster nodes: includes TLS private key, certificate, and CA certificate
-		clusterNodeHosts := []string{fmt.Sprintf("*.%s.%s.svc", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace)}
+		clusterNodeHosts := []string{
+			fmt.Sprintf("*.%s.%s.svc.cluster.local", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace),
+			fmt.Sprintf("*.%s.%s.svc", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace),
+		}
 		r.logger.Infof("cluster node hosts: %+v", clusterNodeHosts)
 		clusterKeyPEM, clusterCertPEM, clusterCACertPEM, err := tls.CreateCerts(certOrg, clusterNodeHosts, time.Now().Add(10*365*24*time.Hour), true, true) // expires in 10 years
 		if err != nil {

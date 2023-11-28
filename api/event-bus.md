@@ -399,7 +399,7 @@ JetStream version, such as “2.7.3”
 </td>
 <td>
 <p>
-Redis StatefulSet size
+JetStream StatefulSet size
 </p>
 </td>
 </tr>
