@@ -75,7 +75,7 @@ require (
 	github.com/tidwall/gjson v1.17.0
 	github.com/tidwall/sjson v1.2.4
 	github.com/xanzy/go-gitlab v0.94.0
-	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
+	github.com/yuin/gopher-lua v1.1.1
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.16.0
