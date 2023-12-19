@@ -37,6 +37,7 @@ var (
 	NATSEvent            EventSourceType = "nats"
 	SNSEvent             EventSourceType = "sns"
 	SQSEvent             EventSourceType = "sqs"
+	MNSEvent             EventSourceType = "mns"
 	PubSubEvent          EventSourceType = "pubsub"
 	GerritEvent          EventSourceType = "gerrit"
 	GithubEvent          EventSourceType = "github"
