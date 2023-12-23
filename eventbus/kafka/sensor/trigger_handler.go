@@ -3,10 +3,10 @@ package kafka
 import (
 	"time"
 
-	"github.com/Knetic/govaluate"
 	"github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/expr-lang/expr"
 	"go.uber.org/zap"
 )
 
@@ -15,7 +15,6 @@ type KafkaTriggerHandler interface {
 	Name() string
 	Ready() bool
 	Reset()
-	OneAndDone() bool
 	DependsOn(*cloudevents.Event) (string, bool)
 	Transform(string, *cloudevents.Event) (*cloudevents.Event, error)
 	Filter(string, *cloudevents.Event) bool
@@ -40,16 +39,6 @@ func (c *KafkaTriggerConnection) DependsOn(event *cloudevents.Event) (string, bo
 	}
 
 	return "", false
-}
-
-func (c *KafkaTriggerConnection) OneAndDone() bool {
-	for _, token := range c.depExpression.Tokens() {
-		if token.Kind == govaluate.LOGICALOP && token.Value == "&&" {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (c *KafkaTriggerConnection) Transform(depName string, event *cloudevents.Event) (*cloudevents.Event, error) {
@@ -140,9 +129,9 @@ func (c *KafkaTriggerConnection) satisfied() (interface{}, error) {
 		}
 	}
 
-	c.Logger.Infow("Evaluating", zap.String("expr", c.depExpression.String()), zap.Any("parameters", parameters))
+	c.Logger.Infow("Evaluating", zap.String("expr", c.depExpression.Source().Content()), zap.Any("parameters", parameters))
 
-	return c.depExpression.Eval(parameters)
+	return expr.Run(c.depExpression, parameters)
 }
 
 func (c *KafkaTriggerConnection) Reset() {

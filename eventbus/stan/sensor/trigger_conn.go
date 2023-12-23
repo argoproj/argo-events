@@ -8,8 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	"github.com/gobwas/glob"
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
@@ -255,7 +256,7 @@ func (n *STANTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSou
 		}
 	}
 
-	result, err := msgHolder.expr.Evaluate(msgHolder.parameters)
+	result, err := expr.Run(msgHolder.expr, msgHolder.parameters)
 	if err != nil {
 		log.Errorf("failed to evaluate dependency expression: %v", err)
 		// TODO: how to handle this situation?
@@ -315,7 +316,7 @@ type eventSourceMessageHolder struct {
 	lastResetTime time.Time
 	// if we reach this time, we reset everything (occurs 60 seconds after lastResetTime)
 	resetTimeout int64
-	expr         *govaluate.EvaluableExpression
+	expr         *vm.Program
 	depNames     []string
 	// Mapping of [eventSourceName + eventName]dependencyName
 	sourceDepMap map[string]string
@@ -330,14 +331,26 @@ type eventSourceMessageHolder struct {
 }
 
 func newEventSourceMessageHolder(logger *zap.SugaredLogger, dependencyExpr string, dependencies []eventbuscommon.Dependency, lastResetTime time.Time) (*eventSourceMessageHolder, error) {
-	dependencyExpr = strings.ReplaceAll(dependencyExpr, "-", "\\-")
-	expression, err := govaluate.NewEvaluableExpression(dependencyExpr)
+	sanitizedDepExpr := dependencyExpr
+
+	for i, d := range dependencies {
+		sanitizedDepName := strings.ReplaceAll(d.Name, "-", "_")
+		sanitizedDepExpr = strings.ReplaceAll(sanitizedDepExpr, d.Name, sanitizedDepName)
+		dependencies[i].Name = sanitizedDepName
+	}
+
+	expression, err := expr.Compile(sanitizedDepExpr)
 	if err != nil {
 		return nil, err
 	}
-	deps := unique(expression.Vars())
-	if len(dependencyExpr) == 0 {
-		return nil, fmt.Errorf("no dependencies found: %s", dependencyExpr)
+	deps := []string{}
+	for _, c := range expression.Constants {
+		if v, ok := c.(string); ok {
+			deps = append(deps, v)
+		}
+	}
+	if len(sanitizedDepExpr) == 0 {
+		return nil, fmt.Errorf("no dependencies found: %s", sanitizedDepExpr)
 	}
 
 	srcDepMap := make(map[string]string)
@@ -446,19 +459,4 @@ func (mh *eventSourceMessageHolder) isCleanedUp() bool {
 		}
 	}
 	return len(mh.msgs) == 0
-}
-
-func unique(stringSlice []string) []string {
-	if len(stringSlice) == 0 {
-		return stringSlice
-	}
-	keys := make(map[string]bool)
-	list := []string{}
-	for _, entry := range stringSlice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
 }

@@ -27,10 +27,10 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Knetic/govaluate"
 	"github.com/Masterminds/sprig/v3"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/expr-lang/expr"
 	"github.com/tidwall/gjson"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -109,7 +109,7 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, operator v1alpha1.Logic
 }
 
 // filterExpr applies expression based filters against event data
-// expression evaluation is based on https://github.com/Knetic/govaluate
+// expression evaluation is based on https://github.com/expr-lang/expr
 // in case "operator input" is equal to v1alpha1.OrLogicalOperator, filters are evaluated as mutual exclusive
 func filterExpr(filters []v1alpha1.ExprFilter, operator v1alpha1.LogicalOperator, event *v1alpha1.Event) (bool, error) {
 	if filters == nil {
@@ -151,7 +151,7 @@ filterExpr:
 			continue
 		}
 
-		expr, exprErr := govaluate.NewEvaluableExpression(filter.Expr)
+		exp, exprErr := expr.Compile(filter.Expr)
 		if exprErr != nil {
 			if operator == v1alpha1.OrLogicalOperator {
 				errMessages = append(errMessages, exprErr.Error())
@@ -161,7 +161,7 @@ filterExpr:
 			}
 		}
 
-		result, resErr := expr.Evaluate(parameters)
+		result, resErr := expr.Run(exp, parameters)
 		if resErr != nil {
 			if operator == v1alpha1.OrLogicalOperator {
 				errMessages = append(errMessages, resErr.Error())
