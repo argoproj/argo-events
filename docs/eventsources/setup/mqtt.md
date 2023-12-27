@@ -37,7 +37,7 @@ MQTT event-source specification is available [here](https://github.com/argoproj/
 
 1. Create the sensor by running the following command.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/mqtt.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/mqtt-sensor.yaml
 
 1. Send message by using MQTT client.
 
