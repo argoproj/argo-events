@@ -211,7 +211,16 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 
 			actionFunc := func(events map[string]cloudevents.Event) {
-				sensorCtx.triggerActions(ctx, sensor, events, trigger)
+				retryStrategy := trigger.RetryStrategy
+				if retryStrategy == nil {
+					retryStrategy = &apicommon.Backoff{Steps: 1}
+				}
+				err := common.DoWithRetry(retryStrategy, func() error {
+					return sensorCtx.triggerActions(ctx, sensor, events, trigger)
+				})
+				if err != nil {
+					triggerLogger.Warnf("failed to trigger actions, %v", err)
+				}
 			}
 
 			var subLock uint32
@@ -333,7 +342,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	return nil
 }
 
-func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1alpha1.Sensor, events map[string]cloudevents.Event, trigger v1alpha1.Trigger) {
+func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1alpha1.Sensor, events map[string]cloudevents.Event, trigger v1alpha1.Trigger) error {
 	eventsMapping := make(map[string]*v1alpha1.Event)
 	depNames := make([]string, 0, len(events))
 	eventIDs := make([]string, 0, len(events))
@@ -345,13 +354,21 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 	if trigger.AtLeastOnce {
 		// By making this a blocking call, wait to Ack the message
 		// until this trigger is executed.
-		sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+		return sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
 	} else {
-		go sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+		go func() {
+			err := sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
+			if err != nil {
+				// Log the error, and let it continue
+				logger := logging.FromContext(ctx)
+				logger.Warnw("Failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name))
+			}
+		}()
+		return nil
 	}
 }
 
-func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) {
+func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string) error {
 	if rl, ok := rateLimiters[trigger.Template.Name]; ok {
 		rl.Take()
 	}
@@ -362,8 +379,10 @@ func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor
 		log.Errorw("Failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name),
 			zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
+		return err
 	} else {
 		sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
+		return nil
 	}
 }
 
@@ -402,16 +421,8 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	}
 
 	logger.Debug("executing the trigger resource")
-	retryStrategy := trigger.RetryStrategy
-	if retryStrategy == nil {
-		retryStrategy = &apicommon.Backoff{Steps: 1}
-	}
-	var newObj interface{}
-	if err := common.DoWithRetry(retryStrategy, func() error {
-		var e error
-		newObj, e = triggerImpl.Execute(ctx, eventsMapping, updatedObj)
-		return e
-	}); err != nil {
+	newObj, err := triggerImpl.Execute(ctx, eventsMapping, updatedObj)
+	if err != nil {
 		return fmt.Errorf("failed to execute trigger, %w", err)
 	}
 	logger.Debug("trigger resource successfully executed")
