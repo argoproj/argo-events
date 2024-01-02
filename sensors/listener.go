@@ -361,7 +361,7 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 			if err != nil {
 				// Log the error, and let it continue
 				logger := logging.FromContext(ctx)
-				logger.Warnw("Failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name))
+				logger.Errorw("Failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name))
 			}
 		}()
 		return nil
@@ -380,10 +380,9 @@ func (sensorCtx *SensorContext) triggerWithRateLimit(ctx context.Context, sensor
 			zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
 		sensorCtx.metrics.ActionFailed(sensor.Name, trigger.Template.Name)
 		return err
-	} else {
-		sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
-		return nil
 	}
+	sensorCtx.metrics.ActionTriggered(sensor.Name, trigger.Template.Name)
+	return nil
 }
 
 func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger, eventsMapping map[string]*v1alpha1.Event, depNames, eventIDs []string, log *zap.SugaredLogger) error {
