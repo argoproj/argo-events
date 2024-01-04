@@ -196,15 +196,15 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				result, err := sensordependencies.Filter(argoEvent, dep.Filters, dep.FiltersLogicalOperator)
 				if err != nil {
 					if !result {
-						triggerLogger.Warnf("Event [%s] discarded due to filtering error: %s",
+						triggerLogger.Debugf("Event [%s] discarded due to filtering error: %s",
 							eventToString(argoEvent), err.Error())
 					} else {
-						triggerLogger.Warnf("Event [%s] passed but with filtering error: %s",
+						triggerLogger.Debugf("Event [%s] passed but with filtering error: %s",
 							eventToString(argoEvent), err.Error())
 					}
 				} else {
 					if !result {
-						triggerLogger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
+						triggerLogger.Debugf("Event [%s] discarded due to filtering", eventToString(argoEvent))
 					}
 				}
 				return result
