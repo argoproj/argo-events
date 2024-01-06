@@ -204,7 +204,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					}
 				} else {
 					if !result {
-						triggerLogger.Warnf("Event [%s] discarded due to filtering", eventToString(argoEvent))
+						triggerLogger.Debugf("Event [%s] discarded due to filtering", eventToString(argoEvent))
 					}
 				}
 				return result
