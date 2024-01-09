@@ -2044,9 +2044,17 @@ The Argo Workflow controller will need to be configured to listen for Workflow o
 
 <ol>
 <li>
-<p>Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus.</p>
+<p>Install Argo Events</p>
 <div class="codehilite"><pre><span></span><code>kubectl create namespace argo-events
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
+# Install with a validating admission controller
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
+</code></pre></div>
+
+</li>
+<li>
+<p>Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus.</p>
+<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </code></pre></div>
 
 </li>
