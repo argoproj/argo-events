@@ -74,15 +74,26 @@ type EventingServer interface {
 	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error
 }
 
+type EventSourceOptions struct {
+	filter               *v1alpha1.EventSourceFilter
+	limitEventsPerSecond *int64
+}
+
 // GetEventingServers returns the mapping of event source type and list of eventing servers
-func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcemetrics.Metrics) (map[apicommon.EventSourceType][]EventingServer, map[string]*v1alpha1.EventSourceFilter) {
+func GetEventingServers(
+	eventSource *v1alpha1.EventSource,
+	metrics *eventsourcemetrics.Metrics) (
+	map[apicommon.EventSourceType][]EventingServer,
+	map[string]EventSourceOptions,
+) {
 	result := make(map[apicommon.EventSourceType][]EventingServer)
-	filters := make(map[string]*v1alpha1.EventSourceFilter)
+	options := make(map[string]EventSourceOptions)
 	if len(eventSource.Spec.AMQP) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AMQP {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &amqp.EventListener{EventSourceName: eventSource.Name, EventName: k, AMQPEventSource: v, Metrics: metrics})
 		}
@@ -91,8 +102,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.AzureEventsHub) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AzureEventsHub {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
@@ -101,8 +113,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.AzureQueueStorage) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AzureQueueStorage {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &azurequeuestorage.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureQueueStorageEventSource: v, Metrics: metrics})
 		}
@@ -111,8 +124,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.AzureServiceBus) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AzureServiceBus {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &azureservicebus.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureServiceBusEventSource: v, Metrics: metrics})
 		}
@@ -121,8 +135,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Bitbucket) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Bitbucket {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &bitbucket.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketEventSource: v, Metrics: metrics})
 		}
@@ -131,8 +146,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.BitbucketServer) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.BitbucketServer {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &bitbucketserver.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketServerEventSource: v, Metrics: metrics})
 		}
@@ -141,8 +157,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Calendar {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &calendar.EventListener{EventSourceName: eventSource.Name, EventName: k, CalendarEventSource: v, Namespace: eventSource.Namespace, Metrics: metrics})
 		}
@@ -151,8 +168,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Emitter) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Emitter {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &emitter.EventListener{EventSourceName: eventSource.Name, EventName: k, EmitterEventSource: v, Metrics: metrics})
 		}
@@ -161,8 +179,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.File) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.File {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &file.EventListener{EventSourceName: eventSource.Name, EventName: k, FileEventSource: v, Metrics: metrics})
 		}
@@ -171,8 +190,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.SFTP) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SFTP {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &sftp.EventListener{EventSourceName: eventSource.Name, EventName: k, SFTPEventSource: v, Metrics: metrics})
 		}
@@ -181,8 +201,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Gerrit) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Gerrit {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &gerrit.EventListener{EventSourceName: eventSource.Name, EventName: k, GerritEventSource: v, Metrics: metrics})
 		}
@@ -191,8 +212,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Github) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Github {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &github.EventListener{EventSourceName: eventSource.Name, EventName: k, GithubEventSource: v, Metrics: metrics})
 		}
@@ -201,8 +223,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Gitlab) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Gitlab {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &gitlab.EventListener{EventSourceName: eventSource.Name, EventName: k, GitlabEventSource: v, Metrics: metrics})
 		}
@@ -211,8 +234,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.HDFS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.HDFS {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &hdfs.EventListener{EventSourceName: eventSource.Name, EventName: k, HDFSEventSource: v, Metrics: metrics})
 		}
@@ -221,8 +245,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Kafka) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Kafka {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: &v.LimitEventsPerSecond,
 			}
 			servers = append(servers, &kafka.EventListener{EventSourceName: eventSource.Name, EventName: k, KafkaEventSource: v, Metrics: metrics})
 		}
@@ -231,8 +256,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.MQTT) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.MQTT {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &mqtt.EventListener{EventSourceName: eventSource.Name, EventName: k, MQTTEventSource: v, Metrics: metrics})
 		}
@@ -248,8 +274,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.NATS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.NATS {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &nats.EventListener{EventSourceName: eventSource.Name, EventName: k, NATSEventSource: v, Metrics: metrics})
 		}
@@ -258,8 +285,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.NSQ) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.NSQ {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &nsq.EventListener{EventSourceName: eventSource.Name, EventName: k, NSQEventSource: v, Metrics: metrics})
 		}
@@ -268,8 +296,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.PubSub) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.PubSub {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &gcppubsub.EventListener{EventSourceName: eventSource.Name, EventName: k, PubSubEventSource: v, Metrics: metrics})
 		}
@@ -278,8 +307,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Redis) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Redis {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &redis.EventListener{EventSourceName: eventSource.Name, EventName: k, RedisEventSource: v, Metrics: metrics})
 		}
@@ -288,8 +318,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.RedisStream) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.RedisStream {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &redisstream.EventListener{EventSourceName: eventSource.Name, EventName: k, EventSource: v, Metrics: metrics})
 		}
@@ -298,8 +329,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.SNS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SNS {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &awssns.EventListener{EventSourceName: eventSource.Name, EventName: k, SNSEventSource: v, Metrics: metrics})
 		}
@@ -308,8 +340,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.SQS) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.SQS {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &awssqs.EventListener{EventSourceName: eventSource.Name, EventName: k, SQSEventSource: v, Metrics: metrics})
 		}
@@ -318,8 +351,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Slack) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Slack {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &slack.EventListener{EventSourceName: eventSource.Name, EventName: k, SlackEventSource: v, Metrics: metrics})
 		}
@@ -342,8 +376,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Webhook) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Webhook {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, Webhook: v, Metrics: metrics})
 		}
@@ -359,8 +394,9 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Pulsar) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Pulsar {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v, Metrics: metrics})
 		}
@@ -369,14 +405,15 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 	if len(eventSource.Spec.Generic) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Generic {
-			if v.Filter != nil {
-				filters[k] = v.Filter
+			options[k] = EventSourceOptions{
+				filter:               v.Filter,
+				limitEventsPerSecond: nil,
 			}
 			servers = append(servers, &generic.EventListener{EventSourceName: eventSource.Name, EventName: k, GenericEventSource: v, Metrics: metrics})
 		}
 		result[apicommon.GenericEvent] = servers
 	}
-	return result, filters
+	return result, options
 }
 
 // EventSourceAdaptor is the adaptor for eventsource service
@@ -411,7 +448,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 		recreateTypes[esType] = true
 	}
 	isRecreateType := false
-	servers, filters := GetEventingServers(e.eventSource, e.metrics)
+	servers, options := GetEventingServers(e.eventSource, e.metrics)
 	for k := range servers {
 		if _, ok := recreateTypes[k]; ok {
 			isRecreateType = true
@@ -422,7 +459,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	}
 
 	if !isRecreateType {
-		return e.run(ctx, servers, filters)
+		return e.run(ctx, servers, options)
 	}
 
 	clusterName := fmt.Sprintf("%s-eventsource-%s", e.eventSource.Namespace, e.eventSource.Name)
@@ -437,7 +474,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 
 	elector.RunOrDie(ctx, leaderelection.LeaderCallbacks{
 		OnStartedLeading: func(ctx context.Context) {
-			if err := e.run(ctx, servers, filters); err != nil {
+			if err := e.run(ctx, servers, options); err != nil {
 				log.Fatalw("failed to start", zap.Error(err))
 			}
 		},
@@ -449,7 +486,11 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	return nil
 }
 
-func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer, filters map[string]*v1alpha1.EventSourceFilter) error {
+func (e *EventSourceAdaptor) run(
+	ctx context.Context,
+	servers map[apicommon.EventSourceType][]EventingServer,
+	options map[string]EventSourceOptions,
+) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
 	clientID := generateClientID(e.hostname)
@@ -534,15 +575,18 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 				}
 				if err = common.DoWithRetry(&backoff, func() error {
 					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) error {
-						if filter, ok := filters[s.GetEventName()]; ok {
-							proceed, err := filterEvent(data, filter)
-							if err != nil {
-								logger.Errorw("Failed to filter event", zap.Error(err))
-								return nil
-							}
-							if !proceed {
-								logger.Info("Filter condition not met, skip dispatching")
-								return nil
+						eventSourceOptions, eventSourceOptionsExist := options[s.GetEventName()]
+						if eventSourceOptionsExist {
+							if eventSourceOptions.filter != nil {
+								proceed, err := filterEvent(data, eventSourceOptions.filter)
+								if err != nil {
+									logger.Errorw("Failed to filter event", zap.Error(err))
+									return nil
+								}
+								if !proceed {
+									logger.Info("Filter condition not met, skip dispatching")
+									return nil
+								}
 							}
 						}
 
@@ -591,6 +635,13 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 						logger.Infow("Succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
+
+						if eventSourceOptionsExist && eventSourceOptions.limitEventsPerSecond != nil && *eventSourceOptions.limitEventsPerSecond > 0 {
+							// 1000000000 is 1 second in nanoseconds
+							d := (1000000000 / time.Duration(*eventSourceOptions.limitEventsPerSecond) * time.Nanosecond) * time.Nanosecond
+							logger.Debugf("Sleeping for: %v.", d)
+							time.Sleep(d)
+						}
 						return nil
 					})
 				}); err != nil {

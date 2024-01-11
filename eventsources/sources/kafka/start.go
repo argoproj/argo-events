@@ -373,12 +373,6 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 				continue
 			}
 		}
-		if consumer.kafkaEventSource.LimitEventsPerSecond > 0 {
-			// 1000000000 is 1 second in nanoseconds
-			d := (1000000000 / time.Duration(consumer.kafkaEventSource.LimitEventsPerSecond) * time.Nanosecond) * time.Nanosecond
-			consumer.logger.Debugf("Sleeping for: %v.", d)
-			time.Sleep(d)
-		}
 	}
 
 	return nil
