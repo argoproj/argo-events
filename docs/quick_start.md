@@ -10,9 +10,16 @@ The Argo Workflow controller will need to be configured to listen for Workflow o
         kubectl create namespace argo
         kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v<<ARGO_WORKFLOWS_VERSION>>/install.yaml
 
-1. Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus.
-        
+1. Install Argo Events
+
         kubectl create namespace argo-events
+        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
+        # Install with a validating admission controller
+        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
+
+
+1. Make sure to have the eventbus pods running in the namespace. Run following command to create the eventbus.
+
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
 1. Setup event-source for webhook as follows.
