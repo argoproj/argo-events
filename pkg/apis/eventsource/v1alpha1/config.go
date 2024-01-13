@@ -14,7 +14,7 @@ type WatchPathConfig struct {
 	// PathRegexp is regexp of relative path of object to watch with respect to the directory
 	PathRegexp string `json:"pathRegexp,omitempty" protobuf:"bytes,3,opt,name=pathRegexp"`
 	// Recursive is used to signify whether the path is watched recursively or not
-	Recursive string `json:"recursive,omitempty" protobuf:"bytes,4,opt,name=recursive"`
+	Recursive bool `json:"recursive,omitempty" protobuf:"bytes,4,opt,name=recursive"`
 }
 
 // Validate validates WatchPathConfig
