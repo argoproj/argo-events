@@ -2062,6 +2062,10 @@
           "description": "PathRegexp is regexp of relative path of object to watch with respect to the directory",
           "type": "string"
         },
+        "recursive": {
+          "description": "Recursive is used to signify whether the path is watched recursively or not",
+          "type": "boolean"
+        },
         "type": {
           "description": "Type of file operations to watch",
           "type": "string"
@@ -3072,6 +3076,10 @@
         "pathRegexp": {
           "description": "PathRegexp is regexp of relative path of object to watch with respect to the directory",
           "type": "string"
+        },
+        "recursive": {
+          "description": "Recursive is used to signify whether the path is watched recursively or not",
+          "type": "boolean"
         }
       }
     },

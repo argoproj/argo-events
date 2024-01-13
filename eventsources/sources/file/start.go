@@ -111,13 +111,13 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 			if info.IsDir() {
 				err = watcher.Add(path)
 				if err != nil {
-					fmt.Errorf("failed to add sub-directory %s to the watcher for %s, %w", path, el.GetEventName(), err)
+					return fmt.Errorf("failed to add sub-directory %s to the watcher for %s, %w", path, el.GetEventName(), err)
 				}
 			}
 			return nil
 		})
 	if err != nil {
-		fmt.Errorf("failed to add sub-directories in %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
+		return fmt.Errorf("failed to add sub-directories in %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
 	}
 
 	var pathRegexp *regexp.Regexp
@@ -164,18 +164,24 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 					log.Errorw("failed getting filestat", zap.Error(err))
 				}
 				if fileinfo.IsDir() {
-					watcher.Add(event.Name)
+					err = watcher.Add(event.Name)
+					if err != nil {
+						return fmt.Errorf("failed getting filestat", zap.Error(err))
+					}
 
 					err = filepath.Walk(event.Name,
 						func(path string, info os.FileInfo, err error) error {
 							if info.IsDir() {
 								err = watcher.Add(path)
 								if err != nil {
-									fmt.Errorf("failed to add new sub-directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
+									return fmt.Errorf("failed to add new sub-directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
 								}
 							}
 							return nil
 						})
+					if err != nil {
+						return fmt.Errorf("failed to add sub-directories in %s to the watcher for %s, %w", event.Name, el.GetEventName(), err)
+					}
 				}
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created

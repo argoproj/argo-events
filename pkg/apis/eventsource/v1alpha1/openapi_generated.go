@@ -2472,6 +2472,13 @@ func schema_pkg_apis_eventsource_v1alpha1_HDFSEventSource(ref common.ReferenceCa
 							Format:      "",
 						},
 					},
+					"recursive": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Recursive is used to signify whether the path is watched recursively or not",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of file operations to watch",
@@ -4397,6 +4404,13 @@ func schema_pkg_apis_eventsource_v1alpha1_WatchPathConfig(ref common.ReferenceCa
 						SchemaProps: spec.SchemaProps{
 							Description: "PathRegexp is regexp of relative path of object to watch with respect to the directory",
 							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"recursive": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Recursive is used to signify whether the path is watched recursively or not",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},

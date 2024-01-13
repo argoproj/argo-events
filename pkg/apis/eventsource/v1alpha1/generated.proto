@@ -1713,6 +1713,9 @@ message WatchPathConfig {
 
   // PathRegexp is regexp of relative path of object to watch with respect to the directory
   optional string pathRegexp = 3;
+
+  // Recursive is used to signify whether the path is watched recursively or not
+  optional bool recursive = 4;
 }
 
 // WebhookContext holds a general purpose REST API context
