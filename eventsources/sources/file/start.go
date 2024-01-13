@@ -20,6 +20,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -100,6 +102,24 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 		return fmt.Errorf("failed to add directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
 	}
 
+	// if recursive, adding all sub-directories to the watcher
+	err = filepath.Walk(fileEventSource.WatchPathConfig.Directory,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				err = watcher.Add(path)
+				if err != nil {
+					fmt.Errorf("failed to add sub-directory %s to the watcher for %s, %w", path, el.GetEventName(), err)
+				}
+			}
+			return nil
+		})
+	if err != nil {
+		fmt.Errorf("failed to add sub-directories in %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
+	}
+
 	var pathRegexp *regexp.Regexp
 	if fileEventSource.WatchPathConfig.PathRegexp != "" {
 		log.Infow("matching file path with configured regex...", zap.Any("regex", fileEventSource.WatchPathConfig.PathRegexp))
@@ -138,6 +158,26 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 				// watcher stopped watching file events
 				return fmt.Errorf("fs watcher stopped for %s", el.GetEventName())
 			}
+			if (fileEventSource.WatchPathConfig.Recursive) && (event.Has(fsnotify.Create)) {
+				fileinfo, err := os.Stat(event.Name)
+				if err != nil {
+					log.Errorw("failed getting filestat", zap.Error(err))
+				}
+				if fileinfo.IsDir() {
+					watcher.Add(event.Name)
+
+					err = filepath.Walk(event.Name,
+						func(path string, info os.FileInfo, err error) error {
+							if info.IsDir() {
+								err = watcher.Add(path)
+								if err != nil {
+									fmt.Errorf("failed to add new sub-directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
+								}
+							}
+							return nil
+						})
+				}
+			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			matched := false
 			relPath := strings.TrimPrefix(event.Name, fileEventSource.WatchPathConfig.Directory)
@@ -164,6 +204,7 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 // listenEvents listen to file related events using polling.
 func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
 	fileEventSource := &el.FileEventSource
+	var err error
 
 	// create new fs watcher
 	log.Info("setting up a new file polling watcher...")
@@ -172,7 +213,11 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 
 	// file descriptor to watch must be available in file system. You can't watch an fs descriptor that is not present.
 	log.Info("adding directory to monitor for the watcher...")
-	err := watcher.Add(fileEventSource.WatchPathConfig.Directory)
+	if fileEventSource.WatchPathConfig.Recursive {
+		err = watcher.AddRecursive(fileEventSource.WatchPathConfig.Directory)
+	} else {
+		err = watcher.Add(fileEventSource.WatchPathConfig.Directory)
+	}
 	if err != nil {
 		return fmt.Errorf("failed to add directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
 	}
