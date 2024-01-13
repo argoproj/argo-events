@@ -166,15 +166,15 @@ func (el *EventListener) listenEvents(ctx context.Context, dispatch func([]byte,
 				if fileinfo.IsDir() {
 					err = watcher.Add(event.Name)
 					if err != nil {
-						return fmt.Errorf("failed getting filestat", zap.Error(err))
+						return fmt.Errorf("failed getting filestat %s", err.Error())
 					}
 
 					err = filepath.Walk(event.Name,
-						func(path string, info os.FileInfo, err error) error {
+						func(path string, info os.FileInfo, ferr error) error {
 							if info.IsDir() {
-								err = watcher.Add(path)
-								if err != nil {
-									return fmt.Errorf("failed to add new sub-directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), err)
+								adderr := watcher.Add(path)
+								if adderr != nil {
+									return fmt.Errorf("failed to add new sub-directory %s to the watcher for %s, %w", fileEventSource.WatchPathConfig.Directory, el.GetEventName(), adderr)
 								}
 							}
 							return nil
