@@ -630,12 +630,12 @@ github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.5.1 h1:sO0/P7g68FrryJzljemN+
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.5.1/go.mod h1:h8hyGFDsU5HMivxiS2iYFZsgDbU9OnnJ163x5UGVKYo=
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.1 h1:6oNBlSdi1QqM1PNW7FPA6xOGA5UNsXnkaYZz9vdPGhA=
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.1/go.mod h1:s4kgfzA0covAXNicZHDMN58jExvcng2mC/DepXiF1EI=
-github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.5.0 h1:HKHkea1fdm18LT8VAxTVZgJpPsLgv+0NZhmtus1UqJQ=
-github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.5.0/go.mod h1:4BbKA+mRmmTP8VaLfDPNF5nOdhRm5upG3AXVWfv1dxc=
+github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.6.0 h1:Fhg/LkAagiLv9Xpw6r2knr19tn9t1TiQoJu5bOMzflc=
+github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.6.0/go.mod h1:7xwz/6tTwO9zMKni8/EozIMi0DTexFSm7YNE9HdD3cQ=
 github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.0 h1:lJwNFV+xYjHREUTHJKx/ZF6CJSt9znxmLw9DqSTvyRU=
 github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.0/go.mod h1:GfT0aGew8Qj5yiQVqOO5v7N8fanbJGyUoHqXg56qcVY=
-github.com/Azure/go-amqp v1.0.2 h1:zHCHId+kKC7fO8IkwyZJnWMvtRXhYC0VJtD0GYkHc6M=
-github.com/Azure/go-amqp v1.0.2/go.mod h1:vZAogwdrkbyK3Mla8m/CxSc/aKdnTZ4IbPxl51Y5WZE=
+github.com/Azure/go-amqp v1.0.4 h1:GX5OFOs706UjuFRD5PDKm3aOuLQ92F7DMbua+DKAYCc=
+github.com/Azure/go-amqp v1.0.4/go.mod h1:vZAogwdrkbyK3Mla8m/CxSc/aKdnTZ4IbPxl51Y5WZE=
 github.com/Azure/go-ansiterm v0.0.0-20210608223527-2377c96fe795/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
 github.com/Azure/go-autorest v14.2.0+incompatible h1:V5VMDjClD3GiElqLWO7mz2MxNAK/vTfRHdAubSIPRgs=
