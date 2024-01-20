@@ -79,7 +79,7 @@ require (
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.18.0
-	google.golang.org/api v0.156.0
+	google.golang.org/api v0.157.0
 	google.golang.org/grpc v1.60.1
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.24.3
@@ -163,8 +163,8 @@ require (
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	gomodules.xyz/envconfig v1.3.1-0.20190308184047-426f31af0d45 // indirect
 	gomodules.xyz/notify v0.1.1 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20231212172506-995d672761c0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240102182953-50ed04b92917 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
@@ -319,7 +319,7 @@ require (
 	golang.org/x/tools v0.13.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto v0.0.0-20231212172506-995d672761c0 // indirect
+	google.golang.org/genproto v0.0.0-20240102182953-50ed04b92917 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
