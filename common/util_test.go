@@ -23,6 +23,7 @@ import (
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -275,4 +276,23 @@ func TestSliceContains(t *testing.T) {
 	assert.True(t, SliceContains([]string{"*", "world"}, "world"))
 	assert.True(t, SliceContains([]string{"*", "hello", "*"}, "*"))
 	assert.False(t, SliceContains([]string{"hello", "world"}, "*"))
+}
+
+func TestCopyStringMap(t *testing.T) {
+	m1 := map[string]string{
+		"a": "aaa",
+		"b": "bbb",
+	}
+	m2 := CopyStringMap(m1)
+
+	m1["a"] = "zzz"
+	delete(m1, "b")
+
+	require.Equal(t, m1, map[string]string{
+		"a": "zzz",
+	})
+	require.Equal(t, m2, map[string]string{
+		"a": "aaa",
+		"b": "bbb",
+	})
 }

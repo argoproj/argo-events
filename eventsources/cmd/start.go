@@ -10,6 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	argoevents "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources"
@@ -60,9 +61,13 @@ func Start() {
 	m := metrics.NewMetrics(eventSource.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", common.EventSourceMetricsPort))
 
-	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
-	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m)
+	cfClient, err := codefresh.NewClient(ctx, eventSource.Namespace)
+	if err != nil {
+		logger.Fatalw("unable to initialise Codefresh Client", zap.Error(err))
+	}
 
+	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
+	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m, cfClient)
 	if err := adaptor.Start(ctx); err != nil {
 		logger.Fatalw("failed to start eventsource server", zap.Error(err))
 	}

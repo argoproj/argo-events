@@ -18,6 +18,7 @@ package argo_workflow
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strconv"
@@ -36,6 +37,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/common"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -120,9 +122,13 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 
 	submittedWFLabels := make(map[string]string)
 	if op == v1alpha1.Submit {
-		submittedWFLabels["events.argoproj.io/sensor"] = t.Sensor.Name
 		submittedWFLabels["events.argoproj.io/trigger"] = trigger.Template.Name
 		submittedWFLabels["events.argoproj.io/action-timestamp"] = strconv.Itoa(int(time.Now().UnixNano() / int64(time.Millisecond)))
+		common.ApplySensorLabels(submittedWFLabels, t.Sensor)
+		err := common.ApplyEventLabels(submittedWFLabels, events)
+		if err != nil {
+			t.Logger.Info("failed to apply event labels, skipping...")
+		}
 	}
 
 	namespace := obj.GetNamespace()
@@ -187,8 +193,9 @@ func (t *ArgoWorkflowTrigger) Execute(ctx context.Context, events map[string]*v1
 		return nil, fmt.Errorf("unknown operation type %s", string(op))
 	}
 
+	var errBuff strings.Builder
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuff)
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	cmd.Args = append(cmd.Args, trigger.Template.ArgoWorkflow.Args...)
 	if err := t.cmdRunner(cmd); err != nil {
 		return nil, fmt.Errorf("failed to execute %s command for workflow %s, %w", string(op), name, err)

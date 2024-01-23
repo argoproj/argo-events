@@ -17,6 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	argoevents "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/controllers/eventbus"
@@ -96,9 +97,16 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 		logger.Fatalw("unable to add Sensor scheme", zap.Error(err))
 	}
 
+	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+
+	cfClient, err := codefresh.NewClient(ctx, eventsOpts.ManagedNamespace)
+	if err != nil {
+		logger.Fatalw("unable to initialise Codefresh Client", zap.Error(err))
+	}
+
 	// EventBus controller
 	eventBusController, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), kubeClient, mgr.GetScheme(), config, logger),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), kubeClient, mgr.GetScheme(), config, logger, cfClient),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up EventBus controller", zap.Error(err))
@@ -130,7 +138,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 
 	// EventSource controller
 	eventSourceController, err := controller.New(eventsource.ControllerName, mgr, controller.Options{
-		Reconciler: eventsource.NewReconciler(mgr.GetClient(), mgr.GetScheme(), imageName, logger),
+		Reconciler: eventsource.NewReconciler(mgr.GetClient(), mgr.GetScheme(), imageName, logger, cfClient),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up EventSource controller", zap.Error(err))
@@ -157,7 +165,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 
 	// Sensor controller
 	sensorController, err := controller.New(sensor.ControllerName, mgr, controller.Options{
-		Reconciler: sensor.NewReconciler(mgr.GetClient(), mgr.GetScheme(), imageName, logger),
+		Reconciler: sensor.NewReconciler(mgr.GetClient(), mgr.GetScheme(), imageName, logger, cfClient),
 	})
 	if err != nil {
 		logger.Fatalw("unable to set up Sensor controller", zap.Error(err))
@@ -178,7 +186,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	logger.Infow("starting controller manager", "version", argoevents.GetVersion())
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		logger.Fatalw("unable to run eventbus controller", zap.Error(err))
 	}
 }
