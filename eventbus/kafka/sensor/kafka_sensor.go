@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/Knetic/govaluate"
-	"github.com/Shopify/sarama"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -132,6 +132,13 @@ func (s *KafkaSensor) Initialize() error {
 		return err
 	}
 
+	// producer is at risk of deadlocking if Errors channel isn't read.
+	go func() {
+		for err := range producer.Errors() {
+			s.Logger.Errorf("Kafka producer error", zap.Error(err))
+		}
+	}()
+
 	s.client = client
 	s.consumer = consumer
 	s.kafkaHandler = &KafkaHandler{
@@ -141,6 +148,7 @@ func (s *KafkaSensor) Initialize() error {
 		Producer:      producer,
 		OffsetManager: offsetManager,
 		TriggerTopic:  s.topics.trigger,
+		Reset:         s.Reset,
 		Handlers: map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()){
 			s.topics.event:   s.Event,
 			s.topics.trigger: s.Trigger,
@@ -366,4 +374,12 @@ func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMes
 	}
 
 	return nil, msg.Offset + 1, f
+}
+
+func (s *KafkaSensor) Reset() error {
+	for _, trigger := range s.triggers {
+		trigger.Reset()
+	}
+
+	return nil
 }

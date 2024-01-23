@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	"go.uber.org/zap"
 )
@@ -25,6 +25,10 @@ type KafkaHandler struct {
 	// one function for each consumed topic, return messages, an
 	// offset and an optional function that will in a transaction
 	Handlers map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func())
+
+	// cleanup function
+	// used to clear state when consumer group is rebalanced
+	Reset func() error
 
 	// maintains a mapping of keys (which correspond to triggers)
 	// to offsets, used to ensure triggers aren't invoked twice
@@ -68,6 +72,8 @@ func (c *Checkpoint) Metadata() string {
 }
 
 func (h *KafkaHandler) Setup(session sarama.ConsumerGroupSession) error {
+	h.Logger.Infow("Kafka setup", zap.Any("claims", session.Claims()))
+
 	// instantiates checkpoints for all topic/partitions managed by
 	// this claim
 	h.checkpoints = Checkpoints{}
@@ -115,7 +121,8 @@ func (h *KafkaHandler) Setup(session sarama.ConsumerGroupSession) error {
 }
 
 func (h *KafkaHandler) Cleanup(session sarama.ConsumerGroupSession) error {
-	return nil
+	h.Logger.Infow("Kafka cleanup", zap.Any("claims", session.Claims()))
+	return h.Reset()
 }
 
 func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
@@ -158,12 +165,13 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 			var fns []func()
 
 			for _, msg := range msgs {
+				key := string(msg.Key)
+
 				h.Logger.Infow("Received message",
 					zap.String("topic", msg.Topic),
+					zap.String("key", key),
 					zap.Int32("partition", msg.Partition),
 					zap.Int64("offset", msg.Offset))
-
-				key := string(msg.Key)
 
 				if checkpoint.Init {
 					// mark offset in order to reconsume from this

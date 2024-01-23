@@ -856,6 +856,138 @@ and
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.EmailTrigger">
+EmailTrigger
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+<p>
+<p>
+EmailTrigger refers to the specification of the email notification
+trigger.
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>username</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Username refers to the username used to connect to the smtp server.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>smtpPassword</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SMTPPassword refers to the Kubernetes secret that holds the smtp
+password used to connect to smtp server.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>host</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Host refers to the smtp host url to which email is send.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>port</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Port refers to the smtp server port to which email is send. Defaults to
+0.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>to</code></br> <em> \[\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+To refers to the email addresses to which the emails are send.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>from</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+From refers to the address from which the email is send from.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subject</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Subject refers to the subject line for the email send.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>body</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Body refers to the body/content of the email send.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.Event">
 Event
 </h3>
@@ -3462,6 +3594,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.AzureEventHubsTrigger">AzureEventHubsTrigger</a>,
 <a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">AzureServiceBusTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
+<a href="#argoproj.io/v1alpha1.EmailTrigger">EmailTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
@@ -3951,6 +4084,18 @@ AzureServiceBusTrigger </a> </em>
 <p>
 AzureServiceBus refers to the trigger designed to place messages on
 Azure Service Bus
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>email</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EmailTrigger"> EmailTrigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Email refers to the trigger designed to send an email notification
 </p>
 </td>
 </tr>

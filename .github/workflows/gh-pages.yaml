@@ -15,13 +15,13 @@ jobs:
     if: github.repository == 'argoproj/argo-events'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4.6.0
+        uses: actions/setup-python@v5.0.0
         with:
           python-version: 3.9
       - name: Setup Golang
-        uses: actions/setup-go@v3.5.0
+        uses: actions/setup-go@v4.1.0
         with:
           go-version: '1.20'
       - name: build

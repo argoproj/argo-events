@@ -29,7 +29,7 @@ spec:
 #      # metadata contains key-value pairs that will be send to the sensor with each event payload
 #      # whatever you put here is blindly delivered to sensor.
 #      # access in resourceParameters or templateParameters via the path metadata.hello
-#      matadata:
+#      metadata:
 #        hello: world
 #
 #    schedule-in-specific-timezone:

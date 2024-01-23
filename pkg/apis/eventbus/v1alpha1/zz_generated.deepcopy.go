@@ -159,6 +159,11 @@ func (in *EventBusSpec) DeepCopyInto(out *EventBusSpec) {
 		*out = new(KafkaBus)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.JetStreamExotic != nil {
+		in, out := &in.JetStreamExotic, &out.JetStreamExotic
+		*out = new(JetStreamConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

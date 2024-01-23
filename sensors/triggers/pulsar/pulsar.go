@@ -43,10 +43,10 @@ type PulsarTrigger struct {
 }
 
 // NewPulsarTrigger returns a new Pulsar trigger context.
-func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers map[string]pulsar.Producer, logger *zap.SugaredLogger) (*PulsarTrigger, error) {
+func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers common.StringKeyedMap[pulsar.Producer], logger *zap.SugaredLogger) (*PulsarTrigger, error) {
 	pulsarTrigger := trigger.Template.Pulsar
 
-	producer, ok := pulsarProducers[trigger.Template.Name]
+	producer, ok := pulsarProducers.Load(trigger.Template.Name)
 	if !ok {
 		var err error
 		tlsTrustCertsFilePath := ""
@@ -73,14 +73,16 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
 		}
 
-		if len(pulsarTrigger.AuthAthenzParams) > 0 && pulsarTrigger.AuthAthenzSecret != nil {
+		if len(pulsarTrigger.AuthAthenzParams) > 0 {
 			logger.Info("setting athenz auth option...")
-			authAthenzFilePath, err := common.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
-			if err != nil {
-				logger.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
-				return nil, err
+			if pulsarTrigger.AuthAthenzSecret != nil {
+				authAthenzFilePath, err := common.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
+				if err != nil {
+					logger.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
+					return nil, err
+				}
+				pulsarTrigger.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
 			}
-			pulsarTrigger.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
 			clientOpt.Authentication = pulsar.NewAuthenticationAthenz(pulsarTrigger.AuthAthenzParams)
 		}
 
@@ -124,7 +126,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			return nil, err
 		}
 
-		pulsarProducers[trigger.Template.Name] = producer
+		pulsarProducers.Store(trigger.Template.Name, producer)
 	}
 
 	return &PulsarTrigger{

@@ -232,6 +232,46 @@ message DataFilter {
   optional string template = 5;
 }
 
+// EmailTrigger refers to the specification of the email notification trigger.
+message EmailTrigger {
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the trigger resource.
+  // +optional
+  repeated TriggerParameter parameters = 1;
+
+  // Username refers to the username used to connect to the smtp server.
+  // +optional
+  optional string username = 2;
+
+  // SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server.
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector smtpPassword = 3;
+
+  // Host refers to the smtp host url to which email is send.
+  optional string host = 4;
+
+  // Port refers to the smtp server port to which email is send.
+  // Defaults to 0.
+  // +optional
+  optional int32 port = 5;
+
+  // To refers to the email addresses to which the emails are send.
+  // +optional
+  repeated string to = 6;
+
+  // From refers to the address from which the email is send from.
+  // +optional
+  optional string from = 7;
+
+  // Subject refers to the subject line for the email send.
+  // +optional
+  optional string subject = 8;
+
+  // Body refers to the body/content of the email send.
+  // +optional
+  optional string body = 9;
+}
+
 // Event represents the cloudevent received from an event source.
 // +protobuf.options.(gogoproto.goproto_stringer)=false
 message Event {
@@ -1033,6 +1073,10 @@ message TriggerTemplate {
   // AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus
   // +optional
   optional AzureServiceBusTrigger azureServiceBus = 16;
+
+  // Email refers to the trigger designed to send an email notification
+  // +optional
+  optional EmailTrigger email = 17;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

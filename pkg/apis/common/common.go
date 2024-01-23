@@ -28,6 +28,7 @@ var (
 	MinioEvent           EventSourceType = "minio"
 	CalendarEvent        EventSourceType = "calendar"
 	FileEvent            EventSourceType = "file"
+	SFTPEvent            EventSourceType = "sftp"
 	ResourceEvent        EventSourceType = "resource"
 	WebhookEvent         EventSourceType = "webhook"
 	AMQPEvent            EventSourceType = "amqp"
@@ -37,6 +38,7 @@ var (
 	SNSEvent             EventSourceType = "sns"
 	SQSEvent             EventSourceType = "sqs"
 	PubSubEvent          EventSourceType = "pubsub"
+	GerritEvent          EventSourceType = "gerrit"
 	GithubEvent          EventSourceType = "github"
 	GitlabEvent          EventSourceType = "gitlab"
 	HDFSEvent            EventSourceType = "hdfs"
@@ -77,6 +79,7 @@ var (
 		ResourceEvent,
 		HDFSEvent,
 		FileEvent,
+		SFTPEvent,
 		GenericEvent,
 	}
 )
@@ -99,6 +102,7 @@ var (
 	K8sTrigger             TriggerType = "Kubernetes"
 	AzureEventHubsTrigger  TriggerType = "AzureEventHubs"
 	AzureServiceBusTrigger TriggerType = "AzureServiceBus"
+	EmailTrigger           TriggerType = "Email"
 )
 
 // EventBusType is the type of event bus

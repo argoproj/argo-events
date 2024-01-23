@@ -64,3 +64,21 @@ For Jetstream, TLS is turned on for all client-server communication as well as b
 ## How it works under the hood
 
 Jetstream has the concept of a Stream, and Subjects (i.e. topics) which are used on a Stream. From the documentation: “Each Stream defines how messages are stored and what the limits (duration, size, interest) of the retention are.” For Argo Events, we have one Stream called "default" with a single set of settings, but we have multiple subjects, each of which is named `default.<eventsourcename>.<eventname>`. Sensors subscribe to the subjects they need using durable consumers.
+
+### Exotic
+
+To use an existing JetStream service, follow the example below.
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+spec:
+  jetstreamExotic:
+      url: nats://xxxxx:xxx
+      accessSecret:
+        name: my-secret-name
+        key: secret-key
+      streamConfig: ""
+```

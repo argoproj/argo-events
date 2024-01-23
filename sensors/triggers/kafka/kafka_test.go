@@ -19,12 +19,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/sarama"
-	"github.com/Shopify/sarama/mocks"
+	"github.com/IBM/sarama"
+	"github.com/IBM/sarama/mocks"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -60,15 +61,14 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getFakeKafkaTrigger(producers map[string]sarama.AsyncProducer) (*KafkaTrigger, error) {
+func getFakeKafkaTrigger(producers common.StringKeyedMap[sarama.AsyncProducer]) (*KafkaTrigger, error) {
 	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 }
 
 func TestNewKafkaTrigger(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	producers := map[string]sarama.AsyncProducer{
-		"fake-trigger": producer,
-	}
+	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers.Store("fake-trigger", producer)
 	trigger, err := NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 
 	assert.Nil(t, err)
@@ -78,9 +78,9 @@ func TestNewKafkaTrigger(t *testing.T) {
 
 func TestKafkaTrigger_FetchResource(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	trigger, err := getFakeKafkaTrigger(map[string]sarama.AsyncProducer{
-		"fake-trigger": producer,
-	})
+	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers.Store("fake-trigger", producer)
+	trigger, err := getFakeKafkaTrigger(producers)
 	assert.Nil(t, err)
 	obj, err := trigger.FetchResource(context.TODO())
 	assert.Nil(t, err)
@@ -92,9 +92,9 @@ func TestKafkaTrigger_FetchResource(t *testing.T) {
 
 func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	trigger, err := getFakeKafkaTrigger(map[string]sarama.AsyncProducer{
-		"fake-trigger": producer,
-	})
+	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers.Store("fake-trigger", producer)
+	trigger, err := getFakeKafkaTrigger(producers)
 	assert.Nil(t, err)
 
 	testEvents := map[string]*v1alpha1.Event{
@@ -136,9 +136,9 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestKafkaTrigger_Execute(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	trigger, err := getFakeKafkaTrigger(map[string]sarama.AsyncProducer{
-		"fake-trigger": producer,
-	})
+	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers.Store("fake-trigger", producer)
+	trigger, err := getFakeKafkaTrigger(producers)
 	assert.Nil(t, err)
 	testEvents := map[string]*v1alpha1.Event{
 		"fake-dependency": {

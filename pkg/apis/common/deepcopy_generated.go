@@ -222,6 +222,11 @@ func (in *S3Artifact) DeepCopyInto(out *S3Artifact) {
 			(*out)[key] = val
 		}
 	}
+	if in.CACertificate != nil {
+		in, out := &in.CACertificate, &out.CACertificate
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

@@ -148,6 +148,11 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
+	if template.Email != nil {
+		if err := validateEmailTrigger(template.Email); err != nil {
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
+		}
+	}
 	return nil
 }
 
@@ -354,6 +359,27 @@ func validateSlackTrigger(trigger *v1alpha1.SlackTrigger) error {
 	}
 	if trigger.SlackToken == nil {
 		return fmt.Errorf("slack token can't be empty")
+	}
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
+			}
+		}
+	}
+	return nil
+}
+
+// validateEmailTrigger validates the Email trigger
+func validateEmailTrigger(trigger *v1alpha1.EmailTrigger) error {
+	if trigger == nil {
+		return fmt.Errorf("trigger can't be nil")
+	}
+	if trigger.Host == "" {
+		return fmt.Errorf("host can't be empty")
+	}
+	if 0 > trigger.Port || trigger.Port > 65535 {
+		return fmt.Errorf("port: %v, port should be between 0-65535", trigger.Port)
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {

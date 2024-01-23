@@ -741,6 +741,18 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>decodeMessage</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DecodeMessage specifies if all the messages should be base64 decoded. If
+set to true the decoding is done before the evaluation of JSONBody
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AzureServiceBusEventSource">
@@ -1334,6 +1346,18 @@ event payload.
 <em>(Optional)</em>
 <p>
 Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tls</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.TLSConfig </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+TLS configuration for the bitbucketserver client.
 </p>
 </td>
 </tr>
@@ -2234,6 +2258,32 @@ AzureQueueStorage event source
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>sftp</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEventSource
+</a> </em>
+</td>
+<td>
+<p>
+SFTP event sources
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>gerrit</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GerritEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GerritEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Gerrit event source
+</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -2264,6 +2314,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
 <a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GenericEventSource">GenericEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GerritEventSource">GerritEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
 <a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>,
@@ -2275,6 +2326,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>,
 <a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>,
 <a href="#argoproj.io/v1alpha1.RedisStreamEventSource">RedisStreamEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">SFTPEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SQSEventSource">SQSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
@@ -2748,6 +2800,32 @@ AzureQueueStorage event source
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>sftp</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SFTPEventSource
+</a> </em>
+</td>
+<td>
+<p>
+SFTP event sources
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>gerrit</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GerritEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GerritEventSource
+</a> </em>
+</td>
+<td>
+<p>
+Gerrit event source
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventSourceStatus">
@@ -2962,6 +3040,145 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <p>
 AuthSecret holds a secret selector that contains a bearer token for
 authentication
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.GerritEventSource">
+GerritEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+GerritEventSource refers to event-source related to gerrit events
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>webhook</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebhookContext"> WebhookContext </a>
+</em>
+</td>
+<td>
+<p>
+Webhook holds configuration to run a http server
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hookName</code></br> <em> string </em>
+</td>
+<td>
+<p>
+HookName is the name of the webhook
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>events</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+Events are gerrit event to listen to. Refer
+<a href="https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events">https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events</a>
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>auth</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.BasicAuth </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Auth hosts secret selectors for username and password
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>gerritBaseURL</code></br> <em> string </em>
+</td>
+<td>
+<p>
+GerritBaseURL is the base URL for API requests to a custom endpoint
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>deleteHookOnFinish</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+DeleteHookOnFinish determines whether to delete the Gerrit hook for the
+project once the event source is stopped.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projects</code></br> <em> \[\]string </em>
+</td>
+<td>
+<p>
+List of project namespace paths like “whynowy/test”.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sslVerify</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SslVerify to enable ssl verification
 </p>
 </td>
 </tr>
@@ -3862,7 +4079,7 @@ Filter
 <p>
 Yaml format Sarama config for Kafka connection. It follows the struct of
 sarama.Config. See
-<a href="https://github.com/Shopify/sarama/blob/main/config.go">https://github.com/Shopify/sarama/blob/main/config.go</a>
+<a href="https://github.com/IBM/sarama/blob/main/config.go">https://github.com/IBM/sarama/blob/main/config.go</a>
 e.g.
 </p>
 <p>
@@ -5185,7 +5402,10 @@ Prefix filter is applied on the resource name.
 <p>
 Labels provide listing options to K8s API to watch resource/s. Refer
 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/</a>
-for more info.
+for more info. Unlike K8s field selector, multiple values are passed as
+comma separated values instead of list of values. Eg: value:
+value1,value2. Same as K8s label selector, operator “=”, “==”, “!=”,
+“exists”, “!”, “notin”, “in”, “gt” and “lt” are supported
 </p>
 </td>
 </tr>
@@ -5228,6 +5448,141 @@ treated as valid.
 <p>
 If the resource is created after the start time then the event is
 treated as valid.
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.SFTPEventSource">
+SFTPEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>
+SFTPEventSource describes an event-source for sftp related events.
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>eventType</code></br> <em> string </em>
+</td>
+<td>
+<p>
+Type of file operations to watch Refer
+<a href="https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go">https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go</a>
+for more information
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>watchPathConfig</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WatchPathConfig"> WatchPathConfig </a>
+</em>
+</td>
+<td>
+<p>
+WatchPathConfig contains configuration about the file path to watch
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>username</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+Username required for authentication if any.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>password</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+Password required for authentication if any.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sshKeySecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+SSHKeySecret refers to the secret that contains SSH key
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>address</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+<td>
+<p>
+Address sftp address.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Filter
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>pollIntervalDuration</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+PollIntervalDuration the interval at which to poll the SFTP server
+defaults to 10 seconds
 </p>
 </td>
 </tr>
@@ -5597,7 +5952,7 @@ Key name
 <td>
 <em>(Optional)</em>
 <p>
-Supported operations like ==, !=, \<=, \>= etc. Defaults to ==. Refer
+Supported operations like ==, != etc. Defaults to ==. Refer
 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors</a>
 for more info.
 </p>
@@ -6201,7 +6556,8 @@ WatchPathConfig
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>,
-<a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>)
+<a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SFTPEventSource">SFTPEventSource</a>)
 </p>
 <p>
 </p>
@@ -6257,6 +6613,7 @@ WebhookContext
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.BitbucketEventSource">BitbucketEventSource</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GerritEventSource">GerritEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,

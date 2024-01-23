@@ -22,7 +22,7 @@ import (
 
 	eventhubs "github.com/Azure/azure-event-hubs-go/v3"
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -32,6 +32,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/codefresh"
+	"github.com/argoproj/argo-events/common"
 	sensormetrics "github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -52,25 +53,25 @@ type SensorContext struct {
 	hostname        string
 
 	// httpClients holds the reference to HTTP clients for HTTP triggers.
-	httpClients map[string]*http.Client
+	httpClients common.StringKeyedMap[*http.Client]
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
-	customTriggerClients map[string]*grpc.ClientConn
+	customTriggerClients common.StringKeyedMap[*grpc.ClientConn]
 	// http client to send slack messages.
 	slackHTTPClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
-	kafkaProducers map[string]sarama.AsyncProducer
+	kafkaProducers common.StringKeyedMap[sarama.AsyncProducer]
 	// pulsarProducers holds references to the active pulsar producers
-	pulsarProducers map[string]pulsar.Producer
+	pulsarProducers common.StringKeyedMap[pulsar.Producer]
 	// natsConnections holds the references to the active nats connections.
-	natsConnections map[string]*natslib.Conn
+	natsConnections common.StringKeyedMap[*natslib.Conn]
 	// awsLambdaClients holds the references to active AWS Lambda clients.
-	awsLambdaClients map[string]*lambda.Lambda
+	awsLambdaClients common.StringKeyedMap[*lambda.Lambda]
 	// openwhiskClients holds the references to active OpenWhisk clients.
-	openwhiskClients map[string]*whisk.Client
+	openwhiskClients common.StringKeyedMap[*whisk.Client]
 	// azureEventHubsClients holds the references to active Azure Event Hub clients.
-	azureEventHubsClients map[string]*eventhubs.Hub
+	azureEventHubsClients common.StringKeyedMap[*eventhubs.Hub]
 	// azureServiceBusClients holds the references to active Azure Service Bus clients.
-	azureServiceBusClients map[string]*servicebus.Sender
+	azureServiceBusClients common.StringKeyedMap[*servicebus.Sender]
 	metrics                *sensormetrics.Metrics
 	cfClient               *codefresh.Client
 }
@@ -84,18 +85,18 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		eventBusConfig:       eventBusConfig,
 		eventBusSubject:      eventBusSubject,
 		hostname:             hostname,
-		httpClients:          make(map[string]*http.Client),
-		customTriggerClients: make(map[string]*grpc.ClientConn),
+		httpClients:          common.NewStringKeyedMap[*http.Client](),
+		customTriggerClients: common.NewStringKeyedMap[*grpc.ClientConn](),
 		slackHTTPClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers:         make(map[string]sarama.AsyncProducer),
-		pulsarProducers:        make(map[string]pulsar.Producer),
-		natsConnections:        make(map[string]*natslib.Conn),
-		awsLambdaClients:       make(map[string]*lambda.Lambda),
-		openwhiskClients:       make(map[string]*whisk.Client),
-		azureEventHubsClients:  make(map[string]*eventhubs.Hub),
-		azureServiceBusClients: make(map[string]*servicebus.Sender),
+		kafkaProducers:         common.NewStringKeyedMap[sarama.AsyncProducer](),
+		pulsarProducers:        common.NewStringKeyedMap[pulsar.Producer](),
+		natsConnections:        common.NewStringKeyedMap[*natslib.Conn](),
+		awsLambdaClients:       common.NewStringKeyedMap[*lambda.Lambda](),
+		openwhiskClients:       common.NewStringKeyedMap[*whisk.Client](),
+		azureEventHubsClients:  common.NewStringKeyedMap[*eventhubs.Hub](),
+		azureServiceBusClients: common.NewStringKeyedMap[*servicebus.Sender](),
 		metrics:                metrics,
 		cfClient:               cfClient,
 	}

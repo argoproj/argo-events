@@ -120,6 +120,10 @@ type EventSourceSpec struct {
 	AzureServiceBus map[string]AzureServiceBusEventSource `json:"azureServiceBus,omitempty" protobuf:"bytes,32,rep,name=azureServiceBus"`
 	// AzureQueueStorage event source
 	AzureQueueStorage map[string]AzureQueueStorageEventSource `json:"azureQueueStorage,omitempty" protobuf:"bytes,33,rep,name=azureQueueStorage"`
+	// SFTP event sources
+	SFTP map[string]SFTPEventSource `json:"sftp,omitempty" protobuf:"bytes,34,rep,name=sftp"`
+	// Gerrit event source
+	Gerrit map[string]GerritEventSource `json:"gerrit,omitempty" protobuf:"bytes,35,rep,name=gerrit"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -288,6 +292,33 @@ type FileEventSource struct {
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,5,opt,name=filter"`
 }
 
+// SFTPEventSource describes an event-source for sftp related events.
+type SFTPEventSource struct {
+	// Type of file operations to watch
+	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
+	EventType string `json:"eventType" protobuf:"bytes,1,opt,name=eventType"`
+	// WatchPathConfig contains configuration about the file path to watch
+	WatchPathConfig WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,2,opt,name=watchPathConfig"`
+	// Username required for authentication if any.
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,3,opt,name=username"`
+	// Password required for authentication if any.
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
+	// SSHKeySecret refers to the secret that contains SSH key
+	SSHKeySecret *corev1.SecretKeySelector `json:"sshKeySecret,omitempty" protobuf:"bytes,5,opt,name=sshKeySecret"`
+	// Address sftp address.
+	Address *corev1.SecretKeySelector `json:"address,omitempty" protobuf:"bytes,6,opt,name=address"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	// PollIntervalDuration the interval at which to poll the SFTP server
+	// defaults to 10 seconds
+	// +optional
+	PollIntervalDuration string `json:"pollIntervalDuration" protobuf:"varint,9,opt,name=pollIntervalDuration"`
+}
+
 // ResourceEventType is the type of event for the K8s resource mutation
 type ResourceEventType string
 
@@ -325,6 +356,10 @@ type ResourceFilter struct {
 	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
 	// Labels provide listing options to K8s API to watch resource/s.
 	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.
+	// Unlike K8s field selector, multiple values are passed as comma separated values instead of list of values.
+	// Eg: value: value1,value2.
+	// Same as K8s label selector, operator "=", "==", "!=", "exists", "!", "notin", "in", "gt" and "lt"
+	// are supported
 	// +optional
 	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 	// Fields provide field filters similar to K8s field selector
@@ -346,7 +381,7 @@ type ResourceFilter struct {
 type Selector struct {
 	// Key name
 	Key string `json:"key" protobuf:"bytes,1,opt,name=key"`
-	// Supported operations like ==, !=, <=, >= etc.
+	// Supported operations like ==, != etc.
 	// Defaults to ==.
 	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
 	// +optional
@@ -522,7 +557,7 @@ type KafkaEventSource struct {
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
 	// Yaml format Sarama config for Kafka connection.
-	// It follows the struct of sarama.Config. See https://github.com/Shopify/sarama/blob/main/config.go
+	// It follows the struct of sarama.Config. See https://github.com/IBM/sarama/blob/main/config.go
 	// e.g.
 	//
 	// consumer:
@@ -728,6 +763,40 @@ type PubSubEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,9,opt,name=filter"`
+}
+
+// GerritEventSource refers to event-source related to gerrit events
+type GerritEventSource struct {
+	// Webhook holds configuration to run a http server
+	Webhook *WebhookContext `json:"webhook,omitempty" protobuf:"bytes,1,opt,name=webhook"`
+	// HookName is the name of the webhook
+	HookName string `json:"hookName" protobuf:"bytes,2,opt,name=hookName"`
+	// Events are gerrit event to listen to.
+	// Refer https://gerrit-review.googlesource.com/Documentation/cmd-stream-events.html#events
+	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`
+	// Auth hosts secret selectors for username and password
+	// +optional
+	Auth *apicommon.BasicAuth `json:"auth,omitempty" protobuf:"bytes,4,opt,name=auth"`
+	// GerritBaseURL is the base URL for API requests to a custom endpoint
+	GerritBaseURL string `json:"gerritBaseURL" protobuf:"bytes,5,opt,name=gerritBaseURL"`
+	// DeleteHookOnFinish determines whether to delete the Gerrit hook for the project once the event source is stopped.
+	// +optional
+	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,6,opt,name=deleteHookOnFinish"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
+	// List of project namespace paths like "whynowy/test".
+	Projects []string `json:"projects,omitempty" protobuf:"bytes,8,rep,name=projects"`
+	// SslVerify to enable ssl verification
+	// +optional
+	SslVerify bool `json:"sslVerify,omitempty" protobuf:"varint,9,opt,name=sslVerify"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,10,opt,name=filter"`
+}
+
+func (g GerritEventSource) NeedToCreateHooks() bool {
+	return g.Auth != nil && g.Webhook != nil && g.Webhook.URL != ""
 }
 
 type OwnedRepositories struct {
@@ -1036,6 +1105,9 @@ type BitbucketServerEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,11,opt,name=filter"`
+	// TLS configuration for the bitbucketserver client.
+	// +optional
+	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,12,opt,name=tls"`
 }
 
 type BitbucketServerRepository struct {
@@ -1236,6 +1308,10 @@ type AzureQueueStorageEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
+	// DecodeMessage specifies if all the messages should be base64 decoded.
+	// If set to true the decoding is done before the evaluation of JSONBody
+	// +optional
+	DecodeMessage bool `json:"decodeMessage,omitempty" protobuf:"bytes,8,opt,name=decodeMessage"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications

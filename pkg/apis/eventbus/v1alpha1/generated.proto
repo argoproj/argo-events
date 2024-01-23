@@ -86,6 +86,10 @@ message EventBusSpec {
   // +optional
   // Kafka eventbus
   optional KafkaBus kafka = 3;
+
+  // Exotic JetStream
+  // +optional
+  optional JetStreamConfig jetstreamExotic = 4;
 }
 
 // EventBusStatus holds the status of the eventbus resource
@@ -101,7 +105,7 @@ message JetStreamBus {
   // JetStream version, such as "2.7.3"
   optional string version = 1;
 
-  // Redis StatefulSet size
+  // JetStream StatefulSet size
   // +kubebuilder:default=3
   optional int32 replicas = 2;
 

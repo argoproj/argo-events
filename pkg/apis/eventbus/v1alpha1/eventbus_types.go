@@ -39,6 +39,9 @@ type EventBusSpec struct {
 	// +optional
 	// Kafka eventbus
 	Kafka *KafkaBus `json:"kafka,omitempty" protobuf:"bytes,3,opt,name=kafka"`
+	// Exotic JetStream
+	// +optional
+	JetStreamExotic *JetStreamConfig `json:"jetstreamExotic,omitempty" protobuf:"bytes,4,opt,name=jetstreamExotic"`
 }
 
 // EventBusStatus holds the status of the eventbus resource

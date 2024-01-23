@@ -107,14 +107,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		clientOpt.Authentication = pulsar.NewAuthenticationToken(token)
 	}
 
-	if len(pulsarEventSource.AuthAthenzParams) > 0 && pulsarEventSource.AuthAthenzSecret != nil {
+	if len(pulsarEventSource.AuthAthenzParams) > 0 {
 		log.Info("setting athenz auth option...")
-		authAthenzFilePath, err := common.GetSecretVolumePath(pulsarEventSource.AuthAthenzSecret)
-		if err != nil {
-			log.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
-			return err
+		if pulsarEventSource.AuthAthenzSecret != nil {
+			authAthenzFilePath, err := common.GetSecretVolumePath(pulsarEventSource.AuthAthenzSecret)
+			if err != nil {
+				log.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
+				return err
+			}
+			pulsarEventSource.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
 		}
-		pulsarEventSource.AuthAthenzParams["privateKey"] = "file://" + authAthenzFilePath
 		clientOpt.Authentication = pulsar.NewAuthenticationAthenz(pulsarEventSource.AuthAthenzParams)
 	}
 
@@ -169,8 +171,10 @@ consumeMessages:
 			if err := el.handleOne(msg, dispatch, log); err != nil {
 				log.Errorw("failed to process a Pulsar event", zap.Error(err))
 				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-			} else {
-				consumer.Ack(msg.Message)
+			}
+
+			if err := consumer.Ack(msg.Message); err != nil {
+				return fmt.Errorf("failed to process a consumer ack, %w", err)
 			}
 		case <-ctx.Done():
 			consumer.Close()
