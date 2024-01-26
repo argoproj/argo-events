@@ -90,6 +90,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 	var numMessages int32 = 10
 	var visibilityTimeout int32 = 120
+	var waitTime int32 = 3 // Defaults to 3 seconds
+	if el.AzureQueueStorageEventSource.WaitTime != nil {
+		waitTime = *el.AzureQueueStorageEventSource.WaitTime
+	}
 	log.Info("listening for messages on the queue...")
 	for {
 		select {
@@ -98,6 +102,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		default:
 		}
+		log.Info("dequeing messages....")
 		messages, err := queueClient.DequeueMessages(ctx, &azqueue.DequeueMessagesOptions{
 			NumberOfMessages:  &numMessages,
 			VisibilityTimeout: &visibilityTimeout,
@@ -114,6 +119,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					log.Errorw("Failed to delete message", zap.Error(err))
 				}
 			}, log)
+		}
+		if len(messages.Messages) == 0 {
+			time.Sleep(time.Second * time.Duration(waitTime))
 		}
 	}
 }

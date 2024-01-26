@@ -978,6 +978,11 @@
         "storageAccountName": {
           "description": "StorageAccountName is the name of the storage account where the queue is. This field is necessary to access via Azure AD (managed identity) and it is ignored if ConnectionString is set.",
           "type": "string"
+        },
+        "waitTime": {
+          "description": "WaitTime is the duration (in seconds) for which the event source waits between empty results from the queue. The default value is 3 seconds.",
+          "format": "int32",
+          "type": "integer"
         }
       },
       "required": [
