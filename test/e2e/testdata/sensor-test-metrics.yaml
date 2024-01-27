@@ -17,5 +17,5 @@ spec:
         name: http-trigger
         http:
           # Expect to fail
-          url: https://not-existing.com/
+          url: https://invalid.com/
           method: GET
