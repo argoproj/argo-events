@@ -6544,6 +6544,17 @@ the directory
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>recursive</code></br> <em> bool </em>
+</td>
+<td>
+<p>
+Recursive is used to signify whether the path is watched recursively or
+not
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.WebhookContext">
