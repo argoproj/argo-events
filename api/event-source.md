@@ -755,13 +755,14 @@ set to true the decoding is done before the evaluation of JSONBody
 </tr>
 <tr>
 <td>
-<code>waitTime</code></br> <em> int32 </em>
+<code>waitTimeInSeconds</code></br> <em> int32 </em>
 </td>
 <td>
 <em>(Optional)</em>
 <p>
-WaitTime is the duration (in seconds) for which the event source waits
-between empty results from the queue. The default value is 3 seconds.
+WaitTimeInSeconds is the duration (in seconds) for which the event
+source waits between empty results from the queue. The default value is
+3 seconds.
 </p>
 </td>
 </tr>

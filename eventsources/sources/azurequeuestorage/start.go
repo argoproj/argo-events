@@ -91,8 +91,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var numMessages int32 = 10
 	var visibilityTimeout int32 = 120
 	var waitTime int32 = 3 // Defaults to 3 seconds
-	if el.AzureQueueStorageEventSource.WaitTime != nil {
-		waitTime = *el.AzureQueueStorageEventSource.WaitTime
+	if el.AzureQueueStorageEventSource.WaitTimeInSeconds != nil {
+		waitTime = *el.AzureQueueStorageEventSource.WaitTimeInSeconds
 	}
 	log.Info("listening for messages on the queue...")
 	for {
