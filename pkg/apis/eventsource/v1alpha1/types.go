@@ -1299,6 +1299,10 @@ type AzureQueueStorageEventSource struct {
 	// If set to true the decoding is done before the evaluation of JSONBody
 	// +optional
 	DecodeMessage bool `json:"decodeMessage,omitempty" protobuf:"bytes,8,opt,name=decodeMessage"`
+	// WaitTimeInSeconds is the duration (in seconds) for which the event source waits between empty results from the queue.
+	// The default value is 3 seconds.
+	// +optional
+	WaitTimeInSeconds *int32 `json:"waitTimeInSeconds,omitempty" protobuf:"varint,9,opt,name=waitTimeInSeconds"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications

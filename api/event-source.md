@@ -753,6 +753,19 @@ set to true the decoding is done before the evaluation of JSONBody
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>waitTimeInSeconds</code></br> <em> int32 </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+WaitTimeInSeconds is the duration (in seconds) for which the event
+source waits between empty results from the queue. The default value is
+3 seconds.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AzureServiceBusEventSource">
