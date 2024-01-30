@@ -515,6 +515,13 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureQueueStorageEventSource(ref commo
 							Format:      "",
 						},
 					},
+					"waitTimeInSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WaitTimeInSeconds is the duration (in seconds) for which the event source waits between empty results from the queue. The default value is 3 seconds.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 				Required: []string{"queueName"},
 			},

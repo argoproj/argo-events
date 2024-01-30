@@ -217,6 +217,11 @@ func (in *AzureQueueStorageEventSource) DeepCopyInto(out *AzureQueueStorageEvent
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.WaitTimeInSeconds != nil {
+		in, out := &in.WaitTimeInSeconds, &out.WaitTimeInSeconds
+		*out = new(int32)
+		**out = **in
+	}
 	return
 }
 
