@@ -141,11 +141,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Install k3d
-        run: curl -sfL https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash &
+        run: curl -sfL https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash &
       - name: Create k3d registry and cluster
         run: |
           k3d registry create e2e-registry --port 5111
-          k3d cluster create e2e -i rancher/k3s:v1.27.10-k3s2 --registry-use k3d-e2e-registry:5111
+          k3d cluster create -i rancher/k3s:v1.27.10-k3s2 --registry-use k3d-e2e-registry:5111
           echo '127.0.0.1 k3d-e2e-registry' | sudo tee -a /etc/hosts
       - name: Run tests
         run: |
