@@ -1,4 +1,5 @@
 PACKAGE=github.com/argoproj/argo-events
+SHELL := /usr/bin/env bash # Make will use bash instead of sh
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
 
