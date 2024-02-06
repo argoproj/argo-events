@@ -149,5 +149,6 @@ jobs:
           echo '127.0.0.1 k3d-e2e-registry' | sudo tee -a /etc/hosts
       - name: Run tests
         run: |
+          export KUBECONFIG=$(k3d kubeconfig write e2e)
           IMAGE_NAMESPACE=k3d-e2e-registry:5111 VERSION=${{ github.sha }} DOCKER_PUSH=true make start
           EventBusDriver=${{ matrix.driver }} make test-functional
