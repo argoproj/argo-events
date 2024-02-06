@@ -8,8 +8,6 @@ run:
     - ".*generated.*"
 linters:
   enable:
-    - deadcode
-   # - depguard
     - dogsled
     - goconst
     - gocritic
@@ -23,9 +21,7 @@ linters:
     - nakedret
     - rowserrcheck
     - staticcheck
-   # - structcheck
     - typecheck
     - unconvert
     - unused
-    - varcheck
     - whitespace
