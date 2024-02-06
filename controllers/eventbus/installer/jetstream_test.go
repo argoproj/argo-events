@@ -18,6 +18,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
+// Workarounds for golangci-lint errors:
+// string `STRING` has N occurrences, make it a constant (goconst)
+const eventBusPrefix = "eventbus-"
+
 var (
 	testJetStreamEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
@@ -71,17 +75,17 @@ func TestJetStreamBadInstallation(t *testing.T) {
 
 func TestJetStreamGenerateNames(t *testing.T) {
 	n := generateJetStreamStatefulSetName(testJetStreamEventBus)
-	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js", n)
+	assert.Equal(t, eventBusPrefix+testJetStreamEventBus.Name+"-js", n)
 	n = generateJetStreamServerSecretName(testJetStreamEventBus)
-	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-server", n)
+	assert.Equal(t, eventBusPrefix+testJetStreamEventBus.Name+"-js-server", n)
 	n = generateJetStreamClientAuthSecretName(testJetStreamEventBus)
-	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-client-auth", n)
+	assert.Equal(t, eventBusPrefix+testJetStreamEventBus.Name+"-js-client-auth", n)
 	n = generateJetStreamConfigMapName(testJetStreamEventBus)
-	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-config", n)
+	assert.Equal(t, eventBusPrefix+testJetStreamEventBus.Name+"-js-config", n)
 	n = generateJetStreamPVCName(testJetStreamEventBus)
-	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-vol", n)
+	assert.Equal(t, eventBusPrefix+testJetStreamEventBus.Name+"-js-vol", n)
 	n = generateJetStreamServiceName(testJetStreamEventBus)
-	assert.Equal(t, "eventbus-"+testJetStreamEventBus.Name+"-js-svc", n)
+	assert.Equal(t, eventBusPrefix+testJetStreamEventBus.Name+"-js-svc", n)
 }
 
 func TestJetStreamCreateObjects(t *testing.T) {
