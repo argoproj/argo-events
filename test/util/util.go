@@ -17,8 +17,12 @@ import (
 	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 )
 
+// Workarounds for golangci-lint errors:
+// string `STRING` has N occurrences, make it a constant (goconst)
+const fieldSelectorMetadataName = "metadata.name="
+
 func WaitForEventBusReady(ctx context.Context, eventBusClient eventbuspkg.EventBusInterface, eventBusName string, timeout time.Duration) error {
-	fieldSelector := "metadata.name=" + eventBusName
+	fieldSelector := fieldSelectorMetadataName + eventBusName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -62,7 +66,7 @@ func WaitForEventBusStatefulSetReady(ctx context.Context, kubeClient kubernetes.
 }
 
 func WaitForEventSourceReady(ctx context.Context, eventSourceClient eventsourcepkg.EventSourceInterface, eventSourceName string, timeout time.Duration) error {
-	fieldSelector := "metadata.name=" + eventSourceName
+	fieldSelector := fieldSelectorMetadataName + eventSourceName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -89,7 +93,7 @@ func WaitForEventSourceDeploymentReady(ctx context.Context, kubeClient kubernete
 }
 
 func WaitForSensorReady(ctx context.Context, sensorClient sensorpkg.SensorInterface, sensorName string, timeout time.Duration) error {
-	fieldSelector := "metadata.name=" + sensorName
+	fieldSelector := fieldSelectorMetadataName + sensorName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
