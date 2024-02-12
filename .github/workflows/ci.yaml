@@ -145,10 +145,9 @@ jobs:
       - name: Create k3d registry and cluster
         run: |
           k3d registry create e2e-registry --port 5111
-          k3d cluster create e2e -i rancher/k3s:v1.27.10-k3s2 --registry-use k3d-e2e-registry:5111
+          k3d cluster create -i rancher/k3s:v1.27.10-k3s2 --registry-use k3d-e2e-registry:5111
           echo '127.0.0.1 k3d-e2e-registry' | sudo tee -a /etc/hosts
       - name: Run tests
         run: |
-          export KUBECONFIG=$(k3d kubeconfig write e2e)
           IMAGE_NAMESPACE=k3d-e2e-registry:5111 VERSION=${{ github.sha }} DOCKER_PUSH=true make start
           EventBusDriver=${{ matrix.driver }} make test-functional

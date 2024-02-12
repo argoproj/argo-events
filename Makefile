@@ -39,7 +39,7 @@ override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
 
 K3D ?= $(shell [ "`command -v kubectl`" != '' ] && [ "`command -v k3d`" != '' ] && [[ "`kubectl config current-context`" =~ k3d-* ]] && echo true || echo false)
-K3DCLUSTER?=e2e
+K3DCLUSTER?=k3s-default
 
 # Check that the needed executables are available, else exit before the build
 K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(error "No $(exec) in PATH")))
