@@ -1,5 +1,46 @@
 # Changelog
 
+## v1.9.1 (2024-02-13)
+
+ * [dd277adf](https://github.com/argoproj/argo-events/commit/dd277adf2c42eed9f3008eafce9c69e5121ae415) Update manifests to v1.9.1
+ * [ffd9b983](https://github.com/argoproj/argo-events/commit/ffd9b983432529694bb16e724380810d37f8a424) chore(deps): bump github.com/ktrysmt/go-bitbucket from 0.9.73 to 0.9.75 (#3011)
+ * [515c8220](https://github.com/argoproj/argo-events/commit/515c822021d8a2a29f0d71fd77e5457c2458b3b7) chore(deps): bump google.golang.org/api from 0.161.0 to 0.163.0 (#3013)
+ * [609570f7](https://github.com/argoproj/argo-events/commit/609570f7b9d174d21e21cf98835374291e877f10) chore(deps): bump github.com/IBM/sarama from 1.42.0 to 1.42.2 (#3015)
+ * [0ece63f9](https://github.com/argoproj/argo-events/commit/0ece63f94693065cdb8c13153a25813999f04b64) chore(deps): bump github.com/xanzy/go-gitlab from 0.96.0 to 0.97.0 (#3014)
+ * [9c1617a9](https://github.com/argoproj/argo-events/commit/9c1617a9b641fdecad8c494e525a0dd6d7d4b78b) chore(deps): bump golang.org/x/crypto from 0.18.0 to 0.19.0 (#3012)
+ * [9ace10d8](https://github.com/argoproj/argo-events/commit/9ace10d8880fbc13183a280cffb613967ff1a991) chore(deps): bump google.golang.org/api from 0.159.0 to 0.161.0 (#3009)
+ * [08bc41e2](https://github.com/argoproj/argo-events/commit/08bc41e298283557f5d8ec1e987c5023f7631826) chore(deps): bump cloud.google.com/go/pubsub from 1.36.0 to 1.36.1 (#3008)
+ * [58fd5c50](https://github.com/argoproj/argo-events/commit/58fd5c50ca4e31cb2d57459d99e5fcfcec6b9482) chore(deps): bump github.com/apache/pulsar-client-go from 0.11.1 to 0.12.0 (#3007)
+ * [6e547f1b](https://github.com/argoproj/argo-events/commit/6e547f1b2fcceee14583fba655af89631eb156e5) chore(deps): bump sigstore/cosign-installer from 3.3.0 to 3.4.0 (#3006)
+ * [c5d24d55](https://github.com/argoproj/argo-events/commit/c5d24d55e85c668152ea3cbc0220deb2f8ade50a) chore(deps): bump peter-evans/create-pull-request from 5 to 6 (#3005)
+ * [ab388a06](https://github.com/argoproj/argo-events/commit/ab388a06e7f66ae0d6df14ecfb16a709902f39a1) feat: add waitTime config field to azure queue storage event source (#2996)
+ * [33a5cefa](https://github.com/argoproj/argo-events/commit/33a5cefa7df542ae1687e0ed7039b086873cb3cc) chore(deps): bump google.golang.org/api from 0.157.0 to 0.159.0 (#3000)
+ * [ff9de1f1](https://github.com/argoproj/argo-events/commit/ff9de1f1133b5db9841a8512bae67c71f59b012e) chore(deps): bump github.com/google/uuid from 1.5.0 to 1.6.0 (#3001)
+ * [2e4a1789](https://github.com/argoproj/argo-events/commit/2e4a178982ada53ff8da2f807c012ba64758d31b) chore(deps): bump cloud.google.com/go/pubsub from 1.34.0 to 1.36.0 (#2999)
+ * [5c4b0d47](https://github.com/argoproj/argo-events/commit/5c4b0d47707e036f7025de2e3083443c0695993c) chore(deps): bump google.golang.org/grpc from 1.60.1 to 1.61.0 (#2998)
+ * [4f9e2838](https://github.com/argoproj/argo-events/commit/4f9e283830f3fdcc61dd61904b796dcffa9085e2) adding base/kafka_test.go for code coverage (#2990)
+ * [1220e33f](https://github.com/argoproj/argo-events/commit/1220e33f3343d7f04512e8c8123abc35bd611bb6) Replace url https://not-existing.com/ with https://invalid.com/ (#2993) (#2994)
+ * [74f47a9a](https://github.com/argoproj/argo-events/commit/74f47a9a60ff14091b86ce8925e95431d633b4b4) chore(deps): bump actions/cache from 3 to 4 (#2987)
+ * [fcf98dd7](https://github.com/argoproj/argo-events/commit/fcf98dd71f526a9ecba0b2d7d0573bf7e9e98476) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus from 1.5.0 to 1.6.0 (#2986)
+ * [2cc883b4](https://github.com/argoproj/argo-events/commit/2cc883b4c283b107adc24391226911c45f439ded) chore(deps): bump cloud.google.com/go/pubsub from 1.33.0 to 1.34.0 (#2985)
+ * [8fa1ae5c](https://github.com/argoproj/argo-events/commit/8fa1ae5c81553052661ca45672171892d4d6815c) chore(deps): bump github.com/cloudevents/sdk-go/v2 from 2.13.0 to 2.15.0 (#2984)
+ * [1bc102b4](https://github.com/argoproj/argo-events/commit/1bc102b4f67a73ab86fd94640db2d2a868e798da) chore(deps): bump github.com/xanzy/go-gitlab from 0.95.2 to 0.96.0 (#2982)
+ * [914490e5](https://github.com/argoproj/argo-events/commit/914490e536a211b22e7263afd1ca4d83558b221e) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity from 1.4.0 to 1.5.1 (#2983)
+ * [a387d5cf](https://github.com/argoproj/argo-events/commit/a387d5cff31ce236f3b266cf8ebe3f40e4bd31d2) chore(deps): bump google.golang.org/api from 0.156.0 to 0.157.0 (#2981)
+ * [ffd53d57](https://github.com/argoproj/argo-events/commit/ffd53d573f5848c06d503912e46df23f4b93087e) chore(deps): bump github.com/nats-io/nats.go from 1.31.0 to 1.32.0 (#2975)
+ * [e765f506](https://github.com/argoproj/argo-events/commit/e765f5062c6d2a392bb7d58557ed454ea7c5cb3d) chore(deps): bump google.golang.org/api from 0.155.0 to 0.156.0 (#2974)
+ * [e8ea1112](https://github.com/argoproj/argo-events/commit/e8ea11128ac8e262fa39d118a4abb9d57dbafec5) chore(deps): bump github.com/Azure/azure-event-hubs-go/v3 from 3.6.0 to 3.6.2 (#2972)
+ * [cf169fff](https://github.com/argoproj/argo-events/commit/cf169fff6310fc292fbd38d4000693033d799ca3) Update quick_start.md (#2965)
+
+### Contributors
+
+ * Babis K
+ * Derek Wang
+ * Eduardo Rodrigues
+ * Jack Jackson
+ * Zubair Haque
+ * dependabot[bot]
+
 ## v1.9.0 (2024-01-09)
 
  * [6a44acd1](https://github.com/argoproj/argo-events/commit/6a44acd1ac57a52dff2cc0293d746c445b035960) Update manifests to v1.9.0
