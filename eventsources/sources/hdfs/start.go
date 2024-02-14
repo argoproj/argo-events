@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/colinmarc/hdfs"
+	"github.com/colinmarc/hdfs/v2"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"

@@ -3,11 +3,11 @@ package hdfs
 import (
 	"fmt"
 
-	"github.com/colinmarc/hdfs"
-	krb "gopkg.in/jcmturner/gokrb5.v5/client"
-	"gopkg.in/jcmturner/gokrb5.v5/config"
-	"gopkg.in/jcmturner/gokrb5.v5/credentials"
-	"gopkg.in/jcmturner/gokrb5.v5/keytab"
+	"github.com/colinmarc/hdfs/v2"
+	krb "github.com/jcmturner/gokrb5/v8/client"
+	"github.com/jcmturner/gokrb5/v8/config"
+	"github.com/jcmturner/gokrb5/v8/credentials"
+	"github.com/jcmturner/gokrb5/v8/keytab"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/common"
@@ -31,12 +31,12 @@ type KrbOptions struct {
 
 // CCacheOptions is options for ccache
 type CCacheOptions struct {
-	CCache credentials.CCache
+	CCache *credentials.CCache
 }
 
 // KeytabOptions is options for keytab
 type KeytabOptions struct {
-	Keytab   keytab.Keytab
+	Keytab   *keytab.Keytab
 	Username string
 	Realm    string
 }
@@ -74,7 +74,8 @@ func createHDFSConfig(hdfsEventSource *v1alpha1.HDFSEventSource) (*HDFSConfig, e
 		if err != nil {
 			return nil, err
 		}
-		ccache, err := credentials.ParseCCache(bytes)
+		ccache := new(credentials.CCache)
+		err = ccache.Unmarshal(bytes)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +92,8 @@ func createHDFSConfig(hdfsEventSource *v1alpha1.HDFSEventSource) (*HDFSConfig, e
 		if err != nil {
 			return nil, err
 		}
-		ktb, err := keytab.Parse(bytes)
+		ktb := new(keytab.Keytab)
+		err = ktb.Unmarshal(bytes)
 		if err != nil {
 			return nil, err
 		}
@@ -134,25 +136,20 @@ func createHDFSClient(addresses []string, user string, krbOptions *KrbOptions) (
 }
 
 func createKrbClient(krbOptions *KrbOptions) (*krb.Client, error) {
-	krbConfig, err := config.NewConfigFromString(krbOptions.Config)
+	krbConfig, err := config.NewFromString(krbOptions.Config)
 	if err != nil {
 		return nil, err
 	}
 
 	if krbOptions.CCacheOptions != nil {
-		client, err := krb.NewClientFromCCache(krbOptions.CCacheOptions.CCache)
-		if err != nil {
-			return nil, err
-		}
-		return client.WithConfig(krbConfig), nil
+		return krb.NewFromCCache(krbOptions.CCacheOptions.CCache, krbConfig)
 	} else if krbOptions.KeytabOptions != nil {
-		client := krb.NewClientWithKeytab(krbOptions.KeytabOptions.Username, krbOptions.KeytabOptions.Realm, krbOptions.KeytabOptions.Keytab)
-		client = *client.WithConfig(krbConfig)
+		client := krb.NewWithKeytab(krbOptions.KeytabOptions.Username, krbOptions.KeytabOptions.Realm, krbOptions.KeytabOptions.Keytab, krbConfig)
 		err = client.Login()
 		if err != nil {
 			return nil, err
 		}
-		return &client, nil
+		return client, nil
 	}
 
 	return nil, fmt.Errorf("Failed to get a Kerberos client")

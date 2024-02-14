@@ -205,7 +205,7 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b =~ "start"`,
+					Expr: `b contains "start"`,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a.b",
@@ -225,7 +225,7 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b !~ "start"`,
+					Expr: `b not contains "start"`,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a.b",

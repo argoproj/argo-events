@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
-	"github.com/Knetic/govaluate"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/expr-lang/expr"
 	"go.uber.org/zap"
 )
 
@@ -172,7 +172,15 @@ func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpres
 	}
 
 	if _, ok := s.triggers[triggerName]; !ok {
-		expr, err := govaluate.NewEvaluableExpression(strings.ReplaceAll(depExpression, "-", "\\-"))
+		sanitizedDepExpr := depExpression
+
+		for i, d := range dependencies {
+			sanitizedDepName := strings.ReplaceAll(d.Name, "-", "_")
+			sanitizedDepExpr = strings.ReplaceAll(sanitizedDepExpr, d.Name, sanitizedDepName)
+			dependencies[i].Name = sanitizedDepName
+		}
+
+		expr, err := expr.Compile(sanitizedDepExpr)
 		if err != nil {
 			return nil, err
 		}
@@ -285,15 +293,8 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 		// can skip ahead to the action topic, otherwise produce to
 		// the trigger topic
 
-		var data any
-		var topic string
-		if trigger.OneAndDone() {
-			data = []*cloudevents.Event{event}
-			topic = s.topics.action
-		} else {
-			data = event
-			topic = s.topics.trigger
-		}
+		data := event
+		topic := s.topics.trigger
 
 		value, err := json.Marshal(data)
 		if err != nil {
