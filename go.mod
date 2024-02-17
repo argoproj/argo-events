@@ -72,7 +72,7 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
 	github.com/stripe/stripe-go v70.15.0+incompatible
-	github.com/tidwall/gjson v1.17.0
+	github.com/tidwall/gjson v1.17.1
 	github.com/tidwall/sjson v1.2.4
 	github.com/xanzy/go-gitlab v0.97.0
 	github.com/yuin/gopher-lua v1.1.1
