@@ -80,7 +80,7 @@ require (
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.19.0
 	google.golang.org/api v0.163.0
-	google.golang.org/grpc v1.61.0
+	google.golang.org/grpc v1.61.1
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3
