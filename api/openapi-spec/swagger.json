@@ -1145,16 +1145,19 @@
       "description": "BitbucketServerEventSource refers to event-source related to Bitbucket Server events",
       "type": "object",
       "required": [
-        "events",
         "bitbucketserverBaseURL"
       ],
       "properties": {
         "accessToken": {
-          "description": "AccessToken is reference to K8s secret which holds the bitbucket api access information",
+          "description": "AccessToken is reference to K8s secret which holds the bitbucket api access information.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "bitbucketserverBaseURL": {
-          "description": "BitbucketServerBaseURL is the base URL for API requests to a custom endpoint",
+          "description": "BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.",
+          "type": "string"
+        },
+        "checkInterval": {
+          "description": "CheckInterval is a duration in which to wait before checking that the webhooks exist, e.g. 1s, 30m, 2h... (defaults to 1m)",
           "type": "string"
         },
         "deleteHookOnFinish": {
@@ -1180,30 +1183,41 @@
           }
         },
         "projectKey": {
-          "description": "DeprecatedProjectKey is the key of project for which integration needs to set up Deprecated: use Repositories instead. Will be unsupported in v1.8",
+          "description": "DeprecatedProjectKey is the key of project for which integration needs to set up. Deprecated: use Repositories instead. Will be unsupported in v1.8.",
           "type": "string"
         },
+        "projects": {
+          "description": "Projects holds a list of projects for which integration needs to set up, this will add the webhook to all repositories in the project.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "repositories": {
-          "description": "Repositories holds a list of repositories for which integration needs to set up",
+          "description": "Repositories holds a list of repositories for which integration needs to set up.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.BitbucketServerRepository"
           }
         },
         "repositorySlug": {
-          "description": "DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up Deprecated: use Repositories instead. Will be unsupported in v1.8",
+          "description": "DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up. Deprecated: use Repositories instead. Will be unsupported in v1.8.",
           "type": "string"
+        },
+        "skipBranchRefsChangedOnOpenPR": {
+          "description": "SkipBranchRefsChangedOnOpenPR bypasses the event repo:refs_changed for branches whenever there's an associated open pull request. This helps in optimizing the event handling process by avoiding unnecessary triggers for branch reference changes that are already part of a pull request under review.",
+          "type": "boolean"
         },
         "tls": {
           "description": "TLS configuration for the bitbucketserver client.",
           "$ref": "#/definitions/io.argoproj.common.TLSConfig"
         },
         "webhook": {
-          "description": "Webhook holds configuration to run a http server",
+          "description": "Webhook holds configuration to run a http server.",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.WebhookContext"
         },
         "webhookSecret": {
-          "description": "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
+          "description": "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
@@ -1216,11 +1230,11 @@
       ],
       "properties": {
         "projectKey": {
-          "description": "ProjectKey is the key of project for which integration needs to set up",
+          "description": "ProjectKey is the key of project for which integration needs to set up.",
           "type": "string"
         },
         "repositorySlug": {
-          "description": "RepositorySlug is the slug of the repository for which integration needs to set up",
+          "description": "RepositorySlug is the slug of the repository for which integration needs to set up.",
           "type": "string"
         }
       }
