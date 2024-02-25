@@ -397,6 +397,11 @@ func (in *BitbucketServerEventSource) DeepCopyInto(out *BitbucketServerEventSour
 		*out = new(WebhookContext)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Projects != nil {
+		in, out := &in.Projects, &out.Projects
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Repositories != nil {
 		in, out := &in.Repositories, &out.Repositories
 		*out = make([]BitbucketServerRepository, len(*in))
