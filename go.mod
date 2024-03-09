@@ -21,7 +21,7 @@ require (
 	github.com/andygrunwald/go-gerrit v0.0.0-20230325081502-da63a5c62d80
 	github.com/antonmedv/expr v1.15.5
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
-	github.com/apache/pulsar-client-go v0.12.0
+	github.com/apache/pulsar-client-go v0.12.1
 	github.com/argoproj/notifications-engine v0.4.0
 	github.com/argoproj/pkg v0.13.6
 	github.com/aws/aws-sdk-go v1.44.209
