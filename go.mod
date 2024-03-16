@@ -81,7 +81,7 @@ require (
 	golang.org/x/crypto v0.21.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	google.golang.org/api v0.169.0
-	google.golang.org/grpc v1.62.0
+	google.golang.org/grpc v1.62.1
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3
