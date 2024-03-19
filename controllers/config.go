@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
 )
 
 type GlobalConfig struct {
@@ -94,7 +94,7 @@ func (g *GlobalConfig) GetJetStreamVersion(version string) (*JetStreamVersion, e
 }
 
 func LoadConfig(onErrorReloading func(error)) (*GlobalConfig, error) {
-	v := viper.New()
+	v := common.ViperWithLogging()
 	v.SetConfigName("controller-config")
 	v.SetConfigType("yaml")
 	v.AddConfigPath("/etc/argo-events")
