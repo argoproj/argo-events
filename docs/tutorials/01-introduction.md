@@ -53,6 +53,10 @@ If the commands are executed successfully, the eventbus, event-source and sensor
 
 - Make sure the workflow pod ran successfully.
 
+        argo logs -n argo-events @latest
+
+  Should result in something similar to what is below.
+
         _________________________________________
         / {"context":{"type":"webhook","specVersi \
         | on":"0.3","source":"webhook","e |
