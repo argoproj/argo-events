@@ -29,7 +29,7 @@ spec:
         jitter: 0.2
 ```
 
-The `expression` string is evaluated with the [expr](https://github.com/antonmedv/expr) package which offers a wide set of basic operators and comparators.
+The `expression` string is evaluated with the [expr](https://github.com/expr-lang/expr) package which offers a wide set of basic operators and comparators.
 
 # Example
 

@@ -90,18 +90,18 @@ The `expr` field defines the expression to be evaluated. The `fields` stanza def
 
 `name` is arbitrary and used in the `expr`, `path` defines how to find the value in the data payload then to be assigned to a parameter.
 
-The expr filter evaluates the expression contained in `expr` using [govaluate](https://github.com/Knetic/govaluate). This library leverages an incredible flexibility and power.
+The expr filter evaluates the expression contained in `expr` using [expr](https://github.com/expr-lang/expr). This library leverages an incredible flexibility and power.
 
-With govaluate we are able to define complex combination of arithmetic (`-`, `*`, `/`, `**`, `%`), negation (`-`), inversion (`!`), bitwise not (`~`), logical (`&&`, `||`), ternary conditional (`?`, `:`) operators,
+With expr we are able to define complex combination of arithmetic (`-`, `*`, `/`, `**`, `%`), negation (`not` or `!`), inversion (`!`), logical (`&&` or `and`, `||` or `or`), ternary conditional (`?`, `:`) operators,
 together with comparators (`>`, `<`, `>=`, `<=`), comma-separated arrays and custom functions.
 
 Here some examples:
 
-- `action =~ "start"`
+- `action matches "start"`
 - `action == "end" && started == true`
-- `action =~ "start" || (started == true && instances == 2)`
+- `action matches "start" || (started == true && instances == 2)`
 
-To discover all options offered by govaluate, take a look at its [manual](https://github.com/Knetic/govaluate/blob/master/MANUAL.md).
+To discover all options offered by expr, take a look at its [manual](https://expr.medv.io/docs/Language-Definition).
 
 ## Practical example
 

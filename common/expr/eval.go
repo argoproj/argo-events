@@ -8,8 +8,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/antonmedv/expr"
 	"github.com/doublerebel/bellows"
+	"github.com/expr-lang/expr"
 
 	sprig "github.com/Masterminds/sprig/v3"
 	exprpkg "github.com/argoproj/pkg/expr"

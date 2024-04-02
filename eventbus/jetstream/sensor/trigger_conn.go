@@ -9,8 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	nats "github.com/nats-io/nats.go"
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
@@ -24,7 +25,7 @@ type JetstreamTriggerConn struct {
 	keyValueStore        nats.KeyValue
 	dependencyExpression string
 	requiresANDLogic     bool
-	evaluableExpression  *govaluate.EvaluableExpression
+	evaluableExpression  *vm.Program
 	deps                 []eventbuscommon.Dependency
 	sourceDepMap         map[string][]string // maps EventSource and EventName to dependency name
 	recentMsgsByID       map[string]*msg     // prevent re-processing the same message as before (map of msg ID to time)
@@ -44,30 +45,35 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 	var err error
 
 	sourceDepMap := make(map[string][]string)
-	for _, d := range deps {
+	sanitizedDepExpr := dependencyExpression
+
+	for i, d := range deps {
+		sanitizedDepName := strings.ReplaceAll(d.Name, "-", "_")
 		key := d.EventSourceName + "__" + d.EventName
 		_, found := sourceDepMap[key]
 		if !found {
 			sourceDepMap[key] = make([]string, 0)
 		}
-		sourceDepMap[key] = append(sourceDepMap[key], d.Name)
+		sanitizedDepExpr = strings.ReplaceAll(sanitizedDepExpr, d.Name, sanitizedDepName)
+		deps[i].Name = sanitizedDepName
+		sourceDepMap[key] = append(sourceDepMap[key], sanitizedDepName)
 	}
 
 	connection := &JetstreamTriggerConn{
 		JetstreamConnection:  conn,
 		sensorName:           sensorName,
 		triggerName:          triggerName,
-		dependencyExpression: dependencyExpression,
-		requiresANDLogic:     strings.Contains(dependencyExpression, "&"),
+		dependencyExpression: sanitizedDepExpr,
+		requiresANDLogic:     strings.Contains(sanitizedDepExpr, "&"),
 		deps:                 deps,
 		sourceDepMap:         sourceDepMap,
 		recentMsgsByID:       make(map[string]*msg),
 		recentMsgsByTime:     make([]*msg, 0)}
 	connection.Logger = connection.Logger.With("triggerName", connection.triggerName, "sensorName", connection.sensorName)
 
-	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
+	connection.evaluableExpression, err = expr.Compile(sanitizedDepExpr)
 	if err != nil {
-		errStr := fmt.Sprintf("failed to evaluate expression %s: %v", dependencyExpression, err)
+		errStr := fmt.Sprintf("failed to evaluate expression %s: %v", sanitizedDepExpr, err)
 		connection.Logger.Error(errStr)
 		return nil, fmt.Errorf(errStr)
 	}
@@ -161,7 +167,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		subscriptionIndex++
 	}
 
-	// create a single goroutine which which handle receiving messages to ensure that all of the processing is occurring on that
+	// create a single goroutine which handles receiving messages to ensure that all of the processing is occurring on that
 	// one goroutine and we don't need to worry about race conditions
 	go conn.processMsgs(ch, processMsgsCloseCh, resetConditionsCh, transform, filter, action, &wg)
 	wg.Add(1)
@@ -379,7 +385,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 		log.Infof("Current state of dependencies: %v", parameters)
 
 		// evaluate the filter expression
-		result, err := conn.evaluableExpression.Evaluate(parameters)
+		result, err := expr.Run(conn.evaluableExpression, parameters)
 		if err != nil {
 			errStr := fmt.Sprintf("failed to evaluate dependency expression: %v", err)
 			log.Error(errStr)

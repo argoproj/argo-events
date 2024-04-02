@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Knetic/govaluate"
 	"github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/expr-lang/expr/vm"
 )
 
 type KafkaTriggerConnection struct {
@@ -17,7 +17,7 @@ type KafkaTriggerConnection struct {
 
 	sensorName    string
 	triggerName   string
-	depExpression *govaluate.EvaluableExpression
+	depExpression *vm.Program
 	dependencies  map[string]common.Dependency
 	atLeastOnce   bool
 

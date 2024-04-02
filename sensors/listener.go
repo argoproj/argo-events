@@ -24,8 +24,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Knetic/govaluate"
-	"github.com/antonmedv/expr"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
@@ -36,6 +34,7 @@ import (
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/expr-lang/expr"
 	cronlib "github.com/robfig/cron/v3"
 	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
@@ -106,8 +105,13 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	sensor := sensorCtx.sensor
 
 	depMapping := make(map[string]v1alpha1.EventDependency)
-	for _, d := range sensor.Spec.Dependencies {
-		depMapping[d.Name] = d
+	sanitizedDepMap := map[string]string{}
+
+	for i, d := range sensor.Spec.Dependencies {
+		sanitizedDepName := strings.ReplaceAll(d.Name, "-", "_")
+		depMapping[sanitizedDepName] = sensor.Spec.Dependencies[i]
+		sanitizedDepMap[sanitizedDepName] = d.Name
+		sensor.Spec.Dependencies[i].Name = sanitizedDepName
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -131,38 +135,39 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			triggerLogger := logger.With(logging.LabelTriggerName, trigger.Template.Name)
 
 			defer wg.Done()
-			depExpression, err := sensorCtx.getDependencyExpression(ctx, trigger)
-			if err != nil {
-				triggerLogger.Errorw("failed to get dependency expression", zap.Error(err))
-				return
+			sanitizedDepExpr := sensorCtx.getDependencyExpression(ctx, trigger)
+
+			for _, d := range sensor.Spec.Dependencies {
+				sanitizedDepExpr = strings.ReplaceAll(sanitizedDepExpr, sanitizedDepMap[d.Name], d.Name)
 			}
+
 			// Calculate dependencies of each of the triggers.
-			de := strings.ReplaceAll(depExpression, "-", "\\-")
-			expr, err := govaluate.NewEvaluableExpression(de)
+			expr, err := expr.Compile(sanitizedDepExpr)
 			if err != nil {
 				triggerLogger.Errorw("failed to get new evaluable expression", zap.Error(err))
 				return
 			}
-			depNames := unique(expr.Vars())
 			deps := []eventbuscommon.Dependency{}
-			for _, depName := range depNames {
-				dep, ok := depMapping[depName]
-				if !ok {
-					triggerLogger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
-					return
+			for _, constant := range expr.Constants {
+				if depName, ok := constant.(string); ok {
+					dep, ok := depMapping[depName]
+					if !ok {
+						triggerLogger.Errorf("Dependency expression and dependency list do not match, %s is not found", depName)
+						return
+					}
+					d := eventbuscommon.Dependency{
+						Name:            dep.Name,
+						EventSourceName: dep.EventSourceName,
+						EventName:       dep.EventName,
+					}
+					deps = append(deps, d)
 				}
-				d := eventbuscommon.Dependency{
-					Name:            dep.Name,
-					EventSourceName: dep.EventSourceName,
-					EventName:       dep.EventName,
-				}
-				deps = append(deps, d)
 			}
 
 			var conn eventbuscommon.TriggerConnection
 			err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 				var err error
-				conn, err = ebDriver.Connect(ctx, trigger.Template.Name, depExpression, deps, trigger.AtLeastOnce)
+				conn, err = ebDriver.Connect(ctx, trigger.Template.Name, sanitizedDepExpr, deps, trigger.AtLeastOnce)
 				triggerLogger.Debugf("just created connection %v, %+v", &conn, conn)
 				return err
 			})
@@ -309,7 +314,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				case <-ticker.C:
 					if conn == nil || conn.IsClosed() {
 						triggerLogger.Info("EventBus connection lost, reconnecting...")
-						conn, err = ebDriver.Connect(ctx, trigger.Template.Name, depExpression, deps, trigger.AtLeastOnce)
+						conn, err = ebDriver.Connect(ctx, trigger.Template.Name, sanitizedDepExpr, deps, trigger.AtLeastOnce)
 						if err != nil {
 							triggerLogger.Errorw("failed to reconnect to eventbus", zap.Any("connection", conn), zap.Error(err))
 							continue
@@ -435,50 +440,14 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	return nil
 }
 
-func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, trigger v1alpha1.Trigger) (string, error) {
+func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, trigger v1alpha1.Trigger) string {
 	logger := logging.FromContext(ctx)
-
-	// Translate original expression which might contain group names
-	// to an expression only contains dependency names
-	translate := func(originalExpr string, parameters map[string]string) (string, error) {
-		originalExpr = strings.ReplaceAll(originalExpr, "&&", " + \"&&\" + ")
-		originalExpr = strings.ReplaceAll(originalExpr, "||", " + \"||\" + ")
-		originalExpr = strings.ReplaceAll(originalExpr, "-", "_")
-		originalExpr = strings.ReplaceAll(originalExpr, "(", "\"(\"+")
-		originalExpr = strings.ReplaceAll(originalExpr, ")", "+\")\"")
-
-		program, err := expr.Compile(originalExpr, expr.Env(parameters))
-		if err != nil {
-			logger.Errorw("Failed to compile original dependency expression", zap.Error(err))
-			return "", err
-		}
-		result, err := expr.Run(program, parameters)
-		if err != nil {
-			logger.Errorw("Failed to parse original dependency expression", zap.Error(err))
-			return "", err
-		}
-		newExpr := fmt.Sprintf("%v", result)
-		newExpr = strings.ReplaceAll(newExpr, "\"(\"", "(")
-		newExpr = strings.ReplaceAll(newExpr, "\")\"", ")")
-		return newExpr, nil
-	}
 
 	sensor := sensorCtx.sensor
 	var depExpression string
-	var err error
 	switch {
 	case trigger.Template.Conditions != "":
-		conditions := trigger.Template.Conditions
-		// Add all the dependency and dependency group to the parameter mappings
-		depGroupMapping := make(map[string]string)
-		for _, dep := range sensor.Spec.Dependencies {
-			key := strings.ReplaceAll(dep.Name, "-", "_")
-			depGroupMapping[key] = dep.Name
-		}
-		depExpression, err = translate(conditions, depGroupMapping)
-		if err != nil {
-			return "", err
-		}
+		depExpression = trigger.Template.Conditions
 	default:
 		deps := []string{}
 		for _, dep := range sensor.Spec.Dependencies {
@@ -487,7 +456,7 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 		depExpression = strings.Join(deps, "&&")
 	}
 	logger.Infof("Dependency expression for trigger %s: %s", trigger.Template.Name, depExpression)
-	return depExpression, nil
+	return depExpression
 }
 
 func eventToString(event *v1alpha1.Event) string {
@@ -508,19 +477,4 @@ func convertEvent(event cloudevents.Event) *v1alpha1.Event {
 		},
 		Data: event.Data(),
 	}
-}
-
-func unique(stringSlice []string) []string {
-	if len(stringSlice) == 0 {
-		return stringSlice
-	}
-	keys := make(map[string]bool)
-	list := []string{}
-	for _, entry := range stringSlice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
 }

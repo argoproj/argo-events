@@ -60,8 +60,7 @@ func TestGetDependencyExpression(t *testing.T) {
 		sensorCtx := &SensorContext{
 			sensor: obj,
 		}
-		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
-		assert.NoError(t, err)
+		expr := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
 		assert.Equal(t, "dep1", expr)
 	})
 
@@ -82,8 +81,8 @@ func TestGetDependencyExpression(t *testing.T) {
 		sensorCtx := &SensorContext{
 			sensor: obj,
 		}
-		_, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
-		assert.NoError(t, err)
+		expr := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
+		assert.Equal(t, "dep1&&dep2", expr)
 	})
 
 	t.Run("get complex expression", func(t *testing.T) {
@@ -109,8 +108,8 @@ func TestGetDependencyExpression(t *testing.T) {
 			sensor: obj,
 		}
 		trig := fakeTrigger.DeepCopy()
-		_, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
-		assert.NoError(t, err)
+		expr := sensorCtx.getDependencyExpression(context.Background(), *trig)
+		assert.Equal(t, "dep1&&dep1a&&dep2", expr)
 	})
 
 	t.Run("get conditions expression", func(t *testing.T) {
@@ -142,7 +141,7 @@ func TestGetDependencyExpression(t *testing.T) {
 		}
 		trig := fakeTrigger.DeepCopy()
 		trig.Template.Conditions = "dep-1 || dep-1a || dep-3"
-		_, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
-		assert.NoError(t, err)
+		expr := sensorCtx.getDependencyExpression(context.Background(), *trig)
+		assert.Equal(t, trig.Template.Conditions, expr)
 	})
 }
