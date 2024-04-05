@@ -19,7 +19,6 @@ import (
 	stansensor "github.com/argoproj/argo-events/eventbus/stan/sensor"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/spf13/viper"
 )
 
 func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string) (eventbuscommon.EventSourceDriver, error) {
@@ -134,7 +133,7 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 			Strategy: eventbusv1alpha1.AuthStrategyNone,
 		}
 	} else {
-		v := viper.New()
+		v := common.ViperWithLogging()
 		v.SetConfigName("auth")
 		v.SetConfigType("yaml")
 		v.AddConfigPath(common.EventBusAuthFileMountPath)
