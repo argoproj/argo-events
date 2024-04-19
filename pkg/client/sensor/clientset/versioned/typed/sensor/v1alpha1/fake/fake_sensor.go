@@ -24,7 +24,6 @@ import (
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -36,9 +35,9 @@ type FakeSensors struct {
 	ns   string
 }
 
-var sensorsResource = schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "sensors"}
+var sensorsResource = v1alpha1.SchemeGroupVersion.WithResource("sensors")
 
-var sensorsKind = schema.GroupVersionKind{Group: "argoproj.io", Version: "v1alpha1", Kind: "Sensor"}
+var sensorsKind = v1alpha1.SchemeGroupVersion.WithKind("Sensor")
 
 // Get takes name of the sensor, and returns the corresponding sensor object, and an error if there is any.
 func (c *FakeSensors) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Sensor, err error) {
