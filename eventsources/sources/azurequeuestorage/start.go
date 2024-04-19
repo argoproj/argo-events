@@ -137,7 +137,7 @@ func (el *EventListener) processMessage(message *azqueue.DequeuedMessage, dispat
 	}
 	body := []byte(*message.MessageText)
 	if el.AzureQueueStorageEventSource.DecodeMessage {
-		rawDecodedText, err := base64.RawURLEncoding.DecodeString(*message.MessageText)
+		rawDecodedText, err := base64.URLEncoding.DecodeString(*message.MessageText)
 		if err != nil {
 			log.Errorw("failed to base64 decode message...", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
