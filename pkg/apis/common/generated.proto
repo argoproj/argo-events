@@ -24,7 +24,7 @@ import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 
 // Package-wide variables from generator "generated".
-option go_package = "common";
+option go_package = "github.com/argoproj/argo-events/pkg/apis/common";
 
 // Amount represent a numeric amount.
 message Amount {

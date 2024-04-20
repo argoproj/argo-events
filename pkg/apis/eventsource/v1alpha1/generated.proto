@@ -27,7 +27,7 @@ import "k8s.io/apimachinery/pkg/runtime/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 
 // Package-wide variables from generator "generated".
-option go_package = "v1alpha1";
+option go_package = "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1";
 
 // AMQPConsumeConfig holds the configuration to immediately starts delivering queued messages
 // +k8s:openapi-gen=true

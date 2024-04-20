@@ -17,10 +17,10 @@ limitations under the License.
 package common
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/spf13/viper"
-	"golang.org/x/exp/slog"
 )
 
 func ViperWithLogging() *viper.Viper {

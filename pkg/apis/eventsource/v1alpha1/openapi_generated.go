@@ -3638,7 +3638,6 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 					"createdBy": {
 						SchemaProps: spec.SchemaProps{
 							Description: "If resource is created before the specified time then the event is treated as valid.",
-							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},

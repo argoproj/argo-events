@@ -17,6 +17,8 @@ cd "${FAKE_REPOPATH}"
 
 CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${FAKE_REPOPATH}"; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
 
+chmod +x ${CODEGEN_PKG}/*.sh
+
 subheader "running codegen for sensor"
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   github.com/argoproj/argo-events/pkg/client/sensor github.com/argoproj/argo-events/pkg/apis \

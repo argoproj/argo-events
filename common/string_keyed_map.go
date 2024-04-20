@@ -24,8 +24,8 @@ func (sm *StringKeyedMap[T]) Store(key string, item T) {
 func (sm *StringKeyedMap[T]) Load(key string) (T, bool) {
 	sm.lock.RLock()
 	defer sm.lock.RUnlock()
-	ok, item := sm.items[key]
-	return ok, item
+	item, ok := sm.items[key]
+	return item, ok
 }
 
 func (sm *StringKeyedMap[T]) Delete(key string) {
