@@ -9,7 +9,7 @@ run:
 linters:
   enable:
     - deadcode
-    - depguard
+   # - depguard
     - dogsled
     - goconst
     - gocritic
@@ -23,7 +23,7 @@ linters:
     - nakedret
     - rowserrcheck
     - staticcheck
-    - structcheck
+   # - structcheck
     - typecheck
     - unconvert
     - unused

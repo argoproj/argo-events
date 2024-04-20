@@ -24,7 +24,6 @@ import (
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -36,9 +35,9 @@ type FakeEventSources struct {
 	ns   string
 }
 
-var eventsourcesResource = schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "eventsources"}
+var eventsourcesResource = v1alpha1.SchemeGroupVersion.WithResource("eventsources")
 
-var eventsourcesKind = schema.GroupVersionKind{Group: "argoproj.io", Version: "v1alpha1", Kind: "EventSource"}
+var eventsourcesKind = v1alpha1.SchemeGroupVersion.WithKind("EventSource")
 
 // Get takes name of the eventSource, and returns the corresponding eventSource object, and an error if there is any.
 func (c *FakeEventSources) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.EventSource, err error) {

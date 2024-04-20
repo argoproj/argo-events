@@ -466,7 +466,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 					},
 					VolumeMode:       &volMode,
 					StorageClassName: js.Persistence.StorageClassName,
-					Resources: corev1.ResourceRequirements{
+					Resources: corev1.VolumeResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceStorage: volSize,
 						},
