@@ -95,7 +95,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if err != nil {
 			return fmt.Errorf("failed to parse private ssh key. err: %+v", err)
 		}
-		
 		publicKey, _, _, _, err := ssh.ParseAuthorizedKey(sshKey)
 		if err != nil {
 			return fmt.Errorf("failed to parse public ssh key. err: %+v", err)
