@@ -5526,7 +5526,8 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
 <p>
-SSHKeySecret refers to the secret that contains SSH key
+SSHKeySecret refers to the secret that contains SSH key. Key needs to
+contain private key and public key.
 </p>
 </td>
 </tr>
