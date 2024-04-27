@@ -1,6 +1,7 @@
 module github.com/argoproj/argo-events
 
 go 1.21
+toolchain go1.22.2
 
 retract v1.15.1 // Contains retractions only.
 
@@ -85,16 +86,16 @@ require (
 	google.golang.org/api v0.176.1
 	google.golang.org/grpc v1.63.2
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
-	k8s.io/api v0.29.2
-	k8s.io/apimachinery v0.29.2
-	k8s.io/client-go v0.29.0
-	k8s.io/code-generator v0.29.2
+	k8s.io/api v0.30.0
+	k8s.io/apimachinery v0.30.0
+	k8s.io/client-go v0.30.0
+	k8s.io/code-generator v0.30.0
 	k8s.io/gengo v0.0.0-20230829151522-9cce18d56c01
-	k8s.io/klog/v2 v2.110.1
-	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00
+	k8s.io/klog/v2 v2.120.1
+	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 	sigs.k8s.io/controller-runtime v0.17.2
-	sigs.k8s.io/controller-tools v0.8.0
+	sigs.k8s.io/controller-tools v0.15.0
 	sigs.k8s.io/yaml v1.4.0
 )
 
@@ -154,7 +155,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.8.0 // indirect
-	github.com/fatih/color v1.15.0 // indirect
+	github.com/fatih/color v1.16.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
@@ -172,7 +173,7 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-openapi/validate v0.22.0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect
-	github.com/gobuffalo/flect v0.2.3 // indirect
+	github.com/gobuffalo/flect v1.0.2 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
@@ -328,8 +329,9 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.29.0 // indirect
-	k8s.io/component-base v0.29.0 // indirect
+	k8s.io/apiextensions-apiserver v0.30.0 // indirect
+	k8s.io/component-base v0.30.0 // indirect
+	k8s.io/gengo/v2 v2.0.0-20240228010128-51d4e06bde70 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
