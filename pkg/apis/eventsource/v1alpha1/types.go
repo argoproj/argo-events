@@ -631,6 +631,9 @@ type NATSEventsSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	// Queue is the name of the queue group to subscribe if specified. Uses QueueSubscribe
+	// +optional
+	Queue string `json:"queue" protobuf:"bytes,9,opt,name=queue"`
 }
 
 // NATSAuth refers to the auth info for NATS EventSource

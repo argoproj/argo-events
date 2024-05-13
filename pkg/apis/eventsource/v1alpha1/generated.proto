@@ -1106,6 +1106,10 @@ message NATSEventsSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 8;
+
+  // Queue is the name of the queue group to subscribe if specified. Uses QueueSubscribe
+  // +optional
+  optional string queue = 9;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub

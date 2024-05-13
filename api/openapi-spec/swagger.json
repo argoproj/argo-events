@@ -2276,6 +2276,10 @@
             "type": "string"
           }
         },
+        "queue": {
+          "description": "Queue is the name of the queue group to subscribe if specified. Uses QueueSubscribe",
+          "type": "string"
+        },
         "subject": {
           "description": "Subject holds the name of the subject onto which messages are published",
           "type": "string"

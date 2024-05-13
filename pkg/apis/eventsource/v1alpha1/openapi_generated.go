@@ -2962,6 +2962,14 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
 						},
 					},
+					"queue": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Queue is the name of the queue group to subscribe if specified. Uses QueueSubscribe",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "subject"},
 			},

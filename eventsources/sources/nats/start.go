@@ -129,8 +129,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		log.Info("assuming all events have a json body...")
 	}
 
-	log.Info("subscribing to messages on the queue...")
-	_, err := conn.Subscribe(natsEventSource.Subject, func(msg *natslib.Msg) {
+	
+	handler := func(msg *natslib.Msg) {
 		defer func(start time.Time) {
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 		}(time.Now())
@@ -157,7 +157,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			log.Errorw("failed to dispatch a NATS event", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}
-	})
+	}
+
+	log.Infof("subscribing to messages on the subject %s queue %s", natsEventSource.Subject, natsEventSource.Queue)
+	var err error
+	if natsEventSource.Queue != "" {
+		_, err = conn.QueueSubscribe(natsEventSource.Subject, natsEventSource.Queue, handler)
+	} else {
+		_, err = conn.Subscribe(natsEventSource.Subject, handler)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to subscribe to the subject %s for event source %s, %w", natsEventSource.Subject, el.GetEventName(), err)
 	}
