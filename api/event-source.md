@@ -4456,8 +4456,9 @@ Filter
 <td>
 <em>(Optional)</em>
 <p>
-Queue is the name of the queue group to subscribe if specified. Uses
-QueueSubscribe
+Queue is the name of the queue group to subscribe as if specified. Uses
+QueueSubscribe logic to subscribe as queue group. If the queue is empty,
+uses default Subscribe logic.
 </p>
 </td>
 </tr>
