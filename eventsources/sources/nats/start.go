@@ -129,7 +129,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		log.Info("assuming all events have a json body...")
 	}
 
-	
 	handler := func(msg *natslib.Msg) {
 		defer func(start time.Time) {
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
