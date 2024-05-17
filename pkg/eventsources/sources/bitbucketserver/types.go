@@ -52,7 +52,7 @@ type Router struct {
 	// client is the bitbucket server client
 	client *bitbucketv1.APIClient
 	// customClient is a custom bitbucket server client which implements a method the gfleury/go-bitbucket-v1 client is missing
-	customClient *customBitbucketClient
+	customClient *customBitbucketServerClient
 	// deleteClient is used to delete webhooks. This client does not contain the cancelable context of the default client
 	deleteClient *bitbucketv1.APIClient
 	// hookIDs is a map of webhook IDs
@@ -62,6 +62,6 @@ type Router struct {
 	hookIDs map[string]int
 	// hookSecret is a Bitbucket Server webhook secret
 	hookSecret string
-	// bitbucketserverEventSource is the event source that contains configuration necessary to consume events from Bitbucket Server
-	bitbucketserverEventSource *v1alpha1.BitbucketServerEventSource
+	// bitbucketServerEventSource is the event source that contains configuration necessary to consume events from Bitbucket Server
+	bitbucketServerEventSource *v1alpha1.BitbucketServerEventSource
 }
