@@ -303,7 +303,7 @@ type SFTPEventSource struct {
 	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,3,opt,name=username"`
 	// Password required for authentication if any.
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
-	// SSHKeySecret refers to the secret that contains SSH key
+	// SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.
 	SSHKeySecret *corev1.SecretKeySelector `json:"sshKeySecret,omitempty" protobuf:"bytes,5,opt,name=sshKeySecret"`
 	// Address sftp address.
 	Address *corev1.SecretKeySelector `json:"address,omitempty" protobuf:"bytes,6,opt,name=address"`
