@@ -3692,7 +3692,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SFTPEventSource(ref common.ReferenceCa
 					},
 					"sshKeySecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SSHKeySecret refers to the secret that contains SSH key",
+							Description: "SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
