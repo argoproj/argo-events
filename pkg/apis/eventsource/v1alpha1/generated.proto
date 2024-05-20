@@ -1423,7 +1423,7 @@ message SFTPEventSource {
   // Password required for authentication if any.
   optional k8s.io.api.core.v1.SecretKeySelector password = 4;
 
-  // SSHKeySecret refers to the secret that contains SSH key
+  // SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.
   optional k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 5;
 
   // Address sftp address.

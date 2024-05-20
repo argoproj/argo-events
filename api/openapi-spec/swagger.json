@@ -2698,7 +2698,7 @@
           "type": "string"
         },
         "sshKeySecret": {
-          "description": "SSHKeySecret refers to the secret that contains SSH key",
+          "description": "SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "username": {
