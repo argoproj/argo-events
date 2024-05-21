@@ -2288,6 +2288,10 @@
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object"
         },
+        "queue": {
+          "description": "Queue is the name of the queue group to subscribe as if specified. Uses QueueSubscribe logic to subscribe as queue group. If the queue is empty, uses default Subscribe logic.",
+          "type": "string"
+        },
         "subject": {
           "description": "Subject holds the name of the subject onto which messages are published",
           "type": "string"

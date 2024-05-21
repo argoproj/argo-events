@@ -79,3 +79,12 @@ spec:
 #          name: my-secret
 #          key: my-credential
 
+#    example-queued-subscription:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      queue: "my-queue"
+#      auth:
+#        credential:
+#          name: my-secret
+#          key: my-credential
