@@ -158,7 +158,6 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
-	
 	var err error
 	if natsEventSource.Queue != nil {
 		log.Infof("subscribing to messages on the subject %s queue %s", natsEventSource.Subject, *natsEventSource.Queue)
