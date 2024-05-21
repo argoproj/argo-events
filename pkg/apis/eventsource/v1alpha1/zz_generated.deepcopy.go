@@ -1430,6 +1430,11 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.Queue != nil {
+		in, out := &in.Queue, &out.Queue
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 

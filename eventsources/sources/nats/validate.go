@@ -43,5 +43,8 @@ func validate(eventSource *v1alpha1.NATSEventsSource) error {
 	if eventSource.TLS != nil {
 		return apicommon.ValidateTLSConfig(eventSource.TLS)
 	}
+	if eventSource.Queue != nil && *eventSource.Queue == "" {
+		return fmt.Errorf("queue group cannot be empty if specified")		
+	}
 	return nil
 }
