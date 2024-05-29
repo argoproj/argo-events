@@ -3,6 +3,7 @@ package metrics
 import (
 	"context"
 	"net/http"
+	"runtime"
 
 	"github.com/prometheus/client_golang/prometheus/collectors"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
+	argoevents "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common/logging"
 )
 
@@ -21,6 +23,16 @@ const (
 	labelEventName       = "event_name"
 	labelSensorName      = "sensor_name"
 	labelTriggerName     = "trigger_name"
+)
+
+var (
+	buildInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "build_info",
+			Help: "A metric with a constant '1' value labeled by version from which Argo-Events was built.",
+		},
+		[]string{"version", "goversion", "goarch", "commit"},
+	)
 )
 
 // Metrics represents EventSource metrics information
@@ -170,10 +182,19 @@ func (m *Metrics) Run(ctx context.Context, addr string) {
 	log := logging.FromContext(ctx)
 	metricsRegistry := prometheus.NewRegistry()
 	metricsRegistry.MustRegister(collectors.NewGoCollector(), m)
+	metricsRegistry.MustRegister(buildInfo)
+	recordBuildInfo()
+
 	http.Handle("/metrics", promhttp.HandlerFor(metricsRegistry, promhttp.HandlerOpts{}))
 
 	log.Info("starting metrics server")
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalw("failed to start metrics server", zap.Error(err))
 	}
+}
+
+// recordBuildInfo publishes information about Argo-Rollouts version and runtime info through an info metric (gauge).
+func recordBuildInfo() {
+	vers := argoevents.GetVersion()
+	buildInfo.WithLabelValues(vers.Version, runtime.Version(), runtime.GOARCH, vers.GitCommit).Set(1)
 }
