@@ -250,6 +250,8 @@ data:
           maxBytes: -1
           replicas: 3
           duplicates: 300s
+          retention: LimitsPolicy
+          discard: DiscardOld
         versions:
         - version: latest
           natsImage: nats:2.10.10
