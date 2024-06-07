@@ -127,11 +127,25 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return err
 	}
 
+	v.SetDefault("retention", "LimitsPolicy")
+	v.SetDefault("discard", "DiscardOld")
+
+	retentionPolicy, err := getRetentionPolicy(v.GetString("retention"))
+	if err != nil {
+		stream.Logger.Errorf("invalid retention policy: %s, error: %v", retentionPolicy, err)
+		return err
+	}
+
+	discardPolicy, err := getDiscardPolicy(v.GetString("discard"))
+	if err != nil {
+		stream.Logger.Errorf("invalid discard policy: %s, error: %v", discardPolicy, err)
+		return err
+	}
 	streamConfig := nats.StreamConfig{
 		Name:       common.JetStreamStreamName,
 		Subjects:   []string{common.JetStreamStreamName + ".*.*"},
-		Retention:  nats.LimitsPolicy,
-		Discard:    nats.DiscardOld,
+		Retention:  retentionPolicy,
+		Discard:    discardPolicy,
 		MaxMsgs:    v.GetInt64("maxMsgs"),
 		MaxAge:     v.GetDuration("maxAge"),
 		MaxBytes:   v.GetInt64("maxBytes"),
@@ -157,4 +171,26 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 
 	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", common.JetStreamStreamName, conn)
 	return nil
+}
+
+func getRetentionPolicy(policy string) (nats.RetentionPolicy, error) {
+	switch policy {
+	case "LimitsPolicy":
+		return nats.LimitsPolicy, nil
+	case "InterestPolicy":
+		return nats.InterestPolicy, nil
+	default:
+		return -1, fmt.Errorf("valid values are 'LimitsPolicy' or 'InterestPolicy'")
+	}
+}
+
+func getDiscardPolicy(policy string) (nats.DiscardPolicy, error) {
+	switch policy {
+	case "DiscardOld":
+		return nats.DiscardOld, nil
+	case "DiscardNew":
+		return nats.DiscardNew, nil
+	default:
+		return -1, fmt.Errorf("valid values are 'DiscardOld' or 'DiscardNew'")
+	}
 }

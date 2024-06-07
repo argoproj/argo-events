@@ -622,7 +622,8 @@ Optional configuration for the streams to be created in this JetStream
 service, if specified, it will be merged with the default configuration
 in controller-config. It accepts a YAML format configuration, available
 fields include, “maxBytes”, “maxMsgs”, “maxAge” (e.g. 72h), “replicas”
-(1, 3, 5), “duplicates” (e.g. 5m).
+(1, 3, 5), “duplicates” (e.g. 5m), "retention"
+(e.g. RetentionPolicy (default) or InterestPolicy), "Discard" (e.g. DiscardOld (default) or DiscardNew).
 </p>
 </td>
 </tr>
