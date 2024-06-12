@@ -6802,6 +6802,17 @@ Filter
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>logLevel</code></br> <em> string </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+LogLevel is the log level for the event source
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <hr/>

@@ -3172,6 +3172,10 @@
           "description": "Filter",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.EventSourceFilter"
         },
+        "logLevel": {
+          "description": "LogLevel is the log level for the event source",
+          "type": "string"
+        },
         "maxPayloadSize": {
           "description": "MaxPayloadSize is the maximum webhook payload size that the server will accept. Requests exceeding that limit will be rejected with \"request too large\" response. Default value: 1048576 (1MB).",
           "type": "integer",

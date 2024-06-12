@@ -4625,6 +4625,13 @@ func schema_pkg_apis_eventsource_v1alpha1_WebhookEventSource(ref common.Referenc
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
 						},
 					},
+					"logLevel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LogLevel is the log level for the event source",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"endpoint", "method", "port", "url"},
 			},
