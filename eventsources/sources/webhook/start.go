@@ -152,16 +152,9 @@ func (router *Router) PostInactivate() error {
 
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
-	logConfig := zap.NewProductionConfig()
-	switch el.Webhook.LogLevel {
-	case "info":
-		logConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
-	case "error":
-		logConfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
-	case "debug":
-		logConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	default:
-		logConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	logConfig, err := logging.ConfigureLogLevelLogger(el.Webhook.LogLevel)
+	if err != nil {
+		return err
 	}
 	logger, err := logConfig.Build()
 	if err != nil {

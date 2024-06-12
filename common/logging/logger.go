@@ -41,6 +41,9 @@ const (
 	LabelHTTPMethod      = "http-method"
 	LabelTime            = "time"
 	TimestampFormat      = "2006-01-02 15:04:05"
+	InfoLevel            = "info"
+	DebugLevel           = "debug"
+	ErrorLevel           = "error"
 )
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger
@@ -80,4 +83,20 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 		return logger
 	}
 	return NewArgoEventsLogger()
+}
+
+// Returns logger conifg depending on the log level
+func ConfigureLogLevelLogger(logLevel string) (zap.Config, error) {
+	logConfig := zap.NewProductionConfig()
+	switch logLevel {
+	case InfoLevel:
+		logConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	case ErrorLevel:
+		logConfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
+	case DebugLevel:
+		logConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+	default:
+		logConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
+	return logConfig, nil
 }
