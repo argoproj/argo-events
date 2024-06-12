@@ -224,6 +224,9 @@ type WebhookEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
+	// LogLevel is the log level for the event source
+	// +optional
+	LogLevel string             `json:"logLevel,omitempty" protobuf:"bytes,3,opt,name=logLevel"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
