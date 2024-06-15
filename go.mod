@@ -69,7 +69,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/slack-go/slack v0.13.0
 	github.com/smartystreets/goconvey v1.7.2
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/stripe/stripe-go v70.15.0+incompatible
