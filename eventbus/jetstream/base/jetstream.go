@@ -127,16 +127,16 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return err
 	}
 
-	v.SetDefault("retention", "LimitsPolicy")
-	v.SetDefault("discard", "DiscardOld")
+	v.SetDefault("retention", 0) // Limits
+	v.SetDefault("discard", 0)   // DiscardOld
 
-	retentionPolicy, err := getRetentionPolicy(v.GetString("retention"))
+	retentionPolicy, err := intToRetentionPolicy(v.GetInt("retention"))
 	if err != nil {
 		stream.Logger.Errorf("invalid retention policy: %s, error: %v", retentionPolicy, err)
 		return err
 	}
 
-	discardPolicy, err := getDiscardPolicy(v.GetString("discard"))
+	discardPolicy, err := intToDiscardPolicy(v.GetInt("discard"))
 	if err != nil {
 		stream.Logger.Errorf("invalid discard policy: %s, error: %v", discardPolicy, err)
 		return err
@@ -173,24 +173,17 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	return nil
 }
 
-func getRetentionPolicy(policy string) (nats.RetentionPolicy, error) {
-	switch policy {
-	case "LimitsPolicy":
-		return nats.LimitsPolicy, nil
-	case "InterestPolicy":
-		return nats.InterestPolicy, nil
-	default:
-		return -1, fmt.Errorf("valid values are 'LimitsPolicy' or 'InterestPolicy'")
+func intToRetentionPolicy(i int) (nats.RetentionPolicy, error) {
+	if i < 0 || i > int(nats.WorkQueuePolicy) {
+		// Handle invalid value, return a default value or panic
+		return -1, fmt.Errorf("invalid int for RetentionPolicy: %d", i)
 	}
+	return nats.RetentionPolicy(i), nil
 }
 
-func getDiscardPolicy(policy string) (nats.DiscardPolicy, error) {
-	switch policy {
-	case "DiscardOld":
-		return nats.DiscardOld, nil
-	case "DiscardNew":
-		return nats.DiscardNew, nil
-	default:
-		return -1, fmt.Errorf("valid values are 'DiscardOld' or 'DiscardNew'")
+func intToDiscardPolicy(i int) (nats.DiscardPolicy, error) {
+	if i < 0 || i > int(nats.DiscardNew) {
+		return -1, fmt.Errorf("invalid int for DiscardPolicy: %d", i)
 	}
+	return nats.DiscardPolicy(i), nil
 }
