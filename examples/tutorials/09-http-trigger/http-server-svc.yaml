@@ -4,7 +4,7 @@ metadata:
   name: http-server
 spec:
   selector:
-    app: http-server
+    app.kubernetes.io/name: http-server
   ports:
     - port: 8090
       targetPort: 8090

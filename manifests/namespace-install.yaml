@@ -310,11 +310,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: controller-manager
+      app.kubernetes.io/name: controller-manager
   template:
     metadata:
       labels:
-        app: controller-manager
+        app.kubernetes.io/name: controller-manager
     spec:
       containers:
       - args:

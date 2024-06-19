@@ -39,10 +39,10 @@ NATS event-source specification is available [here](https://github.com/argoproj/
           name: nats
           namespace: argo-events
           labels:
-            component: nats
+            app.kubernetes.io/component: nats
         spec:
           selector:
-            component: nats
+            app.kubernetes.io/component: nats
           type: ClusterIP
           ports:
           - name: client
@@ -58,14 +58,14 @@ NATS event-source specification is available [here](https://github.com/argoproj/
           name: nats
           namespace: argo-events
           labels:
-            component: nats
+            app.kubernetes.io/component: nats
         spec:
           serviceName: nats
           replicas: 1
           template:
             metadata:
               labels:
-                component: nats
+                app.kubernetes.io/component: nats
             spec:
               containers:
               - name: nats

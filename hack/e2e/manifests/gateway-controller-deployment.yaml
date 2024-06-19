@@ -7,11 +7,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gateway-controller
+      app.kubernetes.io/name: gateway-controller
   template:
     metadata:
       labels:
-        app: gateway-controller
+        app.kubernetes.io/name: gateway-controller
     spec:
       serviceAccountName: argo-events-sa
       containers:

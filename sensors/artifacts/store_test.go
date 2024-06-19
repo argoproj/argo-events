@@ -186,7 +186,7 @@ spec:
   template:
     metadata:
       labels:
-        app: daemonset-example
+        app.kubernetes.io/name: daemonset-example
     spec:
       containers:
       # This container is run once on each Node in the cluster

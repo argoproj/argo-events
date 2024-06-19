@@ -6,11 +6,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: events-webhook
+      app.kubernetes.io/name: events-webhook
   template:
     metadata:
       labels:
-        app: events-webhook
+        app.kubernetes.io/name: events-webhook
     spec:
       containers:
       - name: webhook
@@ -24,5 +24,5 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: PORT
-          value: "443"              
+          value: "443"
       serviceAccountName: argo-events-webhook-sa

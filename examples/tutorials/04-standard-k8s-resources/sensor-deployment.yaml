@@ -24,11 +24,11 @@ spec:
                 replicas: 1
                 selector:
                   matchLabels:
-                    app: mydeploy
+                    app.kubernetes.io/name: mydeploy
                 template:
                   metadata:
                     labels:
-                      app: mydeploy
+                      app.kubernetes.io/name: mydeploy
                   spec:
                     containers:
                       - name: hello-container

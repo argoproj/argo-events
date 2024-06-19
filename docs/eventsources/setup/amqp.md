@@ -44,28 +44,28 @@ The structure of an event dispatched by the event-source over the eventbus looks
         kind: Service
         metadata:
           labels:
-            component: rabbitmq
+            app.kubernetes.io/component: rabbitmq
           name: rabbitmq-service
         spec:
           ports:
             - port: 5672
           selector:
-            app: taskQueue
-            component: rabbitmq
+            app.kubernetes.io/name: taskQueue
+            app.kubernetes.io/component: rabbitmq
         ---
         apiVersion: v1
         kind: ReplicationController
         metadata:
           labels:
-            component: rabbitmq
+            app.kubernetes.io/component: rabbitmq
           name: rabbitmq-controller
         spec:
           replicas: 1
           template:
             metadata:
               labels:
-                app: taskQueue
-                component: rabbitmq
+                app.kubernetes.io/name: taskQueue
+                app.kubernetes.io/component: rabbitmq
             spec:
               containers:
                 - image: rabbitmq

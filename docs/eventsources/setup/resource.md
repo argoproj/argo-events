@@ -39,16 +39,16 @@ Resource event-source specification is available [here](https://github.com/argop
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/resource.yaml
 
-1. The event source we created in step 1 contains configuration which makes the event-source listen to Argo workflows marked with label `app: my-workflow`.
+1. The event source we created in step 1 contains configuration which makes the event-source listen to Argo workflows marked with label `app.kubernetes.io/name: my-workflow`.
 
-1. Lets create a workflow called `my-workflow` with label `app: my-workflow`.
+1. Lets create a workflow called `my-workflow` with label `app.kubernetes.io/name: my-workflow`.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Workflow
         metadata:
           name: my-workflow
           labels:
-            app: my-workflow
+            app.kubernetes.io/name: my-workflow
         spec:
           entrypoint: whalesay
           templates:
@@ -69,7 +69,7 @@ In the example above, we had set up the list option as follows,
         filter:
         # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
         # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
-        
+
             # labels provide listing options to K8s API to watch objects
             labels:
               - key: app
@@ -82,7 +82,7 @@ In the example above, we had set up the list option as follows,
 
 The `key-operation-value` items under the `filter -> labels` are used by the event-source to filter the objects
 that are eligible for the watch. So, in the present case, the event-source will set up a watch for those
-objects who have label "app: my-workflow". You can add more `key-operation-value` items to the list as per your use-case.
+objects who have label "app.kubernetes.io/name: my-workflow". You can add more `key-operation-value` items to the list as per your use-case.
 
 Similarly, you can pass `field` selectors to the watch list options, e.g.,
 
