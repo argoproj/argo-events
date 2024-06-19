@@ -80,7 +80,7 @@ type JetStreamBus struct {
 	StartArgs []string `json:"startArgs,omitempty" protobuf:"bytes,17,rep,name=startArgs"`
 	// Optional configuration for the streams to be created in this JetStream service, if specified, it will be merged with the default configuration in controller-config.
 	// It accepts a YAML format configuration, available fields include, "maxBytes", "maxMsgs", "maxAge" (e.g. 72h), "replicas" (1, 3, 5), "duplicates" (e.g. 5m),
-	// "retention" (e.g. RetentionPolicy (default) or InterestPolicy), "Discard" (e.g. DiscardOld (default) or DiscardNew).
+	// "retention" (e.g. 0: Limits (default), 1: Interest, 2: WorkQueue), "Discard" (e.g. 0: DiscardOld (default), 1: DiscardNew).
 	// +optional
 	StreamConfig *string `json:"streamConfig,omitempty" protobuf:"bytes,18,opt,name=streamConfig"`
 	// Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB
