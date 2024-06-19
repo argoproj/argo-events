@@ -36,14 +36,14 @@ Pulsar event-source is available [here](https://github.com/argoproj/argo-events/
         metadata:
           name: pulsar
           labels:
-            app: pulsar
+            app.kubernetes.io/name: pulsar
         spec:
           replicas: 1
           template:
             metadata:
               name: pulsar
               labels:
-                app: pulsar
+                app.kubernetes.io/name: pulsar
             spec:
               containers:
                 - name: pulsar
@@ -61,7 +61,7 @@ Pulsar event-source is available [here](https://github.com/argoproj/argo-events/
                   emptyDir: {}
           selector:
             matchLabels:
-              app: pulsar
+              app.kubernetes.io/name: pulsar
         ---
         apiVersion: v1
         kind: Service
@@ -69,7 +69,7 @@ Pulsar event-source is available [here](https://github.com/argoproj/argo-events/
           name: pulsar
         spec:
           selector:
-            app: pulsar
+            app.kubernetes.io/name: pulsar
           ports:
             - port: 8080
               targetPort: 8080

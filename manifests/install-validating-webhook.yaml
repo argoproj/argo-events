@@ -89,7 +89,7 @@ spec:
   - port: 443
     targetPort: 443
   selector:
-    app: events-webhook
+    app.kubernetes.io/name: events-webhook
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -100,11 +100,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: events-webhook
+      app.kubernetes.io/name: events-webhook
   template:
     metadata:
       labels:
-        app: events-webhook
+        app.kubernetes.io/name: events-webhook
     spec:
       containers:
       - args:

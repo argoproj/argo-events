@@ -36,7 +36,7 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
         metadata:
           name: nsqlookupd
           labels:
-            app: nsq
+            app.kubernetes.io/name: nsq
         spec:
           ports:
             - port: 4160
@@ -47,15 +47,15 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
               name: http
           clusterIP: None
           selector:
-            app: nsq
-            component: nsqlookupd
+            app.kubernetes.io/name: nsq
+            app.kubernetes.io/component: nsqlookupd
         ---
         apiVersion: v1
         kind: Service
         metadata:
           name: nsqd
           labels:
-            app: nsq
+            app.kubernetes.io/name: nsq
         spec:
           ports:
             - port: 4150
@@ -66,15 +66,15 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
               name: http
           clusterIP: None
           selector:
-            app: nsq
-            component: nsqd
+            app.kubernetes.io/name: nsq
+            app.kubernetes.io/component: nsqd
         ---
         apiVersion: v1
         kind: Service
         metadata:
           name: nsqadmin
           labels:
-            app: nsq
+            app.kubernetes.io/name: nsq
         spec:
           ports:
             - port: 4170
@@ -84,8 +84,8 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
               targetPort: 4171
               name: http
           selector:
-            app: nsq
-            component: nsqadmin
+            app.kubernetes.io/name: nsq
+            app.kubernetes.io/component: nsqadmin
         ---
         apiVersion: apps/v1beta1
         kind: StatefulSet
@@ -99,8 +99,8 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
           template:
             metadata:
               labels:
-                app: nsq
-                component: nsqlookupd
+                app.kubernetes.io/name: nsq
+                app.kubernetes.io/component: nsqlookupd
             spec:
               containers:
                 - name: nsqlookupd
@@ -137,13 +137,13 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
           replicas: 1
           selector:
             matchLabels:
-              app: nsq
-              component: nsqd
+              app.kubernetes.io/name: nsq
+              app.kubernetes.io/component: nsqd
           template:
             metadata:
               labels:
-                app: nsq
-                component: nsqd
+                app.kubernetes.io/name: nsq
+                app.kubernetes.io/component: nsqd
             spec:
               containers:
                 - name: nsqd
@@ -198,8 +198,8 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
           template:
             metadata:
               labels:
-                app: nsq
-                component: nsqadmin
+                app.kubernetes.io/name: nsq
+                app.kubernetes.io/component: nsqadmin
             spec:
               containers:
                 - name: nsqadmin
