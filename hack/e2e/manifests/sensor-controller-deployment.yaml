@@ -7,11 +7,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sensor-controller
+      app.kubernetes.io/name: sensor-controller
   template:
     metadata:
       labels:
-        app: sensor-controller
+        app.kubernetes.io/name: sensor-controller
     spec:
       serviceAccountName: argo-events-sa
       containers:

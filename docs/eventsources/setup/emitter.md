@@ -36,14 +36,14 @@ Emitter event-source specification is available [here](https://github.com/argopr
         metadata:
           name: broker
           labels:
-            app: broker
+            app.kubernetes.io/name: broker
         spec:
           clusterIP: None
           ports:
             - port: 4000
               targetPort: 4000
           selector:
-            app: broker
+            app.kubernetes.io/name: broker
         ---
         apiVersion: apps/v1
         kind: Deployment
@@ -53,11 +53,11 @@ Emitter event-source specification is available [here](https://github.com/argopr
           replicas: 1
           selector:
             matchLabels:
-              app: broker
+              app.kubernetes.io/name: broker
           template:
             metadata:
               labels:
-                app: broker
+                app.kubernetes.io/name: broker
             spec:
               containers:
                 - env:

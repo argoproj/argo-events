@@ -21,7 +21,7 @@ spec:
               metadata:
                 generateName: resource-workflow-
                 labels:
-                  app: resource-workflow
+                  app.kubernetes.io/name: resource-workflow
               spec:
                 entrypoint: whalesay
                 arguments:

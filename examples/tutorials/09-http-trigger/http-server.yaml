@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: http-server
   labels:
-    app: http-server
+    app.kubernetes.io/name: http-server
 spec:
   containers:
     - name: http-server
