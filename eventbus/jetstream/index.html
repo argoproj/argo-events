@@ -2194,6 +2194,7 @@
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">jetstream</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span><span class="w"> </span><span class="c1"># Do NOT use &quot;latest&quot; but a specific version in your real deployment</span>
+<span class="w">                    </span><span class="c1"># See: https://argoproj.github.io/argo-events/eventbus/jetstream/#version</span>
 </code></pre></div>
 <p>The example above brings up a Jetstream
 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
@@ -2203,9 +2204,10 @@ with 3 replicas in the namespace.</p>
 <a href="https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#argoproj.io/v1alpha1.JetstreamBus">here</a>
 for the full spec of <code>jetstream</code>.</p>
 <h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
-<p>The version number specified in the example above is the release number for the NATS server. We will support some subset of these as we've tried them out and only plan to upgrade them as needed. To take a look at what that includes:</p>
+<p>The version number specified in the example above is the release number for the NATS server. We will support some subset of these as we've tried them out and only plan to upgrade them as needed. The list of available versions is managed by the controller manager ConfigMap, which can be updated to support new versions.</p>
 <div class="highlight"><pre><span></span><code>kubectl get configmap argo-events-controller-config -o yaml
 </code></pre></div>
+<p>Check <a href="https://docs.nats.io/nats-concepts/jetstream/streams#configuration">here</a> for a list of configurable features per version.</p>
 <h3 id="a-more-involved-example">A more involved example<a class="headerlink" href="#a-more-involved-example" title="Permanent link">&para;</a></h3>
 <p>Another example with more configuration:</p>
 <div class="highlight"><pre><span></span><code>apiVersion: argoproj.io/v1alpha1
