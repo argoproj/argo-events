@@ -25,6 +25,7 @@ data:
           maxAge: 168h
           maxBytes: -1
           replicas: 3
+          duplicates: 300s
           duplicates:           # 0: Limits, 1: Interest, 2: WorkQueue
           retention: 0
           # 0: DiscardOld, 1: DiscardNew
