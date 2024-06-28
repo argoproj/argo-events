@@ -966,8 +966,8 @@ BitbucketBasicAuth
 </p>
 <p>
 <p>
-BasicAuth holds the information required to authenticate user via basic
-auth mechanism
+BitbucketBasicAuth holds the information required to authenticate user
+via basic auth mechanism
 </p>
 </p>
 <table>
@@ -1318,11 +1318,30 @@ under review.
 </tr>
 <tr>
 <td>
+<code>oneEventPerChange</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+OneEventPerChange controls whether to process each change in a
+repo:refs_changed webhook event as a separate event. This setting is
+useful when multiple tags are pushed simultaneously for the same commit,
+and each tag needs to independently trigger an action, such as a
+distinct workflow in Argo Workflows. When enabled, the
+BitbucketServerEventSource publishes an individual
+BitbucketServerEventData for each change, ensuring independent
+processing of each tag or reference update in a single webhook event.
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>accessToken</code></br> <em>
 <a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 AccessToken is reference to K8s secret which holds the bitbucket api
 access information.
@@ -1336,6 +1355,7 @@ access information.
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>
 WebhookSecret is reference to K8s secret which holds the bitbucket
 webhook secret (for HMAC validation).
