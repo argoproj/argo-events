@@ -546,8 +546,9 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							}
 						}
 
+						uuidNew := uuid.New()
 						event := cloudevents.NewEvent()
-						event.SetID(fmt.Sprintf("%x", uuid.New()))
+						event.SetID(fmt.Sprintf("%x", uuidNew[:]))
 						event.SetType(string(s.GetEventSourceType()))
 						event.SetSource(s.GetEventSourceName())
 						event.SetSubject(s.GetEventName())
