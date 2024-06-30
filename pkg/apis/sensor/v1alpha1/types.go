@@ -493,6 +493,9 @@ type HTTPTrigger struct {
 	// Secure Headers stored in Kubernetes Secrets for the HTTP requests.
 	// +optional
 	SecureHeaders []*apicommon.SecureHeader `json:"secureHeaders,omitempty" protobuf:"bytes,9,rep,name=secureHeaders"`
+	// Log level for the http trigger 
+	// +optional
+	LogLevel string`json:"loglevel,omitempty" protobuf:"bytes,9,opt,name=loglevel"`
 }
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
