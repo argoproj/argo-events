@@ -1782,5 +1782,9 @@ message WebhookEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 2;
+
+  // LogLevel is the log level for the event source
+  // +optional
+  optional string logLevel = 3;
 }
 
