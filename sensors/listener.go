@@ -220,6 +220,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				})
 				if err != nil {
 					triggerLogger.Warnf("failed to trigger actions, %v", err)
+					sensorCtx.metrics.ActionRetriesFailed(sensor.Name, trigger.Template.Name)
 				}
 			}
 

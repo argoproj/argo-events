@@ -45,6 +45,7 @@ type Metrics struct {
 	eventProcessingDuration *prometheus.SummaryVec
 	actionTriggered         *prometheus.CounterVec
 	actionFailed            *prometheus.CounterVec
+	actionRetriesFailed     *prometheus.CounterVec
 	actionDuration          *prometheus.SummaryVec
 }
 
@@ -108,6 +109,14 @@ func NewMetrics(namespace string) *Metrics {
 				labelNamespace: namespace,
 			},
 		}, []string{labelSensorName, labelTriggerName}),
+		actionRetriesFailed: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: prefix,
+			Name:      "action_retries_failed_total",
+			Help:      "How many actions failed after the retries have been exhausted. https://argoproj.github.io/argo-events/metrics/#action_retries_failed_total",
+			ConstLabels: prometheus.Labels{
+				labelNamespace: namespace,
+			},
+		}, []string{labelSensorName, labelTriggerName}),
 		actionDuration: prometheus.NewSummaryVec(prometheus.SummaryOpts{
 			Namespace: prefix,
 			Name:      "action_duration_milliseconds",
@@ -127,6 +136,7 @@ func (m *Metrics) Collect(ch chan<- prometheus.Metric) {
 	m.eventProcessingDuration.Collect(ch)
 	m.actionTriggered.Collect(ch)
 	m.actionFailed.Collect(ch)
+	m.actionRetriesFailed.Collect(ch)
 	m.actionDuration.Collect(ch)
 }
 
@@ -138,6 +148,7 @@ func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
 	m.eventProcessingDuration.Describe(ch)
 	m.actionTriggered.Describe(ch)
 	m.actionFailed.Describe(ch)
+	m.actionRetriesFailed.Describe(ch)
 	m.actionDuration.Describe(ch)
 }
 
@@ -171,6 +182,10 @@ func (m *Metrics) ActionTriggered(sensorName, triggerName string) {
 
 func (m *Metrics) ActionFailed(sensorName, triggerName string) {
 	m.actionFailed.WithLabelValues(sensorName, triggerName).Inc()
+}
+
+func (m *Metrics) ActionRetriesFailed(sensorName, triggerName string) {
+	m.actionRetriesFailed.WithLabelValues(sensorName, triggerName).Inc()
 }
 
 func (m *Metrics) ActionDuration(sensorName, triggerName string, num float64) {
