@@ -129,9 +129,6 @@
         "insecure": {
           "type": "boolean"
         },
-        "useSDKCreds": {
-          "type": "boolean"
-        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
