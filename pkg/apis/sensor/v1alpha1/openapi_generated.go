@@ -2441,11 +2441,17 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Format:      "",
 						},
 					},
+					"dlqTrigger": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Invoke a dead letter queue trigger if the trigger execution failed after the retries, if set, are exhausted and if atLeastOnce is set to true.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RateLimit", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
 	}
 }
 

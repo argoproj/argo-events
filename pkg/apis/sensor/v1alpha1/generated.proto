@@ -938,6 +938,11 @@ message Trigger {
   // +kubebuilder:default=false
   // +optional
   optional bool atLeastOnce = 6;
+
+  // Invoke a dead letter queue trigger if the trigger execution failed after
+  // the retries, if set, are exhausted and if atLeastOnce is set to true.
+  // +optional
+  optional Trigger dlqTrigger = 7;
 }
 
 // TriggerParameter indicates a passed parameter to a service template

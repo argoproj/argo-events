@@ -4514,6 +4514,10 @@
           "description": "AtLeastOnce determines the trigger execution semantics. Defaults to false. Trigger execution will use at-most-once semantics. If set to true, Trigger execution will switch to at-least-once semantics.",
           "type": "boolean"
         },
+        "dlqTrigger": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Trigger",
+          "description": "Invoke a dead letter queue trigger if the trigger execution failed after the retries, if set, are exhausted and if atLeastOnce is set to true."
+        },
         "parameters": {
           "description": "Parameters is the list of parameters applied to the trigger template definition",
           "items": {

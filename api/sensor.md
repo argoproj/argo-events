@@ -3488,7 +3488,8 @@ Trigger
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
+<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>,
+<a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 </p>
 <p>
 <p>
@@ -3579,6 +3580,19 @@ Rate limit, default unit is Second
 AtLeastOnce determines the trigger execution semantics. Defaults to
 false. Trigger execution will use at-most-once semantics. If set to
 true, Trigger execution will switch to at-least-once semantics.
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dlqTrigger</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Trigger"> Trigger </a> </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+Invoke a dead letter queue trigger if the trigger execution failed after
+the retries, if set, are exhausted and if atLeastOnce is set to true.
 </p>
 </td>
 </tr>
