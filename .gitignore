@@ -15,5 +15,6 @@ debug.test
 site/
 /go-diagrams/
 argo-events
-.swo
-.swp
+# ignore temp vi files
+*.swo
+*.swp

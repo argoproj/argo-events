@@ -336,8 +336,11 @@ type Trigger struct {
 	// +kubebuilder:default=false
 	// +optional
 	AtLeastOnce bool `json:"atLeastOnce,omitempty" protobuf:"varint,6,opt,name=atLeastOnce"`
-	// Invoke a dead letter queue trigger if the trigger execution failed after
-	// the retries, if set, are exhausted and if atLeastOnce is set to true.
+	// If the trigger fails, it will retry up to the configured number of
+	// retries. If the maximum retries are reached and the trigger is set to
+	// execute atLeastOnce, the dead letter queue (DLQ) trigger will be invoked if
+	// specified.  Invoking the dead letter queue trigger helps prevent data
+	// loss.
 	// +optional
 	DlqTrigger *Trigger `json:"dlqTrigger,omitempty" protobuf:"bytes,7,opt,name=dlqTrigger"`
 }

@@ -134,3 +134,40 @@ spec:
   # Optional
   revisionHistoryLimit: 3
 ```
+
+## Dead Letter Queue Trigger
+
+To help avoid data loss and dropping a message on failure after all the retries are
+exhausted, optionally, a `dlqTrigger` may be configured as following to invoke
+any of the [10+ triggers](https://argoproj.github.io/argo-events/concepts/trigger/):
+
+```yaml
+spec:
+  triggers:
+    - template:
+        name: http-trigger
+        http:
+          url: https://xxxxx.com/
+          method: GET
+      atLeastOnce: true  # must be true for dlqTrigger
+      retryStrategy:
+        steps: 3
+      dlqTrigger:
+        template:
+          name: http-trigger
+          http:
+            url: https://xxxxx.com/
+            method: PUT
+        atLeastOnce: true  # must be true for dlqTrigger
+        retryStrategy:
+          steps: 5
+```
+
+If the trigger fails, it will retry up to the configured number of retries based
+on `retryStrategy`. If the maximum retries are reached and the trigger, the
+`dlqTrigger` will be invoked if specified.  In order to use the `dlqTrigger`,
+the `atLeastOnce` must be set to true within the trigger and the `dlqTrigger` for
+the Sensor to know about the failure and invoke the `dlqTrigger`.
+
+**note:** `dlqTrigger` is only available for the top level trigger and not
+*recursively within the `dlqTrigger` template.
