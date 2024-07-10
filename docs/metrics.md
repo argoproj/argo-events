@@ -84,6 +84,11 @@ How many actions have been triggered successfully.
 
 How many actions failed.
 
+#### argo_events_action_retries_failed_total
+
+How many actions failed after the retries have been exhausted.  
+This is also incremented if there is no `retryStrategy` specified.
+
 #### argo_events_action_duration_milliseconds
 
 Action triggering duration.
@@ -140,6 +145,7 @@ of monitoring your applications running with Argo Events.
   - `argo_events_events_processing_failed_total`
   - `argo_events_events_sent_failed_total`
   - `argo_events_action_failed_total`
+  - `argo_events_action_retries_failed_total`
 
 - Saturation
 
