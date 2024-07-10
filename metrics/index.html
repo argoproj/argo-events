@@ -1963,6 +1963,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#argo_events_action_retries_failed_total" class="md-nav__link">
+    argo_events_action_retries_failed_total
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#argo_events_action_duration_milliseconds" class="md-nav__link">
     argo_events_action_duration_milliseconds
   </a>
@@ -2241,6 +2248,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#argo_events_action_retries_failed_total" class="md-nav__link">
+    argo_events_action_retries_failed_total
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#argo_events_action_duration_milliseconds" class="md-nav__link">
     argo_events_action_duration_milliseconds
   </a>
@@ -2358,6 +2372,9 @@ milliseconds.</p>
 <p>How many actions have been triggered successfully.</p>
 <h4 id="argo_events_action_failed_total">argo_events_action_failed_total<a class="headerlink" href="#argo_events_action_failed_total" title="Permanent link">&para;</a></h4>
 <p>How many actions failed.</p>
+<h4 id="argo_events_action_retries_failed_total">argo_events_action_retries_failed_total<a class="headerlink" href="#argo_events_action_retries_failed_total" title="Permanent link">&para;</a></h4>
+<p>How many actions failed after the retries have been exhausted.<br />
+This is also incremented if there is no <code>retryStrategy</code> specified.</p>
 <h4 id="argo_events_action_duration_milliseconds">argo_events_action_duration_milliseconds<a class="headerlink" href="#argo_events_action_duration_milliseconds" title="Permanent link">&para;</a></h4>
 <p>Action triggering duration.</p>
 <h3 id="eventbus">EventBus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h3>
@@ -2415,8 +2432,9 @@ of monitoring your applications running with Argo Events.</p>
 <p><code>argo_events_events_processing_failed_total</code></p>
 </li>
 <li><code>argo_events_events_sent_failed_total</code></li>
+<li><code>argo_events_action_failed_total</code></li>
 <li>
-<p><code>argo_events_action_failed_total</code></p>
+<p><code>argo_events_action_retries_failed_total</code></p>
 </li>
 <li>
 <p>Saturation</p>
