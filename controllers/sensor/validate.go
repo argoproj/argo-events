@@ -85,15 +85,15 @@ func validateTrigger(trigger v1alpha1.Trigger) error {
 	if err := validateTriggerTemplateParameters(&trigger); err != nil {
 		return err
 	}
-	if err := validateDlqTriggerTemplate(&trigger); err != nil {
+	if err := validateDlqTrigger(&trigger); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// validateDlqTriggerTemplate validates trigger.atLeastOnce==true and the trigger.dlqTrigger
-func validateDlqTriggerTemplate(trigger *v1alpha1.Trigger) error {
+// validateDlqTrigger validates trigger.atLeastOnce==true and the trigger.dlqTrigger
+func validateDlqTrigger(trigger *v1alpha1.Trigger) error {
 	if trigger == nil {
 		return fmt.Errorf("trigger can't be nil")
 	}
