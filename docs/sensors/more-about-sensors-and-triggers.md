@@ -149,16 +149,19 @@ spec:
         http:
           url: https://xxxxx.com/
           method: GET
-      atLeastOnce: true  # must be true for dlqTrigger
+      # must be true for dlqTrigger
+      atLeastOnce: true  
       retryStrategy:
         steps: 3
       dlqTrigger:
         template:
-          name: http-trigger
+          name: dlq-http-trigger
           http:
             url: https://xxxxx.com/
             method: PUT
-        atLeastOnce: true  # must be true for dlqTrigger
+        # must be true for dlqTrigger
+        atLeastOnce: true
+        # retries the dlqTrigger 5 times
         retryStrategy:
           steps: 5
 ```
