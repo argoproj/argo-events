@@ -41,6 +41,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [ProPoint Solutions](https://supersalon.com)
 1. [PwC Labs](https://www.pwc.com/us/en/careers/why-pwc/what-we-do/what-we-do-pwc-labs.html)
 1. [Rakuten](https://www.rakuten.com)
+1. [Rippling](https://www.rippling.com)
 1. [Rookout](https://www.rookout.com/)
 1. [RTL Nederland](https://www.rtl.nl)
 1. [Salesforce](https://salesforce.com)
