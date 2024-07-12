@@ -221,6 +221,22 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				if err != nil {
 					triggerLogger.Warnf("failed to trigger actions, %v", err)
 					sensorCtx.metrics.ActionRetriesFailed(sensor.Name, trigger.Template.Name)
+					if trigger.DlqTrigger != nil {
+						dlqRetryStrategy := trigger.DlqTrigger.RetryStrategy
+						if dlqRetryStrategy == nil {
+							dlqRetryStrategy = &apicommon.Backoff{Steps: 1}
+						}
+
+						triggerLogger.Debugf("invoking dlqTrigger")
+						dlqErr := common.DoWithRetry(dlqRetryStrategy, func() error {
+							return sensorCtx.triggerActions(ctx, sensor, events, *trigger.DlqTrigger)
+						})
+
+						if dlqErr != nil {
+							triggerLogger.Errorf("failed to trigger dlqTrigger, %v", dlqErr)
+							sensorCtx.metrics.ActionRetriesFailed(sensor.Name, trigger.DlqTrigger.Template.Name)
+						}
+					}
 				}
 			}
 
