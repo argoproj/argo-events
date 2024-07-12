@@ -602,7 +602,8 @@ string
 <td>
 <em>(Optional)</em>
 <p>Optional configuration for the streams to be created in this JetStream service, if specified, it will be merged with the default configuration in controller-config.
-It accepts a YAML format configuration, available fields include, &ldquo;maxBytes&rdquo;, &ldquo;maxMsgs&rdquo;, &ldquo;maxAge&rdquo; (e.g. 72h), &ldquo;replicas&rdquo; (1, 3, 5), &ldquo;duplicates&rdquo; (e.g. 5m).</p>
+It accepts a YAML format configuration, available fields include, &ldquo;maxBytes&rdquo;, &ldquo;maxMsgs&rdquo;, &ldquo;maxAge&rdquo; (e.g. 72h), &ldquo;replicas&rdquo; (1, 3, 5), &ldquo;duplicates&rdquo; (e.g. 5m),
+&ldquo;retention&rdquo; (e.g. 0: Limits (default), 1: Interest, 2: WorkQueue), &ldquo;Discard&rdquo; (e.g. 0: DiscardOld (default), 1: DiscardNew).</p>
 </td>
 </tr>
 <tr>
