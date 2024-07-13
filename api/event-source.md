@@ -1927,6 +1927,17 @@ Service is the specifications of the service to expose the event source
 </tr>
 <tr>
 <td>
+<code>syncAnnotations</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SyncAnnotations indicates whether annotations should be synchronized
+</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>minio</code></br> <em>
 map\[string\]github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
 </em>
@@ -2464,6 +2475,17 @@ Service </a> </em>
 <em>(Optional)</em>
 <p>
 Service is the specifications of the service to expose the event source
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>syncAnnotations</code></br> <em> bool </em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>
+SyncAnnotations indicates whether annotations should be synchronized
 </p>
 </td>
 </tr>

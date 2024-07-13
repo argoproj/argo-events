@@ -60,6 +60,9 @@ type EventSourceSpec struct {
 	// Service is the specifications of the service to expose the event source
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,3,opt,name=service"`
+	// SyncAnnotations indicates whether annotations should be synchronized
+	// +optional
+	SyncAnnotations bool `json:"syncAnnotations,omitempty" protobuf:"varint,36,opt,name=syncAnnotations"`
 	// Minio event sources
 	Minio map[string]apicommon.S3Artifact `json:"minio,omitempty" protobuf:"bytes,4,rep,name=minio"`
 	// Calendar event sources

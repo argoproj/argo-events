@@ -1661,6 +1661,10 @@
             "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.StripeEventSource"
           }
         },
+        "syncAnnotations": {
+          "description": "SyncAnnotations indicates whether annotations should be synchronized",
+          "type": "boolean"
+        },
         "template": {
           "description": "Template is the pod specification for the event source",
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Template"

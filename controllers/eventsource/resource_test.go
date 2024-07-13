@@ -205,6 +205,45 @@ func Test_BuildDeployment(t *testing.T) {
 			assert.Equal(t, gotVolumeMountNames[i], wantVolumeMountNames[i])
 		}
 	})
+	t.Run("Test buildDeployment with SyncAnnotation set to true", func(t *testing.T) {
+		someEventSource := fakeEmptyEventSource()
+		someEventSource.Annotations = map[string]string{
+			"imagesize": "1Gi",
+			"checksum":  "sha1235",
+		}
+		someEventSource.Spec.SyncAnnotations = true
+
+		args := &AdaptorArgs{
+			Image:       testImage,
+			EventSource: someEventSource,
+			Labels:      testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		assert.Equal(t, "1Gi", deployment.Annotations["imagesize"])
+		assert.Equal(t, "sha1235", deployment.Annotations["checksum"])
+	})
+
+	t.Run("Test buildDeployment with SyncAnnotation set to false", func(t *testing.T) {
+		someEventSource := fakeEmptyEventSource()
+		someEventSource.Annotations = map[string]string{
+			"imagesize": "1Gi",
+			"checksum":  "sha1235",
+		}
+		someEventSource.Spec.SyncAnnotations = false
+
+		args := &AdaptorArgs{
+			Image:       testImage,
+			EventSource: someEventSource,
+			Labels:      testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		assert.Equal(t, "", deployment.Annotations["imagesize"])
+		assert.Equal(t, "", deployment.Annotations["checksum"])
+	})
 }
 
 func TestResourceReconcile(t *testing.T) {

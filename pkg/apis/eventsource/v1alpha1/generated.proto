@@ -570,6 +570,10 @@ message EventSourceSpec {
   // +optional
   optional Service service = 3;
 
+  // SyncAnnotations indicates whether annotations should be synchronized
+  // +optional
+  optional bool syncAnnotations = 36;
+
   // Minio event sources
   map<string, github.com.argoproj.argo_events.pkg.apis.common.S3Artifact> minio = 4;
 

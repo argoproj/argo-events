@@ -1382,6 +1382,13 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Service"),
 						},
 					},
+					"syncAnnotations": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SyncAnnotations indicates whether annotations should be synchronized",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"minio": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Minio event sources",
