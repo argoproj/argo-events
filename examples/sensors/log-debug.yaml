@@ -6,8 +6,8 @@ spec:
   template:
     container:
       env:
-        - name: DEBUG_LOG
-          value: "true"
+        - name: LOG_LEVEL
+          value: error
   dependencies:
     - name: test-dep
       eventSourceName: calendar

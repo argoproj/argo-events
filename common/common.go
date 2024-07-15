@@ -27,8 +27,8 @@ import (
 const (
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBECONFIG"
-	// EnvVarDebugLog is the env var to turn on the debug mode for logging
-	EnvVarDebugLog = "DEBUG_LOG"
+	// EnvVarLogLog is the env var to select the log level - options are debug, info, error
+	EnvVarLogLevel = "LOG_LEVEL"
 	// ENVVarPodName should be set to the name of the pod
 	EnvVarPodName = "POD_NAME"
 	// ENVVarLeaderElection sets the leader election mode
