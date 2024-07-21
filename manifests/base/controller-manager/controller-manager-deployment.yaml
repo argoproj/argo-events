@@ -18,7 +18,7 @@ spec:
         runAsUser: 9731
       containers:
         - name: controller-manager
-          image: quay.io/argoproj/argo-events:latest
+          image: quay.io/codefresh/argo-events:v1.9.0-cap-CR-22221
           imagePullPolicy: Always
           args:
             - controller
@@ -28,7 +28,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: ARGO_EVENTS_IMAGE
-              value: quay.io/argoproj/argo-events:latest
+              value: quay.io/codefresh/argo-events:v1.9.0-cap-CR-22221
           volumeMounts:
             - mountPath: /etc/argo-events
               name: controller-config-volume

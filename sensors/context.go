@@ -31,6 +31,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
+	"github.com/argoproj/argo-events/codefresh"
 	"github.com/argoproj/argo-events/common"
 	sensormetrics "github.com/argoproj/argo-events/metrics"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -72,10 +73,11 @@ type SensorContext struct {
 	// azureServiceBusClients holds the references to active Azure Service Bus clients.
 	azureServiceBusClients common.StringKeyedMap[*servicebus.Sender]
 	metrics                *sensormetrics.Metrics
+	cfClient               *codefresh.Client
 }
 
 // NewSensorContext returns a new sensor execution context.
-func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics) *SensorContext {
+func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics, cfClient *codefresh.Client) *SensorContext {
 	return &SensorContext{
 		kubeClient:           kubeClient,
 		dynamicClient:        dynamicClient,
@@ -96,5 +98,6 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		azureEventHubsClients:  common.NewStringKeyedMap[*eventhubs.Hub](),
 		azureServiceBusClients: common.NewStringKeyedMap[*servicebus.Sender](),
 		metrics:                metrics,
+		cfClient:               cfClient,
 	}
 }

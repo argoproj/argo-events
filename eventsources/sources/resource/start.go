@@ -34,6 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/argoproj/argo-events/common"
@@ -44,6 +45,7 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/danielm-codefresh/argo-multi-cluster/pkg/clusterauth"
 )
 
 // InformerEvent holds event generated from resource state change
@@ -88,12 +90,32 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if err != nil {
 		return fmt.Errorf("failed to get a K8s rest config for the event source %s, %w", el.GetEventName(), err)
 	}
+
+	resourceEventSource := &el.ResourceEventSource
+
+	if resourceEventSource.Cluster != "" {
+		clientset, err := kubernetes.NewForConfig(restConfig)
+		if err != nil {
+			return err
+		}
+
+		secret, err := clusterauth.GetClusterSecret(clientset, resourceEventSource.Cluster)
+		if err != nil {
+			return err
+		}
+
+		cluster, err := clusterauth.SecretToCluster(*secret)
+		if err != nil {
+			return err
+		}
+
+		restConfig = cluster.RESTConfig()
+	}
+
 	client, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return fmt.Errorf("failed to set up a dynamic K8s client for the event source %s, %w", el.GetEventName(), err)
 	}
-
-	resourceEventSource := &el.ResourceEventSource
 
 	gvr := schema.GroupVersionResource{
 		Group:    resourceEventSource.Group,
@@ -157,6 +179,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			Version:   resourceEventSource.Version,
 			Resource:  resourceEventSource.Resource,
 			Metadata:  resourceEventSource.Metadata,
+			Cluster:   resourceEventSource.Cluster,
 		}
 
 		eventBody, err := json.Marshal(eventData)
@@ -192,6 +215,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case v1alpha1.ADD:
 			handlerFuncs.AddFunc = func(obj interface{}) {
 				log.Info("detected create event")
+				logResourceMetadata(obj.(*unstructured.Unstructured), log)
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.ADD,
@@ -200,6 +224,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case v1alpha1.UPDATE:
 			handlerFuncs.UpdateFunc = func(oldObj, newObj interface{}) {
 				log.Info("detected update event")
+				logResourceMetadata(newObj.(*unstructured.Unstructured), log)
 				uNewObj := newObj.(*unstructured.Unstructured)
 				uOldObj := oldObj.(*unstructured.Unstructured)
 				if uNewObj.GetResourceVersion() == uOldObj.GetResourceVersion() {
@@ -215,6 +240,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		case v1alpha1.DELETE:
 			handlerFuncs.DeleteFunc = func(obj interface{}) {
 				log.Info("detected delete event")
+				logResourceMetadata(obj.(*unstructured.Unstructured), log)
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.DELETE,
@@ -365,4 +391,18 @@ func getEventTime(obj *unstructured.Unstructured, eventType v1alpha1.ResourceEve
 	default:
 		return obj.GetCreationTimestamp()
 	}
+}
+
+func logResourceMetadata(uObj *unstructured.Unstructured, log *zap.SugaredLogger) {
+	kind := uObj.GetKind()
+	// ATM we want to log additional metadata only for workflows
+	if kind != "Workflow" {
+		return
+	}
+
+	uid := uObj.GetUID()
+	name := uObj.GetName()
+	namespace := uObj.GetNamespace()
+	generation := uObj.GetGeneration()
+	log.Infof("handling resource: %s, name: %s, namespace: %s, uid: %s, generation: %d", kind, name, namespace, uid, generation)
 }
