@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/codefresh
-VERSION?=v1.9.0-cap-CR-22221
-BASE_VERSION:=v1.9.0-cap-CR-22221
+VERSION?=v1.9.2-cap-CR-24607
+BASE_VERSION:=v1.9.2-cap-CR-24607
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -193,6 +193,10 @@ update-manifests-version:
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
 	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' | sed 's/^BASE_VERSION:=.*/BASE_VERSION:=$(VERSION)/' > /tmp/ae_makefile
 	mv /tmp/ae_makefile Makefile
+	find ./manifests -type f -name "*.yaml" -exec \
+      sed -i.bak \
+        -e "s|quay\.io/codefresh/argo-events:[^ ]*|quay.io/codefresh/argo-events:$(VERSION)|g" \
+        {} +
 
 .PHONY: checksums
 checksums:
