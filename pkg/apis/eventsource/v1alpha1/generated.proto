@@ -27,7 +27,7 @@ import "k8s.io/apimachinery/pkg/runtime/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 
 // Package-wide variables from generator "generated".
-option go_package = "v1alpha1";
+option go_package = "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1";
 
 // AMQPConsumeConfig holds the configuration to immediately starts delivering queued messages
 // +k8s:openapi-gen=true
@@ -245,6 +245,11 @@ message AzureQueueStorageEventSource {
   // If set to true the decoding is done before the evaluation of JSONBody
   // +optional
   optional bool decodeMessage = 8;
+
+  // WaitTimeInSeconds is the duration (in seconds) for which the event source waits between empty results from the queue.
+  // The default value is 3 seconds.
+  // +optional
+  optional int32 waitTimeInSeconds = 9;
 }
 
 // AzureServiceBusEventSource describes the event source for azure service bus
@@ -360,58 +365,72 @@ message BitbucketRepository {
 
 // BitbucketServerEventSource refers to event-source related to Bitbucket Server events
 message BitbucketServerEventSource {
-  // Webhook holds configuration to run a http server
+  // Webhook holds configuration to run a http server.
   optional WebhookContext webhook = 1;
 
-  // DeprecatedProjectKey is the key of project for which integration needs to set up
-  // Deprecated: use Repositories instead. Will be unsupported in v1.8
+  // DeprecatedProjectKey is the key of project for which integration needs to set up.
+  // Deprecated: use Repositories instead. Will be unsupported in v1.8.
   // +optional
   optional string projectKey = 2;
 
-  // DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up
-  // Deprecated: use Repositories instead. Will be unsupported in v1.8
+  // DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up.
+  // Deprecated: use Repositories instead. Will be unsupported in v1.8.
   // +optional
   optional string repositorySlug = 3;
 
-  // Repositories holds a list of repositories for which integration needs to set up
+  // Projects holds a list of projects for which integration needs to set up, this will add the webhook to all repositories in the project.
   // +optional
-  repeated BitbucketServerRepository repositories = 4;
+  repeated string projects = 4;
+
+  // Repositories holds a list of repositories for which integration needs to set up.
+  // +optional
+  repeated BitbucketServerRepository repositories = 5;
 
   // Events are bitbucket event to listen to.
   // Refer https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
-  repeated string events = 5;
+  // +optional
+  repeated string events = 6;
 
-  // AccessToken is reference to K8s secret which holds the bitbucket api access information
-  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 6;
+  // SkipBranchRefsChangedOnOpenPR bypasses the event repo:refs_changed for branches whenever there's an associated open pull request.
+  // This helps in optimizing the event handling process by avoiding unnecessary triggers for branch reference changes that are already part of a pull request under review.
+  // +optional
+  optional bool skipBranchRefsChangedOnOpenPR = 7;
 
-  // WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)
-  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 7;
+  // AccessToken is reference to K8s secret which holds the bitbucket api access information.
+  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 8;
 
-  // BitbucketServerBaseURL is the base URL for API requests to a custom endpoint
-  optional string bitbucketserverBaseURL = 8;
+  // WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).
+  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 9;
+
+  // BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.
+  optional string bitbucketserverBaseURL = 10;
 
   // DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
   // +optional
-  optional bool deleteHookOnFinish = 9;
+  optional bool deleteHookOnFinish = 11;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
-  map<string, string> metadata = 10;
+  map<string, string> metadata = 12;
 
   // Filter
   // +optional
-  optional EventSourceFilter filter = 11;
+  optional EventSourceFilter filter = 13;
 
   // TLS configuration for the bitbucketserver client.
   // +optional
-  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 12;
+  optional github.com.argoproj.argo_events.pkg.apis.common.TLSConfig tls = 14;
+
+  // CheckInterval is a duration in which to wait before checking that the webhooks exist, e.g. 1s, 30m, 2h... (defaults to 1m)
+  // +optional
+  optional string checkInterval = 15;
 }
 
 message BitbucketServerRepository {
-  // ProjectKey is the key of project for which integration needs to set up
+  // ProjectKey is the key of project for which integration needs to set up.
   optional string projectKey = 1;
 
-  // RepositorySlug is the slug of the repository for which integration needs to set up
+  // RepositorySlug is the slug of the repository for which integration needs to set up.
   optional string repositorySlug = 2;
 }
 
@@ -1092,6 +1111,11 @@ message NATSEventsSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 8;
+
+  // Queue is the name of the queue group to subscribe as if specified. Uses QueueSubscribe
+  // logic to subscribe as queue group. If the queue is empty, uses default Subscribe logic.
+  // +optional
+  optional string queue = 9;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
@@ -1419,7 +1443,7 @@ message SFTPEventSource {
   // Password required for authentication if any.
   optional k8s.io.api.core.v1.SecretKeySelector password = 4;
 
-  // SSHKeySecret refers to the secret that contains SSH key
+  // SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.
   optional k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 5;
 
   // Address sftp address.

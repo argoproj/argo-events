@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
@@ -132,7 +132,7 @@ func TestValidate(t *testing.T) {
 
 	t.Run("test js eventbus replica", func(t *testing.T) {
 		eb := testJetStreamEventBus.DeepCopy()
-		eb.Spec.JetStream.Replicas = pointer.Int32(3)
+		eb.Spec.JetStream.Replicas = ptr.To[int32](3)
 		err := ValidateEventBus(eb)
 		assert.NoError(t, err)
 		eb.Spec.JetStream.Replicas = nil

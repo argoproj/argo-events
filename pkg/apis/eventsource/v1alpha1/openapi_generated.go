@@ -516,6 +516,13 @@ func schema_pkg_apis_eventsource_v1alpha1_AzureQueueStorageEventSource(ref commo
 							Format:      "",
 						},
 					},
+					"waitTimeInSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WaitTimeInSeconds is the duration (in seconds) for which the event source waits between empty results from the queue. The default value is 3 seconds.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 				Required: []string{"queueName"},
 			},
@@ -813,27 +820,42 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 				Properties: map[string]spec.Schema{
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook holds configuration to run a http server",
+							Description: "Webhook holds configuration to run a http server.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.WebhookContext"),
 						},
 					},
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedProjectKey is the key of project for which integration needs to set up Deprecated: use Repositories instead. Will be unsupported in v1.8",
+							Description: "DeprecatedProjectKey is the key of project for which integration needs to set up. Deprecated: use Repositories instead. Will be unsupported in v1.8.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"repositorySlug": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up Deprecated: use Repositories instead. Will be unsupported in v1.8",
+							Description: "DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up. Deprecated: use Repositories instead. Will be unsupported in v1.8.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
+					"projects": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Projects holds a list of projects for which integration needs to set up, this will add the webhook to all repositories in the project.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 					"repositories": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repositories holds a list of repositories for which integration needs to set up",
+							Description: "Repositories holds a list of repositories for which integration needs to set up.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -860,21 +882,28 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 							},
 						},
 					},
+					"skipBranchRefsChangedOnOpenPR": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SkipBranchRefsChangedOnOpenPR bypasses the event repo:refs_changed for branches whenever there's an associated open pull request. This helps in optimizing the event handling process by avoiding unnecessary triggers for branch reference changes that are already part of a pull request under review.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"accessToken": {
 						SchemaProps: spec.SchemaProps{
-							Description: "AccessToken is reference to K8s secret which holds the bitbucket api access information",
+							Description: "AccessToken is reference to K8s secret which holds the bitbucket api access information.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"webhookSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)",
+							Description: "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"bitbucketserverBaseURL": {
 						SchemaProps: spec.SchemaProps{
-							Description: "BitbucketServerBaseURL is the base URL for API requests to a custom endpoint",
+							Description: "BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -915,8 +944,16 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerEventSource(ref common.
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.TLSConfig"),
 						},
 					},
+					"checkInterval": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CheckInterval is a duration in which to wait before checking that the webhooks exist, e.g. 1s, 30m, 2h... (defaults to 1m)",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"events", "bitbucketserverBaseURL"},
+				Required: []string{"bitbucketserverBaseURL"},
 			},
 		},
 		Dependencies: []string{
@@ -932,7 +969,7 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerRepository(ref common.R
 				Properties: map[string]spec.Schema{
 					"projectKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ProjectKey is the key of project for which integration needs to set up",
+							Description: "ProjectKey is the key of project for which integration needs to set up.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -940,7 +977,7 @@ func schema_pkg_apis_eventsource_v1alpha1_BitbucketServerRepository(ref common.R
 					},
 					"repositorySlug": {
 						SchemaProps: spec.SchemaProps{
-							Description: "RepositorySlug is the slug of the repository for which integration needs to set up",
+							Description: "RepositorySlug is the slug of the repository for which integration needs to set up.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2933,6 +2970,13 @@ func schema_pkg_apis_eventsource_v1alpha1_NATSEventsSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EventSourceFilter"),
 						},
 					},
+					"queue": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Queue is the name of the queue group to subscribe as if specified. Uses QueueSubscribe logic to subscribe as queue group. If the queue is empty, uses default Subscribe logic.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "subject"},
 			},
@@ -3636,7 +3680,6 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 					"createdBy": {
 						SchemaProps: spec.SchemaProps{
 							Description: "If resource is created before the specified time then the event is treated as valid.",
-							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
@@ -3691,7 +3734,7 @@ func schema_pkg_apis_eventsource_v1alpha1_SFTPEventSource(ref common.ReferenceCa
 					},
 					"sshKeySecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SSHKeySecret refers to the secret that contains SSH key",
+							Description: "SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},

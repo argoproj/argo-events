@@ -401,7 +401,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 						Image:           jsVersion.ConfigReloaderImage,
 						ImagePullPolicy: reloaderContainerPullPolicy,
 						SecurityContext: reloaderContainerSecurityContext,
-						Command:         []string{"nats-server-config-reloader", "-pid", "/var/run/nats/nats.pid", "-config", "/etc/nats-config/nats-js.conf"},
+						Args:            []string{"-pid", "/var/run/nats/nats.pid", "-config", "/etc/nats-config/nats-js.conf"},
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/nats-config"},
 							{Name: "pid", MountPath: "/var/run/nats"},
@@ -466,7 +466,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStre
 					},
 					VolumeMode:       &volMode,
 					StorageClassName: js.Persistence.StorageClassName,
-					Resources: corev1.ResourceRequirements{
+					Resources: corev1.VolumeResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceStorage: volSize,
 						},

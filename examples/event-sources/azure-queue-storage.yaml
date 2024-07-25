@@ -12,6 +12,8 @@ spec:
       jsonBody: true
       # DecodeMessage specifies if all the messages from AQS should be base64 decoded
       decodeMessage: false
+      # waitTimeInSeconds defines the wait time between empty reads from the queue
+      waitTimeInSeconds: 2
       # connection string contains information about K8s secret that stores the connection string
       connectionString:
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key

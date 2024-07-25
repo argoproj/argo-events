@@ -122,7 +122,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 			},
 			testFunc: func(err error) {
 				assert.NotNil(t, err)
-				assert.Equal(t, wait.ErrWaitTimeout.Error(), err.Error())
+				assert.True(t, wait.Interrupted(err))
 			},
 		},
 	}

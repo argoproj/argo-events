@@ -252,9 +252,9 @@ data:
           duplicates: 300s
         versions:
         - version: latest
-          natsImage: nats:2.9.16
-          metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
-          configReloaderImage: natsio/nats-server-config-reloader:0.7.0
+          natsImage: nats:2.10.10
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.14.0
+          configReloaderImage: natsio/nats-server-config-reloader:0.14.0
           startCommand: /nats-server
         - version: 2.8.1
           natsImage: nats:2.8.1
@@ -291,6 +291,11 @@ data:
           metricsExporterImage: natsio/prometheus-nats-exporter:0.9.1
           configReloaderImage: natsio/nats-server-config-reloader:0.7.0
           startCommand: /nats-server
+        - version: 2.10.10
+          natsImage: nats:2.10.10
+          metricsExporterImage: natsio/prometheus-nats-exporter:0.14.0
+          configReloaderImage: natsio/nats-server-config-reloader:0.14.0
+          startCommand: /nats-server
 kind: ConfigMap
 metadata:
   name: argo-events-controller-config
@@ -317,12 +322,12 @@ spec:
         - --namespaced
         env:
         - name: ARGO_EVENTS_IMAGE
-          value: quay.io/codefresh/argo-events:v1.9.0-cap-CR-22221
+          value: quay.io/codefresh/argo-events:v1.9.2-cap-CR-24607
         - name: NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: quay.io/codefresh/argo-events:v1.9.0-cap-CR-22221
+        image: quay.io/codefresh/argo-events:v1.9.2-cap-CR-24607
         imagePullPolicy: Always
         livenessProbe:
           httpGet:

@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/codefresh
-VERSION?=v1.9.0-cap-CR-22221
-BASE_VERSION:=v1.9.0-cap-CR-22221
+VERSION?=v1.9.2-cap-CR-24607
+BASE_VERSION:=v1.9.2-cap-CR-24607
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -155,12 +155,12 @@ start: image
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.52.1
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.54.1
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
 	go mod tidy
-	golangci-lint run --fix --verbose --concurrency 4 --timeout 10m
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m --enable goimports
 
 # release - targets only available on release branch
 ifneq ($(findstring release,$(GIT_BRANCH)),)

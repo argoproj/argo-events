@@ -716,6 +716,19 @@ bool
 If set to true the decoding is done before the evaluation of JSONBody</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>waitTimeInSeconds</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>WaitTimeInSeconds is the duration (in seconds) for which the event source waits between empty results from the queue.
+The default value is 3 seconds.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AzureServiceBusEventSource">AzureServiceBusEventSource
@@ -1156,7 +1169,7 @@ WebhookContext
 </em>
 </td>
 <td>
-<p>Webhook holds configuration to run a http server</p>
+<p>Webhook holds configuration to run a http server.</p>
 </td>
 </tr>
 <tr>
@@ -1168,8 +1181,8 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>DeprecatedProjectKey is the key of project for which integration needs to set up
-Deprecated: use Repositories instead. Will be unsupported in v1.8</p>
+<p>DeprecatedProjectKey is the key of project for which integration needs to set up.
+Deprecated: use Repositories instead. Will be unsupported in v1.8.</p>
 </td>
 </tr>
 <tr>
@@ -1181,8 +1194,20 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up
-Deprecated: use Repositories instead. Will be unsupported in v1.8</p>
+<p>DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up.
+Deprecated: use Repositories instead. Will be unsupported in v1.8.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>projects</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Projects holds a list of projects for which integration needs to set up, this will add the webhook to all repositories in the project.</p>
 </td>
 </tr>
 <tr>
@@ -1196,7 +1221,7 @@ Deprecated: use Repositories instead. Will be unsupported in v1.8</p>
 </td>
 <td>
 <em>(Optional)</em>
-<p>Repositories holds a list of repositories for which integration needs to set up</p>
+<p>Repositories holds a list of repositories for which integration needs to set up.</p>
 </td>
 </tr>
 <tr>
@@ -1207,8 +1232,22 @@ Deprecated: use Repositories instead. Will be unsupported in v1.8</p>
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Events are bitbucket event to listen to.
 Refer <a href="https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html">https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>skipBranchRefsChangedOnOpenPR</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>SkipBranchRefsChangedOnOpenPR bypasses the event repo:refs_changed for branches whenever there&rsquo;s an associated open pull request.
+This helps in optimizing the event handling process by avoiding unnecessary triggers for branch reference changes that are already part of a pull request under review.</p>
 </td>
 </tr>
 <tr>
@@ -1221,7 +1260,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>AccessToken is reference to K8s secret which holds the bitbucket api access information</p>
+<p>AccessToken is reference to K8s secret which holds the bitbucket api access information.</p>
 </td>
 </tr>
 <tr>
@@ -1234,7 +1273,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)</p>
+<p>WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).</p>
 </td>
 </tr>
 <tr>
@@ -1245,7 +1284,7 @@ string
 </em>
 </td>
 <td>
-<p>BitbucketServerBaseURL is the base URL for API requests to a custom endpoint</p>
+<p>BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.</p>
 </td>
 </tr>
 <tr>
@@ -1298,6 +1337,18 @@ github.com/argoproj/argo-events/pkg/apis/common.TLSConfig
 <p>TLS configuration for the bitbucketserver client.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>checkInterval</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>CheckInterval is a duration in which to wait before checking that the webhooks exist, e.g. 1s, 30m, 2h&hellip; (defaults to 1m)</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.BitbucketServerRepository">BitbucketServerRepository
@@ -1324,7 +1375,7 @@ string
 </em>
 </td>
 <td>
-<p>ProjectKey is the key of project for which integration needs to set up</p>
+<p>ProjectKey is the key of project for which integration needs to set up.</p>
 </td>
 </tr>
 <tr>
@@ -1335,7 +1386,7 @@ string
 </em>
 </td>
 <td>
-<p>RepositorySlug is the slug of the repository for which integration needs to set up</p>
+<p>RepositorySlug is the slug of the repository for which integration needs to set up.</p>
 </td>
 </tr>
 </tbody>
@@ -4321,6 +4372,19 @@ EventSourceFilter
 <p>Filter</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>queue</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Queue is the name of the queue group to subscribe as if specified. Uses QueueSubscribe
+logic to subscribe as queue group. If the queue is empty, uses default Subscribe logic.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.NSQEventSource">NSQEventSource
@@ -5419,7 +5483,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<p>SSHKeySecret refers to the secret that contains SSH key</p>
+<p>SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.</p>
 </td>
 </tr>
 <tr>

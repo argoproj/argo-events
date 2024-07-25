@@ -217,6 +217,11 @@ func (in *AzureQueueStorageEventSource) DeepCopyInto(out *AzureQueueStorageEvent
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.WaitTimeInSeconds != nil {
+		in, out := &in.WaitTimeInSeconds, &out.WaitTimeInSeconds
+		*out = new(int32)
+		**out = **in
+	}
 	return
 }
 
@@ -391,6 +396,11 @@ func (in *BitbucketServerEventSource) DeepCopyInto(out *BitbucketServerEventSour
 		in, out := &in.Webhook, &out.Webhook
 		*out = new(WebhookContext)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Projects != nil {
+		in, out := &in.Projects, &out.Projects
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 	if in.Repositories != nil {
 		in, out := &in.Repositories, &out.Repositories
@@ -1419,6 +1429,11 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 	if in.Filter != nil {
 		in, out := &in.Filter, &out.Filter
 		*out = new(EventSourceFilter)
+		**out = **in
+	}
+	if in.Queue != nil {
+		in, out := &in.Queue, &out.Queue
+		*out = new(string)
 		**out = **in
 	}
 	return

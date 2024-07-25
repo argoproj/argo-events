@@ -90,6 +90,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 	var numMessages int32 = 10
 	var visibilityTimeout int32 = 120
+	var waitTime int32 = 3 // Defaults to 3 seconds
+	if el.AzureQueueStorageEventSource.WaitTimeInSeconds != nil {
+		waitTime = *el.AzureQueueStorageEventSource.WaitTimeInSeconds
+	}
 	log.Info("listening for messages on the queue...")
 	for {
 		select {
@@ -98,6 +102,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		default:
 		}
+		log.Info("dequeing messages....")
 		messages, err := queueClient.DequeueMessages(ctx, &azqueue.DequeueMessagesOptions{
 			NumberOfMessages:  &numMessages,
 			VisibilityTimeout: &visibilityTimeout,
@@ -115,6 +120,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 			}, log)
 		}
+		if len(messages.Messages) == 0 {
+			time.Sleep(time.Second * time.Duration(waitTime))
+		}
 	}
 }
 
@@ -129,7 +137,7 @@ func (el *EventListener) processMessage(message *azqueue.DequeuedMessage, dispat
 	}
 	body := []byte(*message.MessageText)
 	if el.AzureQueueStorageEventSource.DecodeMessage {
-		rawDecodedText, err := base64.RawURLEncoding.DecodeString(*message.MessageText)
+		rawDecodedText, err := base64.URLEncoding.DecodeString(*message.MessageText)
 		if err != nil {
 			log.Errorw("failed to base64 decode message...", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())

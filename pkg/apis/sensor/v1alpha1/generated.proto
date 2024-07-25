@@ -27,7 +27,7 @@ import "k8s.io/apimachinery/pkg/runtime/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 
 // Package-wide variables from generator "generated".
-option go_package = "v1alpha1";
+option go_package = "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1";
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
 message AWSLambdaTrigger {

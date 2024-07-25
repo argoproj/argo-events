@@ -253,7 +253,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	sharedInformer := informer.Informer()
-	sharedInformer.AddEventHandler(handlerFuncs)
+	if _, err := sharedInformer.AddEventHandler(handlerFuncs); err != nil {
+		return fmt.Errorf("failed to add event handler, %w", err)
+	}
 
 	doneCh := make(chan struct{})
 

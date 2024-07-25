@@ -597,12 +597,12 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 							},
 							Body: eventBody,
 						}
-
+						logger.Debugw(string(data), zap.String("eventID", event.ID()))
 						if err = common.DoWithRetry(&common.DefaultBackoff, func() error {
 							return e.eventBusConn.Publish(ctx, msg)
 						}); err != nil {
 							logger.Errorw("Failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
-								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()))
+								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
 							e.cfClient.ReportError(
 								errors.Wrapf(err, "failed to publish an event { %s: %s, %s: %s }",

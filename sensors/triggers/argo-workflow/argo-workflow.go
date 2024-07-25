@@ -240,13 +240,12 @@ func (t *ArgoWorkflowTrigger) ApplyPolicy(ctx context.Context, resource interfac
 
 	err := p.ApplyPolicy(ctx)
 	if err != nil {
-		switch err {
-		case wait.ErrWaitTimeout:
+		if wait.Interrupted(err) {
 			if trigger.Policy.K8s.ErrorOnBackoffTimeout {
 				return fmt.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
 			}
 			return nil
-		default:
+		} else {
 			return err
 		}
 	}

@@ -785,7 +785,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 					},
 					VolumeMode:       &volMode,
 					StorageClassName: i.eventBus.Spec.NATS.Native.Persistence.StorageClassName,
-					Resources: corev1.ResourceRequirements{
+					Resources: corev1.VolumeResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceStorage: volSize,
 						},
