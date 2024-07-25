@@ -193,10 +193,6 @@ update-manifests-version:
 	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
 	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' | sed 's/^BASE_VERSION:=.*/BASE_VERSION:=$(VERSION)/' > /tmp/ae_makefile
 	mv /tmp/ae_makefile Makefile
-	find ./manifests -type f -name "*.yaml" -exec \
-      sed -i.bak \
-        -e "s|quay\.io/codefresh/argo-events:[^ ]*|quay.io/codefresh/argo-events:$(VERSION)|g" \
-        {} +
 
 .PHONY: checksums
 checksums:
