@@ -174,6 +174,9 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 		},
 		Spec: args.EventSource.Spec,
 	}
+	if args.EventSource.Spec.SyncAnnotations {
+		eventSourceCopy.SetAnnotations(args.EventSource.ObjectMeta.GetAnnotations())
+	}
 	eventSourceBytes, err := json.Marshal(eventSourceCopy)
 	if err != nil {
 		return nil, fmt.Errorf("failed marshal eventsource spec")
@@ -288,6 +291,9 @@ func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*a
 			Labels:       mergeLabels(args.EventSource.Labels, args.Labels),
 		},
 		Spec: *deploymentSpec,
+	}
+	if args.EventSource.Spec.SyncAnnotations {
+		deployment.SetAnnotations(args.EventSource.ObjectMeta.GetAnnotations())
 	}
 	if err := controllerscommon.SetObjectMeta(args.EventSource, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err

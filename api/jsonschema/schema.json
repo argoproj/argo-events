@@ -1677,6 +1677,10 @@
           "description": "Stripe event sources",
           "type": "object"
         },
+        "syncAnnotations": {
+          "description": "SyncAnnotations indicates whether annotations should be synchronized",
+          "type": "boolean"
+        },
         "template": {
           "$ref": "#/definitions/io.argoproj.eventsource.v1alpha1.Template",
           "description": "Template is the pod specification for the event source"
