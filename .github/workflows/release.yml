@@ -78,7 +78,7 @@ jobs:
 
       - name: Container build and push with arm64/amd64
         run: |
-          IMAGE_NAMESPACE=${{ secrets.QUAYIO_ORG }} VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true make image-multi
+          IMAGE_NAMESPACE=quay.io/${{ secrets.QUAYIO_ORG }} VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true make image-multi
 
   bom:
     runs-on: ubuntu-latest
