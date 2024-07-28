@@ -100,7 +100,7 @@ jobs:
       - run: go install github.com/spdx/spdx-sbom-generator/cmd/generator@v0.0.13
       - run: mkdir -p dist
       - run: generator -o /tmp -p .
-      - run: bom generate --image quay.io/codefresh-io/argo-events:$VERSION -o /tmp/argo-events.spdx
+      - run: bom generate --image quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION -o /tmp/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: cd /tmp && tar -zcf sbom.tar.gz *.spdx
       - uses: actions/upload-artifact@v3
