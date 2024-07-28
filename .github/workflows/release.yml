@@ -18,6 +18,7 @@ permissions:
 jobs:
   build-binaries:
     runs-on: ubuntu-20.04
+    if: github.repository == 'codefresh-io/argo-events'
     name: Build binaries
     steps:
       - name: Checkout
@@ -47,8 +48,6 @@ jobs:
     strategy:
       matrix:
         target: [ argo-events ]
-    outputs:
-      VERSION: ${{ steps.version.outputs.VERSION }}
     steps:
       - uses: actions/checkout@v4
 
@@ -78,36 +77,30 @@ jobs:
           echo "VERSION=$tag" >> $GITHUB_OUTPUT
 
       - name: Container build and push with arm64/amd64
-        env:
-          IMAGE_NAMESPACE: quay.io/${{ secrets.QUAYIO_ORG }}
         run: |
-          VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true make image-multi
+          IMAGE_NAMESPACE=${{ secrets.QUAYIO_ORG }} VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true make image-multi
 
   bom:
     runs-on: ubuntu-latest
+    if: github.repository == 'codefresh-io/argo-events'
     needs: [ build-push-linux-multi ]
     steps:
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
-      - id: version
-        run: |
+      - run: |
           if [ ${GITHUB_REF##*/} = master ]; then
            echo "VERSION=latest" >> $GITHUB_ENV
           else
-            echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+            echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
           fi
       - uses: actions/setup-go@v5
         with:
           go-version: "1.21"
       - uses: actions/checkout@v4
-      - run: go install sigs.k8s.io/bom/cmd/bom@v0.5.1
+      - run: go install sigs.k8s.io/bom/cmd/bom@v0.2.0
       - run: go install github.com/spdx/spdx-sbom-generator/cmd/generator@v0.0.13
       - run: mkdir -p dist
-      - run: generator -o dist -p .
-      # do not scan images, this is only supported for debian-based images. See: https://github.com/kubernetes-sigs/bom#usage
-      - env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-        run:
-          bom generate --scan-images=false --image quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION -o /tmp/argo-events.spdx
+      - run: generator -o /tmp -p .
+      - run: bom generate --image quay.io/argoproj/argo-events:$VERSION -o /tmp/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: cd /tmp && tar -zcf sbom.tar.gz *.spdx
       - uses: actions/upload-artifact@v3
@@ -116,11 +109,12 @@ jobs:
           path: /tmp/sbom.tar.gz
 
   release:
-    runs-on: ubuntu-latest
-    needs: [ build-push-linux-multi, bom ]
     permissions:
       contents: write  # for softprops/action-gh-release to create GitHub release
-      id-token: write # Needed to create an OIDC token for keyless signing
+      id-token: write
+    runs-on: ubuntu-latest
+    if: github.repository == 'codefresh-io/argo-events'
+    needs: [ build-push-linux-multi, bom ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -154,17 +148,17 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
         with:
-          cosign-release: 'v2.1.1'
+          cosign-release: 'v2.3.0'
 
       - name: Install crane to get digest of image
-        uses: imjasonh/setup-crane@e82f1b9a8007d399333baba4d75915558e9fb6a4 # v0.2
+        uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
 
       - name: Get digests of container images
         id: get-digest
         env:
           VERSION: ${{ needs.build-push-linux-multi.outputs.VERSION }}
         run: |
-          echo "digest=$(crane digest quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION)" >> $GITHUB_OUTPUT
+          echo "digest=$(crane digest quay.io/${{ secrets.QUAYIO_ORG }}/argo-events:$VERSION)" >> $GITHUB_ENV
 
       - name: Sign Argo Events container image and assets
         env:
