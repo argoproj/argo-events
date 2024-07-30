@@ -18,6 +18,8 @@ spec:
         - s3:ObjectRemoved:Delete
       # type of the connection
       insecure: true
+      # refers to IAM authentication
+      useSDKCreds: true
       # accessKey refers to K8s secret that stores the access key
       accessKey:
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
