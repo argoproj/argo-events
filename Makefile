@@ -1,4 +1,5 @@
 PACKAGE=github.com/argoproj/argo-events
+SHELL := /usr/bin/env bash # Make will use bash instead of sh
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
 
@@ -38,6 +39,7 @@ override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
 
 K3D ?= $(shell [ "`command -v kubectl`" != '' ] && [ "`command -v k3d`" != '' ] && [[ "`kubectl config current-context`" =~ k3d-* ]] && echo true || echo false)
+K3DCLUSTER?=k3s-default
 
 # Check that the needed executables are available, else exit before the build
 K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(error "No $(exec) in PATH")))
@@ -73,7 +75,7 @@ image: clean $(BUILD_DIST)
 	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)  --target $(BINARY_NAME) -f $(DOCKERFILE) .
 	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
 ifeq ($(K3D),true)
-	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)
+	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --cluster $(K3DCLUSTER)
 endif
 
 image-linux-%: dist/$(BINARY_NAME)-linux-%
@@ -155,7 +157,7 @@ start: image
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.54.1
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.57.2
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
