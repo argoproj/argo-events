@@ -1246,6 +1246,11 @@ func (in *Trigger) DeepCopyInto(out *Trigger) {
 		*out = new(RateLimit)
 		**out = **in
 	}
+	if in.DlqTrigger != nil {
+		in, out := &in.DlqTrigger, &out.DlqTrigger
+		*out = new(Trigger)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
