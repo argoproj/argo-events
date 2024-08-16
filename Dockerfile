@@ -6,7 +6,7 @@ FROM alpine:3.16.2 as base
 ARG ARCH
 RUN apk update && apk upgrade && \
     apk add ca-certificates && \
-    apk --no-cache add tzdata
+    apk --no-cache add tzdata git
 
 ENV ARGO_VERSION=v3.4.8
 
@@ -26,4 +26,5 @@ COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=base /usr/local/bin/argo /usr/local/bin/argo
 COPY --from=base /bin/argo-events /bin/argo-events
+COPY --from=base /usr/bin/git /usr/bin/git
 ENTRYPOINT [ "/bin/argo-events" ]
