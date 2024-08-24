@@ -387,10 +387,10 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	// annotations := make(map[string]string)
 	// labels := make(map[string]string)
 
-	if args.EventSource.Spec.Service.Metadata != nil {
+	// if args.EventSource.Spec.Service.Metadata != nil {
 		// annotations = args.EventSource.Spec.Service.Metadata.Annotations
 		// labels = mergeLabels(args.EventSource.Spec.Service.Metadata.Labels, args.EventSource.Labels)
-	}
+	// }
 
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
