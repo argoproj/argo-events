@@ -2866,7 +2866,7 @@
           "type": "string"
         },
         "metadata": {
-          "description": "Metadata sets the pods's metadata, i.e. annotations and labels",
+          "description": "Metadata sets the pods's metadata, i.e. annotations and labels default={annotations: {}, labels: {}}",
           "$ref": "#/definitions/io.argoproj.common.Metadata"
         },
         "ports": {

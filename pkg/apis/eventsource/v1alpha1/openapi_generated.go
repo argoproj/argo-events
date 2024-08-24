@@ -4004,7 +4004,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Service(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Metadata sets the pods's metadata, i.e. annotations and labels",
+							Description: "Metadata sets the pods's metadata, i.e. annotations and labels default={annotations: {}, labels: {}}",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Metadata"),
 						},
 					},

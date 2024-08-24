@@ -1558,6 +1558,7 @@ message Selector {
 // Service holds the service information eventsource exposes
 message Service {
   // Metadata sets the pods's metadata, i.e. annotations and labels
+  // default={annotations: {}, labels: {}}
   optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 1;
 
   // The list of ports that are exposed by this ClusterIP service.

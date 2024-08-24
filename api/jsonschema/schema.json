@@ -2883,7 +2883,7 @@
         },
         "metadata": {
           "$ref": "#/definitions/io.argoproj.common.Metadata",
-          "description": "Metadata sets the pods's metadata, i.e. annotations and labels"
+          "description": "Metadata sets the pods's metadata, i.e. annotations and labels default={annotations: {}, labels: {}}"
         },
         "ports": {
           "description": "The list of ports that are exposed by this ClusterIP service.",
