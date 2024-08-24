@@ -1557,13 +1557,16 @@ message Selector {
 
 // Service holds the service information eventsource exposes
 message Service {
+  // Metadata sets the pods's metadata, i.e. annotations and labels
+  optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 1;
+
   // The list of ports that are exposed by this ClusterIP service.
   // +patchMergeKey=port
   // +patchStrategy=merge
   // +listType=map
   // +listMapKey=port
   // +listMapKey=protocol
-  repeated k8s.io.api.core.v1.ServicePort ports = 1;
+  repeated k8s.io.api.core.v1.ServicePort ports = 2;
 
   // clusterIP is the IP address of the service and is usually assigned
   // randomly by the master. If an address is specified manually and is not in
@@ -1573,7 +1576,7 @@ message Service {
   // can be specified for headless services when proxying is not required.
   // More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
   // +optional
-  optional string clusterIP = 2;
+  optional string clusterIP = 3;
 }
 
 // SlackEventSource refers to event-source for Slack related events

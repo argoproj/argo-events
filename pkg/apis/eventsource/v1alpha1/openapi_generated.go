@@ -4002,6 +4002,12 @@ func schema_pkg_apis_eventsource_v1alpha1_Service(ref common.ReferenceCallback) 
 				Description: "Service holds the service information eventsource exposes",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata sets the pods's metadata, i.e. annotations and labels",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Metadata"),
+						},
+					},
 					"ports": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
@@ -4038,7 +4044,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Service(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.ServicePort"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Metadata", "k8s.io/api/core/v1.ServicePort"},
 	}
 }
 
