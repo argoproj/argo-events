@@ -394,9 +394,9 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
-			Namespace:   eventSource.Namespace,
-			Labels:      labels,
+			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
+			Namespace: eventSource.Namespace,
+			Labels:    labels,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:     ports,
@@ -408,7 +408,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
-	svc.SetAnnotations(mergeLabels(annotations ,svc.GetObjectMeta().GetAnnotations()))
+	// svc.SetAnnotations(mergeLabels(annotations, svc.GetObjectMeta().GetAnnotations()))
 	return svc, nil
 }
 
