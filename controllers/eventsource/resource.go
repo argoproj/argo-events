@@ -388,7 +388,8 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
 			Namespace: eventSource.Namespace,
-			Labels:    mergeLabels(args.EventSource.Labels, args.Labels),
+			Labels:    mergeLabels(mergeLabels(args.EventSource.Labels, args.Labels), args.EventSource.Labels),
+			Annotations: args.EventSource.Annotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:     ports,
