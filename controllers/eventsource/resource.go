@@ -384,13 +384,13 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	// Use a ports copy otherwise it will update the oririnal Ports spec in EventSource
 	ports := []corev1.ServicePort{}
 	ports = append(ports, eventSource.Spec.Service.Ports...)
-	// annotations := make(map[string]string)
+	annotations := make(map[string]string)
 	// labels := make(map[string]string)
 
-	// if args.EventSource.Spec.Service.Metadata != nil {
-		// annotations = args.EventSource.Spec.Service.Metadata.Annotations
+	if args.EventSource.Spec.Service.Metadata != nil {
+		annotations = args.EventSource.Spec.Service.Metadata.Annotations
 		// labels = mergeLabels(args.EventSource.Spec.Service.Metadata.Labels, args.EventSource.Labels)
-	// }
+	}
 
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -409,6 +409,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
+	svc.SetAnnotations(annotations)
 	return svc, nil
 }
 
