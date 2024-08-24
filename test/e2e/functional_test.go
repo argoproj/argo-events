@@ -148,6 +148,7 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 
 	defer w1.DeleteEventSource()
 
+	
 	w1.Then().ExpectEventSourcePodLogContains(LogEventSourceStarted)
 
 	defer w1.Then().
