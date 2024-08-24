@@ -387,10 +387,10 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	annotations := make(map[string]string)
 	labels := make(map[string]string)
 
-	if args.EventSource.Spec.Service.Metadata != nil {
-		annotations = args.EventSource.Spec.Service.Metadata.Annotations
-		// labels = mergeLabels(args.EventSource.Spec.Service.Metadata.Labels, args.EventSource.Labels)
-	}
+	// if args.EventSource.Spec.Service.Metadata != nil {
+	// 	annotations = args.EventSource.Spec.Service.Metadata.Annotations
+	// 	// labels = mergeLabels(args.EventSource.Spec.Service.Metadata.Labels, args.EventSource.Labels)
+	// }
 
 	fmt.Printf("%+v %+v\n", annotations, labels)
 
@@ -407,8 +407,8 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 			Selector:  args.Labels,
 		},
 	}
-	// svc.ObjectMeta.SetAnnotations(annotations)
-	// svc.ObjectMeta.SetLabels(labels)
+	svc.ObjectMeta.SetAnnotations(annotations)
+	svc.ObjectMeta.SetLabels(labels)
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
