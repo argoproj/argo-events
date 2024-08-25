@@ -399,7 +399,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		},
 	}
 	svc.ObjectMeta.SetAnnotations(args.EventSource.Spec.Service.Metadata.Annotations)
-	// svc.ObjectMeta.SetLabels(labels)
+	svc.ObjectMeta.SetLabels(args.EventSource.Spec.Service.Metadata.Labels)
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
