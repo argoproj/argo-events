@@ -11,6 +11,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Anova](https://www.anova.com/)
 1. [Ant Group](https://www.antgroup.com/)
 1. [ArthurAI](https://arthur.ai/)
+1. [AtomicFI](https://atomic.financial/)
 1. [BioBox Analytics](https://biobox.io)
 1. [BlackRock](https://www.blackrock.com/)
 1. [Bloomberg](https://www.bloomberg.com/)
