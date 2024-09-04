@@ -399,7 +399,6 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		},
 	}
 
-
 	if args.EventSource.Spec.Service.Metadata != nil {
 		if args.EventSource.Spec.Service.Metadata.Labels != nil {
 			svc.ObjectMeta.SetLabels(args.EventSource.Spec.Service.Metadata.Labels)
