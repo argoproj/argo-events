@@ -404,7 +404,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 			svc.ObjectMeta.SetLabels(args.EventSource.Spec.Service.Metadata.Labels)
 		}
 		if args.EventSource.Spec.Service.Metadata.Annotations != nil {
-			svc.ObjectMeta.SetAnnotations()
+			svc.ObjectMeta.SetAnnotations(args.EventSource.Spec.Service.Metadata.Annotations)
 		}
 	}
 
