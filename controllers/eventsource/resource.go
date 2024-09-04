@@ -401,12 +401,6 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 
 	svc.ObjectMeta.SetAnnotations(args.EventSource.Spec.Service.Metadata.Annotations)
 	svc.ObjectMeta.SetLabels(args.EventSource.Spec.Service.Metadata.Labels)
-	// if args.EventSource.Spec.Service.Metadata != nil {
-	// if args.EventSource.Spec.Service.Metadata.Labels != nil {
-	// }
-	// if args.EventSource.Spec.Service.Metadata.Annotations != nil {
-	// }
-	// }
 
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
