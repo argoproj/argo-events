@@ -405,6 +405,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		// }
 		// if args.EventSource.Spec.Service.Metadata.Annotations != nil {
 		svc.ObjectMeta.SetAnnotations(args.EventSource.Spec.Service.Metadata.Annotations)
+		
 		// 	}
 	}
 
