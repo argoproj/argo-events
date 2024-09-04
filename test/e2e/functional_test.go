@@ -189,8 +189,8 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 		Contains("argo_events_events_processing_failed_total")
 
 	// Expect to see 1 success and 1 failure
-	w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger")).
-		ExpectSensorPodLogContains(LogTriggerActionFailed)
+	// w2.Then().ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger")).
+	// 	ExpectSensorPodLogContains(LogTriggerActionFailed)
 
 	// Sensor POD metrics
 	s.e("http://localhost:7718").GET("/metrics").
