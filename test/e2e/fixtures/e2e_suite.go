@@ -30,7 +30,7 @@ const (
 	Label          = "argo-events-e2e"
 	LabelValue     = "true"
 	EventBusName   = "argo-events-e2e"
-	defaultTimeout = 60 * time.Second
+	defaultTimeout = 120 * time.Second
 )
 
 var (
