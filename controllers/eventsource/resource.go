@@ -389,6 +389,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
 			Namespace: eventSource.Namespace,
+			Labels:    mergeLabels(args.EventSource.Labels, args.Labels),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:     ports,
@@ -398,20 +399,14 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 		},
 	}
 
-	labels := mergeLabels(args.EventSource.Labels, args.Labels)
-	annotations := make(map[string]string)
-
 	if args.EventSource.Spec.Service.Metadata != nil {
 		if args.EventSource.Spec.Service.Metadata.Labels != nil {
-			labels = mergeLabels(labels, args.EventSource.Spec.Service.Metadata.Labels)
+			svc.ObjectMeta.SetLabels(args.EventSource.Spec.Service.Metadata.Labels)
 		}
 		if args.EventSource.Spec.Service.Metadata.Annotations != nil {
-			annotations = mergeLabels(annotations, args.EventSource.Spec.Service.Metadata.Annotations)
+			svc.ObjectMeta.SetAnnotations(args.EventSource.Spec.Service.Metadata.Annotations)
 		}
 	}
-
-	svc.ObjectMeta.SetLabels(labels)
-	svc.ObjectMeta.SetAnnotations(annotations)
 
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
