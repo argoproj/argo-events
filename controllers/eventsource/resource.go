@@ -399,7 +399,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	}
 
 	labels := mergeLabels(args.EventSource.Labels, args.Labels)
-	annotations = make(map[string]string)
+	annotations := make(map[string]string)
 
 	if args.EventSource.Spec.Service.Metadata != nil {
 		if args.EventSource.Spec.Service.Metadata.Labels != nil {
