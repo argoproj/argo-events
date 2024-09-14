@@ -411,7 +411,7 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	}
 
 	svc.ObjectMeta.SetLabels(labels)
-	svc.ObjectMeta.SetAnnotations(annotations)	
+	svc.ObjectMeta.SetAnnotations(annotations)
 
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
