@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 	"time"
@@ -287,7 +288,15 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTim
 	if filter == nil {
 		return true
 	}
-	uObj := event.Obj.(*unstructured.Unstructured)
+
+	var uObj *unstructured.Unstructured
+	if castEventObject, ok := event.Obj.(*unstructured.Unstructured); ok {
+		uObj = castEventObject
+	} else {
+		log.Infof("event object is not of type '*unstructured.Unstructured' but of type '%s'\n", reflect.TypeOf(event.Obj).Name())
+		return false
+	}
+
 	if len(filter.Prefix) > 0 && !strings.HasPrefix(uObj.GetName(), filter.Prefix) {
 		log.Infof("resource name does not match prefix. resource-name: %s, prefix: %s\n", uObj.GetName(), filter.Prefix)
 		return false
