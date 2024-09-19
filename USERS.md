@@ -37,6 +37,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Mobimeo GmbH](https://mobimeo.com/en/home/)
 1. [OneCause](https://www.onecause.com/)
 1. [Pinnacle Reliability](https://pinnaclereliability.com/)
+1. [PDOK](https://pdok.nl)
 1. [Phrase](https://www.phrase.com/)
 1. [Produvar](https://www.produvar.com/)
 1. [ProPoint Solutions](https://supersalon.com)
