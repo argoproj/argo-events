@@ -156,7 +156,7 @@ type podLogCheckOptions struct {
 
 func defaultPodLogCheckOptions() *podLogCheckOptions {
 	return &podLogCheckOptions{
-		timeout: 120 * time.Second,
+		timeout: 60 * time.Second,
 		count:   -1,
 	}
 }

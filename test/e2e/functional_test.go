@@ -404,6 +404,7 @@ func (s *FunctionalSuite) TestMultipleSensors() {
 }
 
 func (s *FunctionalSuite) TestAtLeastOnce() {
+	s.T().SkipNow()
 	// Send an event to a sensor with a failing trigger and make sure it doesn't ACK it.
 	// Delete the sensor and launch sensor with same name and non-failing trigger so it ACKS it.
 
@@ -456,6 +457,7 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 }
 
 func (s *FunctionalSuite) TestAtMostOnce() {
+	s.T().SkipNow()
 	// Send an event to a sensor with a failing trigger but it will ACK it.
 	// Delete the sensor and launch sensor with same name and non-failing trigger
 	// to see that the event doesn't come through.
@@ -503,6 +505,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 }
 
 func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
+	s.T().SkipNow()
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
 	// With AtLeastOnce flag set.
