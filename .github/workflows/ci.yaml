@@ -122,7 +122,7 @@ jobs:
         run: curl -sfL https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash &
       - name: Create k3d cluster
         run: |
-          k3d cluster create e2e -i rancher/k3s:v1.21.7-k3s1
+          k3d cluster create e2e
           mkdir -p ~/.kube
           k3d kubeconfig get e2e > ~/.kube/argo-events-e2e-config
       - name: Install Argo Events
