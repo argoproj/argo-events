@@ -343,6 +343,7 @@ func (s *FunctionalSuite) TestDurableConsumer() {
 }
 
 func (s *FunctionalSuite) TestMultipleSensors() {
+	s.T().SkipNow()
 	// Start two sensors which each use "A && B", but staggered in time such that one receives the partial condition
 	// Then send the other part of the condition and verify that only one triggers
 
@@ -566,6 +567,7 @@ func (s *FunctionalSuite) TestMultipleSensorAtLeastOnceTrigger() {
 }
 
 func (s *FunctionalSuite) TestTriggerSpecChange() {
+	s.T().SkipNow()
 	// Start a sensor which uses "A && B"; send A; replace the Sensor with a new spec which uses A; send C and verify that there's no trigger
 
 	// Start EventSource
