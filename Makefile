@@ -39,6 +39,15 @@ VERSION=$(GIT_TAG)
 override LDFLAGS += -X ${PACKAGE}.gitTag=${GIT_TAG}
 endif
 
+# Check Python
+PYTHON:=$(shell command -v python 2> /dev/null)
+ifndef PYTHON
+PYTHON:=$(shell command -v python3 2> /dev/null)
+endif
+ifndef PYTHON
+$(error "Python is not available, please install.")
+endif
+
 CURRENT_CONTEXT:=$(shell [[ "`command -v kubectl`" != '' ]] && kubectl config current-context 2> /dev/null || echo "unset")
 IMAGE_IMPORT_CMD:=$(shell [[ "`command -v k3d`" != '' ]] && [[ "$(CURRENT_CONTEXT)" =~ k3d-* ]] && echo "k3d image import -c `echo $(CURRENT_CONTEXT) | cut -c 5-`")
 ifndef IMAGE_IMPORT_CMD
@@ -175,6 +184,13 @@ $(GOPATH)/bin/golangci-lint:
 lint: $(GOPATH)/bin/golangci-lint
 	go mod tidy
 	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m --enable goimports
+
+/usr/local/bin/mkdocs:
+	$(PYTHON) -m pip install mkdocs==1.3.0 mkdocs_material==8.3.9 mkdocs-embed-external-markdown==2.3.0
+
+.PHONY: docs
+docs: /usr/local/bin/mkdocs
+	mkdocs build
 
 # release - targets only available on release branch
 ifneq ($(findstring release,$(GIT_BRANCH)),)
