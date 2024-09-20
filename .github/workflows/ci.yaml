@@ -31,28 +31,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Install protoc
-        run: |
-          set -eux -o pipefail
-          PROTOC_VERSION=3.19.4
-          PROTOC_ZIP=protoc-$PROTOC_VERSION-linux-x86_64.zip
-          curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v$PROTOC_VERSION/$PROTOC_ZIP
-          sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
-          sudo unzip -o $PROTOC_ZIP -d /usr/local 'include/*'
-          sudo chmod +x /usr/local/bin/protoc
-          sudo find /usr/local/include -type f | xargs sudo chmod a+r
-          sudo find /usr/local/include -type d | xargs sudo chmod a+rx
-          rm -f $PROTOC_ZIP
-          ls /usr/local/include/google/protobuf/
-      - name: Install pandoc
-        run: |
-          set -eux -o pipefail
-          PANDOC_VERSION=2.17.1
-          PANDOC_ZIP=pandoc-$PANDOC_VERSION-linux-amd64.tar.gz
-          curl -OL https://github.com/jgm/pandoc/releases/download/$PANDOC_VERSION/$PANDOC_ZIP
-          sudo tar xvzf $PANDOC_ZIP --strip-components 1 -C /usr/local
-          rm -f $PANDOC_ZIP
-          echo /usr/local/pandoc-$PANDOC_VERSION/bin >> $GITHUB_PATH
       - name: Get dependencies
         run: go mod download
       - name: Make codegen
@@ -146,6 +124,7 @@ jobs:
         run: |
           k3d registry create e2e-registry --port 5111
           k3d cluster create e2e -i rancher/k3s:v1.21.7-k3s1 --registry-use k3d-e2e-registry:5111
+          mkdir -p ~/.kube
           k3d kubeconfig get e2e > ~/.kube/argo-events-e2e-config
           echo '127.0.0.1 k3d-e2e-registry' | sudo tee -a /etc/hosts
       - name: Run tests
