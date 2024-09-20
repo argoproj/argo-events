@@ -7,41 +7,53 @@ set -o pipefail
 source $(dirname $0)/library.sh
 header "generating proto files"
 
-ensure_protobuf
 ensure_vendor
-
-if [ "`command -v protoc-gen-gogo`" = "" ]; then
-  go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogo
-fi
-
-if [ "`command -v protoc-gen-gogofast`" = "" ]; then
-  go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogofast
-fi
-
-if [ "`command -v goimports`" = "" ]; then
-  export GO111MODULE="off"
-  go get golang.org/x/tools/cmd/goimports
-  export GO111MODULE="on"
-fi
 
 make_fake_paths
 export GOPATH="${FAKE_GOPATH}"
+export PATH="${GOPATH}/bin:${PATH}"
 cd "${FAKE_REPOPATH}"
 
-# go < 1.17
-#go install -mod=vendor ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
-# go >= 1.17
-GOBIN=${GOPATH}/bin go install -mod=vendor ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
+install-protobuf() {
+  # protobuf version
+  PROTOBUF_VERSION=27.2
+  PB_REL="https://github.com/protocolbuffers/protobuf/releases"
+  OS=$(uname_os)
+  ARCH=$(uname_arch)
+
+  echo "OS: $OS  ARCH: $ARCH"
+  BINARY_URL=$PB_REL/download/v${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION}-${OS}-${ARCH}.zip
+  if [[ "$OS" = "darwin" ]]; then
+    BINARY_URL=$PB_REL/download/v${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION}-osx-universal_binary.zip
+  elif [[ "$OS" = "linux" ]]; then
+    BINARY_URL=$PB_REL/download/v${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION}-linux-x86_64.zip
+  fi
+  echo "Downloading $BINARY_URL"
+
+  tmp=$(mktemp -d)
+  trap 'rm -rf ${tmp}' EXIT
+
+  curl -sL -o ${tmp}/protoc-${PROTOBUF_VERSION}-${OS}-${ARCH}.zip $BINARY_URL
+  unzip ${tmp}/protoc-${PROTOBUF_VERSION}-${OS}-${ARCH}.zip -d ${GOPATH}
+}
+
+install-protobuf
+
+go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogo
+go install -mod=vendor ./vendor/github.com/gogo/protobuf/protoc-gen-gogofast
+go install -mod=vendor ./vendor/github.com/gogo/protobuf/gogoproto
+go install -mod=vendor ./vendor/golang.org/x/tools/cmd/goimports
+go install -mod=vendor ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
 
 export GO111MODULE="off"
 
-${GOPATH}/bin/go-to-protobuf \
+go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
         --packages=github.com/argoproj/argo-events/pkg/apis/common \
         --apimachinery-packages=+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1 \
         --proto-import ./vendor
 
-${GOPATH}/bin/go-to-protobuf \
+go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
         --packages=github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1,github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1,github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1 \
         --apimachinery-packages=github.com/argoproj/argo-events/pkg/apis/common,+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1 \
