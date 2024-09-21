@@ -33,8 +33,8 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
-	"github.com/argoproj/argo-events/pkg/apis/events"
 )
 
 // controller controls the webhook operations

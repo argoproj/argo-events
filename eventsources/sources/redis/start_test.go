@@ -9,8 +9,8 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
+	"github.com/argoproj/argo-events/eventsources/events"
 	metrics "github.com/argoproj/argo-events/metrics"
-	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 

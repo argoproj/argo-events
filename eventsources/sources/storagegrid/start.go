@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"

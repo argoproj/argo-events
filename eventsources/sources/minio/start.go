@@ -33,10 +33,10 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
+	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/events"
 )
 
 // EventListener implements Eventing for minio event sources

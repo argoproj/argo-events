@@ -41,10 +41,10 @@ import (
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
+	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
