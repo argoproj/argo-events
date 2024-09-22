@@ -34,7 +34,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // GetClientConfig return rest config, if path not specified, assume in cluster config
@@ -208,7 +208,7 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 }
 
 // GetTLSConfig returns a tls configuration for given cert and key or skips the certs if InsecureSkipVerify is true.
-func GetTLSConfig(config *dfv1.TLSConfig) (*tls.Config, error) {
+func GetTLSConfig(config *aev1.TLSConfig) (*tls.Config, error) {
 	if config == nil {
 		return nil, fmt.Errorf("TLSConfig is nil")
 	}

@@ -23,15 +23,15 @@ import (
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 var (
-	defaultFactor   = dfv1.NewAmount("1.0")
-	defaultJitter   = dfv1.NewAmount("1")
-	defaultDuration = dfv1.FromString("1s")
+	defaultFactor   = aev1.NewAmount("1.0")
+	defaultJitter   = aev1.NewAmount("1")
+	defaultDuration = aev1.FromString("1s")
 
-	DefaultBackoff = dfv1.Backoff{
+	DefaultBackoff = aev1.Backoff{
 		Steps:    5,
 		Duration: &defaultDuration,
 		Factor:   &defaultFactor,
@@ -49,14 +49,14 @@ func IsRetryableKubeAPIError(err error) bool {
 }
 
 // Convert2WaitBackoff converts to a wait backoff option
-func Convert2WaitBackoff(backoff *dfv1.Backoff) (*wait.Backoff, error) {
+func Convert2WaitBackoff(backoff *aev1.Backoff) (*wait.Backoff, error) {
 	result := wait.Backoff{}
 
 	d := backoff.Duration
 	if d == nil {
 		d = &defaultDuration
 	}
-	if d.Type == dfv1.Int64 {
+	if d.Type == aev1.Int64 {
 		result.Duration = time.Duration(d.Int64Value())
 	} else {
 		parsedDuration, err := time.ParseDuration(d.StrVal)
@@ -94,7 +94,7 @@ func Convert2WaitBackoff(backoff *dfv1.Backoff) (*wait.Backoff, error) {
 	return &result, nil
 }
 
-func DoWithRetry(backoff *dfv1.Backoff, f func() error) error {
+func DoWithRetry(backoff *aev1.Backoff, f func() error) error {
 	if backoff == nil {
 		backoff = &DefaultBackoff
 	}
