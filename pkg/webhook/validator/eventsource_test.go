@@ -12,7 +12,7 @@ import (
 )
 
 func TestValidateEventSource(t *testing.T) {
-	dir := "../../examples/event-sources"
+	dir := "../../../examples/event-sources"
 	dirEntries, err := os.ReadDir(dir)
 	assert.Nil(t, err)
 	for _, entry := range dirEntries {

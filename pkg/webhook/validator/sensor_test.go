@@ -49,7 +49,7 @@ var (
 )
 
 func TestValidateSensor(t *testing.T) {
-	dir := "../../examples/sensors"
+	dir := "../../../examples/sensors"
 	dirEntries, err := os.ReadDir(dir)
 	assert.Nil(t, err)
 
