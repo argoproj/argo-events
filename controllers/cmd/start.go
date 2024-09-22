@@ -94,14 +94,6 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 		logger.Fatalw("Unable to add scheme", zap.Error(err))
 	}
 
-	if err := aev1.AddToScheme(mgr.GetScheme()); err != nil {
-		logger.Fatalw("Unable to add EventSource scheme", zap.Error(err))
-	}
-
-	if err := aev1.AddToScheme(mgr.GetScheme()); err != nil {
-		logger.Fatalw("Unable to add Sensor scheme", zap.Error(err))
-	}
-
 	// EventBus controller
 	eventBusController, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
 		Reconciler: eventbus.NewReconciler(mgr.GetClient(), kubeClient, mgr.GetScheme(), config, logger),
