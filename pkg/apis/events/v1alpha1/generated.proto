@@ -268,7 +268,7 @@ message ArtifactLocation {
   optional GitArtifact git = 6;
 
   // Resource is generic template for K8s resource
-  optional Resource resource = 7;
+  optional K8SResource resource = 7;
 }
 
 // AzureEventHubsTrigger refers to specification of the Azure Event Hubs Trigger
@@ -853,7 +853,8 @@ message Event {
 
 // EventBus is the definition of a eventbus resource
 // +genclient
-// +kubebuilder:resource:singular=eventbus,shortName=eb
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:shortName=eb
 // +kubebuilder:subresource:status
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
@@ -1642,6 +1643,11 @@ message JetStreamConfig {
   optional string streamConfig = 3;
 }
 
+// K8SResource represent arbitrary structured data.
+message K8SResource {
+  optional bytes value = 1;
+}
+
 // K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels
 message K8SResourcePolicy {
   // Labels required to identify whether a resource is in success state
@@ -2426,11 +2432,6 @@ message RedisStreamEventSource {
   // Username required for ACL style authentication if any.
   // +optional
   optional string username = 10;
-}
-
-// Resource represent arbitrary structured data.
-message Resource {
-  optional bytes value = 1;
 }
 
 // ResourceEventSource refers to a event-source for K8s resource related events.

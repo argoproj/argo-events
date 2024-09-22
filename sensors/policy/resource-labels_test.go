@@ -51,7 +51,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	uObj := newUnstructured("apps/v1", "Deployment", "fake", "test")
 	runtimeScheme := runtime.NewScheme()
 	client := fake.NewSimpleDynamicClient(runtimeScheme, uObj)
-	artifact := v1alpha1.NewResource(uObj)
+	artifact := v1alpha1.NewK8SResource(uObj)
 	jitter := v1alpha1.NewAmount("0.5")
 	factor := v1alpha1.NewAmount("2")
 	duration := v1alpha1.FromString("1s")

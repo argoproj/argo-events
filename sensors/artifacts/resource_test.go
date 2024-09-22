@@ -40,7 +40,7 @@ func TestNewResourceReader(t *testing.T) {
 				},
 			},
 		}
-		artifact := v1alpha1.NewResource(un)
+		artifact := v1alpha1.NewK8SResource(un)
 		reader, err := NewResourceReader(&artifact)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(reader, convey.ShouldNotBeNil)

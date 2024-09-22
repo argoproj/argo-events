@@ -903,7 +903,7 @@ type ArtifactLocation struct {
 	// Git repository hosting the artifact
 	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
 	// Resource is generic template for K8s resource
-	Resource *Resource `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
+	Resource *K8SResource `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
 }
 
 // FileArtifact contains information about an artifact in a filesystem

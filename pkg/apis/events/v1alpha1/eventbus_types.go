@@ -6,7 +6,8 @@ import (
 
 // EventBus is the definition of a eventbus resource
 // +genclient
-// +kubebuilder:resource:singular=eventbus,shortName=eb
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:shortName=eb
 // +kubebuilder:subresource:status
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true

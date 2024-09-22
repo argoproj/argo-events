@@ -10,15 +10,15 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestRetryableKubeAPIError(t *testing.T) {
 	errUnAuth := errors.NewUnauthorized("reason")
-	errNotFound := errors.NewNotFound(dfv1.GroupResource("sensor"), "hello")
-	errForbidden := errors.NewForbidden(dfv1.GroupResource("sensor"), "hello", nil)
-	errInvalid := errors.NewInvalid(dfv1.GroupKind("core/data"), "hello", nil)
-	errMethodNotSupported := errors.NewMethodNotSupported(dfv1.GroupResource("sensor"), "action")
+	errNotFound := errors.NewNotFound(aev1.Resource("sensor"), "hello")
+	errForbidden := errors.NewForbidden(aev1.Resource("sensor"), "hello", nil)
+	errInvalid := errors.NewInvalid(aev1.GroupKind("core/data"), "hello", nil)
+	errMethodNotSupported := errors.NewMethodNotSupported(aev1.Resource("sensor"), "action")
 
 	assert.True(t, IsRetryableKubeAPIError(errUnAuth))
 	assert.False(t, IsRetryableKubeAPIError(errNotFound))
@@ -59,10 +59,10 @@ func TestConnectDurationString(t *testing.T) {
 }
 
 func TestConnectRetry(t *testing.T) {
-	factor := dfv1.NewAmount("1.0")
-	jitter := dfv1.NewAmount("1")
-	duration := dfv1.FromInt64(1000000000)
-	backoff := dfv1.Backoff{
+	factor := aev1.NewAmount("1.0")
+	jitter := aev1.NewAmount("1")
+	duration := aev1.FromInt64(1000000000)
+	backoff := aev1.Backoff{
 		Duration: &duration,
 		Factor:   &factor,
 		Jitter:   &jitter,
@@ -86,10 +86,10 @@ func TestConnectRetry(t *testing.T) {
 }
 
 func TestRetryFailure(t *testing.T) {
-	factor := dfv1.NewAmount("1.0")
-	jitter := dfv1.NewAmount("1")
-	duration := dfv1.FromString("1s")
-	backoff := dfv1.Backoff{
+	factor := aev1.NewAmount("1.0")
+	jitter := aev1.NewAmount("1")
+	duration := aev1.FromString("1s")
+	backoff := aev1.Backoff{
 		Duration: &duration,
 		Factor:   &factor,
 		Jitter:   &jitter,
@@ -104,10 +104,10 @@ func TestRetryFailure(t *testing.T) {
 }
 
 func TestConvert2WaitBackoff(t *testing.T) {
-	factor := dfv1.NewAmount("1.0")
-	jitter := dfv1.NewAmount("1")
-	duration := dfv1.FromString("1s")
-	backoff := dfv1.Backoff{
+	factor := aev1.NewAmount("1.0")
+	jitter := aev1.NewAmount("1")
+	duration := aev1.FromString("1s")
+	backoff := aev1.Backoff{
 		Duration: &duration,
 		Factor:   &factor,
 		Jitter:   &jitter,

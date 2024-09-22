@@ -33,7 +33,7 @@ type ResourceReader struct {
 }
 
 // NewResourceReader creates a new ArtifactReader for resource
-func NewResourceReader(resourceArtifact *v1alpha1.Resource) (ArtifactReader, error) {
+func NewResourceReader(resourceArtifact *v1alpha1.K8SResource) (ArtifactReader, error) {
 	if resourceArtifact == nil {
 		return nil, fmt.Errorf("ResourceArtifact does not exist")
 	}

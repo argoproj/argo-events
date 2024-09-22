@@ -26,7 +26,7 @@ import (
 
 func TestFetchKubernetesResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact := v1alpha1.NewResource(deployment)
+	artifact := v1alpha1.NewK8SResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}

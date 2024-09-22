@@ -568,7 +568,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		"fake-dependency": event,
 	}
 
-	artifact := v1alpha1.NewResource(deployment)
+	artifact := v1alpha1.NewK8SResource(deployment)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}

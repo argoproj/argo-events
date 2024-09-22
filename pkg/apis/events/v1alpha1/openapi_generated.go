@@ -95,6 +95,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Int64OrString":                schema_pkg_apis_events_v1alpha1_Int64OrString(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.JetStreamBus":                 schema_pkg_apis_events_v1alpha1_JetStreamBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.JetStreamConfig":              schema_pkg_apis_events_v1alpha1_JetStreamConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.K8SResource":                  schema_pkg_apis_events_v1alpha1_K8SResource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.K8SResourcePolicy":            schema_pkg_apis_events_v1alpha1_K8SResourcePolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaBus":                     schema_pkg_apis_events_v1alpha1_KafkaBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup":           schema_pkg_apis_events_v1alpha1_KafkaConsumerGroup(ref),
@@ -120,7 +121,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RateLimit":                    schema_pkg_apis_events_v1alpha1_RateLimit(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisEventSource":             schema_pkg_apis_events_v1alpha1_RedisEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisStreamEventSource":       schema_pkg_apis_events_v1alpha1_RedisStreamEventSource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Resource":                     schema_pkg_apis_events_v1alpha1_Resource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceEventSource":          schema_pkg_apis_events_v1alpha1_ResourceEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceFilter":               schema_pkg_apis_events_v1alpha1_ResourceFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact":                   schema_pkg_apis_events_v1alpha1_S3Artifact(ref),
@@ -654,14 +654,14 @@ func schema_pkg_apis_events_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 					"resource": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Resource is generic template for K8s resource",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Resource"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.K8SResource"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Resource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.URLArtifact", "k8s.io/api/core/v1.ConfigMapKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.K8SResource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.URLArtifact", "k8s.io/api/core/v1.ConfigMapKeySelector"},
 	}
 }
 
@@ -4486,6 +4486,18 @@ func schema_pkg_apis_events_v1alpha1_JetStreamConfig(ref common.ReferenceCallbac
 	}
 }
 
+func schema_pkg_apis_events_v1alpha1_K8SResource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "K8SResource represent arbitrary structured data.",
+				Type:        K8SResource{}.OpenAPISchemaType(),
+				Format:      K8SResource{}.OpenAPISchemaFormat(),
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_events_v1alpha1_K8SResourcePolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -6289,18 +6301,6 @@ func schema_pkg_apis_events_v1alpha1_RedisStreamEventSource(ref common.Reference
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
-	}
-}
-
-func schema_pkg_apis_events_v1alpha1_Resource(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Resource represent arbitrary structured data.",
-				Type:        Resource{}.OpenAPISchemaType(),
-				Format:      Resource{}.OpenAPISchemaFormat(),
-			},
-		},
 	}
 }
 

@@ -265,7 +265,7 @@
           "type": "string"
         },
         "resource": {
-          "$ref": "#/definitions/io.argoproj.events.v1alpha1.Resource",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.K8SResource",
           "description": "Resource is generic template for K8s resource"
         },
         "s3": {
@@ -2358,6 +2358,10 @@
       },
       "type": "object"
     },
+    "io.argoproj.events.v1alpha1.K8SResource": {
+      "description": "K8SResource represent arbitrary structured data.",
+      "type": "object"
+    },
     "io.argoproj.events.v1alpha1.K8SResourcePolicy": {
       "description": "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels",
       "properties": {
@@ -3358,10 +3362,6 @@
         "hostAddress",
         "streams"
       ],
-      "type": "object"
-    },
-    "io.argoproj.events.v1alpha1.Resource": {
-      "description": "Resource represent arbitrary structured data.",
       "type": "object"
     },
     "io.argoproj.events.v1alpha1.ResourceEventSource": {

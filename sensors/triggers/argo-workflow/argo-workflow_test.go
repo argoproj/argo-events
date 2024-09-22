@@ -74,7 +74,7 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 func getFakeWfTrigger(operation v1alpha1.ArgoWorkflowOperation) *ArgoWorkflowTrigger {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-	artifact := v1alpha1.NewResource(un)
+	artifact := v1alpha1.NewK8SResource(un)
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake",

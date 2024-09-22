@@ -271,7 +271,7 @@
         },
         "resource": {
           "description": "Resource is generic template for K8s resource",
-          "$ref": "#/definitions/io.argoproj.events.v1alpha1.Resource"
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.K8SResource"
         },
         "s3": {
           "description": "S3 compliant artifact",
@@ -2341,6 +2341,10 @@
         }
       }
     },
+    "io.argoproj.events.v1alpha1.K8SResource": {
+      "description": "K8SResource represent arbitrary structured data.",
+      "type": "object"
+    },
     "io.argoproj.events.v1alpha1.K8SResourcePolicy": {
       "description": "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using labels",
       "type": "object",
@@ -3342,10 +3346,6 @@
           "type": "string"
         }
       }
-    },
-    "io.argoproj.events.v1alpha1.Resource": {
-      "description": "Resource represent arbitrary structured data.",
-      "type": "object"
     },
     "io.argoproj.events.v1alpha1.ResourceEventSource": {
       "description": "ResourceEventSource refers to a event-source for K8s resource related events.",
