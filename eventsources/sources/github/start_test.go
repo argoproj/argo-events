@@ -28,7 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 var (

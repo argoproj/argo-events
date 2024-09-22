@@ -21,8 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	metrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventListener implements ConfigExecutor
@@ -44,8 +43,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.GitlabEvent
+func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
+	return v1alpha1.GitlabEvent
 }
 
 // Router contains the configuration information for a route

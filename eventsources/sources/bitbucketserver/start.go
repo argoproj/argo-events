@@ -41,7 +41,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"go.uber.org/zap"
 )
 

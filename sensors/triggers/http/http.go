@@ -27,8 +27,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -76,13 +75,13 @@ func NewHTTPTrigger(httpClients common.StringKeyedMap[*http.Client], sensor *v1a
 		Client:  client,
 		Sensor:  sensor,
 		Trigger: trigger,
-		Logger:  logger.With(logging.LabelTriggerType, apicommon.HTTPTrigger),
+		Logger:  logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeHTTP),
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *HTTPTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.HTTPTrigger
+func (t *HTTPTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeHTTP
 }
 
 // FetchResource fetches the trigger. As the HTTP trigger simply executes a http request, there

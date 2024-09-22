@@ -25,17 +25,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/yaml"
 
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsversiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	eventspkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
-	eventsourceversiond "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
-	sensorversiond "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	testutil "github.com/argoproj/argo-events/test/util"
 )
 
@@ -112,8 +104,8 @@ type options struct {
 
 	kubeClient        kubernetes.Interface
 	eventBusClient    eventspkg.EventBusInterface
-	eventSourceClient eventsourcepkg.EventSourceInterface
-	sensorClient      sensorpkg.SensorInterface
+	eventSourceClient eventspkg.EventSourceInterface
+	sensorClient      eventspkg.SensorInterface
 	restConfig        *rest.Config
 }
 
@@ -131,8 +123,8 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 		return nil, err
 	}
 	eventBusClient := eventsversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventBus(namespace)
-	eventSourceClient := eventsourceversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventSources(namespace)
-	sensorClient := sensorversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().Sensors(namespace)
+	eventSourceClient := eventsversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventSources(namespace)
+	sensorClient := eventsversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().Sensors(namespace)
 	return &options{
 		namespace:          namespace,
 		testingEventSource: testingEventSource,
@@ -150,9 +142,9 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 	}, nil
 }
 
-func (o *options) createEventBus(ctx context.Context) (*dfv1.EventBus, error) {
+func (o *options) createEventBus(ctx context.Context) (*v1alpha1.EventBus, error) {
 	fmt.Printf("------- Creating %v EventBus -------\n", o.eventBusType)
-	eb := &dfv1.EventBus{}
+	eb := &v1alpha1.EventBus{}
 	if err := readResource(fmt.Sprintf("@testdata/eventbus/%v.yaml", o.eventBusType), eb); err != nil {
 		return nil, fmt.Errorf("failed to read %v event bus yaml file: %w", o.eventBusType, err)
 	}
@@ -176,9 +168,9 @@ func (o *options) createEventBus(ctx context.Context) (*dfv1.EventBus, error) {
 	return result, nil
 }
 
-func (o *options) createEventSource(ctx context.Context) (*eventsourcev1alpha1.EventSource, error) {
+func (o *options) createEventSource(ctx context.Context) (*v1alpha1.EventSource, error) {
 	fmt.Printf("\n------- Creating %v EventSource -------\n", o.testingEventSource)
-	es := &eventsourcev1alpha1.EventSource{}
+	es := &v1alpha1.EventSource{}
 	file := fmt.Sprintf("@testdata/eventsources/%v.yaml", o.testingEventSource)
 	if err := readResource(file, es); err != nil {
 		return nil, fmt.Errorf("failed to read %v event source yaml file: %w", o.testingEventSource, err)
@@ -210,9 +202,9 @@ func (o *options) createEventSource(ctx context.Context) (*eventsourcev1alpha1.E
 	return result, nil
 }
 
-func (o *options) createSensor(ctx context.Context) (*sensorv1alpha1.Sensor, error) {
+func (o *options) createSensor(ctx context.Context) (*v1alpha1.Sensor, error) {
 	fmt.Printf("\n------- Creating %v Sensor -------\n", o.testingTrigger)
-	sensor := &sensorv1alpha1.Sensor{}
+	sensor := &v1alpha1.Sensor{}
 	file := fmt.Sprintf("@testdata/sensors/%v.yaml", o.testingTrigger)
 	if err := readResource(file, sensor); err != nil {
 		return nil, fmt.Errorf("failed to read %v sensor yaml file: %w", o.testingTrigger, err)
@@ -576,9 +568,9 @@ func (o *options) dynamicFor(r schema.GroupVersionResource) dynamic.ResourceInte
 func (o *options) cleanUpResources(ctx context.Context) error {
 	hasTestLabel := metav1.ListOptions{LabelSelector: StressTestingLabel}
 	resources := []schema.GroupVersionResource{
-		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
-		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
-		{Group: dfv1.EventBusGroupVersionKind.Group, Version: "v1alpha1", Resource: "eventbus"},
+		{Group: v1alpha1.SchemeGroupVersion.Group, Version: v1alpha1.SchemeGroupVersion.Version, Resource: "eventsources"},
+		{Group: v1alpha1.SchemeGroupVersion.Group, Version: v1alpha1.SchemeGroupVersion.Version, Resource: "sensors"},
+		{Group: v1alpha1.SchemeGroupVersion.Group, Version: v1alpha1.SchemeGroupVersion.Version, Resource: "eventbus"},
 	}
 	for _, r := range resources {
 		if err := o.dynamicFor(r).DeleteCollection(ctx, metav1.DeleteOptions{PropagationPolicy: &background}, hasTestLabel); err != nil {

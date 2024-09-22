@@ -36,7 +36,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // controller controls the webhook operations
@@ -204,7 +204,7 @@ func (router *Router) chooseAuthStrategy() (AuthStrategy, error) {
 }
 
 // applyBitbucketWebhook creates or updates the configured webhook in Bitbucket
-func (router *Router) applyBitbucketWebhook(repo v1alpha1.BitbucketRepository) error {
+func (router *Router) applyBitbucketWebhook(repo aev1.BitbucketRepository) error {
 	bitbucketEventSource := router.bitbucketEventSource
 	route := router.route
 	logger := router.GetRoute().Logger.With(
@@ -249,7 +249,7 @@ func (router *Router) applyBitbucketWebhook(repo v1alpha1.BitbucketRepository) e
 }
 
 // createWebhook creates a new webhook
-func (router *Router) createWebhook(repo v1alpha1.BitbucketRepository, formattedWebhookURL string) (*bitbucketv2.Webhook, error) {
+func (router *Router) createWebhook(repo aev1.BitbucketRepository, formattedWebhookURL string) (*bitbucketv2.Webhook, error) {
 	opt := &bitbucketv2.WebhooksOptions{
 		Owner:       repo.Owner,
 		RepoSlug:    repo.RepositorySlug,
@@ -263,7 +263,7 @@ func (router *Router) createWebhook(repo v1alpha1.BitbucketRepository, formatted
 }
 
 // deleteWebhook deletes an existing webhook
-func (router *Router) deleteWebhook(repo v1alpha1.BitbucketRepository, hookID string) error {
+func (router *Router) deleteWebhook(repo aev1.BitbucketRepository, hookID string) error {
 	_, err := router.client.Repositories.Webhooks.Delete(&bitbucketv2.WebhooksOptions{
 		Owner:    repo.Owner,
 		RepoSlug: repo.RepositorySlug,
@@ -281,7 +281,7 @@ func (router *Router) deleteWebhook(repo v1alpha1.BitbucketRepository, hookID st
 }
 
 // listWebhooks gets a list of all existing webhooks in target repository
-func (router *Router) listWebhooks(repo v1alpha1.BitbucketRepository) ([]WebhookSubscription, error) {
+func (router *Router) listWebhooks(repo aev1.BitbucketRepository) ([]WebhookSubscription, error) {
 	hooksResponse, err := router.client.Repositories.Webhooks.Gets(&bitbucketv2.WebhooksOptions{
 		Owner:    repo.Owner,
 		RepoSlug: repo.RepositorySlug,

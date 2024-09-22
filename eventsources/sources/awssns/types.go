@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 )
 
@@ -34,7 +34,7 @@ type Router struct {
 	// Route contains webhook context and configuration related to api route
 	Route *webhook.Route
 	// eventSource refers to sns event source configuration
-	eventSource *v1alpha1.SNSEventSource
+	eventSource *aev1.SNSEventSource
 	// session refers to aws session
 	session *snslib.SNS
 	// subscriptionArn is sns arn

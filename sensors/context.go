@@ -33,8 +33,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	sensormetrics "github.com/argoproj/argo-events/metrics"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // SensorContext contains execution context for Sensor
@@ -46,7 +45,7 @@ type SensorContext struct {
 	// Sensor object
 	sensor *v1alpha1.Sensor
 	// EventBus config
-	eventBusConfig *eventbusv1alpha1.BusConfig
+	eventBusConfig *v1alpha1.BusConfig
 	// EventBus subject
 	eventBusSubject string
 	hostname        string
@@ -75,7 +74,7 @@ type SensorContext struct {
 }
 
 // NewSensorContext returns a new sensor execution context.
-func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics) *SensorContext {
+func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, eventBusConfig *v1alpha1.BusConfig, eventBusSubject, hostname string, metrics *sensormetrics.Metrics) *SensorContext {
 	return &SensorContext{
 		kubeClient:           kubeClient,
 		dynamicClient:        dynamicClient,

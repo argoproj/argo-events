@@ -29,8 +29,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 const (
@@ -92,27 +92,27 @@ var (
 		},
 	}
 
-	fakeEventBus = &dfv1.EventBus{
+	fakeEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: dfv1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
 			Name:      common.DefaultEventBusName,
 		},
-		Spec: dfv1.EventBusSpec{
-			NATS: &dfv1.NATSBus{
-				Native: &dfv1.NativeStrategy{
-					Auth: &dfv1.AuthStrategyToken,
+		Spec: v1alpha1.EventBusSpec{
+			NATS: &v1alpha1.NATSBus{
+				Native: &v1alpha1.NativeStrategy{
+					Auth: &v1alpha1.AuthStrategyToken,
 				},
 			},
 		},
-		Status: dfv1.EventBusStatus{
-			Config: dfv1.BusConfig{
-				NATS: &dfv1.NATSConfig{
+		Status: v1alpha1.EventBusStatus{
+			Config: v1alpha1.BusConfig{
+				NATS: &v1alpha1.NATSConfig{
 					URL:  "nats://xxxx",
-					Auth: &dfv1.AuthStrategyToken,
+					Auth: &v1alpha1.AuthStrategyToken,
 					AccessSecret: &corev1.SecretKeySelector{
 						Key: "test-key",
 						LocalObjectReference: corev1.LocalObjectReference{
@@ -124,46 +124,46 @@ var (
 		},
 	}
 
-	fakeEventBusJetstream = &dfv1.EventBus{
+	fakeEventBusJetstream = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: dfv1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
 			Name:      common.DefaultEventBusName,
 		},
-		Spec: dfv1.EventBusSpec{
-			JetStream: &dfv1.JetStreamBus{
+		Spec: v1alpha1.EventBusSpec{
+			JetStream: &v1alpha1.JetStreamBus{
 				Version: "x.x.x",
 			},
 		},
-		Status: dfv1.EventBusStatus{
-			Config: dfv1.BusConfig{
-				JetStream: &dfv1.JetStreamConfig{
+		Status: v1alpha1.EventBusStatus{
+			Config: v1alpha1.BusConfig{
+				JetStream: &v1alpha1.JetStreamConfig{
 					URL: "nats://xxxx",
 				},
 			},
 		},
 	}
 
-	fakeEventBusKafka = &dfv1.EventBus{
+	fakeEventBusKafka = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: dfv1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
 			Name:      common.DefaultEventBusName,
 		},
-		Spec: dfv1.EventBusSpec{
-			Kafka: &dfv1.KafkaBus{
+		Spec: v1alpha1.EventBusSpec{
+			Kafka: &v1alpha1.KafkaBus{
 				URL: "localhost:9092",
 			},
 		},
-		Status: dfv1.EventBusStatus{
-			Config: dfv1.BusConfig{
-				Kafka: &dfv1.KafkaBus{
+		Status: v1alpha1.EventBusStatus{
+			Config: v1alpha1.BusConfig{
+				Kafka: &v1alpha1.KafkaBus{
 					URL: "localhost:9092",
 				},
 			},
@@ -222,10 +222,10 @@ func Test_BuildDeployment(t *testing.T) {
 
 		// add secrets to kafka eventbus
 		testBus := fakeEventBusKafka.DeepCopy()
-		testBus.Spec.Kafka.TLS = &dfv1.TLSConfig{
+		testBus.Spec.Kafka.TLS = &v1alpha1.TLSConfig{
 			CACertSecret: &corev1.SecretKeySelector{Key: "cert", LocalObjectReference: corev1.LocalObjectReference{Name: "tls-secret"}},
 		}
-		testBus.Spec.Kafka.SASL = &dfv1.SASLConfig{
+		testBus.Spec.Kafka.SASL = &v1alpha1.SASLConfig{
 			Mechanism:      "SCRAM-SHA-512",
 			UserSecret:     &corev1.SecretKeySelector{Key: "username", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
 			PasswordSecret: &corev1.SecretKeySelector{Key: "password", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},

@@ -34,7 +34,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // controller controls the webhook operations
@@ -58,8 +58,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.StripeEvent
+func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
+	return v1alpha1.StripeEvent
 }
 
 // Implement Router

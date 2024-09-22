@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/IBM/sarama"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
 
 func TestBrokers(t *testing.T) {
-	config := &eventbusv1alpha1.KafkaBus{
+	config := &v1alpha1.KafkaBus{
 		URL: "broker1:9092,broker2:9092",
 	}
 
@@ -24,7 +24,7 @@ func TestBrokers(t *testing.T) {
 }
 
 func TestConfig(t *testing.T) {
-	config := &eventbusv1alpha1.KafkaBus{
+	config := &v1alpha1.KafkaBus{
 		URL: "localhost:9092",
 	}
 
@@ -41,10 +41,10 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfig_StartOldest(t *testing.T) {
-	config := &eventbusv1alpha1.KafkaBus{
+	config := &v1alpha1.KafkaBus{
 		URL: "localhost:9092",
-		ConsumerGroup: &eventbusv1alpha1.KafkaConsumerGroup{
-			StartOldest: true,
+		ConsumerGroup: &v1alpha1.KafkaConsumerGroup{
+			Oldest: true,
 		},
 	}
 
@@ -60,7 +60,7 @@ func TestConfig_StartOldest(t *testing.T) {
 }
 
 func TestConfig_NoSASL(t *testing.T) {
-	config := &eventbusv1alpha1.KafkaBus{
+	config := &v1alpha1.KafkaBus{
 		URL:  "localhost:9092",
 		SASL: nil,
 	}
@@ -77,7 +77,7 @@ func TestConfig_NoSASL(t *testing.T) {
 }
 
 func TestNewKafka(t *testing.T) {
-	config := &eventbusv1alpha1.KafkaBus{
+	config := &v1alpha1.KafkaBus{
 		URL: "localhost:9092",
 	}
 
@@ -91,7 +91,7 @@ func TestNewKafka(t *testing.T) {
 }
 
 func TestNewKafka_EmptyURL(t *testing.T) {
-	config := &eventbusv1alpha1.KafkaBus{
+	config := &v1alpha1.KafkaBus{
 		URL: "",
 	}
 

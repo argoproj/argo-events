@@ -15,8 +15,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/metrics"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors"
 )
 
@@ -41,7 +40,7 @@ func Start() {
 		logger.Fatalw("failed to unmarshal sensor object", zap.Error(err))
 	}
 
-	busConfig := &eventbusv1alpha1.BusConfig{}
+	busConfig := &v1alpha1.BusConfig{}
 	encodedBusConfigSpec := os.Getenv(common.EnvVarEventBusConfig)
 	if len(encodedBusConfigSpec) > 0 {
 		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)

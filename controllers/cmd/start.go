@@ -23,9 +23,7 @@ import (
 	"github.com/argoproj/argo-events/controllers/eventbus"
 	"github.com/argoproj/argo-events/controllers/eventsource"
 	"github.com/argoproj/argo-events/controllers/sensor"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
@@ -92,15 +90,15 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 		logger.Fatalw("Unable add a health check", zap.Error(err))
 	}
 
-	if err := eventbusv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := aev1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("Unable to add scheme", zap.Error(err))
 	}
 
-	if err := eventsourcev1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := aev1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("Unable to add EventSource scheme", zap.Error(err))
 	}
 
-	if err := sensorv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := aev1.AddToScheme(mgr.GetScheme()); err != nil {
 		logger.Fatalw("Unable to add Sensor scheme", zap.Error(err))
 	}
 
@@ -113,7 +111,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	// Watch EventBus and enqueue EventBus object key
-	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &eventbusv1alpha1.EventBus{}), &handler.EnqueueRequestForObject{},
+	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &aev1.EventBus{}), &handler.EnqueueRequestForObject{},
 		predicate.Or(
 			predicate.GenerationChangedPredicate{},
 			predicate.LabelChangedPredicate{},
@@ -123,21 +121,21 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 
 	// Watch ConfigMaps and enqueue owning EventBus key
 	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &eventbusv1alpha1.EventBus{}, handler.OnlyControllerOwner()),
+		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
 		predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("Unable to watch ConfigMaps", zap.Error(err))
 	}
 
 	// Watch StatefulSets and enqueue owning EventBus key
 	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &appv1.StatefulSet{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &eventbusv1alpha1.EventBus{}, handler.OnlyControllerOwner()),
+		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
 		predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("Unable to watch StatefulSets", zap.Error(err))
 	}
 
 	// Watch Services and enqueue owning EventBus key
 	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &corev1.Service{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &eventbusv1alpha1.EventBus{}, handler.OnlyControllerOwner()),
+		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
 		predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("Unable to watch Services", zap.Error(err))
 	}
@@ -151,7 +149,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	// Watch EventSource and enqueue EventSource object key
-	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &eventsourcev1alpha1.EventSource{}), &handler.EnqueueRequestForObject{},
+	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &aev1.EventSource{}), &handler.EnqueueRequestForObject{},
 		predicate.Or(
 			predicate.GenerationChangedPredicate{},
 			predicate.LabelChangedPredicate{},
@@ -161,14 +159,14 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 
 	// Watch Deployments and enqueue owning EventSource key
 	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &appv1.Deployment{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &eventsourcev1alpha1.EventSource{}, handler.OnlyControllerOwner()),
+		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventSource{}, handler.OnlyControllerOwner()),
 		predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("Unable to watch Deployments", zap.Error(err))
 	}
 
 	// Watch Services and enqueue owning EventSource key
 	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &corev1.Service{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &eventsourcev1alpha1.EventSource{}, handler.OnlyControllerOwner()),
+		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventSource{}, handler.OnlyControllerOwner()),
 		predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("Unable to watch Services", zap.Error(err))
 	}
@@ -182,7 +180,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	// Watch Sensor and enqueue Sensor object key
-	if err := sensorController.Watch(source.Kind(mgr.GetCache(), &sensorv1alpha1.Sensor{}), &handler.EnqueueRequestForObject{},
+	if err := sensorController.Watch(source.Kind(mgr.GetCache(), &aev1.Sensor{}), &handler.EnqueueRequestForObject{},
 		predicate.Or(
 			predicate.GenerationChangedPredicate{},
 			predicate.LabelChangedPredicate{},
@@ -192,7 +190,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 
 	// Watch Deployments and enqueue owning Sensor key
 	if err := sensorController.Watch(source.Kind(mgr.GetCache(), &appv1.Deployment{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &sensorv1alpha1.Sensor{}, handler.OnlyControllerOwner()),
+		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.Sensor{}, handler.OnlyControllerOwner()),
 		predicate.GenerationChangedPredicate{}); err != nil {
 		logger.Fatalw("Unable to watch Deployments", zap.Error(err))
 	}

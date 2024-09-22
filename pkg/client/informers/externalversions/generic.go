@@ -55,6 +55,10 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=argoproj.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("eventbus"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Argoproj().V1alpha1().EventBus().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("eventsources"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Argoproj().V1alpha1().EventSources().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("sensors"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Argoproj().V1alpha1().Sensors().Informer()}, nil
 
 	}
 

@@ -26,6 +26,10 @@ import (
 type Interface interface {
 	// EventBus returns a EventBusInformer.
 	EventBus() EventBusInformer
+	// EventSources returns a EventSourceInformer.
+	EventSources() EventSourceInformer
+	// Sensors returns a SensorInformer.
+	Sensors() SensorInformer
 }
 
 type version struct {
@@ -42,4 +46,14 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // EventBus returns a EventBusInformer.
 func (v *version) EventBus() EventBusInformer {
 	return &eventBusInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// EventSources returns a EventSourceInformer.
+func (v *version) EventSources() EventSourceInformer {
+	return &eventSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Sensors returns a SensorInformer.
+func (v *version) Sensors() SensorInformer {
+	return &sensorInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

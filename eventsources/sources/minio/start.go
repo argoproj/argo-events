@@ -36,14 +36,14 @@ import (
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventListener implements Eventing for minio event sources
 type EventListener struct {
 	EventSourceName  string
 	EventName        string
-	MinioEventSource apicommon.S3Artifact
+	MinioEventSource v1alpha1.S3Artifact
 	Metrics          *metrics.Metrics
 }
 
@@ -58,8 +58,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.MinioEvent
+func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
+	return v1alpha1.MinioEvent
 }
 
 // StartListening starts listening events
@@ -152,7 +152,7 @@ func (el *EventListener) handleOne(notification notification.Info, dispatch func
 	return nil
 }
 
-func getFilters(eventSource *apicommon.S3Artifact) (string, string) {
+func getFilters(eventSource *v1alpha1.S3Artifact) (string, string) {
 	if eventSource.Filter == nil {
 		return "", ""
 	}

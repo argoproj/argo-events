@@ -11,14 +11,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common/logging"
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	eventsourcepkg "github.com/argoproj/argo-events/pkg/apis/eventsource"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sensorpkg "github.com/argoproj/argo-events/pkg/apis/sensor"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
-	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 )
 
 // Validator is an interface for CRD objects
@@ -28,65 +22,64 @@ type Validator interface {
 }
 
 // GetValidator returns a Validator instance
-func GetValidator(ctx context.Context, client kubernetes.Interface, ebClient eventbusclient.Interface,
-	esClient eventsourceclient.Interface, sensorClient sensorclient.Interface,
+func GetValidator(ctx context.Context, client kubernetes.Interface, aeClient eventsclient.ArgoprojV1alpha1Interface,
 	kind metav1.GroupVersionKind, oldBytes []byte, newBytes []byte) (Validator, error) {
 	log := logging.FromContext(ctx)
 	switch kind.Kind {
-	case dfv1.EventBusGroupVersionKind.Kind:
-		var new *dfv1.EventBus
+	case aev1.EventBusGroupVersionKind.Kind:
+		var new *aev1.EventBus
 		if len(newBytes) > 0 {
-			new = &dfv1.EventBus{}
+			new = &aev1.EventBus{}
 			if err := json.Unmarshal(newBytes, new); err != nil {
 				log.Errorf("Could not unmarshal new raw object: %v", err)
 				return nil, err
 			}
 		}
-		var old *dfv1.EventBus
+		var old *aev1.EventBus
 		if len(oldBytes) > 0 {
-			old = &dfv1.EventBus{}
+			old = &aev1.EventBus{}
 			if err := json.Unmarshal(oldBytes, old); err != nil {
 				log.Errorf("Could not unmarshal old raw object: %v", err)
 				return nil, err
 			}
 		}
-		return NewEventBusValidator(client, ebClient, esClient, sensorClient, old, new), nil
-	case eventsourcepkg.Kind:
-		var new *eventsourcev1alpha1.EventSource
+		return NewEventBusValidator(client, aeClient.EventBus(new.Namespace), aeClient.EventSources(new.Namespace), aeClient.Sensors(new.Namespace), old, new), nil
+	case aev1.EventSourceGroupVersionKind.Kind:
+		var new *aev1.EventSource
 		if len(newBytes) > 0 {
-			new = &eventsourcev1alpha1.EventSource{}
+			new = &aev1.EventSource{}
 			if err := json.Unmarshal(newBytes, new); err != nil {
 				log.Errorf("Could not unmarshal new raw object: %v", err)
 				return nil, err
 			}
 		}
-		var old *eventsourcev1alpha1.EventSource
+		var old *aev1.EventSource
 		if len(oldBytes) > 0 {
-			old = &eventsourcev1alpha1.EventSource{}
+			old = &aev1.EventSource{}
 			if err := json.Unmarshal(oldBytes, old); err != nil {
 				log.Errorf("Could not unmarshal old raw object: %v", err)
 				return nil, err
 			}
 		}
-		return NewEventSourceValidator(client, ebClient, esClient, sensorClient, old, new), nil
-	case sensorpkg.Kind:
-		var new *sensorv1alpha1.Sensor
+		return NewEventSourceValidator(client, aeClient.EventBus(new.Namespace), aeClient.EventSources(new.Namespace), aeClient.Sensors(new.Namespace), old, new), nil
+	case aev1.SensorGroupVersionKind.Kind:
+		var new *aev1.Sensor
 		if len(newBytes) > 0 {
-			new = &sensorv1alpha1.Sensor{}
+			new = &aev1.Sensor{}
 			if err := json.Unmarshal(newBytes, new); err != nil {
 				log.Errorf("Could not unmarshal new raw object: %v", err)
 				return nil, err
 			}
 		}
-		var old *sensorv1alpha1.Sensor
+		var old *aev1.Sensor
 		if len(oldBytes) > 0 {
-			old = &sensorv1alpha1.Sensor{}
+			old = &aev1.Sensor{}
 			if err := json.Unmarshal(oldBytes, old); err != nil {
 				log.Errorf("Could not unmarshal old raw object: %v", err)
 				return nil, err
 			}
 		}
-		return NewSensorValidator(client, ebClient, esClient, sensorClient, old, new), nil
+		return NewSensorValidator(client, aeClient.EventBus(new.Namespace), aeClient.EventSources(new.Namespace), aeClient.Sensors(new.Namespace), old, new), nil
 	default:
 		return nil, fmt.Errorf("unrecognized GVK %v", kind)
 	}

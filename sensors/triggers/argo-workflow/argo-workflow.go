@@ -34,8 +34,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -64,7 +63,7 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 		DynamicClient: dynamicClient,
 		Sensor:        sensor,
 		Trigger:       trigger,
-		Logger:        logger.With(logging.LabelTriggerType, apicommon.ArgoWorkflowTrigger),
+		Logger:        logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeArgoWorkflow),
 		cmdRunner: func(cmd *exec.Cmd) error {
 			return cmd.Run()
 		},
@@ -72,8 +71,8 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *ArgoWorkflowTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.ArgoWorkflowTrigger
+func (t *ArgoWorkflowTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeArgoWorkflow
 }
 
 // FetchResource fetches the trigger resource from external source

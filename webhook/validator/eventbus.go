@@ -7,25 +7,23 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	eventbuscontroller "github.com/argoproj/argo-events/controllers/eventbus"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
-	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 )
 
 type eventbus struct {
 	client            kubernetes.Interface
-	eventBusClient    eventbusclient.Interface
-	eventSourceClient eventsourceclient.Interface
-	sensorClient      sensorclient.Interface
+	eventBusClient    eventsclient.EventBusInterface
+	eventSourceClient eventsclient.EventSourceInterface
+	sensorClient      eventsclient.SensorInterface
 
-	oldeb *eventbusv1alpha1.EventBus
-	neweb *eventbusv1alpha1.EventBus
+	oldeb *v1alpha1.EventBus
+	neweb *v1alpha1.EventBus
 }
 
 // NewEventBusValidator returns a validator for EventBus
-func NewEventBusValidator(client kubernetes.Interface, ebClient eventbusclient.Interface,
-	esClient eventsourceclient.Interface, sClient sensorclient.Interface, old, new *eventbusv1alpha1.EventBus) Validator {
+func NewEventBusValidator(client kubernetes.Interface, ebClient eventsclient.EventBusInterface,
+	esClient eventsclient.EventSourceInterface, sClient eventsclient.SensorInterface, old, new *v1alpha1.EventBus) Validator {
 	return &eventbus{client: client, eventBusClient: ebClient, eventSourceClient: esClient, sensorClient: sClient, oldeb: old, neweb: new}
 }
 
@@ -88,15 +86,15 @@ func (eb *eventbus) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionRe
 	return AllowedResponse()
 }
 
-func authChanged(old, new *eventbusv1alpha1.AuthStrategy) bool {
+func authChanged(old, new *v1alpha1.AuthStrategy) bool {
 	if old == nil && new == nil {
 		return false
 	}
 	if old == nil {
-		return *new != eventbusv1alpha1.AuthStrategyNone
+		return *new != v1alpha1.AuthStrategyNone
 	}
 	if new == nil {
-		return *old != eventbusv1alpha1.AuthStrategyNone
+		return *old != v1alpha1.AuthStrategyNone
 	}
 	return *new != *old
 }

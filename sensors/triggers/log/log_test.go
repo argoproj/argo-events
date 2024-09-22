@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 
-	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestLogTrigger(t *testing.T) {

@@ -6,8 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -19,7 +18,7 @@ const (
 )
 
 var (
-	testBadBusConfig = dfv1.BusConfig{}
+	testBadBusConfig = v1alpha1.BusConfig{}
 
 	testValidSensorSpec = &v1alpha1.Sensor{
 		TypeMeta:   metav1.TypeMeta{},
@@ -36,11 +35,11 @@ var (
 	}
 
 	testClusterID = "test"
-	testBusConfig = dfv1.BusConfig{
-		NATS: &dfv1.NATSConfig{
+	testBusConfig = v1alpha1.BusConfig{
+		NATS: &v1alpha1.NATSConfig{
 			URL:       "nats://test:4222",
 			ClusterID: &testClusterID,
-			Auth:      &dfv1.AuthStrategyNone,
+			Auth:      &v1alpha1.AuthStrategyNone,
 		},
 	}
 )

@@ -28,9 +28,7 @@ import (
 
 	"github.com/argoproj/argo-events/common/logging"
 	commontls "github.com/argoproj/argo-events/common/tls"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
-	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 	"github.com/argoproj/argo-events/webhook/validator"
 )
 
@@ -79,10 +77,8 @@ type Options struct {
 
 // AdmissionController implements a webhook for validation
 type AdmissionController struct {
-	Client            kubernetes.Interface
-	EventBusClient    eventbusclient.Interface
-	EventSourceClient eventsourceclient.Interface
-	SensorClient      sensorclient.Interface
+	Client           kubernetes.Interface
+	ArgoEventsClient eventsclient.ArgoprojV1alpha1Interface
 
 	Options  Options
 	Handlers map[schema.GroupVersionKind]runtime.Object
@@ -270,7 +266,7 @@ func (ac *AdmissionController) admit(ctx context.Context, request *admissionv1.A
 		log.Infof("Operation not interested: %v %v", request.Kind, request.Operation)
 		return &admissionv1.AdmissionResponse{Allowed: true}
 	}
-	v, err := validator.GetValidator(ctx, ac.Client, ac.EventBusClient, ac.EventSourceClient, ac.SensorClient,
+	v, err := validator.GetValidator(ctx, ac.Client, ac.ArgoEventsClient,
 		request.Kind, request.OldObject.Raw, request.Object.Raw)
 	if err != nil {
 		return validator.DeniedResponse("failed to get a validator: %v", err)

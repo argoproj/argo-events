@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/argoproj/argo-events/eventsources/sources"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestValidateEventSource(t *testing.T) {
@@ -39,7 +39,7 @@ func TestValidateEventSource(t *testing.T) {
 	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "aws-sns.yaml"))
 	assert.Nil(t, err)
 
-	var eventSource *v1alpha1.EventSource
+	var eventSource *aev1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
 	assert.NotNil(t, eventSource.Spec.SNS)

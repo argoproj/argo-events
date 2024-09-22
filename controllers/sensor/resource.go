@@ -35,8 +35,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // AdaptorArgs are the args needed to create a sensor deployment
@@ -47,7 +46,7 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, eventBus *dfv1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
+func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	sensor := args.Sensor
 
@@ -122,7 +121,7 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func buildDeployment(args *AdaptorArgs, eventBus *dfv1.EventBus) (*appv1.Deployment, error) {
+func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Deployment, error) {
 	deploymentSpec, err := buildDeploymentSpec(args)
 	if err != nil {
 		return nil, err
@@ -249,7 +248,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *dfv1.EventBus) (*appv1.Deploym
 		},
 		Spec: *deploymentSpec,
 	}
-	if err := controllerscommon.SetObjectMeta(args.Sensor, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(args.Sensor, deployment, v1alpha1.SensorGroupVersionKind); err != nil {
 		return nil, err
 	}
 

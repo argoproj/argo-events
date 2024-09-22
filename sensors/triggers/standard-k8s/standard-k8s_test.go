@@ -32,8 +32,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	core "k8s.io/client-go/testing"
 	k8stesting "k8s.io/client-go/testing"
 )
@@ -76,7 +75,7 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact := apicommon.NewResource(deployment)
+	artifact := v1alpha1.NewResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}
@@ -113,7 +112,7 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact := apicommon.NewResource(deployment)
+	artifact := v1alpha1.NewResource(deployment)
 	fakeSensor.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}
@@ -143,7 +142,7 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestStandardK8sTrigger_Execute(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact := apicommon.NewResource(deployment)
+	artifact := v1alpha1.NewResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}

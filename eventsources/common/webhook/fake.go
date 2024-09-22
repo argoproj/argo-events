@@ -21,10 +21,10 @@ import (
 
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
-var Hook = &v1alpha1.WebhookContext{
+var Hook = &aev1.WebhookContext{
 	Endpoint: "/fake",
 	Port:     "12000",
 	URL:      "test-url",

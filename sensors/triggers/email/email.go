@@ -27,8 +27,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -66,14 +65,14 @@ func NewEmailTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger 
 	return &EmailTrigger{
 		Sensor:   sensor,
 		Trigger:  trigger,
-		Logger:   logger.With(logging.LabelTriggerType, apicommon.EmailTrigger),
+		Logger:   logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeEmail),
 		emailSvc: emailSvc,
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *EmailTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.EmailTrigger
+func (t *EmailTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeEmail
 }
 
 func (t *EmailTrigger) FetchResource(ctx context.Context) (interface{}, error) {

@@ -11,7 +11,7 @@ import (
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	"github.com/argoproj/argo-events/eventsources/events"
 	metrics "github.com/argoproj/argo-events/metrics"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func Test_HandleOne(t *testing.T) {

@@ -5,19 +5,19 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/argoproj/argo-events/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"go.uber.org/zap"
 )
 
 type Kafka struct {
 	Logger *zap.SugaredLogger
-	config *eventbusv1alpha1.KafkaBus
+	config *v1alpha1.KafkaBus
 }
 
-func NewKafka(config *eventbusv1alpha1.KafkaBus, logger *zap.SugaredLogger) *Kafka {
+func NewKafka(config *v1alpha1.KafkaBus, logger *zap.SugaredLogger) *Kafka {
 	// set defaults
 	if config.ConsumerGroup == nil {
-		config.ConsumerGroup = &eventbusv1alpha1.KafkaConsumerGroup{}
+		config.ConsumerGroup = &v1alpha1.KafkaConsumerGroup{}
 	}
 
 	return &Kafka{
@@ -37,7 +37,7 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 	config.Consumer.IsolationLevel = sarama.ReadCommitted
 	config.Consumer.Offsets.AutoCommit.Enable = false
 
-	switch k.config.ConsumerGroup.StartOldest {
+	switch k.config.ConsumerGroup.Oldest {
 	case true:
 		config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	case false:

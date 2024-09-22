@@ -33,15 +33,14 @@ import (
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventListener implements Eventing for amqp event source
 type EventListener struct {
 	EventSourceName string
 	EventName       string
-	AMQPEventSource v1alpha1.AMQPEventSource
+	AMQPEventSource aev1.AMQPEventSource
 	Metrics         *metrics.Metrics
 }
 
@@ -56,8 +55,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.AMQPEvent
+func (el *EventListener) GetEventSourceType() aev1.EventSourceType {
+	return aev1.AMQPEvent
 }
 
 // StartListening starts listening events
@@ -156,7 +155,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) handleOne(amqpEventSource *v1alpha1.AMQPEventSource, msg amqplib.Delivery, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(amqpEventSource *aev1.AMQPEventSource, msg amqplib.Delivery, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
@@ -198,9 +197,9 @@ func (el *EventListener) handleOne(amqpEventSource *v1alpha1.AMQPEventSource, ms
 
 // setDefaults sets the default values in case the user hasn't defined them
 // helps also to keep retro-compatibility with current dpeloyments
-func setDefaults(eventSource *v1alpha1.AMQPEventSource) {
+func setDefaults(eventSource *aev1.AMQPEventSource) {
 	if eventSource.ExchangeDeclare == nil {
-		eventSource.ExchangeDeclare = &v1alpha1.AMQPExchangeDeclareConfig{
+		eventSource.ExchangeDeclare = &aev1.AMQPExchangeDeclareConfig{
 			Durable:    true,
 			AutoDelete: false,
 			Internal:   false,
@@ -209,7 +208,7 @@ func setDefaults(eventSource *v1alpha1.AMQPEventSource) {
 	}
 
 	if eventSource.QueueDeclare == nil {
-		eventSource.QueueDeclare = &v1alpha1.AMQPQueueDeclareConfig{
+		eventSource.QueueDeclare = &aev1.AMQPQueueDeclareConfig{
 			Name:       "",
 			Durable:    false,
 			AutoDelete: false,
@@ -219,13 +218,13 @@ func setDefaults(eventSource *v1alpha1.AMQPEventSource) {
 	}
 
 	if eventSource.QueueBind == nil {
-		eventSource.QueueBind = &v1alpha1.AMQPQueueBindConfig{
+		eventSource.QueueBind = &aev1.AMQPQueueBindConfig{
 			NoWait: false,
 		}
 	}
 
 	if eventSource.Consume == nil {
-		eventSource.Consume = &v1alpha1.AMQPConsumeConfig{
+		eventSource.Consume = &aev1.AMQPConsumeConfig{
 			ConsumerTag: "",
 			AutoAck:     true,
 			Exclusive:   false,
@@ -236,7 +235,7 @@ func setDefaults(eventSource *v1alpha1.AMQPEventSource) {
 }
 
 // getDelivery sets up a channel for message deliveries
-func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-chan amqplib.Delivery, error) {
+func getDelivery(ch *amqplib.Channel, eventSource *aev1.AMQPEventSource) (<-chan amqplib.Delivery, error) {
 	err := ch.ExchangeDeclare(
 		eventSource.ExchangeName,
 		eventSource.ExchangeType,

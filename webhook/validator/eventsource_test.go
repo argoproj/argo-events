@@ -8,7 +8,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestValidateEventSource(t *testing.T) {
@@ -27,7 +27,7 @@ func TestValidateEventSource(t *testing.T) {
 		es.Namespace = testNamespace
 		newEs := es.DeepCopy()
 		newEs.Generation++
-		v := NewEventSourceValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, es, newEs)
+		v := NewEventSourceValidator(fakeK8sClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), es, newEs)
 		r := v.ValidateCreate(contextWithLogger(t))
 		assert.True(t, r.Allowed)
 		r = v.ValidateUpdate(contextWithLogger(t))

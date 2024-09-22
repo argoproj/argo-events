@@ -30,8 +30,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -52,7 +51,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,
-		Logger:  logger.With(logging.LabelTriggerType, apicommon.CustomTrigger),
+		Logger:  logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeCustom),
 	}
 
 	ct := trigger.Template.CustomTrigger
@@ -124,8 +123,8 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 }
 
 // GetTriggerType returns the type of the trigger
-func (ct *CustomTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.CustomTrigger
+func (ct *CustomTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeCustom
 }
 
 // FetchResource fetches the trigger resource from external source

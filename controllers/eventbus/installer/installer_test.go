@@ -13,8 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/argoproj/argo-events/controllers"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 const (
@@ -80,8 +79,7 @@ func TestGetInstaller(t *testing.T) {
 }
 
 func init() {
-	_ = eventsourcev1alpha1.AddToScheme(scheme.Scheme)
-	_ = sensorv1alpha1.AddToScheme(scheme.Scheme)
+	_ = aev1.AddToScheme(scheme.Scheme)
 }
 
 func TestGetLinkedEventSources(t *testing.T) {
@@ -113,39 +111,39 @@ func TestGetLinkedSensors(t *testing.T) {
 	})
 }
 
-func fakeEmptyEventSource() *eventsourcev1alpha1.EventSource {
-	return &eventsourcev1alpha1.EventSource{
+func fakeEmptyEventSource() *aev1.EventSource {
+	return &aev1.EventSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
 			Name:      "test-es",
 		},
-		Spec: eventsourcev1alpha1.EventSourceSpec{},
+		Spec: aev1.EventSourceSpec{},
 	}
 }
 
-func fakeCalendarEventSourceMap(name string) map[string]eventsourcev1alpha1.CalendarEventSource {
-	return map[string]eventsourcev1alpha1.CalendarEventSource{name: {Schedule: "*/5 * * * *"}}
+func fakeCalendarEventSourceMap(name string) map[string]aev1.CalendarEventSource {
+	return map[string]aev1.CalendarEventSource{name: {Schedule: "*/5 * * * *"}}
 }
 
-func fakeSensor() *sensorv1alpha1.Sensor {
-	return &sensorv1alpha1.Sensor{
+func fakeSensor() *aev1.Sensor {
+	return &aev1.Sensor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "fake-sensor",
 			Namespace: testNamespace,
 		},
-		Spec: sensorv1alpha1.SensorSpec{
-			Triggers: []sensorv1alpha1.Trigger{
+		Spec: aev1.SensorSpec{
+			Triggers: []aev1.Trigger{
 				{
-					Template: &sensorv1alpha1.TriggerTemplate{
+					Template: &aev1.TriggerTemplate{
 						Name: "fake-trigger",
-						K8s: &sensorv1alpha1.StandardK8STrigger{
+						K8s: &aev1.StandardK8STrigger{
 							Operation: "create",
-							Source:    &sensorv1alpha1.ArtifactLocation{},
+							Source:    &aev1.ArtifactLocation{},
 						},
 					},
 				},
 			},
-			Dependencies: []sensorv1alpha1.EventDependency{
+			Dependencies: []aev1.EventDependency{
 				{
 					Name:            "fake-dep",
 					EventSourceName: "fake-source",

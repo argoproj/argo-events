@@ -25,8 +25,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -79,13 +78,13 @@ func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger
 		Sensor:  sensor,
 		Trigger: trigger,
 		Hub:     hub,
-		Logger:  logger.With(logging.LabelTriggerType, apicommon.AzureEventHubsTrigger),
+		Logger:  logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeAzureEventHubs),
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *AzureEventHubsTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.AzureEventHubsTrigger
+func (t *AzureEventHubsTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeAzureEventHubs
 }
 
 // FetchResource fetches the trigger. As the Azure Event Hubs trigger is simply a Hub client, there

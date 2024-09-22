@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ValidateWebhookContext validates a webhook context
-func ValidateWebhookContext(context *v1alpha1.WebhookContext) error {
+func ValidateWebhookContext(context *aev1.WebhookContext) error {
 	if context == nil {
 		return fmt.Errorf("")
 	}

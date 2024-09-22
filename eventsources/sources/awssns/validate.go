@@ -22,7 +22,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ValidateEventSource validates sns event source
@@ -30,7 +30,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 	return validate(&listener.SNSEventSource)
 }
 
-func validate(snsEventSource *v1alpha1.SNSEventSource) error {
+func validate(snsEventSource *aev1.SNSEventSource) error {
 	if snsEventSource == nil {
 		return common.ErrNilEventSource
 	}

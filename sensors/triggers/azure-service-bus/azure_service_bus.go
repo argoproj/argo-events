@@ -25,8 +25,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -43,7 +42,7 @@ type AzureServiceBusTrigger struct {
 }
 
 func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients common.StringKeyedMap[*servicebus.Sender], logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
-	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.AzureServiceBusTrigger)
+	triggerLogger := logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeAzureServiceBus)
 	azureServiceBusTrigger := trigger.Template.AzureServiceBus
 
 	sender, ok := azureServiceBusClients.Load(trigger.Template.Name)
@@ -103,8 +102,8 @@ func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigge
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *AzureServiceBusTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.AzureServiceBusTrigger
+func (t *AzureServiceBusTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeAzureServiceBus
 }
 
 // FetchResource fetches the trigger resource

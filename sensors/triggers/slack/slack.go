@@ -27,8 +27,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -62,15 +61,15 @@ func NewSlackTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger 
 	return &SlackTrigger{
 		Sensor:     sensor,
 		Trigger:    trigger,
-		Logger:     logger.With(logging.LabelTriggerType, apicommon.SlackTrigger),
+		Logger:     logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeSlack),
 		httpClient: httpClient,
 		slackSvc:   slackSvc,
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *SlackTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.SlackTrigger
+func (t *SlackTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeSlack
 }
 
 func (t *SlackTrigger) FetchResource(ctx context.Context) (interface{}, error) {

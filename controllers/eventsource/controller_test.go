@@ -12,8 +12,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,27 +40,27 @@ var (
 		Key: testConfigMapKey,
 	}
 
-	fakeEventBus = &dfv1.EventBus{
+	fakeEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: dfv1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
 			Name:      common.DefaultEventBusName,
 		},
-		Spec: dfv1.EventBusSpec{
-			NATS: &dfv1.NATSBus{
-				Native: &dfv1.NativeStrategy{
-					Auth: &dfv1.AuthStrategyToken,
+		Spec: v1alpha1.EventBusSpec{
+			NATS: &v1alpha1.NATSBus{
+				Native: &v1alpha1.NativeStrategy{
+					Auth: &v1alpha1.AuthStrategyToken,
 				},
 			},
 		},
-		Status: dfv1.EventBusStatus{
-			Config: dfv1.BusConfig{
-				NATS: &dfv1.NATSConfig{
+		Status: v1alpha1.EventBusStatus{
+			Config: v1alpha1.BusConfig{
+				NATS: &v1alpha1.NATSConfig{
 					URL:  "nats://xxxx",
-					Auth: &dfv1.AuthStrategyToken,
+					Auth: &v1alpha1.AuthStrategyToken,
 					AccessSecret: &corev1.SecretKeySelector{
 						Key: "test-key",
 						LocalObjectReference: corev1.LocalObjectReference{
@@ -73,46 +72,46 @@ var (
 		},
 	}
 
-	fakeEventBusJetstream = &dfv1.EventBus{
+	fakeEventBusJetstream = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: dfv1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
 			Name:      common.DefaultEventBusName,
 		},
-		Spec: dfv1.EventBusSpec{
-			JetStream: &dfv1.JetStreamBus{
+		Spec: v1alpha1.EventBusSpec{
+			JetStream: &v1alpha1.JetStreamBus{
 				Version: "x.x.x",
 			},
 		},
-		Status: dfv1.EventBusStatus{
-			Config: dfv1.BusConfig{
-				JetStream: &dfv1.JetStreamConfig{
+		Status: v1alpha1.EventBusStatus{
+			Config: v1alpha1.BusConfig{
+				JetStream: &v1alpha1.JetStreamConfig{
 					URL: "nats://xxxx",
 				},
 			},
 		},
 	}
 
-	fakeEventBusKafka = &dfv1.EventBus{
+	fakeEventBusKafka = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: dfv1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
 			Name:      common.DefaultEventBusName,
 		},
-		Spec: dfv1.EventBusSpec{
-			Kafka: &dfv1.KafkaBus{
+		Spec: v1alpha1.EventBusSpec{
+			Kafka: &v1alpha1.KafkaBus{
 				URL: "localhost:9092",
 			},
 		},
-		Status: dfv1.EventBusStatus{
-			Config: dfv1.BusConfig{
-				Kafka: &dfv1.KafkaBus{
+		Status: v1alpha1.EventBusStatus{
+			Config: v1alpha1.BusConfig{
+				Kafka: &v1alpha1.KafkaBus{
 					URL: "localhost:9092",
 				},
 			},
@@ -185,7 +184,6 @@ func fakeHDFSEventSourceMap(name string) map[string]v1alpha1.HDFSEventSource {
 
 func init() {
 	_ = v1alpha1.AddToScheme(scheme.Scheme)
-	_ = dfv1.AddToScheme(scheme.Scheme)
 	_ = appv1.AddToScheme(scheme.Scheme)
 	_ = corev1.AddToScheme(scheme.Scheme)
 }

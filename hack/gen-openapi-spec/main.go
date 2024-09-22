@@ -9,10 +9,7 @@ import (
 	"k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kube-openapi/pkg/validation/spec"
 
-	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	esv1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 type (
@@ -36,19 +33,7 @@ func main() {
 	}
 	defs := spec.Definitions{}
 	dependencies := []string{}
-	for defName, val := range cv1.GetOpenAPIDefinitions(referenceCallback) {
-		defs[swaggify(defName)] = val.Schema
-		dependencies = append(dependencies, val.Dependencies...)
-	}
-	for defName, val := range dfv1.GetOpenAPIDefinitions(referenceCallback) {
-		defs[swaggify(defName)] = val.Schema
-		dependencies = append(dependencies, val.Dependencies...)
-	}
-	for defName, val := range esv1.GetOpenAPIDefinitions(referenceCallback) {
-		defs[swaggify(defName)] = val.Schema
-		dependencies = append(dependencies, val.Dependencies...)
-	}
-	for defName, val := range sv1.GetOpenAPIDefinitions(referenceCallback) {
+	for defName, val := range aev1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
 		dependencies = append(dependencies, val.Dependencies...)
 	}

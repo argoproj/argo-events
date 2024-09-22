@@ -25,8 +25,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -74,13 +73,13 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 		Sensor:  sensor,
 		Trigger: trigger,
 		Conn:    conn,
-		Logger:  logger.With(logging.LabelTriggerType, apicommon.NATSTrigger),
+		Logger:  logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeNATS),
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *NATSTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.NATSTrigger
+func (t *NATSTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeNATS
 }
 
 // FetchResource fetches the trigger. As the NATS trigger is simply a NATS client, there

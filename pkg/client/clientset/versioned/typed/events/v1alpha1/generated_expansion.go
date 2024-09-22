@@ -19,3 +19,7 @@ limitations under the License.
 package v1alpha1
 
 type EventBusExpansion interface{}
+
+type EventSourceExpansion interface{}
+
+type SensorExpansion interface{}

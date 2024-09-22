@@ -19,10 +19,9 @@ package artifacts
 import (
 	"testing"
 
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
-	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 func TestNewResourceReader(t *testing.T) {
@@ -41,7 +40,7 @@ func TestNewResourceReader(t *testing.T) {
 				},
 			},
 		}
-		artifact := common.NewResource(un)
+		artifact := v1alpha1.NewResource(un)
 		reader, err := NewResourceReader(&artifact)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(reader, convey.ShouldNotBeNil)

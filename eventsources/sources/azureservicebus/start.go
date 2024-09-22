@@ -15,15 +15,14 @@ import (
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventListener implements Eventing for azure events hub event source
 type EventListener struct {
 	EventSourceName            string
 	EventName                  string
-	AzureServiceBusEventSource v1alpha1.AzureServiceBusEventSource
+	AzureServiceBusEventSource aev1.AzureServiceBusEventSource
 	Metrics                    *metrics.Metrics
 }
 
@@ -38,8 +37,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.AzureServiceBus
+func (el *EventListener) GetEventSourceType() aev1.EventSourceType {
+	return aev1.AzureServiceBus
 }
 
 type ReceiverType string
@@ -155,7 +154,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
-func (el *EventListener) handleOne(servicebusEventSource *v1alpha1.AzureServiceBusEventSource, message *servicebus.ReceivedMessage, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
+func (el *EventListener) handleOne(servicebusEventSource *aev1.AzureServiceBusEventSource, message *servicebus.ReceivedMessage, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())

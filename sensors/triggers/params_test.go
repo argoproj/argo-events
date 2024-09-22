@@ -27,8 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -569,7 +568,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		"fake-dependency": event,
 	}
 
-	artifact := apicommon.NewResource(deployment)
+	artifact := v1alpha1.NewResource(deployment)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}

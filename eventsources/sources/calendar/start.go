@@ -34,8 +34,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/persist"
 	metrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventListener implements Eventing for calendar based events
@@ -61,8 +60,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.CalendarEvent
+func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
+	return v1alpha1.CalendarEvent
 }
 
 // initializePersistence initialize the persistence object.

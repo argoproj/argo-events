@@ -7,25 +7,23 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	eventsourcecontroller "github.com/argoproj/argo-events/controllers/eventsource"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
-	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 )
 
 type eventsource struct {
 	client            kubernetes.Interface
-	eventBusClient    eventbusclient.Interface
-	eventSourceClient eventsourceclient.Interface
-	sensorClient      sensorclient.Interface
+	eventBusClient    eventsclient.EventBusInterface
+	eventSourceClient eventsclient.EventSourceInterface
+	sensorClient      eventsclient.SensorInterface
 
-	oldes *eventsourcev1alpha1.EventSource
-	newes *eventsourcev1alpha1.EventSource
+	oldes *v1alpha1.EventSource
+	newes *v1alpha1.EventSource
 }
 
 // NewEventSourceValidator returns a validator for EventSource
-func NewEventSourceValidator(client kubernetes.Interface, ebClient eventbusclient.Interface,
-	esClient eventsourceclient.Interface, sClient sensorclient.Interface, old, new *eventsourcev1alpha1.EventSource) Validator {
+func NewEventSourceValidator(client kubernetes.Interface, ebClient eventsclient.EventBusInterface,
+	esClient eventsclient.EventSourceInterface, sClient eventsclient.SensorInterface, old, new *v1alpha1.EventSource) Validator {
 	return &eventsource{client: client, eventBusClient: ebClient, eventSourceClient: esClient, sensorClient: sClient, oldes: old, newes: new}
 }
 

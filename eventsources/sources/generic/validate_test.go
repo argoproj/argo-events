@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/eventsources/sources"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 )

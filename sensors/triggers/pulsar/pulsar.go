@@ -25,8 +25,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -133,13 +132,13 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		Sensor:   sensor,
 		Trigger:  trigger,
 		Producer: producer,
-		Logger:   logger.With(logging.LabelTriggerType, apicommon.PulsarTrigger),
+		Logger:   logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypePulsar),
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *PulsarTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.PulsarTrigger
+func (t *PulsarTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypePulsar
 }
 
 // FetchResource fetches the trigger. As the Pulsar trigger is simply a Pulsar producer, there

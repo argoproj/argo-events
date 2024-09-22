@@ -24,7 +24,7 @@ import (
 	"go.uber.org/zap"
 
 	metrics "github.com/argoproj/argo-events/metrics"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 var (
@@ -47,7 +47,7 @@ type Router interface {
 // Route contains general information about a route
 type Route struct {
 	// WebhookContext refers to the webhook context
-	Context *v1alpha1.WebhookContext
+	Context *aev1.WebhookContext
 	// Logger to log stuff
 	Logger *zap.SugaredLogger
 	// StartCh controls the

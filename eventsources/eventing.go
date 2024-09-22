@@ -53,9 +53,7 @@ import (
 	"github.com/argoproj/argo-events/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/eventsources/sources/webhook"
 	eventsourcemetrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventingServer is the server API for Eventing service.
@@ -68,16 +66,16 @@ type EventingServer interface {
 
 	GetEventName() string
 
-	GetEventSourceType() apicommon.EventSourceType
+	GetEventSourceType() aev1.EventSourceType
 
 	// Function to start listening events.
 	StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error
 }
 
 // GetEventingServers returns the mapping of event source type and list of eventing servers
-func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcemetrics.Metrics) (map[apicommon.EventSourceType][]EventingServer, map[string]*v1alpha1.EventSourceFilter) {
-	result := make(map[apicommon.EventSourceType][]EventingServer)
-	filters := make(map[string]*v1alpha1.EventSourceFilter)
+func GetEventingServers(eventSource *aev1.EventSource, metrics *eventsourcemetrics.Metrics) (map[aev1.EventSourceType][]EventingServer, map[string]*aev1.EventSourceFilter) {
+	result := make(map[aev1.EventSourceType][]EventingServer)
+	filters := make(map[string]*aev1.EventSourceFilter)
 	if len(eventSource.Spec.AMQP) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.AMQP {
@@ -86,7 +84,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &amqp.EventListener{EventSourceName: eventSource.Name, EventName: k, AMQPEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.AMQPEvent] = servers
+		result[aev1.AMQPEvent] = servers
 	}
 	if len(eventSource.Spec.AzureEventsHub) != 0 {
 		servers := []EventingServer{}
@@ -96,7 +94,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &azureeventshub.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureEventsHubEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.AzureEventsHub] = servers
+		result[aev1.AzureEventsHub] = servers
 	}
 	if len(eventSource.Spec.AzureQueueStorage) != 0 {
 		servers := []EventingServer{}
@@ -106,7 +104,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &azurequeuestorage.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureQueueStorageEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.AzureQueueStorage] = servers
+		result[aev1.AzureQueueStorage] = servers
 	}
 	if len(eventSource.Spec.AzureServiceBus) != 0 {
 		servers := []EventingServer{}
@@ -116,7 +114,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &azureservicebus.EventListener{EventSourceName: eventSource.Name, EventName: k, AzureServiceBusEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.AzureServiceBus] = servers
+		result[aev1.AzureServiceBus] = servers
 	}
 	if len(eventSource.Spec.Bitbucket) != 0 {
 		servers := []EventingServer{}
@@ -126,7 +124,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &bitbucket.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.BitbucketEvent] = servers
+		result[aev1.BitbucketEvent] = servers
 	}
 	if len(eventSource.Spec.BitbucketServer) != 0 {
 		servers := []EventingServer{}
@@ -136,7 +134,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &bitbucketserver.EventListener{EventSourceName: eventSource.Name, EventName: k, BitbucketServerEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.BitbucketServerEvent] = servers
+		result[aev1.BitbucketServerEvent] = servers
 	}
 	if len(eventSource.Spec.Calendar) != 0 {
 		servers := []EventingServer{}
@@ -146,7 +144,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &calendar.EventListener{EventSourceName: eventSource.Name, EventName: k, CalendarEventSource: v, Namespace: eventSource.Namespace, Metrics: metrics})
 		}
-		result[apicommon.CalendarEvent] = servers
+		result[aev1.CalendarEvent] = servers
 	}
 	if len(eventSource.Spec.Emitter) != 0 {
 		servers := []EventingServer{}
@@ -156,7 +154,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &emitter.EventListener{EventSourceName: eventSource.Name, EventName: k, EmitterEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.EmitterEvent] = servers
+		result[aev1.EmitterEvent] = servers
 	}
 	if len(eventSource.Spec.File) != 0 {
 		servers := []EventingServer{}
@@ -166,7 +164,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &file.EventListener{EventSourceName: eventSource.Name, EventName: k, FileEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.FileEvent] = servers
+		result[aev1.FileEvent] = servers
 	}
 	if len(eventSource.Spec.SFTP) != 0 {
 		servers := []EventingServer{}
@@ -176,7 +174,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &sftp.EventListener{EventSourceName: eventSource.Name, EventName: k, SFTPEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.SFTPEvent] = servers
+		result[aev1.SFTPEvent] = servers
 	}
 	if len(eventSource.Spec.Gerrit) != 0 {
 		servers := []EventingServer{}
@@ -186,7 +184,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &gerrit.EventListener{EventSourceName: eventSource.Name, EventName: k, GerritEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.GerritEvent] = servers
+		result[aev1.GerritEvent] = servers
 	}
 	if len(eventSource.Spec.Github) != 0 {
 		servers := []EventingServer{}
@@ -196,7 +194,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &github.EventListener{EventSourceName: eventSource.Name, EventName: k, GithubEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.GithubEvent] = servers
+		result[aev1.GithubEvent] = servers
 	}
 	if len(eventSource.Spec.Gitlab) != 0 {
 		servers := []EventingServer{}
@@ -206,7 +204,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &gitlab.EventListener{EventSourceName: eventSource.Name, EventName: k, GitlabEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.GitlabEvent] = servers
+		result[aev1.GitlabEvent] = servers
 	}
 	if len(eventSource.Spec.HDFS) != 0 {
 		servers := []EventingServer{}
@@ -216,7 +214,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &hdfs.EventListener{EventSourceName: eventSource.Name, EventName: k, HDFSEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.HDFSEvent] = servers
+		result[aev1.HDFSEvent] = servers
 	}
 	if len(eventSource.Spec.Kafka) != 0 {
 		servers := []EventingServer{}
@@ -226,7 +224,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &kafka.EventListener{EventSourceName: eventSource.Name, EventName: k, KafkaEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.KafkaEvent] = servers
+		result[aev1.KafkaEvent] = servers
 	}
 	if len(eventSource.Spec.MQTT) != 0 {
 		servers := []EventingServer{}
@@ -236,14 +234,14 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &mqtt.EventListener{EventSourceName: eventSource.Name, EventName: k, MQTTEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.MQTTEvent] = servers
+		result[aev1.MQTTEvent] = servers
 	}
 	if len(eventSource.Spec.Minio) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Minio {
 			servers = append(servers, &minio.EventListener{EventSourceName: eventSource.Name, EventName: k, MinioEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.MinioEvent] = servers
+		result[aev1.MinioEvent] = servers
 	}
 	if len(eventSource.Spec.NATS) != 0 {
 		servers := []EventingServer{}
@@ -253,7 +251,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &nats.EventListener{EventSourceName: eventSource.Name, EventName: k, NATSEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.NATSEvent] = servers
+		result[aev1.NATSEvent] = servers
 	}
 	if len(eventSource.Spec.NSQ) != 0 {
 		servers := []EventingServer{}
@@ -263,7 +261,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &nsq.EventListener{EventSourceName: eventSource.Name, EventName: k, NSQEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.NSQEvent] = servers
+		result[aev1.NSQEvent] = servers
 	}
 	if len(eventSource.Spec.PubSub) != 0 {
 		servers := []EventingServer{}
@@ -273,7 +271,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &gcppubsub.EventListener{EventSourceName: eventSource.Name, EventName: k, PubSubEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.PubSubEvent] = servers
+		result[aev1.PubSubEvent] = servers
 	}
 	if len(eventSource.Spec.Redis) != 0 {
 		servers := []EventingServer{}
@@ -283,7 +281,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &redis.EventListener{EventSourceName: eventSource.Name, EventName: k, RedisEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.RedisEvent] = servers
+		result[aev1.RedisEvent] = servers
 	}
 	if len(eventSource.Spec.RedisStream) != 0 {
 		servers := []EventingServer{}
@@ -293,7 +291,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &redisstream.EventListener{EventSourceName: eventSource.Name, EventName: k, EventSource: v, Metrics: metrics})
 		}
-		result[apicommon.RedisStreamEvent] = servers
+		result[aev1.RedisStreamEvent] = servers
 	}
 	if len(eventSource.Spec.SNS) != 0 {
 		servers := []EventingServer{}
@@ -303,7 +301,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &awssns.EventListener{EventSourceName: eventSource.Name, EventName: k, SNSEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.SNSEvent] = servers
+		result[aev1.SNSEvent] = servers
 	}
 	if len(eventSource.Spec.SQS) != 0 {
 		servers := []EventingServer{}
@@ -313,7 +311,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &awssqs.EventListener{EventSourceName: eventSource.Name, EventName: k, SQSEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.SQSEvent] = servers
+		result[aev1.SQSEvent] = servers
 	}
 	if len(eventSource.Spec.Slack) != 0 {
 		servers := []EventingServer{}
@@ -323,21 +321,21 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &slack.EventListener{EventSourceName: eventSource.Name, EventName: k, SlackEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.SlackEvent] = servers
+		result[aev1.SlackEvent] = servers
 	}
 	if len(eventSource.Spec.StorageGrid) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.StorageGrid {
 			servers = append(servers, &storagegrid.EventListener{EventSourceName: eventSource.Name, EventName: k, StorageGridEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.StorageGridEvent] = servers
+		result[aev1.StorageGridEvent] = servers
 	}
 	if len(eventSource.Spec.Stripe) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Stripe {
 			servers = append(servers, &stripe.EventListener{EventSourceName: eventSource.Name, EventName: k, StripeEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.StripeEvent] = servers
+		result[aev1.StripeEvent] = servers
 	}
 	if len(eventSource.Spec.Webhook) != 0 {
 		servers := []EventingServer{}
@@ -347,14 +345,14 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, Webhook: v, Metrics: metrics})
 		}
-		result[apicommon.WebhookEvent] = servers
+		result[aev1.WebhookEvent] = servers
 	}
 	if len(eventSource.Spec.Resource) != 0 {
 		servers := []EventingServer{}
 		for k, v := range eventSource.Spec.Resource {
 			servers = append(servers, &resource.EventListener{EventSourceName: eventSource.Name, EventName: k, ResourceEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.ResourceEvent] = servers
+		result[aev1.ResourceEvent] = servers
 	}
 	if len(eventSource.Spec.Pulsar) != 0 {
 		servers := []EventingServer{}
@@ -364,7 +362,7 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &pulsar.EventListener{EventSourceName: eventSource.Name, EventName: k, PulsarEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.PulsarEvent] = servers
+		result[aev1.PulsarEvent] = servers
 	}
 	if len(eventSource.Spec.Generic) != 0 {
 		servers := []EventingServer{}
@@ -374,15 +372,15 @@ func GetEventingServers(eventSource *v1alpha1.EventSource, metrics *eventsourcem
 			}
 			servers = append(servers, &generic.EventListener{EventSourceName: eventSource.Name, EventName: k, GenericEventSource: v, Metrics: metrics})
 		}
-		result[apicommon.GenericEvent] = servers
+		result[aev1.GenericEvent] = servers
 	}
 	return result, filters
 }
 
 // EventSourceAdaptor is the adaptor for eventsource service
 type EventSourceAdaptor struct {
-	eventSource     *v1alpha1.EventSource
-	eventBusConfig  *eventbusv1alpha1.BusConfig
+	eventSource     *aev1.EventSource
+	eventBusConfig  *aev1.BusConfig
 	eventBusSubject string
 	hostname        string
 
@@ -392,7 +390,7 @@ type EventSourceAdaptor struct {
 }
 
 // NewEventSourceAdaptor returns a new EventSourceAdaptor
-func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *eventbusv1alpha1.BusConfig, eventBusSubject, hostname string, metrics *eventsourcemetrics.Metrics) *EventSourceAdaptor {
+func NewEventSourceAdaptor(eventSource *aev1.EventSource, eventBusConfig *aev1.BusConfig, eventBusSubject, hostname string, metrics *eventsourcemetrics.Metrics) *EventSourceAdaptor {
 	return &EventSourceAdaptor{
 		eventSource:     eventSource,
 		eventBusConfig:  eventBusConfig,
@@ -406,8 +404,8 @@ func NewEventSourceAdaptor(eventSource *v1alpha1.EventSource, eventBusConfig *ev
 func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	log := logging.FromContext(ctx)
 
-	recreateTypes := make(map[apicommon.EventSourceType]bool)
-	for _, esType := range apicommon.RecreateStrategyEventSources {
+	recreateTypes := make(map[aev1.EventSourceType]bool)
+	for _, esType := range aev1.RecreateStrategyEventSources {
 		recreateTypes[esType] = true
 	}
 	isRecreateType := false
@@ -449,7 +447,7 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	return nil
 }
 
-func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.EventSourceType][]EventingServer, filters map[string]*v1alpha1.EventSourceFilter) error {
+func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSourceType][]EventingServer, filters map[string]*aev1.EventSourceFilter) error {
 	logger := logging.FromContext(ctx)
 	logger.Info("Starting event source server...")
 	clientID := generateClientID(e.hostname)
@@ -523,10 +521,10 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[apicommon.Even
 				defer wg.Done()
 				e.metrics.IncRunningServices(s.GetEventSourceName())
 				defer e.metrics.DecRunningServices(s.GetEventSourceName())
-				duration := apicommon.FromString("1s")
-				factor := apicommon.NewAmount("1")
-				jitter := apicommon.NewAmount("30")
-				backoff := apicommon.Backoff{
+				duration := aev1.FromString("1s")
+				factor := aev1.NewAmount("1")
+				jitter := aev1.NewAmount("30")
+				backoff := aev1.Backoff{
 					Steps:    10,
 					Duration: &duration,
 					Factor:   &factor,
@@ -632,7 +630,7 @@ func generateClientID(hostname string) string {
 	return clientID
 }
 
-func filterEvent(data []byte, filter *v1alpha1.EventSourceFilter) (bool, error) {
+func filterEvent(data []byte, filter *aev1.EventSourceFilter) (bool, error) {
 	dataMap := make(map[string]interface{})
 	err := json.Unmarshal(data, &dataMap)
 	if err != nil {

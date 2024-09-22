@@ -12,8 +12,7 @@ import (
 	"github.com/Knetic/govaluate"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"go.uber.org/zap"
 )
@@ -21,7 +20,7 @@ import (
 type KafkaSensor struct {
 	*base.Kafka
 	*sync.Mutex
-	sensor *sensorv1alpha1.Sensor
+	sensor *v1alpha1.Sensor
 
 	// kafka details
 	topics    *Topics
@@ -40,7 +39,7 @@ type KafkaSensor struct {
 	connected    bool
 }
 
-func NewKafkaSensor(kafkaConfig *eventbusv1alpha1.KafkaBus, sensor *sensorv1alpha1.Sensor, hostname string, logger *zap.SugaredLogger) *KafkaSensor {
+func NewKafkaSensor(kafkaConfig *v1alpha1.KafkaBus, sensor *v1alpha1.Sensor, hostname string, logger *zap.SugaredLogger) *KafkaSensor {
 	topics := &Topics{
 		event:   kafkaConfig.Topic,
 		trigger: fmt.Sprintf("%s-%s-%s", kafkaConfig.Topic, sensor.Name, "trigger"),

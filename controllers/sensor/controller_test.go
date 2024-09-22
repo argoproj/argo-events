@@ -26,8 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/argoproj/argo-events/common/logging"
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 const (
@@ -70,7 +69,6 @@ func TestReconcile(t *testing.T) {
 }
 
 func init() {
-	_ = dfv1.AddToScheme(scheme.Scheme)
 	_ = v1alpha1.AddToScheme(scheme.Scheme)
 	_ = appv1.AddToScheme(scheme.Scheme)
 	_ = corev1.AddToScheme(scheme.Scheme)

@@ -34,15 +34,14 @@ import (
 	"github.com/argoproj/argo-events/eventsources/events"
 	"github.com/argoproj/argo-events/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventListener implements Eventing for aws sqs event source
 type EventListener struct {
 	EventSourceName string
 	EventName       string
-	SQSEventSource  v1alpha1.SQSEventSource
+	SQSEventSource  aev1.SQSEventSource
 	Metrics         *metrics.Metrics
 }
 
@@ -57,8 +56,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.SQSEvent
+func (el *EventListener) GetEventSourceType() aev1.EventSourceType {
+	return aev1.SQSEvent
 }
 
 // StartListening starts listening events

@@ -21,8 +21,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	openwhisk "github.com/argoproj/argo-events/sensors/triggers/apache-openwhisk"
 	argoworkflow "github.com/argoproj/argo-events/sensors/triggers/argo-workflow"
 	awslambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
@@ -41,7 +40,7 @@ import (
 
 // Trigger interface
 type Trigger interface {
-	GetTriggerType() apicommon.TriggerType
+	GetTriggerType() v1alpha1.TriggerType
 	// FetchResource fetches the trigger resource from external source
 	FetchResource(context.Context) (interface{}, error)
 	// ApplyResourceParameters applies parameters to the trigger resource

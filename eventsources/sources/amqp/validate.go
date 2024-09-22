@@ -21,8 +21,7 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ValidateEventSource validates gateway event source
@@ -30,7 +29,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 	return validate(&listener.AMQPEventSource)
 }
 
-func validate(eventSource *v1alpha1.AMQPEventSource) error {
+func validate(eventSource *aev1.AMQPEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
@@ -47,10 +46,10 @@ func validate(eventSource *v1alpha1.AMQPEventSource) error {
 		return fmt.Errorf("exchange type must be specified")
 	}
 	if eventSource.TLS != nil {
-		return apicommon.ValidateTLSConfig(eventSource.TLS)
+		return aev1.ValidateTLSConfig(eventSource.TLS)
 	}
 	if eventSource.Auth != nil {
-		return apicommon.ValidateBasicAuth(eventSource.Auth)
+		return aev1.ValidateBasicAuth(eventSource.Auth)
 	}
 	return nil
 }

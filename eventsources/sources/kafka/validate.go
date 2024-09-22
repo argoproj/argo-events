@@ -21,8 +21,7 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ValidateEventSource validates the gateway event source
@@ -44,10 +43,10 @@ func validate(eventSource *v1alpha1.KafkaEventSource) error {
 		return fmt.Errorf("consumerGroup or partition must be specified")
 	}
 	if eventSource.TLS != nil {
-		return apicommon.ValidateTLSConfig(eventSource.TLS)
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
 	}
 	if eventSource.SASL != nil {
-		return apicommon.ValidateSASLConfig(eventSource.SASL)
+		return v1alpha1.ValidateSASLConfig(eventSource.SASL)
 	}
 	return nil
 }

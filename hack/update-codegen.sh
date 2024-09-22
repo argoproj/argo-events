@@ -31,18 +31,6 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "client,informer,lister" \
   --plural-exceptions="EventBus:EventBus" \
   --go-header-file hack/custom-boilerplate.go.txt
 
-subheader "running codegen for sensor"
-bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-  github.com/argoproj/argo-events/pkg/client/sensor github.com/argoproj/argo-events/pkg/apis \
-  "sensor:v1alpha1" \
-  --go-header-file hack/custom-boilerplate.go.txt
-
-subheader "running codegen for eventsource"
-bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-  github.com/argoproj/argo-events/pkg/client/eventsource github.com/argoproj/argo-events/pkg/apis \
-  "eventsource:v1alpha1" \
-  --go-header-file hack/custom-boilerplate.go.txt
-
 # gofmt the tree
 subheader "running gofmt"
 find . -name "*.go" -type f -print0 | xargs -0 gofmt -s -w

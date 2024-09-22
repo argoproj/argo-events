@@ -27,8 +27,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	commonaws "github.com/argoproj/argo-events/eventsources/common/aws"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -63,13 +62,13 @@ func NewAWSLambdaTrigger(lambdaClients common.StringKeyedMap[*lambda.Lambda], se
 		LambdaClient: lambdaClient,
 		Sensor:       sensor,
 		Trigger:      trigger,
-		Logger:       logger.With(logging.LabelTriggerType, apicommon.LambdaTrigger),
+		Logger:       logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeLambda),
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *AWSLambdaTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.LambdaTrigger
+func (t *AWSLambdaTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeLambda
 }
 
 // FetchResource fetches the trigger resource

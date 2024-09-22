@@ -20,8 +20,7 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ValidateEventSource validates nats event source
@@ -40,7 +39,7 @@ func validate(eventSource *v1alpha1.RedisStreamEventSource) error {
 		return fmt.Errorf("stream/streams must be specified")
 	}
 	if eventSource.TLS != nil {
-		return apicommon.ValidateTLSConfig(eventSource.TLS)
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
 	}
 	return nil
 }

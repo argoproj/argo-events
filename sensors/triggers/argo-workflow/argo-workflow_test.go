@@ -25,8 +25,7 @@ import (
 	"k8s.io/client-go/dynamic"
 
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -75,7 +74,7 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 func getFakeWfTrigger(operation v1alpha1.ArgoWorkflowOperation) *ArgoWorkflowTrigger {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-	artifact := apicommon.NewResource(un)
+	artifact := v1alpha1.NewResource(un)
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake",

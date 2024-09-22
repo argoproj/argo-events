@@ -24,7 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ResourceReader implements the ArtifactReader interface for resource artifacts
@@ -33,7 +33,7 @@ type ResourceReader struct {
 }
 
 // NewResourceReader creates a new ArtifactReader for resource
-func NewResourceReader(resourceArtifact *common.Resource) (ArtifactReader, error) {
+func NewResourceReader(resourceArtifact *v1alpha1.Resource) (ArtifactReader, error) {
 	if resourceArtifact == nil {
 		return nil, fmt.Errorf("ResourceArtifact does not exist")
 	}

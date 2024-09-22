@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/minio/minio-go/v7/pkg/notification"
 )
 
@@ -30,7 +30,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 	return validate(&listener.MinioEventSource)
 }
 
-func validate(eventSource *apicommon.S3Artifact) error {
+func validate(eventSource *v1alpha1.S3Artifact) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}

@@ -32,6 +32,14 @@ func (c *FakeArgoprojV1alpha1) EventBus(namespace string) v1alpha1.EventBusInter
 	return &FakeEventBus{c, namespace}
 }
 
+func (c *FakeArgoprojV1alpha1) EventSources(namespace string) v1alpha1.EventSourceInterface {
+	return &FakeEventSources{c, namespace}
+}
+
+func (c *FakeArgoprojV1alpha1) Sensors(namespace string) v1alpha1.SensorInterface {
+	return &FakeSensors{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeArgoprojV1alpha1) RESTClient() rest.Interface {

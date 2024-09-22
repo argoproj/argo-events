@@ -10,21 +10,19 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers"
-	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // Installer is an interface for event bus installation
 type Installer interface {
-	Install(ctx context.Context) (*v1alpha1.BusConfig, error)
+	Install(ctx context.Context) (*aev1.BusConfig, error)
 	// Uninsall only needs to handle those resources not cascade deleted.
 	// For example, undeleted PVCs not automatically deleted when deleting a StatefulSet
 	Uninstall(ctx context.Context) error
 }
 
 // Install function installs the event bus
-func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
+func Install(ctx context.Context, eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
 	installer, err := getInstaller(eventBus, client, kubeClient, config, logger)
 	if err != nil {
 		logger.Errorw("failed to an installer", zap.Error(err))
@@ -40,7 +38,7 @@ func Install(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Cli
 }
 
 // GetInstaller returns Installer implementation
-func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) (Installer, error) {
+func getInstaller(eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) (Installer, error) {
 	if nats := eventBus.Spec.NATS; nats != nil {
 		if nats.Exotic != nil {
 			return NewExoticNATSInstaller(eventBus, logger), nil
@@ -57,7 +55,7 @@ func getInstaller(eventBus *v1alpha1.EventBus, client client.Client, kubeClient 
 	return nil, fmt.Errorf("invalid eventbus spec")
 }
 
-func getLabels(bus *v1alpha1.EventBus) map[string]string {
+func getLabels(bus *aev1.EventBus) map[string]string {
 	return map[string]string{
 		"controller":          "eventbus-controller",
 		"eventbus-name":       bus.Name,
@@ -73,7 +71,7 @@ func getLabels(bus *v1alpha1.EventBus) map[string]string {
 // separately.
 //
 // It could also be used to check if the EventBus object can be safely deleted.
-func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
+func Uninstall(ctx context.Context, eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
 	linkedEventSources, err := linkedEventSources(ctx, eventBus.Namespace, eventBus.Name, client)
 	if err != nil {
 		logger.Errorw("failed to query linked EventSources", zap.Error(err))
@@ -101,7 +99,7 @@ func Uninstall(ctx context.Context, eventBus *v1alpha1.EventBus, client client.C
 }
 
 func linkedEventSources(ctx context.Context, namespace, eventBusName string, c client.Client) (int, error) {
-	esl := &eventsourcev1alpha1.EventSourceList{}
+	esl := &aev1.EventSourceList{}
 	if err := c.List(ctx, esl, &client.ListOptions{
 		Namespace: namespace,
 	}); err != nil {
@@ -121,7 +119,7 @@ func linkedEventSources(ctx context.Context, namespace, eventBusName string, c c
 }
 
 func linkedSensors(ctx context.Context, namespace, eventBusName string, c client.Client) (int, error) {
-	sl := &sensorv1alpha1.SensorList{}
+	sl := &aev1.SensorList{}
 	if err := c.List(ctx, sl, &client.ListOptions{
 		Namespace: namespace,
 	}); err != nil {

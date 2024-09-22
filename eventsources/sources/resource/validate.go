@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ValidateEventSource validates a resource event source

@@ -8,8 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 type LogTrigger struct {
@@ -20,12 +19,12 @@ type LogTrigger struct {
 }
 
 func NewLogTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*LogTrigger, error) {
-	return &LogTrigger{Sensor: sensor, Trigger: trigger, Logger: logger.With(logging.LabelTriggerType, apicommon.LogTrigger)}, nil
+	return &LogTrigger{Sensor: sensor, Trigger: trigger, Logger: logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeLog)}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *LogTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.LogTrigger
+func (t *LogTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeLog
 }
 
 func (t *LogTrigger) FetchResource(ctx context.Context) (interface{}, error) {

@@ -27,8 +27,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -48,7 +47,7 @@ var sensorObj = &v1alpha1.Sensor{
 						RequiredAcks:   1,
 						Compress:       false,
 						FlushFrequency: 0,
-						SASL: &apicommon.SASLConfig{
+						SASL: &v1alpha1.SASLConfig{
 							Mechanism: "PLAIN",
 						},
 						TLS:             nil,

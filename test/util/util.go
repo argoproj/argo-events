@@ -13,8 +13,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	eventpkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
-	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
-	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 )
 
 func WaitForEventBusReady(ctx context.Context, eventBusClient eventpkg.EventBusInterface, eventBusName string, timeout time.Duration) error {
@@ -61,7 +59,7 @@ func WaitForEventBusStatefulSetReady(ctx context.Context, kubeClient kubernetes.
 	}
 }
 
-func WaitForEventSourceReady(ctx context.Context, eventSourceClient eventsourcepkg.EventSourceInterface, eventSourceName string, timeout time.Duration) error {
+func WaitForEventSourceReady(ctx context.Context, eventSourceClient eventpkg.EventSourceInterface, eventSourceName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + eventSourceName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
@@ -88,7 +86,7 @@ func WaitForEventSourceDeploymentReady(ctx context.Context, kubeClient kubernete
 	return waitForDeploymentAndPodReady(ctx, kubeClient, namespace, "EventSource", labelSelector, timeout)
 }
 
-func WaitForSensorReady(ctx context.Context, sensorClient sensorpkg.SensorInterface, sensorName string, timeout time.Duration) error {
+func WaitForSensorReady(ctx context.Context, sensorClient eventpkg.SensorInterface, sensorName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + sensorName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
 	ctx, cancel := context.WithTimeout(ctx, timeout)

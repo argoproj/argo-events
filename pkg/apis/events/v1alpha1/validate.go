@@ -69,3 +69,10 @@ func ValidateSASLConfig(saslConfig *SASLConfig) error {
 
 	return nil
 }
+
+func ValidateEventSource(eventSource *EventSource) error {
+	if eventSource == nil {
+		return fmt.Errorf("event source can't be nil")
+	}
+	return nil
+}

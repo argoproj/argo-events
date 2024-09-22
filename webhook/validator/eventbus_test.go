@@ -5,12 +5,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestValidateEventBusCreate(t *testing.T) {
 	eb := fakeEventBus()
-	v := NewEventBusValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, nil, eb)
+	v := NewEventBusValidator(fakeK8sClient, fakeEventsClient.EventBus(eb.Namespace), fakeEventsClient.EventSources(eb.Namespace), fakeEventsClient.Sensors(eb.Namespace), nil, eb)
 	r := v.ValidateCreate(contextWithLogger(t))
 	assert.True(t, r.Allowed)
 }
@@ -21,7 +21,7 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		newEb := eb.DeepCopy()
 		newEb.Generation++
 		newEb.Spec.NATS.Native.Auth = nil
-		v := NewEventBusValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, eb, newEb)
+		v := NewEventBusValidator(fakeK8sClient, fakeEventsClient.EventBus(eb.Namespace), fakeEventsClient.EventSources(eb.Namespace), fakeEventsClient.Sensors(eb.Namespace), eb, newEb)
 		r := v.ValidateUpdate(contextWithLogger(t))
 		assert.False(t, r.Allowed)
 	})
@@ -31,11 +31,11 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		newEb.Generation++
 		newEb.Spec.NATS.Native = nil
 		cID := "test-id"
-		newEb.Spec.NATS.Exotic = &dfv1.NATSConfig{
+		newEb.Spec.NATS.Exotic = &aev1.NATSConfig{
 			ClusterID: &cID,
 			URL:       "nats://abc:1234",
 		}
-		v := NewEventBusValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, eb, newEb)
+		v := NewEventBusValidator(fakeK8sClient, fakeEventsClient.EventBus(eb.Namespace), fakeEventsClient.EventSources(eb.Namespace), fakeEventsClient.Sensors(eb.Namespace), eb, newEb)
 		r := v.ValidateUpdate(contextWithLogger(t))
 		assert.False(t, r.Allowed)
 	})
@@ -46,7 +46,7 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		newEb.Generation++
 		newEb.Spec.NATS.Exotic = nil
 		newEb.Spec.NATS.Native = eb.Spec.NATS.Native
-		v := NewEventBusValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, exoticEb, newEb)
+		v := NewEventBusValidator(fakeK8sClient, fakeEventsClient.EventBus(eb.Namespace), fakeEventsClient.EventSources(eb.Namespace), fakeEventsClient.Sensors(eb.Namespace), exoticEb, newEb)
 		r := v.ValidateUpdate(contextWithLogger(t))
 		assert.False(t, r.Allowed)
 	})
@@ -55,10 +55,10 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		newEb := eb.DeepCopy()
 		newEb.Generation++
 		newEb.Spec.NATS = nil
-		newEb.Spec.JetStreamExotic = &dfv1.JetStreamConfig{
+		newEb.Spec.JetStreamExotic = &aev1.JetStreamConfig{
 			URL: "nats://nats:4222",
 		}
-		v := NewEventBusValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, eb, newEb)
+		v := NewEventBusValidator(fakeK8sClient, fakeEventsClient.EventBus(eb.Namespace), fakeEventsClient.EventSources(eb.Namespace), fakeEventsClient.Sensors(eb.Namespace), eb, newEb)
 		r := v.ValidateUpdate(contextWithLogger(t))
 		assert.False(t, r.Allowed)
 	})

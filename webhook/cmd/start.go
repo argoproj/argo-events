@@ -13,12 +13,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	eventsourcev1alphal1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sensorv1alphal1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
-	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventsversiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	"github.com/argoproj/argo-events/webhook"
 	envpkg "github.com/argoproj/pkg/env"
 )
@@ -39,9 +35,7 @@ func Start() {
 		logger.Fatalw("failed to get kubeconfig", zap.Error(err))
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
-	eventBusClient := eventbusclient.NewForConfigOrDie(restConfig)
-	eventSourceClient := eventsourceclient.NewForConfigOrDie(restConfig)
-	sensorClient := sensorclient.NewForConfigOrDie(restConfig)
+	aeClient := eventsversiond.NewForConfigOrDie(restConfig).ArgoprojV1alpha1()
 
 	namespace, defined := os.LookupEnv(namespaceEnvVar)
 	if !defined {
@@ -65,15 +59,13 @@ func Start() {
 		ClientAuth:      tls.VerifyClientCertIfGiven,
 	}
 	controller := webhook.AdmissionController{
-		Client:            kubeClient,
-		EventBusClient:    eventBusClient,
-		EventSourceClient: eventSourceClient,
-		SensorClient:      sensorClient,
-		Options:           options,
+		Client:           kubeClient,
+		ArgoEventsClient: aeClient,
+		Options:          options,
 		Handlers: map[schema.GroupVersionKind]runtime.Object{
-			dfv1.EventBusGroupVersionKind:               &dfv1.EventBus{},
-			eventsourcev1alphal1.SchemaGroupVersionKind: &eventsourcev1alphal1.EventSource{},
-			sensorv1alphal1.SchemaGroupVersionKind:      &sensorv1alphal1.Sensor{},
+			aev1.EventBusGroupVersionKind:    &aev1.EventBus{},
+			aev1.EventSourceGroupVersionKind: &aev1.EventSource{},
+			aev1.SensorGroupVersionKind:      &aev1.Sensor{},
 		},
 		Logger: logger,
 	}

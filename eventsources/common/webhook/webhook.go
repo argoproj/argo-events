@@ -29,7 +29,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	eventsourcecommon "github.com/argoproj/argo-events/eventsources/common"
 	metrics "github.com/argoproj/argo-events/metrics"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // NewController returns a webhook controller

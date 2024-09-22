@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/itchyny/gojq"
 	"github.com/tidwall/gjson"

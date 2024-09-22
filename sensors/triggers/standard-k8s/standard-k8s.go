@@ -34,8 +34,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -68,13 +67,13 @@ func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic
 		DynamicClient: dynamicClient,
 		Sensor:        sensor,
 		Trigger:       trigger,
-		Logger:        logger.With(logging.LabelTriggerType, apicommon.K8sTrigger),
+		Logger:        logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeK8s),
 	}
 }
 
 // GetTriggerType returns the type of the trigger
-func (k8sTrigger *StandardK8sTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.K8sTrigger
+func (k8sTrigger *StandardK8sTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeK8s
 }
 
 // FetchResource fetches the trigger resource from external source

@@ -20,15 +20,3 @@ type KafkaBus struct {
 	// +optional
 	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,6,opt,name=consumerGroup"`
 }
-
-type KafkaConsumerGroup struct {
-	// Consumer group name, defaults to {namespace_name}-{sensor_name}
-	// +optional
-	GroupName string `json:"groupName,omitempty" protobuf:"bytes,1,opt,name=groupName"`
-	// Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.
-	// +optional
-	RebalanceStrategy string `json:"rebalanceStrategy,omitempty" protobuf:"bytes,2,opt,name=rebalanceStrategy"`
-	// When starting up a new group do we want to start from the oldest event (true) or the newest event (false), defaults to false
-	// +optional
-	StartOldest bool `json:"startOldest,omitempty" default:"false" protobuf:"bytes,3,opt,name=startOldest"`
-}

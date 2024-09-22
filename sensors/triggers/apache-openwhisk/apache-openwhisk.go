@@ -26,8 +26,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
@@ -89,13 +88,13 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 		OpenWhiskClient: client,
 		Sensor:          sensor,
 		Trigger:         trigger,
-		Logger:          logger.With(logging.LabelTriggerType, apicommon.OpenWhiskTrigger),
+		Logger:          logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeOpenWhisk),
 	}, nil
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *TriggerImpl) GetTriggerType() apicommon.TriggerType {
-	return apicommon.OpenWhiskTrigger
+func (t *TriggerImpl) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeOpenWhisk
 }
 
 // FetchResource fetches the trigger. As the OpenWhisk trigger simply executes a http request, there

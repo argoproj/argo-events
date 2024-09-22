@@ -18,8 +18,7 @@ package bitbucketserver
 import (
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
 	metrics "github.com/argoproj/argo-events/metrics"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 )
 
@@ -42,8 +41,8 @@ func (el *EventListener) GetEventName() string {
 }
 
 // GetEventSourceType return type of event server
-func (el *EventListener) GetEventSourceType() apicommon.EventSourceType {
-	return apicommon.BitbucketServerEvent
+func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
+	return v1alpha1.BitbucketServerEvent
 }
 
 // Router contains the configuration information for a route

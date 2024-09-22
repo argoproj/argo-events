@@ -21,8 +21,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -87,7 +86,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	defaultValue := "http://default.com"
-	secureHeader := &common.SecureHeader{Name: "test", ValueFrom: &common.ValueFromSource{
+	secureHeader := &v1alpha1.SecureHeader{Name: "test", ValueFrom: &v1alpha1.ValueFromSource{
 		SecretKeyRef: &corev1.SecretKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "tokens",
@@ -95,7 +94,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 			Key: "serviceToken"}},
 	}
 
-	secureHeaders := []*common.SecureHeader{}
+	secureHeaders := []*v1alpha1.SecureHeader{}
 	secureHeaders = append(secureHeaders, secureHeader)
 	trigger.Trigger.Template.HTTP.SecureHeaders = secureHeaders
 	trigger.Trigger.Template.HTTP.Parameters = []v1alpha1.TriggerParameter{

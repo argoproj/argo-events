@@ -25,3 +25,19 @@ type EventBusListerExpansion interface{}
 // EventBusNamespaceListerExpansion allows custom methods to be added to
 // EventBusNamespaceLister.
 type EventBusNamespaceListerExpansion interface{}
+
+// EventSourceListerExpansion allows custom methods to be added to
+// EventSourceLister.
+type EventSourceListerExpansion interface{}
+
+// EventSourceNamespaceListerExpansion allows custom methods to be added to
+// EventSourceNamespaceLister.
+type EventSourceNamespaceListerExpansion interface{}
+
+// SensorListerExpansion allows custom methods to be added to
+// SensorLister.
+type SensorListerExpansion interface{}
+
+// SensorNamespaceListerExpansion allows custom methods to be added to
+// SensorNamespaceLister.
+type SensorNamespaceListerExpansion interface{}

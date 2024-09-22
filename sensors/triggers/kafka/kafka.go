@@ -31,8 +31,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
 )
 
@@ -53,7 +52,7 @@ type KafkaTrigger struct {
 // NewKafkaTrigger returns a new kafka trigger context.
 func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers common.StringKeyedMap[sarama.AsyncProducer], logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
-	triggerLogger := logger.With(logging.LabelTriggerType, apicommon.KafkaTrigger)
+	triggerLogger := logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeKafka)
 
 	producer, ok := kafkaProducers.Load(trigger.Template.Name)
 	var schema *srclient.Schema
@@ -154,8 +153,8 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 }
 
 // GetTriggerType returns the type of the trigger
-func (t *KafkaTrigger) GetTriggerType() apicommon.TriggerType {
-	return apicommon.KafkaTrigger
+func (t *KafkaTrigger) GetTriggerType() v1alpha1.TriggerType {
+	return v1alpha1.TriggerTypeKafka
 }
 
 // FetchResource fetches the trigger. As the Kafka trigger is simply a Kafka producer, there
@@ -264,7 +263,7 @@ func avroParser(schema string, schemaID int, payload []byte) ([]byte, error) {
 }
 
 // getSchemaFromRegistry returns a schema from registry.
-func getSchemaFromRegistry(sr *apicommon.SchemaRegistryConfig) (*srclient.Schema, error) {
+func getSchemaFromRegistry(sr *v1alpha1.SchemaRegistryConfig) (*srclient.Schema, error) {
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
 	if sr.Auth.Username != nil && sr.Auth.Password != nil {
 		user, _ := common.GetSecretFromVolume(sr.Auth.Username)

@@ -21,13 +21,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestFetchKubernetesResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact := apicommon.NewResource(deployment)
+	artifact := v1alpha1.NewResource(deployment)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: &artifact,
 	}

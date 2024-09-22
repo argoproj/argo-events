@@ -34,7 +34,7 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 
 	"github.com/argoproj/argo-events/eventsources/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestRouteActiveHandler(t *testing.T) {

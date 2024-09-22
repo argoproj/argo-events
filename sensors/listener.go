@@ -31,8 +31,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventbus"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	sensordependencies "github.com/argoproj/argo-events/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/sensors/triggers"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -213,7 +212,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			actionFunc := func(events map[string]cloudevents.Event) {
 				retryStrategy := trigger.RetryStrategy
 				if retryStrategy == nil {
-					retryStrategy = &apicommon.Backoff{Steps: 1}
+					retryStrategy = &v1alpha1.Backoff{Steps: 1}
 				}
 				err := common.DoWithRetry(retryStrategy, func() error {
 					return sensorCtx.triggerActions(ctx, sensor, events, trigger)
@@ -224,7 +223,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					if trigger.DlqTrigger != nil {
 						dlqRetryStrategy := trigger.DlqTrigger.RetryStrategy
 						if dlqRetryStrategy == nil {
-							dlqRetryStrategy = &apicommon.Backoff{Steps: 1}
+							dlqRetryStrategy = &v1alpha1.Backoff{Steps: 1}
 						}
 
 						triggerLogger.Debugf("invoking dlqTrigger")

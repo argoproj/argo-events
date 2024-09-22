@@ -6,17 +6,16 @@ import (
 	"strings"
 	"time"
 
-	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
-	eventbusjetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	nats "github.com/nats-io/nats.go"
-	"go.uber.org/zap"
-
 	"encoding/json"
 
 	"github.com/argoproj/argo-events/common"
+	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
+	eventbusjetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	hashstructure "github.com/mitchellh/hashstructure/v2"
+	nats "github.com/nats-io/nats.go"
+	"go.uber.org/zap"
 )
 
 const (

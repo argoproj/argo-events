@@ -28,8 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic/fake"
 
-	"github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
@@ -52,10 +51,10 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	uObj := newUnstructured("apps/v1", "Deployment", "fake", "test")
 	runtimeScheme := runtime.NewScheme()
 	client := fake.NewSimpleDynamicClient(runtimeScheme, uObj)
-	artifact := common.NewResource(uObj)
-	jitter := common.NewAmount("0.5")
-	factor := common.NewAmount("2")
-	duration := common.FromString("1s")
+	artifact := v1alpha1.NewResource(uObj)
+	jitter := v1alpha1.NewAmount("0.5")
+	factor := v1alpha1.NewAmount("2")
+	duration := v1alpha1.FromString("1s")
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
@@ -71,7 +70,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 				Labels: map[string]string{
 					"complete": "true",
 				},
-				Backoff: &common.Backoff{
+				Backoff: &v1alpha1.Backoff{
 					Steps:    2,
 					Duration: &duration,
 					Factor:   &factor,

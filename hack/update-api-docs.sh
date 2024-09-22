@@ -17,25 +17,10 @@ export GO111MODULE="off"
 
 cd "${FAKE_REPOPATH}"
 
-# Event Source
 go run ${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
  -config "${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
- -api-dir "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1" \
- -out-file "${FAKE_REPOPATH}/api/event-source.html" \
- -template-dir "${FAKE_REPOPATH}/hack/api-docs-template"
-
-# Sensor
-go run ${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
- -config "${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
- -api-dir "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1" \
- -out-file "${FAKE_REPOPATH}/api/sensor.html" \
- -template-dir "${FAKE_REPOPATH}/hack/api-docs-template"
-
-# EventBus
-go run ${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
- -config "${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
- -api-dir "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1" \
- -out-file "${FAKE_REPOPATH}/api/event-bus.html" \
+ -api-dir "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1" \
+ -out-file "${FAKE_REPOPATH}/docs/APIs.html" \
  -template-dir "${FAKE_REPOPATH}/hack/api-docs-template"
 
 install-pandoc() {
@@ -91,7 +76,5 @@ install-pandoc
 
 # Setup at https://pandoc.org/installing.html
 
-${PANDOC_BINARY} --from markdown --to gfm ${FAKE_REPOPATH}/api/event-source.html > ${FAKE_REPOPATH}/api/event-source.md
-${PANDOC_BINARY} --from markdown --to gfm ${FAKE_REPOPATH}/api/sensor.html > ${FAKE_REPOPATH}/api/sensor.md
-${PANDOC_BINARY} --from markdown --to gfm ${FAKE_REPOPATH}/api/event-bus.html > ${FAKE_REPOPATH}/api/event-bus.md
-
+${PANDOC_BINARY} --from markdown --to gfm ${FAKE_REPOPATH}/docs/APIs.html > ${FAKE_REPOPATH}/docs/APIs.md
+rm ${FAKE_REPOPATH}/docs/APIs.html
