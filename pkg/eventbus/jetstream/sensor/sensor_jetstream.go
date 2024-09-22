@@ -8,10 +8,10 @@ import (
 
 	"encoding/json"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 	eventbusjetstreambase "github.com/argoproj/argo-events/pkg/eventbus/jetstream/base"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	hashstructure "github.com/mitchellh/hashstructure/v2"
 	nats "github.com/nats-io/nats.go"
@@ -458,6 +458,6 @@ type MsgInfo struct {
 
 func getDurableName(sensorName string, triggerName string, depName string) string {
 	hashKey := fmt.Sprintf("%s-%s-%s", sensorName, triggerName, depName)
-	hashVal := common.Hasher(hashKey)
+	hashVal := sharedutil.Hasher(hashKey)
 	return fmt.Sprintf("group-%s", hashVal)
 }

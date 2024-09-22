@@ -11,8 +11,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/argoproj/argo-events/common"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 var (
@@ -23,7 +23,7 @@ var (
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: aev1.EventBusSpec{
 			NATS: &aev1.NATSBus{

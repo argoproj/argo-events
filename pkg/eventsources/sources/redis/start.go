@@ -25,13 +25,13 @@ import (
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for the Redis event source
@@ -73,7 +73,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("retrieving password if it has been configured...")
 	if redisEventSource.Password != nil {
-		password, err := common.GetSecretFromVolume(redisEventSource.Password)
+		password, err := sharedutil.GetSecretFromVolume(redisEventSource.Password)
 		if err != nil {
 			return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
 		}
@@ -85,7 +85,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if redisEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(redisEventSource.TLS)
 		if err != nil {
 			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}

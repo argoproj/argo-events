@@ -12,24 +12,24 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	argoevents "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 func Start() {
 	logger := logging.NewArgoEventsLogger().Named("sensor")
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
+	kubeConfig, _ := os.LookupEnv(sharedutil.EnvVarKubeConfig)
+	restConfig, err := sharedutil.GetClientConfig(kubeConfig)
 	if err != nil {
 		logger.Fatalw("failed to get kubeconfig", zap.Error(err))
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
-	encodedSensorSpec, defined := os.LookupEnv(common.EnvVarSensorObject)
+	encodedSensorSpec, defined := os.LookupEnv(sharedutil.EnvVarSensorObject)
 	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarSensorObject)
+		logger.Fatalf("required environment variable '%s' not defined", sharedutil.EnvVarSensorObject)
 	}
 	sensorSpec, err := base64.StdEncoding.DecodeString(encodedSensorSpec)
 	if err != nil {
@@ -41,7 +41,7 @@ func Start() {
 	}
 
 	busConfig := &v1alpha1.BusConfig{}
-	encodedBusConfigSpec := os.Getenv(common.EnvVarEventBusConfig)
+	encodedBusConfigSpec := os.Getenv(sharedutil.EnvVarEventBusConfig)
 	if len(encodedBusConfigSpec) > 0 {
 		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)
 		if err != nil {
@@ -59,9 +59,9 @@ func Start() {
 			}
 		}
 	}
-	ebSubject, defined := os.LookupEnv(common.EnvVarEventBusSubject)
+	ebSubject, defined := os.LookupEnv(sharedutil.EnvVarEventBusSubject)
 	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarEventBusSubject)
+		logger.Fatalf("required environment variable '%s' not defined", sharedutil.EnvVarEventBusSubject)
 	}
 
 	hostname, defined := os.LookupEnv("POD_NAME")
@@ -78,7 +78,7 @@ func Start() {
 
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
 	m := metrics.NewMetrics(sensor.Namespace)
-	go m.Run(ctx, fmt.Sprintf(":%d", common.SensorMetricsPort))
+	go m.Run(ctx, fmt.Sprintf(":%d", sharedutil.SensorMetricsPort))
 
 	logger.Infow("starting sensor server", "version", argoevents.GetVersion())
 	sensorExecutionCtx := sensors.NewSensorContext(kubeClient, dynamicClient, sensor, busConfig, ebSubject, hostname, m)

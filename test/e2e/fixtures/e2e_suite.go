@@ -13,10 +13,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	versiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	eventspkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -68,7 +68,7 @@ type E2ESuite struct {
 func (s *E2ESuite) SetupSuite() {
 	var err error
 
-	kubeConfig, found := os.LookupEnv(common.EnvVarKubeConfig)
+	kubeConfig, found := os.LookupEnv(sharedutil.EnvVarKubeConfig)
 	if !found {
 		home, _ := os.UserHomeDir()
 		kubeConfig = home + "/.kube/config"
@@ -76,7 +76,7 @@ func (s *E2ESuite) SetupSuite() {
 			kubeConfig = ""
 		}
 	}
-	s.restConfig, err = common.GetClientConfig(kubeConfig)
+	s.restConfig, err = sharedutil.GetClientConfig(kubeConfig)
 	s.CheckError(err)
 	s.kubeClient, err = kubernetes.NewForConfig(s.restConfig)
 	s.CheckError(err)

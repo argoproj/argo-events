@@ -10,8 +10,8 @@ import (
 	"gopkg.in/jcmturner/gokrb5.v5/keytab"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // HDFSConfig is config for HDFS
@@ -42,7 +42,7 @@ type KeytabOptions struct {
 }
 
 func getConfigMapKey(selector *corev1.ConfigMapKeySelector) (string, error) {
-	result, err := common.GetConfigMapFromVolume(selector)
+	result, err := sharedutil.GetConfigMapFromVolume(selector)
 	if err != nil {
 		return "", fmt.Errorf("configmap value not injected, %w", err)
 	}
@@ -50,7 +50,7 @@ func getConfigMapKey(selector *corev1.ConfigMapKeySelector) (string, error) {
 }
 
 func getSecretKey(selector *corev1.SecretKeySelector) ([]byte, error) {
-	result, err := common.GetSecretFromVolume(selector)
+	result, err := sharedutil.GetSecretFromVolume(selector)
 	if err != nil {
 		return nil, fmt.Errorf("secret value not injected, %w", err)
 	}

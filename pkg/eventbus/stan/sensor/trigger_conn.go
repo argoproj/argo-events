@@ -291,7 +291,7 @@ func (n *STANTriggerConn) getGroupNameFromClientID(clientID string) (string, err
 	// take off the last part: clientID should have a dash at the end and we can remove that part
 	strs := strings.Split(clientID, "-")
 	if len(strs) < 2 {
-		err := fmt.Errorf("Expected client ID to contain dash: %s", clientID)
+		err := fmt.Errorf("expected client ID to contain dash: %s", clientID)
 		log.Error(err)
 		return "", err
 	}

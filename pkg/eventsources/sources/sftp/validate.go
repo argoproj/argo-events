@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates sftp event source
@@ -31,7 +31,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(sftpEventSource *v1alpha1.SFTPEventSource) error {
 	if sftpEventSource == nil {
-		return common.ErrNilEventSource
+		return sharedutil.ErrNilEventSource
 	}
 	if sftpEventSource.EventType == "" {
 		return fmt.Errorf("type must be specified")

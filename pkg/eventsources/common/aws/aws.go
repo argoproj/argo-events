@@ -25,16 +25,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/argoproj/argo-events/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // GetAWSCredFromEnvironment reads credential stored in ENV by using envFrom.
 func GetAWSCredFromEnvironment(access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector) (*credentials.Credentials, error) {
-	accessKey, ok := common.GetEnvFromSecret(access)
+	accessKey, ok := sharedutil.GetEnvFromSecret(access)
 	if !ok {
 		return nil, fmt.Errorf("can not find envFrom %v", access)
 	}
-	secretKey, ok := common.GetEnvFromSecret(secret)
+	secretKey, ok := sharedutil.GetEnvFromSecret(secret)
 	if !ok {
 		return nil, fmt.Errorf("can not find envFrom %v", secret)
 	}
@@ -46,18 +46,18 @@ func GetAWSCredFromEnvironment(access *corev1.SecretKeySelector, secret *corev1.
 
 // GetAWSCredFromVolume reads credential stored in mounted secret volume.
 func GetAWSCredFromVolume(access *corev1.SecretKeySelector, secret *corev1.SecretKeySelector, sessionToken *corev1.SecretKeySelector) (*credentials.Credentials, error) {
-	accessKey, err := common.GetSecretFromVolume(access)
+	accessKey, err := sharedutil.GetSecretFromVolume(access)
 	if err != nil {
 		return nil, fmt.Errorf("can not find access key, %w", err)
 	}
-	secretKey, err := common.GetSecretFromVolume(secret)
+	secretKey, err := sharedutil.GetSecretFromVolume(secret)
 	if err != nil {
 		return nil, fmt.Errorf("can not find secret key, %w", err)
 	}
 
 	var token string
 	if sessionToken != nil {
-		token, err = common.GetSecretFromVolume(sessionToken)
+		token, err = sharedutil.GetSecretFromVolume(sessionToken)
 		if err != nil {
 			return nil, fmt.Errorf("can not find session token, %w", err)
 		}

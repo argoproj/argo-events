@@ -24,8 +24,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ResourceLabels implements trigger policy based on the resource labels
@@ -45,9 +45,9 @@ func (rl *ResourceLabels) ApplyPolicy(ctx context.Context) error {
 
 	b := rl.Trigger.Policy.K8s.Backoff
 	if b == nil {
-		b = &common.DefaultBackoff
+		b = &sharedutil.DefaultBackoff
 	}
-	backoff, err := common.Convert2WaitBackoff(b)
+	backoff, err := sharedutil.Convert2WaitBackoff(b)
 	if err != nil {
 		return err
 	}

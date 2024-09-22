@@ -36,7 +36,6 @@ import (
 	"github.com/ghodss/yaml"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -45,6 +44,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 var (
@@ -107,7 +107,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if !route.Active {
 		logger.Info("endpoint is not active, won't process the request")
-		common.SendErrorResponse(writer, "inactive endpoint")
+		sharedutil.SendErrorResponse(writer, "inactive endpoint")
 		return
 	}
 
@@ -119,7 +119,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse the request body", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -128,13 +128,13 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	err = yaml.Unmarshal(body, &notification)
 	if err != nil {
 		logger.Errorw("failed to convert request payload into sns notification", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
 	if notification == nil {
-		common.SendErrorResponse(writer, "bad request, not a valid SNS notification")
+		sharedutil.SendErrorResponse(writer, "bad request, not a valid SNS notification")
 		return
 	}
 
@@ -143,7 +143,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		err = notification.verify()
 		if err != nil {
 			logger.Errorw("failed to verify sns message", zap.Error(err))
-			common.SendErrorResponse(writer, err.Error())
+			sharedutil.SendErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
@@ -159,7 +159,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		})
 		if err != nil {
 			logger.Errorw("failed to send confirmation response to aws sns", zap.Error(err))
-			common.SendErrorResponse(writer, err.Error())
+			sharedutil.SendErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
@@ -179,7 +179,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			logger.Errorw("failed to marshal the event data", zap.Error(err))
-			common.SendErrorResponse(writer, err.Error())
+			sharedutil.SendErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
@@ -221,7 +221,7 @@ func (router *Router) PostActivate() error {
 		router.session = snslib.New(awsSession, &aws.Config{Endpoint: &snsEventSource.Endpoint, Region: &snsEventSource.Region})
 	}
 
-	formattedURL := common.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
+	formattedURL := sharedutil.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
 	if _, err := router.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedURL,
 		Protocol: func(endpoint string) *string {

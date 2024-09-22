@@ -8,15 +8,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 var (
 	testNatsEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test-ns",
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
@@ -30,7 +30,7 @@ var (
 	testJetStreamEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test-ns",
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			JetStream: &v1alpha1.JetStreamBus{
@@ -42,7 +42,7 @@ var (
 	testJetStreamExoticBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test-ns",
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			JetStreamExotic: &v1alpha1.JetStreamConfig{
@@ -54,7 +54,7 @@ var (
 	testKafkaEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test-ns",
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			Kafka: &v1alpha1.KafkaBus{

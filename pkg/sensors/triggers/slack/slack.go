@@ -25,10 +25,10 @@ import (
 	notifications "github.com/argoproj/notifications-engine/pkg/services"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 type SlackTrigger struct {
@@ -47,7 +47,7 @@ type SlackTrigger struct {
 // NewSlackTrigger returns a new Slack trigger context
 func NewSlackTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, httpClient *http.Client) (*SlackTrigger, error) {
 	slackTrigger := trigger.Template.Slack
-	slackToken, err := common.GetSecretFromVolume(slackTrigger.SlackToken)
+	slackToken, err := sharedutil.GetSecretFromVolume(slackTrigger.SlackToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve the slack token, %w", err)
 	}

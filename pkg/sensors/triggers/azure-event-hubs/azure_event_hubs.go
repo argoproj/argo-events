@@ -23,10 +23,10 @@ import (
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // AzureEventHubsTrigger describes the trigger to send messages to an Event Hub
@@ -42,7 +42,7 @@ type AzureEventHubsTrigger struct {
 }
 
 // NewAzureEventHubsTrigger returns a new azure event hubs context.
-func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureEventHubsClient common.StringKeyedMap[*eventhub.Hub], logger *zap.SugaredLogger) (*AzureEventHubsTrigger, error) {
+func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureEventHubsClient sharedutil.StringKeyedMap[*eventhub.Hub], logger *zap.SugaredLogger) (*AzureEventHubsTrigger, error) {
 	azureEventHubsTrigger := trigger.Template.AzureEventHubs
 
 	hub, ok := azureEventHubsClient.Load(trigger.Template.Name)
@@ -53,11 +53,11 @@ func NewAzureEventHubsTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger
 		fqdn := azureEventHubsTrigger.FQDN
 		hubName := azureEventHubsTrigger.HubName
 
-		sharedAccessKeyName, err := common.GetSecretFromVolume(azureEventHubsTrigger.SharedAccessKeyName)
+		sharedAccessKeyName, err := sharedutil.GetSecretFromVolume(azureEventHubsTrigger.SharedAccessKeyName)
 		if err != nil {
 			return nil, err
 		}
-		sharedAccessKey, err := common.GetSecretFromVolume(azureEventHubsTrigger.SharedAccessKey)
+		sharedAccessKey, err := sharedutil.GetSecretFromVolume(azureEventHubsTrigger.SharedAccessKey)
 		if err != nil {
 			return nil, err
 		}

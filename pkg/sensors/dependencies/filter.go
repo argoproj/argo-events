@@ -29,8 +29,8 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/Masterminds/sprig/v3"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"github.com/tidwall/gjson"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -472,11 +472,11 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 	}
 
 	// Parse start and stop
-	startTime, startErr := common.ParseTime(timeFilter.Start, eventTime)
+	startTime, startErr := sharedutil.ParseTime(timeFilter.Start, eventTime)
 	if startErr != nil {
 		return false, fmt.Errorf(errMsgTemplate, "time", startErr.Error())
 	}
-	stopTime, stopErr := common.ParseTime(timeFilter.Stop, eventTime)
+	stopTime, stopErr := sharedutil.ParseTime(timeFilter.Stop, eventTime)
 	if stopErr != nil {
 		return false, fmt.Errorf(errMsgTemplate, "time", stopErr.Error())
 	}

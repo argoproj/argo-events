@@ -17,9 +17,10 @@ limitations under the License.
 package common
 
 import (
-	"github.com/argoproj/argo-events/common"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // SetObjectMeta sets ObjectMeta of child resource
@@ -37,7 +38,7 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 		obj.SetNamespace(owner.GetNamespace())
 	}
 
-	hash, err := common.GetObjectHash(obj)
+	hash, err := sharedutil.GetObjectHash(obj)
 	if err != nil {
 		return err
 	}
@@ -45,7 +46,7 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
-	annotations[common.AnnotationResourceSpecHash] = hash
+	annotations[sharedutil.AnnotationResourceSpecHash] = hash
 	obj.SetAnnotations(annotations)
 
 	return nil

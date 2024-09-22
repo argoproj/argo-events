@@ -31,13 +31,13 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/fsevent"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for sftp event source
@@ -69,11 +69,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
 
-	username, err := common.GetSecretFromVolume(el.SFTPEventSource.Username)
+	username, err := sharedutil.GetSecretFromVolume(el.SFTPEventSource.Username)
 	if err != nil {
 		return fmt.Errorf("username not found, %w", err)
 	}
-	address, err := common.GetSecretFromVolume(el.SFTPEventSource.Address)
+	address, err := sharedutil.GetSecretFromVolume(el.SFTPEventSource.Address)
 	if err != nil {
 		return fmt.Errorf("address not found, %w", err)
 	}
@@ -82,7 +82,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var hostKeyCallback ssh.HostKeyCallback
 
 	if el.SFTPEventSource.SSHKeySecret != nil {
-		sshKeyPath, err := common.GetSecretVolumePath(el.SFTPEventSource.SSHKeySecret)
+		sshKeyPath, err := sharedutil.GetSecretVolumePath(el.SFTPEventSource.SSHKeySecret)
 		if err != nil {
 			return fmt.Errorf("failed to get SSH key from mounted volume, %w", err)
 		}
@@ -101,7 +101,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		authMethod = ssh.PublicKeys(signer)
 		hostKeyCallback = ssh.FixedHostKey(publicKey)
 	} else {
-		password, err := common.GetSecretFromVolume(el.SFTPEventSource.Password)
+		password, err := sharedutil.GetSecretFromVolume(el.SFTPEventSource.Password)
 		if err != nil {
 			return fmt.Errorf("password not found, %w", err)
 		}
@@ -116,7 +116,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	var sshClient *ssh.Client
-	err = common.DoWithRetry(nil, func() error {
+	err = sharedutil.DoWithRetry(nil, func() error {
 		var err error
 		sshClient, err = ssh.Dial("tcp", address, sftpConfig)
 		return err
@@ -251,7 +251,7 @@ func (el *EventListener) listenEvents(ctx context.Context, sftpClient *sftp.Clie
 
 func sftpNonDirFiles(sftpClient *sftp.Client, dir string) ([]fs.FileInfo, error) {
 	var files []fs.FileInfo
-	err := common.DoWithRetry(nil, func() error {
+	err := sharedutil.DoWithRetry(nil, func() error {
 		var err error
 		files, err = sftpClient.ReadDir(dir)
 		return err

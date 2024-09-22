@@ -25,7 +25,7 @@ import (
 	zap "go.uber.org/zap"
 	"k8s.io/klog/v2"
 
-	"github.com/argoproj/argo-events/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // Logger constants
@@ -48,7 +48,7 @@ const (
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger
 func NewArgoEventsLogger() *zap.SugaredLogger {
-	logLevel, _ := os.LookupEnv(common.EnvVarLogLevel)
+	logLevel, _ := os.LookupEnv(sharedutil.EnvVarLogLevel)
 	config := ConfigureLogLevelLogger(logLevel)
 	// Config customization goes here if any
 	config.OutputPaths = []string{"stdout"}

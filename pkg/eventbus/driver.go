@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/fsnotify/fsnotify"
 	"go.uber.org/zap"
 
@@ -17,6 +16,7 @@ import (
 	kafkasensor "github.com/argoproj/argo-events/pkg/eventbus/kafka/sensor"
 	stansource "github.com/argoproj/argo-events/pkg/eventbus/stan/eventsource"
 	stansensor "github.com/argoproj/argo-events/pkg/eventbus/stan/sensor"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 func GetEventSourceDriver(ctx context.Context, eventBusConfig v1alpha1.BusConfig, eventSourceName string, defaultSubject string) (eventbuscommon.EventSourceDriver, error) {
@@ -131,10 +131,10 @@ func GetAuth(ctx context.Context, eventBusConfig v1alpha1.BusConfig) (*eventbusc
 			Strategy: v1alpha1.AuthStrategyNone,
 		}
 	} else {
-		v := common.ViperWithLogging()
+		v := sharedutil.ViperWithLogging()
 		v.SetConfigName("auth")
 		v.SetConfigType("yaml")
-		v.AddConfigPath(common.EventBusAuthFileMountPath)
+		v.AddConfigPath(sharedutil.EventBusAuthFileMountPath)
 		err := v.ReadInConfig()
 		if err != nil {
 			return nil, fmt.Errorf("failed to load auth.yaml. err: %w", err)

@@ -25,13 +25,13 @@ import (
 	emitter "github.com/emitter-io/go/v2"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for Emitter event source
@@ -68,7 +68,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var options []func(client *emitter.Client)
 	if emitterEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(emitterEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(emitterEventSource.TLS)
 		if err != nil {
 			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
@@ -77,7 +77,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	options = append(options, emitter.WithBrokers(emitterEventSource.Broker), emitter.WithAutoReconnect(true))
 
 	if emitterEventSource.Username != nil {
-		username, err := common.GetSecretFromVolume(emitterEventSource.Username)
+		username, err := sharedutil.GetSecretFromVolume(emitterEventSource.Username)
 		if err != nil {
 			return fmt.Errorf("failed to retrieve the username from %s, %w", emitterEventSource.Username.Name, err)
 		}
@@ -85,7 +85,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if emitterEventSource.Password != nil {
-		password, err := common.GetSecretFromVolume(emitterEventSource.Password)
+		password, err := sharedutil.GetSecretFromVolume(emitterEventSource.Password)
 		if err != nil {
 			return fmt.Errorf("failed to retrieve the password from %s, %w", emitterEventSource.Password.Name, err)
 		}
@@ -99,7 +99,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Infow("creating a client", zap.Any("channelName", emitterEventSource.ChannelName))
 	client := emitter.NewClient(options...)
 
-	if err := common.DoWithRetry(emitterEventSource.ConnectionBackoff, func() error {
+	if err := sharedutil.DoWithRetry(emitterEventSource.ConnectionBackoff, func() error {
 		if err := client.Connect(); err != nil {
 			return err
 		}

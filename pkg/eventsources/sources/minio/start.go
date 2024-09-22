@@ -30,13 +30,13 @@ import (
 	"github.com/minio/minio-go/v7/pkg/notification"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for minio event sources
@@ -74,11 +74,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	minioEventSource := &el.MinioEventSource
 
 	log.Info("retrieving access and secret key...")
-	accessKey, err := common.GetSecretFromVolume(minioEventSource.AccessKey)
+	accessKey, err := sharedutil.GetSecretFromVolume(minioEventSource.AccessKey)
 	if err != nil {
 		return fmt.Errorf("failed to get the access key for event source %s, %w", el.GetEventName(), err)
 	}
-	secretKey, err := common.GetSecretFromVolume(minioEventSource.SecretKey)
+	secretKey, err := sharedutil.GetSecretFromVolume(minioEventSource.SecretKey)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve the secret key for event source %s, %w", el.GetEventName(), err)
 	}
@@ -87,7 +87,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var clientErr error
 	if minioEventSource.CACertificate != nil {
 		log.Info("retrieving CA certificate...")
-		caCertificate, err := common.GetSecretFromVolume(minioEventSource.CACertificate)
+		caCertificate, err := sharedutil.GetSecretFromVolume(minioEventSource.CACertificate)
 		if err != nil {
 			return fmt.Errorf("failed to get the CA certificate for event source %s, %w", el.GetEventName(), err)
 		}

@@ -9,13 +9,13 @@ import (
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for azure events hub event source
@@ -59,7 +59,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	servicebusEventSource := &el.AzureServiceBusEventSource
 	clientOptions := servicebus.ClientOptions{}
 	if servicebusEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(servicebusEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(servicebusEventSource.TLS)
 		if err != nil {
 			log.Errorw("failed to get the tls configuration", zap.Error(err))
 			return err
@@ -69,7 +69,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var client *servicebus.Client
 	if servicebusEventSource.ConnectionString != nil {
 		log.Info("connecting to the service bus using connection string...")
-		connStr, err := common.GetSecretFromVolume(servicebusEventSource.ConnectionString)
+		connStr, err := sharedutil.GetSecretFromVolume(servicebusEventSource.ConnectionString)
 		if err != nil {
 			log.With("connection-string", servicebusEventSource.ConnectionString.Name).Errorw("failed to retrieve connection string from secret", zap.Error(err))
 			return err

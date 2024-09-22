@@ -29,12 +29,12 @@ import (
 	"github.com/andygrunwald/go-gerrit"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // controller controls the webhook operations
@@ -71,7 +71,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if !route.Active {
 		logger.Info("endpoint is not active, won't process the request")
-		common.SendErrorResponse(writer, "inactive endpoint")
+		sharedutil.SendErrorResponse(writer, "inactive endpoint")
 		return
 	}
 
@@ -83,7 +83,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -97,7 +97,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	eventBody, err := json.Marshal(event)
 	if err != nil {
 		logger.Info("failed to marshal event")
-		common.SendErrorResponse(writer, "invalid event")
+		sharedutil.SendErrorResponse(writer, "invalid event")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -106,7 +106,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	route.DataCh <- eventBody
 
 	logger.Info("request successfully processed")
-	common.SendSuccessResponse(writer, "success")
+	sharedutil.SendSuccessResponse(writer, "success")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -162,7 +162,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		logger.Info("retrieving the access token credentials...")
 
-		formattedURL := common.FormattedURL(gerritEventSource.Webhook.URL, gerritEventSource.Webhook.Endpoint)
+		formattedURL := sharedutil.FormattedURL(gerritEventSource.Webhook.URL, gerritEventSource.Webhook.Endpoint)
 		opt := &ProjectHookConfigs{
 			URL:       formattedURL,
 			Events:    router.gerritEventSource.Events,
@@ -176,11 +176,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return fmt.Errorf("failed to initialize client, %w", err)
 		}
 		if gerritEventSource.Auth != nil {
-			username, err := common.GetSecretFromVolume(gerritEventSource.Auth.Username)
+			username, err := sharedutil.GetSecretFromVolume(gerritEventSource.Auth.Username)
 			if err != nil {
 				return fmt.Errorf("username not found, %w", err)
 			}
-			password, err := common.GetSecretFromVolume(gerritEventSource.Auth.Password)
+			password, err := sharedutil.GetSecretFromVolume(gerritEventSource.Auth.Password)
 			if err != nil {
 				return fmt.Errorf("password not found, %w", err)
 			}

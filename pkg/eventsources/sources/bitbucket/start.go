@@ -30,13 +30,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // controller controls the webhook operations
@@ -73,7 +73,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if !route.Active {
 		logger.Info("endpoint is not active, won't process the request")
-		common.SendErrorResponse(writer, "inactive endpoint")
+		sharedutil.SendErrorResponse(writer, "inactive endpoint")
 		return
 	}
 
@@ -81,7 +81,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Desugar().Error("failed to parse request body", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		return
 	}
 
@@ -94,7 +94,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	eventBody, err := json.Marshal(event)
 	if err != nil {
 		logger.Info("failed to marshal event")
-		common.SendErrorResponse(writer, "invalid event")
+		sharedutil.SendErrorResponse(writer, "invalid event")
 		return
 	}
 
@@ -102,7 +102,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	route.DataCh <- eventBody
 
 	logger.Info("request successfully processed")
-	common.SendSuccessResponse(writer, "success")
+	sharedutil.SendSuccessResponse(writer, "success")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -215,7 +215,7 @@ func (router *Router) applyBitbucketWebhook(repo aev1.BitbucketRepository) error
 		"repository-slug", repo.RepositorySlug,
 	)
 
-	formattedWebhookURL := common.FormattedURL(bitbucketEventSource.Webhook.URL, bitbucketEventSource.Webhook.Endpoint)
+	formattedWebhookURL := sharedutil.FormattedURL(bitbucketEventSource.Webhook.URL, bitbucketEventSource.Webhook.Endpoint)
 
 	logger.Info("listing existing webhooks...")
 	hooks, err := router.listWebhooks(repo)

@@ -11,13 +11,13 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for azure events hub event source
@@ -56,7 +56,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	// if connectionString is set then use it
 	// otherwise try to connect via Azure Active Directory (AAD) with storageAccountName
 	if queueStorageEventSource.ConnectionString != nil {
-		connStr, err := common.GetSecretFromVolume(queueStorageEventSource.ConnectionString)
+		connStr, err := sharedutil.GetSecretFromVolume(queueStorageEventSource.ConnectionString)
 		if err != nil {
 			log.With("connection-string", queueStorageEventSource.ConnectionString.Name).Errorw("failed to retrieve connection string from secret", zap.Error(err))
 			return err

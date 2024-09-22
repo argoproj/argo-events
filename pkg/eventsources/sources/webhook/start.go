@@ -25,13 +25,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"go.uber.org/zap"
 )
 
@@ -97,13 +97,13 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if !route.Active {
 		logger.Info("endpoint is not active, wont't process the request")
-		common.SendErrorResponse(writer, "endpoint is inactive")
+		sharedutil.SendErrorResponse(writer, "endpoint is inactive")
 		return
 	}
 
 	if route.Context.Method != request.Method {
 		logger.Info("http method does not match")
-		common.SendErrorResponse(writer, "http method does not match")
+		sharedutil.SendErrorResponse(writer, "http method does not match")
 		return
 	}
 
@@ -114,7 +114,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	body, err := GetBody(&writer, request, route, logger)
 	if err != nil {
 		logger.Errorw("failed to get body", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -128,7 +128,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	data, err := json.Marshal(payload)
 	if err != nil {
 		logger.Errorw("failed to construct the event payload", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -136,7 +136,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	logger.Info("dispatching event on route's data channel...")
 	route.DataCh <- data
 	logger.Info("successfully processed the request")
-	common.SendSuccessResponse(writer, "success")
+	sharedutil.SendSuccessResponse(writer, "success")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -177,7 +177,7 @@ func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.
 		case "application/x-www-form-urlencoded":
 			if err := request.ParseForm(); err != nil {
 				logger.Errorw("failed to parse form data", zap.Error(err))
-				common.SendInternalErrorResponse(*writer, err.Error())
+				sharedutil.SendInternalErrorResponse(*writer, err.Error())
 				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				return nil, err
 			}
@@ -190,7 +190,7 @@ func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.
 			body, err := getRequestBody(request)
 			if err != nil {
 				logger.Errorw("failed to read request body", zap.Error(err))
-				common.SendErrorResponse(*writer, err.Error())
+				sharedutil.SendErrorResponse(*writer, err.Error())
 				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				return nil, err
 			}

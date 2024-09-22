@@ -27,9 +27,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -98,7 +98,7 @@ var (
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
@@ -130,7 +130,7 @@ var (
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			JetStream: &v1alpha1.JetStreamBus{
@@ -153,7 +153,7 @@ var (
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
 			Kafka: &v1alpha1.KafkaBus{

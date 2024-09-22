@@ -30,9 +30,9 @@ import (
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	k8stesting "k8s.io/client-go/testing"
 )
 
@@ -95,7 +95,7 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
-			DataContentType: common.MediaTypeJSON,
+			DataContentType: sharedutil.MediaTypeJSON,
 			Subject:         "example-1",
 			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",

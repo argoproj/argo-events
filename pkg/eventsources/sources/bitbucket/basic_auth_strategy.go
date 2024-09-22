@@ -21,7 +21,7 @@ import (
 	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/argoproj/argo-events/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 type BasicAuthStrategy struct {
@@ -30,12 +30,12 @@ type BasicAuthStrategy struct {
 }
 
 func NewBasicAuthStrategy(usernameSecret, passwordSecret *corev1.SecretKeySelector) (*BasicAuthStrategy, error) {
-	username, err := common.GetSecretFromVolume(usernameSecret)
+	username, err := sharedutil.GetSecretFromVolume(usernameSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve bitbucket username from secret, %w", err)
 	}
 
-	password, err := common.GetSecretFromVolume(passwordSecret)
+	password, err := sharedutil.GetSecretFromVolume(passwordSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve bitbucket password from secret, %w", err)
 	}

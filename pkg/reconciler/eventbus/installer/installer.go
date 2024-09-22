@@ -8,9 +8,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/argoproj/argo-events/common"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // Installer is an interface for event bus installation
@@ -57,9 +57,9 @@ func getInstaller(eventBus *aev1.EventBus, client client.Client, kubeClient kube
 
 func getLabels(bus *aev1.EventBus) map[string]string {
 	return map[string]string{
-		"controller":          "eventbus-controller",
-		"eventbus-name":       bus.Name,
-		common.LabelOwnerName: bus.Name,
+		"controller":              "eventbus-controller",
+		"eventbus-name":           bus.Name,
+		sharedutil.LabelOwnerName: bus.Name,
 	}
 }
 
@@ -109,7 +109,7 @@ func linkedEventSources(ctx context.Context, namespace, eventBusName string, c c
 	for _, es := range esl.Items {
 		ebName := es.Spec.EventBusName
 		if ebName == "" {
-			ebName = common.DefaultEventBusName
+			ebName = sharedutil.DefaultEventBusName
 		}
 		if ebName == eventBusName {
 			result++
@@ -129,7 +129,7 @@ func linkedSensors(ctx context.Context, namespace, eventBusName string, c client
 	for _, s := range sl.Items {
 		sName := s.Spec.EventBusName
 		if sName == "" {
-			sName = common.DefaultEventBusName
+			sName = sharedutil.DefaultEventBusName
 		}
 		if sName == eventBusName {
 			result++

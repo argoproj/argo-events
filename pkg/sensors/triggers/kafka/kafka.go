@@ -29,10 +29,10 @@ import (
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // KafkaTrigger describes the trigger to place messages on Kafka topic using a producer
@@ -50,7 +50,7 @@ type KafkaTrigger struct {
 }
 
 // NewKafkaTrigger returns a new kafka trigger context.
-func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers common.StringKeyedMap[sarama.AsyncProducer], logger *zap.SugaredLogger) (*KafkaTrigger, error) {
+func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaProducers sharedutil.StringKeyedMap[sarama.AsyncProducer], logger *zap.SugaredLogger) (*KafkaTrigger, error) {
 	kafkatrigger := trigger.Template.Kafka
 	triggerLogger := logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeKafka)
 
@@ -75,18 +75,18 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 			config.Net.SASL.Enable = true
 			config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkatrigger.SASL.GetMechanism())
 			if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
-				config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA512New} }
+				config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA512New} }
 			} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
-				config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA256New} }
+				config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA256New} }
 			}
 
-			user, err := common.GetSecretFromVolume(kafkatrigger.SASL.UserSecret)
+			user, err := sharedutil.GetSecretFromVolume(kafkatrigger.SASL.UserSecret)
 			if err != nil {
 				return nil, fmt.Errorf("error getting user value from secret, %w", err)
 			}
 			config.Net.SASL.User = user
 
-			password, err := common.GetSecretFromVolume(kafkatrigger.SASL.PasswordSecret)
+			password, err := sharedutil.GetSecretFromVolume(kafkatrigger.SASL.PasswordSecret)
 			if err != nil {
 				return nil, fmt.Errorf("error getting password value from secret, %w", err)
 			}
@@ -94,7 +94,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		}
 
 		if kafkatrigger.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(kafkatrigger.TLS)
+			tlsConfig, err := sharedutil.GetTLSConfig(kafkatrigger.TLS)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
@@ -266,8 +266,8 @@ func avroParser(schema string, schemaID int, payload []byte) ([]byte, error) {
 func getSchemaFromRegistry(sr *v1alpha1.SchemaRegistryConfig) (*srclient.Schema, error) {
 	schemaRegistryClient := srclient.CreateSchemaRegistryClient(sr.URL)
 	if sr.Auth.Username != nil && sr.Auth.Password != nil {
-		user, _ := common.GetSecretFromVolume(sr.Auth.Username)
-		password, _ := common.GetSecretFromVolume(sr.Auth.Password)
+		user, _ := sharedutil.GetSecretFromVolume(sr.Auth.Username)
+		password, _ := sharedutil.GetSecretFromVolume(sr.Auth.Password)
 		schemaRegistryClient.SetCredentials(user, password)
 	}
 	schema, err := schemaRegistryClient.GetSchema(int(sr.SchemaID))

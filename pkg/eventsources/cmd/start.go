@@ -10,18 +10,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	argoevents "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 func Start() {
 	logger := logging.NewArgoEventsLogger().Named("eventsource")
-	encodedEventSourceSpec, defined := os.LookupEnv(common.EnvVarEventSourceObject)
+	encodedEventSourceSpec, defined := os.LookupEnv(sharedutil.EnvVarEventSourceObject)
 	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarEventSourceObject)
+		logger.Fatalf("required environment variable '%s' not defined", sharedutil.EnvVarEventSourceObject)
 	}
 	eventSourceSpec, err := base64.StdEncoding.DecodeString(encodedEventSourceSpec)
 	if err != nil {
@@ -33,7 +33,7 @@ func Start() {
 	}
 
 	busConfig := &v1alpha1.BusConfig{}
-	encodedBusConfigSpec := os.Getenv(common.EnvVarEventBusConfig)
+	encodedBusConfigSpec := os.Getenv(sharedutil.EnvVarEventBusConfig)
 	if len(encodedBusConfigSpec) > 0 {
 		busConfigSpec, err := base64.StdEncoding.DecodeString(encodedBusConfigSpec)
 		if err != nil {
@@ -44,9 +44,9 @@ func Start() {
 		}
 	}
 
-	ebSubject, defined := os.LookupEnv(common.EnvVarEventBusSubject)
+	ebSubject, defined := os.LookupEnv(sharedutil.EnvVarEventBusSubject)
 	if !defined {
-		logger.Fatalf("required environment variable '%s' not defined", common.EnvVarEventBusSubject)
+		logger.Fatalf("required environment variable '%s' not defined", sharedutil.EnvVarEventBusSubject)
 	}
 
 	hostname, defined := os.LookupEnv("POD_NAME")
@@ -57,7 +57,7 @@ func Start() {
 	logger = logger.With(logging.LabelEventSourceName, eventSource.Name)
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
 	m := metrics.NewMetrics(eventSource.Namespace)
-	go m.Run(ctx, fmt.Sprintf(":%d", common.EventSourceMetricsPort))
+	go m.Run(ctx, fmt.Sprintf(":%d", sharedutil.EventSourceMetricsPort))
 
 	logger.Infow("starting eventsource server", "version", argoevents.GetVersion())
 	adaptor := eventsources.NewEventSourceAdaptor(eventSource, busConfig, ebSubject, hostname, m)

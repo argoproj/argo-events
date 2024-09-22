@@ -23,8 +23,8 @@ import (
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ArtifactReader enables reading artifacts from an external store
@@ -36,7 +36,7 @@ type ArtifactReader interface {
 func FetchArtifact(reader ArtifactReader) (*unstructured.Unstructured, error) {
 	var obj []byte
 
-	if err := common.DoWithRetry(&common.DefaultBackoff, func() error {
+	if err := sharedutil.DoWithRetry(&sharedutil.DefaultBackoff, func() error {
 		var e error
 		obj, e = reader.Read()
 		return e
@@ -54,11 +54,11 @@ type Credentials struct {
 // GetCredentials for this minio
 func GetCredentials(art *v1alpha1.ArtifactLocation) (*Credentials, error) {
 	if art.S3 != nil {
-		accessKey, err := common.GetSecretFromVolume(art.S3.AccessKey)
+		accessKey, err := sharedutil.GetSecretFromVolume(art.S3.AccessKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve accessKey, %w", err)
 		}
-		secretKey, err := common.GetSecretFromVolume(art.S3.SecretKey)
+		secretKey, err := sharedutil.GetSecretFromVolume(art.S3.SecretKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve secretKey, %w", err)
 		}

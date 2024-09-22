@@ -29,7 +29,6 @@ import (
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -37,6 +36,7 @@ import (
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing kafka event source
@@ -165,7 +165,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 	var consumer sarama.Consumer
 
 	log.Info("connecting to Kafka cluster...")
-	if err := common.DoWithRetry(kafkaEventSource.ConnectionBackoff, func() error {
+	if err := sharedutil.DoWithRetry(kafkaEventSource.ConnectionBackoff, func() error {
 		var err error
 
 		config, err := getSaramaConfig(kafkaEventSource, log)
@@ -272,7 +272,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 }
 
 func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.SugaredLogger) (*sarama.Config, error) {
-	config, err := common.GetSaramaConfigFromYAMLString(kafkaEventSource.Config)
+	config, err := sharedutil.GetSaramaConfigFromYAMLString(kafkaEventSource.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -293,19 +293,19 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 
 		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaEventSource.SASL.GetMechanism())
 		if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
-			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA512New} }
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA512New} }
 		} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
-			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA256New} }
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA256New} }
 		}
 
-		user, err := common.GetSecretFromVolume(kafkaEventSource.SASL.UserSecret)
+		user, err := sharedutil.GetSecretFromVolume(kafkaEventSource.SASL.UserSecret)
 		if err != nil {
 			log.Errorf("Error getting user value from secret: %v", err)
 			return nil, err
 		}
 		config.Net.SASL.User = user
 
-		password, err := common.GetSecretFromVolume(kafkaEventSource.SASL.PasswordSecret)
+		password, err := sharedutil.GetSecretFromVolume(kafkaEventSource.SASL.PasswordSecret)
 		if err != nil {
 			log.Errorf("Error getting password value from secret: %v", err)
 			return nil, err
@@ -314,7 +314,7 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 	}
 
 	if kafkaEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(kafkaEventSource.TLS)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 		}

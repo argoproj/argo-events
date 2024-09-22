@@ -37,13 +37,13 @@ import (
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // InformerEvent holds event generated from resource state change
@@ -83,8 +83,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	log.Info("setting up a K8s client")
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
+	kubeConfig, _ := os.LookupEnv(sharedutil.EnvVarKubeConfig)
+	restConfig, err := sharedutil.GetClientConfig(kubeConfig)
 	if err != nil {
 		return fmt.Errorf("failed to get a K8s rest config for the event source %s, %w", el.GetEventName(), err)
 	}

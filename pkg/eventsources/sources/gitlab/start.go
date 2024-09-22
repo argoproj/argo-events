@@ -27,12 +27,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"github.com/xanzy/go-gitlab"
 	"go.uber.org/zap"
 )
@@ -72,7 +72,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if !route.Active {
 		logger.Info("endpoint is not active, won't process the request")
-		common.SendErrorResponse(writer, "inactive endpoint")
+		sharedutil.SendErrorResponse(writer, "inactive endpoint")
 		return
 	}
 
@@ -82,7 +82,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if router.secretToken != "" {
 		if t := request.Header.Get("X-Gitlab-Token"); t != router.secretToken {
-			common.SendErrorResponse(writer, "token mismatch")
+			sharedutil.SendErrorResponse(writer, "token mismatch")
 			return
 		}
 	}
@@ -90,7 +90,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -104,7 +104,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	eventBody, err := json.Marshal(event)
 	if err != nil {
 		logger.Info("failed to marshal event")
-		common.SendErrorResponse(writer, "invalid event")
+		sharedutil.SendErrorResponse(writer, "invalid event")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -113,7 +113,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	route.DataCh <- eventBody
 
 	logger.Info("request successfully processed")
-	common.SendSuccessResponse(writer, "success")
+	sharedutil.SendSuccessResponse(writer, "success")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -183,7 +183,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		logger.Info("retrieving the access token credentials...")
 
 		defaultEventValue := false
-		formattedURL := common.FormattedURL(gitlabEventSource.Webhook.URL, gitlabEventSource.Webhook.Endpoint)
+		formattedURL := sharedutil.FormattedURL(gitlabEventSource.Webhook.URL, gitlabEventSource.Webhook.Endpoint)
 		opt := &gitlab.AddProjectHookOptions{
 			URL:                      &formattedURL,
 			EnableSSLVerification:    &router.gitlabEventSource.EnableSSLVerification,
@@ -224,7 +224,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 
 		if gitlabEventSource.SecretToken != nil {
-			token, err := common.GetSecretFromVolume(gitlabEventSource.SecretToken)
+			token, err := sharedutil.GetSecretFromVolume(gitlabEventSource.SecretToken)
 			if err != nil {
 				return fmt.Errorf("failed to retrieve secret token. err: %w", err)
 			}
@@ -233,7 +233,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			router.secretToken = token
 		}
 
-		accessToken, err := common.GetSecretFromVolume(gitlabEventSource.AccessToken)
+		accessToken, err := sharedutil.GetSecretFromVolume(gitlabEventSource.AccessToken)
 		if err != nil {
 			return fmt.Errorf("failed to get gitlab credentials. err: %w", err)
 		}

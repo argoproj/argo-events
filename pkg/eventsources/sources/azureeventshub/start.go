@@ -25,13 +25,13 @@ import (
 	eventhub "github.com/Azure/azure-event-hubs-go/v3"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for azure events hub event source
@@ -66,13 +66,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	hubEventSource := &el.AzureEventsHubEventSource
 	log.Info("retrieving the shared access key name...")
-	sharedAccessKeyName, err := common.GetSecretFromVolume(hubEventSource.SharedAccessKeyName)
+	sharedAccessKeyName, err := sharedutil.GetSecretFromVolume(hubEventSource.SharedAccessKeyName)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve the shared access key name from secret %s, %w", hubEventSource.SharedAccessKeyName.Name, err)
 	}
 
 	log.Info("retrieving the shared access key...")
-	sharedAccessKey, err := common.GetSecretFromVolume(hubEventSource.SharedAccessKey)
+	sharedAccessKey, err := sharedutil.GetSecretFromVolume(hubEventSource.SharedAccessKey)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve the shared access key from secret %s, %w", hubEventSource.SharedAccessKey.Name, err)
 	}

@@ -12,13 +12,13 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for generic event source
@@ -132,7 +132,7 @@ func (el *EventListener) connect() (Eventing_StartEventSourceClient, error) {
 	client := NewEventingClient(el.conn)
 	ctx := context.Background()
 	if el.GenericEventSource.AuthSecret != nil {
-		token, err := common.GetSecretFromVolume(el.GenericEventSource.AuthSecret)
+		token, err := sharedutil.GetSecretFromVolume(el.GenericEventSource.AuthSecret)
 		if err != nil {
 			return nil, err
 		}

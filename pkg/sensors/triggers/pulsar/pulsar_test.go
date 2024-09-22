@@ -25,9 +25,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 type mockPulsarProducer struct {
@@ -87,7 +87,7 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getFakePulsarTrigger(producers common.StringKeyedMap[pulsar.Producer]) (*PulsarTrigger, error) {
+func getFakePulsarTrigger(producers sharedutil.StringKeyedMap[pulsar.Producer]) (*PulsarTrigger, error) {
 	return NewPulsarTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 }
 
@@ -96,7 +96,7 @@ func TestNewPulsarTrigger(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	producers := common.NewStringKeyedMap[pulsar.Producer]()
+	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := NewPulsarTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 	assert.Nil(t, err)
@@ -109,7 +109,7 @@ func TestPulsarTrigger_FetchResource(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	producers := common.NewStringKeyedMap[pulsar.Producer]()
+	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := getFakePulsarTrigger(producers)
 	assert.Nil(t, err)
@@ -126,7 +126,7 @@ func TestPulsarTrigger_ApplyResourceParameters(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	producers := common.NewStringKeyedMap[pulsar.Producer]()
+	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := getFakePulsarTrigger(producers)
 	assert.Nil(t, err)
@@ -173,7 +173,7 @@ func TestPulsarTrigger_Execute(t *testing.T) {
 		topic: "fake-topic",
 		name:  "fake-producer",
 	}
-	producers := common.NewStringKeyedMap[pulsar.Producer]()
+	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := getFakePulsarTrigger(producers)
 	assert.Nil(t, err)

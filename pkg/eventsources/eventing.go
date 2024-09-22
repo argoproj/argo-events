@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/expr"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
@@ -54,6 +53,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/webhook"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventingServer is the server API for Eventing service.
@@ -456,7 +456,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 		logger.Errorw("failed to get eventbus driver", zap.Error(err))
 		return err
 	}
-	if err = common.DoWithRetry(&common.DefaultBackoff, func() error {
+	if err = sharedutil.DoWithRetry(&sharedutil.DefaultBackoff, func() error {
 		err = driver.Initialize()
 		if err != nil {
 			return err
@@ -530,7 +530,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 					Factor:   &factor,
 					Jitter:   &jitter,
 				}
-				if err = common.DoWithRetry(&backoff, func() error {
+				if err = sharedutil.DoWithRetry(&backoff, func() error {
 					return s.StartListening(ctx, func(data []byte, opts ...eventsourcecommon.Option) error {
 						if filter, ok := filters[s.GetEventName()]; ok {
 							proceed, err := filterEvent(data, filter)
@@ -579,7 +579,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 							Body: eventBody,
 						}
 						logger.Debugw(string(data), zap.String("eventID", event.ID()))
-						if err = common.DoWithRetry(&common.DefaultBackoff, func() error {
+						if err = sharedutil.DoWithRetry(&sharedutil.DefaultBackoff, func() error {
 							return e.eventBusConn.Publish(ctx, msg)
 						}); err != nil {
 							logger.Errorw("Failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,

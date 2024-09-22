@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/fsevent"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates hdfs event source
@@ -33,7 +33,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *v1alpha1.HDFSEventSource) error {
 	if eventSource == nil {
-		return common.ErrNilEventSource
+		return sharedutil.ErrNilEventSource
 	}
 	if eventSource.Type == "" {
 		return fmt.Errorf("type is required")

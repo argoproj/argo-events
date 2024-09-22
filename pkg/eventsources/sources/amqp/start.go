@@ -27,13 +27,13 @@ import (
 	amqplib "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for amqp event source
@@ -69,24 +69,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	amqpEventSource := &el.AMQPEventSource
 	var conn *amqplib.Connection
-	if err := common.DoWithRetry(amqpEventSource.ConnectionBackoff, func() error {
+	if err := sharedutil.DoWithRetry(amqpEventSource.ConnectionBackoff, func() error {
 		c := amqplib.Config{
 			Heartbeat: 10 * time.Second,
 			Locale:    "en_US",
 		}
 		if amqpEventSource.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS)
+			tlsConfig, err := sharedutil.GetTLSConfig(amqpEventSource.TLS)
 			if err != nil {
 				return fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
 			c.TLSClientConfig = tlsConfig
 		}
 		if amqpEventSource.Auth != nil {
-			username, err := common.GetSecretFromVolume(amqpEventSource.Auth.Username)
+			username, err := sharedutil.GetSecretFromVolume(amqpEventSource.Auth.Username)
 			if err != nil {
 				return fmt.Errorf("username not found, %w", err)
 			}
-			password, err := common.GetSecretFromVolume(amqpEventSource.Auth.Password)
+			password, err := sharedutil.GetSecretFromVolume(amqpEventSource.Auth.Password)
 			if err != nil {
 				return fmt.Errorf("password not found, %w", err)
 			}
@@ -98,7 +98,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		var err error
 		var url string
 		if amqpEventSource.URLSecret != nil {
-			url, err = common.GetSecretFromVolume(amqpEventSource.URLSecret)
+			url, err = sharedutil.GetSecretFromVolume(amqpEventSource.URLSecret)
 			if err != nil {
 				return fmt.Errorf("urlSecret not found, %w", err)
 			}

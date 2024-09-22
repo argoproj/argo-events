@@ -24,12 +24,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	commonaws "github.com/argoproj/argo-events/pkg/eventsources/common/aws"
 	"github.com/argoproj/argo-events/pkg/sensors/policy"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // AWSLambdaTrigger refers to trigger that invokes AWS Lambda functions
@@ -45,7 +45,7 @@ type AWSLambdaTrigger struct {
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients common.StringKeyedMap[*lambda.Lambda], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients sharedutil.StringKeyedMap[*lambda.Lambda], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
 	lambdaClient, ok := lambdaClients.Load(trigger.Template.Name)

@@ -25,9 +25,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -60,13 +60,13 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getFakeKafkaTrigger(producers common.StringKeyedMap[sarama.AsyncProducer]) (*KafkaTrigger, error) {
+func getFakeKafkaTrigger(producers sharedutil.StringKeyedMap[sarama.AsyncProducer]) (*KafkaTrigger, error) {
 	return NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 }
 
 func TestNewKafkaTrigger(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers := sharedutil.NewStringKeyedMap[sarama.AsyncProducer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := NewKafkaTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 
@@ -77,7 +77,7 @@ func TestNewKafkaTrigger(t *testing.T) {
 
 func TestKafkaTrigger_FetchResource(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers := sharedutil.NewStringKeyedMap[sarama.AsyncProducer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := getFakeKafkaTrigger(producers)
 	assert.Nil(t, err)
@@ -91,7 +91,7 @@ func TestKafkaTrigger_FetchResource(t *testing.T) {
 
 func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers := sharedutil.NewStringKeyedMap[sarama.AsyncProducer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := getFakeKafkaTrigger(producers)
 	assert.Nil(t, err)
@@ -135,7 +135,7 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestKafkaTrigger_Execute(t *testing.T) {
 	producer := mocks.NewAsyncProducer(t, nil)
-	producers := common.NewStringKeyedMap[sarama.AsyncProducer]()
+	producers := sharedutil.NewStringKeyedMap[sarama.AsyncProducer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := getFakeKafkaTrigger(producers)
 	assert.Nil(t, err)

@@ -25,13 +25,13 @@ import (
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for mqtt event source
@@ -105,7 +105,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	log.Info("setting up the mqtt broker client...")
 	opts := mqttlib.NewClientOptions().AddBroker(mqttEventSource.URL).SetClientID(mqttEventSource.ClientID)
 	if mqttEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(mqttEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(mqttEventSource.TLS)
 		if err != nil {
 			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
@@ -113,11 +113,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if mqttEventSource.Auth != nil {
-		username, err := common.GetSecretFromVolume(mqttEventSource.Auth.Username)
+		username, err := sharedutil.GetSecretFromVolume(mqttEventSource.Auth.Username)
 		if err != nil {
 			return fmt.Errorf("username not found, %w", err)
 		}
-		password, err := common.GetSecretFromVolume(mqttEventSource.Auth.Password)
+		password, err := sharedutil.GetSecretFromVolume(mqttEventSource.Auth.Password)
 		if err != nil {
 			return fmt.Errorf("password not found, %w", err)
 		}
@@ -128,7 +128,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var client mqttlib.Client
 
 	log.Info("connecting to mqtt broker...")
-	if err := common.DoWithRetry(mqttEventSource.ConnectionBackoff, func() error {
+	if err := sharedutil.DoWithRetry(mqttEventSource.ConnectionBackoff, func() error {
 		client = mqttlib.NewClient(opts)
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
 			return token.Error()

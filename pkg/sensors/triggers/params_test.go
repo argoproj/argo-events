@@ -26,8 +26,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -86,7 +86,7 @@ func TestConstructPayload(t *testing.T) {
 				ID:              "1",
 				Type:            "webhook",
 				Source:          "webhook-gateway",
-				DataContentType: common.MediaTypeJSON,
+				DataContentType: sharedutil.MediaTypeJSON,
 				Subject:         "example-1",
 			},
 			Data: []byte("{\"firstName\": \"fake\"}"),
@@ -96,7 +96,7 @@ func TestConstructPayload(t *testing.T) {
 				ID:              "2",
 				Type:            "calendar",
 				Source:          "calendar-gateway",
-				DataContentType: common.MediaTypeJSON,
+				DataContentType: sharedutil.MediaTypeJSON,
 				Subject:         "example-1",
 			},
 			Data: []byte("{\"lastName\": \"foo\"}"),
@@ -106,7 +106,7 @@ func TestConstructPayload(t *testing.T) {
 				ID:              "3",
 				Type:            "calendar",
 				Source:          "calendar-gateway",
-				DataContentType: common.MediaTypeJSON,
+				DataContentType: sharedutil.MediaTypeJSON,
 				Subject:         "example-1",
 			},
 			Data: []byte("{\"age\": 100, \"isActive\": false, \"countries\": [\"ca\", \"us\", \"mx\"]}"),
@@ -195,7 +195,7 @@ func TestConstructPayload(t *testing.T) {
 func TestResolveParamValue(t *testing.T) {
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
-			DataContentType: common.MediaTypeJSON,
+			DataContentType: sharedutil.MediaTypeJSON,
 			Subject:         "example-1",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
@@ -358,7 +358,7 @@ func TestResolveParamValue(t *testing.T) {
 func TestRenderDataAsJSON(t *testing.T) {
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
-			DataContentType: common.MediaTypeJSON,
+			DataContentType: sharedutil.MediaTypeJSON,
 			Subject:         "example-1",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
@@ -382,7 +382,7 @@ func TestRenderDataAsJSON(t *testing.T) {
 	yamlBody, err := yaml.Marshal(&testYaml)
 	assert.Nil(t, err)
 	event.Data = yamlBody
-	event.Context.DataContentType = common.MediaTypeYAML
+	event.Context.DataContentType = sharedutil.MediaTypeYAML
 	assert.Nil(t, err)
 	body, err = renderEventDataAsJSON(event)
 	assert.Nil(t, err)
@@ -392,7 +392,7 @@ func TestRenderDataAsJSON(t *testing.T) {
 func TestApplyParams(t *testing.T) {
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
-			DataContentType: common.MediaTypeJSON,
+			DataContentType: sharedutil.MediaTypeJSON,
 			Subject:         "example-1",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
@@ -554,7 +554,7 @@ func TestApplyResourceParameters(t *testing.T) {
 
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
-			DataContentType: common.MediaTypeJSON,
+			DataContentType: sharedutil.MediaTypeJSON,
 			Subject:         "example-1",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
@@ -592,7 +592,7 @@ func TestApplyTemplateParameters(t *testing.T) {
 	obj := sensorObj.DeepCopy()
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
-			DataContentType: common.MediaTypeJSON,
+			DataContentType: sharedutil.MediaTypeJSON,
 			Subject:         "example-1",
 			Source:          "webhook-gateway",
 			Type:            "webhook",

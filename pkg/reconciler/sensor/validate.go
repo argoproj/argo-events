@@ -23,8 +23,8 @@ import (
 
 	cronlib "github.com/robfig/cron/v3"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it
@@ -642,11 +642,11 @@ func validateEventTimeFilter(timeFilter *v1alpha1.TimeFilter) error {
 	now := time.Now().UTC()
 
 	// Parse start and stop
-	startTime, startErr := common.ParseTime(timeFilter.Start, now)
+	startTime, startErr := sharedutil.ParseTime(timeFilter.Start, now)
 	if startErr != nil {
 		return startErr
 	}
-	stopTime, stopErr := common.ParseTime(timeFilter.Stop, now)
+	stopTime, stopErr := sharedutil.ParseTime(timeFilter.Stop, now)
 	if stopErr != nil {
 		return stopErr
 	}

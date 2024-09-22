@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates bitbucketserver event source
@@ -32,7 +32,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *v1alpha1.BitbucketServerEventSource) error {
 	if eventSource == nil {
-		return common.ErrNilEventSource
+		return sharedutil.ErrNilEventSource
 	}
 	if eventSource.GetBitbucketServerRepositories() == nil && len(eventSource.Projects) == 0 {
 		return fmt.Errorf("at least one project or repository configuration is required")

@@ -23,10 +23,10 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // PulsarTrigger describes the trigger to place messages on Pulsar topic using a producer
@@ -42,7 +42,7 @@ type PulsarTrigger struct {
 }
 
 // NewPulsarTrigger returns a new Pulsar trigger context.
-func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers common.StringKeyedMap[pulsar.Producer], logger *zap.SugaredLogger) (*PulsarTrigger, error) {
+func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsarProducers sharedutil.StringKeyedMap[pulsar.Producer], logger *zap.SugaredLogger) (*PulsarTrigger, error) {
 	pulsarTrigger := trigger.Template.Pulsar
 
 	producer, ok := pulsarProducers.Load(trigger.Template.Name)
@@ -50,7 +50,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		var err error
 		tlsTrustCertsFilePath := ""
 		if pulsarTrigger.TLSTrustCertsSecret != nil {
-			tlsTrustCertsFilePath, err = common.GetSecretVolumePath(pulsarTrigger.TLSTrustCertsSecret)
+			tlsTrustCertsFilePath, err = sharedutil.GetSecretVolumePath(pulsarTrigger.TLSTrustCertsSecret)
 			if err != nil {
 				logger.Errorw("failed to get TLSTrustCertsFilePath from the volume", zap.Error(err))
 				return nil, err
@@ -64,7 +64,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		}
 
 		if pulsarTrigger.AuthTokenSecret != nil {
-			token, err := common.GetSecretFromVolume(pulsarTrigger.AuthTokenSecret)
+			token, err := sharedutil.GetSecretFromVolume(pulsarTrigger.AuthTokenSecret)
 			if err != nil {
 				logger.Errorw("failed to get AuthTokenSecret from the volume", zap.Error(err))
 				return nil, err
@@ -75,7 +75,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 		if len(pulsarTrigger.AuthAthenzParams) > 0 {
 			logger.Info("setting athenz auth option...")
 			if pulsarTrigger.AuthAthenzSecret != nil {
-				authAthenzFilePath, err := common.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
+				authAthenzFilePath, err := sharedutil.GetSecretVolumePath(pulsarTrigger.AuthAthenzSecret)
 				if err != nil {
 					logger.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
 					return nil, err
@@ -90,12 +90,12 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 			var clientCertPath, clientKeyPath string
 			switch {
 			case pulsarTrigger.TLS.ClientCertSecret != nil && pulsarTrigger.TLS.ClientKeySecret != nil:
-				clientCertPath, err = common.GetSecretVolumePath(pulsarTrigger.TLS.ClientCertSecret)
+				clientCertPath, err = sharedutil.GetSecretVolumePath(pulsarTrigger.TLS.ClientCertSecret)
 				if err != nil {
 					logger.Errorw("failed to get ClientCertPath from the volume", zap.Error(err))
 					return nil, err
 				}
-				clientKeyPath, err = common.GetSecretVolumePath(pulsarTrigger.TLS.ClientKeySecret)
+				clientKeyPath, err = sharedutil.GetSecretVolumePath(pulsarTrigger.TLS.ClientKeySecret)
 				if err != nil {
 					logger.Errorw("failed to get ClientKeyPath from the volume", zap.Error(err))
 					return nil, err
@@ -108,7 +108,7 @@ func NewPulsarTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, pulsar
 
 		var client pulsar.Client
 
-		if err := common.DoWithRetry(pulsarTrigger.ConnectionBackoff, func() error {
+		if err := sharedutil.DoWithRetry(pulsarTrigger.ConnectionBackoff, func() error {
 			var err error
 			if client, err = pulsar.NewClient(clientOpt); err != nil {
 				return err

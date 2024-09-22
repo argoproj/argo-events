@@ -26,13 +26,13 @@ import (
 	"github.com/nsqio/go-nsq"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for the NSQ event source
@@ -83,7 +83,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	config := nsq.NewConfig()
 
 	if nsqEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(nsqEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(nsqEventSource.TLS)
 		if err != nil {
 			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
@@ -91,7 +91,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		config.TlsV1 = true
 	}
 
-	if err := common.DoWithRetry(nsqEventSource.ConnectionBackoff, func() error {
+	if err := sharedutil.DoWithRetry(nsqEventSource.ConnectionBackoff, func() error {
 		var err error
 		if consumer, err = nsq.NewConsumer(nsqEventSource.Topic, nsqEventSource.Channel, config); err != nil {
 			return err

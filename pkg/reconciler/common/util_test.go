@@ -19,11 +19,12 @@ package common
 import (
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 func TestSetObjectMeta(t *testing.T) {
@@ -43,5 +44,5 @@ func TestSetObjectMeta(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "fake-namespace", pod.Namespace)
 	assert.Equal(t, owner.GroupVersionKind().Kind, pod.OwnerReferences[0].Kind)
-	assert.NotEmpty(t, pod.Annotations[common.AnnotationResourceSpecHash])
+	assert.NotEmpty(t, pod.Annotations[sharedutil.AnnotationResourceSpecHash])
 }

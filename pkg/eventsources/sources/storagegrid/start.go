@@ -32,12 +32,12 @@ import (
 	"github.com/joncalhoun/qson"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // controller controls the webhook operations
@@ -134,7 +134,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if !route.Active {
 		logger.Warn("endpoint is inactive, won't process the request")
-		common.SendErrorResponse(writer, "inactive endpoint")
+		sharedutil.SendErrorResponse(writer, "inactive endpoint")
 		return
 	}
 
@@ -143,7 +143,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
-		common.SendErrorResponse(writer, "")
+		sharedutil.SendErrorResponse(writer, "")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -211,12 +211,12 @@ func (router *Router) PostActivate() error {
 	eventSource := router.storageGridEventSource
 	route := router.route
 
-	authToken, err := common.GetSecretFromVolume(eventSource.AuthToken)
+	authToken, err := sharedutil.GetSecretFromVolume(eventSource.AuthToken)
 	if err != nil {
 		return fmt.Errorf("AuthToken not found, %w", err)
 	}
 
-	registrationURL := common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
+	registrationURL := sharedutil.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
 
 	client := resty.New()
 
@@ -230,11 +230,11 @@ func (router *Router) PostActivate() error {
 	logger.Info("checking if the endpoint already exists...")
 
 	response, err := client.R().
-		SetHeader("Content-Type", common.MediaTypeJSON).
+		SetHeader("Content-Type", sharedutil.MediaTypeJSON).
 		SetAuthToken(authToken).
 		SetResult(&getEndpointResponse{}).
 		SetError(&genericResponse{}).
-		Get(common.FormattedURL(eventSource.APIURL, "/org/endpoints"))
+		Get(sharedutil.FormattedURL(eventSource.APIURL, "/org/endpoints"))
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func (router *Router) PostActivate() error {
 		logger.Info("endpoint urn does not exist, registering a new endpoint")
 		newEndpoint := createEndpointRequest{
 			DisplayName: router.route.EventName,
-			EndpointURI: common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint),
+			EndpointURI: sharedutil.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint),
 			EndpointURN: eventSource.TopicArn,
 			AuthType:    "anonymous",
 			InsecureTLS: true,
@@ -272,12 +272,12 @@ func (router *Router) PostActivate() error {
 		}
 
 		response, err := client.R().
-			SetHeader("Content-Type", common.MediaTypeJSON).
+			SetHeader("Content-Type", sharedutil.MediaTypeJSON).
 			SetAuthToken(authToken).
 			SetBody(string(newEndpointBody)).
 			SetResult(&genericResponse{}).
 			SetError(&genericResponse{}).
-			Post(common.FormattedURL(eventSource.APIURL, "/org/endpoints"))
+			Post(sharedutil.FormattedURL(eventSource.APIURL, "/org/endpoints"))
 		if err != nil {
 			return err
 		}
@@ -311,12 +311,12 @@ func (router *Router) PostActivate() error {
 	}
 
 	response, err = client.R().
-		SetHeader("Content-Type", common.MediaTypeJSON).
+		SetHeader("Content-Type", sharedutil.MediaTypeJSON).
 		SetAuthToken(authToken).
 		SetBody(string(notificationRequestBody)).
 		SetResult(&registerNotificationResponse{}).
 		SetError(&genericResponse{}).
-		Put(common.FormattedURL(eventSource.APIURL, fmt.Sprintf("/org/containers/%s/notification", eventSource.Bucket)))
+		Put(sharedutil.FormattedURL(eventSource.APIURL, fmt.Sprintf("/org/containers/%s/notification", eventSource.Bucket)))
 	if err != nil {
 		return err
 	}

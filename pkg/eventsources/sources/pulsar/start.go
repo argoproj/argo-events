@@ -24,13 +24,13 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for the Pulsar event source
@@ -84,7 +84,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	var err error
 	tlsTrustCertsFilePath := ""
 	if pulsarEventSource.TLSTrustCertsSecret != nil {
-		tlsTrustCertsFilePath, err = common.GetSecretVolumePath(pulsarEventSource.TLSTrustCertsSecret)
+		tlsTrustCertsFilePath, err = sharedutil.GetSecretVolumePath(pulsarEventSource.TLSTrustCertsSecret)
 		if err != nil {
 			log.Errorw("failed to get TLSTrustCertsFilePath from the volume", zap.Error(err))
 			return err
@@ -98,7 +98,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	if pulsarEventSource.AuthTokenSecret != nil {
-		token, err := common.GetSecretFromVolume(pulsarEventSource.AuthTokenSecret)
+		token, err := sharedutil.GetSecretFromVolume(pulsarEventSource.AuthTokenSecret)
 		if err != nil {
 			log.Errorw("failed to get AuthTokenSecret from the volume", zap.Error(err))
 			return err
@@ -109,7 +109,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if len(pulsarEventSource.AuthAthenzParams) > 0 {
 		log.Info("setting athenz auth option...")
 		if pulsarEventSource.AuthAthenzSecret != nil {
-			authAthenzFilePath, err := common.GetSecretVolumePath(pulsarEventSource.AuthAthenzSecret)
+			authAthenzFilePath, err := sharedutil.GetSecretVolumePath(pulsarEventSource.AuthAthenzSecret)
 			if err != nil {
 				log.Errorw("failed to get authAthenzSecret from the volume", zap.Error(err))
 				return err
@@ -124,12 +124,12 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		var clientCertPath, clientKeyPath string
 		switch {
 		case pulsarEventSource.TLS.ClientCertSecret != nil && pulsarEventSource.TLS.ClientKeySecret != nil:
-			clientCertPath, err = common.GetSecretVolumePath(pulsarEventSource.TLS.ClientCertSecret)
+			clientCertPath, err = sharedutil.GetSecretVolumePath(pulsarEventSource.TLS.ClientCertSecret)
 			if err != nil {
 				log.Errorw("failed to get ClientCertPath from the volume", zap.Error(err))
 				return err
 			}
-			clientKeyPath, err = common.GetSecretVolumePath(pulsarEventSource.TLS.ClientKeySecret)
+			clientKeyPath, err = sharedutil.GetSecretVolumePath(pulsarEventSource.TLS.ClientKeySecret)
 			if err != nil {
 				log.Errorw("failed to get ClientKeyPath from the volume", zap.Error(err))
 				return err
@@ -142,7 +142,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var client pulsar.Client
 
-	if err := common.DoWithRetry(pulsarEventSource.ConnectionBackoff, func() error {
+	if err := sharedutil.DoWithRetry(pulsarEventSource.ConnectionBackoff, func() error {
 		var err error
 		if client, err = pulsar.NewClient(clientOpt); err != nil {
 			return err

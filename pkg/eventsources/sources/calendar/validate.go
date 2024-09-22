@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates sqs event source
@@ -31,7 +31,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(calendarEventSource *v1alpha1.CalendarEventSource) error {
 	if calendarEventSource == nil {
-		return common.ErrNilEventSource
+		return sharedutil.ErrNilEventSource
 	}
 	if calendarEventSource.Schedule == "" && calendarEventSource.Interval == "" {
 		return fmt.Errorf("must have either schedule or interval")

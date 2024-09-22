@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates azure events hub event source
@@ -31,7 +31,7 @@ func (el *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *v1alpha1.AzureEventsHubEventSource) error {
 	if eventSource == nil {
-		return common.ErrNilEventSource
+		return sharedutil.ErrNilEventSource
 	}
 	if eventSource.FQDN == "" {
 		return fmt.Errorf("FQDN is not specified")

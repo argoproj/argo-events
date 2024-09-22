@@ -35,13 +35,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/exp/slices"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"go.uber.org/zap"
 )
 
@@ -81,7 +81,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	if !route.Active {
 		logger.Info("endpoint is not active, won't process the request")
-		common.SendErrorResponse(writer, "inactive endpoint")
+		sharedutil.SendErrorResponse(writer, "inactive endpoint")
 		return
 	}
 
@@ -93,7 +93,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	body, err := router.parseAndValidateBitbucketServerRequest(request)
 	if err != nil {
 		logger.Errorw("failed to parse/validate request", zap.Error(err))
-		common.SendErrorResponse(writer, err.Error())
+		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -105,7 +105,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		err := json.Unmarshal(body, &refsChanged)
 		if err != nil {
 			logger.Errorf("reading webhook body", zap.Error(err))
-			common.SendErrorResponse(writer, err.Error())
+			sharedutil.SendErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
@@ -118,7 +118,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			hasOpenPR, err := router.refsChangedHasOpenPullRequest(refsChanged.Repository.Project.Key, refsChanged.Repository.Slug, refsChanged.Changes[0].ToHash)
 			if err != nil {
 				logger.Errorf("checking if changed branch ref has an open pull request", zap.Error(err))
-				common.SendErrorResponse(writer, err.Error())
+				sharedutil.SendErrorResponse(writer, err.Error())
 				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				return
 			}
@@ -126,7 +126,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			// Do not publish this Branch repo:refs_changed event if a related Pull Request is already opened for the commit.
 			if hasOpenPR {
 				logger.Info("skipping publishing event, commit has an open pull request")
-				common.SendSuccessResponse(writer, "success")
+				sharedutil.SendSuccessResponse(writer, "success")
 				return
 			}
 		}
@@ -141,7 +141,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	eventBody, err := json.Marshal(event)
 	if err != nil {
 		logger.Errorw("failed to parse event", zap.Error(err))
-		common.SendErrorResponse(writer, "invalid event")
+		sharedutil.SendErrorResponse(writer, "invalid event")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -150,7 +150,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	route.DataCh <- eventBody
 
 	logger.Info("request successfully processed")
-	common.SendSuccessResponse(writer, "success")
+	sharedutil.SendSuccessResponse(writer, "success")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -220,7 +220,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	logger.Info("started processing the Bitbucket Server event source...")
 
 	logger.Info("retrieving the access token credentials...")
-	bitbucketToken, err := common.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
+	bitbucketToken, err := sharedutil.GetSecretFromVolume(bitbucketserverEventSource.AccessToken)
 	if err != nil {
 		return fmt.Errorf("getting bitbucketserver token. err: %w", err)
 	}
@@ -264,7 +264,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	if bitbucketserverEventSource.WebhookSecret != nil {
 		logger.Info("retrieving the webhook secret...")
-		webhookSecret, err := common.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
+		webhookSecret, err := sharedutil.GetSecretFromVolume(bitbucketserverEventSource.WebhookSecret)
 		if err != nil {
 			return fmt.Errorf("getting bitbucketserver webhook secret. err: %w", err)
 		}
@@ -347,7 +347,7 @@ func (router *Router) applyBitbucketServerWebhook(repo v1alpha1.BitbucketServerR
 		"base-url", bitbucketserverEventSource.BitbucketServerBaseURL,
 	)
 
-	formattedURL := common.FormattedURL(bitbucketserverEventSource.Webhook.URL, bitbucketserverEventSource.Webhook.Endpoint)
+	formattedURL := sharedutil.FormattedURL(bitbucketserverEventSource.Webhook.URL, bitbucketserverEventSource.Webhook.Endpoint)
 
 	hooks, err := router.listWebhooks(repo)
 	if err != nil {
@@ -444,7 +444,7 @@ func (router *Router) updateWebhook(hookID int, requestBody []byte, repo v1alpha
 }
 
 func (router *Router) shouldUpdateWebhook(existingHook bitbucketv1.Webhook, newHook bitbucketv1.Webhook) bool {
-	return !common.ElementsMatch(existingHook.Events, newHook.Events) ||
+	return !sharedutil.ElementsMatch(existingHook.Events, newHook.Events) ||
 		existingHook.Configuration.Secret != newHook.Configuration.Secret
 }
 
@@ -456,7 +456,7 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 	// otherwise Bitbucket Server sends 500 response because of empty string value in the hook.Configuration.Secret field
 	if hook.Configuration.Secret == "" {
 		hookMap := make(map[string]interface{})
-		err = common.StructToMap(hook, hookMap)
+		err = sharedutil.StructToMap(hook, hookMap)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert webhook to map, %w", err)
 		}
@@ -569,7 +569,7 @@ func newBitbucketServerClientCfg(bitbucketserverEventSource *v1alpha1.BitbucketS
 	bitbucketCfg.HTTPClient = &http.Client{}
 
 	if bitbucketserverEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(bitbucketserverEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(bitbucketserverEventSource.TLS)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get the tls configuration. err: %w", err)
 		}

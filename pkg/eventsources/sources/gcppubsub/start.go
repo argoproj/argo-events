@@ -31,13 +31,13 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for gcp pub-sub event source
@@ -195,7 +195,7 @@ func (el *EventListener) hash() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return common.Hasher(el.GetEventName() + string(body)), nil
+	return sharedutil.Hasher(el.GetEventName() + string(body)), nil
 }
 
 func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.SugaredLogger) (*pubsub.Client, *pubsub.Subscription, error) {
@@ -204,7 +204,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	opts := make([]option.ClientOption, 0, 1)
 	if secret := el.PubSubEventSource.CredentialSecret; secret != nil {
 		logger.Debug("using credentials from secret")
-		jsonCred, err := common.GetSecretFromVolume(secret)
+		jsonCred, err := sharedutil.GetSecretFromVolume(secret)
 		if err != nil {
 			return nil, nil, fmt.Errorf("could not find credentials, %w", err)
 		}

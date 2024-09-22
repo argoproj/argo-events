@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 func TestFilterContext(t *testing.T) {
@@ -30,7 +30,7 @@ func TestFilterContext(t *testing.T) {
 				Time: metav1.Time{
 					Time: time.Now().UTC(),
 				},
-				DataContentType: common.MediaTypeJSON,
+				DataContentType: sharedutil.MediaTypeJSON,
 				Subject:         "example-1",
 			},
 			result: false,
@@ -49,7 +49,7 @@ func TestFilterContext(t *testing.T) {
 				Time: metav1.Time{
 					Time: time.Now().UTC(),
 				},
-				DataContentType: common.MediaTypeJSON,
+				DataContentType: sharedutil.MediaTypeJSON,
 				Subject:         "example-1",
 			},
 			result: true,

@@ -1,7 +1,7 @@
 package artifacts
 
 import (
-	"github.com/argoproj/argo-events/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -18,7 +18,7 @@ func NewConfigMapReader(configmapArtifact *corev1.ConfigMapKeySelector) (*Config
 }
 
 func (c *ConfigMapReader) Read() (body []byte, err error) {
-	cm, err := common.GetConfigMapFromVolume(c.configmapArtifact)
+	cm, err := sharedutil.GetConfigMapFromVolume(c.configmapArtifact)
 	if err != nil {
 		return nil, err
 	}

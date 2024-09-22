@@ -29,13 +29,13 @@ import (
 	"github.com/slack-go/slack/slackevents"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // controller controls the webhook operations
@@ -108,7 +108,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 
 	if !route.Active {
 		logger.Warn("endpoint is not active, won't process it")
-		common.SendErrorResponse(writer, "endpoint is inactive")
+		sharedutil.SendErrorResponse(writer, "endpoint is inactive")
 		return
 	}
 
@@ -120,7 +120,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	err := rc.verifyRequest(request)
 	if err != nil {
 		logger.Errorw("failed to validate the request", zap.Error(err))
-		common.SendResponse(writer, http.StatusUnauthorized, err.Error())
+		sharedutil.SendResponse(writer, http.StatusUnauthorized, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -133,7 +133,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	if len(request.Header["Content-Type"]) > 0 && request.Header["Content-Type"][0] == "application/x-www-form-urlencoded" {
 		if err := request.ParseForm(); err != nil {
 			logger.Errorw("failed to parse form data", zap.Error(err))
-			common.SendInternalErrorResponse(writer, err.Error())
+			sharedutil.SendInternalErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
@@ -143,7 +143,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 			data, err = rc.handleInteraction(request)
 			if err != nil {
 				logger.Errorw("failed to process the interaction", zap.Error(err))
-				common.SendInternalErrorResponse(writer, err.Error())
+				sharedutil.SendInternalErrorResponse(writer, err.Error())
 				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				return
 			}
@@ -152,7 +152,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 			data, err = rc.handleSlashCommand(request)
 			if err != nil {
 				logger.Errorw("failed to process the slash command", zap.Error(err))
-				common.SendInternalErrorResponse(writer, err.Error())
+				sharedutil.SendInternalErrorResponse(writer, err.Error())
 				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				return
 			}
@@ -160,7 +160,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		default:
 			err = fmt.Errorf("could not determine slack type from form parameters")
 			logger.Errorw("failed to determine type of slack post", zap.Error(err))
-			common.SendInternalErrorResponse(writer, err.Error())
+			sharedutil.SendInternalErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
@@ -172,7 +172,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		data, response, err = rc.handleEvent(request)
 		if err != nil {
 			logger.Errorw("failed to handle the event", zap.Error(err))
-			common.SendInternalErrorResponse(writer, err.Error())
+			sharedutil.SendInternalErrorResponse(writer, err.Error())
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
@@ -191,7 +191,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	}
 
 	logger.Debug("request successfully processed")
-	common.SendSuccessResponse(writer, "success")
+	sharedutil.SendSuccessResponse(writer, "success")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -320,13 +320,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	slackEventSource := &el.SlackEventSource
 	log.Info("retrieving the slack token...")
-	token, err := common.GetSecretFromVolume(slackEventSource.Token)
+	token, err := sharedutil.GetSecretFromVolume(slackEventSource.Token)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve the token, %w", err)
 	}
 
 	log.Info("retrieving the signing secret...")
-	signingSecret, err := common.GetSecretFromVolume(slackEventSource.SigningSecret)
+	signingSecret, err := sharedutil.GetSecretFromVolume(slackEventSource.SigningSecret)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve the signing secret, %w", err)
 	}

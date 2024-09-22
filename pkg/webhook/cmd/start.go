@@ -11,11 +11,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsversiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
-	"github.com/argoproj/argo-events/webhook"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
+	"github.com/argoproj/argo-events/pkg/webhook"
 	envpkg "github.com/argoproj/pkg/env"
 )
 
@@ -29,8 +29,8 @@ const (
 
 func Start() {
 	logger := logging.NewArgoEventsLogger().Named("webhook")
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
+	kubeConfig, _ := os.LookupEnv(sharedutil.EnvVarKubeConfig)
+	restConfig, err := sharedutil.GetClientConfig(kubeConfig)
 	if err != nil {
 		logger.Fatalw("failed to get kubeconfig", zap.Error(err))
 	}

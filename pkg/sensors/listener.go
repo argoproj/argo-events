@@ -26,7 +26,6 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/antonmedv/expr"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/leaderelection"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -34,6 +33,7 @@ import (
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 	sensordependencies "github.com/argoproj/argo-events/pkg/sensors/dependencies"
 	sensortriggers "github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	cronlib "github.com/robfig/cron/v3"
 	"go.uber.org/ratelimit"
@@ -115,7 +115,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	err = common.DoWithRetry(&common.DefaultBackoff, func() error {
+	err = sharedutil.DoWithRetry(&sharedutil.DefaultBackoff, func() error {
 		return ebDriver.Initialize()
 	})
 	if err != nil {
@@ -159,7 +159,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 
 			var conn eventbuscommon.TriggerConnection
-			err = common.DoWithRetry(&common.DefaultBackoff, func() error {
+			err = sharedutil.DoWithRetry(&sharedutil.DefaultBackoff, func() error {
 				var err error
 				conn, err = ebDriver.Connect(ctx, trigger.Template.Name, depExpression, deps, trigger.AtLeastOnce)
 				triggerLogger.Debugf("just created connection %v, %+v", &conn, conn)
@@ -214,7 +214,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 				if retryStrategy == nil {
 					retryStrategy = &v1alpha1.Backoff{Steps: 1}
 				}
-				err := common.DoWithRetry(retryStrategy, func() error {
+				err := sharedutil.DoWithRetry(retryStrategy, func() error {
 					return sensorCtx.triggerActions(ctx, sensor, events, trigger)
 				})
 				if err != nil {
@@ -227,7 +227,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 						}
 
 						triggerLogger.Debugf("invoking dlqTrigger")
-						dlqErr := common.DoWithRetry(dlqRetryStrategy, func() error {
+						dlqErr := sharedutil.DoWithRetry(dlqRetryStrategy, func() error {
 							return sensorCtx.triggerActions(ctx, sensor, events, *trigger.DlqTrigger)
 						})
 
@@ -279,7 +279,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 					// set lastResetTime (the last time this would've been triggered)
 					if len(cr.Entries()) > 0 {
-						prevTriggerTime, err := common.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
+						prevTriggerTime, err := sharedutil.PrevCronTime(c.ByTime.Cron, cronParser, nowTime)
 						if err != nil {
 							triggerLogger.Errorw("couldn't get previous cron trigger time", zap.Error(err))
 							continue

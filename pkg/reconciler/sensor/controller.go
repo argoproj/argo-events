@@ -30,9 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -100,7 +100,7 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	sensor.Status.InitConditions()
 
 	eventBus := &v1alpha1.EventBus{}
-	eventBusName := common.DefaultEventBusName
+	eventBusName := sharedutil.DefaultEventBusName
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
@@ -124,9 +124,9 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		Image:  r.sensorImage,
 		Sensor: sensor,
 		Labels: map[string]string{
-			"controller":           "sensor-controller",
-			common.LabelSensorName: sensor.Name,
-			common.LabelOwnerName:  sensor.Name,
+			"controller":               "sensor-controller",
+			sharedutil.LabelSensorName: sensor.Name,
+			sharedutil.LabelOwnerName:  sensor.Name,
 		},
 	}
 	return Reconcile(r.client, eventBus, args, log)

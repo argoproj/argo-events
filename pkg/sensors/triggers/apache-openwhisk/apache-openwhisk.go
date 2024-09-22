@@ -24,11 +24,11 @@ import (
 	"github.com/apache/openwhisk-client-go/whisk"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/policy"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // TriggerImpl implements the Trigger interface for OpenWhisk trigger.
@@ -44,7 +44,7 @@ type TriggerImpl struct {
 }
 
 // NewTriggerImpl returns a new TriggerImpl
-func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients common.StringKeyedMap[*whisk.Client], logger *zap.SugaredLogger) (*TriggerImpl, error) {
+func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhiskClients sharedutil.StringKeyedMap[*whisk.Client], logger *zap.SugaredLogger) (*TriggerImpl, error) {
 	openwhisktrigger := trigger.Template.OpenWhisk
 
 	client, ok := openWhiskClients.Load(trigger.Template.Name)
@@ -60,7 +60,7 @@ func NewTriggerImpl(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, openWhis
 		config.Host = openwhisktrigger.Host
 
 		if openwhisktrigger.AuthToken != nil {
-			token, err := common.GetSecretFromVolume(openwhisktrigger.AuthToken)
+			token, err := sharedutil.GetSecretFromVolume(openwhisktrigger.AuthToken)
 			if err != nil {
 				return nil, fmt.Errorf("failed to retrieve auth token, %w", err)
 			}

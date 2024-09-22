@@ -20,9 +20,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/argoproj/argo-events/common"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates sns event source
@@ -32,7 +32,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(snsEventSource *aev1.SNSEventSource) error {
 	if snsEventSource == nil {
-		return common.ErrNilEventSource
+		return sharedutil.ErrNilEventSource
 	}
 	if snsEventSource.TopicArn == "" {
 		return fmt.Errorf("must specify topic arn")

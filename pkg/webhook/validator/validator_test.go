@@ -11,10 +11,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	fakeClient "k8s.io/client-go/kubernetes/fake"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	fakeeventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/fake"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -47,7 +47,7 @@ func fakeEventBus() *aev1.EventBus {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
-			Name:      common.DefaultEventBusName,
+			Name:      sharedutil.DefaultEventBusName,
 		},
 		Spec: aev1.EventBusSpec{
 			NATS: &aev1.NATSBus{

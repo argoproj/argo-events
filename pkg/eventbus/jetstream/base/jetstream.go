@@ -5,9 +5,9 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/argoproj/argo-events/common"
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	nats "github.com/nats-io/nats.go"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -110,14 +110,14 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	var err error
 
 	// before we add the Stream first let's check to make sure it doesn't already exist
-	streamInfo, err := conn.JSContext.StreamInfo(common.JetStreamStreamName)
+	streamInfo, err := conn.JSContext.StreamInfo(sharedutil.JetStreamStreamName)
 	if streamInfo != nil && err == nil {
-		stream.Logger.Infof("No need to create Stream '%s' as it already exists", common.JetStreamStreamName)
+		stream.Logger.Infof("No need to create Stream '%s' as it already exists", sharedutil.JetStreamStreamName)
 		return nil
 	}
 	if err != nil && err != nats.ErrStreamNotFound {
 		stream.Logger.Warnf(`Error calling StreamInfo for Stream '%s' (this can happen if another Jetstream client "
-		is trying to create the Stream at the same time): %v`, common.JetStreamStreamName, err)
+		is trying to create the Stream at the same time): %v`, sharedutil.JetStreamStreamName, err)
 	}
 
 	// unmarshal settings
@@ -142,8 +142,8 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return err
 	}
 	streamConfig := nats.StreamConfig{
-		Name:       common.JetStreamStreamName,
-		Subjects:   []string{common.JetStreamStreamName + ".*.*"},
+		Name:       sharedutil.JetStreamStreamName,
+		Subjects:   []string{sharedutil.JetStreamStreamName + ".*.*"},
 		Retention:  retentionPolicy,
 		Discard:    discardPolicy,
 		MaxMsgs:    v.GetInt64("maxMsgs"),
@@ -155,11 +155,11 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
 
-	connectErr := common.DoWithRetry(nil, func() error { // exponential backoff if it fails the first time
+	connectErr := sharedutil.DoWithRetry(nil, func() error { // exponential backoff if it fails the first time
 		_, err = conn.JSContext.AddStream(&streamConfig)
 		if err != nil {
 			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v`,
-				common.JetStreamStreamName, conn, err)
+				sharedutil.JetStreamStreamName, conn, err)
 			return fmt.Errorf(errStr)
 		} else {
 			return nil
@@ -169,7 +169,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return connectErr
 	}
 
-	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", common.JetStreamStreamName, conn)
+	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", sharedutil.JetStreamStreamName, conn)
 	return nil
 }
 

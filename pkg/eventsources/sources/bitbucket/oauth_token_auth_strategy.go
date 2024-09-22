@@ -21,7 +21,7 @@ import (
 	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/argoproj/argo-events/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 type OAuthTokenAuthStrategy struct {
@@ -29,7 +29,7 @@ type OAuthTokenAuthStrategy struct {
 }
 
 func NewOAuthTokenAuthStrategy(oauthTokenSecret *corev1.SecretKeySelector) (*OAuthTokenAuthStrategy, error) {
-	token, err := common.GetSecretFromVolume(oauthTokenSecret)
+	token, err := sharedutil.GetSecretFromVolume(oauthTokenSecret)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve bitbucket oauth token from secret, %w", err)
 	}

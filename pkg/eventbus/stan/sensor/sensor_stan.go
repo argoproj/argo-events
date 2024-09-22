@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/argoproj/argo-events/common"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 	stanbase "github.com/argoproj/argo-events/pkg/eventbus/stan/base"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"go.uber.org/zap"
 )
 
@@ -32,7 +32,7 @@ func (n *SensorSTAN) Connect(ctx context.Context, triggerName string, dependency
 	// Generate clientID with hash code
 	hashKey := fmt.Sprintf("%s-%s-%s", n.sensorName, triggerName, dependencyExpression)
 	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(100)))
-	hashVal := common.Hasher(hashKey)
+	hashVal := sharedutil.Hasher(hashKey)
 	clientID := fmt.Sprintf("client-%v-%v", hashVal, randomNum.Int64())
 
 	conn, err := n.MakeConnection(clientID)

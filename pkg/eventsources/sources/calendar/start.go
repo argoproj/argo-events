@@ -28,13 +28,13 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/persist"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for calendar based events
@@ -69,9 +69,9 @@ func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
 func (el *EventListener) initializePersistence(ctx context.Context, persistence *v1alpha1.EventPersistence) error {
 	el.log.Info("Initializing Persistence")
 	if persistence.ConfigMap != nil {
-		kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+		kubeConfig, _ := os.LookupEnv(sharedutil.EnvVarKubeConfig)
 
-		restConfig, err := common.GetClientConfig(kubeConfig)
+		restConfig, err := sharedutil.GetClientConfig(kubeConfig)
 		if err != nil {
 			return fmt.Errorf("failed to get a K8s rest config for the event source %s, %w", el.GetEventName(), err)
 		}
@@ -146,7 +146,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 
 	el.log.Info("parsing exclusion dates if any...")
-	exDates, err := common.ParseExclusionDates(calendarEventSource.ExclusionDates)
+	exDates, err := sharedutil.ParseExclusionDates(calendarEventSource.ExclusionDates)
 	if err != nil {
 		return err
 	}

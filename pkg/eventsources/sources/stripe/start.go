@@ -28,13 +28,13 @@ import (
 	"github.com/stripe/stripe-go/webhookendpoint"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // controller controls the webhook operations
@@ -87,7 +87,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 
 	if !route.Active {
 		logger.Warn("endpoint is not active, won't process it")
-		common.SendErrorResponse(writer, "endpoint is inactive")
+		sharedutil.SendErrorResponse(writer, "endpoint is inactive")
 		return
 	}
 
@@ -107,14 +107,14 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	var event *stripe.Event
 	if err := json.Unmarshal(payload, &event); err != nil {
 		logger.Errorw("failed to parse request body", zap.Error(err))
-		common.SendErrorResponse(writer, "failed to parse the event")
+		sharedutil.SendErrorResponse(writer, "failed to parse the event")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
 
 	if ok := filterEvent(event, rc.stripeEventSource.EventFilter); !ok {
 		logger.Errorw("failed to pass the filters", zap.Any("event-type", event.Type), zap.Error(err))
-		common.SendErrorResponse(writer, "invalid event")
+		sharedutil.SendErrorResponse(writer, "invalid event")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -127,7 +127,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	data, err := json.Marshal(eventData)
 	if err != nil {
 		logger.Errorw("failed to marshal event data", zap.Any("event-id", event.ID), zap.Error(err))
-		common.SendErrorResponse(writer, "invalid event")
+		sharedutil.SendErrorResponse(writer, "invalid event")
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
 	}
@@ -135,7 +135,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	logger.Info("dispatching event on route's data channel...")
 	route.DataCh <- data
 	logger.Info("request successfully processed")
-	common.SendSuccessResponse(writer, "success")
+	sharedutil.SendSuccessResponse(writer, "success")
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -149,7 +149,7 @@ func (rc *Router) PostActivate() error {
 		)
 		logger.Info("registering a new webhook")
 
-		apiKey, err := common.GetSecretFromVolume(stripeEventSource.APIKey)
+		apiKey, err := sharedutil.GetSecretFromVolume(stripeEventSource.APIKey)
 		if err != nil {
 			return fmt.Errorf("APIKey not found, %w", err)
 		}
@@ -157,7 +157,7 @@ func (rc *Router) PostActivate() error {
 		stripe.Key = apiKey
 
 		params := &stripe.WebhookEndpointParams{
-			URL: stripe.String(common.FormattedURL(stripeEventSource.Webhook.URL, stripeEventSource.Webhook.Endpoint)),
+			URL: stripe.String(sharedutil.FormattedURL(stripeEventSource.Webhook.URL, stripeEventSource.Webhook.Endpoint)),
 		}
 		if stripeEventSource.EventFilter != nil {
 			params.EnabledEvents = stripe.StringSlice(stripeEventSource.EventFilter)

@@ -33,9 +33,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // AdaptorArgs are the args needed to create a sensor deployment
@@ -56,7 +56,7 @@ func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorA
 		return fmt.Errorf("failed to get EventBus")
 	}
 
-	eventBusName := common.DefaultEventBusName
+	eventBusName := sharedutil.DefaultEventBusName
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
@@ -79,10 +79,10 @@ func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorA
 		return err
 	}
 	if deploy != nil {
-		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
+		if deploy.Annotations != nil && deploy.Annotations[sharedutil.AnnotationResourceSpecHash] != expectedDeploy.Annotations[sharedutil.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
 			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
+			deploy.Annotations[sharedutil.AnnotationResourceSpecHash] = expectedDeploy.Annotations[sharedutil.AnnotationResourceSpecHash]
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
@@ -144,23 +144,23 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 
 	env := []corev1.EnvVar{
 		{
-			Name:  common.EnvVarSensorObject,
+			Name:  sharedutil.EnvVarSensorObject,
 			Value: base64.StdEncoding.EncodeToString(sensorBytes),
 		},
 		{
-			Name:  common.EnvVarEventBusSubject,
+			Name:  sharedutil.EnvVarEventBusSubject,
 			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
 		},
 		{
-			Name:      common.EnvVarPodName,
+			Name:      sharedutil.EnvVarPodName,
 			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}},
 		},
 		{
-			Name:  common.EnvVarLeaderElection,
-			Value: args.Sensor.Annotations[common.AnnotationLeaderElection],
+			Name:  sharedutil.EnvVarLeaderElection,
+			Value: args.Sensor.Annotations[sharedutil.AnnotationLeaderElection],
 		},
 		{
-			Name:  common.EnvVarEventBusConfig,
+			Name:  sharedutil.EnvVarEventBusConfig,
 			Value: base64.StdEncoding.EncodeToString(busConfigBytes),
 		},
 	}
@@ -214,17 +214,17 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 		})
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "auth-volume",
-			MountPath: common.EventBusAuthFileMountPath,
+			MountPath: sharedutil.EventBusAuthFileMountPath,
 		})
 	}
 
 	// secrets
-	volSecrets, volSecretMounts := common.VolumesFromSecretsOrConfigMaps(common.SecretKeySelectorType, secretObjs...)
+	volSecrets, volSecretMounts := sharedutil.VolumesFromSecretsOrConfigMaps(sharedutil.SecretKeySelectorType, secretObjs...)
 	volumes = append(volumes, volSecrets...)
 	volumeMounts = append(volumeMounts, volSecretMounts...)
 
 	// config maps
-	volConfigMaps, volCofigMapMounts := common.VolumesFromSecretsOrConfigMaps(common.ConfigMapKeySelectorType, sensorCopy)
+	volConfigMaps, volCofigMapMounts := sharedutil.VolumesFromSecretsOrConfigMaps(sharedutil.ConfigMapKeySelectorType, sensorCopy)
 	volumeMounts = append(volumeMounts, volCofigMapMounts...)
 	volumes = append(volumes, volConfigMaps...)
 
@@ -259,10 +259,10 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 	replicas := args.Sensor.Spec.GetReplicas()
 	sensorContainer := corev1.Container{
 		Image:           args.Image,
-		ImagePullPolicy: common.GetImagePullPolicy(),
+		ImagePullPolicy: sharedutil.GetImagePullPolicy(),
 		Args:            []string{"sensor-service"},
 		Ports: []corev1.ContainerPort{
-			{Name: "metrics", ContainerPort: common.SensorMetricsPort},
+			{Name: "metrics", ContainerPort: sharedutil.SensorMetricsPort},
 		},
 	}
 	if args.Sensor.Spec.Template != nil && args.Sensor.Spec.Template.Container != nil {

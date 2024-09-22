@@ -25,11 +25,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/policy"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // HTTPTrigger describes the trigger to invoke HTTP request
@@ -45,7 +45,7 @@ type HTTPTrigger struct {
 }
 
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(httpClients common.StringKeyedMap[*http.Client], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
+func NewHTTPTrigger(httpClients sharedutil.StringKeyedMap[*http.Client], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*HTTPTrigger, error) {
 	httptrigger := trigger.Template.HTTP
 
 	client, ok := httpClients.Load(trigger.Template.Name)
@@ -53,7 +53,7 @@ func NewHTTPTrigger(httpClients common.StringKeyedMap[*http.Client], sensor *v1a
 		client = &http.Client{}
 
 		if httptrigger.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(httptrigger.TLS)
+			tlsConfig, err := sharedutil.GetTLSConfig(httptrigger.TLS)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
@@ -156,9 +156,9 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 			var value string
 			var err error
 			if secure.ValueFrom.SecretKeyRef != nil {
-				value, err = common.GetSecretFromVolume(secure.ValueFrom.SecretKeyRef)
+				value, err = sharedutil.GetSecretFromVolume(secure.ValueFrom.SecretKeyRef)
 			} else {
-				value, err = common.GetConfigMapFromVolume(secure.ValueFrom.ConfigMapKeyRef)
+				value, err = sharedutil.GetConfigMapFromVolume(secure.ValueFrom.ConfigMapKeyRef)
 			}
 			if err != nil {
 				return nil, fmt.Errorf("failed to retrieve the value for secureHeader, %w", err)
@@ -174,14 +174,14 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		password := ""
 
 		if basicAuth.Username != nil {
-			username, err = common.GetSecretFromVolume(basicAuth.Username)
+			username, err = sharedutil.GetSecretFromVolume(basicAuth.Username)
 			if err != nil {
 				return nil, fmt.Errorf("failed to retrieve the username, %w", err)
 			}
 		}
 
 		if basicAuth.Password != nil {
-			password, err = common.GetSecretFromVolume(basicAuth.Password)
+			password, err = sharedutil.GetSecretFromVolume(basicAuth.Password)
 			if !ok {
 				return nil, fmt.Errorf("failed to retrieve the password, %w", err)
 			}

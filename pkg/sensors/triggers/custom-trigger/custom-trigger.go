@@ -28,10 +28,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // CustomTrigger implements Trigger interface for custom trigger resource
@@ -47,7 +47,7 @@ type CustomTrigger struct {
 }
 
 // NewCustomTrigger returns a new custom trigger
-func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients common.StringKeyedMap[*grpc.ClientConn]) (*CustomTrigger, error) {
+func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger, customTriggerClients sharedutil.StringKeyedMap[*grpc.ClientConn]) (*CustomTrigger, error) {
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,
@@ -79,7 +79,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		var err error
 		switch {
 		case ct.CertSecret != nil:
-			certFilePath, err = common.GetSecretVolumePath(ct.CertSecret)
+			certFilePath, err = sharedutil.GetSecretVolumePath(ct.CertSecret)
 			if err != nil {
 				return nil, err
 			}
@@ -101,7 +101,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		return nil, err
 	}
 
-	backoff, err := common.Convert2WaitBackoff(&common.DefaultBackoff)
+	backoff, err := sharedutil.Convert2WaitBackoff(&sharedutil.DefaultBackoff)
 	if err != nil {
 		return nil, err
 	}

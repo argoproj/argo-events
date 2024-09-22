@@ -29,7 +29,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	commontls "github.com/argoproj/argo-events/common/tls"
 	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
-	"github.com/argoproj/argo-events/webhook/validator"
+	"github.com/argoproj/argo-events/pkg/webhook/validator"
 )
 
 const (

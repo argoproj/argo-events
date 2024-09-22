@@ -25,10 +25,10 @@ import (
 	notifications "github.com/argoproj/notifications-engine/pkg/services"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 type EmailTrigger struct {
@@ -48,7 +48,7 @@ func NewEmailTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger 
 	var smtpPassword string
 	if emailTrigger.SMTPPassword != nil {
 		var err error
-		smtpPassword, err = common.GetSecretFromVolume(emailTrigger.SMTPPassword)
+		smtpPassword, err = sharedutil.GetSecretFromVolume(emailTrigger.SMTPPassword)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve the smtp password, %w", err)
 		}

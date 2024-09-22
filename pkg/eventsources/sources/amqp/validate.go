@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/argoproj/argo-events/common"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates gateway event source
@@ -31,7 +31,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *aev1.AMQPEventSource) error {
 	if eventSource == nil {
-		return common.ErrNilEventSource
+		return sharedutil.ErrNilEventSource
 	}
 	if eventSource.URL == "" && eventSource.URLSecret == nil {
 		return fmt.Errorf("either url or urlSecret must be specified")

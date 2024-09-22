@@ -9,8 +9,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 type EventPersist interface {
@@ -75,7 +75,7 @@ func (cmp *ConfigMapPersist) Save(event *Event) error {
 		return fmt.Errorf("event object is nil")
 	}
 	// Using Connect util func for backoff retry if K8s API returns error
-	err := common.DoWithRetry(&common.DefaultBackoff, func() error {
+	err := sharedutil.DoWithRetry(&sharedutil.DefaultBackoff, func() error {
 		cm, err := cmp.kubeClient.CoreV1().ConfigMaps(cmp.namespace).Get(cmp.ctx, cmp.name, metav1.GetOptions{})
 		if err != nil {
 			if apierr.IsNotFound(err) && cmp.createIfNotExist {

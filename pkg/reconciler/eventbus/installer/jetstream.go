@@ -24,10 +24,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/tls"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -122,7 +122,7 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: generateJetStreamClientAuthSecretName(r.eventBus),
 				},
-				Key: common.JetStreamClientAuthSecretKey,
+				Key: sharedutil.JetStreamClientAuthSecretKey,
 			},
 			StreamConfig: string(b),
 		},
@@ -147,14 +147,14 @@ func (r *jetStreamInstaller) buildJetStreamServiceSpec() corev1.ServiceSpec {
 
 func (r *jetStreamInstaller) createService(ctx context.Context) error {
 	spec := r.buildJetStreamServiceSpec()
-	hash := common.MustHash(spec)
+	hash := sharedutil.MustHash(spec)
 	obj := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: r.eventBus.Namespace,
 			Name:      generateJetStreamServiceName(r.eventBus),
 			Labels:    r.labels,
 			Annotations: map[string]string{
-				common.AnnotationResourceSpecHash: hash,
+				sharedutil.AnnotationResourceSpecHash: hash,
 			},
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
@@ -174,8 +174,8 @@ func (r *jetStreamInstaller) createService(ctx context.Context) error {
 			return fmt.Errorf("failed to check if jetstream service is existing, err: %w", err)
 		}
 	}
-	if old.GetAnnotations()[common.AnnotationResourceSpecHash] != hash {
-		old.Annotations[common.AnnotationResourceSpecHash] = hash
+	if old.GetAnnotations()[sharedutil.AnnotationResourceSpecHash] != hash {
+		old.Annotations[sharedutil.AnnotationResourceSpecHash] = hash
 		old.Spec = spec
 		if err := r.client.Update(ctx, old); err != nil {
 			return fmt.Errorf("failed to update jetstream service, err: %w", err)
@@ -191,14 +191,14 @@ func (r *jetStreamInstaller) createStatefulSet(ctx context.Context) error {
 		return fmt.Errorf("failed to get jetstream version, err: %w", err)
 	}
 	spec := r.buildStatefulSetSpec(jsVersion)
-	hash := common.MustHash(spec)
+	hash := sharedutil.MustHash(spec)
 	obj := &appv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: r.eventBus.Namespace,
 			Name:      generateJetStreamStatefulSetName(r.eventBus),
 			Labels:    r.mergeEventBusLabels(r.labels),
 			Annotations: map[string]string{
-				common.AnnotationResourceSpecHash: hash,
+				sharedutil.AnnotationResourceSpecHash: hash,
 			},
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
@@ -218,8 +218,8 @@ func (r *jetStreamInstaller) createStatefulSet(ctx context.Context) error {
 			return fmt.Errorf("failed to check if jetstream statefulset is existing, err: %w", err)
 		}
 	}
-	if old.GetAnnotations()[common.AnnotationResourceSpecHash] != hash {
-		old.Annotations[common.AnnotationResourceSpecHash] = hash
+	if old.GetAnnotations()[sharedutil.AnnotationResourceSpecHash] != hash {
+		old.Annotations[sharedutil.AnnotationResourceSpecHash] = hash
 		old.Spec = spec
 		if err := r.client.Update(ctx, old); err != nil {
 			return fmt.Errorf("failed to update jetstream statefulset, err: %w", err)
@@ -294,7 +294,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 											},
 											Items: []corev1.KeyToPath{
 												{
-													Key:  common.JetStreamConfigMapKey,
+													Key:  sharedutil.JetStreamConfigMapKey,
 													Path: "nats-js.conf",
 												},
 											},
@@ -307,31 +307,31 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 											},
 											Items: []corev1.KeyToPath{
 												{
-													Key:  common.JetStreamServerSecretAuthKey,
+													Key:  sharedutil.JetStreamServerSecretAuthKey,
 													Path: "auth.conf",
 												},
 												{
-													Key:  common.JetStreamServerPrivateKeyKey,
+													Key:  sharedutil.JetStreamServerPrivateKeyKey,
 													Path: secretServerKeyPEMFile,
 												},
 												{
-													Key:  common.JetStreamServerCertKey,
+													Key:  sharedutil.JetStreamServerCertKey,
 													Path: secretServerCertPEMFile,
 												},
 												{
-													Key:  common.JetStreamServerCACertKey,
+													Key:  sharedutil.JetStreamServerCACertKey,
 													Path: secretCACertPEMFile,
 												},
 												{
-													Key:  common.JetStreamClusterPrivateKeyKey,
+													Key:  sharedutil.JetStreamClusterPrivateKeyKey,
 													Path: secretClusterKeyPEMFile,
 												},
 												{
-													Key:  common.JetStreamClusterCertKey,
+													Key:  sharedutil.JetStreamClusterCertKey,
 													Path: secretClusterCertPEMFile,
 												},
 												{
-													Key:  common.JetStreamClusterCACertKey,
+													Key:  sharedutil.JetStreamClusterCACertKey,
 													Path: secretClusterCACertPEMFile,
 												},
 											},
@@ -359,7 +359,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 							{Name: "SERVER_NAME", Value: "$(POD_NAME)"},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
 							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc"},
-							{Name: "JS_KEY", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: generateJetStreamServerSecretName(r.eventBus)}, Key: common.JetStreamServerSecretEncryptionKey}}},
+							{Name: "JS_KEY", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: generateJetStreamServerSecretName(r.eventBus)}, Key: sharedutil.JetStreamServerSecretEncryptionKey}}},
 						},
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/nats-config"},
@@ -528,10 +528,10 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 
 	if !oldClientObjExisting || !oldServerObjExisting {
 		// Generate server-auth.conf file
-		encryptionKey := common.RandomString(12)
-		jsUser := common.RandomString(8)
-		jsPass := common.RandomString(16)
-		sysPassword := common.RandomString(24)
+		encryptionKey := sharedutil.RandomString(12)
+		jsUser := sharedutil.RandomString(8)
+		jsPass := sharedutil.RandomString(16)
+		sysPassword := sharedutil.RandomString(24)
 		authTpl := template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/server-auth.conf"))
 		var authTplOutput bytes.Buffer
 		if err := authTpl.Execute(&authTplOutput, struct {
@@ -578,14 +578,14 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
-				common.JetStreamServerSecretAuthKey:       authTplOutput.Bytes(),
-				common.JetStreamServerSecretEncryptionKey: []byte(encryptionKey),
-				common.JetStreamServerPrivateKeyKey:       serverKeyPEM,
-				common.JetStreamServerCertKey:             serverCertPEM,
-				common.JetStreamServerCACertKey:           caCertPEM,
-				common.JetStreamClusterPrivateKeyKey:      clusterKeyPEM,
-				common.JetStreamClusterCertKey:            clusterCertPEM,
-				common.JetStreamClusterCACertKey:          clusterCACertPEM,
+				sharedutil.JetStreamServerSecretAuthKey:       authTplOutput.Bytes(),
+				sharedutil.JetStreamServerSecretEncryptionKey: []byte(encryptionKey),
+				sharedutil.JetStreamServerPrivateKeyKey:       serverKeyPEM,
+				sharedutil.JetStreamServerCertKey:             serverCertPEM,
+				sharedutil.JetStreamServerCACertKey:           caCertPEM,
+				sharedutil.JetStreamClusterPrivateKeyKey:      clusterKeyPEM,
+				sharedutil.JetStreamClusterCertKey:            clusterCertPEM,
+				sharedutil.JetStreamClusterCACertKey:          clusterCACertPEM,
 			},
 		}
 
@@ -600,7 +600,7 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 			},
 			Type: corev1.SecretTypeOpaque,
 			Data: map[string][]byte{
-				common.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("username: %s\npassword: %s", jsUser, jsPass)),
+				sharedutil.JetStreamClientAuthSecretKey: []byte(fmt.Sprintf("username: %s\npassword: %s", jsUser, jsPass)),
 			},
 		}
 
@@ -645,7 +645,7 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	if x := r.eventBus.Spec.JetStream.Settings; x != nil {
 		settings = *x
 	}
-	maxPayload := common.JetStreamMaxPayload
+	maxPayload := sharedutil.JetStreamMaxPayload
 	if r.eventBus.Spec.JetStream.MaxPayload != nil {
 		maxPayload = *r.eventBus.Spec.JetStream.MaxPayload
 	}
@@ -675,16 +675,16 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	}); err != nil {
 		return fmt.Errorf("failed to parse nats config template, error: %w", err)
 	}
-	data[common.JetStreamConfigMapKey] = confTplOutput.String()
+	data[sharedutil.JetStreamConfigMapKey] = confTplOutput.String()
 
-	hash := common.MustHash(data)
+	hash := sharedutil.MustHash(data)
 	obj := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: r.eventBus.Namespace,
 			Name:      generateJetStreamConfigMapName(r.eventBus),
 			Labels:    r.labels,
 			Annotations: map[string]string{
-				common.AnnotationResourceSpecHash: hash,
+				sharedutil.AnnotationResourceSpecHash: hash,
 			},
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
@@ -704,8 +704,8 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 			return fmt.Errorf("failed to check if jetstream configmap is existing, err: %w", err)
 		}
 	}
-	if old.GetAnnotations()[common.AnnotationResourceSpecHash] != hash {
-		old.Annotations[common.AnnotationResourceSpecHash] = hash
+	if old.GetAnnotations()[sharedutil.AnnotationResourceSpecHash] != hash {
+		old.Annotations[sharedutil.AnnotationResourceSpecHash] = hash
 		old.Data = data
 		if err := r.client.Update(ctx, old); err != nil {
 			return fmt.Errorf("failed to update jetstream configmap, err: %w", err)

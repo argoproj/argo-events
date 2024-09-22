@@ -23,10 +23,10 @@ import (
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // AzureServiceBusTrigger describes the trigger to send messages to a Service Bus
@@ -41,14 +41,14 @@ type AzureServiceBusTrigger struct {
 	Logger *zap.SugaredLogger
 }
 
-func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients common.StringKeyedMap[*servicebus.Sender], logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
+func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, azureServiceBusClients sharedutil.StringKeyedMap[*servicebus.Sender], logger *zap.SugaredLogger) (*AzureServiceBusTrigger, error) {
 	triggerLogger := logger.With(logging.LabelTriggerType, v1alpha1.TriggerTypeAzureServiceBus)
 	azureServiceBusTrigger := trigger.Template.AzureServiceBus
 
 	sender, ok := azureServiceBusClients.Load(trigger.Template.Name)
 
 	if !ok {
-		connStr, err := common.GetSecretFromVolume(azureServiceBusTrigger.ConnectionString)
+		connStr, err := sharedutil.GetSecretFromVolume(azureServiceBusTrigger.ConnectionString)
 		if err != nil {
 			triggerLogger.With("connection-string", azureServiceBusTrigger.ConnectionString.Name).Errorw("failed to retrieve connection string from secret", zap.Error(err))
 			return nil, err
@@ -57,7 +57,7 @@ func NewAzureServiceBusTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigge
 		triggerLogger.Info("connecting to the service bus...")
 		clientOptions := servicebus.ClientOptions{}
 		if azureServiceBusTrigger.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(azureServiceBusTrigger.TLS)
+			tlsConfig, err := sharedutil.GetTLSConfig(azureServiceBusTrigger.TLS)
 			if err != nil {
 				triggerLogger.Errorw("failed to get the tls configuration", zap.Error(err))
 				return nil, err

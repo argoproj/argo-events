@@ -23,10 +23,10 @@ import (
 	natslib "github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // NATSTrigger holds the context of the NATS trigger.
@@ -42,7 +42,7 @@ type NATSTrigger struct {
 }
 
 // NewNATSTrigger returns new nats trigger.
-func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections common.StringKeyedMap[*natslib.Conn], logger *zap.SugaredLogger) (*NATSTrigger, error) {
+func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConnections sharedutil.StringKeyedMap[*natslib.Conn], logger *zap.SugaredLogger) (*NATSTrigger, error) {
 	natstrigger := trigger.Template.NATS
 
 	conn, ok := natsConnections.Load(trigger.Template.Name)
@@ -52,7 +52,7 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 		opts.Url = natstrigger.URL
 
 		if natstrigger.TLS != nil {
-			tlsConfig, err := common.GetTLSConfig(natstrigger.TLS)
+			tlsConfig, err := sharedutil.GetTLSConfig(natstrigger.TLS)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 			}

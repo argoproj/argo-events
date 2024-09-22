@@ -25,13 +25,13 @@ import (
 	natslib "github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // EventListener implements Eventing for nats event source
@@ -67,7 +67,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var opt []natslib.Option
 	if natsEventSource.TLS != nil {
-		tlsConfig, err := common.GetTLSConfig(natsEventSource.TLS)
+		tlsConfig, err := sharedutil.GetTLSConfig(natsEventSource.TLS)
 		if err != nil {
 			return fmt.Errorf("failed to get the tls configuration, %w", err)
 		}
@@ -77,23 +77,23 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if natsEventSource.Auth != nil {
 		switch {
 		case natsEventSource.Auth.Basic != nil:
-			username, err := common.GetSecretFromVolume(natsEventSource.Auth.Basic.Username)
+			username, err := sharedutil.GetSecretFromVolume(natsEventSource.Auth.Basic.Username)
 			if err != nil {
 				return err
 			}
-			password, err := common.GetSecretFromVolume(natsEventSource.Auth.Basic.Password)
+			password, err := sharedutil.GetSecretFromVolume(natsEventSource.Auth.Basic.Password)
 			if err != nil {
 				return err
 			}
 			opt = append(opt, natslib.UserInfo(username, password))
 		case natsEventSource.Auth.Token != nil:
-			token, err := common.GetSecretFromVolume(natsEventSource.Auth.Token)
+			token, err := sharedutil.GetSecretFromVolume(natsEventSource.Auth.Token)
 			if err != nil {
 				return err
 			}
 			opt = append(opt, natslib.Token(token))
 		case natsEventSource.Auth.NKey != nil:
-			nkeyFile, err := common.GetSecretVolumePath(natsEventSource.Auth.NKey)
+			nkeyFile, err := sharedutil.GetSecretVolumePath(natsEventSource.Auth.NKey)
 			if err != nil {
 				return err
 			}
@@ -103,7 +103,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			opt = append(opt, o)
 		case natsEventSource.Auth.Credential != nil:
-			cFile, err := common.GetSecretVolumePath(natsEventSource.Auth.Credential)
+			cFile, err := sharedutil.GetSecretVolumePath(natsEventSource.Auth.Credential)
 			if err != nil {
 				return err
 			}
@@ -113,7 +113,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	var conn *natslib.Conn
 	log.Info("connecting to nats cluster...")
-	if err := common.DoWithRetry(natsEventSource.ConnectionBackoff, func() error {
+	if err := sharedutil.DoWithRetry(natsEventSource.ConnectionBackoff, func() error {
 		var err error
 		if conn, err = natslib.Connect(natsEventSource.URL, opt...); err != nil {
 			return err

@@ -31,9 +31,9 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common"
 	sensormetrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // SensorContext contains execution context for Sensor
@@ -51,25 +51,25 @@ type SensorContext struct {
 	hostname        string
 
 	// httpClients holds the reference to HTTP clients for HTTP triggers.
-	httpClients common.StringKeyedMap[*http.Client]
+	httpClients sharedutil.StringKeyedMap[*http.Client]
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
-	customTriggerClients common.StringKeyedMap[*grpc.ClientConn]
+	customTriggerClients sharedutil.StringKeyedMap[*grpc.ClientConn]
 	// http client to send slack messages.
 	slackHTTPClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
-	kafkaProducers common.StringKeyedMap[sarama.AsyncProducer]
+	kafkaProducers sharedutil.StringKeyedMap[sarama.AsyncProducer]
 	// pulsarProducers holds references to the active pulsar producers
-	pulsarProducers common.StringKeyedMap[pulsar.Producer]
+	pulsarProducers sharedutil.StringKeyedMap[pulsar.Producer]
 	// natsConnections holds the references to the active nats connections.
-	natsConnections common.StringKeyedMap[*natslib.Conn]
+	natsConnections sharedutil.StringKeyedMap[*natslib.Conn]
 	// awsLambdaClients holds the references to active AWS Lambda clients.
-	awsLambdaClients common.StringKeyedMap[*lambda.Lambda]
+	awsLambdaClients sharedutil.StringKeyedMap[*lambda.Lambda]
 	// openwhiskClients holds the references to active OpenWhisk clients.
-	openwhiskClients common.StringKeyedMap[*whisk.Client]
+	openwhiskClients sharedutil.StringKeyedMap[*whisk.Client]
 	// azureEventHubsClients holds the references to active Azure Event Hub clients.
-	azureEventHubsClients common.StringKeyedMap[*eventhubs.Hub]
+	azureEventHubsClients sharedutil.StringKeyedMap[*eventhubs.Hub]
 	// azureServiceBusClients holds the references to active Azure Service Bus clients.
-	azureServiceBusClients common.StringKeyedMap[*servicebus.Sender]
+	azureServiceBusClients sharedutil.StringKeyedMap[*servicebus.Sender]
 	metrics                *sensormetrics.Metrics
 }
 
@@ -82,18 +82,18 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		eventBusConfig:       eventBusConfig,
 		eventBusSubject:      eventBusSubject,
 		hostname:             hostname,
-		httpClients:          common.NewStringKeyedMap[*http.Client](),
-		customTriggerClients: common.NewStringKeyedMap[*grpc.ClientConn](),
+		httpClients:          sharedutil.NewStringKeyedMap[*http.Client](),
+		customTriggerClients: sharedutil.NewStringKeyedMap[*grpc.ClientConn](),
 		slackHTTPClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers:         common.NewStringKeyedMap[sarama.AsyncProducer](),
-		pulsarProducers:        common.NewStringKeyedMap[pulsar.Producer](),
-		natsConnections:        common.NewStringKeyedMap[*natslib.Conn](),
-		awsLambdaClients:       common.NewStringKeyedMap[*lambda.Lambda](),
-		openwhiskClients:       common.NewStringKeyedMap[*whisk.Client](),
-		azureEventHubsClients:  common.NewStringKeyedMap[*eventhubs.Hub](),
-		azureServiceBusClients: common.NewStringKeyedMap[*servicebus.Sender](),
+		kafkaProducers:         sharedutil.NewStringKeyedMap[sarama.AsyncProducer](),
+		pulsarProducers:        sharedutil.NewStringKeyedMap[pulsar.Producer](),
+		natsConnections:        sharedutil.NewStringKeyedMap[*natslib.Conn](),
+		awsLambdaClients:       sharedutil.NewStringKeyedMap[*lambda.Lambda](),
+		openwhiskClients:       sharedutil.NewStringKeyedMap[*whisk.Client](),
+		azureEventHubsClients:  sharedutil.NewStringKeyedMap[*eventhubs.Hub](),
+		azureServiceBusClients: sharedutil.NewStringKeyedMap[*servicebus.Sender](),
 		metrics:                metrics,
 	}
 }

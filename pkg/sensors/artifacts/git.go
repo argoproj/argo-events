@@ -30,8 +30,8 @@ import (
 	go_git_ssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -96,11 +96,11 @@ func getSSHKeyAuth(sshKeyFile string, insecureIgnoreHostKey bool) (transport.Aut
 
 func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	if g.artifact.Creds != nil {
-		username, err := common.GetSecretFromVolume(g.artifact.Creds.Username)
+		username, err := sharedutil.GetSecretFromVolume(g.artifact.Creds.Username)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve username, %w", err)
 		}
-		password, err := common.GetSecretFromVolume(g.artifact.Creds.Password)
+		password, err := sharedutil.GetSecretFromVolume(g.artifact.Creds.Password)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve password, %w", err)
 		}
@@ -110,7 +110,7 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 		}, nil
 	}
 	if g.artifact.SSHKeySecret != nil {
-		sshKeyPath, err := common.GetSecretVolumePath(g.artifact.SSHKeySecret)
+		sshKeyPath, err := sharedutil.GetSecretVolumePath(g.artifact.SSHKeySecret)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get SSH key from mounted volume, %w", err)
 		}

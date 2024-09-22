@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/fsnotify/fsnotify"
+
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 type GlobalConfig struct {
@@ -94,7 +95,7 @@ func (g *GlobalConfig) GetJetStreamVersion(version string) (*JetStreamVersion, e
 }
 
 func LoadConfig(onErrorReloading func(error)) (*GlobalConfig, error) {
-	v := common.ViperWithLogging()
+	v := sharedutil.ViperWithLogging()
 	v.SetConfigName("controller-config")
 	v.SetConfigType("yaml")
 	v.AddConfigPath("/etc/argo-events")

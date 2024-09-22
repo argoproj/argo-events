@@ -3,7 +3,7 @@ package github
 import (
 	gh "github.com/google/go-github/v50/github"
 
-	"github.com/argoproj/argo-events/common"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // compareHook returns true if the hook matches the url and event.
@@ -18,8 +18,8 @@ func compareHook(hook *gh.Hook, url string, events []string) bool {
 
 	// Webhook events are equal if both old events slice and new events slice
 	// contain the same events, or if both have "*" event.
-	return common.ElementsMatch(hook.Events, events) ||
-		(common.SliceContains(hook.Events, "*") && common.SliceContains(events, "*"))
+	return sharedutil.ElementsMatch(hook.Events, events) ||
+		(sharedutil.SliceContains(hook.Events, "*") && sharedutil.SliceContains(events, "*"))
 }
 
 // getHook returns the hook that matches the url and event, or nil if not found.
