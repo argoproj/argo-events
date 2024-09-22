@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/argoproj/argo-events/eventsources"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/eventsources"
 )
 
 // ValidateEventSource validates if the eventSource is valid

@@ -30,7 +30,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 const (
@@ -313,7 +312,7 @@ func TestResourceReconcile(t *testing.T) {
 		assert.False(t, sensorObj.Status.IsReady())
 	})
 
-	for _, eb := range []*aev1.EventBus{fakeEventBus, fakeEventBusJetstream, fakeEventBusKafka} {
+	for _, eb := range []*v1alpha1.EventBus{fakeEventBus, fakeEventBusJetstream, fakeEventBusKafka} {
 		testBus := eb.DeepCopy()
 
 		t.Run("test resource reconcile with eventbus", func(t *testing.T) {

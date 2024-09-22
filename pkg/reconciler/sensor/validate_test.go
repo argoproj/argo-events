@@ -29,7 +29,7 @@ import (
 )
 
 func TestValidateSensor(t *testing.T) {
-	dir := "../../examples/sensors"
+	dir := "../../../examples/sensors"
 	dirEntries, err := os.ReadDir(dir)
 	require.NoError(t, err)
 

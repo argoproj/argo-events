@@ -20,8 +20,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 )
 
 var (
