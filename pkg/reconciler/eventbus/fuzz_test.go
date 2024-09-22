@@ -11,10 +11,9 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/argoproj/argo-events/controllers"
-
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
 )
 
 var initter sync.Once
@@ -35,12 +34,12 @@ func FuzzEventbusReconciler(f *testing.F) {
 			return
 		}
 		cl := fake.NewClientBuilder().Build()
-		config := &controllers.GlobalConfig{}
+		config := &reconciler.GlobalConfig{}
 		err = f.GenerateStruct(config)
 		if err != nil {
 			return
 		}
-		r := &reconciler{
+		r := &eventBusReconciler{
 			client: cl,
 			scheme: scheme.Scheme,
 			config: config,

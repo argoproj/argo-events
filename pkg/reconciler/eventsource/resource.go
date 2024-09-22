@@ -19,8 +19,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
-	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
 )
 
 // AdaptorArgs are the args needed to create a sensor deployment

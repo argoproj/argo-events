@@ -6,9 +6,9 @@ import (
 	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/client-go/kubernetes"
 
-	eventbuscontroller "github.com/argoproj/argo-events/controllers/eventbus"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
+	eventbuscontroller "github.com/argoproj/argo-events/pkg/reconciler/eventbus"
 )
 
 type eventbus struct {

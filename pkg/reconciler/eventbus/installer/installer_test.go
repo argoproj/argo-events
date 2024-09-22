@@ -12,8 +12,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/argoproj/argo-events/controllers"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
 )
 
 const (
@@ -23,10 +23,10 @@ const (
 )
 
 var (
-	fakeConfig = &controllers.GlobalConfig{
-		EventBus: &controllers.EventBusConfig{
-			NATS: &controllers.StanConfig{
-				Versions: []controllers.StanVersion{
+	fakeConfig = &reconciler.GlobalConfig{
+		EventBus: &reconciler.EventBusConfig{
+			NATS: &reconciler.StanConfig{
+				Versions: []reconciler.StanVersion{
 					{
 						Version:              "0.22.1",
 						NATSStreamingImage:   "test-n-s-image",
@@ -34,8 +34,8 @@ var (
 					},
 				},
 			},
-			JetStream: &controllers.JetStreamConfig{
-				Versions: []controllers.JetStreamVersion{
+			JetStream: &reconciler.JetStreamConfig{
+				Versions: []reconciler.JetStreamVersion{
 					{
 						Version:              "2.7.3",
 						NatsImage:            testJetStreamImage,

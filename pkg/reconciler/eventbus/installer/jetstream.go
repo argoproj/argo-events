@@ -26,8 +26,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/tls"
-	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
 )
 
 const (
@@ -58,12 +58,12 @@ type jetStreamInstaller struct {
 	client     client.Client
 	eventBus   *v1alpha1.EventBus
 	kubeClient kubernetes.Interface
-	config     *controllers.GlobalConfig
+	config     *reconciler.GlobalConfig
 	labels     map[string]string
 	logger     *zap.SugaredLogger
 }
 
-func NewJetStreamInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, kubeClient kubernetes.Interface, logger *zap.SugaredLogger) Installer {
+func NewJetStreamInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *reconciler.GlobalConfig, labels map[string]string, kubeClient kubernetes.Interface, logger *zap.SugaredLogger) Installer {
 	return &jetStreamInstaller{
 		client:     client,
 		kubeClient: kubeClient,
@@ -229,7 +229,7 @@ func (r *jetStreamInstaller) createStatefulSet(ctx context.Context) error {
 	return nil
 }
 
-func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *controllers.JetStreamVersion) appv1.StatefulSetSpec {
+func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStreamVersion) appv1.StatefulSetSpec {
 	js := r.eventBus.Spec.JetStream
 	replicas := int32(js.GetReplicas())
 	podTemplateLabels := make(map[string]string)

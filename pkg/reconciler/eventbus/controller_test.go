@@ -15,8 +15,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/argoproj/argo-events/controllers"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
 )
 
 const (
@@ -71,10 +71,10 @@ var (
 		},
 	}
 
-	fakeConfig = &controllers.GlobalConfig{
-		EventBus: &controllers.EventBusConfig{
-			NATS: &controllers.StanConfig{
-				Versions: []controllers.StanVersion{
+	fakeConfig = &reconciler.GlobalConfig{
+		EventBus: &reconciler.EventBusConfig{
+			NATS: &reconciler.StanConfig{
+				Versions: []reconciler.StanVersion{
 					{
 						Version:              "0.22.1",
 						NATSStreamingImage:   "test-n-s-image",
@@ -82,8 +82,8 @@ var (
 					},
 				},
 			},
-			JetStream: &controllers.JetStreamConfig{
-				Versions: []controllers.JetStreamVersion{
+			JetStream: &reconciler.JetStreamConfig{
+				Versions: []reconciler.JetStreamVersion{
 					{
 						Version:              "testVersion",
 						NatsImage:            "testJSImage",
@@ -107,7 +107,7 @@ func TestReconcileNative(t *testing.T) {
 		testBus := nativeBus.DeepCopy()
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
-		r := &reconciler{
+		r := &eventBusReconciler{
 			client:     cl,
 			kubeClient: k8sfake.NewSimpleClientset(),
 			scheme:     scheme.Scheme,
@@ -128,7 +128,7 @@ func TestReconcileExotic(t *testing.T) {
 		testBus := exoticBus.DeepCopy()
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
-		r := &reconciler{
+		r := &eventBusReconciler{
 			client:     cl,
 			kubeClient: k8sfake.NewSimpleClientset(),
 			scheme:     scheme.Scheme,
@@ -146,7 +146,7 @@ func TestNeedsUpdate(t *testing.T) {
 	t.Run("needs update", func(t *testing.T) {
 		testBus := nativeBus.DeepCopy()
 		cl := fake.NewClientBuilder().Build()
-		r := &reconciler{
+		r := &eventBusReconciler{
 			client:     cl,
 			kubeClient: k8sfake.NewSimpleClientset(),
 			scheme:     scheme.Scheme,

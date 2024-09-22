@@ -19,11 +19,11 @@ import (
 
 	argoevents "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/controllers"
-	"github.com/argoproj/argo-events/controllers/eventbus"
-	"github.com/argoproj/argo-events/controllers/eventsource"
-	"github.com/argoproj/argo-events/controllers/sensor"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
+	"github.com/argoproj/argo-events/pkg/reconciler/eventbus"
+	"github.com/argoproj/argo-events/pkg/reconciler/eventsource"
+	"github.com/argoproj/argo-events/pkg/reconciler/sensor"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
@@ -41,14 +41,14 @@ type ArgoEventsControllerOpts struct {
 
 func Start(eventsOpts ArgoEventsControllerOpts) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
-	config, err := controllers.LoadConfig(func(err error) {
+	config, err := reconciler.LoadConfig(func(err error) {
 		logger.Errorw("Failed to reload global configuration file", zap.Error(err))
 	})
 	if err != nil {
 		logger.Fatalw("Failed to load global configuration file", zap.Error(err))
 	}
 
-	if err = controllers.ValidateConfig(config); err != nil {
+	if err = reconciler.ValidateConfig(config); err != nil {
 		logger.Fatalw("Global configuration file validation failed", zap.Error(err))
 	}
 

@@ -9,8 +9,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/controllers"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
 )
 
 // Installer is an interface for event bus installation
@@ -22,7 +22,7 @@ type Installer interface {
 }
 
 // Install function installs the event bus
-func Install(ctx context.Context, eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
+func Install(ctx context.Context, eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *reconciler.GlobalConfig, logger *zap.SugaredLogger) error {
 	installer, err := getInstaller(eventBus, client, kubeClient, config, logger)
 	if err != nil {
 		logger.Errorw("failed to an installer", zap.Error(err))
@@ -38,7 +38,7 @@ func Install(ctx context.Context, eventBus *aev1.EventBus, client client.Client,
 }
 
 // GetInstaller returns Installer implementation
-func getInstaller(eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) (Installer, error) {
+func getInstaller(eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *reconciler.GlobalConfig, logger *zap.SugaredLogger) (Installer, error) {
 	if nats := eventBus.Spec.NATS; nats != nil {
 		if nats.Exotic != nil {
 			return NewExoticNATSInstaller(eventBus, logger), nil
@@ -71,7 +71,7 @@ func getLabels(bus *aev1.EventBus) map[string]string {
 // separately.
 //
 // It could also be used to check if the EventBus object can be safely deleted.
-func Uninstall(ctx context.Context, eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *controllers.GlobalConfig, logger *zap.SugaredLogger) error {
+func Uninstall(ctx context.Context, eventBus *aev1.EventBus, client client.Client, kubeClient kubernetes.Interface, config *reconciler.GlobalConfig, logger *zap.SugaredLogger) error {
 	linkedEventSources, err := linkedEventSources(ctx, eventBus.Namespace, eventBus.Name, client)
 	if err != nil {
 		logger.Errorw("failed to query linked EventSources", zap.Error(err))

@@ -14,9 +14,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/common/logging"
-	"github.com/argoproj/argo-events/controllers"
-	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
+	"github.com/argoproj/argo-events/pkg/reconciler/eventbus/installer"
 )
 
 const (
@@ -26,21 +26,21 @@ const (
 	finalizerName = ControllerName
 )
 
-type reconciler struct {
+type eventBusReconciler struct {
 	client     client.Client
 	kubeClient kubernetes.Interface
 	scheme     *runtime.Scheme
 
-	config *controllers.GlobalConfig
+	config *reconciler.GlobalConfig
 	logger *zap.SugaredLogger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, kubeClient kubernetes.Interface, scheme *runtime.Scheme, config *controllers.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, config: config, kubeClient: kubeClient, logger: logger}
+func NewReconciler(client client.Client, kubeClient kubernetes.Interface, scheme *runtime.Scheme, config *reconciler.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
+	return &eventBusReconciler{client: client, scheme: scheme, config: config, kubeClient: kubeClient, logger: logger}
 }
 
-func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *eventBusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	eventBus := &v1alpha1.EventBus{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventBus); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -70,7 +70,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // reconcile does the real logic
-func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
+func (r *eventBusReconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
 	log := logging.FromContext(ctx)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
@@ -97,7 +97,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	return installer.Install(ctx, eventBus, r.client, r.kubeClient, r.config, log)
 }
 
-func (r *reconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {
+func (r *eventBusReconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {
 	if old == nil {
 		return true
 	}

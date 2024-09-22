@@ -5,7 +5,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	controllercmd "github.com/argoproj/argo-events/controllers/cmd"
+	controllercmd "github.com/argoproj/argo-events/pkg/reconciler/cmd"
 	envpkg "github.com/argoproj/pkg/env"
 )
 

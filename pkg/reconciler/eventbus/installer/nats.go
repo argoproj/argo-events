@@ -20,9 +20,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/controllers"
-	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/reconciler"
+	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
 )
 
 const (
@@ -48,13 +48,13 @@ type natsInstaller struct {
 	client     client.Client
 	kubeClient kubernetes.Interface
 	eventBus   *v1alpha1.EventBus
-	config     *controllers.GlobalConfig
+	config     *reconciler.GlobalConfig
 	labels     map[string]string
 	logger     *zap.SugaredLogger
 }
 
 // NewNATSInstaller returns a new NATS installer
-func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, kubeClient kubernetes.Interface, logger *zap.SugaredLogger) Installer {
+func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *reconciler.GlobalConfig, labels map[string]string, kubeClient kubernetes.Interface, logger *zap.SugaredLogger) Installer {
 	return &natsInstaller{
 		client:     client,
 		kubeClient: kubeClient,
