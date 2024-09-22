@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 )
 
 const (
@@ -38,8 +37,7 @@ func main() {
 		definitions := swagger["definitions"]
 		oneOf := make([]obj, 0, len(crdKinds))
 		for _, kind := range crdKinds {
-			lowerCaseKind := strings.ToLower(kind)
-			definitionKey := fmt.Sprintf("io.argoproj.%s.%s.%s", lowerCaseKind, version, kind)
+			definitionKey := fmt.Sprintf("io.argoproj.events.%s.%s", version, kind)
 			v := definitions.(obj)[definitionKey].(obj)
 			v["x-kubernetes-group-version-kind"] = []obj{
 				{
@@ -84,7 +82,7 @@ func main() {
 }
 
 func transformInt64OrStringDefinition(definitions obj) {
-	int64OrStringDefinition := definitions["io.argoproj.common.Int64OrString"].(obj)
+	int64OrStringDefinition := definitions["io.argoproj.events.v1alpha1.Int64OrString"].(obj)
 	int64OrStringDefinition["type"] = []string{
 		"integer",
 		"string",
