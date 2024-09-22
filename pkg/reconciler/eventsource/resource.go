@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
@@ -35,7 +36,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 	ctx := context.Background()
 	eventSource := args.EventSource
 	eventBus := &aev1.EventBus{}
-	eventBusName := sharedutil.DefaultEventBusName
+	eventBusName := v1alpha1.DefaultEventBusName
 	if len(eventSource.Spec.EventBusName) > 0 {
 		eventBusName = eventSource.Spec.EventBusName
 	}
@@ -70,10 +71,10 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 		return err
 	}
 	if deploy != nil {
-		if deploy.Annotations != nil && deploy.Annotations[sharedutil.AnnotationResourceSpecHash] != expectedDeploy.Annotations[sharedutil.AnnotationResourceSpecHash] {
+		if deploy.Annotations != nil && deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
 			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.Annotations[sharedutil.AnnotationResourceSpecHash] = expectedDeploy.Annotations[sharedutil.AnnotationResourceSpecHash]
+			deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash]
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
@@ -123,7 +124,7 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 				return err
 			}
 			logger.Infow("service is created", "serviceName", expectedSvc.Name)
-		} else if existingSvc.Annotations != nil && existingSvc.Annotations[sharedutil.AnnotationResourceSpecHash] != expectedSvc.Annotations[sharedutil.AnnotationResourceSpecHash] {
+		} else if existingSvc.Annotations != nil && existingSvc.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedSvc.Annotations[v1alpha1.AnnotationResourceSpecHash] {
 			// To avoid service updating issues such as port name change, re-create it.
 			err = client.Delete(ctx, existingSvc)
 			if err != nil {
@@ -184,23 +185,23 @@ func buildDeployment(args *AdaptorArgs, eventBus *aev1.EventBus) (*appv1.Deploym
 
 	env := []corev1.EnvVar{
 		{
-			Name:  sharedutil.EnvVarEventSourceObject,
+			Name:  v1alpha1.EnvVarEventSourceObject,
 			Value: base64.StdEncoding.EncodeToString(eventSourceBytes),
 		},
 		{
-			Name:  sharedutil.EnvVarEventBusSubject,
+			Name:  v1alpha1.EnvVarEventBusSubject,
 			Value: fmt.Sprintf("eventbus-%s", args.EventSource.Namespace),
 		},
 		{
-			Name:      sharedutil.EnvVarPodName,
+			Name:      v1alpha1.EnvVarPodName,
 			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}},
 		},
 		{
-			Name:  sharedutil.EnvVarLeaderElection,
-			Value: args.EventSource.Annotations[sharedutil.AnnotationLeaderElection],
+			Name:  v1alpha1.EnvVarLeaderElection,
+			Value: args.EventSource.Annotations[v1alpha1.AnnotationLeaderElection],
 		},
 		{
-			Name:  sharedutil.EnvVarEventBusConfig,
+			Name:  v1alpha1.EnvVarEventBusConfig,
 			Value: base64.StdEncoding.EncodeToString(busConfigBytes),
 		},
 	}
@@ -254,17 +255,17 @@ func buildDeployment(args *AdaptorArgs, eventBus *aev1.EventBus) (*appv1.Deploym
 		})
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "auth-volume",
-			MountPath: sharedutil.EventBusAuthFileMountPath,
+			MountPath: v1alpha1.EventBusAuthFileMountPath,
 		})
 	}
 
 	// secrets
-	volSecrets, volSecretMounts := sharedutil.VolumesFromSecretsOrConfigMaps(sharedutil.SecretKeySelectorType, secretObjs...)
+	volSecrets, volSecretMounts := sharedutil.VolumesFromSecretsOrConfigMaps(v1alpha1.SecretKeySelectorType, secretObjs...)
 	volumes = append(volumes, volSecrets...)
 	volumeMounts = append(volumeMounts, volSecretMounts...)
 
 	// config maps
-	volConfigMaps, volCofigMapMounts := sharedutil.VolumesFromSecretsOrConfigMaps(sharedutil.ConfigMapKeySelectorType, eventSourceCopy)
+	volConfigMaps, volCofigMapMounts := sharedutil.VolumesFromSecretsOrConfigMaps(v1alpha1.ConfigMapKeySelectorType, eventSourceCopy)
 	volumeMounts = append(volumeMounts, volCofigMapMounts...)
 	volumes = append(volumes, volConfigMaps...)
 
@@ -301,7 +302,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		ImagePullPolicy: sharedutil.GetImagePullPolicy(),
 		Args:            []string{"eventsource-service"},
 		Ports: []corev1.ContainerPort{
-			{Name: "metrics", ContainerPort: sharedutil.EventSourceMetricsPort},
+			{Name: "metrics", ContainerPort: v1alpha1.EventSourceMetricsPort},
 		},
 	}
 	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Container != nil {

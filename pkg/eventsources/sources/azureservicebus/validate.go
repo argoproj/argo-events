@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates azure events hub event source
@@ -31,7 +30,7 @@ func (el *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *v1alpha1.AzureServiceBusEventSource) error {
 	if eventSource == nil {
-		return sharedutil.ErrNilEventSource
+		return v1alpha1.ErrNilEventSource
 	}
 	if eventSource.ConnectionString == nil && eventSource.FullyQualifiedNamespace == "" {
 		return fmt.Errorf("ConnectionString or fullyQualifiedNamespace must be specified")

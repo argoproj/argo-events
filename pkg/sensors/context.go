@@ -31,8 +31,8 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
-	sensormetrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sensormetrics "github.com/argoproj/argo-events/pkg/metrics"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 

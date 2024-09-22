@@ -19,7 +19,7 @@ package artifacts
 import (
 	"fmt"
 
-	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 // InlineReader implements the ArtifactReader interface for inlined artifacts

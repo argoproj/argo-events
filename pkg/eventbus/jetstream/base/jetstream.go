@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	nats "github.com/nats-io/nats.go"
@@ -73,13 +73,13 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	}
 
 	switch stream.auth.Strategy {
-	case eventbusv1alpha1.AuthStrategyToken:
+	case v1alpha1.AuthStrategyToken:
 		log.Info("NATS auth strategy: Token")
 		opts = append(opts, nats.Token(stream.auth.Credential.Token))
-	case eventbusv1alpha1.AuthStrategyBasic:
+	case v1alpha1.AuthStrategyBasic:
 		log.Info("NATS auth strategy: Basic")
 		opts = append(opts, nats.UserInfo(stream.auth.Credential.Username, stream.auth.Credential.Password))
-	case eventbusv1alpha1.AuthStrategyNone:
+	case v1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:
 		return nil, fmt.Errorf("unsupported auth strategy")
@@ -110,14 +110,14 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	var err error
 
 	// before we add the Stream first let's check to make sure it doesn't already exist
-	streamInfo, err := conn.JSContext.StreamInfo(sharedutil.JetStreamStreamName)
+	streamInfo, err := conn.JSContext.StreamInfo(v1alpha1.JetStreamStreamName)
 	if streamInfo != nil && err == nil {
-		stream.Logger.Infof("No need to create Stream '%s' as it already exists", sharedutil.JetStreamStreamName)
+		stream.Logger.Infof("No need to create Stream '%s' as it already exists", v1alpha1.JetStreamStreamName)
 		return nil
 	}
 	if err != nil && err != nats.ErrStreamNotFound {
 		stream.Logger.Warnf(`Error calling StreamInfo for Stream '%s' (this can happen if another Jetstream client "
-		is trying to create the Stream at the same time): %v`, sharedutil.JetStreamStreamName, err)
+		is trying to create the Stream at the same time): %v`, v1alpha1.JetStreamStreamName, err)
 	}
 
 	// unmarshal settings
@@ -142,8 +142,8 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return err
 	}
 	streamConfig := nats.StreamConfig{
-		Name:       sharedutil.JetStreamStreamName,
-		Subjects:   []string{sharedutil.JetStreamStreamName + ".*.*"},
+		Name:       v1alpha1.JetStreamStreamName,
+		Subjects:   []string{v1alpha1.JetStreamStreamName + ".*.*"},
 		Retention:  retentionPolicy,
 		Discard:    discardPolicy,
 		MaxMsgs:    v.GetInt64("maxMsgs"),
@@ -159,7 +159,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		_, err = conn.JSContext.AddStream(&streamConfig)
 		if err != nil {
 			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v`,
-				sharedutil.JetStreamStreamName, conn, err)
+				v1alpha1.JetStreamStreamName, conn, err)
 			return fmt.Errorf(errStr)
 		} else {
 			return nil
@@ -169,7 +169,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		return connectErr
 	}
 
-	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", sharedutil.JetStreamStreamName, conn)
+	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", v1alpha1.JetStreamStreamName, conn)
 	return nil
 }
 

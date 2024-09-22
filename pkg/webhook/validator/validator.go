@@ -10,9 +10,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 // Validator is an interface for CRD objects

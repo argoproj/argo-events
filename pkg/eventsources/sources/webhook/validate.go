@@ -21,7 +21,6 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates webhook event source
@@ -31,7 +30,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(webhookEventSource *v1alpha1.WebhookEventSource) error {
 	if webhookEventSource == nil {
-		return sharedutil.ErrNilEventSource
+		return v1alpha1.ErrNilEventSource
 	}
 	return webhook.ValidateWebhookContext(&webhookEventSource.WebhookContext)
 }

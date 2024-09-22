@@ -26,9 +26,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	clientadmissionregistrationv1 "k8s.io/client-go/kubernetes/typed/admissionregistration/v1"
 
-	"github.com/argoproj/argo-events/common/logging"
-	commontls "github.com/argoproj/argo-events/common/tls"
 	eventsclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
+	tlsutil "github.com/argoproj/argo-events/pkg/shared/tls"
 	"github.com/argoproj/argo-events/pkg/webhook/validator"
 )
 
@@ -287,7 +287,7 @@ func (ac *AdmissionController) generateSecret(ctx context.Context) (*corev1.Secr
 	hosts := []string{}
 	hosts = append(hosts, fmt.Sprintf("%s.%s.svc.cluster.local", ac.Options.ServiceName, ac.Options.Namespace))
 	hosts = append(hosts, fmt.Sprintf("%s.%s.svc", ac.Options.ServiceName, ac.Options.Namespace))
-	serverKey, serverCert, caCert, err := commontls.CreateCerts(certOrg, hosts, time.Now().Add(10*365*24*time.Hour), true, false)
+	serverKey, serverCert, caCert, err := tlsutil.CreateCerts(certOrg, hosts, time.Now().Add(10*365*24*time.Hour), true, false)
 	if err != nil {
 		return nil, err
 	}

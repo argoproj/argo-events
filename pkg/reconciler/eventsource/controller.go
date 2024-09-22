@@ -12,9 +12,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 const (
@@ -88,9 +88,9 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *aev1.EventSourc
 		Image:       r.eventSourceImage,
 		EventSource: eventSource,
 		Labels: map[string]string{
-			"controller":                    "eventsource-controller",
-			sharedutil.LabelEventSourceName: eventSource.Name,
-			sharedutil.LabelOwnerName:       eventSource.Name,
+			"controller":                  "eventsource-controller",
+			v1alpha1.LabelEventSourceName: eventSource.Name,
+			v1alpha1.LabelOwnerName:       eventSource.Name,
 		},
 	}
 	return Reconcile(r.client, args, log)

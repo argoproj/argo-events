@@ -29,7 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -163,12 +162,12 @@ func renderEventDataAsJSON(event *v1alpha1.Event) ([]byte, error) {
 	}
 	raw := event.Data
 	switch event.Context.DataContentType {
-	case sharedutil.MediaTypeJSON:
+	case v1alpha1.MediaTypeJSON:
 		if isJSON(raw) {
 			return raw, nil
 		}
 		return nil, fmt.Errorf("event data is not valid JSON")
-	case sharedutil.MediaTypeYAML:
+	case v1alpha1.MediaTypeYAML:
 		data, err := yaml.YAMLToJSON(raw)
 		if err != nil {
 			return nil, fmt.Errorf("failed converting yaml event data to JSON: %s", err)

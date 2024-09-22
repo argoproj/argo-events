@@ -56,7 +56,7 @@ func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorA
 		return fmt.Errorf("failed to get EventBus")
 	}
 
-	eventBusName := sharedutil.DefaultEventBusName
+	eventBusName := v1alpha1.DefaultEventBusName
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
@@ -79,10 +79,10 @@ func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorA
 		return err
 	}
 	if deploy != nil {
-		if deploy.Annotations != nil && deploy.Annotations[sharedutil.AnnotationResourceSpecHash] != expectedDeploy.Annotations[sharedutil.AnnotationResourceSpecHash] {
+		if deploy.Annotations != nil && deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash] {
 			deploy.Spec = expectedDeploy.Spec
 			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.Annotations[sharedutil.AnnotationResourceSpecHash] = expectedDeploy.Annotations[sharedutil.AnnotationResourceSpecHash]
+			deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash]
 			err = client.Update(ctx, deploy)
 			if err != nil {
 				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
@@ -144,23 +144,23 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 
 	env := []corev1.EnvVar{
 		{
-			Name:  sharedutil.EnvVarSensorObject,
+			Name:  v1alpha1.EnvVarSensorObject,
 			Value: base64.StdEncoding.EncodeToString(sensorBytes),
 		},
 		{
-			Name:  sharedutil.EnvVarEventBusSubject,
+			Name:  v1alpha1.EnvVarEventBusSubject,
 			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
 		},
 		{
-			Name:      sharedutil.EnvVarPodName,
+			Name:      v1alpha1.EnvVarPodName,
 			ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}},
 		},
 		{
-			Name:  sharedutil.EnvVarLeaderElection,
-			Value: args.Sensor.Annotations[sharedutil.AnnotationLeaderElection],
+			Name:  v1alpha1.EnvVarLeaderElection,
+			Value: args.Sensor.Annotations[v1alpha1.AnnotationLeaderElection],
 		},
 		{
-			Name:  sharedutil.EnvVarEventBusConfig,
+			Name:  v1alpha1.EnvVarEventBusConfig,
 			Value: base64.StdEncoding.EncodeToString(busConfigBytes),
 		},
 	}
@@ -214,17 +214,17 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 		})
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "auth-volume",
-			MountPath: sharedutil.EventBusAuthFileMountPath,
+			MountPath: v1alpha1.EventBusAuthFileMountPath,
 		})
 	}
 
 	// secrets
-	volSecrets, volSecretMounts := sharedutil.VolumesFromSecretsOrConfigMaps(sharedutil.SecretKeySelectorType, secretObjs...)
+	volSecrets, volSecretMounts := sharedutil.VolumesFromSecretsOrConfigMaps(v1alpha1.SecretKeySelectorType, secretObjs...)
 	volumes = append(volumes, volSecrets...)
 	volumeMounts = append(volumeMounts, volSecretMounts...)
 
 	// config maps
-	volConfigMaps, volCofigMapMounts := sharedutil.VolumesFromSecretsOrConfigMaps(sharedutil.ConfigMapKeySelectorType, sensorCopy)
+	volConfigMaps, volCofigMapMounts := sharedutil.VolumesFromSecretsOrConfigMaps(v1alpha1.ConfigMapKeySelectorType, sensorCopy)
 	volumeMounts = append(volumeMounts, volCofigMapMounts...)
 	volumes = append(volumes, volConfigMaps...)
 
@@ -262,7 +262,7 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 		ImagePullPolicy: sharedutil.GetImagePullPolicy(),
 		Args:            []string{"sensor-service"},
 		Ports: []corev1.ContainerPort{
-			{Name: "metrics", ContainerPort: sharedutil.SensorMetricsPort},
+			{Name: "metrics", ContainerPort: v1alpha1.SensorMetricsPort},
 		},
 	}
 	if args.Sensor.Spec.Template != nil && args.Sensor.Spec.Template.Container != nil {

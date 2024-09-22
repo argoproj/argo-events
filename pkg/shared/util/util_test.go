@@ -130,29 +130,29 @@ var (
 
 func TestFindTypeValues(t *testing.T) {
 	t.Run("test find secretKeySelectors", func(t *testing.T) {
-		values := findTypeValues(testXObj, SecretKeySelectorType)
+		values := findTypeValues(testXObj, aev1.SecretKeySelectorType)
 		assert.Equal(t, len(values), 7)
-		values = findTypeValues(&testXObj, SecretKeySelectorType)
+		values = findTypeValues(&testXObj, aev1.SecretKeySelectorType)
 		assert.Equal(t, len(values), 7)
 	})
 
 	t.Run("test find configMapKeySelectors", func(t *testing.T) {
-		values := findTypeValues(testXObj, ConfigMapKeySelectorType)
+		values := findTypeValues(testXObj, aev1.ConfigMapKeySelectorType)
 		assert.Equal(t, len(values), 7)
-		values = findTypeValues(&testXObj, ConfigMapKeySelectorType)
+		values = findTypeValues(&testXObj, aev1.ConfigMapKeySelectorType)
 		assert.Equal(t, len(values), 7)
 	})
 }
 
 func TestVolumesFromSecretsOrConfigMaps(t *testing.T) {
 	t.Run("test secret volumes", func(t *testing.T) {
-		vols, mounts := VolumesFromSecretsOrConfigMaps(SecretKeySelectorType, &testXObj)
+		vols, mounts := VolumesFromSecretsOrConfigMaps(aev1.SecretKeySelectorType, &testXObj)
 		assert.Equal(t, len(vols), 6)
 		assert.Equal(t, len(mounts), 6)
 	})
 
 	t.Run("test configmap volumes", func(t *testing.T) {
-		vols, mounts := VolumesFromSecretsOrConfigMaps(ConfigMapKeySelectorType, &testXObj)
+		vols, mounts := VolumesFromSecretsOrConfigMaps(aev1.ConfigMapKeySelectorType, &testXObj)
 		assert.Equal(t, len(vols), 6)
 		assert.Equal(t, len(mounts), 6)
 	})

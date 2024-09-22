@@ -30,12 +30,12 @@ import (
 	"github.com/minio/minio-go/v7/pkg/notification"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common/logging"
-	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 

@@ -20,7 +20,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	openwhisk "github.com/argoproj/argo-events/pkg/sensors/triggers/apache-openwhisk"
 	argoworkflow "github.com/argoproj/argo-events/pkg/sensors/triggers/argo-workflow"
@@ -36,6 +35,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/pulsar"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/slack"
 	standardk8s "github.com/argoproj/argo-events/pkg/sensors/triggers/standard-k8s"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 // Trigger interface

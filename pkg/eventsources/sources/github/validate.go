@@ -19,7 +19,6 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates a github event source
@@ -29,7 +28,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	if githubEventSource == nil {
-		return sharedutil.ErrNilEventSource
+		return v1alpha1.ErrNilEventSource
 	}
 	if githubEventSource.GetOwnedRepositories() == nil && githubEventSource.Organizations == nil {
 		return fmt.Errorf("either repositories or organizations is required")

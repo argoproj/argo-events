@@ -33,10 +33,10 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/policy"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 // ArgoWorkflowTrigger implements Trigger interface for Argo workflow

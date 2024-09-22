@@ -28,13 +28,13 @@ import (
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common/logging"
-	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	awscommon "github.com/argoproj/argo-events/pkg/eventsources/common/aws"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 // EventListener implements Eventing for aws sqs event source

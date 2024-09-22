@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/IBM/sarama"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"go.uber.org/zap"
 )
 
@@ -76,21 +76,21 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 		switch config.Net.SASL.Mechanism {
 		case "SCRAM-SHA-512":
 			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
-				return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA512New}
+				return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA512New}
 			}
 		case "SCRAM-SHA-256":
 			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
-				return &common.XDGSCRAMClient{HashGeneratorFcn: common.SHA256New}
+				return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA256New}
 			}
 		}
 
-		user, err := common.GetSecretFromVolume(k.config.SASL.UserSecret)
+		user, err := sharedutil.GetSecretFromVolume(k.config.SASL.UserSecret)
 		if err != nil {
 			return nil, err
 		}
 		config.Net.SASL.User = user
 
-		password, err := common.GetSecretFromVolume(k.config.SASL.PasswordSecret)
+		password, err := sharedutil.GetSecretFromVolume(k.config.SASL.PasswordSecret)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +99,7 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 
 	// tls
 	if k.config.TLS != nil {
-		tls, err := common.GetTLSConfig(k.config.TLS)
+		tls, err := sharedutil.GetTLSConfig(k.config.TLS)
 		if err != nil {
 			return nil, err
 		}

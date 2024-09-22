@@ -23,7 +23,6 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/fsevent"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates hdfs event source
@@ -33,7 +32,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *v1alpha1.HDFSEventSource) error {
 	if eventSource == nil {
-		return sharedutil.ErrNilEventSource
+		return v1alpha1.ErrNilEventSource
 	}
 	if eventSource.Type == "" {
 		return fmt.Errorf("type is required")

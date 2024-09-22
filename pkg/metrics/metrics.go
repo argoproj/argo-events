@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	argoevents "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 const (

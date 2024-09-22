@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 	appv1 "k8s.io/api/apps/v1"
@@ -105,7 +104,7 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamStatefulSetName(testObj)}, sts)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(sts.Spec.Template.Spec.Containers))
-		assert.Contains(t, sts.Annotations, sharedutil.AnnotationResourceSpecHash)
+		assert.Contains(t, sts.Annotations, v1alpha1.AnnotationResourceSpecHash)
 		assert.Equal(t, testJetStreamImage, sts.Spec.Template.Spec.Containers[0].Image)
 		assert.Equal(t, testJSReloaderImage, sts.Spec.Template.Spec.Containers[1].Image)
 		assert.Equal(t, testJetStreamExporterImage, sts.Spec.Template.Spec.Containers[2].Image)
@@ -128,7 +127,7 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamServiceName(testObj)}, svc)
 		assert.NoError(t, err)
 		assert.Equal(t, 4, len(svc.Spec.Ports))
-		assert.Contains(t, svc.Annotations, sharedutil.AnnotationResourceSpecHash)
+		assert.Contains(t, svc.Annotations, v1alpha1.AnnotationResourceSpecHash)
 	})
 
 	t.Run("test create auth secrets", func(t *testing.T) {
@@ -140,19 +139,19 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamServerSecretName(testObj)}, s)
 		assert.NoError(t, err)
 		assert.Equal(t, 8, len(s.Data))
-		assert.Contains(t, s.Data, sharedutil.JetStreamServerSecretAuthKey)
-		assert.Contains(t, s.Data, sharedutil.JetStreamServerSecretEncryptionKey)
-		assert.Contains(t, s.Data, sharedutil.JetStreamServerPrivateKeyKey)
-		assert.Contains(t, s.Data, sharedutil.JetStreamServerCertKey)
-		assert.Contains(t, s.Data, sharedutil.JetStreamServerCACertKey)
-		assert.Contains(t, s.Data, sharedutil.JetStreamClusterPrivateKeyKey)
-		assert.Contains(t, s.Data, sharedutil.JetStreamClusterCertKey)
-		assert.Contains(t, s.Data, sharedutil.JetStreamClusterCACertKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamServerSecretAuthKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamServerSecretEncryptionKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamServerPrivateKeyKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamServerCertKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamServerCACertKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamClusterPrivateKeyKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamClusterCertKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamClusterCACertKey)
 		s = &corev1.Secret{}
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamClientAuthSecretName(testObj)}, s)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(s.Data))
-		assert.Contains(t, s.Data, sharedutil.JetStreamClientAuthSecretKey)
+		assert.Contains(t, s.Data, v1alpha1.JetStreamClientAuthSecretKey)
 	})
 
 	t.Run("test create configmap", func(t *testing.T) {
@@ -164,7 +163,7 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamConfigMapName(testObj)}, c)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(c.Data))
-		assert.Contains(t, c.Annotations, sharedutil.AnnotationResourceSpecHash)
+		assert.Contains(t, c.Annotations, v1alpha1.AnnotationResourceSpecHash)
 	})
 }
 

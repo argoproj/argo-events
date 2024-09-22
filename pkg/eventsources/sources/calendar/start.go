@@ -28,12 +28,12 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/argoproj/argo-events/common/logging"
-	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/persist"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
@@ -69,7 +69,7 @@ func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
 func (el *EventListener) initializePersistence(ctx context.Context, persistence *v1alpha1.EventPersistence) error {
 	el.log.Info("Initializing Persistence")
 	if persistence.ConfigMap != nil {
-		kubeConfig, _ := os.LookupEnv(sharedutil.EnvVarKubeConfig)
+		kubeConfig, _ := os.LookupEnv(v1alpha1.EnvVarKubeConfig)
 
 		restConfig, err := sharedutil.GetClientConfig(kubeConfig)
 		if err != nil {

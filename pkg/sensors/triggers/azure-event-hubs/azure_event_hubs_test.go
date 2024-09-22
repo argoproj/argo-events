@@ -19,8 +19,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"

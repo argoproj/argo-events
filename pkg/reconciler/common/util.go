@@ -20,6 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
@@ -46,7 +47,7 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
-	annotations[sharedutil.AnnotationResourceSpecHash] = hash
+	annotations[v1alpha1.AnnotationResourceSpecHash] = hash
 	obj.SetAnnotations(annotations)
 
 	return nil

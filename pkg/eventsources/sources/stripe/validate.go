@@ -22,7 +22,6 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 // ValidateEventSource validates stripe event source
@@ -32,7 +31,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *v1alpha1.StripeEventSource) error {
 	if eventSource == nil {
-		return sharedutil.ErrNilEventSource
+		return v1alpha1.ErrNilEventSource
 	}
 	if eventSource.CreateWebhook {
 		if eventSource.APIKey == nil {

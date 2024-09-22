@@ -23,8 +23,8 @@ import (
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 // ResourceReader implements the ArtifactReader interface for resource artifacts

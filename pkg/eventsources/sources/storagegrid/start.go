@@ -32,11 +32,11 @@ import (
 	"github.com/joncalhoun/qson"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
@@ -230,7 +230,7 @@ func (router *Router) PostActivate() error {
 	logger.Info("checking if the endpoint already exists...")
 
 	response, err := client.R().
-		SetHeader("Content-Type", sharedutil.MediaTypeJSON).
+		SetHeader("Content-Type", v1alpha1.MediaTypeJSON).
 		SetAuthToken(authToken).
 		SetResult(&getEndpointResponse{}).
 		SetError(&genericResponse{}).
@@ -272,7 +272,7 @@ func (router *Router) PostActivate() error {
 		}
 
 		response, err := client.R().
-			SetHeader("Content-Type", sharedutil.MediaTypeJSON).
+			SetHeader("Content-Type", v1alpha1.MediaTypeJSON).
 			SetAuthToken(authToken).
 			SetBody(string(newEndpointBody)).
 			SetResult(&genericResponse{}).
@@ -311,7 +311,7 @@ func (router *Router) PostActivate() error {
 	}
 
 	response, err = client.R().
-		SetHeader("Content-Type", sharedutil.MediaTypeJSON).
+		SetHeader("Content-Type", v1alpha1.MediaTypeJSON).
 		SetAuthToken(authToken).
 		SetBody(string(notificationRequestBody)).
 		SetResult(&registerNotificationResponse{}).

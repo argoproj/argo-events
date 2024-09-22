@@ -19,9 +19,9 @@ package webhook
 import (
 	"net/http"
 
-	"github.com/argoproj/argo-events/common/logging"
-	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 var Hook = &aev1.WebhookContext{

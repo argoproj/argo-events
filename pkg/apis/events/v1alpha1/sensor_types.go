@@ -426,6 +426,19 @@ type HTTPTrigger struct {
 	SecureHeaders []*SecureHeader `json:"secureHeaders,omitempty" protobuf:"bytes,9,rep,name=secureHeaders"`
 }
 
+// SecureHeader refers to HTTP Headers with auth tokens as values
+type SecureHeader struct {
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	// Values can be read from either secrets or configmaps
+	ValueFrom *ValueFromSource `json:"valueFrom,omitempty" protobuf:"bytes,2,opt,name=valueFrom"`
+}
+
+// ValueFromSource allows you to reference keys from either a Configmap or Secret
+type ValueFromSource struct {
+	SecretKeyRef    *corev1.SecretKeySelector    `json:"secretKeyRef,omitempty" protobuf:"bytes,1,opt,name=secretKeyRef"`
+	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty" protobuf:"bytes,2,opt,name=configMapKeyRef"`
+}
+
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
 type AWSLambdaTrigger struct {
 	// FunctionName refers to the name of the function to invoke.
@@ -543,6 +556,17 @@ type KafkaTrigger struct {
 	// Schema Registry configuration to producer message with avro format
 	// +optional
 	SchemaRegistry *SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,13,opt,name=schemaRegistry"`
+}
+
+// SchemaRegistryConfig refers to configuration for a client
+type SchemaRegistryConfig struct {
+	// Schema Registry URL.
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// Schema ID
+	SchemaID int32 `json:"schemaId" protobuf:"varint,2,name=schemaId"`
+	// +optional
+	// SchemaRegistry - basic authentication
+	Auth BasicAuth `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
 }
 
 // PulsarTrigger refers to the specification of the Pulsar trigger.

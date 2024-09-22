@@ -27,11 +27,11 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/argoproj/argo-events/common/logging"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"github.com/xanzy/go-gitlab"
 	"go.uber.org/zap"

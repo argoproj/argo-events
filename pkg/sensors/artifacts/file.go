@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 // FileReader implements the ArtifactReader interface for file artifacts

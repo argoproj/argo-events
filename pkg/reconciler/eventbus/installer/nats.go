@@ -157,10 +157,10 @@ func (i *natsInstaller) createStanService(ctx context.Context) (*corev1.Service,
 	if svc != nil {
 		// TODO: potential issue here - if service spec is updated manually, reconciler will not change it back.
 		// Revisit it later to see if it is needed to compare the spec.
-		if svc.Annotations != nil && svc.Annotations[sharedutil.AnnotationResourceSpecHash] != expectedSvc.Annotations[sharedutil.AnnotationResourceSpecHash] {
+		if svc.Annotations != nil && svc.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedSvc.Annotations[v1alpha1.AnnotationResourceSpecHash] {
 			svc.Spec = expectedSvc.Spec
 			svc.SetLabels(expectedSvc.Labels)
-			svc.Annotations[sharedutil.AnnotationResourceSpecHash] = expectedSvc.Annotations[sharedutil.AnnotationResourceSpecHash]
+			svc.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedSvc.Annotations[v1alpha1.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
@@ -198,10 +198,10 @@ func (i *natsInstaller) createConfigMap(ctx context.Context) (*corev1.ConfigMap,
 	}
 	if cm != nil {
 		// TODO: Potential issue about comparing hash
-		if cm.Annotations != nil && cm.Annotations[sharedutil.AnnotationResourceSpecHash] != expectedCm.Annotations[sharedutil.AnnotationResourceSpecHash] {
+		if cm.Annotations != nil && cm.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedCm.Annotations[v1alpha1.AnnotationResourceSpecHash] {
 			cm.Data = expectedCm.Data
 			cm.SetLabels(expectedCm.Labels)
-			cm.Annotations[sharedutil.AnnotationResourceSpecHash] = expectedCm.Annotations[sharedutil.AnnotationResourceSpecHash]
+			cm.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedCm.Annotations[v1alpha1.AnnotationResourceSpecHash]
 			err := i.client.Update(ctx, cm)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateConfigMapFailed", "Failed to update existing configmap")
@@ -377,11 +377,11 @@ func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, conf
 		return err
 	}
 	if ss != nil {
-		if ss.Annotations != nil && ss.Annotations[sharedutil.AnnotationResourceSpecHash] == expectedSs.Annotations[sharedutil.AnnotationResourceSpecHash] {
+		if ss.Annotations != nil && ss.Annotations[v1alpha1.AnnotationResourceSpecHash] == expectedSs.Annotations[v1alpha1.AnnotationResourceSpecHash] {
 			return nil
 		}
 		ss.SetLabels(expectedSs.Labels)
-		ss.Annotations[sharedutil.AnnotationResourceSpecHash] = expectedSs.Annotations[sharedutil.AnnotationResourceSpecHash]
+		ss.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedSs.Annotations[v1alpha1.AnnotationResourceSpecHash]
 		ss.Spec = expectedSs.Spec
 		if err := i.client.Update(ctx, ss); err != nil {
 			i.eventBus.Status.MarkDeployFailed("UpdateStatefulSetFailed", "Failed to update a statefulset")
@@ -438,7 +438,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if replicas < 3 {
 		replicas = 3
 	}
-	maxAge := sharedutil.STANMaxAge
+	maxAge := v1alpha1.STANMaxAge
 	if i.eventBus.Spec.NATS.Native.MaxAge != nil {
 		maxAge = *i.eventBus.Spec.NATS.Native.MaxAge
 	}
@@ -446,23 +446,23 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	maxMsgs := sharedutil.STANMaxMsgs
+	maxMsgs := v1alpha1.STANMaxMsgs
 	if i.eventBus.Spec.NATS.Native.MaxMsgs != nil {
 		maxMsgs = *i.eventBus.Spec.NATS.Native.MaxMsgs
 	}
-	maxSubs := sharedutil.STANMaxSubs
+	maxSubs := v1alpha1.STANMaxSubs
 	if i.eventBus.Spec.NATS.Native.MaxSubs != nil {
 		maxSubs = *i.eventBus.Spec.NATS.Native.MaxSubs
 	}
-	maxBytes := sharedutil.STANMaxBytes
+	maxBytes := v1alpha1.STANMaxBytes
 	if i.eventBus.Spec.NATS.Native.MaxBytes != nil {
 		maxBytes = *i.eventBus.Spec.NATS.Native.MaxBytes
 	}
-	maxPayload := sharedutil.STANMaxPayload
+	maxPayload := v1alpha1.STANMaxPayload
 	if i.eventBus.Spec.NATS.Native.MaxPayload != nil {
 		maxPayload = *i.eventBus.Spec.NATS.Native.MaxPayload
 	}
-	raftHeartbeatTimeout := sharedutil.STANRaftHeartbeatTimeout
+	raftHeartbeatTimeout := v1alpha1.STANRaftHeartbeatTimeout
 	if i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout != nil {
 		raftHeartbeatTimeout = *i.eventBus.Spec.NATS.Native.RaftHeartbeatTimeout
 	}
@@ -470,7 +470,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftElectionTimeout := sharedutil.STANRaftElectionTimeout
+	raftElectionTimeout := v1alpha1.STANRaftElectionTimeout
 	if i.eventBus.Spec.NATS.Native.RaftElectionTimeout != nil {
 		raftElectionTimeout = *i.eventBus.Spec.NATS.Native.RaftElectionTimeout
 	}
@@ -478,7 +478,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftLeaseTimeout := sharedutil.STANRaftLeaseTimeout
+	raftLeaseTimeout := v1alpha1.STANRaftLeaseTimeout
 	if i.eventBus.Spec.NATS.Native.RaftLeaseTimeout != nil {
 		raftLeaseTimeout = *i.eventBus.Spec.NATS.Native.RaftLeaseTimeout
 	}
@@ -486,7 +486,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	if err != nil {
 		return nil, err
 	}
-	raftCommitTimeout := sharedutil.STANRaftCommitTimeout
+	raftCommitTimeout := v1alpha1.STANRaftCommitTimeout
 	if i.eventBus.Spec.NATS.Native.RaftCommitTimeout != nil {
 		raftCommitTimeout = *i.eventBus.Spec.NATS.Native.RaftCommitTimeout
 	}
@@ -748,7 +748,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						Image:           stanVersion.MetricsExporterImage,
 						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
-							{Name: "metrics", ContainerPort: sharedutil.EventBusMetricsPort},
+							{Name: "metrics", ContainerPort: v1alpha1.EventBusMetricsPort},
 						},
 						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(monitorPort)))},
 						Resources:       metricsContainerResources,

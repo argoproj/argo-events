@@ -23,8 +23,8 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
-	metrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
 )
 
 var (

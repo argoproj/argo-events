@@ -13,10 +13,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
 	"github.com/argoproj/argo-events/pkg/reconciler/eventbus/installer"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 const (

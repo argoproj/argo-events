@@ -30,14 +30,13 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 func TestFilter(t *testing.T) {
 	convey.Convey("Given a resource object, apply filter on it", t, func() {
 		resourceEventSource := &v1alpha1.ResourceEventSource{
-			Namespace: "fake",
 			GroupVersionResource: metav1.GroupVersionResource{
 				Group:    "",
 				Resource: "pods",

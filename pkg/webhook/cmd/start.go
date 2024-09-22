@@ -11,12 +11,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
-	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsversiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"github.com/argoproj/argo-events/pkg/webhook"
-	envpkg "github.com/argoproj/pkg/env"
 )
 
 const (
@@ -29,7 +28,7 @@ const (
 
 func Start() {
 	logger := logging.NewArgoEventsLogger().Named("webhook")
-	kubeConfig, _ := os.LookupEnv(sharedutil.EnvVarKubeConfig)
+	kubeConfig, _ := os.LookupEnv(aev1.EnvVarKubeConfig)
 	restConfig, err := sharedutil.GetClientConfig(kubeConfig)
 	if err != nil {
 		logger.Fatalw("failed to get kubeconfig", zap.Error(err))
@@ -42,16 +41,16 @@ func Start() {
 		logger.Fatalf("required environment variable %q not defined", namespaceEnvVar)
 	}
 
-	portStr := envpkg.LookupEnvStringOr(portEnvVar, "443")
+	portStr := sharedutil.LookupEnvStringOr(portEnvVar, "443")
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		logger.Fatalf("port should be a number, environment variable %q not valid", portStr)
 	}
 
 	options := webhook.Options{
-		ServiceName:     envpkg.LookupEnvStringOr(serviceNameEnvVar, "events-webhook"),
-		DeploymentName:  envpkg.LookupEnvStringOr(deploymentNameEnvVar, "events-webhook"),
-		ClusterRoleName: envpkg.LookupEnvStringOr(clusterRoleNameEnvVar, "argo-events-webhook"),
+		ServiceName:     sharedutil.LookupEnvStringOr(serviceNameEnvVar, "events-webhook"),
+		DeploymentName:  sharedutil.LookupEnvStringOr(deploymentNameEnvVar, "events-webhook"),
+		ClusterRoleName: sharedutil.LookupEnvStringOr(clusterRoleNameEnvVar, "argo-events-webhook"),
 		Namespace:       namespace,
 		Port:            port,
 		SecretName:      "events-webhook-certs",

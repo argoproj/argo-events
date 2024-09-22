@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 func TestRun(t *testing.T) {

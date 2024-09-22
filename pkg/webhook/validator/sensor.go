@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -31,7 +30,7 @@ func NewSensorValidator(client kubernetes.Interface, ebClient eventsclient.Event
 }
 
 func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
-	eventBusName := sharedutil.DefaultEventBusName
+	eventBusName := v1alpha1.DefaultEventBusName
 	if len(s.newSensor.Spec.EventBusName) > 0 {
 		eventBusName = s.newSensor.Spec.EventBusName
 	}

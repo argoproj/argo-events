@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 
-	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
 )
 
 func Test_HandleOne(t *testing.T) {

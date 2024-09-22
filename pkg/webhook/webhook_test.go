@@ -17,8 +17,8 @@ import (
 	fakeClient "k8s.io/client-go/kubernetes/fake"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
-	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 func fakeOptions() Options {

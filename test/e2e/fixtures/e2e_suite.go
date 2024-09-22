@@ -68,7 +68,7 @@ type E2ESuite struct {
 func (s *E2ESuite) SetupSuite() {
 	var err error
 
-	kubeConfig, found := os.LookupEnv(sharedutil.EnvVarKubeConfig)
+	kubeConfig, found := os.LookupEnv(v1alpha1.EnvVarKubeConfig)
 	if !found {
 		home, _ := os.UserHomeDir()
 		kubeConfig = home + "/.kube/config"

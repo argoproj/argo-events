@@ -25,9 +25,9 @@ import (
 	notifications "github.com/argoproj/notifications-engine/pkg/services"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 

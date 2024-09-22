@@ -18,14 +18,14 @@ import (
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
-	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 var (
-	eventBusAuthFileMountPath = sharedutil.EventBusAuthFileMountPath
+	eventBusAuthFileMountPath = aev1.EventBusAuthFileMountPath
 )
 
 type Elector interface {
@@ -39,7 +39,7 @@ type LeaderCallbacks struct {
 
 func NewElector(ctx context.Context, eventBusConfig aev1.BusConfig, clusterName string, clusterSize int, namespace string, leasename string, hostname string) (Elector, error) {
 	switch {
-	case eventBusConfig.Kafka != nil || strings.ToLower(os.Getenv(sharedutil.EnvVarLeaderElection)) == "k8s":
+	case eventBusConfig.Kafka != nil || strings.ToLower(os.Getenv(aev1.EnvVarLeaderElection)) == "k8s":
 		return newKubernetesElector(namespace, leasename, hostname)
 	case eventBusConfig.NATS != nil:
 		return newEventBusElector(ctx, eventBusConfig.NATS.Auth, clusterName, clusterSize, eventBusConfig.NATS.URL)

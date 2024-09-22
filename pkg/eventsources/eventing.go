@@ -14,10 +14,6 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common/expr"
-	"github.com/argoproj/argo-events/common/leaderelection"
-	"github.com/argoproj/argo-events/common/logging"
-	eventsourcemetrics "github.com/argoproj/argo-events/metrics"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventbus"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
@@ -53,6 +49,10 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/webhook"
+	eventsourcemetrics "github.com/argoproj/argo-events/pkg/metrics"
+	"github.com/argoproj/argo-events/pkg/shared/expr"
+	"github.com/argoproj/argo-events/pkg/shared/leaderelection"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 

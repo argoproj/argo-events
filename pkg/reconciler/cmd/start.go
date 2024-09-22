@@ -18,12 +18,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	argoevents "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common/logging"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
 	"github.com/argoproj/argo-events/pkg/reconciler/eventbus"
 	"github.com/argoproj/argo-events/pkg/reconciler/eventsource"
 	"github.com/argoproj/argo-events/pkg/reconciler/sensor"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 

@@ -17,9 +17,9 @@ limitations under the License.
 package stripe
 
 import (
-	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
 )
 
 // EventListener implements Eventing for stripe event source

@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"github.com/minio/minio-go/v7/pkg/notification"
 )
 
@@ -32,7 +31,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 
 func validate(eventSource *v1alpha1.S3Artifact) error {
 	if eventSource == nil {
-		return sharedutil.ErrNilEventSource
+		return v1alpha1.ErrNilEventSource
 	}
 	if eventSource.AccessKey == nil {
 		return fmt.Errorf("access key can't be empty")

@@ -16,9 +16,9 @@ limitations under the License.
 package bitbucketserver
 
 import (
-	metrics "github.com/argoproj/argo-events/metrics"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
+	metrics "github.com/argoproj/argo-events/pkg/metrics"
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 )
 

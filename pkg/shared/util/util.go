@@ -274,14 +274,14 @@ func VolumesFromSecretsOrConfigMaps(t reflect.Type, objs ...interface{}) ([]v1.V
 	}
 
 	switch t {
-	case SecretKeySelectorType:
+	case aev1.SecretKeySelectorType:
 		for _, v := range values {
 			selector := v.(*v1.SecretKeySelector)
 			vol, mount := GenerateSecretVolumeSpecs(selector)
 			resultVolumes = append(resultVolumes, vol)
 			resultMounts = append(resultMounts, mount)
 		}
-	case ConfigMapKeySelectorType:
+	case aev1.ConfigMapKeySelectorType:
 		for _, v := range values {
 			selector := v.(*v1.ConfigMapKeySelector)
 			vol, mount := GenerateConfigMapVolumeSpecs(selector)
@@ -445,7 +445,7 @@ func SliceContains(strSlice []string, targetStr string) bool {
 
 func GetImagePullPolicy() v1.PullPolicy {
 	imgPullPolicy := v1.PullAlways
-	if x := os.Getenv(EnvImagePullPolicy); x != "" {
+	if x := os.Getenv(aev1.EnvImagePullPolicy); x != "" {
 		imgPullPolicy = v1.PullPolicy(x)
 	}
 	return imgPullPolicy
