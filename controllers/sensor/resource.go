@@ -35,7 +35,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -47,7 +47,7 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, eventBus *eventbusv1alpha1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
+func Reconcile(client client.Client, eventBus *dfv1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	sensor := args.Sensor
 
@@ -122,7 +122,7 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus) (*appv1.Deployment, error) {
+func buildDeployment(args *AdaptorArgs, eventBus *dfv1.EventBus) (*appv1.Deployment, error) {
 	deploymentSpec, err := buildDeploymentSpec(args)
 	if err != nil {
 		return nil, err

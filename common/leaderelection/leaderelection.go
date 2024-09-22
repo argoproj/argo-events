@@ -21,7 +21,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 var (
@@ -37,7 +37,7 @@ type LeaderCallbacks struct {
 	OnStoppedLeading func()
 }
 
-func NewElector(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, clusterName string, clusterSize int, namespace string, leasename string, hostname string) (Elector, error) {
+func NewElector(ctx context.Context, eventBusConfig dfv1.BusConfig, clusterName string, clusterSize int, namespace string, leasename string, hostname string) (Elector, error) {
 	switch {
 	case eventBusConfig.Kafka != nil || strings.ToLower(os.Getenv(common.EnvVarLeaderElection)) == "k8s":
 		return newKubernetesElector(namespace, leasename, hostname)
@@ -45,16 +45,16 @@ func NewElector(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, 
 		return newEventBusElector(ctx, eventBusConfig.NATS.Auth, clusterName, clusterSize, eventBusConfig.NATS.URL)
 	case eventBusConfig.JetStream != nil:
 		if eventBusConfig.JetStream.AccessSecret != nil {
-			return newEventBusElector(ctx, &eventbusv1alpha1.AuthStrategyBasic, clusterName, clusterSize, eventBusConfig.JetStream.URL)
+			return newEventBusElector(ctx, &dfv1.AuthStrategyBasic, clusterName, clusterSize, eventBusConfig.JetStream.URL)
 		} else {
-			return newEventBusElector(ctx, &eventbusv1alpha1.AuthStrategyNone, clusterName, clusterSize, eventBusConfig.JetStream.URL)
+			return newEventBusElector(ctx, &dfv1.AuthStrategyNone, clusterName, clusterSize, eventBusConfig.JetStream.URL)
 		}
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}
 }
 
-func newEventBusElector(ctx context.Context, authStrategy *eventbusv1alpha1.AuthStrategy, clusterName string, clusterSize int, url string) (Elector, error) {
+func newEventBusElector(ctx context.Context, authStrategy *dfv1.AuthStrategy, clusterName string, clusterSize int, url string) (Elector, error) {
 	auth, err := getEventBusAuth(ctx, authStrategy)
 	if err != nil {
 		return nil, err
@@ -68,14 +68,14 @@ func newEventBusElector(ctx context.Context, authStrategy *eventbusv1alpha1.Auth
 	}, nil
 }
 
-func getEventBusAuth(ctx context.Context, authStrategy *eventbusv1alpha1.AuthStrategy) (*eventbuscommon.Auth, error) {
+func getEventBusAuth(ctx context.Context, authStrategy *dfv1.AuthStrategy) (*eventbuscommon.Auth, error) {
 	logger := logging.FromContext(ctx)
 
 	var auth *eventbuscommon.Auth
 
-	if authStrategy == nil || *authStrategy == eventbusv1alpha1.AuthStrategyNone {
+	if authStrategy == nil || *authStrategy == dfv1.AuthStrategyNone {
 		auth = &eventbuscommon.Auth{
-			Strategy: eventbusv1alpha1.AuthStrategyNone,
+			Strategy: dfv1.AuthStrategyNone,
 		}
 	} else {
 		v := common.ViperWithLogging()
@@ -122,9 +122,9 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	// Will never give up
 	opts.MaxReconnect = -1
 	opts.Url = e.url
-	if e.auth.Strategy == eventbusv1alpha1.AuthStrategyToken {
+	if e.auth.Strategy == dfv1.AuthStrategyToken {
 		opts.Token = e.auth.Credential.Token
-	} else if e.auth.Strategy == eventbusv1alpha1.AuthStrategyBasic {
+	} else if e.auth.Strategy == dfv1.AuthStrategyBasic {
 		opts.User = e.auth.Credential.Username
 		opts.Password = e.auth.Credential.Password
 	}

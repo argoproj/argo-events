@@ -22,7 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 const (
@@ -423,7 +423,7 @@ func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 			Selector: i.labels,
 		},
 	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(i.eventBus, svc, v1alpha1.EventBusGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return svc, nil
@@ -539,7 +539,7 @@ streaming {
 			configMapKey: conf,
 		},
 	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, cm, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(i.eventBus, cm, v1alpha1.EventBusGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return cm, nil
@@ -566,7 +566,7 @@ func (i *natsInstaller) buildServerAuthSecret(authStrategy v1alpha1.AuthStrategy
 			serverAuthSecretKey: []byte(secret),
 		},
 	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, s, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(i.eventBus, s, v1alpha1.EventBusGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return s, nil
@@ -586,7 +586,7 @@ func (i *natsInstaller) buildClientAuthSecret(authStrategy v1alpha1.AuthStrategy
 			clientAuthSecretKey: []byte(secret),
 		},
 	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, s, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(i.eventBus, s, v1alpha1.EventBusGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return s, nil
@@ -608,7 +608,7 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 		},
 		Spec: *spec,
 	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, ss, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(i.eventBus, ss, v1alpha1.EventBusGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return ss, nil

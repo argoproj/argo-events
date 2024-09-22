@@ -7,7 +7,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	nats "github.com/nats-io/nats.go"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

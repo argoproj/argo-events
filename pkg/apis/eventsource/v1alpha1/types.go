@@ -21,6 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // EventSource is the definition of a eventsource resource
@@ -143,7 +144,7 @@ func (e EventSourceSpec) GetReplicas() int32 {
 // Template holds the information of an EventSource deployment template
 type Template struct {
 	// Metadata sets the pods's metadata, i.e. annotations and labels
-	Metadata *apicommon.Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	Metadata *v1alpha1.Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// ServiceAccountName is the name of the ServiceAccount to use to run event source pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 	// +optional
@@ -409,7 +410,7 @@ type AMQPEventSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,6,opt,name=jsonBody"`
 	// TLS configuration for the amqp client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
+	TLS *v1alpha1.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`
@@ -528,7 +529,7 @@ type KafkaEventSource struct {
 	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
 	// TLS configuration for the kafka client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	TLS *v1alpha1.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
@@ -550,7 +551,7 @@ type KafkaEventSource struct {
 	Version string `json:"version" protobuf:"bytes,10,opt,name=version"`
 	// SASL configuration for the kafka client
 	// +optional
-	SASL *apicommon.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,11,opt,name=sasl"`
+	SASL *v1alpha1.SASLConfig `json:"sasl,omitempty" protobuf:"bytes,11,opt,name=sasl"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,12,opt,name=filter"`
@@ -595,7 +596,7 @@ type MQTTEventSource struct {
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,5,opt,name=jsonBody"`
 	// TLS configuration for the mqtt client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
+	TLS *v1alpha1.TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,7,rep,name=metadata"`
@@ -1265,7 +1266,7 @@ type AzureServiceBusEventSource struct {
 	SubscriptionName string `json:"subscriptionName" protobuf:"bytes,4,opt,name=subscriptionName"`
 	// TLS configuration for the service bus client
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	TLS *v1alpha1.TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
@@ -1432,7 +1433,7 @@ type RedisStreamEventSource struct {
 	ConsumerGroup string `json:"consumerGroup,omitempty" protobuf:"bytes,6,opt,name=consumerGroup"`
 	// TLS configuration for the redis client.
 	// +optional
-	TLS *apicommon.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
+	TLS *v1alpha1.TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,8,rep,name=metadata"`

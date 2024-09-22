@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/eventsources"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // ValidateEventSource validates if the eventSource is valid
 func ValidateEventSource(eventSource *v1alpha1.EventSource) error {
-	recreateTypes := make(map[apicommon.EventSourceType]bool)
-	for _, esType := range apicommon.RecreateStrategyEventSources {
+	recreateTypes := make(map[dfv1.EventSourceType]bool)
+	for _, esType := range dfv1.RecreateStrategyEventSources {
 		recreateTypes[esType] = true
 	}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/fsnotify/fsnotify"
 	"go.uber.org/zap"
 
@@ -17,11 +16,11 @@ import (
 	kafkasensor "github.com/argoproj/argo-events/eventbus/kafka/sensor"
 	stansource "github.com/argoproj/argo-events/eventbus/stan/eventsource"
 	stansensor "github.com/argoproj/argo-events/eventbus/stan/sensor"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, eventSourceName string, defaultSubject string) (eventbuscommon.EventSourceDriver, error) {
+func GetEventSourceDriver(ctx context.Context, eventBusConfig dfv1.BusConfig, eventSourceName string, defaultSubject string) (eventbuscommon.EventSourceDriver, error) {
 	auth, err := GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
@@ -34,31 +33,31 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 
 	logger.Infof("eventBusConfig: %+v", eventBusConfig)
 
-	var eventBusType apicommon.EventBusType
+	var eventBusType dfv1.EventBusType
 	switch {
 	case eventBusConfig.NATS != nil:
-		eventBusType = apicommon.EventBusNATS
+		eventBusType = dfv1.EventBusNATS
 	case eventBusConfig.JetStream != nil:
-		eventBusType = apicommon.EventBusJetStream
+		eventBusType = dfv1.EventBusJetStream
 	case eventBusConfig.Kafka != nil:
-		eventBusType = apicommon.EventBusKafka
+		eventBusType = dfv1.EventBusKafka
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}
 
 	var dvr eventbuscommon.EventSourceDriver
 	switch eventBusType {
-	case apicommon.EventBusNATS:
+	case dfv1.EventBusNATS:
 		if defaultSubject == "" {
 			return nil, fmt.Errorf("subject must be specified to create NATS Streaming driver")
 		}
 		dvr = stansource.NewSourceSTAN(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, eventSourceName, defaultSubject, auth, logger)
-	case apicommon.EventBusJetStream:
+	case dfv1.EventBusJetStream:
 		dvr, err = jetstreamsource.NewSourceJetstream(eventBusConfig.JetStream.URL, eventSourceName, eventBusConfig.JetStream.StreamConfig, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 		if err != nil {
 			return nil, err
 		}
-	case apicommon.EventBusKafka:
+	case dfv1.EventBusKafka:
 		dvr = kafkasource.NewKafkaSource(eventBusConfig.Kafka, logger)
 	default:
 		return nil, fmt.Errorf("invalid eventbus type")
@@ -66,7 +65,7 @@ func GetEventSourceDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.B
 	return dvr, nil
 }
 
-func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig, sensorSpec *v1alpha1.Sensor, hostname string) (eventbuscommon.SensorDriver, error) {
+func GetSensorDriver(ctx context.Context, eventBusConfig dfv1.BusConfig, sensorSpec *v1alpha1.Sensor, hostname string) (eventbuscommon.SensorDriver, error) {
 	auth, err := GetAuth(ctx, eventBusConfig)
 	if err != nil {
 		return nil, err
@@ -80,27 +79,27 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	}
 	logger := logging.FromContext(ctx)
 
-	var eventBusType apicommon.EventBusType
+	var eventBusType dfv1.EventBusType
 	switch {
 	case eventBusConfig.NATS != nil:
-		eventBusType = apicommon.EventBusNATS
+		eventBusType = dfv1.EventBusNATS
 	case eventBusConfig.JetStream != nil:
-		eventBusType = apicommon.EventBusJetStream
+		eventBusType = dfv1.EventBusJetStream
 	case eventBusConfig.Kafka != nil:
-		eventBusType = apicommon.EventBusKafka
+		eventBusType = dfv1.EventBusKafka
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}
 
 	var dvr eventbuscommon.SensorDriver
 	switch eventBusType {
-	case apicommon.EventBusNATS:
+	case dfv1.EventBusNATS:
 		dvr = stansensor.NewSensorSTAN(eventBusConfig.NATS.URL, *eventBusConfig.NATS.ClusterID, sensorSpec.Name, auth, logger)
 		return dvr, nil
-	case apicommon.EventBusJetStream:
+	case dfv1.EventBusJetStream:
 		dvr, err = jetstreamsensor.NewSensorJetstream(eventBusConfig.JetStream.URL, sensorSpec, eventBusConfig.JetStream.StreamConfig, auth, logger) // don't need to pass in subject because subjects will be derived from dependencies
 		return dvr, err
-	case apicommon.EventBusKafka:
+	case dfv1.EventBusKafka:
 		dvr = kafkasensor.NewKafkaSensor(eventBusConfig.Kafka, sensorSpec, hostname, logger)
 		return dvr, nil
 	default:
@@ -108,16 +107,16 @@ func GetSensorDriver(ctx context.Context, eventBusConfig eventbusv1alpha1.BusCon
 	}
 }
 
-func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*eventbuscommon.Auth, error) {
+func GetAuth(ctx context.Context, eventBusConfig dfv1.BusConfig) (*eventbuscommon.Auth, error) {
 	logger := logging.FromContext(ctx)
 
-	var eventBusAuth *eventbusv1alpha1.AuthStrategy
+	var eventBusAuth *dfv1.AuthStrategy
 	switch {
 	case eventBusConfig.NATS != nil:
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
 		if eventBusConfig.JetStream.AccessSecret != nil {
-			eventBusAuth = &eventbusv1alpha1.AuthStrategyBasic
+			eventBusAuth = &dfv1.AuthStrategyBasic
 		} else {
 			eventBusAuth = nil
 		}
@@ -128,9 +127,9 @@ func GetAuth(ctx context.Context, eventBusConfig eventbusv1alpha1.BusConfig) (*e
 	}
 	var auth *eventbuscommon.Auth
 	cred := &eventbuscommon.AuthCredential{}
-	if eventBusAuth == nil || *eventBusAuth == eventbusv1alpha1.AuthStrategyNone {
+	if eventBusAuth == nil || *eventBusAuth == dfv1.AuthStrategyNone {
 		auth = &eventbuscommon.Auth{
-			Strategy: eventbusv1alpha1.AuthStrategyNone,
+			Strategy: dfv1.AuthStrategyNone,
 		}
 	} else {
 		v := common.ViperWithLogging()

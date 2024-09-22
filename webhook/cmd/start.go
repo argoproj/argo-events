@@ -13,10 +13,10 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/logging"
-	eventbusv1alphal1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcev1alphal1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorv1alphal1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/webhook"
@@ -71,7 +71,7 @@ func Start() {
 		SensorClient:      sensorClient,
 		Options:           options,
 		Handlers: map[schema.GroupVersionKind]runtime.Object{
-			eventbusv1alphal1.SchemaGroupVersionKind:    &eventbusv1alphal1.EventBus{},
+			dfv1.EventBusGroupVersionKind:               &dfv1.EventBus{},
 			eventsourcev1alphal1.SchemaGroupVersionKind: &eventsourcev1alphal1.EventSource{},
 			sensorv1alphal1.SchemaGroupVersionKind:      &sensorv1alphal1.Sensor{},
 		},

@@ -8,7 +8,7 @@ import (
 
 	eventsourcecontroller "github.com/argoproj/argo-events/controllers/eventsource"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )

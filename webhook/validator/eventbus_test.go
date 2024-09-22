@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestValidateEventBusCreate(t *testing.T) {
@@ -31,7 +31,7 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		newEb.Generation++
 		newEb.Spec.NATS.Native = nil
 		cID := "test-id"
-		newEb.Spec.NATS.Exotic = &eventbusv1alpha1.NATSConfig{
+		newEb.Spec.NATS.Exotic = &dfv1.NATSConfig{
 			ClusterID: &cID,
 			URL:       "nats://abc:1234",
 		}
@@ -55,7 +55,7 @@ func TestValidateEventBusUpdate(t *testing.T) {
 		newEb := eb.DeepCopy()
 		newEb.Generation++
 		newEb.Spec.NATS = nil
-		newEb.Spec.JetStreamExotic = &eventbusv1alpha1.JetStreamConfig{
+		newEb.Spec.JetStreamExotic = &dfv1.JetStreamConfig{
 			URL: "nats://nats:4222",
 		}
 		v := NewEventBusValidator(fakeK8sClient, fakeEventBusClient, fakeEventSourceClient, fakeSensorClient, eb, newEb)

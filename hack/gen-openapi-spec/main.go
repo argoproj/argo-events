@@ -10,7 +10,7 @@ import (
 	"k8s.io/kube-openapi/pkg/validation/spec"
 
 	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
-	ebv1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	esv1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -40,7 +40,7 @@ func main() {
 		defs[swaggify(defName)] = val.Schema
 		dependencies = append(dependencies, val.Dependencies...)
 	}
-	for defName, val := range ebv1.GetOpenAPIDefinitions(referenceCallback) {
+	for defName, val := range dfv1.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
 		dependencies = append(dependencies, val.Dependencies...)
 	}

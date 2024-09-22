@@ -11,17 +11,17 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/yaml"
 
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
+	eventspkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
 	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 )
 
 type Given struct {
 	t                 *testing.T
-	eventBusClient    eventbuspkg.EventBusInterface
+	eventBusClient    eventspkg.EventBusInterface
 	eventSourceClient eventsourcepkg.EventSourceInterface
 	sensorClient      sensorpkg.SensorInterface
 	eventBus          *eventbusv1alpha1.EventBus

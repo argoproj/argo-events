@@ -11,13 +11,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common/logging"
-	eventbuspkg "github.com/argoproj/argo-events/pkg/apis/eventbus"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/apis/eventsource"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorpkg "github.com/argoproj/argo-events/pkg/apis/sensor"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
@@ -34,18 +33,18 @@ func GetValidator(ctx context.Context, client kubernetes.Interface, ebClient eve
 	kind metav1.GroupVersionKind, oldBytes []byte, newBytes []byte) (Validator, error) {
 	log := logging.FromContext(ctx)
 	switch kind.Kind {
-	case eventbuspkg.Kind:
-		var new *eventbusv1alpha1.EventBus
+	case dfv1.EventBusGroupVersionKind.Kind:
+		var new *dfv1.EventBus
 		if len(newBytes) > 0 {
-			new = &eventbusv1alpha1.EventBus{}
+			new = &dfv1.EventBus{}
 			if err := json.Unmarshal(newBytes, new); err != nil {
 				log.Errorf("Could not unmarshal new raw object: %v", err)
 				return nil, err
 			}
 		}
-		var old *eventbusv1alpha1.EventBus
+		var old *dfv1.EventBus
 		if len(oldBytes) > 0 {
-			old = &eventbusv1alpha1.EventBus{}
+			old = &dfv1.EventBus{}
 			if err := json.Unmarshal(oldBytes, old); err != nil {
 				log.Errorf("Could not unmarshal old raw object: %v", err)
 				return nil, err

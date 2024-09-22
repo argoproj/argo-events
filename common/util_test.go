@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -174,14 +174,14 @@ func TestVolumesFromSecretsOrConfigMaps(t *testing.T) {
 	})
 }
 
-func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *apicommon.TLSConfig {
+func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *dfv1.TLSConfig {
 	t.Helper()
 	if insecureSkipVerify == true {
-		return &apicommon.TLSConfig{
+		return &dfv1.TLSConfig{
 			InsecureSkipVerify: true,
 		}
 	} else {
-		return &apicommon.TLSConfig{
+		return &dfv1.TLSConfig{
 			CACertSecret: &corev1.SecretKeySelector{
 				Key: "fake-key1",
 				LocalObjectReference: corev1.LocalObjectReference{
@@ -206,7 +206,7 @@ func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *apicommon.TLSConfig {
 
 func TestGetTLSConfig(t *testing.T) {
 	t.Run("test empty", func(t *testing.T) {
-		c := &apicommon.TLSConfig{}
+		c := &dfv1.TLSConfig{}
 		_, err := GetTLSConfig(c)
 		assert.NotNil(t, err)
 		assert.True(t, strings.Contains(err.Error(), "neither of caCertSecret, clientCertSecret and clientKeySecret is configured"))

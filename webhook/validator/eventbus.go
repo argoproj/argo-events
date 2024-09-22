@@ -7,8 +7,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	eventbuscontroller "github.com/argoproj/argo-events/controllers/eventbus"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )

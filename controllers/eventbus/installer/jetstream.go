@@ -27,7 +27,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/common/tls"
 	"github.com/argoproj/argo-events/controllers"
-	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 const (
@@ -157,7 +157,7 @@ func (r *jetStreamInstaller) createService(ctx context.Context) error {
 				common.AnnotationResourceSpecHash: hash,
 			},
 			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
 			},
 		},
 		Spec: spec,
@@ -201,7 +201,7 @@ func (r *jetStreamInstaller) createStatefulSet(ctx context.Context) error {
 				common.AnnotationResourceSpecHash: hash,
 			},
 			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
 			},
 		},
 		Spec: spec,
@@ -573,7 +573,7 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 				Name:      generateJetStreamServerSecretName(r.eventBus),
 				Labels:    r.labels,
 				OwnerReferences: []metav1.OwnerReference{
-					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
 				},
 			},
 			Type: corev1.SecretTypeOpaque,
@@ -595,7 +595,7 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 				Name:      generateJetStreamClientAuthSecretName(r.eventBus),
 				Labels:    r.labels,
 				OwnerReferences: []metav1.OwnerReference{
-					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+					*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
 				},
 			},
 			Type: corev1.SecretTypeOpaque,
@@ -687,7 +687,7 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 				common.AnnotationResourceSpecHash: hash,
 			},
 			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.SchemaGroupVersionKind),
+				*metav1.NewControllerRef(r.eventBus.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind),
 			},
 		},
 		Data: data,

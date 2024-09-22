@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
@@ -45,7 +45,7 @@ func TestValidateSensor(t *testing.T) {
 				assert.NoError(t, err)
 
 				var sensor *v1alpha1.Sensor
-				eventBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{JetStream: &eventbusv1alpha1.JetStreamBus{}}}
+				eventBus := &dfv1.EventBus{Spec: dfv1.EventBusSpec{JetStream: &dfv1.JetStreamBus{}}}
 				err = yaml.Unmarshal(content, &sensor)
 				assert.NoError(t, err)
 
@@ -56,8 +56,8 @@ func TestValidateSensor(t *testing.T) {
 }
 
 func TestValidDependencies(t *testing.T) {
-	jetstreamBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{JetStream: &eventbusv1alpha1.JetStreamBus{}}}
-	stanBus := &eventbusv1alpha1.EventBus{Spec: eventbusv1alpha1.EventBusSpec{NATS: &eventbusv1alpha1.NATSBus{}}}
+	jetstreamBus := &dfv1.EventBus{Spec: dfv1.EventBusSpec{JetStream: &dfv1.JetStreamBus{}}}
+	stanBus := &dfv1.EventBus{Spec: dfv1.EventBusSpec{NATS: &dfv1.NATSBus{}}}
 
 	t.Run("test duplicate deps fail for STAN", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()

@@ -25,14 +25,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/yaml"
 
-	"github.com/argoproj/argo-events/pkg/apis/eventbus"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	eventbusversiond "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
-	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
+	eventsversiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	eventspkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 	eventsourceversiond "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
 	sensorversiond "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
@@ -112,7 +111,7 @@ type options struct {
 	noCleanUp   bool
 
 	kubeClient        kubernetes.Interface
-	eventBusClient    eventbuspkg.EventBusInterface
+	eventBusClient    eventspkg.EventBusInterface
 	eventSourceClient eventsourcepkg.EventSourceInterface
 	sensorClient      sensorpkg.SensorInterface
 	restConfig        *rest.Config
@@ -131,7 +130,7 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 	if err != nil {
 		return nil, err
 	}
-	eventBusClient := eventbusversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventBus(namespace)
+	eventBusClient := eventsversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventBus(namespace)
 	eventSourceClient := eventsourceversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().EventSources(namespace)
 	sensorClient := sensorversiond.NewForConfigOrDie(config).ArgoprojV1alpha1().Sensors(namespace)
 	return &options{
@@ -151,9 +150,9 @@ func NewOptions(testingEventSource TestingEventSource, testingTrigger TestingTri
 	}, nil
 }
 
-func (o *options) createEventBus(ctx context.Context) (*eventbusv1alpha1.EventBus, error) {
+func (o *options) createEventBus(ctx context.Context) (*dfv1.EventBus, error) {
 	fmt.Printf("------- Creating %v EventBus -------\n", o.eventBusType)
-	eb := &eventbusv1alpha1.EventBus{}
+	eb := &dfv1.EventBus{}
 	if err := readResource(fmt.Sprintf("@testdata/eventbus/%v.yaml", o.eventBusType), eb); err != nil {
 		return nil, fmt.Errorf("failed to read %v event bus yaml file: %w", o.eventBusType, err)
 	}
@@ -579,7 +578,7 @@ func (o *options) cleanUpResources(ctx context.Context) error {
 	resources := []schema.GroupVersionResource{
 		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
 		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
-		{Group: eventbus.Group, Version: "v1alpha1", Resource: eventbus.Plural},
+		{Group: dfv1.EventBusGroupVersionKind.Group, Version: "v1alpha1", Resource: "eventbus"},
 	}
 	for _, r := range resources {
 		if err := o.dynamicFor(r).DeleteCollection(ctx, metav1.DeleteOptions{PropagationPolicy: &background}, hasTestLabel); err != nil {

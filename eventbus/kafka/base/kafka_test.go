@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/IBM/sarama"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )

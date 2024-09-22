@@ -21,12 +21,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func TestRetryableKubeAPIError(t *testing.T) {
@@ -75,10 +75,10 @@ func TestConnectDurationString(t *testing.T) {
 }
 
 func TestConnectRetry(t *testing.T) {
-	factor := apicommon.NewAmount("1.0")
-	jitter := apicommon.NewAmount("1")
-	duration := apicommon.FromInt64(1000000000)
-	backoff := apicommon.Backoff{
+	factor := dfv1.NewAmount("1.0")
+	jitter := dfv1.NewAmount("1")
+	duration := dfv1.FromInt64(1000000000)
+	backoff := dfv1.Backoff{
 		Duration: &duration,
 		Factor:   &factor,
 		Jitter:   &jitter,
@@ -102,10 +102,10 @@ func TestConnectRetry(t *testing.T) {
 }
 
 func TestRetryFailure(t *testing.T) {
-	factor := apicommon.NewAmount("1.0")
-	jitter := apicommon.NewAmount("1")
-	duration := apicommon.FromString("1s")
-	backoff := apicommon.Backoff{
+	factor := dfv1.NewAmount("1.0")
+	jitter := dfv1.NewAmount("1")
+	duration := dfv1.FromString("1s")
+	backoff := dfv1.Backoff{
 		Duration: &duration,
 		Factor:   &factor,
 		Jitter:   &jitter,
@@ -120,10 +120,10 @@ func TestRetryFailure(t *testing.T) {
 }
 
 func TestConvert2WaitBackoff(t *testing.T) {
-	factor := apicommon.NewAmount("1.0")
-	jitter := apicommon.NewAmount("1")
-	duration := apicommon.FromString("1s")
-	backoff := apicommon.Backoff{
+	factor := dfv1.NewAmount("1.0")
+	jitter := dfv1.NewAmount("1")
+	duration := dfv1.FromString("1s")
+	backoff := dfv1.Backoff{
 		Duration: &duration,
 		Factor:   &factor,
 		Jitter:   &jitter,

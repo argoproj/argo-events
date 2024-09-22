@@ -3,7 +3,7 @@ package eventbus
 import (
 	"fmt"
 
-	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // ValidateEventBus accepts an EventBus and performs validation against it

@@ -28,7 +28,7 @@ import (
 
 	"github.com/argoproj/argo-events/common/logging"
 	commontls "github.com/argoproj/argo-events/common/tls"
-	eventbusclient "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
+	eventbusclient "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	eventsourceclient "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	sensorclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/webhook/validator"

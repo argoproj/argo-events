@@ -12,8 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/argoproj/argo-events/common/logging"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
@@ -81,10 +80,10 @@ func Test_BuildDeployment(t *testing.T) {
 
 		// add secrets to kafka eventbus
 		testBus := fakeEventBusKafka.DeepCopy()
-		testBus.Spec.Kafka.TLS = &apicommon.TLSConfig{
+		testBus.Spec.Kafka.TLS = &dfv1.TLSConfig{
 			CACertSecret: &corev1.SecretKeySelector{Key: "cert", LocalObjectReference: corev1.LocalObjectReference{Name: "tls-secret"}},
 		}
-		testBus.Spec.Kafka.SASL = &apicommon.SASLConfig{
+		testBus.Spec.Kafka.SASL = &dfv1.SASLConfig{
 			Mechanism:      "SCRAM-SHA-512",
 			UserSecret:     &corev1.SecretKeySelector{Key: "username", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
 			PasswordSecret: &corev1.SecretKeySelector{Key: "password", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
@@ -222,7 +221,7 @@ func TestResourceReconcile(t *testing.T) {
 		assert.False(t, testEventSource.Status.IsReady())
 	})
 
-	for _, eb := range []*eventbusv1alpha1.EventBus{fakeEventBus, fakeEventBusJetstream, fakeEventBusKafka} {
+	for _, eb := range []*dfv1.EventBus{fakeEventBus, fakeEventBusJetstream, fakeEventBusKafka} {
 		testBus := eb.DeepCopy()
 
 		t.Run("test resource reconcile with eventbus", func(t *testing.T) {

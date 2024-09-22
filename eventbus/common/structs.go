@@ -1,7 +1,7 @@
 package common
 
 import (
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // Auth contains the auth infor for event bus

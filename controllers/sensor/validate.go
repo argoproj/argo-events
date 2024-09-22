@@ -24,7 +24,7 @@ import (
 	cronlib "github.com/robfig/cron/v3"
 
 	"github.com/argoproj/argo-events/common"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -32,9 +32,8 @@ import (
 // we return an error so that it can be logged as a message on the sensor status
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
 // Exporting this function so that external APIs can use this to validate sensor resource.
-func ValidateSensor(s *v1alpha1.Sensor, b *eventbusv1alpha1.EventBus) error {
+func ValidateSensor(s *v1alpha1.Sensor, b *dfv1.EventBus) error {
 	if s == nil {
-		s.Status.MarkDependenciesNotProvided("InvalidSensor", "nil sensor")
 		return fmt.Errorf("nil sensor")
 	}
 	if b == nil {
@@ -483,7 +482,7 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 }
 
 // perform a check to see that each event dependency is in correct format and has valid filters set if any
-func validateDependencies(eventDependencies []v1alpha1.EventDependency, b *eventbusv1alpha1.EventBus) error {
+func validateDependencies(eventDependencies []v1alpha1.EventDependency, b *dfv1.EventBus) error {
 	if len(eventDependencies) < 1 {
 		return fmt.Errorf("no event dependencies found")
 	}

@@ -4,7 +4,7 @@ import (
 	"github.com/IBM/sarama"
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	"github.com/argoproj/argo-events/eventbus/kafka/base"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"go.uber.org/zap"
 )
 

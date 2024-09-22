@@ -18,7 +18,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/argoproj/argo-events/common/logging"
-	eventbusv1alphal1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	dfv1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcev1alphal1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorv1alphal1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -70,7 +70,7 @@ func fakeAdmissionController(t *testing.T, options Options) *AdmissionController
 		Client:  fakeClient.NewSimpleClientset(),
 		Options: options,
 		Handlers: map[schema.GroupVersionKind]runtime.Object{
-			eventbusv1alphal1.SchemaGroupVersionKind:    &eventbusv1alphal1.EventBus{},
+			dfv1.EventBusGroupVersionKind:               &dfv1.EventBus{},
 			eventsourcev1alphal1.SchemaGroupVersionKind: &eventsourcev1alphal1.EventSource{},
 			sensorv1alphal1.SchemaGroupVersionKind:      &sensorv1alphal1.Sensor{},
 		},

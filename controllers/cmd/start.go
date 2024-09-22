@@ -23,7 +23,7 @@ import (
 	"github.com/argoproj/argo-events/controllers/eventbus"
 	"github.com/argoproj/argo-events/controllers/eventsource"
 	"github.com/argoproj/argo-events/controllers/sensor"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"

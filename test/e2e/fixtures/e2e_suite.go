@@ -14,11 +14,10 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventbus"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
-	eventbusversiond "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
-	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
+	eventbusversiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	eventspkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 	eventsourceversiond "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
 	sensorversiond "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
@@ -65,7 +64,7 @@ spec:
 type E2ESuite struct {
 	suite.Suite
 	restConfig        *rest.Config
-	eventBusClient    eventbuspkg.EventBusInterface
+	eventBusClient    eventspkg.EventBusInterface
 	eventSourceClient eventsourcepkg.EventSourceInterface
 	sensorClient      sensorpkg.SensorInterface
 	kubeClient        kubernetes.Interface
@@ -94,7 +93,7 @@ func (s *E2ESuite) SetupSuite() {
 	s.DeleteResources()
 	// Clean up test event bus if any
 	resources := []schema.GroupVersionResource{
-		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventbus.Plural},
+		{Group: eventsource.Group, Version: "v1alpha1", Resource: "eventbus"},
 	}
 	s.deleteResources(resources)
 

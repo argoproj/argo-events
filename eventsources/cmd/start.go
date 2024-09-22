@@ -14,7 +14,7 @@ import (
 	"github.com/argoproj/argo-events/common/logging"
 	"github.com/argoproj/argo-events/eventsources"
 	"github.com/argoproj/argo-events/metrics"
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
