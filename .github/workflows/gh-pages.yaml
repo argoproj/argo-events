@@ -23,13 +23,12 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.22'
       - name: build
-        run: |
-          pip install mkdocs==1.3.0 mkdocs_material==8.2.9
-          mkdocs build
+        run: make docs
       - name: deploy
         uses: peaceiris/actions-gh-pages@v4
+        if: github.repository == 'argoproj/argo-events' && github.ref == 'refs/heads/master'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
