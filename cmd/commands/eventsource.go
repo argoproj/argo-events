@@ -3,7 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	eventsourcecmd "github.com/argoproj/argo-events/eventsources/cmd"
+	eventsourcecmd "github.com/argoproj/argo-events/pkg/eventsources/cmd"
 )
 
 func NewEventSourceCommand() *cobra.Command {

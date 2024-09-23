@@ -11,22 +11,18 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/yaml"
 
-	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	eventsourcev1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
-	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
-	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventspkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 )
 
 type Given struct {
 	t                 *testing.T
-	eventBusClient    eventbuspkg.EventBusInterface
-	eventSourceClient eventsourcepkg.EventSourceInterface
-	sensorClient      sensorpkg.SensorInterface
-	eventBus          *eventbusv1alpha1.EventBus
-	eventSource       *eventsourcev1alpha1.EventSource
-	sensor            *sensorv1alpha1.Sensor
+	eventBusClient    eventspkg.EventBusInterface
+	eventSourceClient eventspkg.EventSourceInterface
+	sensorClient      eventspkg.SensorInterface
+	eventBus          *v1alpha1.EventBus
+	eventSource       *v1alpha1.EventSource
+	sensor            *v1alpha1.Sensor
 	restConfig        *rest.Config
 	kubeClient        kubernetes.Interface
 }
@@ -37,7 +33,7 @@ type Given struct {
 // 2. Raw YAML.
 func (g *Given) EventBus(text string) *Given {
 	g.t.Helper()
-	g.eventBus = &eventbusv1alpha1.EventBus{}
+	g.eventBus = &v1alpha1.EventBus{}
 	g.readResource(text, g.eventBus)
 	l := g.eventBus.GetLabels()
 	if l == nil {
@@ -55,7 +51,7 @@ func (g *Given) EventBus(text string) *Given {
 // 2. Raw YAML.
 func (g *Given) EventSource(text string) *Given {
 	g.t.Helper()
-	g.eventSource = &eventsourcev1alpha1.EventSource{}
+	g.eventSource = &v1alpha1.EventSource{}
 	g.readResource(text, g.eventSource)
 	l := g.eventSource.GetLabels()
 	if l == nil {
@@ -73,7 +69,7 @@ func (g *Given) EventSource(text string) *Given {
 // 2. Raw YAML.
 func (g *Given) Sensor(text string) *Given {
 	g.t.Helper()
-	g.sensor = &sensorv1alpha1.Sensor{}
+	g.sensor = &v1alpha1.Sensor{}
 	g.readResource(text, g.sensor)
 	l := g.sensor.GetLabels()
 	if l == nil {

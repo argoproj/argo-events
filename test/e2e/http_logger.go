@@ -3,7 +3,7 @@ package e2e
 import (
 	"go.uber.org/zap"
 
-	"github.com/argoproj/argo-events/common/logging"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
 type httpLogger struct {

@@ -3,7 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	webhookcmd "github.com/argoproj/argo-events/webhook/cmd"
+	webhookcmd "github.com/argoproj/argo-events/pkg/webhook/cmd"
 )
 
 func NewWebhookCommand() *cobra.Command {
