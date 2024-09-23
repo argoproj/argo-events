@@ -13,16 +13,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventbus"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
-	eventbusversiond "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned"
-	eventbuspkg "github.com/argoproj/argo-events/pkg/client/eventbus/clientset/versioned/typed/eventbus/v1alpha1"
-	eventsourceversiond "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
-	eventsourcepkg "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned/typed/eventsource/v1alpha1"
-	sensorversiond "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	sensorpkg "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	versiond "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	eventspkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 const (
@@ -65,16 +59,16 @@ spec:
 type E2ESuite struct {
 	suite.Suite
 	restConfig        *rest.Config
-	eventBusClient    eventbuspkg.EventBusInterface
-	eventSourceClient eventsourcepkg.EventSourceInterface
-	sensorClient      sensorpkg.SensorInterface
+	eventBusClient    eventspkg.EventBusInterface
+	eventSourceClient eventspkg.EventSourceInterface
+	sensorClient      eventspkg.SensorInterface
 	kubeClient        kubernetes.Interface
 }
 
 func (s *E2ESuite) SetupSuite() {
 	var err error
 
-	kubeConfig, found := os.LookupEnv(common.EnvVarKubeConfig)
+	kubeConfig, found := os.LookupEnv(v1alpha1.EnvVarKubeConfig)
 	if !found {
 		home, _ := os.UserHomeDir()
 		kubeConfig = home + "/.kube/config"
@@ -82,19 +76,19 @@ func (s *E2ESuite) SetupSuite() {
 			kubeConfig = ""
 		}
 	}
-	s.restConfig, err = common.GetClientConfig(kubeConfig)
+	s.restConfig, err = sharedutil.GetClientConfig(kubeConfig)
 	s.CheckError(err)
 	s.kubeClient, err = kubernetes.NewForConfig(s.restConfig)
 	s.CheckError(err)
-	s.eventBusClient = eventbusversiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().EventBus(Namespace)
-	s.eventSourceClient = eventsourceversiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().EventSources(Namespace)
-	s.sensorClient = sensorversiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().Sensors(Namespace)
+	s.eventBusClient = versiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().EventBus(Namespace)
+	s.eventSourceClient = versiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().EventSources(Namespace)
+	s.sensorClient = versiond.NewForConfigOrDie(s.restConfig).ArgoprojV1alpha1().Sensors(Namespace)
 
 	// Clean up resources if any
 	s.DeleteResources()
 	// Clean up test event bus if any
 	resources := []schema.GroupVersionResource{
-		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventbus.Plural},
+		{Group: v1alpha1.SchemeGroupVersion.Group, Version: v1alpha1.SchemeGroupVersion.Version, Resource: "eventbus"},
 	}
 	s.deleteResources(resources)
 
@@ -144,8 +138,8 @@ func (s *E2ESuite) deleteResources(resources []schema.GroupVersionResource) {
 
 func (s *E2ESuite) DeleteResources() {
 	resources := []schema.GroupVersionResource{
-		{Group: eventsource.Group, Version: "v1alpha1", Resource: eventsource.Plural},
-		{Group: sensor.Group, Version: "v1alpha1", Resource: sensor.Plural},
+		{Group: v1alpha1.SchemeGroupVersion.Group, Version: v1alpha1.SchemeGroupVersion.Version, Resource: "eventsources"},
+		{Group: v1alpha1.SchemeGroupVersion.Group, Version: v1alpha1.SchemeGroupVersion.Version, Resource: "sensors"},
 		{Group: "", Version: "v1", Resource: "pods"},
 	}
 	s.deleteResources(resources)

@@ -3,7 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	sensorcmd "github.com/argoproj/argo-events/sensors/cmd"
+	sensorcmd "github.com/argoproj/argo-events/pkg/sensors/cmd"
 )
 
 func NewSensorCommand() *cobra.Command {
