@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
@@ -41,6 +42,20 @@ type ArgoEventsControllerOpts struct {
 	HealthPort       int32
 }
 
+func lookupEnvDurationOr(key string, o time.Duration) *time.Duration {
+	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
+	v, found := os.LookupEnv(key)
+	if found && v != "" {
+		d, err := time.ParseDuration(v)
+		if err != nil {
+			logger.With(key, v).Fatalw("parsing %s duration", key, zap.Error(err))
+		} else {
+			return &d
+		}
+	}
+	return &o
+}
+
 func Start(eventsOpts ArgoEventsControllerOpts) {
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
 	config, err := controllers.LoadConfig(func(err error) {
@@ -74,6 +89,9 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	if eventsOpts.LeaderElection {
 		opts.LeaderElection = true
 		opts.LeaderElectionID = "argo-events-controller"
+		opts.LeaseDuration = lookupEnvDurationOr("LEADER_ELECTION_LEASE_DURATION", 15*time.Second)
+		opts.RenewDeadline = lookupEnvDurationOr("LEADER_ELECTION_RENEW_DEADLINE", 10*time.Second)
+		opts.RetryPeriod = lookupEnvDurationOr("LEADER_ELECTION_RETRY_PERIOD", 5*time.Second)
 	}
 	restConfig := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restConfig, opts)
