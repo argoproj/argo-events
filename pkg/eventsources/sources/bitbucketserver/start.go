@@ -140,7 +140,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		bitbucketServerEventSource.OneEventPerChange,
 	)
 	if err != nil {
-		logger.Errorw("failed to parse/validate request", zap.Error(err))
+		logger.Errorw("failed to handle event", zap.Error(err))
 		sharedutil.SendErrorResponse(writer, err.Error())
 		route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 		return
@@ -188,12 +188,12 @@ func (router *Router) PostInactivate() error {
 func (router *Router) listWebhooks(repo v1alpha1.BitbucketServerRepository) ([]bitbucketv1.Webhook, error) {
 	apiResponse, err := router.client.DefaultApi.FindWebhooks(repo.ProjectKey, repo.RepositorySlug, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list existing hooks to check for duplicates for repository %s/%s, %w", repo.ProjectKey, repo.RepositorySlug, err)
+		return nil, fmt.Errorf("failed to list existing hooks to check for duplicates for repository %s/%s: %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
 
 	hooks, err := bitbucketv1.GetWebhooksResponse(apiResponse)
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert the list of webhooks for repository %s/%s, %w", repo.ProjectKey, repo.RepositorySlug, err)
+		return nil, fmt.Errorf("failed to convert the list of webhooks for repository %s/%s: %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
 
 	return hooks, nil
@@ -235,7 +235,7 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 		hookMap := make(map[string]interface{})
 		err = sharedutil.StructToMap(hook, hookMap)
 		if err != nil {
-			return nil, fmt.Errorf("failed to convert webhook to map, %w", err)
+			return nil, fmt.Errorf("failed to convert webhook to map: %w", err)
 		}
 
 		delete(hookMap, "configuration")
@@ -245,7 +245,7 @@ func (router *Router) createRequestBodyFromWebhook(hook bitbucketv1.Webhook) ([]
 
 	requestBody, err := json.Marshal(finalHook)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal new webhook to JSON, %w", err)
+		return nil, fmt.Errorf("failed to marshal new webhook to JSON: %w", err)
 	}
 
 	return requestBody, nil
@@ -375,7 +375,7 @@ func (router *Router) applyBitbucketServerWebhook(repo v1alpha1.BitbucketServerR
 
 	requestBody, err := router.createRequestBodyFromWebhook(newHook)
 	if err != nil {
-		return fmt.Errorf("failed to create request body from webhook, %w", err)
+		return fmt.Errorf("failed to create request body from webhook: %w", err)
 	}
 
 	// Update the webhook when it does exist and the events/configuration have changed.
@@ -594,7 +594,7 @@ func refsChangedHasOpenPullRequest(customBitbucketServerClient *customBitbucketS
 func validateBitbucketServerRequest(hookSecret string, request *http.Request) ([]byte, error) {
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse request body, %w", err)
+		return nil, fmt.Errorf("failed to parse request body: %w", err)
 	}
 
 	if len(hookSecret) != 0 {
