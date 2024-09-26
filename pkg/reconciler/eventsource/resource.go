@@ -397,7 +397,6 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 			Selector:  args.Labels,
 		},
 	}
-<<<<<<< HEAD:controllers/eventsource/resource.go
 
 	labels := mergeLabels(args.EventSource.Labels, args.Labels)
 	annotations := make(map[string]string)
@@ -415,9 +414,6 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	svc.ObjectMeta.SetAnnotations(annotations)
 
 	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
-=======
-	if err := controllerscommon.SetObjectMeta(eventSource, svc, aev1.EventSourceGroupVersionKind); err != nil {
->>>>>>> master:pkg/reconciler/eventsource/resource.go
 		return nil, err
 	}
 	return svc, nil

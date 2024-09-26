@@ -123,10 +123,10 @@ func (e EventSourceSpec) GetReplicas() int32 {
 }
 
 // Service holds the service information eventsource exposes
-type Service struct {
+type ƒ struct {
 	// Metadata sets the pods's metadata, i.e. annotations and labels
 	// default={annotations: {}, labels: {}}
-	Metadata *apicommon.Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	Metadata *Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// The list of ports that are exposed by this ClusterIP service.
 	// +patchMergeKey=port
 	// +patchStrategy=merge
