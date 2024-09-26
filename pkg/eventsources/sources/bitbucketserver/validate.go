@@ -33,9 +33,6 @@ func validate(eventSource *v1alpha1.BitbucketServerEventSource) error {
 	if eventSource == nil {
 		return v1alpha1.ErrNilEventSource
 	}
-	if eventSource.GetBitbucketServerRepositories() == nil && len(eventSource.Projects) == 0 {
-		return fmt.Errorf("at least one project or repository configuration is required")
-	}
 	if eventSource.ShouldCreateWebhooks() && len(eventSource.Events) == 0 {
 		return fmt.Errorf("events must be defined to create a bitbucket server webhook")
 	}
