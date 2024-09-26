@@ -979,7 +979,7 @@ type BitbucketAuth struct {
 	OAuthToken *corev1.SecretKeySelector `json:"oauthToken,omitempty" protobuf:"bytes,2,opt,name=oauthToken"`
 }
 
-// BasicAuth holds the information required to authenticate user via basic auth mechanism
+// BitbucketBasicAuth holds the information required to authenticate user via basic auth mechanism
 type BitbucketBasicAuth struct {
 	// Username refers to the K8s secret that holds the username.
 	Username *corev1.SecretKeySelector `json:"username" protobuf:"bytes,1,name=username"`
@@ -1013,27 +1013,35 @@ type BitbucketServerEventSource struct {
 	// This helps in optimizing the event handling process by avoiding unnecessary triggers for branch reference changes that are already part of a pull request under review.
 	// +optional
 	SkipBranchRefsChangedOnOpenPR bool `json:"skipBranchRefsChangedOnOpenPR,omitempty" protobuf:"varint,7,opt,name=skipBranchRefsChangedOnOpenPR"`
+	// OneEventPerChange controls whether to process each change in a repo:refs_changed webhook event as a separate event. This setting is useful when multiple tags are
+	// pushed simultaneously for the same commit, and each tag needs to independently trigger an action, such as a distinct workflow in Argo Workflows. When enabled, the
+	// BitbucketServerEventSource publishes an individual BitbucketServerEventData for each change, ensuring independent processing of each tag or reference update in a
+	// single webhook event.
+	// +optional
+	OneEventPerChange bool `json:"oneEventPerChange,omitempty" protobuf:"varint,8,opt,name=oneEventPerChange"`
 	// AccessToken is reference to K8s secret which holds the bitbucket api access information.
-	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,8,opt,name=accessToken"`
+	// +optional
+	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,9,opt,name=accessToken"`
 	// WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).
-	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,9,opt,name=webhookSecret"`
+	// +optional
+	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,10,opt,name=webhookSecret"`
 	// BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.
-	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,10,opt,name=bitbucketserverBaseURL"`
+	BitbucketServerBaseURL string `json:"bitbucketserverBaseURL" protobuf:"bytes,11,opt,name=bitbucketserverBaseURL"`
 	// DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
 	// +optional
-	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,11,opt,name=deleteHookOnFinish"`
+	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"varint,12,opt,name=deleteHookOnFinish"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
-	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,12,rep,name=metadata"`
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,13,rep,name=metadata"`
 	// Filter
 	// +optional
-	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,13,opt,name=filter"`
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,14,opt,name=filter"`
 	// TLS configuration for the bitbucketserver client.
 	// +optional
-	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,14,opt,name=tls"`
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,15,opt,name=tls"`
 	// CheckInterval is a duration in which to wait before checking that the webhooks exist, e.g. 1s, 30m, 2h... (defaults to 1m)
 	// +optional
-	CheckInterval string `json:"checkInterval" protobuf:"bytes,15,opt,name=checkInterval"`
+	CheckInterval string `json:"checkInterval" protobuf:"bytes,16,opt,name=checkInterval"`
 }
 
 type BitbucketServerRepository struct {
@@ -1044,7 +1052,10 @@ type BitbucketServerRepository struct {
 }
 
 func (b BitbucketServerEventSource) ShouldCreateWebhooks() bool {
-	return b.AccessToken != nil && b.Webhook != nil && b.Webhook.URL != ""
+	return b.AccessToken != nil &&
+		b.Webhook != nil &&
+		b.Webhook.URL != "" &&
+		(len(b.GetBitbucketServerRepositories()) > 0 || len(b.Projects) > 0)
 }
 
 func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []BitbucketServerRepository {

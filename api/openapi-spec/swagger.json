@@ -558,7 +558,7 @@
       }
     },
     "io.argoproj.events.v1alpha1.BitbucketBasicAuth": {
-      "description": "BasicAuth holds the information required to authenticate user via basic auth mechanism",
+      "description": "BitbucketBasicAuth holds the information required to authenticate user via basic auth mechanism",
       "type": "object",
       "required": [
         "username",
@@ -692,6 +692,10 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "oneEventPerChange": {
+          "description": "OneEventPerChange controls whether to process each change in a repo:refs_changed webhook event as a separate event. This setting is useful when multiple tags are pushed simultaneously for the same commit, and each tag needs to independently trigger an action, such as a distinct workflow in Argo Workflows. When enabled, the BitbucketServerEventSource publishes an individual BitbucketServerEventData for each change, ensuring independent processing of each tag or reference update in a single webhook event.",
+          "type": "boolean"
         },
         "projectKey": {
           "description": "DeprecatedProjectKey is the key of project for which integration needs to set up. Deprecated: use Repositories instead. Will be unsupported in v1.8.",

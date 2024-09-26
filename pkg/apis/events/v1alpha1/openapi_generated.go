@@ -1155,7 +1155,7 @@ func schema_pkg_apis_events_v1alpha1_BitbucketBasicAuth(ref common.ReferenceCall
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "BasicAuth holds the information required to authenticate user via basic auth mechanism",
+				Description: "BitbucketBasicAuth holds the information required to authenticate user via basic auth mechanism",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"username": {
@@ -1389,6 +1389,13 @@ func schema_pkg_apis_events_v1alpha1_BitbucketServerEventSource(ref common.Refer
 					"skipBranchRefsChangedOnOpenPR": {
 						SchemaProps: spec.SchemaProps{
 							Description: "SkipBranchRefsChangedOnOpenPR bypasses the event repo:refs_changed for branches whenever there's an associated open pull request. This helps in optimizing the event handling process by avoiding unnecessary triggers for branch reference changes that are already part of a pull request under review.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"oneEventPerChange": {
+						SchemaProps: spec.SchemaProps{
+							Description: "OneEventPerChange controls whether to process each change in a repo:refs_changed webhook event as a separate event. This setting is useful when multiple tags are pushed simultaneously for the same commit, and each tag needs to independently trigger an action, such as a distinct workflow in Argo Workflows. When enabled, the BitbucketServerEventSource publishes an individual BitbucketServerEventData for each change, ensuring independent processing of each tag or reference update in a single webhook event.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},

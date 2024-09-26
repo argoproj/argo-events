@@ -28,12 +28,12 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
 )
 
-func TestValidateEventSource(t *testing.T) {
+func TestValidateBitbucketServerEventSource(t *testing.T) {
 	listener := &EventListener{}
 
 	err := listener.ValidateEventSource(context.Background())
 	assert.Error(t, err)
-	assert.Equal(t, "at least one project or repository configuration is required", err.Error())
+	assert.Equal(t, "bitbucket server base url can't be empty", err.Error())
 
 	content, err := os.ReadFile(fmt.Sprintf("%s/%s", sources.EventSourceDir, "bitbucketserver.yaml"))
 	assert.Nil(t, err)

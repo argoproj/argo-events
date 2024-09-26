@@ -470,7 +470,7 @@ message BitbucketAuth {
   optional k8s.io.api.core.v1.SecretKeySelector oauthToken = 2;
 }
 
-// BasicAuth holds the information required to authenticate user via basic auth mechanism
+// BitbucketBasicAuth holds the information required to authenticate user via basic auth mechanism
 message BitbucketBasicAuth {
   // Username refers to the K8s secret that holds the username.
   optional k8s.io.api.core.v1.SecretKeySelector username = 1;
@@ -563,34 +563,43 @@ message BitbucketServerEventSource {
   // +optional
   optional bool skipBranchRefsChangedOnOpenPR = 7;
 
+  // OneEventPerChange controls whether to process each change in a repo:refs_changed webhook event as a separate event. This setting is useful when multiple tags are
+  // pushed simultaneously for the same commit, and each tag needs to independently trigger an action, such as a distinct workflow in Argo Workflows. When enabled, the
+  // BitbucketServerEventSource publishes an individual BitbucketServerEventData for each change, ensuring independent processing of each tag or reference update in a
+  // single webhook event.
+  // +optional
+  optional bool oneEventPerChange = 8;
+
   // AccessToken is reference to K8s secret which holds the bitbucket api access information.
-  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 8;
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 9;
 
   // WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).
-  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 9;
+  // +optional
+  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 10;
 
   // BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.
-  optional string bitbucketserverBaseURL = 10;
+  optional string bitbucketserverBaseURL = 11;
 
   // DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event source is stopped.
   // +optional
-  optional bool deleteHookOnFinish = 11;
+  optional bool deleteHookOnFinish = 12;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
-  map<string, string> metadata = 12;
+  map<string, string> metadata = 13;
 
   // Filter
   // +optional
-  optional EventSourceFilter filter = 13;
+  optional EventSourceFilter filter = 14;
 
   // TLS configuration for the bitbucketserver client.
   // +optional
-  optional TLSConfig tls = 14;
+  optional TLSConfig tls = 15;
 
   // CheckInterval is a duration in which to wait before checking that the webhooks exist, e.g. 1s, 30m, 2h... (defaults to 1m)
   // +optional
-  optional string checkInterval = 15;
+  optional string checkInterval = 16;
 }
 
 message BitbucketServerRepository {
