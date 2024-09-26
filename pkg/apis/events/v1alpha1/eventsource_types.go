@@ -1055,7 +1055,7 @@ func (b BitbucketServerEventSource) ShouldCreateWebhooks() bool {
 	return b.AccessToken != nil &&
 		b.Webhook != nil &&
 		b.Webhook.URL != "" &&
-		((len(b.GetBitbucketServerRepositories()) > 0 && b.GetBitbucketServerRepositories() != nil) || len(b.Projects) > 0)
+		(len(b.GetBitbucketServerRepositories()) > 0 || len(b.Projects) > 0)
 }
 
 func (b BitbucketServerEventSource) GetBitbucketServerRepositories() []BitbucketServerRepository {
