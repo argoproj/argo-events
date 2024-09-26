@@ -3,10 +3,10 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/common/logging"
-	controllercmd "github.com/argoproj/argo-events/controllers/cmd"
-	envpkg "github.com/argoproj/pkg/env"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	controllercmd "github.com/argoproj/argo-events/pkg/reconciler/cmd"
+	"github.com/argoproj/argo-events/pkg/shared/logging"
+	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 func NewControllerCommand() *cobra.Command {
@@ -35,10 +35,10 @@ func NewControllerCommand() *cobra.Command {
 		},
 	}
 	command.Flags().BoolVar(&namespaced, "namespaced", false, "Whether to run in namespaced scope, defaults to false.")
-	command.Flags().StringVar(&managedNamespace, "managed-namespace", envpkg.LookupEnvStringOr("NAMESPACE", "argo-events"), "The namespace that the controller watches when \"--namespaced\" is \"true\".")
+	command.Flags().StringVar(&managedNamespace, "managed-namespace", sharedutil.LookupEnvStringOr("NAMESPACE", "argo-events"), "The namespace that the controller watches when \"--namespaced\" is \"true\".")
 	command.Flags().BoolVar(&leaderElection, "leader-election", true, "Enable leader election")
-	command.Flags().Int32Var(&metricsPort, "metrics-port", common.ControllerMetricsPort, "Metrics port")
-	command.Flags().Int32Var(&healthPort, "health-port", common.ControllerHealthPort, "Health port")
+	command.Flags().Int32Var(&metricsPort, "metrics-port", v1alpha1.ControllerMetricsPort, "Metrics port")
+	command.Flags().Int32Var(&healthPort, "health-port", v1alpha1.ControllerHealthPort, "Health port")
 	command.Flags().IntVar(&klogLevel, "kloglevel", 0, "klog level")
 	return command
 }
