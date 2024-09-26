@@ -6023,7 +6023,6 @@ Description
 <tbody>
 <tr>
 <td>
-<<<<<<< HEAD
 
 <code>metadata</code></br> <em>
 github.com/argoproj/argo-events/pkg/apis/common.Metadata </em>
@@ -6045,8 +6044,6 @@ default={annotations: {}, labels: {}}
 
 <td>
 
-=======
->>>>>>> master
 <code>ports</code></br> <em>
 <a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#serviceport-v1-core">
 \[\]Kubernetes core/v1.ServicePort </a> </em>
