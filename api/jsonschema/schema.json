@@ -3907,7 +3907,7 @@
           "type": "string"
         },
         "metadata": {
-          "$ref": "#/definitions/io.argoproj.common.Metadata",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.Metadata",
           "description": "Metadata sets the pods's metadata, i.e. annotations and labels default={annotations: {}, labels: {}}"
         },
         "ports": {

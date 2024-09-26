@@ -123,7 +123,7 @@ func (e EventSourceSpec) GetReplicas() int32 {
 }
 
 // Service holds the service information eventsource exposes
-type ƒ struct {
+type Service struct {
 	// Metadata sets the pods's metadata, i.e. annotations and labels
 	// default={annotations: {}, labels: {}}
 	Metadata *Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
