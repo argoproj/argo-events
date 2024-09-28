@@ -7,7 +7,7 @@ retract v1.15.1 // Contains retractions only.
 retract v1.15.0 // Published accidentally.
 
 require (
-	cloud.google.com/go/compute/metadata v0.3.0
+	cloud.google.com/go/compute/metadata v0.5.2
 	cloud.google.com/go/pubsub v1.38.0
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20221103172237-443f56ff4ba8
 	github.com/Azure/azure-event-hubs-go/v3 v3.6.2
@@ -307,7 +307,7 @@ require (
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/term v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
