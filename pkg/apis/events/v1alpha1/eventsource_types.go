@@ -124,13 +124,16 @@ func (e EventSourceSpec) GetReplicas() int32 {
 
 // Service holds the service information eventsource exposes
 type Service struct {
+	// Metadata sets the pods's metadata, i.e. annotations and labels
+	// default={annotations: {}, labels: {}}
+	Metadata *Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// The list of ports that are exposed by this ClusterIP service.
 	// +patchMergeKey=port
 	// +patchStrategy=merge
 	// +listType=map
 	// +listMapKey=port
 	// +listMapKey=protocol
-	Ports []corev1.ServicePort `json:"ports,omitempty" patchStrategy:"merge" patchMergeKey:"port" protobuf:"bytes,1,rep,name=ports"`
+	Ports []corev1.ServicePort `json:"ports,omitempty" patchStrategy:"merge" patchMergeKey:"port" protobuf:"bytes,2,rep,name=ports"`
 	// clusterIP is the IP address of the service and is usually assigned
 	// randomly by the master. If an address is specified manually and is not in
 	// use by others, it will be allocated to the service; otherwise, creation
@@ -139,7 +142,7 @@ type Service struct {
 	// can be specified for headless services when proxying is not required.
 	// More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
 	// +optional
-	ClusterIP string `json:"clusterIP,omitempty" protobuf:"bytes,2,opt,name=clusterIP"`
+	ClusterIP string `json:"clusterIP,omitempty" protobuf:"bytes,3,opt,name=clusterIP"`
 }
 
 // CalendarEventSource describes an HTTP based EventSource
