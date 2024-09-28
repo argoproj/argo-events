@@ -384,11 +384,11 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 	// Use a ports copy otherwise it will update the oririnal Ports spec in EventSource
 	ports := []corev1.ServicePort{}
 	ports = append(ports, eventSource.Spec.Service.Ports...)
+
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-eventsource-svc", eventSource.Name),
 			Namespace: eventSource.Namespace,
-			Labels:    mergeLabels(args.EventSource.Labels, args.Labels),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:     ports,
@@ -397,7 +397,23 @@ func buildService(args *AdaptorArgs) (*corev1.Service, error) {
 			Selector:  args.Labels,
 		},
 	}
-	if err := controllerscommon.SetObjectMeta(eventSource, svc, aev1.EventSourceGroupVersionKind); err != nil {
+
+	labels := mergeLabels(args.EventSource.Labels, args.Labels)
+	annotations := make(map[string]string)
+
+	if args.EventSource.Spec.Service.Metadata != nil {
+		if args.EventSource.Spec.Service.Metadata.Labels != nil {
+			labels = mergeLabels(args.EventSource.Spec.Service.Metadata.Labels, labels)
+		}
+		if args.EventSource.Spec.Service.Metadata.Annotations != nil {
+			annotations = mergeLabels(args.EventSource.Spec.Service.Metadata.Annotations, annotations)
+		}
+	}
+
+	svc.ObjectMeta.SetLabels(labels)
+	svc.ObjectMeta.SetAnnotations(annotations)
+
+	if err := controllerscommon.SetObjectMeta(eventSource, svc, v1alpha1.EventSourceGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return svc, nil

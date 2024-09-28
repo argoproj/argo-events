@@ -3881,6 +3881,10 @@
           "description": "clusterIP is the IP address of the service and is usually assigned randomly by the master. If an address is specified manually and is not in use by others, it will be allocated to the service; otherwise, creation of the service will fail. This field can not be changed through updates. Valid values are \"None\", empty string (\"\"), or a valid IP address. \"None\" can be specified for headless services when proxying is not required. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
           "type": "string"
         },
+        "metadata": {
+          "description": "Metadata sets the pods's metadata, i.e. annotations and labels default={annotations: {}, labels: {}}",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.Metadata"
+        },
         "ports": {
           "description": "The list of ports that are exposed by this ClusterIP service.",
           "type": "array",
