@@ -2,18 +2,21 @@ package eventsource
 
 import (
 	"context"
+	"strings"
 
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/yaml"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
@@ -38,13 +41,13 @@ func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImag
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	eventSource := &aev1.EventSource{}
+	eventSource := &v1alpha1.EventSource{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventSource); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.logger.Warnw("WARNING: eventsource not found", "request", req)
 			return reconcile.Result{}, nil
 		}
-		r.logger.Errorw("unable to get eventsource ctl", "request", req, "error", err)
+		r.logger.Errorw("unable to get eventsource", "request", req, zap.Error(err))
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", eventSource.Namespace).With("eventSource", eventSource.Name)
@@ -54,10 +57,12 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
-	if r.needsUpdate(eventSource, esCopy) {
-		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
-		if err := r.client.Update(ctx, esCopy.DeepCopy()); err != nil {
-			return reconcile.Result{}, err
+	esCopy.Status.LastUpdated = metav1.Now()
+	if !equality.Semantic.DeepEqual(eventSource.Finalizers, esCopy.Finalizers) {
+		patchYaml := "metadata:\n  finalizers: [" + strings.Join(esCopy.Finalizers, ",") + "]"
+		patchJson, _ := yaml.YAMLToJSON([]byte(patchYaml))
+		if err := r.client.Patch(ctx, eventSource, client.RawPatch(types.MergePatchType, []byte(patchJson))); err != nil {
+			return ctrl.Result{}, err
 		}
 	}
 	if err := r.client.Status().Update(ctx, esCopy); err != nil {
@@ -67,23 +72,25 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // reconcile does the real logic
-func (r *reconciler) reconcile(ctx context.Context, eventSource *aev1.EventSource) error {
+func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventSource) error {
 	log := logging.FromContext(ctx)
 	if !eventSource.DeletionTimestamp.IsZero() {
-		log.Info("deleting eventsource")
+		log.Info("Deleting eventsource")
 		if controllerutil.ContainsFinalizer(eventSource, finalizerName) {
-			// Finalizer logic should be added here.
+			// We don't add finalizer anymore, keep the removing logic for backward compatibility
 			controllerutil.RemoveFinalizer(eventSource, finalizerName)
 		}
 		return nil
 	}
-	controllerutil.AddFinalizer(eventSource, finalizerName)
 
 	eventSource.Status.InitConditions()
+	eventSource.Status.SetObservedGeneration(eventSource.Generation)
 	if err := ValidateEventSource(eventSource); err != nil {
-		log.Errorw("validation error", zap.Error(err))
+		log.Errorw("Validation error", zap.Error(err))
+		eventSource.Status.MarkSourcesNotProvided("InvalidEventSource", err.Error())
 		return err
 	}
+	eventSource.Status.MarkSourcesProvided()
 	args := &AdaptorArgs{
 		Image:       r.eventSourceImage,
 		EventSource: eventSource,
@@ -94,14 +101,4 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *aev1.EventSourc
 		},
 	}
 	return Reconcile(r.client, args, log)
-}
-
-func (r *reconciler) needsUpdate(old, new *aev1.EventSource) bool {
-	if old == nil {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(old.Finalizers, new.Finalizers) {
-		return true
-	}
-	return false
 }

@@ -19,7 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
@@ -27,7 +26,7 @@ import (
 // AdaptorArgs are the args needed to create a sensor deployment
 type AdaptorArgs struct {
 	Image       string
-	EventSource *aev1.EventSource
+	EventSource *v1alpha1.EventSource
 	Labels      map[string]string
 }
 
@@ -35,7 +34,7 @@ type AdaptorArgs struct {
 func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	eventSource := args.EventSource
-	eventBus := &aev1.EventBus{}
+	eventBus := &v1alpha1.EventBus{}
 	eventBusName := v1alpha1.DefaultEventBusName
 	if len(eventSource.Spec.EventBusName) > 0 {
 		eventBusName = eventSource.Spec.EventBusName
@@ -162,12 +161,12 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func buildDeployment(args *AdaptorArgs, eventBus *aev1.EventBus) (*appv1.Deployment, error) {
+func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Deployment, error) {
 	deploymentSpec, err := buildDeploymentSpec(args)
 	if err != nil {
 		return nil, err
 	}
-	eventSourceCopy := &aev1.EventSource{
+	eventSourceCopy := &v1alpha1.EventSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: args.EventSource.Namespace,
 			Name:      args.EventSource.Name,
@@ -289,7 +288,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *aev1.EventBus) (*appv1.Deploym
 		},
 		Spec: *deploymentSpec,
 	}
-	if err := controllerscommon.SetObjectMeta(args.EventSource, deployment, aev1.EventSourceGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(args.EventSource, deployment, v1alpha1.EventSourceGroupVersionKind); err != nil {
 		return nil, err
 	}
 
