@@ -62,7 +62,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	esCopy := eventSource.DeepCopy()
 	reconcileErr := r.reconcile(ctx, esCopy)
 	if reconcileErr != nil {
-		log.Errorw("reconcile error", zap.Error(reconcileErr))
+		log.Errorw("Reconcile error", zap.Error(reconcileErr))
 	}
 	esCopy.Status.LastUpdated = metav1.Now()
 	if !equality.Semantic.DeepEqual(eventSource.Finalizers, esCopy.Finalizers) {
@@ -117,14 +117,12 @@ func (r *reconciler) orchestrateResources(ctx context.Context, eventSource *v1al
 	err := r.client.Get(ctx, types.NamespacedName{Namespace: eventSource.Namespace, Name: eventBusName}, eventBus)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			// eventSource.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
 			log.Errorw("EventBus not found", "eventBusName", eventBusName, zap.Error(err))
 			return fmt.Errorf("eventbus %s not found", eventBusName)
 		}
 		return fmt.Errorf("failed to get eventbus %q, %w", eventBusName, err)
 	}
 	if !eventBus.Status.IsReady() {
-		// eventSource.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
 		return fmt.Errorf("eventbus %q not ready", eventBusName)
 	}
 

@@ -19,16 +19,19 @@ package sensor
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/yaml"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
@@ -61,7 +64,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			r.logger.Warnw("WARNING: sensor not found", "request", req)
 			return reconcile.Result{}, nil
 		}
-		r.logger.Errorw("unable to get sensor ctl", zap.Any("request", req), zap.Error(err))
+		r.logger.Errorw("Unable to get sensor", zap.Any("request", req), zap.Error(err))
 		return ctrl.Result{}, err
 	}
 	log := r.logger.With("namespace", sensor.Namespace).With("sensor", sensor.Name)
@@ -69,14 +72,17 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	sensorCopy := sensor.DeepCopy()
 	reconcileErr := r.reconcile(ctx, sensorCopy)
 	if reconcileErr != nil {
-		log.Errorw("reconcile error", zap.Error(reconcileErr))
+		log.Errorw("Reconcile error", zap.Error(reconcileErr))
 	}
-	if r.needsUpdate(sensor, sensorCopy) {
-		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
-		if err := r.client.Update(ctx, sensorCopy.DeepCopy()); err != nil {
-			return reconcile.Result{}, err
+	sensorCopy.Status.LastUpdated = metav1.Now()
+	if !equality.Semantic.DeepEqual(sensor.Finalizers, sensorCopy.Finalizers) {
+		patchYaml := "metadata:\n  finalizers: [" + strings.Join(sensorCopy.Finalizers, ",") + "]"
+		patchJson, _ := yaml.YAMLToJSON([]byte(patchYaml))
+		if err := r.client.Patch(ctx, sensor, client.RawPatch(types.MergePatchType, []byte(patchJson))); err != nil {
+			return ctrl.Result{}, err
 		}
 	}
+
 	if err := r.client.Status().Update(ctx, sensorCopy); err != nil {
 		return reconcile.Result{}, err
 	}
@@ -87,16 +93,16 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) error {
 	log := logging.FromContext(ctx)
 	if !sensor.DeletionTimestamp.IsZero() {
-		log.Info("deleting sensor")
+		log.Info("Deleting sensor")
 		if controllerutil.ContainsFinalizer(sensor, finalizerName) {
-			// Finalizer logic should be added here.
+			// We don't add finalizer anymore, keep the removing logic for backward compatibility
 			controllerutil.RemoveFinalizer(sensor, finalizerName)
 		}
 		return nil
 	}
-	controllerutil.AddFinalizer(sensor, finalizerName)
 
 	sensor.Status.InitConditions()
+	sensor.Status.SetObservedGeneration(sensor.Generation)
 
 	eventBus := &v1alpha1.EventBus{}
 	eventBusName := v1alpha1.DefaultEventBusName
@@ -107,11 +113,11 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")
-			log.Errorw("EventBus not found", "eventBusName", eventBusName, "error", err)
+			log.Errorw("EventBus not found", "eventBusName", eventBusName, zap.Error(err))
 			return fmt.Errorf("eventbus %s not found", eventBusName)
 		}
 		sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
-		log.Errorw("failed to get EventBus", "eventBusName", eventBusName, "error", err)
+		log.Errorw("failed to get EventBus", "eventBusName", eventBusName, zap.Error(err))
 		return err
 	}
 
@@ -129,14 +135,4 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		},
 	}
 	return Reconcile(r.client, eventBus, args, log)
-}
-
-func (r *reconciler) needsUpdate(old, new *v1alpha1.Sensor) bool {
-	if old == nil {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(old.Finalizers, new.Finalizers) {
-		return true
-	}
-	return false
 }
