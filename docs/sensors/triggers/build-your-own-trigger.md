@@ -27,11 +27,11 @@ The complete proto file is available [here](https://github.com/argoproj/argo-eve
 Let's walk through the contract,
 
 1. `FetchResource`: If the trigger server needs to fetch a resource from external sources like S3, Git or a URL, this is the
-    place to do so. e.g. if the trigger server aims to invoke a TektonCD pipeline and the `PipelineRun` resource lives on Git, then
-    trigger server can first fetch it from Git and return it back to sensor.
+   place to do so. e.g. if the trigger server aims to invoke a TektonCD pipeline and the `PipelineRun` resource lives on Git, then
+   trigger server can first fetch it from Git and return it back to sensor.
 
 2. `Execute`: In this method, the trigger server executes/invokes the trigger. e.g. TektonCD pipeline resource being
-    created in K8s cluster.
+   created in K8s cluster.
 
 3. `ApplyPolicy`: This is where your trigger implementation can check whether the triggered resource transitioned into the success state.
    Depending upon the response from the trigger server, the sensor will either stop processing subsequent triggers, or it will continue to
@@ -85,14 +85,14 @@ The most important fields are,
 1. `serverURL`: This is the URL of the trigger gRPC server.
 
 1. `spec`: It is a map of string -> string. The spec can be anything you want as per your use-case. The sensor sends
-    the spec to trigger server, and it is upto the trigger gRPC server to interpret the spec.
+   the spec to trigger server, and it is upto the trigger gRPC server to interpret the spec.
 
 1. `parameters`: The parameters override the resource that is fetched by the trigger server.
-    Read more info on parameters [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
+   Read more info on parameters [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
 
 1. `payload`: Payload to send to the trigger server. Read more on payload [here](https://argoproj.github.io/argo-events/sensors/triggers/http-trigger/#request-payload).
 
-The complete spec for the custom trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#customtrigger).
+The complete spec for the custom trigger is available [here](../../APIs.md#argoproj.io/v1alpha1.CustomTrigger).
 
 ## Custom Trigger in Action
 

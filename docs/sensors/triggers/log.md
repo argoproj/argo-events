@@ -1,6 +1,6 @@
 # Log
 
-Log trigger is for debugging -  it just logs events it receives as JSON:
+Log trigger is for debugging - it just logs events it receives as JSON:
 
 ```json
 {
@@ -18,7 +18,7 @@ Log trigger is for debugging -  it just logs events it receives as JSON:
 
 ## Specification
 
-The specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#logtrigger).
+The specification is available [here](../../APIs.md#argoproj.io/v1alpha1.LogTrigger).
 
 ## Parameterization
 

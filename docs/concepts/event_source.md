@@ -35,7 +35,7 @@ Available event-sources:
 
 ## Specification
 
-The complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md).
+The complete specification is available [here](../APIs.md#argoproj.io/v1alpha1.EventSourceSpec).
 
 ## Examples
 

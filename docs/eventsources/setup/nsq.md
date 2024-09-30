@@ -25,11 +25,11 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-NSQ event-source is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#nsqeventsource).
+NSQ event-source is available [here](../../APIs.md#argoproj.io/v1alpha1.NSQEventSource).
 
 ## Setup
 
-1. Deploy NSQ on local K8s cluster.
+1.  Deploy NSQ on local K8s cluster.
 
         apiVersion: v1
         kind: Service
@@ -230,29 +230,29 @@ NSQ event-source is available [here](https://github.com/argoproj/argo-events/blo
                     - nsqlookupd.argo-events.svc:4161
               terminationGracePeriodSeconds: 5
 
-1. Expose NSQD by kubectl `port-forward`.
+1.  Expose NSQD by kubectl `port-forward`.
 
          kubectl -n argo-events port-forward service/nsqd 4151:4151
 
-1. Create topic `hello` and channel `my-channel`.
+1.  Create topic `hello` and channel `my-channel`.
 
         curl -X POST 'http://localhost:4151/topic/create?topic=hello'
 
         curl -X POST 'http://localhost:4151/channel/create?topic=hello&channel=my-channel'
 
-1. Create the event source by running the following command.
+1.  Create the event source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nsq.yaml
 
-1. Create the sensor by running the following command.
+1.  Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/nsq.yaml
 
-1. Publish a message on topic `hello` and channel `my-channel`.
+1.  Publish a message on topic `hello` and channel `my-channel`.
 
         curl -d '{"message": "hello"}' 'http://localhost:4151/pub?topic=hello&channel=my-channel'
 
-9. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
+1.  Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 

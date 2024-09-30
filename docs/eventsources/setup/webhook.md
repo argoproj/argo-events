@@ -25,20 +25,20 @@ The structure of an event dispatched by the event-source to the sensor looks lik
 
 ## Specification
 
-Webhook event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#webhookcontext).
+Webhook event-source specification is available [here](../../APIs.md#argoproj.io/v1alpha1.WebhookContext).
 
 ## Setup
 
-1. Install the event source in the `argo-events` namespace.
+1.  Install the event source in the `argo-events` namespace.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
-1. The event-source pod is listening for HTTP requests on port `12000` and endpoint `/example`.
+1.  The event-source pod is listening for HTTP requests on port `12000` and endpoint `/example`.
     It's time to create the sensor.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml   
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 
-1. Once the sensor pod is in running state, test the setup by sending a POST request to event-source service.
+1.  Once the sensor pod is in running state, test the setup by sending a POST request to event-source service.
 
 ## Troubleshoot
 

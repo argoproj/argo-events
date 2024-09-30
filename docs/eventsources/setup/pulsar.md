@@ -25,11 +25,11 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-Pulsar event-source is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#pulsareventsource).
+Pulsar event-source is available [here](../../APIs.md#argoproj.io/v1alpha1.PulsarEventSource).
 
 ## Setup
 
-1. To test locally, deploy a standalone Pulsar.
+1.  To test locally, deploy a standalone Pulsar.
 
         apiVersion: apps/v1
         kind: Deployment
@@ -79,21 +79,21 @@ Pulsar event-source is available [here](https://github.com/argoproj/argo-events/
               targetPort: 6650
           type: LoadBalancer
 
-1. Port forward to the pulsar pod using kubectl for port 6650.
+1.  Port forward to the pulsar pod using kubectl for port 6650.
 
-1. For production deployment, follow the official Pulsar documentation online.
+1.  For production deployment, follow the official Pulsar documentation online.
 
-1. Deploy the eventsource.
+1.  Deploy the eventsource.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/pulsar.yaml
 
-1. Deploy the sensor.
+1.  Deploy the sensor.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/pulsar.yaml
 
-1. Publish a message on topic `test`.
+1.  Publish a message on topic `test`.
 
-1. Run `argo list` to find the workflow.
+1.  Run `argo list` to find the workflow.
 
 ## Troubleshoot
 

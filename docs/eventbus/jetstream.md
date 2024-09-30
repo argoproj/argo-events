@@ -11,8 +11,9 @@ metadata:
   name: default
 spec:
   jetstream:
-    version: latest # Do NOT use "latest" but a specific version in your real deployment
-                    # See: https://argoproj.github.io/argo-events/eventbus/jetstream/#version
+    version:
+      latest # Do NOT use "latest" but a specific version in your real deployment
+      # See: https://argoproj.github.io/argo-events/eventbus/jetstream/#version
 ```
 
 The example above brings up a Jetstream
@@ -22,7 +23,7 @@ with 3 replicas in the namespace.
 ## Properties
 
 Check
-[here](https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#argoproj.io/v1alpha1.JetstreamBus)
+[here](../APIs.md#argoproj.io/v1alpha1.JetStreamBus)
 for the full spec of `jetstream`.
 
 ### version
@@ -34,7 +35,6 @@ kubectl get configmap argo-events-controller-config -o yaml
 ```
 
 Check [here](https://docs.nats.io/nats-concepts/jetstream/streams#configuration) for a list of configurable features per version.
-
 
 ### A more involved example
 
@@ -80,9 +80,9 @@ metadata:
   name: default
 spec:
   jetstreamExotic:
-      url: nats://xxxxx:xxx
-      accessSecret:
-        name: my-secret-name
-        key: secret-key
-      streamConfig: ""
+    url: nats://xxxxx:xxx
+    accessSecret:
+      name: my-secret-name
+      key: secret-key
+    streamConfig: ""
 ```

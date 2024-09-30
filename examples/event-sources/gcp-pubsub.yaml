@@ -1,7 +1,7 @@
 # ======================================================================================================================
 # SEE ALSO
 #   - Set up guide:   https://argoproj.github.io/argo-events/setup/gcp-pub-sub/
-#   - Specification:  https://github.com/argoproj/argo-events/blob/stable/api/event-source.md#pubsubeventsource
+#   - Specification:  https://github.com/argoproj/argo-events/blob/stable/docs/APIs.md#argoproj.io/v1alpha1.PubSubEventSource
 # ----------------------------------------------------------------------------------------------------------------------
 
 apiVersion: argoproj.io/v1alpha1
@@ -38,7 +38,6 @@ spec:
         key: secret-key
       # Deprecated, legacy approach
       # credentialsFile: ""
-
 # ----------------------------------------------------------------------------------------------------------------------
 # followings are example for using Workload Identity
 
