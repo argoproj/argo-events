@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -120,6 +122,14 @@ func (e EventSourceSpec) GetReplicas() int32 {
 		replicas = 1
 	}
 	return replicas
+}
+
+func (es EventSource) GetDeploymentName() string {
+	return fmt.Sprintf("%s-es", es.Name)
+}
+
+func (es EventSource) GetServiceName() string {
+	return fmt.Sprintf("%s-es-svc", es.Name)
 }
 
 // Service holds the service information eventsource exposes

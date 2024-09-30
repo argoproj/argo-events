@@ -7,6 +7,28 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+const (
+	Project = "argo-events"
+
+	KeyComponent       = "app.kubernetes.io/component"
+	KeyPartOf          = "app.kubernetes.io/part-of"
+	KeyManagedBy       = "app.kubernetes.io/managed-by"
+	KeyAppName         = "app.kubernetes.io/name"
+	KeyHash            = "events.argoproj.io/hash" // hash of the object
+	KeyEventSourceName = "events.argoproj.io/eventsource-name"
+	KeySensorName      = "events.argoproj.io/sensor-name"
+
+	// controllers
+	ControllerEventBus    = "eventbus-controller"
+	ControllerEventSource = "eventsource-controller"
+	ControllerSensor      = "sensor-controller"
+
+	// components
+	ComponentEventBus    = "eventbus"
+	ComponentEventSource = "eventsourcd"
+	ComponentSensor      = "sensor"
+)
+
 // EventSourceType is the type of event source
 type EventSourceType string
 
