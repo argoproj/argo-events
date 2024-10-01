@@ -27,21 +27,21 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-Resource event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#resourceeventsource).
+Resource event-source specification is available [here](../../APIs.md#argoproj.io/v1alpha1.ResourceEventSource).
 
 ## Setup
 
-1. Create the event source by running the following command.
+1.  Create the event source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/resource.yaml
 
-1. Create the sensor by running the following command.
+1.  Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/resource.yaml
 
-1. The event source we created in step 1 contains configuration which makes the event-source listen to Argo workflows marked with label `app: my-workflow`.
+1.  The event source we created in step 1 contains configuration which makes the event-source listen to Argo workflows marked with label `app: my-workflow`.
 
-1. Lets create a workflow called `my-workflow` with label `app: my-workflow`.
+1.  Lets create a workflow called `my-workflow` with label `app: my-workflow`.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Workflow
@@ -58,7 +58,7 @@ Resource event-source specification is available [here](https://github.com/argop
               command: [cowsay]
               args: ["hello world"]
 
-1. Once the `my-workflow` is created, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.
+1.  Once the `my-workflow` is created, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.
 
 ## List Options
 
@@ -69,7 +69,7 @@ In the example above, we had set up the list option as follows,
         filter:
         # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
         # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
-        
+
             # labels provide listing options to K8s API to watch objects
             labels:
               - key: app

@@ -30,15 +30,15 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-GCP Pub/Sub event-source specification is available [here](https://github.com/argoproj/argo-events/blob/stable/api/event-source.md#pubsubeventsource).
+GCP Pub/Sub event-source specification is available [here](../../APIs.md#argoproj.io/v1alpha1.PubSubEventSource).
 
 ## Setup
 
-1. Fetch the project credentials JSON file from GCP console.
+1.  Fetch the project credentials JSON file from GCP console.
 
-     If you use Workload Identity, you can skip this and next steps.
+    If you use Workload Identity, you can skip this and next steps.
 
-1. Create a K8s secret called `gcp-credentials` to store the credentials file.
+1.  Create a K8s secret called `gcp-credentials` to store the credentials file.
 
         apiVersion: v1
         data:
@@ -49,21 +49,21 @@ GCP Pub/Sub event-source specification is available [here](https://github.com/ar
           namespace: argo-events
         type: Opaque
 
-1. Create the event source by running the following command.
+1.  Create the event source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/gcp-pubsub.yaml
 
     If you use Workload Identity, omit `credentialSecret` field. Instead don't forget to configure appropriate service account (see [example](https://github.com/argoproj/argo-events/blob/stable/examples/event-sources/gcp-pubsub.yaml)).
 
-1. Inspect the event-source pod logs to make sure it was able to subscribe to the topic.
+1.  Inspect the event-source pod logs to make sure it was able to subscribe to the topic.
 
-1. Create the sensor by running the following command.
+1.  Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml
 
-1. Publish a message from GCP Pub/Sub console.
+1.  Publish a message from GCP Pub/Sub console.
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
+1.  Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Subscription, topic and service account preparation
 

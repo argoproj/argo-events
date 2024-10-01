@@ -25,29 +25,29 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-Redis event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#argoproj.io/v1alpha1.RedisEventSource).
+Redis event-source specification is available [here](../../APIs.md#argoproj.io/v1alpha1.RedisEventSource).
 
 ## Setup
 
-1. Follow the [documentation](https://kubernetes.io/docs/tutorials/configuration/configure-redis-using-configmap/#real-world-example-configuring-redis-using-a-configmap) to set up Redis database.
+1.  Follow the [documentation](https://kubernetes.io/docs/tutorials/configuration/configure-redis-using-configmap/#real-world-example-configuring-redis-using-a-configmap) to set up Redis database.
 
-1. Create the event source by running the following command.
+1.  Create the event source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/redis.yaml
 
-1. Create the sensor by running the following command.
+1.  Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/redis.yaml
 
-1. Log into redis pod using `kubectl`.
+1.  Log into redis pod using `kubectl`.
 
         kubectl -n argo-events exec -it <redis-pod-name> -c <redis-container-name> -- /bin/bash
 
-1. Run `redis-cli` and publish a message on `FOO` channel.
+1.  Run `redis-cli` and publish a message on `FOO` channel.
 
         PUBLISH FOO hello
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
+1.  Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 

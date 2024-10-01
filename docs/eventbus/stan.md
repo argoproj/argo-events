@@ -1,4 +1,3 @@
-
 ## NATS Streaming
 
 You can create a `native` NATS EventBus, or connect to an existing NATS
@@ -44,7 +43,7 @@ spec:
 #### Properties
 
 Check
-[here](https://github.com/argoproj/argo-events/tree/stable/api/event-bus.md#argoproj.io/v1alpha1.NativeStrategy)
+[here](../APIs.md#argoproj.io/v1alpha1.NativeStrategy)
 for the full spec of `native`.
 
 - `replicas` - StatefulSet replicas, defaults to 3, and requires minimal 3.
@@ -167,4 +166,4 @@ A sample result:
 ```
 
 All the events in a namespace are published to same channel/subject/topic
-  named `eventbus-{namespace}` in the EventBus.
+named `eventbus-{namespace}` in the EventBus.

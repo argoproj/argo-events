@@ -8,7 +8,7 @@ combination.
 
 | Topic Provided/Existing | Sub ID Provided/Existing | Actions                                                               |
 | ----------------------- | ------------------------ | --------------------------------------------------------------------- |
-| Yes/Yes                 | Yes/Yes                  | Validate if given topic matches subscription's topic                   |
+| Yes/Yes                 | Yes/Yes                  | Validate if given topic matches subscription's topic                  |
 | Yes/Yes                 | Yes/No                   | Create a subscription with given ID                                   |
 | Yes/Yes                 | No/-                     | Create or re-use subscription with auto generated subID               |
 | Yes/No                  | Yes/No                   | Create a topic and a subscription with given subID                    |
@@ -23,7 +23,7 @@ If you have configured
 [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
 and want to use it for a PubSub EventSource, leave `credentialSecret` nil.
 
-Full spec is available [here](https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#pubsubeventsource).
+Full spec is available [here](../APIs.md#argoproj.io/v1alpha1.PubSubEventSource).
 
 See a PubSub EventSource
 [example](https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml).
