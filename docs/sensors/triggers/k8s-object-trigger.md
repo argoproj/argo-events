@@ -17,13 +17,13 @@ set up event-driven pipelines for existing workloads.
 
 ## Trigger a K8s Pod
 
-1. We will use webhook event-source and sensor to trigger a K8s pod.
+1.  We will use webhook event-source and sensor to trigger a K8s pod.
 
-1. Lets set up a webhook event source to process incoming requests.
+1.  Lets set up a webhook event source to process incoming requests.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
-1. To trigger a pod, we need to create a sensor as defined below.
+1.  To trigger a pod, we need to create a sensor as defined below.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -60,21 +60,21 @@ set up event-driven pipelines for existing workloads.
                         dependencyName: test-dep
                       dest: spec.containers.0.args.0
 
-1. Create the sensor.
+1.  Create the sensor.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
 
-1. Lets expose the webhook event-source pod using `port-forward` so that we can make a request to it.
-  
-        kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000   
+1.  Lets expose the webhook event-source pod using `port-forward` so that we can make a request to it.
 
-1. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
+        kubectl -n argo-events port-forward <name-of-event-source-pod> 12000:12000
+
+1.  Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-1. After the pod was completed, inspect the logs of the pod, you will see something similar as below.
+1.  After the pod was completed, inspect the logs of the pod, you will see something similar as below.
 
-        _________________________________________ 
+        _________________________________________
         / {"context":{"type":"webhook","specVersi \
         | on":"0.3","source":"webhook","e |
         | ventID":"30306463666539362d346666642d34 |
@@ -87,18 +87,18 @@ set up event-driven pipelines for existing workloads.
         | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
         | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
         \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ=="}       /
-        ----------------------------------------- 
+        -----------------------------------------
           \
            \
-            \     
-                          ##        .            
-                    ## ## ##       ==            
-                 ## ## ## ##      ===            
-             /""""""""""""""""___/ ===        
-        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-             \______ o          __/            
-              \    \        __/             
-                \____\______/   
+            \
+                          ##        .
+                    ## ## ##       ==
+                 ## ## ## ##      ===
+             /""""""""""""""""___/ ===
+        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+             \______ o          __/
+              \    \        __/
+                \____\______/
 
 ## Operation
 
@@ -111,7 +111,7 @@ Operation can be either.
 3. `patch`: Patches the object using given patch strategy.
 4. `delete`: Deletes the object if it exists.
 
-More info available at [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.StandardK8sTrigger).
+More info available at [here](../../APIs.md#argoproj.io/v1alpha1.StandardK8STrigger).
 
 ## Parameterization
 

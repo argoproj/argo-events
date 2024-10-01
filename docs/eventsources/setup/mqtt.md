@@ -1,6 +1,6 @@
 # MQTT
 
-The event-source listens to messages over MQTT and helps sensor trigger the workloads.  
+The event-source listens to messages over MQTT and helps sensor trigger the workloads.
 
 ## Event Structure
 
@@ -25,23 +25,23 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-MQTT event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#mqtteventsource).
+MQTT event-source specification is available [here](../../APIs.md#argoproj.io/v1alpha1.MQTTEventSource).
 
 ## Setup
 
-1. Make sure to set up the MQTT Broker and Bridge in Kubernetes if you don't already have one.
+1.  Make sure to set up the MQTT Broker and Bridge in Kubernetes if you don't already have one.
 
-1. Create the event source by running the following command. Make sure to update the appropriate fields.
+1.  Create the event source by running the following command. Make sure to update the appropriate fields.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/mqtt.yaml
 
-1. Create the sensor by running the following command.
+1.  Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/mqtt-sensor.yaml
 
-1. Send message by using MQTT client.
+1.  Send message by using MQTT client.
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
+1.  Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 

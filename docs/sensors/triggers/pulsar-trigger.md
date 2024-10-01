@@ -4,16 +4,16 @@ Pulsar trigger allows sensor to publish events on Pulsar topic. This trigger hel
 
 ## Specification
 
-The Pulsar trigger specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#pulsartrigger).
+The Pulsar trigger specification is available [here](../../APIs.md#argoproj.io/v1alpha1.PulsarTrigger).
 
 ## Walkthrough
 
-1. Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event on a Pulsar topic.
+1.  Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event on a Pulsar topic.
 
-1. Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/).
-   Do not create the Minio sensor, we are going to create it in next step.
+1.  Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/).
+    Do not create the Minio sensor, we are going to create it in next step.
 
-1. Lets create the sensor.
+1.  Lets create the sensor.
 
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
@@ -42,16 +42,16 @@ The Pulsar trigger specification is available [here](https://github.com/argoproj
                         dataKey: notification.0.s3.bucket.name
                       dest: bucket
 
-1. The Pulsar message needs a body. In order to construct message based on the event data, sensor offers
-   `payload` field as a part of the Pulsar trigger.
+1.  The Pulsar message needs a body. In order to construct message based on the event data, sensor offers
+    `payload` field as a part of the Pulsar trigger.
 
-   The `payload` contains the list of `src` which refers to the source event and `dest` which refers to destination key within result request payload.
+    The `payload` contains the list of `src` which refers to the source event and `dest` which refers to destination key within result request payload.
 
-   The `payload` declared above will generate a message body like below.
+    The `payload` declared above will generate a message body like below.
 
-        {
-            "fileName": "hello.txt" // name/key of the object
-            "bucket": "input" // name of the bucket
-        }
+         {
+             "fileName": "hello.txt" // name/key of the object
+             "bucket": "input" // name of the bucket
+         }
 
-1. Drop a file called `hello.txt` onto the bucket `input` and you will receive the message on Pulsar topic
+1.  Drop a file called `hello.txt` onto the bucket `input` and you will receive the message on Pulsar topic

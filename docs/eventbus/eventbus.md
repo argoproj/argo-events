@@ -18,6 +18,6 @@ The common practice is to create an EventBus named `default` in the namespace. I
 you want to use a different name, or you want to have multiple EventBus in one
 namespace, you need to specify `eventBusName` in the spec of EventSource and
 Sensor correspondingly, so that they can find the right one. See EventSource
-[spec](https://github.com/argoproj/argo-events/tree/stable/api/event-source.md#eventsourcespec)
+[spec](../APIs.md#argoproj.io/v1alpha1.EventSourceSpec)
 and Sensor
-[spec](https://github.com/argoproj/argo-events/tree/stable/api/sensor.md#sensorspec).
+[spec](../APIs.md#argoproj.io/v1alpha1.SensorSpec).

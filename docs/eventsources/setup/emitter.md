@@ -24,11 +24,11 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-Emitter event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#emittereventsource).
+Emitter event-source specification is available [here](../../APIs.md#argoproj.io/v1alpha1.EmitterEventSource).
 
 ## Setup
 
-1. Deploy the emitter in your local K8s cluster.
+1.  Deploy the emitter in your local K8s cluster.
 
         ---
         apiVersion: v1
@@ -81,19 +81,19 @@ Emitter event-source specification is available [here](https://github.com/argopr
                   hostPath:
                     path: /emitter #directory on host
 
-1. Create the event-source by running the following command.
+1.  Create the event-source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/emitter.yaml
 
-1. Inspect the event-source pod logs to make sure it was able to subscribe to the topic specified in the event source to consume messages.
+1.  Inspect the event-source pod logs to make sure it was able to subscribe to the topic specified in the event source to consume messages.
 
-1. Create the sensor by running the following command.
+1.  Create the sensor by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/emitter.yaml
 
-1. Send a message on emitter channel using one of the clients <https://emitter.io/develop/golang/>.
+1.  Send a message on emitter channel using one of the clients <https://emitter.io/develop/golang/>.
 
-1. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
+1.  Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow.
 
 ## Troubleshoot
 

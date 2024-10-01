@@ -14,29 +14,29 @@ In the previous sections, you have been dealing with the `Resource` trigger sour
 
 Git trigger source refers to K8s trigger refers to the K8s resource stored in Git.
 
-The specification for the Git source is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.GitArtifact).
+The specification for the Git source is available [here](../APIs.md#argoproj.io/v1alpha1.GitArtifact).
 
-1. In order to fetch data from git, you need to set up the private SSH key in sensor.
+1.  In order to fetch data from git, you need to set up the private SSH key in sensor.
 
-2. If you don't have ssh keys available, create them following this [guide](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+2.  If you don't have ssh keys available, create them following this [guide](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
-3. Create a K8s secret that holds the SSH keys.
+3.  Create a K8s secret that holds the SSH keys.
 
         kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/<YOUR_SSH_KEY_FILE_NAME>
 
-4. Create a K8s secret that holds known hosts.
+4.  Create a K8s secret that holds known hosts.
 
         kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
 
-5. Create a sensor with the git trigger source and refer it to the `hello world` workflow stored on the Argo Git project.
+5.  Create a sensor with the git trigger source and refer it to the `hello world` workflow stored on the Argo Git project.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-git.yaml 
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-git.yaml
 
-6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
+6.  Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-7. Now, you should see an Argo workflow being created.
+7.  Now, you should see an Argo workflow being created.
 
         kubectl -n argo-events get wf
 
@@ -46,24 +46,24 @@ You can refer to the K8s resource stored on S3 compliant store as the trigger so
 
 For this tutorial, lets set up a minio server which is S3 compliant store.
 
-1. Create a K8s secret called `artifacts-minio` that holds your minio access key and secret key.
-   The access key must be stored under `accesskey` key and secret key must be stored under `secretkey`.
+1.  Create a K8s secret called `artifacts-minio` that holds your minio access key and secret key.
+    The access key must be stored under `accesskey` key and secret key must be stored under `secretkey`.
 
-2. Follow steps described [here](https://github.com/minio/minio/tree/master/docs/orchestration/kubernetes#minio-deployment-on-kubernetes) to set up the minio server.
+2.  Follow steps described [here](https://github.com/minio/minio/tree/master/docs/orchestration/kubernetes#minio-deployment-on-kubernetes) to set up the minio server.
 
-3. Make sure a service is available to expose the minio server.
+3.  Make sure a service is available to expose the minio server.
 
-4. Create a bucket called `workflows` and store a basic `hello world` Argo workflow with key name `hello-world.yaml`.
+4.  Create a bucket called `workflows` and store a basic `hello world` Argo workflow with key name `hello-world.yaml`.
 
-5. Create the sensor with trigger source as S3.
+5.  Create the sensor with trigger source as S3.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-minio.yaml
 
-6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
+6.  Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-7. Now, you should see an Argo workflow being created.
+7.  Now, you should see an Argo workflow being created.
 
         kubectl -n argo-events get wf
 
@@ -71,19 +71,19 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
 
 K8s configmap can be treated as trigger source if needed.
 
-1. Lets create a configmap called `trigger-store`.
+1.  Lets create a configmap called `trigger-store`.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/trigger-store.yaml
 
-2. Create a sensor with trigger source as configmap and refer it to the `trigger-store`.
+2.  Create a sensor with trigger source as configmap and refer it to the `trigger-store`.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-cm.yaml
 
-3. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
+3.  Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-4. Now, you should see an Argo workflow being created.
+4.  Now, you should see an Argo workflow being created.
 
         kubectl -n argo-events get wf
 

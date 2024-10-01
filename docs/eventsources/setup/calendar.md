@@ -24,19 +24,19 @@ The structure of an event dispatched by the event-source over the eventbus looks
 
 ## Specification
 
-Calendar event-source specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#calendareventsource).
+Calendar event-source specification is available [here](../../APIs.md#argoproj.io/v1alpha1.CalendarEventSource).
 
 ## Setup
 
-1. Install the event source in the `argo-events` namespace.
+1.  Install the event source in the `argo-events` namespace.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/calendar.yaml
 
-1. The event-source will generate events at every 10 seconds. Let's create the sensor.
+1.  The event-source will generate events at every 10 seconds. Let's create the sensor.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/calendar.yaml   
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/calendar.yaml
 
-1. Once the sensor pod is in running state, wait for next interval to occur for sensor to trigger workflow.
+1.  Once the sensor pod is in running state, wait for next interval to occur for sensor to trigger workflow.
 
 ## Troubleshoot
 
