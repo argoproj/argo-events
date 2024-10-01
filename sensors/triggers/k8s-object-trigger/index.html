@@ -2208,7 +2208,7 @@ set up event-driven pipelines for existing workloads.</p>
 </li>
 <li>
 <p>After the pod was completed, inspect the logs of the pod, you will see something similar as below.</p>
-<div class="codehilite"><pre><span></span><code><span class="nx">_________________________________________</span><span class="w"> </span>
+<div class="codehilite"><pre><span></span><code><span class="nx">_________________________________________</span>
 <span class="o">/</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;context&quot;</span><span class="p">:{</span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;webhook&quot;</span><span class="p">,</span><span class="s">&quot;specVersi \</span>
 <span class="s">| on&quot;</span><span class="p">:</span><span class="s">&quot;0.3&quot;</span><span class="p">,</span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="s">&quot;webhook&quot;</span><span class="p">,</span><span class="s">&quot;e |</span>
 <span class="s">| ventID&quot;</span><span class="p">:</span><span class="s">&quot;30306463666539362d346666642d34 |</span>
@@ -2221,17 +2221,17 @@ set up event-driven pipelines for existing workloads.</p>
 <span class="s">| iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |</span>
 <span class="s">| FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |</span>
 <span class="s">\ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;</span><span class="p">}</span><span class="w">       </span><span class="o">/</span>
-<span class="o">-----------------------------------------</span><span class="w"> </span>
+<span class="o">-----------------------------------------</span>
 <span class="w">  </span>\
 <span class="w">   </span>\
-<span class="w">    </span><span class="err">\</span><span class="w">     </span>
-<span class="w">                  </span><span class="err">##</span><span class="w">        </span><span class="p">.</span><span class="w">            </span>
-<span class="w">            </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">       </span><span class="o">==</span><span class="w">            </span>
-<span class="w">         </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">      </span><span class="o">==</span><span class="p">=</span><span class="w">            </span>
-<span class="w">     </span><span class="o">/</span><span class="s">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span><span class="nx">___</span><span class="o">/</span><span class="w"> </span><span class="o">==</span><span class="p">=</span><span class="w">        </span>
-<span class="o">~~~</span><span class="w"> </span><span class="p">{</span><span class="o">~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="o">/</span><span class="w">  </span><span class="o">==</span><span class="p">=</span><span class="o">-</span><span class="w"> </span><span class="o">~~~</span><span class="w">   </span>
-<span class="w">     </span><span class="err">\</span><span class="nx">______</span><span class="w"> </span><span class="nx">o</span><span class="w">          </span><span class="nx">__</span><span class="o">/</span><span class="w">            </span>
-<span class="w">      </span><span class="err">\</span><span class="w">    </span><span class="err">\</span><span class="w">        </span><span class="nx">__</span><span class="o">/</span><span class="w">             </span>
+<span class="w">    </span>\
+<span class="w">                  </span><span class="err">##</span><span class="w">        </span><span class="p">.</span>
+<span class="w">            </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">       </span><span class="o">==</span>
+<span class="w">         </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">      </span><span class="o">==</span><span class="p">=</span>
+<span class="w">     </span><span class="o">/</span><span class="s">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span><span class="nx">___</span><span class="o">/</span><span class="w"> </span><span class="o">==</span><span class="p">=</span>
+<span class="o">~~~</span><span class="w"> </span><span class="p">{</span><span class="o">~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="o">/</span><span class="w">  </span><span class="o">==</span><span class="p">=</span><span class="o">-</span><span class="w"> </span><span class="o">~~~</span>
+<span class="w">     </span><span class="err">\</span><span class="nx">______</span><span class="w"> </span><span class="nx">o</span><span class="w">          </span><span class="nx">__</span><span class="o">/</span>
+<span class="w">      </span><span class="err">\</span><span class="w">    </span><span class="err">\</span><span class="w">        </span><span class="nx">__</span><span class="o">/</span>
 <span class="w">        </span><span class="err">\</span><span class="nx">____</span><span class="err">\</span><span class="nx">______</span><span class="o">/</span>
 </code></pre></div>
 
@@ -2246,7 +2246,7 @@ set up event-driven pipelines for existing workloads.</p>
 <li><code>patch</code>: Patches the object using given patch strategy.</li>
 <li><code>delete</code>: Deletes the object if it exists.</li>
 </ol>
-<p>More info available at <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.StandardK8sTrigger">here</a>.</p>
+<p>More info available at <a href="../../../APIs/#argoproj.io/v1alpha1.StandardK8STrigger">here</a>.</p>
 <h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
 <p>Similar to other type of triggers, sensor offers parameterization for the K8s trigger. Parameterization is specially useful when
 you want to define a generic trigger template in the sensor and populate the K8s object values on the fly.</p>

@@ -2100,7 +2100,7 @@
 <h1 id="pulsar-trigger">Pulsar Trigger<a class="headerlink" href="#pulsar-trigger" title="Permanent link">&para;</a></h1>
 <p>Pulsar trigger allows sensor to publish events on Pulsar topic. This trigger helps source the events from outside world into your messaging queues.</p>
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>The Pulsar trigger specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#pulsartrigger">here</a>.</p>
+<p>The Pulsar trigger specification is available <a href="../../../APIs/#argoproj.io/v1alpha1.PulsarTrigger">here</a>.</p>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
@@ -2108,7 +2108,7 @@
 </li>
 <li>
 <p>Set up the Minio Event Source <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>.
-   Do not create the Minio sensor, we are going to create it in next step.</p>
+    Do not create the Minio sensor, we are going to create it in next step.</p>
 </li>
 <li>
 <p>Lets create the sensor.</p>
@@ -2143,19 +2143,19 @@
 </li>
 <li>
 <p>The Pulsar message needs a body. In order to construct message based on the event data, sensor offers
-   <code>payload</code> field as a part of the Pulsar trigger.</p>
-</li>
-</ol>
+    <code>payload</code> field as a part of the Pulsar trigger.</p>
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a message body like below.</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;fileName&quot;: &quot;hello.txt&quot; // name/key of the object
-        &quot;bucket&quot;: &quot;input&quot; // name of the bucket
-    }
+<div class="codehilite"><pre><span></span><code> {
+     &quot;fileName&quot;: &quot;hello.txt&quot; // name/key of the object
+     &quot;bucket&quot;: &quot;input&quot; // name of the bucket
+ }
 </code></pre></div>
 
-<ol>
-<li>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on Pulsar topic</li>
+</li>
+<li>
+<p>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on Pulsar topic</p>
+</li>
 </ol>
 
               

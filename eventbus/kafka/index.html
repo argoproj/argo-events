@@ -2270,10 +2270,10 @@ below).</p>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">kafka</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka:9092</span><span class="w">   </span><span class="c1"># must be managed independently</span>
-<span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example&quot;</span><span class="w">  </span><span class="c1"># optional</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka:9092</span><span class="w"> </span><span class="c1"># must be managed independently</span>
+<span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example&quot;</span><span class="w"> </span><span class="c1"># optional</span>
 </code></pre></div>
-<p>See <a href="https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#kafkabus">here</a>
+<p>See <a href="../../APIs/#argoproj.io/v1alpha1.KafkaBus">here</a>
 for the full specification.</p>
 <h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
 <h3 id="url">url<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
@@ -2287,7 +2287,7 @@ information.</p>
 <p>Kafka version, we recommend not manually setting this field in most
 circumstances. Defaults to the oldest supported stable version.</p>
 <h3 id="tls">tls<a class="headerlink" href="#tls" title="Permanent link">&para;</a></h3>
-<p>Enables TLS on the kafka connection.
+<p>Enables TLS on the kafka connection.</p>
 <div class="highlight"><pre><span></span><code>tls:
   caCertSecret:
     name: my-secret
@@ -2298,9 +2298,9 @@ circumstances. Defaults to the oldest supported stable version.</p>
   clientKeySecret:
     name: my-secret
     key: client-key-key
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="sasl">sasl<a class="headerlink" href="#sasl" title="Permanent link">&para;</a></h3>
-<p>Enables SASL authentication on the kafka connection.
+<p>Enables SASL authentication on the kafka connection.</p>
 <div class="highlight"><pre><span></span><code>sasl:
   mechanism: PLAIN
   passwordSecret:
@@ -2309,7 +2309,7 @@ circumstances. Defaults to the oldest supported stable version.</p>
   userSecret:
     key: user
     name: my-user
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="consumergroupgroupname">consumerGroup.groupName<a class="headerlink" href="#consumergroupgroupname" title="Permanent link">&para;</a></h3>
 <p>Consumer group name, defaults to <code>{namespace-name}-{sensor-name}</code>.</p>
 <h3 id="consumergrouprebalancestrategy">consumerGroup.rebalanceStrategy<a class="headerlink" href="#consumergrouprebalancestrategy" title="Permanent link">&para;</a></h3>

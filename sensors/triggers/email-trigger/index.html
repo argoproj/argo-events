@@ -2073,22 +2073,22 @@
 </li>
 <li>
 <p>Set up port-forwarding to expose the http server. We will
-   use port-forwarding here.</p>
-<div class="codehilite"><pre><span></span><code>kubectl port-forward -n argo-events &lt;event-source-pod-name&gt; 12000:12000
+    use port-forwarding here.</p>
+<div class="codehilite"><pre><span></span><code> kubectl port-forward -n argo-events &lt;event-source-pod-name&gt; 12000:12000
 </code></pre></div>
 
 </li>
 </ol>
 <h2 id="email-trigger_1">Email Trigger<a class="headerlink" href="#email-trigger_1" title="Permanent link">&para;</a></h2>
 <p>Lets say we want to send an email to a dynamic recepient using a custom email body template.</p>
-<p>The custom email body template we are going to use is the following:
+<p>The custom email body template we are going to use is the following:</p>
 <div class="highlight"><pre><span></span><code>Hi &lt;name&gt;,
   Hello There
 
 Thanks,
 Obi
 </code></pre></div>
-where the name has to be substituted with the receiver name from the event.</p>
+<p>where the name has to be substituted with the receiver name from the event.</p>
 <ol>
 <li>
 <p>Create a sensor with Email trigger.</p>
@@ -2096,7 +2096,7 @@ where the name has to be substituted with the receiver name from the event.</p>
 </code></pre></div>
 
 <p><strong>Note</strong>: Please update <code>email.port</code>, <code>email.host</code> and <code>email.username</code> to that of your SMTP server.
-    If your SMTP server doesnot require authentication, the <code>email.username</code> and <code>email.smtpPassword</code> should be ommitted.</p>
+If your SMTP server doesnot require authentication, the <code>email.username</code> and <code>email.smtpPassword</code> should be ommitted.</p>
 </li>
 <li>
 <p>Send a http request to the event-source-pod to fire the Email trigger.</p>
@@ -2111,13 +2111,13 @@ where the name has to be substituted with the receiver name from the event.</p>
 </code></pre></div>
 
 <p><strong>Note</strong>: You have to remove the parameterization for <code>email.to.0</code> and add <code>email.to</code> like so:
-    <div class="highlight"><pre><span></span><code><span class="nt">email</span><span class="p">:</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">to</span><span class="p p-Indicator">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target1@email.com</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target2@email.com</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-</code></pre></div></p>
+<code>yaml
+email:
+  ...
+  to:
+    - target1@email.com
+    - target2@email.com
+  ...</code></p>
 </li>
 </ol>
 <h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
@@ -2154,7 +2154,7 @@ where the name has to be substituted with the receiver name from the event.</p>
 <li><code>email.subject</code> can be used to specify the subject of the email which will be sent.</li>
 </ul>
 <p>To understand more on parameterization, take a look at <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">this tutorial</a>.</p>
-<p>The complete specification of Email trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#emailtrigger">here</a>.</p>
+<p>The complete specification of Email trigger is available <a href="../../../APIs/#argoproj.io/v1alpha1.EmailTrigger">here</a>.</p>
 
               
             </article>

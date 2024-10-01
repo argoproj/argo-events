@@ -2148,65 +2148,65 @@
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>NATS event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#natseventssource">here</a>.</p>
+<p>NATS event-source specification is available <a href="../../../APIs/#argoproj.io/v1alpha1.NATSEventsSource">here</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Make sure to have NATS cluster deployed in the Kubernetes. If you don't have one already installed, please refer <a href="https://github.com/nats-io/nats-operator">https://github.com/nats-io/nats-operator</a> for details.</li>
-</ol>
+<li>
+<p>Make sure to have NATS cluster deployed in the Kubernetes. If you don't have one already installed, please refer <a href="https://github.com/nats-io/nats-operator">https://github.com/nats-io/nats-operator</a> for details.</p>
 <p>NATS cluster setup for test purposes,</p>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">v1</span>
-<span class="w">    </span><span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">Service</span>
-<span class="w">    </span><span class="nx">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">      </span><span class="kn">namespace</span><span class="p">:</span><span class="w"> </span><span class="nx">argo</span><span class="o">-</span><span class="nx">events</span>
-<span class="w">      </span><span class="nx">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">    </span><span class="nx">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nx">selector</span><span class="p">:</span>
-<span class="w">        </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">      </span><span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">ClusterIP</span>
-<span class="w">      </span><span class="nx">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">client</span>
-<span class="w">        </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">4222</span>
-<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">cluster</span>
-<span class="w">        </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">6222</span>
-<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">monitor</span>
-<span class="w">        </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">8222</span>
-<span class="w">    </span><span class="o">---</span>
-<span class="w">    </span><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">apps</span><span class="o">/</span><span class="nx">v1beta1</span>
-<span class="w">    </span><span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">StatefulSet</span>
-<span class="w">    </span><span class="nx">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">      </span><span class="kn">namespace</span><span class="p">:</span><span class="w"> </span><span class="nx">argo</span><span class="o">-</span><span class="nx">events</span>
-<span class="w">      </span><span class="nx">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">    </span><span class="nx">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nx">serviceName</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">      </span><span class="nx">replicas</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
-<span class="w">      </span><span class="nx">template</span><span class="p">:</span>
-<span class="w">        </span><span class="nx">metadata</span><span class="p">:</span>
-<span class="w">          </span><span class="nx">labels</span><span class="p">:</span>
-<span class="w">            </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">        </span><span class="nx">spec</span><span class="p">:</span>
-<span class="w">          </span><span class="nx">containers</span><span class="p">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
-<span class="w">            </span><span class="nx">image</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span><span class="p">:</span><span class="nx">latest</span>
-<span class="w">            </span><span class="nx">ports</span><span class="p">:</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nx">containerPort</span><span class="p">:</span><span class="w"> </span><span class="mi">4222</span>
-<span class="w">              </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">client</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nx">containerPort</span><span class="p">:</span><span class="w"> </span><span class="mi">6222</span>
-<span class="w">              </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">cluster</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nx">containerPort</span><span class="p">:</span><span class="w"> </span><span class="mi">8222</span>
-<span class="w">              </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">monitor</span>
-<span class="w">            </span><span class="nx">livenessProbe</span><span class="p">:</span>
-<span class="w">              </span><span class="nx">httpGet</span><span class="p">:</span>
-<span class="w">                </span><span class="nx">path</span><span class="p">:</span><span class="w"> </span><span class="o">/</span>
-<span class="w">                </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">8222</span>
-<span class="w">              </span><span class="nx">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
-<span class="w">              </span><span class="nx">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<div class="codehilite"><pre><span></span><code><span class="w"> </span><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">v1</span>
+<span class="w"> </span><span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">Service</span>
+<span class="w"> </span><span class="nx">metadata</span><span class="p">:</span>
+<span class="w">   </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w">   </span><span class="kn">namespace</span><span class="p">:</span><span class="w"> </span><span class="nx">argo</span><span class="o">-</span><span class="nx">events</span>
+<span class="w">   </span><span class="nx">labels</span><span class="p">:</span>
+<span class="w">     </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w"> </span><span class="nx">spec</span><span class="p">:</span>
+<span class="w">   </span><span class="nx">selector</span><span class="p">:</span>
+<span class="w">     </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w">   </span><span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">ClusterIP</span>
+<span class="w">   </span><span class="nx">ports</span><span class="p">:</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">client</span>
+<span class="w">     </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">4222</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">cluster</span>
+<span class="w">     </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">6222</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">monitor</span>
+<span class="w">     </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">8222</span>
+<span class="w"> </span><span class="o">---</span>
+<span class="w"> </span><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">apps</span><span class="o">/</span><span class="nx">v1beta1</span>
+<span class="w"> </span><span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">StatefulSet</span>
+<span class="w"> </span><span class="nx">metadata</span><span class="p">:</span>
+<span class="w">   </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w">   </span><span class="kn">namespace</span><span class="p">:</span><span class="w"> </span><span class="nx">argo</span><span class="o">-</span><span class="nx">events</span>
+<span class="w">   </span><span class="nx">labels</span><span class="p">:</span>
+<span class="w">     </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w"> </span><span class="nx">spec</span><span class="p">:</span>
+<span class="w">   </span><span class="nx">serviceName</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w">   </span><span class="nx">replicas</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">   </span><span class="nx">template</span><span class="p">:</span>
+<span class="w">     </span><span class="nx">metadata</span><span class="p">:</span>
+<span class="w">       </span><span class="nx">labels</span><span class="p">:</span>
+<span class="w">         </span><span class="nx">component</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w">     </span><span class="nx">spec</span><span class="p">:</span>
+<span class="w">       </span><span class="nx">containers</span><span class="p">:</span>
+<span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span>
+<span class="w">         </span><span class="nx">image</span><span class="p">:</span><span class="w"> </span><span class="nx">nats</span><span class="p">:</span><span class="nx">latest</span>
+<span class="w">         </span><span class="nx">ports</span><span class="p">:</span>
+<span class="w">         </span><span class="o">-</span><span class="w"> </span><span class="nx">containerPort</span><span class="p">:</span><span class="w"> </span><span class="mi">4222</span>
+<span class="w">           </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">client</span>
+<span class="w">         </span><span class="o">-</span><span class="w"> </span><span class="nx">containerPort</span><span class="p">:</span><span class="w"> </span><span class="mi">6222</span>
+<span class="w">           </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">cluster</span>
+<span class="w">         </span><span class="o">-</span><span class="w"> </span><span class="nx">containerPort</span><span class="p">:</span><span class="w"> </span><span class="mi">8222</span>
+<span class="w">           </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">monitor</span>
+<span class="w">         </span><span class="nx">livenessProbe</span><span class="p">:</span>
+<span class="w">           </span><span class="nx">httpGet</span><span class="p">:</span>
+<span class="w">             </span><span class="nx">path</span><span class="p">:</span><span class="w"> </span><span class="o">/</span>
+<span class="w">             </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">8222</span>
+<span class="w">           </span><span class="nx">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">           </span><span class="nx">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
 </code></pre></div>
 
-<ol>
+</li>
 <li>
 <p>Create the event source by running the following command.</p>
 <div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nats.yaml

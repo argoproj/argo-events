@@ -2147,13 +2147,13 @@
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>GitHub event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#githubeventsource">here</a>. <br />
+<p>GitHub event-source specification is available <a href="../../../APIs/#argoproj.io/v1alpha1.GithubEventSource">here</a>. <br />
 Example event-source yaml file is <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/github.yaml">here</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p>Create an API token if you don't have one. Follow <a href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line">instructions</a> to create a new GitHub API Token.
-   Grant it the <code>repo_hook</code> permissions.</p>
+    Grant it the <code>repo_hook</code> permissions.</p>
 </li>
 <li>
 <p>Base64 encode your API token key.</p>
@@ -2182,9 +2182,9 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 </li>
 <li>
 <p>The event-source for GitHub creates a pod and exposes it via service.
-   The name for the service is in <code>&lt;event-source-name&gt;-eventsource-svc</code> format.
-   You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from GitHub.
-   You can find more information on Ingress or Route online.</p>
+    The name for the service is in <code>&lt;event-source-name&gt;-eventsource-svc</code> format.
+    You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from GitHub.
+    You can find more information on Ingress or Route online.</p>
 </li>
 <li>
 <p>Create the event source by running the following command. Make sure to replace the <code>url</code> field.</p>

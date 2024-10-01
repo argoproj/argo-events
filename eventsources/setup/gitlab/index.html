@@ -2147,13 +2147,13 @@
 </code></pre></div>
 
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>GitLab event-source specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md#gitlabeventsource">here</a>. <br />
+<p>GitLab event-source specification is available <a href="../../../APIs/#argoproj.io/v1alpha1.GitlabEventSource">here</a>. <br />
 Example event-source yaml file is <a href="https://github.com/argoproj/argo-events/blob/master/examples/event-sources/gitlab.yaml">here</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p>Create an API token if you don't have one. Follow <a href="https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html">instructions</a> to create a new GitLab API Token.
-   Grant it the <code>api</code> permissions.</p>
+    Grant it the <code>api</code> permissions.</p>
 </li>
 <li>
 <p>Base64 encode your api token key.</p>
@@ -2181,9 +2181,9 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 </li>
 <li>
 <p>The event-source for GitLab creates a pod and exposes it via service.
-   The name for the service is in <code>&lt;event-source-name&gt;-eventsource-svc</code> format.
-   You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from GitLab.
-   You can find more information on Ingress or Route online.</p>
+    The name for the service is in <code>&lt;event-source-name&gt;-eventsource-svc</code> format.
+    You will need to create an Ingress or OpenShift Route for the event-source service so that it can be reached from GitLab.
+    You can find more information on Ingress or Route online.</p>
 </li>
 <li>
 <p>Create the event source by running the following command. Make sure to update <code>url</code> field.</p>

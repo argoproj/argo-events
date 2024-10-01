@@ -2161,12 +2161,12 @@ run a gRPC server that implements the interface that the sensor expects.</p>
 <ol>
 <li>
 <p><code>FetchResource</code>: If the trigger server needs to fetch a resource from external sources like S3, Git or a URL, this is the
-    place to do so. e.g. if the trigger server aims to invoke a TektonCD pipeline and the <code>PipelineRun</code> resource lives on Git, then
-    trigger server can first fetch it from Git and return it back to sensor.</p>
+   place to do so. e.g. if the trigger server aims to invoke a TektonCD pipeline and the <code>PipelineRun</code> resource lives on Git, then
+   trigger server can first fetch it from Git and return it back to sensor.</p>
 </li>
 <li>
 <p><code>Execute</code>: In this method, the trigger server executes/invokes the trigger. e.g. TektonCD pipeline resource being
-    created in K8s cluster.</p>
+   created in K8s cluster.</p>
 </li>
 <li>
 <p><code>ApplyPolicy</code>: This is where your trigger implementation can check whether the triggered resource transitioned into the success state.
@@ -2222,17 +2222,17 @@ The specification under <code>custom</code> key defines the custom trigger.</p>
 </li>
 <li>
 <p><code>spec</code>: It is a map of string -&gt; string. The spec can be anything you want as per your use-case. The sensor sends
-    the spec to trigger server, and it is upto the trigger gRPC server to interpret the spec.</p>
+   the spec to trigger server, and it is upto the trigger gRPC server to interpret the spec.</p>
 </li>
 <li>
 <p><code>parameters</code>: The parameters override the resource that is fetched by the trigger server.
-    Read more info on parameters <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
+   Read more info on parameters <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
 </li>
 <li>
 <p><code>payload</code>: Payload to send to the trigger server. Read more on payload <a href="https://argoproj.github.io/argo-events/sensors/triggers/http-trigger/#request-payload">here</a>.</p>
 </li>
 </ol>
-<p>The complete spec for the custom trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#customtrigger">here</a>.</p>
+<p>The complete spec for the custom trigger is available <a href="../../../APIs/#argoproj.io/v1alpha1.CustomTrigger">here</a>.</p>
 <h2 id="custom-trigger-in-action">Custom Trigger in Action<a class="headerlink" href="#custom-trigger-in-action" title="Permanent link">&para;</a></h2>
 <p>Refer to a sample <a href="https://github.com/VaibhavPage/tekton-cd-trigger">trigger server</a> that invokes TektonCD pipeline on events.</p>
 

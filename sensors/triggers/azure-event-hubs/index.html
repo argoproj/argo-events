@@ -2101,7 +2101,7 @@
 <p>Azure Event Hubs Trigger allows a sensor to publish events to <a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about">Azure Event Hubs</a>. Argo Events integrates with Azure Event Hubs to stream data from an <code>EventSource</code></p>
 <p><strong>NOTE:</strong> Parametrization for <code>fqdn</code> and <code>hubName</code> values are not yet supported.</p>
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>The Azure Event Hubs trigger specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#azureeventhubstrigger">here</a>.</p>
+<p>The Azure Event Hubs trigger specification is available <a href="../../../APIs/#argoproj.io/v1alpha1.AzureEventHubsTrigger">here</a>.</p>
 <h2 id="send-an-event-to-azure-event-hubs">Send an Event to Azure Event Hubs<a class="headerlink" href="#send-an-event-to-azure-event-hubs" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
@@ -2173,15 +2173,13 @@
 <li>
 <p>The Event needs a body. In order to construct a messaged based on your event data, the Azure Event Hubs sensor has the <code>payload</code> field as part of the trigger.</p>
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source events and <code>dest</code> which refers to destination key within the resulting request payload.</p>
-</li>
-</ol>
 <p>The <code>payload</code> declared above will generate a message body like below,</p>
-<div class="codehilite"><pre><span></span><code>    {
-        &quot;message&quot;: &quot;some message here&quot; // name/key of the object
-    }
+<div class="codehilite"><pre><span></span><code> {
+     &quot;message&quot;: &quot;some message here&quot; // name/key of the object
+ }
 </code></pre></div>
 
-<ol>
+</li>
 <li>
 <p>Let's expose the webhook event-source pod using <code>port-forward</code> so that we can make a request to it.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward &lt;name-of-event-source-pod&gt; 12000:12000

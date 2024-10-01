@@ -2225,8 +2225,8 @@
 </li>
 <li>
 <p>Set up port-forwarding to expose the http server. We will
-   use port-forwarding here.</p>
-<div class="codehilite"><pre><span></span><code>kubectl port-forward -n argo-events &lt;event-source-pod-name&gt; 12000:12000
+    use port-forwarding here.</p>
+<div class="codehilite"><pre><span></span><code> kubectl port-forward -n argo-events &lt;event-source-pod-name&gt; 12000:12000
 </code></pre></div>
 
 </li>
@@ -2437,7 +2437,7 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
 <span class="w">              </span><span class="p">}]</span>
 </code></pre></div>
 
-<p>The complete specification of Slack trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#slacktrigger">here</a>.</p>
+<p>The complete specification of Slack trigger is available <a href="../../../APIs/#argoproj.io/v1alpha1.SlackTrigger">here</a>.</p>
 
               
             </article>

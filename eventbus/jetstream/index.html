@@ -2194,15 +2194,16 @@
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">jetstream</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span><span class="w"> </span><span class="c1"># Do NOT use &quot;latest&quot; but a specific version in your real deployment</span>
-<span class="w">                    </span><span class="c1"># See: https://argoproj.github.io/argo-events/eventbus/jetstream/#version</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">latest</span><span class="w"> </span><span class="c1"># Do NOT use &quot;latest&quot; but a specific version in your real deployment</span>
+<span class="w">      </span><span class="c1"># See: https://argoproj.github.io/argo-events/eventbus/jetstream/#version</span>
 </code></pre></div>
 <p>The example above brings up a Jetstream
 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
 with 3 replicas in the namespace.</p>
 <h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
 <p>Check
-<a href="https://github.com/argoproj/argo-events/blob/master/api/event-bus.md#argoproj.io/v1alpha1.JetstreamBus">here</a>
+<a href="../../APIs/#argoproj.io/v1alpha1.JetStreamBus">here</a>
 for the full spec of <code>jetstream</code>.</p>
 <h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
 <p>The version number specified in the example above is the release number for the NATS server. We will support some subset of these as we've tried them out and only plan to upgrade them as needed. The list of available versions is managed by the controller manager ConfigMap, which can be updated to support new versions.</p>
@@ -2242,11 +2243,11 @@ spec:
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">jetstreamExotic</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nats://xxxxx:xxx</span>
-<span class="w">      </span><span class="nt">accessSecret</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-secret-name</span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-key</span>
-<span class="w">      </span><span class="nt">streamConfig</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nats://xxxxx:xxx</span>
+<span class="w">    </span><span class="nt">accessSecret</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-secret-name</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-key</span>
+<span class="w">    </span><span class="nt">streamConfig</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 </code></pre></div>
 
               
