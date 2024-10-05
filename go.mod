@@ -1,6 +1,7 @@
 module github.com/argoproj/argo-events
 
 go 1.22
+toolchain go1.22.5
 
 retract v1.15.1 // Contains retractions only.
 
@@ -81,7 +82,7 @@ require (
 	go.uber.org/ratelimit v0.3.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.28.0
-	golang.org/x/tools v0.24.0
+	golang.org/x/tools v0.26.0
 	google.golang.org/api v0.181.0
 	google.golang.org/grpc v1.63.2
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
@@ -303,8 +304,8 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
-	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/mod v0.21.0 // indirect
+	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
