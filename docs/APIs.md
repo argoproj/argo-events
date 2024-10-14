@@ -9129,7 +9129,7 @@ Path to file that contains trigger resource definition
 <em>(Optional)</em>
 <p>
 
-Branch to use to pull trigger resource
+Branch to use to pull trigger resource. Defaults to "master". Required where <code>tag</code> and <code>ref</code> are unset AND the target repository's default branch is not "master" (eg. "main", "trunk", etc.)
 </p>
 
 </td>
