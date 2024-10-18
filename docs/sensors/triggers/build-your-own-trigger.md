@@ -22,7 +22,7 @@ The interface exposed via proto file,
             rpc ApplyPolicy(ApplyPolicyRequest) returns (ApplyPolicyResponse);
         }
 
-The complete proto file is available [here](https://github.com/argoproj/argo-events/blob/master/sensors/triggers/trigger.proto).
+The complete proto file is available [here](https://github.com/argoproj/argo-events/blob/master/pkg/sensors/triggers/trigger.proto).
 
 Let's walk through the contract,
 
