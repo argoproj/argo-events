@@ -584,6 +584,10 @@
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NATSConfig",
           "description": "Exotic holds an exotic NATS config"
         },
+        "metadata": {
+          "$ref": "#/definitions/io.argoproj.common.Metadata",
+          "description": "StatefulSet metadata, we actually uses only annotation from it for now"
+        },
         "native": {
           "$ref": "#/definitions/io.argoproj.eventbus.v1alpha1.NativeStrategy",
           "description": "Native means to bring up a native NATS service"
@@ -5395,6 +5399,9 @@
           "description": "Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
         }
       },
+      "required": [
+        "items"
+      ],
       "type": "object",
       "x-kubernetes-group-version-kind": [
         {
@@ -5453,6 +5460,9 @@
           "description": "Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
         }
       },
+      "required": [
+        "items"
+      ],
       "type": "object",
       "x-kubernetes-group-version-kind": [
         {
@@ -5868,6 +5878,9 @@
           "description": "Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
         }
       },
+      "required": [
+        "items"
+      ],
       "type": "object",
       "x-kubernetes-group-version-kind": [
         {
@@ -5926,6 +5939,9 @@
           "description": "Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
         }
       },
+      "required": [
+        "items"
+      ],
       "type": "object",
       "x-kubernetes-group-version-kind": [
         {

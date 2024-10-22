@@ -602,11 +602,17 @@ func schema_pkg_apis_eventbus_v1alpha1_NATSBus(ref common.ReferenceCallback) com
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"),
 						},
 					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "StatefulSet metadata, we actually uses only annotation from it for now",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Metadata"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NativeStrategy"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Metadata", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NativeStrategy"},
 	}
 }
 

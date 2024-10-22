@@ -3,10 +3,12 @@ package installer
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 	appv1 "k8s.io/api/apps/v1"
@@ -298,4 +300,57 @@ func TestBuildConfigMap(t *testing.T) {
 			}
 		}
 	})
+}
+
+// Returns annotations when both Metadata and Annotations are non-nil
+func TestGetAnnotationsWithNonNilMetadataAndAnnotations(t *testing.T) {
+	annotations := map[string]string{"key1": "value1", "key2": "value2"}
+	bus := &v1alpha1.EventBus{
+		Spec: v1alpha1.EventBusSpec{
+			NATS: &v1alpha1.NATSBus{
+				Metadata: &common.Metadata{
+					Annotations: annotations,
+				},
+			},
+		},
+	}
+	result := getAnnotations(bus)
+	if !reflect.DeepEqual(result, annotations) {
+		t.Errorf("Expected %v, got %v", annotations, result)
+	}
+}
+
+// Returns an empty map when Metadata is nil
+func TestGetAnnotationsWithNilMetadata(t *testing.T) {
+	bus := &v1alpha1.EventBus{
+		Spec: v1alpha1.EventBusSpec{
+			NATS: &v1alpha1.NATSBus{
+				Metadata: nil,
+			},
+		},
+	}
+	result := getAnnotations(bus)
+	if len(result) != 0 {
+		t.Errorf("Expected empty map, got %v", result)
+	}
+}
+
+// Handles nil EventBus input gracefully
+func TestGetAnnotationsWithNilEventBus(t *testing.T) {
+	var bus *v1alpha1.EventBus = nil
+	result := getAnnotations(bus)
+	if len(result) != 0 {
+		t.Errorf("Expected empty map, got %v", result)
+	}
+}
+
+// Handles EventBus with nil Spec
+func TestGetAnnotationsWithNilSpec(t *testing.T) {
+	bus := &v1alpha1.EventBus{
+		Spec: v1alpha1.EventBusSpec{},
+	}
+	result := getAnnotations(bus)
+	if len(result) != 0 {
+		t.Errorf("Expected empty map, got %v", result)
+	}
 }

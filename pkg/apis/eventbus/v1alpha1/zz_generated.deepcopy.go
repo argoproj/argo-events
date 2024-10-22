@@ -376,6 +376,11 @@ func (in *NATSBus) DeepCopyInto(out *NATSBus) {
 		*out = new(NATSConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = new(common.Metadata)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

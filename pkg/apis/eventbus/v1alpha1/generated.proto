@@ -259,6 +259,10 @@ message NATSBus {
 
   // Exotic holds an exotic NATS config
   optional NATSConfig exotic = 2;
+
+  // StatefulSet metadata, we actually uses only annotation from it for now
+  // +optional
+  optional github.com.argoproj.argo_events.pkg.apis.common.Metadata metadata = 3;
 }
 
 // NATSConfig holds the config of NATS

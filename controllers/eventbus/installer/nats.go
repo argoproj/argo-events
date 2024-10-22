@@ -45,24 +45,33 @@ const (
 
 // natsInstaller is used create a NATS installation.
 type natsInstaller struct {
-	client     client.Client
-	kubeClient kubernetes.Interface
-	eventBus   *v1alpha1.EventBus
-	config     *controllers.GlobalConfig
-	labels     map[string]string
-	logger     *zap.SugaredLogger
+	client      client.Client
+	kubeClient  kubernetes.Interface
+	eventBus    *v1alpha1.EventBus
+	config      *controllers.GlobalConfig
+	labels      map[string]string
+	logger      *zap.SugaredLogger
+	annotations map[string]string
 }
 
 // NewNATSInstaller returns a new NATS installer
 func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config *controllers.GlobalConfig, labels map[string]string, kubeClient kubernetes.Interface, logger *zap.SugaredLogger) Installer {
 	return &natsInstaller{
-		client:     client,
-		kubeClient: kubeClient,
-		eventBus:   eventBus,
-		config:     config,
-		labels:     labels,
-		logger:     logger.Named("nats"),
+		client:      client,
+		kubeClient:  kubeClient,
+		eventBus:    eventBus,
+		config:      config,
+		labels:      labels,
+		logger:      logger.Named("nats"),
+		annotations: getAnnotations(eventBus),
 	}
+}
+
+func getAnnotations(bus *v1alpha1.EventBus) map[string]string {
+	if bus != nil && bus.Spec.NATS != nil && bus.Spec.NATS.Metadata != nil && bus.Spec.NATS.Metadata.Annotations != nil {
+		return bus.Spec.NATS.Metadata.Annotations
+	}
+	return map[string]string{}
 }
 
 // Install creats a StatefulSet and a Service for NATS
@@ -602,9 +611,10 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 	}
 	ss := &appv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: i.eventBus.Namespace,
-			Name:      generateStatefulSetName(i.eventBus),
-			Labels:    i.mergeEventBusLabels(i.labels),
+			Namespace:   i.eventBus.Namespace,
+			Name:        generateStatefulSetName(i.eventBus),
+			Labels:      i.mergeEventBusLabels(i.labels),
+			Annotations: i.annotations,
 		},
 		Spec: *spec,
 	}

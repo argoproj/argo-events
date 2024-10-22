@@ -11,6 +11,9 @@ type NATSBus struct {
 	Native *NativeStrategy `json:"native,omitempty" protobuf:"bytes,1,opt,name=native"`
 	// Exotic holds an exotic NATS config
 	Exotic *NATSConfig `json:"exotic,omitempty" protobuf:"bytes,2,opt,name=exotic"`
+	// StatefulSet metadata, we actually uses only annotation from it for now
+	// +optional
+	Metadata *common.Metadata `json:"metadata,omitempty" protobuf:"bytes,3,opt,name=metadata"`
 }
 
 // AuthStrategy is the auth strategy of native nats installaion
