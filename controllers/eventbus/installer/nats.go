@@ -68,11 +68,10 @@ func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config 
 }
 
 func getAnnotations(bus *v1alpha1.EventBus) map[string]string {
-	if bus.Spec.NATS.Metadata != nil && bus.Spec.NATS.Metadata.Annotations != nil {
+	if bus != nil && bus.Spec.NATS != nil && bus.Spec.NATS.Metadata != nil && bus.Spec.NATS.Metadata.Annotations != nil {
 		return bus.Spec.NATS.Metadata.Annotations
 	}
 	return map[string]string{}
-
 }
 
 // Install creats a StatefulSet and a Service for NATS
