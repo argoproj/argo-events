@@ -322,7 +322,7 @@ spec:
         - --namespaced
         env:
         - name: ARGO_EVENTS_IMAGE
-          value: quay.io/codefresh/argo-events:v1.9.2-cap-CR-24607
+          value: quay.io/codefresh/argo-events:v1.9.2-cap-CR-25582
         - name: NAMESPACE
           valueFrom:
             fieldRef:

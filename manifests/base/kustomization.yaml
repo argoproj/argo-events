@@ -13,7 +13,7 @@ resources:
 images:
 - name: quay.io/argoproj/argo-events
   newName: quay.io/codefresh/argo-events
-  newTag: v1.9.2-cap-CR-24607
+  newTag: v1.9.2-cap-CR-25582
 
 patches:
 - patch: |-
@@ -28,4 +28,4 @@ patches:
             - name: controller-manager
               env:
                 - name: ARGO_EVENTS_IMAGE
-                  value: quay.io/codefresh/argo-events:v1.9.2-cap-CR-24607
+                  value: quay.io/codefresh/argo-events:v1.9.2-cap-CR-25582

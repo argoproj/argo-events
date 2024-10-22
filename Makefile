@@ -16,8 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/codefresh
-VERSION?=v1.9.2-cap-CR-24607
-BASE_VERSION:=v1.9.2-cap-CR-24607
+VERSION?=v1.9.2-cap-CR-25582
+BASE_VERSION:=v1.9.2-cap-CR-25582
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
