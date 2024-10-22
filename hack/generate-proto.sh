@@ -33,7 +33,7 @@ cd "${FAKE_REPOPATH}"
 # go >= 1.17
 GOBIN=${GOPATH}/bin go install -mod=vendor ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
 
-export GO111MODULE="off"
+export GO111MODULE="on"
 
 ${GOPATH}/bin/go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
