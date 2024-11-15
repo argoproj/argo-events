@@ -17,3 +17,7 @@ dependencies are resolved.
 1. Azure Event Hubs Messages
 1. Create any Kubernetes Objects
 1. Log (for debugging event bus messages)
+
+## Examples
+
+Examples are located under [examples/triggers](https://github.com/argoproj/argo-events/tree/master/examples/triggers).
