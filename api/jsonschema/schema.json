@@ -2519,6 +2519,13 @@
           "format": "int32",
           "type": "integer"
         },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Headers for the Kafka Messages.",
+          "type": "object"
+        },
         "parameters": {
           "description": "Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
           "items": {
@@ -2554,6 +2561,13 @@
         "schemaRegistry": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.SchemaRegistryConfig",
           "description": "Schema Registry configuration to producer message with avro format"
+        },
+        "secureHeaders": {
+          "description": "Secure Headers stored in Kubernetes Secrets for the Kafka messages.",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.SecureHeader"
+          },
+          "type": "array"
         },
         "tls": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig",

@@ -556,6 +556,12 @@ type KafkaTrigger struct {
 	// Schema Registry configuration to producer message with avro format
 	// +optional
 	SchemaRegistry *SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,13,opt,name=schemaRegistry"`
+	// Headers for the Kafka Messages.
+	// +optional
+	Headers map[string]string `json:"headers,omitempty" protobuf:"bytes,14,rep,name=headers"`
+	// Secure Headers stored in Kubernetes Secrets for the Kafka messages.
+	// +optional
+	SecureHeaders []*SecureHeader `json:"secureHeaders,omitempty" protobuf:"bytes,15,rep,name=secureHeaders"`
 }
 
 // SchemaRegistryConfig refers to configuration for a client
