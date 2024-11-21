@@ -125,6 +125,17 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	}
 }
 
+func safeBase64Decode(data string) ([]byte, error) {
+	rawDecoded, err := base64.URLEncoding.DecodeString(data)
+	if err != nil {
+		rawDecoded, err = base64.StdEncoding.DecodeString(data)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return rawDecoded, nil
+}
+
 func (el *EventListener) processMessage(message *azqueue.DequeuedMessage, dispatch func([]byte, ...eventsourcecommon.Option) error, ack func(), log *zap.SugaredLogger) {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
@@ -136,7 +147,7 @@ func (el *EventListener) processMessage(message *azqueue.DequeuedMessage, dispat
 	}
 	body := []byte(*message.MessageText)
 	if el.AzureQueueStorageEventSource.DecodeMessage {
-		rawDecodedText, err := base64.URLEncoding.DecodeString(*message.MessageText)
+		rawDecodedText, err := safeBase64Decode(*message.MessageText)
 		if err != nil {
 			log.Errorw("failed to base64 decode message...", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
