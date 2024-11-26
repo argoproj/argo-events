@@ -4868,12 +4868,41 @@ func schema_pkg_apis_events_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig"),
 						},
 					},
+					"headers": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Headers for the Kafka Messages.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"secureHeaders": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Secure Headers stored in Kubernetes Secrets for the Kafka messages.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SecureHeader"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"url", "topic", "payload"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SecureHeader", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"},
 	}
 }
 
