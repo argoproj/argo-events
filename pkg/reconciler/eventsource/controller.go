@@ -97,7 +97,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 		eventSource.Status.MarkSourcesNotProvided("InvalidEventSource", err.Error())
 		return err
 	}
-
+	eventSource.Status.MarkSourcesProvided()
 	if err := r.orchestrateResources(ctx, eventSource); err != nil {
 		log.Errorw("Error orchestrating resources", zap.Error(err))
 		eventSource.Status.MarkDeployFailed("OrchestrateResourcesFailed", err.Error())
@@ -181,7 +181,7 @@ func (r *reconciler) createOrUpdateDeployment(ctx context.Context, eventBus *v1a
 		}
 	}
 	if needToCreate {
-		if err := r.client.Create(ctx, existingDeploy); err != nil && !apierrors.IsAlreadyExists(err) {
+		if err := r.client.Create(ctx, expectedDeploy); err != nil && !apierrors.IsAlreadyExists(err) {
 			log.Errorw("Failed to create a deployment", zap.String("deployment", expectedDeploy.Name), zap.Error(err))
 			return fmt.Errorf("failed to create a deployment, %w", err)
 		}
@@ -205,7 +205,7 @@ func (r *reconciler) buildDeployment(eventBus *v1alpha1.EventBus, eventSource *v
 	eventSourceCopy := &v1alpha1.EventSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: eventSource.Namespace,
-			Name:      eventSource.Name,
+			Name:      eventSource.GetDeploymentName(),
 		},
 		Spec: eventSource.Spec,
 	}
