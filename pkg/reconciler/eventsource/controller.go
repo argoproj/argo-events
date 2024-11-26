@@ -68,7 +68,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if !equality.Semantic.DeepEqual(eventSource.Finalizers, esCopy.Finalizers) {
 		patchYaml := "metadata:\n  finalizers: [" + strings.Join(esCopy.Finalizers, ",") + "]"
 		patchJson, _ := yaml.YAMLToJSON([]byte(patchYaml))
-		if err := r.client.Patch(ctx, eventSource, client.RawPatch(types.MergePatchType, []byte(patchJson))); err != nil {
+		if err := r.client.Patch(ctx, eventSource, client.RawPatch(types.MergePatchType, patchJson)); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

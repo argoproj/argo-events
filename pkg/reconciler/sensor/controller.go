@@ -78,7 +78,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if !equality.Semantic.DeepEqual(sensor.Finalizers, sensorCopy.Finalizers) {
 		patchYaml := "metadata:\n  finalizers: [" + strings.Join(sensorCopy.Finalizers, ",") + "]"
 		patchJson, _ := yaml.YAMLToJSON([]byte(patchYaml))
-		if err := r.client.Patch(ctx, sensor, client.RawPatch(types.MergePatchType, []byte(patchJson))); err != nil {
+		if err := r.client.Patch(ctx, sensor, client.RawPatch(types.MergePatchType, patchJson)); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
