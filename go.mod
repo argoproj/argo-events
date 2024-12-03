@@ -1,6 +1,6 @@
 module github.com/argoproj/argo-events
 
-go 1.22
+go 1.22.7
 
 retract v1.15.1 // Contains retractions only.
 
