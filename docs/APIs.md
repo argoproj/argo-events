@@ -12369,6 +12369,47 @@ Schema Registry configuration to producer message with avro format
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>headers</code></br> <em> map\[string\]string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Headers for the Kafka Messages.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>secureHeaders</code></br> <em>
+<a href="#argoproj.io/v1alpha1.*github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SecureHeader">
+\[\]\*github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SecureHeader
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Secure Headers stored in Kubernetes Secrets for the Kafka messages.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

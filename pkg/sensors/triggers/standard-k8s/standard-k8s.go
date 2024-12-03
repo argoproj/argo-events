@@ -40,8 +40,11 @@ import (
 )
 
 var clusterResources = map[string]bool{
-	"namespaces": true,
-	"nodes":      true,
+	"namespaces":          true,
+	"nodes":               true,
+	"persistentvolumes":   true,
+	"clusterroles":        true,
+	"clusterrolebindings": true,
 }
 
 // StandardK8STrigger implements Trigger interface for standard Kubernetes resources

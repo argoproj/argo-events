@@ -2477,6 +2477,24 @@ func (in *KafkaTrigger) DeepCopyInto(out *KafkaTrigger) {
 		*out = new(SchemaRegistryConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Headers != nil {
+		in, out := &in.Headers, &out.Headers
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.SecureHeaders != nil {
+		in, out := &in.SecureHeaders, &out.SecureHeaders
+		*out = make([]*SecureHeader, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(SecureHeader)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
 	return
 }
 

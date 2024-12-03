@@ -1825,6 +1825,14 @@ message KafkaTrigger {
   // Schema Registry configuration to producer message with avro format
   // +optional
   optional SchemaRegistryConfig schemaRegistry = 13;
+
+  // Headers for the Kafka Messages.
+  // +optional
+  map<string, string> headers = 14;
+
+  // Secure Headers stored in Kubernetes Secrets for the Kafka messages.
+  // +optional
+  repeated SecureHeader secureHeaders = 15;
 }
 
 message LogTrigger {

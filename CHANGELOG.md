@@ -1,5 +1,73 @@
 # Changelog
 
+## v1.9.3 (2024-11-26)
+
+ * [9c8bda9a](https://github.com/argoproj/argo-events/commit/9c8bda9ad1d46bf75e91b851d2265acbf704efbc) Update manifests to v1.9.3
+ * [beec989a](https://github.com/argoproj/argo-events/commit/beec989ac390fae3cb8d6619d26d322f5f984e3c) fix: decode base64-encoded messages from Azure Storage Queue (#3366)
+ * [f5054378](https://github.com/argoproj/argo-events/commit/f50543788c3db6bbf593eee6c52959c62228b37e) feat(triggers/kafka): produce optional Kafka Message Headers (#3365)
+ * [98c99ba1](https://github.com/argoproj/argo-events/commit/98c99ba1aa22a1af1c49c20fb2d34c3c62232557) Upgrade Argo CLI version to v3.6.0 due to CVE-2024-27304 (#3371)
+ * [c1f5f24a](https://github.com/argoproj/argo-events/commit/c1f5f24a971fd38d7ca93b6bd90f8019959ca13c) chore(deps): bump github.com/go-resty/resty/v2 from 2.16.0 to 2.16.2 (#3370)
+ * [91f83171](https://github.com/argoproj/argo-events/commit/91f83171b0ea778ae95fea8de8ba124147f0bb23) chore(deps): bump github.com/xanzy/go-gitlab from 0.113.0 to 0.114.0 (#3368)
+ * [fdecc009](https://github.com/argoproj/argo-events/commit/fdecc009c371b50fb74907ff46759ea6c557f717) chore(deps): bump github.com/stretchr/testify from 1.9.0 to 1.10.0 (#3367)
+ * [089dba9f](https://github.com/argoproj/argo-events/commit/089dba9fabd3bf706558f39402ae8190cedb5de7) chore(deps): bump github.com/go-resty/resty/v2 from 2.15.3 to 2.16.0 (#3363)
+ * [82ea66ca](https://github.com/argoproj/argo-events/commit/82ea66ca280ae858ec5fce7d4fcfbc05f3f0de9b) chore(deps): bump github.com/bradleyfalzon/ghinstallation/v2 from 2.11.0 to 2.12.0 (#3362)
+ * [ccae199d](https://github.com/argoproj/argo-events/commit/ccae199d96e33ead8556ac316fdd38c2f72be6d6) chore(deps): bump golang.org/x/crypto from 0.28.0 to 0.29.0 (#3357)
+ * [5b15ce4d](https://github.com/argoproj/argo-events/commit/5b15ce4d79c18c465a0363a7a5d80d58825c6f9f) chore(deps): bump github.com/xanzy/go-gitlab from 0.112.0 to 0.113.0 (#3353)
+ * [1c6c16af](https://github.com/argoproj/argo-events/commit/1c6c16afff2d41266d7a4ac8bcfa359580849d5b) chore(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.0 to 4.5.1 (#3351)
+ * [66a0f28a](https://github.com/argoproj/argo-events/commit/66a0f28ab2f48c1aeaf2a98f5a9ee3c9668b8a30) chore(deps): bump github.com/fsnotify/fsnotify from 1.7.0 to 1.8.0 (#3347)
+ * [791c87bc](https://github.com/argoproj/argo-events/commit/791c87bc99d33d3ebc920f0413617362e6a2d5da) Update link to proto file in build-your-own-trigger.md (#3331)
+ * [dafed696](https://github.com/argoproj/argo-events/commit/dafed69660de61e0cdb221080e23cff02f05e27c) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.77 to 7.0.78 (#3324)
+ * [8ab1596f](https://github.com/argoproj/argo-events/commit/8ab1596fdf99ba341dbb04b25821606887db8b4e) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity from 1.7.0 to 1.8.0 (#3323)
+ * [aab05fb7](https://github.com/argoproj/argo-events/commit/aab05fb733b47e1faf79c0081ec2487d52cb6038) chore(deps): bump github.com/xanzy/go-gitlab from 0.107.0 to 0.111.0 (#3321)
+ * [963e4f96](https://github.com/argoproj/argo-events/commit/963e4f96b794a0cae4997f2bc05dc8dfd312dfe1) chore(deps): bump sigstore/cosign-installer from 3.5.0 to 3.7.0 (#3318)
+ * [adb4cc50](https://github.com/argoproj/argo-events/commit/adb4cc508d0064dd62231ae622c13029e08c76b9) chore(deps): bump github.com/tidwall/gjson from 1.17.1 to 1.18.0 (#3316)
+ * [d2dc1d96](https://github.com/argoproj/argo-events/commit/d2dc1d96e6ca6ab40be909bc29cb3f191c204644) chore(deps): bump golang.org/x/crypto from 0.26.0 to 0.28.0 (#3315)
+ * [99b043f6](https://github.com/argoproj/argo-events/commit/99b043f64b51bd6dc297afeee7e6f7e99f03b6e1) fix(docs): update API doc links (#3310)
+ * [1db08de0](https://github.com/argoproj/argo-events/commit/1db08de043ce6a8787e6357fc0618b1d00cc6931) feat: eventsource service metadata (#3257)
+ * [ed278aee](https://github.com/argoproj/argo-events/commit/ed278aee5f65c1775b7283907492d928605bda92) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.74 to 7.0.77 (#3306)
+ * [5bc45299](https://github.com/argoproj/argo-events/commit/5bc45299e83a0179b29199d0a4aa5a2d98951928) chore(deps): bump github.com/go-resty/resty/v2 from 2.13.1 to 2.15.3 (#3305)
+ * [7bea42bf](https://github.com/argoproj/argo-events/commit/7bea42bfbd5769552d03510426d4f900ff4825b9) feat(eventsources/bitbucketserver): add OneEventPerChange config option for webhook event handling (#3135)
+ * [e3148f6a](https://github.com/argoproj/argo-events/commit/e3148f6ab1fde1d20bf6691375541e4e1026550a) chore(deps): bump github.com/prometheus/client_golang from 1.19.1 to 1.20.4 (#3295)
+ * [13028fcd](https://github.com/argoproj/argo-events/commit/13028fcd51914a470f2d7e560a7403154b0f1b9a) fix(ci): fix bunch of ci issues (#3292)
+ * [20fd81fb](https://github.com/argoproj/argo-events/commit/20fd81fba02db85c848f52117eef0e6892ff4040) fix:eventsource crash on cast #3238 (#3282)
+ * [789c91ea](https://github.com/argoproj/argo-events/commit/789c91ea48be591130f80afc5c0d906aafc70da3) chore(deps): bump github.com/aws/aws-sdk-go from v1.44.209 => v1.47.11 (#3261)
+ * [af54701c](https://github.com/argoproj/argo-events/commit/af54701c7a3ab88dca6b007f323c01d107467e96) Fix tuto exemple 02-parameterization/sensor-05.yaml (#3218)
+ * [8fb91d65](https://github.com/argoproj/argo-events/commit/8fb91d657c954560ac9c7b4cdc7ccde494c7731d) chore(deps): bump github.com/slack-go/slack from 0.13.0 to 0.13.1 (#3213)
+ * [213a29ef](https://github.com/argoproj/argo-events/commit/213a29ef86d16f4fe6187933bc64a1f7f263f0f2) chore(deps): bump github.com/xanzy/go-gitlab from 0.106.0 to 0.107.0 (#3212)
+ * [69f705a4](https://github.com/argoproj/argo-events/commit/69f705a4b07b7cbc1ac92ed83cfc77f64dd64204) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.73 to 7.0.74 (#3211)
+ * [179890b8](https://github.com/argoproj/argo-events/commit/179890b896e106b9d916e8dd8ee97ab928099703) Added log level option configuration (#3201)
+ * [247c962f](https://github.com/argoproj/argo-events/commit/247c962f890c40cd980725b288dcd4743749ba30) feat(EventSensor): Dead Letter Queue Trigger (#3199)
+ * [ec818b9f](https://github.com/argoproj/argo-events/commit/ec818b9fc74cafd373d30f5c44c0d7c4b36becf8) feat: Jestream configurable DiscardNew policies (#3151)
+ * [9a63429d](https://github.com/argoproj/argo-events/commit/9a63429d2af0c1bbe6a718d441d3afcdbd930f86) chore(deps): bump github.com/nats-io/nats-streaming-server from 0.24.3 to 0.24.6 (#3202)
+ * [cfdca089](https://github.com/argoproj/argo-events/commit/cfdca0894b95f3ce5f69e611301f8745b9d205e9) feat: argo_events_action_retries_failed_total metric (#3190)
+ * [25f7a3d9](https://github.com/argoproj/argo-events/commit/25f7a3d9200506df94a832bfa28e0f6dc547908d) fix: CloudEvent.ID length to 32 chars (#3186)
+ * [97f34b1d](https://github.com/argoproj/argo-events/commit/97f34b1d4f1dd1b96b5de5b1f52a5c5d8c954d42) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.72 to 7.0.73 (#3197)
+ * [9b911c99](https://github.com/argoproj/argo-events/commit/9b911c99b02f0446f95e71b64c896558272617c7) chore(deps): bump golang.org/x/crypto from 0.24.0 to 0.25.0 (#3196)
+ * [80f7e97f](https://github.com/argoproj/argo-events/commit/80f7e97f9ce543e829ea31ea4803c223c6544564) chore(deps): bump dependabot/fetch-metadata from 2.1.0 to 2.2.0 (#3193)
+ * [e31660a5](https://github.com/argoproj/argo-events/commit/e31660a5cb43e3324783852d5eabb50f5c38280f) chore(deps): bump github.com/xanzy/go-gitlab from 0.105.0 to 0.106.0 (#3187)
+ * [6ac9c75d](https://github.com/argoproj/argo-events/commit/6ac9c75d14fbbecd6378003319c27042272ed2a9) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.71 to 7.0.72 (#3177)
+ * [a0eb80a2](https://github.com/argoproj/argo-events/commit/a0eb80a20c7e34e7919409dc18284b587a0dc5ff) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity from 1.5.2 to 1.7.0 (#3178)
+ * [0418c0f5](https://github.com/argoproj/argo-events/commit/0418c0f5aea119334dd5d9420526571aef895f84) chore(deps): bump github.com/spf13/cobra from 1.8.0 to 1.8.1 (#3168)
+ * [d621efcc](https://github.com/argoproj/argo-events/commit/d621efcc960cf59e5a190650c9e7163f986da163) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.70 to 7.0.71 (#3167)
+ * [446fef02](https://github.com/argoproj/argo-events/commit/446fef02ff92163f944c90fa5f04a7af700b80c2) chore(deps): bump github.com/nats-io/nats.go from 1.35.0 to 1.36.0 (#3166)
+ * [f1a3ffd1](https://github.com/argoproj/argo-events/commit/f1a3ffd1e7f5282db1af9b73b72d6e5dada159d2) chore(deps): bump imjasonh/setup-crane from 0.2 to 0.4 (#3164)
+
+### Contributors
+
+ * Atropos
+ * Daimanta
+ * Derek Wang
+ * Francesco Rotondo
+ * Max Vorobev
+ * MenD32
+ * Mitch Anderson
+ * Omer Aplatony
+ * Pepe Barbe
+ * Ryan Currah
+ * Sébastien DIDIER
+ * Taleb Zeghmi
+ * dependabot[bot]
+
 ## v1.9.2 (2024-06-13)
 
  * [8dd63f13](https://github.com/argoproj/argo-events/commit/8dd63f1305746e6503269a7675288b1f65e53df5) Update manifests to v1.9.2

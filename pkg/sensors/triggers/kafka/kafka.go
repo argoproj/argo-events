@@ -213,10 +213,50 @@ func (t *KafkaTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.
 		}
 	}
 
+	numHeaders := 0
+	if trigger.Headers != nil {
+		numHeaders += len(trigger.Headers)
+	}
+	if trigger.SecureHeaders != nil {
+		numHeaders += len(trigger.SecureHeaders)
+	}
+
 	msg := &sarama.ProducerMessage{
 		Topic:     trigger.Topic,
 		Value:     sarama.ByteEncoder(payload),
 		Timestamp: time.Now().UTC(),
+		Headers:   make([]sarama.RecordHeader, numHeaders),
+	}
+
+	headerIndex := 0
+	if trigger.Headers != nil {
+		for k, v := range trigger.Headers {
+			msg.Headers[headerIndex] = sarama.RecordHeader{
+				Key:   []byte(k),
+				Value: []byte(v),
+			}
+			headerIndex++
+		}
+	}
+
+	if trigger.SecureHeaders != nil {
+		for _, secure := range trigger.SecureHeaders {
+			var value string
+			var err error
+			if secure.ValueFrom.SecretKeyRef != nil {
+				value, err = sharedutil.GetSecretFromVolume(secure.ValueFrom.SecretKeyRef)
+			} else {
+				value, err = sharedutil.GetConfigMapFromVolume(secure.ValueFrom.ConfigMapKeyRef)
+			}
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve the value for secureHeader, %w", err)
+			}
+			msg.Headers[headerIndex] = sarama.RecordHeader{
+				Key:   []byte(secure.Name),
+				Value: []byte(value),
+			}
+			headerIndex++
+		}
 	}
 
 	if trigger.PartitioningKey != nil {

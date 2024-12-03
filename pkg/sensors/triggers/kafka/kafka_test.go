@@ -18,6 +18,9 @@ package kafka
 import (
 	"context"
 	"testing"
+	"time"
+
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/IBM/sarama"
 	"github.com/IBM/sarama/mocks"
@@ -111,7 +114,18 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	defaultValue := "http://default.com"
+	secureHeader := &v1alpha1.SecureHeader{Name: "test", ValueFrom: &v1alpha1.ValueFromSource{
+		SecretKeyRef: &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "tokens",
+			},
+			Key: "serviceToken"}},
+	}
 
+	secureHeaders := []*v1alpha1.SecureHeader{}
+	secureHeaders = append(secureHeaders, secureHeader)
+	trigger.Trigger.Template.Kafka.Headers = map[string]string{"key": "value"}
+	trigger.Trigger.Template.Kafka.SecureHeaders = secureHeaders
 	trigger.Trigger.Template.Kafka.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
@@ -128,13 +142,18 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.NotNil(t, resource)
 
 	updatedTrigger, ok := resource.(*v1alpha1.KafkaTrigger)
+	assert.Equal(t, "value", updatedTrigger.Headers["key"])
+	assert.Equal(t, "serviceToken", updatedTrigger.SecureHeaders[0].ValueFrom.SecretKeyRef.Key)
 	assert.Nil(t, err)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, "another-fake-kafka-url", updatedTrigger.URL)
 }
 
 func TestKafkaTrigger_Execute(t *testing.T) {
-	producer := mocks.NewAsyncProducer(t, nil)
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+
+	producer := mocks.NewAsyncProducer(t, config)
 	producers := sharedutil.NewStringKeyedMap[sarama.AsyncProducer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := getFakeKafkaTrigger(producers)
@@ -154,7 +173,7 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 	}
 
 	defaultValue := "hello"
-
+	trigger.Trigger.Template.Kafka.Headers = map[string]string{"key1": "value1", "key2": "value2"}
 	trigger.Trigger.Template.Kafka.Payload = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
@@ -171,4 +190,16 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 	result, err := trigger.Execute(context.TODO(), testEvents, trigger.Trigger.Template.Kafka)
 	assert.Nil(t, err)
 	assert.Nil(t, result)
+
+	select {
+	case kafkaMessage := <-producer.Successes():
+		assert.NotNil(t, kafkaMessage)
+		assert.Equal(t, 2, len(kafkaMessage.Headers))
+		assert.Equal(t, "key1", string(kafkaMessage.Headers[0].Key))
+		assert.Equal(t, "value1", string(kafkaMessage.Headers[0].Value))
+		assert.Equal(t, "key2", string(kafkaMessage.Headers[1].Key))
+		assert.Equal(t, "value2", string(kafkaMessage.Headers[1].Value))
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "timed out waiting for message to contain headers")
+	}
 }
