@@ -2,6 +2,8 @@ package eventsource
 
 import (
 	"context"
+	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"testing"
 
@@ -20,7 +22,47 @@ const (
 )
 
 var (
-	testLabels = map[string]string{"controller": "test-controller"}
+	testLabels                   = map[string]string{"controller": "test-controller"}
+	fakeEventBusJetstreamWithTLS = &v1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      v1alpha1.DefaultEventBusName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			JetStream: &v1alpha1.JetStreamBus{},
+		},
+		Status: v1alpha1.EventBusStatus{
+			Config: v1alpha1.BusConfig{
+				JetStream: &v1alpha1.JetStreamConfig{
+					URL: "nats://xxxx",
+					TLS: &v1alpha1.TLSConfig{
+						CACertSecret: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "secret-0",
+							},
+							Key: "ca.crt",
+						},
+						ClientKeySecret: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "secret-1",
+							},
+							Key: "tls.key",
+						},
+						ClientCertSecret: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "secret-1",
+							},
+							Key: "tls.crt",
+						},
+					},
+				},
+			},
+		},
+	}
 )
 
 func Test_BuildDeployment(t *testing.T) {
@@ -117,6 +159,52 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, hasSASLSecretVolumeMount)
 		assert.True(t, hasTLSSecretVolume)
 		assert.True(t, hasTLSSecretVolumeMount)
+	})
+
+	t.Run("test jetstream eventbus secrets attached", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:       testImage,
+			EventSource: testEventSource,
+			Labels:      testLabels,
+		}
+
+		deployment, err := buildDeployment(args, fakeEventBusJetstreamWithTLS.DeepCopy())
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+
+		hasCAVolume := false
+		hasCertVolume := false
+		hasCAVolumeMount := false
+		hasCertVolumeMount := false
+		for _, volume := range deployment.Spec.Template.Spec.Volumes {
+			if volume.Name == "secret-0" {
+				if hasCAVolume {
+					assert.Fail(t, "Secrets should be de-duplicated")
+				}
+				hasCAVolume = true
+			}
+			if volume.Name == "secret-1" {
+				if hasCertVolume {
+					assert.Fail(t, "Secrets should be de-duplicated")
+				}
+				hasCertVolume = true
+			}
+		}
+		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+			if volumeMount.Name == "secret-0" {
+				hasCAVolumeMount = true
+				assert.Equal(t, volumeMount.MountPath, fmt.Sprintf("/argo-events/secrets/%s", volumeMount.Name))
+			}
+			if volumeMount.Name == "secret-1" {
+				hasCertVolumeMount = true
+				assert.Equal(t, volumeMount.MountPath, fmt.Sprintf("/argo-events/secrets/%s", volumeMount.Name))
+			}
+		}
+
+		assert.True(t, hasCAVolume)
+		assert.True(t, hasCertVolume)
+		assert.True(t, hasCAVolumeMount)
+		assert.True(t, hasCertVolumeMount)
 	})
 
 	t.Run("test secret volume and volumemount order deterministic", func(t *testing.T) {
