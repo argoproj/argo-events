@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"

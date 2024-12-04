@@ -21,6 +21,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"sort"
+
 	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
@@ -30,7 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sort"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
@@ -232,7 +233,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 	uniqueCertVolumeMap := make(map[string][]corev1.KeyToPath)
 	for _, secret := range []*corev1.SecretKeySelector{caCertSecret, clientCertSecret, clientKeySecret} {
 		if secret != nil {
-			uniqueCertVolumeMap[caCertSecret.Name] = append(uniqueCertVolumeMap[secret.Name], corev1.KeyToPath{
+			uniqueCertVolumeMap[secret.Name] = append(uniqueCertVolumeMap[secret.Name], corev1.KeyToPath{
 				Key:  secret.Key,
 				Path: secret.Key,
 			})
@@ -243,7 +244,6 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 	// because the secrets MUST be mounted at /argo-events/secrets/<secret-name>
 	// in order for util.GetTLSConfig to work without modification
 	for secretName, items := range uniqueCertVolumeMap {
-
 		// The names of volumes MUST be valid DNS_LABELs; as the secret names are user-supplied,
 		// we perform some input cleansing to ensure they conform
 		volumeName := sharedutil.ConvertToDNSLabel(secretName)
