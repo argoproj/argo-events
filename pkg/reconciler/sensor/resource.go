@@ -192,9 +192,12 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 		accessSecret = eventBus.Status.Config.NATS.AccessSecret
 		secretObjs = []interface{}{sensorCopy}
 	case eventBus.Status.Config.JetStream != nil:
-		caCertSecret = eventBus.Status.Config.JetStream.TLS.CACertSecret
-		clientCertSecret = eventBus.Status.Config.JetStream.TLS.ClientCertSecret
-		clientKeySecret = eventBus.Status.Config.JetStream.TLS.ClientKeySecret
+		tlsOptions := eventBus.Status.Config.JetStream.TLS
+		if tlsOptions != nil {
+			caCertSecret = tlsOptions.CACertSecret
+			clientCertSecret = tlsOptions.ClientCertSecret
+			clientKeySecret = tlsOptions.ClientKeySecret
+		}
 		accessSecret = eventBus.Status.Config.JetStream.AccessSecret
 		secretObjs = []interface{}{sensorCopy}
 	case eventBus.Status.Config.Kafka != nil:
