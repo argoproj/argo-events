@@ -20,7 +20,7 @@ func TestNewSourceJetstream(t *testing.T) {
 	logger := zap.NewExample().Sugar()
 
 	auth := &common.Auth{}
-	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger, nil)
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
 }
@@ -29,7 +29,7 @@ func TestSourceJetstream_Connect(t *testing.T) {
 	logger := zap.NewExample().Sugar()
 
 	auth := &common.Auth{}
-	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger, nil)
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
 
@@ -44,7 +44,7 @@ func TestSourceJetstream_Initialize_Failure(t *testing.T) {
 	auth := &common.Auth{
 		Strategy: v1alpha1.AuthStrategyNone,
 	}
-	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger)
+	sourceJetstream, err := NewSourceJetstream(testURL, testEventSource, testStreamConfig, auth, logger, nil)
 	assert.NotNil(t, sourceJetstream)
 	assert.Nil(t, err)
 

@@ -4485,11 +4485,17 @@ func schema_pkg_apis_events_v1alpha1_JetStreamConfig(ref common.ReferenceCallbac
 							Format: "",
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SSL/TLS settings for the NATS client",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

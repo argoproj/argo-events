@@ -2355,6 +2355,10 @@
         "streamConfig": {
           "type": "string"
         },
+        "tls": {
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig",
+          "description": "SSL/TLS settings for the NATS client"
+        },
         "url": {
           "description": "JetStream (Nats) URL",
           "type": "string"

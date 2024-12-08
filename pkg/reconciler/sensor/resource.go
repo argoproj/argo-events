@@ -181,14 +181,29 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 
 	var secretObjs []interface{}
 	var accessSecret *corev1.SecretKeySelector
+	var caCertSecret *corev1.SecretKeySelector
+	var clientCertSecret *corev1.SecretKeySelector
+	var clientKeySecret *corev1.SecretKeySelector
 	switch {
 	case eventBus.Status.Config.NATS != nil:
+		caCertSecret = nil
+		clientCertSecret = nil
+		clientKeySecret = nil
 		accessSecret = eventBus.Status.Config.NATS.AccessSecret
 		secretObjs = []interface{}{sensorCopy}
 	case eventBus.Status.Config.JetStream != nil:
+		tlsOptions := eventBus.Status.Config.JetStream.TLS
+		if tlsOptions != nil {
+			caCertSecret = tlsOptions.CACertSecret
+			clientCertSecret = tlsOptions.ClientCertSecret
+			clientKeySecret = tlsOptions.ClientKeySecret
+		}
 		accessSecret = eventBus.Status.Config.JetStream.AccessSecret
 		secretObjs = []interface{}{sensorCopy}
 	case eventBus.Status.Config.Kafka != nil:
+		caCertSecret = nil
+		clientCertSecret = nil
+		clientKeySecret = nil
 		accessSecret = nil
 		secretObjs = []interface{}{sensorCopy, eventBus} // kafka requires secrets for sasl and tls
 	default:
@@ -215,6 +230,43 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "auth-volume",
 			MountPath: v1alpha1.EventBusAuthFileMountPath,
+		})
+	}
+
+	uniqueCertVolumeMap := make(map[string][]corev1.KeyToPath)
+	for _, secret := range []*corev1.SecretKeySelector{caCertSecret, clientCertSecret, clientKeySecret} {
+		if secret != nil {
+			uniqueCertVolumeMap[secret.Name] = append(uniqueCertVolumeMap[secret.Name], corev1.KeyToPath{
+				Key:  secret.Key,
+				Path: secret.Key,
+			})
+		}
+	}
+
+	// We deduplicate the certificate secret mounts to ensure every secret under the TLS config is only mounted once
+	// because the secrets MUST be mounted at /argo-events/secrets/<secret-name>
+	// in order for util.GetTLSConfig to work without modification
+	for secretName, items := range uniqueCertVolumeMap {
+		// The names of volumes MUST be valid DNS_LABELs; as the secret names are user-supplied,
+		// we perform some input cleansing to ensure they conform
+		volumeName := sharedutil.ConvertToDNSLabel(secretName)
+
+		optional := false
+
+		volumes = append(volumes, corev1.Volume{
+			Name: volumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: secretName,
+					Items:      items,
+					Optional:   &optional,
+				},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      volumeName,
+			MountPath: fmt.Sprintf("/argo-events/secrets/%s", secretName),
 		})
 	}
 

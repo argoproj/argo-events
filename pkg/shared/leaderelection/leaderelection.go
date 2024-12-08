@@ -42,19 +42,19 @@ func NewElector(ctx context.Context, eventBusConfig aev1.BusConfig, clusterName 
 	case eventBusConfig.Kafka != nil || strings.ToLower(os.Getenv(aev1.EnvVarLeaderElection)) == "k8s":
 		return newKubernetesElector(namespace, leasename, hostname)
 	case eventBusConfig.NATS != nil:
-		return newEventBusElector(ctx, eventBusConfig.NATS.Auth, clusterName, clusterSize, eventBusConfig.NATS.URL)
+		return newEventBusElector(ctx, eventBusConfig.NATS.Auth, clusterName, clusterSize, eventBusConfig.NATS.URL, nil)
 	case eventBusConfig.JetStream != nil:
 		if eventBusConfig.JetStream.AccessSecret != nil {
-			return newEventBusElector(ctx, &aev1.AuthStrategyBasic, clusterName, clusterSize, eventBusConfig.JetStream.URL)
+			return newEventBusElector(ctx, &aev1.AuthStrategyBasic, clusterName, clusterSize, eventBusConfig.JetStream.URL, eventBusConfig.JetStream.TLS)
 		} else {
-			return newEventBusElector(ctx, &aev1.AuthStrategyNone, clusterName, clusterSize, eventBusConfig.JetStream.URL)
+			return newEventBusElector(ctx, &aev1.AuthStrategyNone, clusterName, clusterSize, eventBusConfig.JetStream.URL, eventBusConfig.JetStream.TLS)
 		}
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}
 }
 
-func newEventBusElector(ctx context.Context, authStrategy *aev1.AuthStrategy, clusterName string, clusterSize int, url string) (Elector, error) {
+func newEventBusElector(ctx context.Context, authStrategy *aev1.AuthStrategy, clusterName string, clusterSize int, url string, tls *aev1.TLSConfig) (Elector, error) {
 	auth, err := getEventBusAuth(ctx, authStrategy)
 	if err != nil {
 		return nil, err
@@ -65,6 +65,7 @@ func newEventBusElector(ctx context.Context, authStrategy *aev1.AuthStrategy, cl
 		size:        clusterSize,
 		url:         url,
 		auth:        auth,
+		tls:         tls,
 	}, nil
 }
 
@@ -113,6 +114,7 @@ type natsEventBusElector struct {
 	size        int
 	url         string
 	auth        *eventbuscommon.Auth
+	tls         *aev1.TLSConfig
 }
 
 func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCallbacks) {
@@ -129,8 +131,16 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 		opts.Password = e.auth.Credential.Password
 	}
 
-	opts.TLSConfig = &tls.Config{ // seems fine to pass this in even when we're not using TLS
-		InsecureSkipVerify: true,
+	if e.tls != nil {
+		tlsConfig, err := sharedutil.GetTLSConfig(e.tls)
+		if err != nil {
+			log.Fatalw("failed to load tls configuration", zap.Error(err))
+		}
+		opts.TLSConfig = tlsConfig
+	} else {
+		opts.TLSConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
 	}
 
 	rpc, err := graft.NewNatsRpc(opts)
