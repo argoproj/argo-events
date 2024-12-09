@@ -2,6 +2,7 @@ package eventsource
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	appv1 "k8s.io/api/apps/v1"
@@ -209,7 +210,7 @@ func TestReconcile(t *testing.T) {
 		testEventSource.Spec.Calendar = fakeCalendarEventSourceMap("test")
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
-		testBus := fakeEventBus.DeepCopy()
+		testBus := fakeEventBusJetstream.DeepCopy()
 		testBus.Status.MarkDeployed("test", "test")
 		testBus.Status.MarkConfigured()
 		err := cl.Create(ctx, testBus)
@@ -223,5 +224,179 @@ func TestReconcile(t *testing.T) {
 		err = r.reconcile(ctx, testEventSource)
 		assert.NoError(t, err)
 		assert.True(t, testEventSource.Status.IsReady())
+	})
+}
+
+func Test_BuildDeployment(t *testing.T) {
+	cl := fake.NewClientBuilder().Build()
+	r := &reconciler{
+		client:           cl,
+		scheme:           scheme.Scheme,
+		eventSourceImage: "test-image",
+		logger:           logging.NewArgoEventsLogger(),
+	}
+	testEventSource := fakeEmptyEventSource()
+	testEventSource.Spec.HDFS = fakeHDFSEventSourceMap("test")
+	testEventSource.Spec.Template = &v1alpha1.Template{
+		ImagePullSecrets: []corev1.LocalObjectReference{
+			{
+				Name: "test",
+			},
+		},
+		PriorityClassName: "test-class",
+	}
+
+	t.Run("test build HDFS", func(t *testing.T) {
+		deployment, err := r.buildDeployment(fakeEventBus.DeepCopy(), testEventSource)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		volumes := deployment.Spec.Template.Spec.Volumes
+		assert.True(t, len(volumes) > 0)
+		hasAuthVolume := false
+		hasTmpVolume := false
+		cmRefs, secretRefs := 0, 0
+		for _, vol := range volumes {
+			if vol.Name == "auth-volume" {
+				hasAuthVolume = true
+			}
+			if vol.Name == "tmp" {
+				hasTmpVolume = true
+			}
+			if strings.Contains(vol.Name, testEventSource.Spec.HDFS["test"].KrbCCacheSecret.Name) {
+				secretRefs++
+			}
+			if strings.Contains(vol.Name, testEventSource.Spec.HDFS["test"].KrbConfigConfigMap.Name) {
+				cmRefs++
+			}
+		}
+		assert.True(t, hasAuthVolume)
+		assert.True(t, hasTmpVolume)
+		assert.True(t, len(deployment.Spec.Template.Spec.ImagePullSecrets) > 0)
+		assert.True(t, cmRefs > 0)
+		assert.True(t, secretRefs > 0)
+		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
+	})
+
+	t.Run("test kafka eventbus secrets attached", func(t *testing.T) {
+		// add secrets to kafka eventbus
+		testBus := fakeEventBusKafka.DeepCopy()
+		testBus.Spec.Kafka.TLS = &v1alpha1.TLSConfig{
+			CACertSecret: &corev1.SecretKeySelector{Key: "cert", LocalObjectReference: corev1.LocalObjectReference{Name: "tls-secret"}},
+		}
+		testBus.Spec.Kafka.SASL = &v1alpha1.SASLConfig{
+			Mechanism:      "SCRAM-SHA-512",
+			UserSecret:     &corev1.SecretKeySelector{Key: "username", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
+			PasswordSecret: &corev1.SecretKeySelector{Key: "password", LocalObjectReference: corev1.LocalObjectReference{Name: "sasl-secret"}},
+		}
+
+		deployment, err := r.buildDeployment(testBus, testEventSource)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+
+		hasSASLSecretVolume := false
+		hasSASLSecretVolumeMount := false
+		hasTLSSecretVolume := false
+		hasTLSSecretVolumeMount := false
+		for _, volume := range deployment.Spec.Template.Spec.Volumes {
+			if volume.Name == "secret-sasl-secret" {
+				hasSASLSecretVolume = true
+			}
+			if volume.Name == "secret-tls-secret" {
+				hasTLSSecretVolume = true
+			}
+		}
+		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+			if volumeMount.Name == "secret-sasl-secret" {
+				hasSASLSecretVolumeMount = true
+			}
+			if volumeMount.Name == "secret-tls-secret" {
+				hasTLSSecretVolumeMount = true
+			}
+		}
+
+		assert.True(t, hasSASLSecretVolume)
+		assert.True(t, hasSASLSecretVolumeMount)
+		assert.True(t, hasTLSSecretVolume)
+		assert.True(t, hasTLSSecretVolumeMount)
+	})
+
+	t.Run("test secret volume and volumemount order deterministic", func(t *testing.T) {
+		webhooksWithSecrets := map[string]v1alpha1.WebhookEventSource{
+			"webhook4": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook4",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook4"},
+						Key:                  "secret",
+					},
+				},
+			},
+			"webhook3": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook3",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook3"},
+						Key:                  "secret",
+					},
+				},
+			},
+			"webhook1": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook1",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook1"},
+						Key:                  "secret",
+					},
+				},
+			},
+			"webhook2": {
+				WebhookContext: v1alpha1.WebhookContext{
+					URL:      "http://a.b",
+					Endpoint: "/webhook2",
+					Port:     "1234",
+					AuthSecret: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{Name: "webhook2"},
+						Key:                  "secret",
+					},
+				},
+			},
+		}
+		es := testEventSource.DeepCopy()
+		es.Spec.Webhook = webhooksWithSecrets
+
+		wantVolumeNames := []string{"auth-volume", "cm-test-cm", "secret-test-secret", "secret-webhook1", "secret-webhook2", "secret-webhook3", "secret-webhook4", "tmp"}
+		wantVolumeMountNames := []string{"auth-volume", "cm-test-cm", "secret-test-secret", "secret-webhook1", "secret-webhook2", "secret-webhook3", "secret-webhook4", "tmp"}
+
+		deployment, err := r.buildDeployment(fakeEventBus, es)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		gotVolumes := deployment.Spec.Template.Spec.Volumes
+		gotVolumeMounts := deployment.Spec.Template.Spec.Containers[0].VolumeMounts
+
+		var gotVolumeNames []string
+		var gotVolumeMountNames []string
+
+		for _, v := range gotVolumes {
+			gotVolumeNames = append(gotVolumeNames, v.Name)
+		}
+		for _, v := range gotVolumeMounts {
+			gotVolumeMountNames = append(gotVolumeMountNames, v.Name)
+		}
+
+		assert.Equal(t, len(gotVolumes), len(wantVolumeNames))
+		assert.Equal(t, len(gotVolumeMounts), len(wantVolumeMountNames))
+
+		for i := range gotVolumeNames {
+			assert.Equal(t, gotVolumeNames[i], wantVolumeNames[i])
+		}
+		for i := range gotVolumeMountNames {
+			assert.Equal(t, gotVolumeMountNames[i], wantVolumeMountNames[i])
+		}
 	})
 }
