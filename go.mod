@@ -80,7 +80,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1
 	go.uber.org/ratelimit v0.3.1
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.30.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/tools v0.24.0
 	google.golang.org/api v0.181.0
 	google.golang.org/grpc v1.63.2
