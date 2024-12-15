@@ -1650,6 +1650,10 @@ message JetStreamConfig {
 
   // +optional
   optional string streamConfig = 3;
+
+  // SSL/TLS settings for the NATS client
+  // +optional
+  optional TLSConfig tls = 4;
 }
 
 // K8SResource represent arbitrary structured data.
