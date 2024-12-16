@@ -5,13 +5,8 @@ issues:
     - pkg/client
     - vendor
     - "eventsources/common/naivewatcher"
-    # Fix me
-    - "pkg/sensors/triggers/custom-trigger"
-    - "pkg/eventsources/sources/generic"
   exclude-files:
     - ".*generated.*"
-    # Fix me
-    - pkg/eventsources/sources/gcppubsub/start.go
 linters:
   enable:
    # - depguard
