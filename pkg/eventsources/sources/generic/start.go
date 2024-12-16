@@ -120,11 +120,10 @@ func (el *EventListener) handleOne(event *Event, dispatch func([]byte, ...events
 
 func (el *EventListener) connect() (Eventing_StartEventSourceClient, error) {
 	var opt []grpc.DialOption
-	opt = append(opt, grpc.WithBlock())
 	if el.GenericEventSource.Insecure {
 		opt = append(opt, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
-	conn, err := grpc.DialContext(context.Background(), el.GenericEventSource.URL, opt...)
+	conn, err := grpc.NewClient(el.GenericEventSource.URL, opt...)
 	if err != nil {
 		return nil, err
 	}

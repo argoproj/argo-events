@@ -70,7 +70,6 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 	logger.Infow("instantiating trigger client...", zap.Any("server-url", ct.ServerURL))
 
 	opt := []grpc.DialOption{
-		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
@@ -93,7 +92,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		opt = append(opt, grpc.WithTransportCredentials(creds))
 	}
 
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		ct.ServerURL,
 		opt...,
 	)

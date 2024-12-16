@@ -67,16 +67,12 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
 	if err != nil {
-		errStr := fmt.Sprintf("failed to evaluate expression %s: %v", dependencyExpression, err)
-		connection.Logger.Error(errStr)
-		return nil, fmt.Errorf(errStr)
+		return nil, fmt.Errorf("failed to evaluate expression %s: %w", dependencyExpression, err)
 	}
 
 	connection.keyValueStore, err = conn.JSContext.KeyValue(sensorName)
 	if err != nil {
-		errStr := fmt.Sprintf("failed to get K/V store for sensor %s: %v", sensorName, err)
-		connection.Logger.Error(errStr)
-		return nil, fmt.Errorf(errStr)
+		return nil, fmt.Errorf("failed to get K/V store for sensor %s: %v", sensorName, err)
 	}
 
 	connection.Logger.Infof("Successfully located K/V store for sensor %s", sensorName)
@@ -146,9 +142,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
 		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew())
 		if err != nil {
-			errorStr := fmt.Sprintf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
-			log.Error(errorStr)
-			return fmt.Errorf(errorStr)
+			return fmt.Errorf("failed to subscribe to subject %s using group %s: %w", subject, durableName, err)
 		} else {
 			log.Debugf("successfully subscribed to subject %s with durable name %s", subject, durableName)
 		}
@@ -445,9 +439,7 @@ func (conn *JetstreamTriggerConn) getSavedDependency(depName string) (msg MsgInf
 			var msgInfo MsgInfo
 			err := json.Unmarshal(entry.Value(), &msgInfo)
 			if err != nil {
-				errStr := fmt.Sprintf("error unmarshalling value %s for key %s: %v", string(entry.Value()), key, err)
-				conn.Logger.Error(errStr)
-				return MsgInfo{}, true, fmt.Errorf(errStr)
+				return MsgInfo{}, true, fmt.Errorf("error unmarshalling value %s for key %s: %w", string(entry.Value()), key, err)
 			}
 			return msgInfo, true, nil
 		}
@@ -459,20 +451,15 @@ func (conn *JetstreamTriggerConn) getSavedDependency(depName string) (msg MsgInf
 }
 
 func (conn *JetstreamTriggerConn) saveDependency(depName string, msgInfo MsgInfo) error {
-	log := conn.Logger
 	jsonEncodedMsg, err := json.Marshal(msgInfo)
 	if err != nil {
-		errorStr := fmt.Sprintf("failed to convert msgInfo struct into JSON: %+v", msgInfo)
-		log.Error(errorStr)
-		return fmt.Errorf(errorStr)
+		return fmt.Errorf("failed to convert msgInfo struct into JSON: %w", err)
 	}
 	key := getDependencyKey(conn.triggerName, depName)
 
 	_, err = conn.keyValueStore.Put(key, jsonEncodedMsg)
 	if err != nil {
-		errorStr := fmt.Sprintf("failed to store dependency under key %s, value:%s: %+v", key, jsonEncodedMsg, err)
-		log.Error(errorStr)
-		return fmt.Errorf(errorStr)
+		return fmt.Errorf("failed to store dependency under key %s, value:%s: %w", key, jsonEncodedMsg, err)
 	}
 
 	return nil
@@ -533,12 +520,8 @@ func (conn *JetstreamTriggerConn) clearDependencyIfExists(depName string) error 
 func (conn *JetstreamTriggerConn) getDependencyNames(eventSourceName, eventName string) ([]string, error) {
 	deps, found := conn.sourceDepMap[eventSourceName+"__"+eventName]
 	if !found {
-		errStr := fmt.Sprintf("incoming event source and event not associated with any dependencies, event source=%s, event=%s",
-			eventSourceName, eventName)
-		conn.Logger.Error(errStr)
-		return nil, fmt.Errorf(errStr)
+		return nil, fmt.Errorf("incoming event source and event not associated with any dependencies, event source=%s, event=%s", eventSourceName, eventName)
 	}
-
 	return deps, nil
 }
 

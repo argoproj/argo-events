@@ -11,7 +11,7 @@ import (
 	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/gobwas/glob"
-	"github.com/nats-io/stan.go"
+	stan "github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
 	"go.uber.org/zap"
 

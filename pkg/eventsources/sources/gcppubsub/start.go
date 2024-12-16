@@ -78,7 +78,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	logger.Info("started processing the GCP Pub Sub event source...")
 	defer sources.Recover(el.GetEventName())
 
-	err := el.fillDefault(logger)
+	err := el.fillDefault(ctx, logger)
 	if err != nil {
 		return fmt.Errorf("failed to fill default values for %s, %w", el.GetEventName(), err)
 	}
@@ -158,7 +158,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	return nil
 }
 
-func (el *EventListener) fillDefault(logger *zap.SugaredLogger) error {
+func (el *EventListener) fillDefault(ctx context.Context, logger *zap.SugaredLogger) error {
 	// Default value for each field
 	//  - ProjectID:        determine from GCP metadata server (only valid in GCP)
 	//  - TopicProjectID:   same as ProjectID (filled only if topic is specified)
@@ -167,7 +167,7 @@ func (el *EventListener) fillDefault(logger *zap.SugaredLogger) error {
 
 	if el.PubSubEventSource.ProjectID == "" {
 		logger.Debug("determine project ID from GCP metadata server")
-		proj, err := metadata.ProjectID()
+		proj, err := metadata.ProjectIDWithContext(ctx)
 		if err != nil {
 			return fmt.Errorf("project ID is not given and couldn't determine from GCP metadata server, %w", err)
 		}

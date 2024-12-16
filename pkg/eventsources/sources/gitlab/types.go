@@ -17,7 +17,7 @@ limitations under the License.
 package gitlab
 
 import (
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"

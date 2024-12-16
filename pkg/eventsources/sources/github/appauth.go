@@ -16,7 +16,7 @@ package github
 import (
 	"net/http"
 
-	"github.com/bradleyfalzon/ghinstallation/v2"
+	ghinstallation "github.com/bradleyfalzon/ghinstallation/v2"
 )
 
 type AppsAuthStrategy struct {
