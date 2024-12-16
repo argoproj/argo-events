@@ -96,7 +96,7 @@ func (s *E2ESuite) SetupSuite() {
 		When().
 		CreateEventBus().
 		WaitForEventBusReady()
-	s.T().Log("EventBus is ready")
+	s.Suite.T().Log("EventBus is ready")
 
 	time.Sleep(10 * time.Second) // give it a little extra time to be fully ready // todo: any issues with this? Otherwise, I need to increase the allowance in the backoff
 }
@@ -109,7 +109,7 @@ func (s *E2ESuite) TearDownSuite() {
 		Wait(3 * time.Second).
 		Then().
 		ExpectEventBusDeleted()
-	s.T().Log("EventBus is deleted")
+	s.Suite.T().Log("EventBus is deleted")
 }
 
 func (s *E2ESuite) BeforeTest(string, string) {
@@ -151,15 +151,15 @@ func (s *E2ESuite) dynamicFor(r schema.GroupVersionResource) dynamic.ResourceInt
 }
 
 func (s *E2ESuite) CheckError(err error) {
-	s.T().Helper()
+	s.Suite.T().Helper()
 	if err != nil {
-		s.T().Fatal(err)
+		s.Suite.T().Fatal(err)
 	}
 }
 
 func (s *E2ESuite) Given() *Given {
 	return &Given{
-		t:                 s.T(),
+		t:                 s.Suite.T(),
 		eventBusClient:    s.eventBusClient,
 		eventSourceClient: s.eventSourceClient,
 		sensorClient:      s.sensorClient,

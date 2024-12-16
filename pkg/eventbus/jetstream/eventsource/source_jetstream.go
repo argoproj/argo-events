@@ -24,11 +24,11 @@ func NewSourceJetstream(url, eventSourceName string, streamConfig string, auth *
 }
 
 func (n *SourceJetstream) Initialize() error {
-	return n.Init() // member of jetstreambase.Jetstream
+	return n.Jetstream.Init() // member of jetstreambase.Jetstream
 }
 
 func (n *SourceJetstream) Connect(clientID string) (eventbuscommon.EventSourceConnection, error) {
-	conn, err := n.MakeConnection()
+	conn, err := n.Jetstream.MakeConnection()
 	if err != nil {
 		return nil, err
 	}

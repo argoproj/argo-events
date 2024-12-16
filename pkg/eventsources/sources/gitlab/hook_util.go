@@ -1,7 +1,7 @@
 package gitlab
 
 import (
-	"github.com/xanzy/go-gitlab"
+	gitlab "github.com/xanzy/go-gitlab"
 )
 
 func getProjectHook(hooks []*gitlab.ProjectHook, url string) *gitlab.ProjectHook {

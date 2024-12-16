@@ -33,7 +33,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
-	"github.com/xanzy/go-gitlab"
+	gitlab "github.com/xanzy/go-gitlab"
 	"go.uber.org/zap"
 )
 

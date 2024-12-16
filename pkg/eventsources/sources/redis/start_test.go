@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/go-redis/redis/v8"
+	redis "github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 

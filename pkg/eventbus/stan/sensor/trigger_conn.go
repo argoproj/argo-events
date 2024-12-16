@@ -11,7 +11,7 @@ import (
 	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/gobwas/glob"
-	"github.com/nats-io/stan.go"
+	stan "github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
 	"go.uber.org/zap"
 
@@ -30,7 +30,7 @@ type STANTriggerConn struct {
 
 func NewSTANTriggerConn(conn *stanbase.STANConnection, sensorName string, triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency) *STANTriggerConn {
 	n := &STANTriggerConn{conn, sensorName, triggerName, dependencyExpression, deps}
-	n.Logger = n.Logger.With("triggerName", n.triggerName).With("clientID", n.ClientID)
+	n.STANConnection.Logger = n.STANConnection.Logger.With("triggerName", n.triggerName).With("clientID", n.STANConnection.ClientID)
 	return n
 }
 
@@ -38,7 +38,7 @@ func (n *STANTriggerConn) String() string {
 	if n == nil {
 		return ""
 	}
-	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.ClientID, n.sensorName, n.triggerName)
+	return fmt.Sprintf("STANTriggerConn{ClientID:%s,Sensor:%s,Trigger:%s}", n.STANConnection.ClientID, n.sensorName, n.triggerName)
 }
 
 func (conn *STANTriggerConn) IsClosed() bool {
@@ -76,7 +76,7 @@ func (n *STANTriggerConn) Subscribe(
 		return fmt.Errorf("Subscribe() failed; STANTriggerConn is nil")
 	}
 
-	log := n.Logger
+	log := n.STANConnection.Logger
 
 	if defaultSubject == nil {
 		log.Error("can't subscribe over NATS streaming: defaultSubject not set")
@@ -87,12 +87,12 @@ func (n *STANTriggerConn) Subscribe(
 		return err
 	}
 	// use group name as durable name
-	group, err := n.getGroupNameFromClientID(n.ClientID)
+	group, err := n.getGroupNameFromClientID(n.STANConnection.ClientID)
 	if err != nil {
 		return err
 	}
 	durableName := group
-	sub, err := n.STANConn.QueueSubscribe(*defaultSubject, group, func(m *stan.Msg) {
+	sub, err := n.STANConnection.STANConn.QueueSubscribe(*defaultSubject, group, func(m *stan.Msg) {
 		n.processEventSourceMsg(m, msgHolder, transform, filter, action, log)
 	}, stan.DurableName(durableName),
 		stan.SetManualAckMode(),
@@ -278,7 +278,7 @@ func (n *STANTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSou
 	for k, v := range msgHolder.msgs {
 		messages[k] = *v.event
 	}
-	log.Debugf("Triggering actions for client %s", n.ClientID)
+	log.Debugf("Triggering actions for client %s", n.STANConnection.ClientID)
 
 	action(messages)
 
@@ -287,7 +287,7 @@ func (n *STANTriggerConn) processEventSourceMsg(m *stan.Msg, msgHolder *eventSou
 }
 
 func (n *STANTriggerConn) getGroupNameFromClientID(clientID string) (string, error) {
-	log := n.Logger.With("clientID", n.ClientID)
+	log := n.STANConnection.Logger.With("clientID", n.STANConnection.ClientID)
 	// take off the last part: clientID should have a dash at the end and we can remove that part
 	strs := strings.Split(clientID, "-")
 	if len(strs) < 2 {

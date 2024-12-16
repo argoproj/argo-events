@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	redis "github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"

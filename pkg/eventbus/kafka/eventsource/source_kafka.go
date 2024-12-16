@@ -26,7 +26,7 @@ func (s *KafkaSource) Initialize() error {
 }
 
 func (s *KafkaSource) Connect(string) (eventbuscommon.EventSourceConnection, error) {
-	config, err := s.Config()
+	config, err := s.Kafka.Config()
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (s *KafkaSource) Connect(string) (eventbuscommon.EventSourceConnection, err
 	config.Producer.Return.Errors = true
 	config.Producer.Return.Successes = true
 
-	client, err := sarama.NewClient(s.Brokers(), config)
+	client, err := sarama.NewClient(s.Kafka.Brokers(), config)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (s *KafkaSource) Connect(string) (eventbuscommon.EventSourceConnection, err
 	}
 
 	conn := &KafkaSourceConnection{
-		KafkaConnection: base.NewKafkaConnection(s.Logger),
+		KafkaConnection: base.NewKafkaConnection(s.Kafka.Logger),
 		Topic:           s.topic,
 		Client:          client,
 		Producer:        producer,

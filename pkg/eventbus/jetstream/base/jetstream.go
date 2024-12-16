@@ -40,9 +40,7 @@ func NewJetstream(url string, streamSettings string, auth *eventbuscommon.Auth, 
 func (stream *Jetstream) Init() error {
 	mgmtConnection, err := stream.MakeConnection()
 	if err != nil {
-		errStr := fmt.Sprintf("error creating Management Connection for Jetstream stream %+v: %v", stream, err)
-		stream.Logger.Error(errStr)
-		return fmt.Errorf(errStr)
+		return fmt.Errorf("error creating Management Connection for Jetstream stream %+v: %w", stream, err)
 	}
 	err = stream.CreateStream(mgmtConnection)
 	if err != nil {
@@ -170,9 +168,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	connectErr := sharedutil.DoWithRetry(nil, func() error { // exponential backoff if it fails the first time
 		_, err = conn.JSContext.AddStream(&streamConfig)
 		if err != nil {
-			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v`,
-				v1alpha1.JetStreamStreamName, conn, err)
-			return fmt.Errorf(errStr)
+			return fmt.Errorf("failed to add Jetstream stream %q for connection %+v: %w", v1alpha1.JetStreamStreamName, conn, err)
 		} else {
 			return nil
 		}

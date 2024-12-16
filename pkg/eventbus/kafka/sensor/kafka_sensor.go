@@ -104,7 +104,7 @@ func (t Triggers) Ready() bool {
 }
 
 func (s *KafkaSensor) Initialize() error {
-	config, err := s.Config()
+	config, err := s.Kafka.Config()
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (s *KafkaSensor) Initialize() error {
 	// sensor specific config
 	config.Producer.Transaction.ID = s.hostname
 
-	client, err := sarama.NewClient(s.Brokers(), config)
+	client, err := sarama.NewClient(s.Kafka.Brokers(), config)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (s *KafkaSensor) Initialize() error {
 	// producer is at risk of deadlocking if Errors channel isn't read.
 	go func() {
 		for err := range producer.Errors() {
-			s.Logger.Errorf("Kafka producer error", zap.Error(err))
+			s.Kafka.Logger.Errorf("Kafka producer error", zap.Error(err))
 		}
 	}()
 
@@ -143,7 +143,7 @@ func (s *KafkaSensor) Initialize() error {
 	s.consumer = consumer
 	s.kafkaHandler = &KafkaHandler{
 		Mutex:         &sync.Mutex{},
-		Logger:        s.Logger,
+		Logger:        s.Kafka.Logger,
 		GroupName:     s.groupName,
 		Producer:      producer,
 		OffsetManager: offsetManager,
@@ -160,8 +160,8 @@ func (s *KafkaSensor) Initialize() error {
 }
 
 func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpression string, dependencies []eventbuscommon.Dependency, atLeastOnce bool) (eventbuscommon.TriggerConnection, error) {
-	s.Lock()
-	defer s.Unlock()
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
 
 	// connect only if disconnected, if ever the connection is lost
 	// the connected boolean will flip and the sensor listener will
@@ -183,7 +183,7 @@ func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpres
 		}
 
 		s.triggers[triggerName] = &KafkaTriggerConnection{
-			KafkaConnection: base.NewKafkaConnection(s.Logger),
+			KafkaConnection: base.NewKafkaConnection(s.Kafka.Logger),
 			sensorName:      s.sensor.Name,
 			triggerName:     triggerName,
 			depExpression:   expr,
@@ -202,44 +202,44 @@ func (s *KafkaSensor) Listen(ctx context.Context) {
 
 	for {
 		if len(s.triggers) != len(s.sensor.Spec.Triggers) || !s.triggers.Ready() {
-			s.Logger.Info("Not ready to consume, waiting...")
+			s.Kafka.Logger.Info("Not ready to consume, waiting...")
 			time.Sleep(3 * time.Second)
 			continue
 		}
 
-		s.Logger.Infow("Consuming", zap.Strings("topics", s.topics.List()), zap.String("group", s.groupName))
+		s.Kafka.Logger.Infow("Consuming", zap.Strings("topics", s.topics.List()), zap.String("group", s.groupName))
 
 		if err := s.consumer.Consume(ctx, s.topics.List(), s.kafkaHandler); err != nil {
 			// fail fast if topics do not exist
 			if err == sarama.ErrUnknownTopicOrPartition {
-				s.Logger.Fatalf(
+				s.Kafka.Logger.Fatalf(
 					"Topics do not exist. Please ensure the topics '%s' have been created, or the kafka setting '%s' is set to true.",
 					s.topics.List(),
 					"auto.create.topics.enable",
 				)
 			}
 
-			s.Logger.Errorw("Failed to consume", zap.Error(err))
+			s.Kafka.Logger.Errorw("Failed to consume", zap.Error(err))
 			return
 		}
 
 		if err := ctx.Err(); err != nil {
-			s.Logger.Errorw("Kafka error", zap.Error(err))
+			s.Kafka.Logger.Errorw("Kafka error", zap.Error(err))
 			return
 		}
 	}
 }
 
 func (s *KafkaSensor) Disconnect() {
-	s.Lock()
-	defer s.Unlock()
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
 
 	s.connected = false
 }
 
 func (s *KafkaSensor) Close() error {
-	s.Lock()
-	defer s.Unlock()
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
 
 	// protect against being called multiple times
 	if s.IsClosed() {
@@ -264,7 +264,7 @@ func (s *KafkaSensor) IsClosed() bool {
 func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {
 	var event *cloudevents.Event
 	if err := json.Unmarshal(msg.Value, &event); err != nil {
-		s.Logger.Errorw("Failed to deserialize cloudevent, skipping", zap.Error(err))
+		s.Kafka.Logger.Errorw("Failed to deserialize cloudevent, skipping", zap.Error(err))
 		return nil, msg.Offset + 1, nil
 	}
 
@@ -272,12 +272,12 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 	for _, trigger := range s.triggers.List(event) {
 		event, err := trigger.Transform(trigger.depName, event)
 		if err != nil {
-			s.Logger.Errorw("Failed to transform cloudevent, skipping", zap.Error(err))
+			s.Kafka.Logger.Errorw("Failed to transform cloudevent, skipping", zap.Error(err))
 			continue
 		}
 
 		if !trigger.Filter(trigger.depName, event) {
-			s.Logger.Debug("Filter condition satisfied, skipping")
+			s.Kafka.Logger.Debug("Filter condition satisfied, skipping")
 			continue
 		}
 
@@ -297,7 +297,7 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 
 		value, err := json.Marshal(data)
 		if err != nil {
-			s.Logger.Errorw("Failed to serialize cloudevent, skipping", zap.Error(err))
+			s.Kafka.Logger.Errorw("Failed to serialize cloudevent, skipping", zap.Error(err))
 			continue
 		}
 
@@ -316,7 +316,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 	if err := json.Unmarshal(msg.Value, &event); err != nil {
 		// do not return here as we still need to call trigger.Offset
 		// below to determine current offset
-		s.Logger.Errorw("Failed to deserialize cloudevent, skipping", zap.Error(err))
+		s.Kafka.Logger.Errorw("Failed to deserialize cloudevent, skipping", zap.Error(err))
 	}
 
 	messages := []*sarama.ProducerMessage{}
@@ -328,7 +328,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 		func() {
 			events, err := trigger.Update(event, msg.Partition, msg.Offset, msg.Timestamp)
 			if err != nil {
-				s.Logger.Errorw("Failed to update trigger, skipping", zap.Error(err))
+				s.Kafka.Logger.Errorw("Failed to update trigger, skipping", zap.Error(err))
 				return
 			}
 
@@ -339,7 +339,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 
 			value, err := json.Marshal(events)
 			if err != nil {
-				s.Logger.Errorw("Failed to serialize cloudevent, skipping", zap.Error(err))
+				s.Kafka.Logger.Errorw("Failed to serialize cloudevent, skipping", zap.Error(err))
 				return
 			}
 
@@ -364,7 +364,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {
 	var events []*cloudevents.Event
 	if err := json.Unmarshal(msg.Value, &events); err != nil {
-		s.Logger.Errorw("Failed to deserialize cloudevents, skipping", zap.Error(err))
+		s.Kafka.Logger.Errorw("Failed to deserialize cloudevents, skipping", zap.Error(err))
 		return nil, msg.Offset + 1, nil
 	}
 

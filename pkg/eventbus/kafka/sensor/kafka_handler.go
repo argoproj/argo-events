@@ -204,8 +204,8 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 			}
 
 			func() {
-				h.Lock()
-				defer h.Unlock()
+				h.Mutex.Lock()
+				defer h.Mutex.Unlock()
 				if err := transaction.Commit(session, messages, offset, checkpoint.Metadata()); err != nil {
 					h.Logger.Errorw("Transaction error", zap.Error(err))
 				}
@@ -222,8 +222,8 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 }
 
 func (h *KafkaHandler) Close() error {
-	h.Lock()
-	defer h.Unlock()
+	h.Mutex.Lock()
+	defer h.Mutex.Unlock()
 
 	if err := h.OffsetManager.Close(); err != nil {
 		return err

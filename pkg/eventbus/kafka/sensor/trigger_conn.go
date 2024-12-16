@@ -42,7 +42,7 @@ type eventWithMetadata struct {
 }
 
 func (e1 *eventWithMetadata) Same(e2 *eventWithMetadata) bool {
-	return e1.Source() == e2.Source() && e1.Subject() == e2.Subject()
+	return e1.Event.Source() == e2.Event.Source() && e1.Event.Subject() == e2.Event.Subject()
 }
 
 func (e *eventWithMetadata) After(t time.Time) bool {

@@ -19,7 +19,7 @@ func (n *STANSourceConn) Publish(ctx context.Context,
 	if n == nil {
 		return fmt.Errorf("Publish() failed; JetstreamSourceConn is nil")
 	}
-	return n.STANConn.Publish(n.subject, msg.Body)
+	return n.STANConnection.STANConn.Publish(n.subject, msg.Body)
 }
 
 func (conn *STANSourceConn) IsClosed() bool {
