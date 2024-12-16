@@ -23,12 +23,12 @@ func (n *STANSourceConn) Publish(ctx context.Context,
 }
 
 func (conn *STANSourceConn) IsClosed() bool {
-	return conn == nil || conn.IsClosed()
+	return conn == nil || conn.STANConnection.IsClosed()
 }
 
 func (conn *STANSourceConn) Close() error {
 	if conn == nil {
 		return fmt.Errorf("can't close STAN source connection, STANSourceConn is nil")
 	}
-	return conn.Close()
+	return conn.STANConnection.Close()
 }

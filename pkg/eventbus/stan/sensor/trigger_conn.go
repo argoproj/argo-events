@@ -42,14 +42,14 @@ func (n *STANTriggerConn) String() string {
 }
 
 func (conn *STANTriggerConn) IsClosed() bool {
-	return conn == nil || conn.IsClosed()
+	return conn == nil || conn.STANConnection.IsClosed()
 }
 
 func (conn *STANTriggerConn) Close() error {
 	if conn == nil {
 		return fmt.Errorf("can't close STAN trigger connection, STANTriggerConn is nil")
 	}
-	return conn.Close()
+	return conn.STANConnection.Close()
 }
 
 // Subscribe is used to subscribe to multiple event source dependencies
