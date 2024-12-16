@@ -153,7 +153,7 @@ func (s *E2ESuite) dynamicFor(r schema.GroupVersionResource) dynamic.ResourceInt
 func (s *E2ESuite) CheckError(err error) {
 	s.T().Helper()
 	if err != nil {
-		s.Suite.T().Fatal(err)
+		s.T().Fatal(err)
 	}
 }
 
