@@ -35,7 +35,7 @@ func (n *SensorSTAN) Connect(ctx context.Context, triggerName string, dependency
 	hashVal := sharedutil.Hasher(hashKey)
 	clientID := fmt.Sprintf("client-%v-%v", hashVal, randomNum.Int64())
 
-	conn, err := n.STAN.MakeConnection(clientID)
+	conn, err := n.MakeConnection(clientID)
 	if err != nil {
 		return nil, err
 	}

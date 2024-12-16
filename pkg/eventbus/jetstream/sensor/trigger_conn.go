@@ -63,7 +63,7 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		sourceDepMap:         sourceDepMap,
 		recentMsgsByID:       make(map[string]*msg),
 		recentMsgsByTime:     make([]*msg, 0)}
-	connection.JetstreamConnection.Logger = connection.JetstreamConnection.Logger.With("triggerName", connection.triggerName, "sensorName", connection.sensorName)
+	connection.Logger = connection.Logger.With("triggerName", connection.triggerName, "sensorName", connection.sensorName)
 
 	connection.evaluableExpression, err = govaluate.NewEvaluableExpression(strings.ReplaceAll(dependencyExpression, "-", "\\-"))
 	if err != nil {
@@ -75,19 +75,19 @@ func NewJetstreamTriggerConn(conn *jetstreambase.JetstreamConnection,
 		return nil, fmt.Errorf("failed to get K/V store for sensor %s: %v", sensorName, err)
 	}
 
-	connection.JetstreamConnection.Logger.Infof("Successfully located K/V store for sensor %s", sensorName)
+	connection.Logger.Infof("Successfully located K/V store for sensor %s", sensorName)
 	return connection, nil
 }
 
 func (conn *JetstreamTriggerConn) IsClosed() bool {
-	return conn == nil || conn.JetstreamConnection.IsClosed()
+	return conn == nil || conn.IsClosed()
 }
 
 func (conn *JetstreamTriggerConn) Close() error {
 	if conn == nil {
 		return fmt.Errorf("can't close Jetstream trigger connection, JetstreamTriggerConn is nil")
 	}
-	return conn.JetstreamConnection.Close()
+	return conn.Close()
 }
 
 func (conn *JetstreamTriggerConn) String() string {
@@ -110,7 +110,7 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	}
 
 	var err error
-	log := conn.JetstreamConnection.Logger
+	log := conn.Logger
 	// derive subjects that we'll subscribe with using the dependencies passed in
 	subjects := make(map[string]eventbuscommon.Dependency)
 	for _, dep := range conn.deps {
@@ -138,9 +138,9 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 		// set durable name separately for each subscription
 		durableName := getDurableName(conn.sensorName, conn.triggerName, dependency.Name)
 
-		conn.JetstreamConnection.Logger.Debugf("durable name for sensor='%s', trigger='%s', dep='%s': '%s'", conn.sensorName, conn.triggerName, dependency.Name, durableName)
+		conn.Logger.Debugf("durable name for sensor='%s', trigger='%s', dep='%s': '%s'", conn.sensorName, conn.triggerName, dependency.Name, durableName)
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
-		subscriptions[subscriptionIndex], err = conn.JetstreamConnection.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew())
+		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew())
 		if err != nil {
 			return fmt.Errorf("failed to subscribe to subject %s using group %s: %w", subject, durableName, err)
 		} else {
@@ -181,8 +181,8 @@ func (conn *JetstreamTriggerConn) shutdownSubscriptions(processMsgsCloseCh chan 
 		ch <- struct{}{}
 	}
 	wg.Wait()
-	conn.JetstreamConnection.NATSConn.Close()
-	conn.JetstreamConnection.Logger.Debug("closed NATSConn")
+	conn.NATSConn.Close()
+	conn.Logger.Debug("closed NATSConn")
 }
 
 func (conn *JetstreamTriggerConn) pullSubscribe(
@@ -199,7 +199,7 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
 			if previousErr != fetchErr || time.Since(previousErrTime) > 10*time.Second {
 				// avoid log spew - only log error every 10 seconds
-				conn.JetstreamConnection.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, fetchErr, previousErr, previousErrTime)
+				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, fetchErr, previousErr, previousErrTime)
 			}
 			previousErr = fetchErr
 			previousErrTime = time.Now()
@@ -209,8 +209,8 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 		select {
 		case <-closeCh:
 			wg.Done()
-			conn.JetstreamConnection.Logger.Debug("wg.Done(): pullSubscribe")
-			conn.JetstreamConnection.Logger.Infof("exiting pullSubscribe() for subscription %+v", subscription)
+			conn.Logger.Debug("wg.Done(): pullSubscribe")
+			conn.Logger.Infof("exiting pullSubscribe() for subscription %+v", subscription)
 			return
 		default:
 		}
@@ -235,7 +235,7 @@ func (conn *JetstreamTriggerConn) processMsgs(
 	wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
-		conn.JetstreamConnection.Logger.Debug("wg.Done(): processMsgs")
+		conn.Logger.Debug("wg.Done(): processMsgs")
 	}()
 
 	for {
@@ -243,10 +243,10 @@ func (conn *JetstreamTriggerConn) processMsgs(
 		case msg := <-receiveChannel:
 			conn.processMsg(msg, transform, filter, action)
 		case <-resetConditionsCh:
-			conn.JetstreamConnection.Logger.Info("reset conditions")
+			conn.Logger.Info("reset conditions")
 			_ = conn.clearAllDependencies(nil)
 		case <-closeCh:
-			conn.JetstreamConnection.Logger.Info("shutting down processMsgs routine")
+			conn.Logger.Info("shutting down processMsgs routine")
 			return
 		}
 	}
@@ -259,7 +259,7 @@ func (conn *JetstreamTriggerConn) processMsg(
 	action func(map[string]cloudevents.Event)) {
 	meta, err := m.Metadata()
 	if err != nil {
-		conn.JetstreamConnection.Logger.Errorf("can't get Metadata() for message %+v??", m)
+		conn.Logger.Errorf("can't get Metadata() for message %+v??", m)
 	}
 
 	done := make(chan bool)
@@ -272,17 +272,17 @@ func (conn *JetstreamTriggerConn) processMsg(
 				err = m.AckSync()
 				if err != nil {
 					errStr := fmt.Sprintf("Error performing AckSync() on message: %v", err)
-					conn.JetstreamConnection.Logger.Error(errStr)
+					conn.Logger.Error(errStr)
 				}
-				conn.JetstreamConnection.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
+				conn.Logger.Debugf("acked message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
 				return
 			case <-ticker.C:
 				err = m.InProgress()
 				if err != nil {
 					errStr := fmt.Sprintf("Error performing InProgess() on message: %v", err)
-					conn.JetstreamConnection.Logger.Error(errStr)
+					conn.Logger.Error(errStr)
 				}
-				conn.JetstreamConnection.Logger.Debugf("InProgess message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
+				conn.Logger.Debugf("InProgess message of Stream seq: %s:%d, Consumer seq: %s:%d", meta.Stream, meta.Sequence.Stream, meta.Consumer, meta.Sequence.Consumer)
 			}
 		}
 	}()
@@ -291,7 +291,7 @@ func (conn *JetstreamTriggerConn) processMsg(
 		done <- true
 	}()
 
-	log := conn.JetstreamConnection.Logger
+	log := conn.Logger
 
 	var event *cloudevents.Event
 	if err := json.Unmarshal(m.Data, &event); err != nil {
@@ -333,7 +333,7 @@ func (conn *JetstreamTriggerConn) processDependency(
 	transform func(depName string, event cloudevents.Event) (*cloudevents.Event, error),
 	filter func(string, cloudevents.Event) bool,
 	action func(map[string]cloudevents.Event)) {
-	log := conn.JetstreamConnection.Logger
+	log := conn.Logger
 	event, err := transform(depName, *event)
 	if err != nil {
 		log.Errorw("failed to apply event transformation, ", err)
@@ -493,11 +493,11 @@ func (conn *JetstreamTriggerConn) clearDependencyIfExistsBeforeTime(depName stri
 	if found {
 		// determine if the dependency is from before the time in question
 		if msgInfo.Timestamp.Before(beforeTime) {
-			conn.JetstreamConnection.Logger.Debugf("clearing key %s from the K/V store since its message time %+v occurred before %+v; MsgInfo:%+v",
+			conn.Logger.Debugf("clearing key %s from the K/V store since its message time %+v occurred before %+v; MsgInfo:%+v",
 				key, msgInfo.Timestamp.Local(), beforeTime.Local(), msgInfo)
 			err := conn.keyValueStore.Delete(key)
 			if err != nil && err != nats.ErrKeyNotFound {
-				conn.JetstreamConnection.Logger.Error(err)
+				conn.Logger.Error(err)
 				return err
 			}
 		}
@@ -508,10 +508,10 @@ func (conn *JetstreamTriggerConn) clearDependencyIfExistsBeforeTime(depName stri
 
 func (conn *JetstreamTriggerConn) clearDependencyIfExists(depName string) error {
 	key := getDependencyKey(conn.triggerName, depName)
-	conn.JetstreamConnection.Logger.Debugf("clearing key %s from the K/V store", key)
+	conn.Logger.Debugf("clearing key %s from the K/V store", key)
 	err := conn.keyValueStore.Delete(key)
 	if err != nil && err != nats.ErrKeyNotFound {
-		conn.JetstreamConnection.Logger.Error(err)
+		conn.Logger.Error(err)
 		return err
 	}
 	return nil
@@ -539,7 +539,7 @@ func (conn *JetstreamTriggerConn) purgeOldMsgs() {
 	// evict any old messages from our message cache
 	for _, msg := range conn.recentMsgsByTime {
 		if now-msg.time > 60*1000*1000*1000 { // older than 1 minute
-			conn.JetstreamConnection.Logger.Debugf("deleting message %v from cache", *msg)
+			conn.Logger.Debugf("deleting message %v from cache", *msg)
 			delete(conn.recentMsgsByID, msg.msgID)
 			conn.recentMsgsByTime = conn.recentMsgsByTime[1:]
 		} else {

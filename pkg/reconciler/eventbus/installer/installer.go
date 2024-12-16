@@ -8,7 +8,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
 )
@@ -57,9 +56,9 @@ func getInstaller(eventBus *aev1.EventBus, client client.Client, kubeClient kube
 
 func getLabels(bus *aev1.EventBus) map[string]string {
 	return map[string]string{
-		"controller":            "eventbus-controller",
-		"eventbus-name":         bus.Name,
-		v1alpha1.LabelOwnerName: bus.Name,
+		"controller":        "eventbus-controller",
+		"eventbus-name":     bus.Name,
+		aev1.LabelOwnerName: bus.Name,
 	}
 }
 
@@ -109,7 +108,7 @@ func linkedEventSources(ctx context.Context, namespace, eventBusName string, c c
 	for _, es := range esl.Items {
 		ebName := es.Spec.EventBusName
 		if ebName == "" {
-			ebName = v1alpha1.DefaultEventBusName
+			ebName = aev1.DefaultEventBusName
 		}
 		if ebName == eventBusName {
 			result++
@@ -129,7 +128,7 @@ func linkedSensors(ctx context.Context, namespace, eventBusName string, c client
 	for _, s := range sl.Items {
 		sName := s.Spec.EventBusName
 		if sName == "" {
-			sName = v1alpha1.DefaultEventBusName
+			sName = aev1.DefaultEventBusName
 		}
 		if sName == eventBusName {
 			result++

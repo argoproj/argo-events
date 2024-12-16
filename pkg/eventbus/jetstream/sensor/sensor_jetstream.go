@@ -47,23 +47,23 @@ func NewSensorJetstream(url string, sensorSpec *v1alpha1.Sensor, streamConfig st
 }
 
 func (stream *SensorJetstream) Initialize() error {
-	err := stream.Jetstream.Init() // member of jetstreambase.Jetstream
+	err := stream.Init() // member of jetstreambase.Jetstream
 	if err != nil {
 		return err
 	}
 
 	// see if there's an existing one
-	stream.keyValueStore, _ = stream.Jetstream.MgmtConnection.JSContext.KeyValue(stream.sensorName)
+	stream.keyValueStore, _ = stream.MgmtConnection.JSContext.KeyValue(stream.sensorName)
 	if stream.keyValueStore == nil {
 		// create Key/Value store for this Sensor (seems to be okay to call this if it already exists)
-		stream.keyValueStore, err = stream.Jetstream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
+		stream.keyValueStore, err = stream.MgmtConnection.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
 		if err != nil {
 			return fmt.Errorf("failed to Create Key/Value Store for sensor %s, err: %w", stream.sensorName, err)
 		}
 	} else {
-		stream.Jetstream.Logger.Infof("found existing K/V store for sensor %s, using that", stream.sensorName)
+		stream.Logger.Infof("found existing K/V store for sensor %s, using that", stream.sensorName)
 	}
-	stream.Jetstream.Logger.Infof("successfully created/located K/V store for sensor %s", stream.sensorName)
+	stream.Logger.Infof("successfully created/located K/V store for sensor %s", stream.sensorName)
 
 	// Here we can take the sensor specification and clean up the K/V store so as to remove any old
 	// Triggers for this Sensor that no longer exist and any old Dependencies (and also Drain any corresponding Connections)
@@ -72,7 +72,7 @@ func (stream *SensorJetstream) Initialize() error {
 }
 
 func (stream *SensorJetstream) Connect(ctx context.Context, triggerName string, dependencyExpression string, deps []eventbuscommon.Dependency, atLeastOnce bool) (eventbuscommon.TriggerConnection, error) {
-	conn, err := stream.Jetstream.MakeConnection()
+	conn, err := stream.MakeConnection()
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (stream *SensorJetstream) Connect(ctx context.Context, triggerName string, 
 //     the dependency definition has changed, or the trigger expression has changed
 //  3. for each dependency purged, delete the associated consumer so no new data is sent there
 func (stream *SensorJetstream) setStateToSpec(sensorSpec *v1alpha1.Sensor) error {
-	log := stream.Jetstream.Logger
+	log := stream.Logger
 	if sensorSpec == nil {
 		return fmt.Errorf("nil  sensorSpec")
 	}
@@ -135,17 +135,17 @@ func (stream *SensorJetstream) purgeDependency(triggerName string, depName strin
 	// purge from Key/Value store first
 	key := getDependencyKey(triggerName, depName)
 	durableName := getDurableName(stream.sensorName, triggerName, depName)
-	stream.Jetstream.Logger.Debugf("purging dependency, including 1) key %s from the K/V store, and 2) durable consumer %s", key, durableName)
+	stream.Logger.Debugf("purging dependency, including 1) key %s from the K/V store, and 2) durable consumer %s", key, durableName)
 	err := stream.keyValueStore.Delete(key)
 	if err != nil && err != nats.ErrKeyNotFound { // sometimes we call this on a trigger/dependency combination not sure if it actually exists or not, so
 		// don't need to worry about case of it not existing
-		stream.Jetstream.Logger.Error(err)
+		stream.Logger.Error(err)
 		return err
 	}
 	// then delete consumer
-	stream.Jetstream.Logger.Debugf("durable name for sensor='%s', trigger='%s', dep='%s': '%s'", stream.sensorName, triggerName, depName, durableName)
+	stream.Logger.Debugf("durable name for sensor='%s', trigger='%s', dep='%s': '%s'", stream.sensorName, triggerName, depName, durableName)
 
-	_ = stream.Jetstream.MgmtConnection.JSContext.DeleteConsumer("default", durableName) // sometimes we call this on a trigger/dependency combination not sure if it actually exists or not, so
+	_ = stream.MgmtConnection.JSContext.DeleteConsumer("default", durableName) // sometimes we call this on a trigger/dependency combination not sure if it actually exists or not, so
 	// don't need to worry about case of it not existing
 
 	return nil
@@ -159,7 +159,7 @@ func (stream *SensorJetstream) saveSpec(sensorSpec *v1alpha1.Sensor, removedTrig
 		if err != nil {
 			return fmt.Errorf("error deleting key %s: %w", key, err)
 		}
-		stream.Jetstream.Logger.Debugf("successfully removed Trigger expression at key %s", key)
+		stream.Logger.Debugf("successfully removed Trigger expression at key %s", key)
 	}
 
 	// save the dependency definitions
@@ -273,7 +273,7 @@ func (stream *SensorJetstream) getDependencyDefinitions() (DependencyDefinitionV
 		}
 		return nil, fmt.Errorf("error getting key %s: %w", DependencyDefsKey, err)
 	}
-	stream.Jetstream.Logger.Debugf("Value of key %s: %s", DependencyDefsKey, string(depDefs.Value()))
+	stream.Logger.Debugf("Value of key %s: %s", DependencyDefsKey, string(depDefs.Value()))
 
 	depDefMap := DependencyDefinitionValue{}
 	err = json.Unmarshal(depDefs.Value(), &depDefMap)
@@ -293,7 +293,7 @@ func (stream *SensorJetstream) storeDependencyDefinitions(depDef DependencyDefin
 	if err != nil {
 		return fmt.Errorf("error storing %s under key %s: %w", string(bytes), DependencyDefsKey, err)
 	}
-	stream.Jetstream.Logger.Debugf("successfully stored dependency definition under key %s: %s", DependencyDefsKey, string(bytes))
+	stream.Logger.Debugf("successfully stored dependency definition under key %s: %s", DependencyDefsKey, string(bytes))
 	return nil
 }
 
@@ -305,7 +305,7 @@ func (stream *SensorJetstream) getTriggerList() (TriggerValue, error) {
 		}
 		return nil, fmt.Errorf("error getting key %s: %w", TriggersKey, err)
 	}
-	stream.Jetstream.Logger.Debugf("Value of key %s: %s", TriggersKey, string(triggerListJson.Value()))
+	stream.Logger.Debugf("Value of key %s: %s", TriggersKey, string(triggerListJson.Value()))
 
 	triggerList := TriggerValue{}
 	err = json.Unmarshal(triggerListJson.Value(), &triggerList)
@@ -325,7 +325,7 @@ func (stream *SensorJetstream) storeTriggerList(triggerList TriggerValue) error 
 	if err != nil {
 		return fmt.Errorf("error storing %s under key %s: %w", string(bytes), TriggersKey, err)
 	}
-	stream.Jetstream.Logger.Debugf("successfully stored trigger list under key %s: %s", TriggersKey, string(bytes))
+	stream.Logger.Debugf("successfully stored trigger list under key %s: %s", TriggersKey, string(bytes))
 	return nil
 }
 
@@ -338,7 +338,7 @@ func (stream *SensorJetstream) getTriggerExpression(triggerName string) (string,
 		}
 		return "", fmt.Errorf("error getting key %s: %w", key, err)
 	}
-	stream.Jetstream.Logger.Debugf("Value of key %s: %s", key, string(expr.Value()))
+	stream.Logger.Debugf("Value of key %s: %s", key, string(expr.Value()))
 
 	return string(expr.Value()), nil
 }
@@ -349,12 +349,12 @@ func (stream *SensorJetstream) storeTriggerExpression(triggerName string, condit
 	if err != nil {
 		return fmt.Errorf("errror storing %s under key %s: %w", conditionExpression, key, err)
 	}
-	stream.Jetstream.Logger.Debugf("successfully stored trigger expression under key %s: %s", key, conditionExpression)
+	stream.Logger.Debugf("successfully stored trigger expression under key %s: %s", key, conditionExpression)
 	return nil
 }
 
 func (stream *SensorJetstream) purgeSelectedDepsForTrigger(triggerName string, deps []string) error {
-	stream.Jetstream.Logger.Debugf("purging selected dependencies %v for trigger %s", deps, triggerName)
+	stream.Logger.Debugf("purging selected dependencies %v for trigger %s", deps, triggerName)
 	for _, dep := range deps {
 		err := stream.purgeDependency(triggerName, dep) // this will attempt a delete even if no such key exists for a particular trigger, but that's okay
 		if err != nil {
@@ -365,7 +365,7 @@ func (stream *SensorJetstream) purgeSelectedDepsForTrigger(triggerName string, d
 }
 
 func (stream *SensorJetstream) purgeAllDepsForTrigger(triggerName string) error {
-	stream.Jetstream.Logger.Debugf("purging all dependencies for trigger %s", triggerName)
+	stream.Logger.Debugf("purging all dependencies for trigger %s", triggerName)
 	// use the stored trigger expression to determine which dependencies need to be purged
 	storedExpression, err := stream.getTriggerExpression(triggerName)
 	if err != nil {

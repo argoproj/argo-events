@@ -31,18 +31,18 @@ func (jsc *JetstreamSourceConn) Publish(ctx context.Context,
 
 	// derive subject from event source name and event name
 	subject := fmt.Sprintf("default.%s.%s", msg.EventSourceName, msg.EventName)
-	_, err := jsc.JetstreamConnection.JSContext.Publish(subject, msg.Body, dedupKey)
-	jsc.JetstreamConnection.Logger.Debugf("published message to subject %s", subject)
+	_, err := jsc.JSContext.Publish(subject, msg.Body, dedupKey)
+	jsc.Logger.Debugf("published message to subject %s", subject)
 	return err
 }
 
 func (conn *JetstreamSourceConn) IsClosed() bool {
-	return conn == nil || conn.JetstreamConnection.IsClosed()
+	return conn == nil || conn.IsClosed()
 }
 
 func (conn *JetstreamSourceConn) Close() error {
 	if conn == nil {
 		return fmt.Errorf("can't close Jetstream source connection, JetstreamSourceConn is nil")
 	}
-	return conn.JetstreamConnection.Close()
+	return conn.Close()
 }

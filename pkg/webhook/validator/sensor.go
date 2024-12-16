@@ -2,7 +2,6 @@ package validator
 
 import (
 	"context"
-	"fmt"
 
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,11 +35,11 @@ func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionRespo
 	}
 	eventBus, err := s.eventBusClient.Get(ctx, eventBusName, metav1.GetOptions{})
 	if err != nil {
-		return DeniedResponse(fmt.Sprintf("failed to get EventBus eventBusName=%s; err=%v", eventBusName, err))
+		return DeniedResponse("failed to get EventBus eventBusName=%s; err=%v", eventBusName, err)
 	}
 
 	if err := sensorcontroller.ValidateSensor(s.newSensor, eventBus); err != nil {
-		return DeniedResponse(err.Error())
+		return DeniedResponse("invalid Sensor: %s", err.Error())
 	}
 	return AllowedResponse()
 }

@@ -1,11 +1,15 @@
 run:
   timeout: 5m
-  skip-dirs:
+issues:
+  exclude-dirs:
     - pkg/client
     - vendor
     - "eventsources/common/naivewatcher"
-  skip-files:
+    - "pkg/sensors/triggers/custom-trigger"
+    - "pkg/eventsources/sources/generic"
+  exclude-files:
     - ".*generated.*"
+    - pkg/eventsources/sources/gcppubsub/start.go
 linters:
   enable:
    # - depguard

@@ -25,7 +25,7 @@ func (n *SourceSTAN) Initialize() error {
 }
 
 func (n *SourceSTAN) Connect(clientID string) (eventbuscommon.EventSourceConnection, error) {
-	conn, err := n.STAN.MakeConnection(clientID)
+	conn, err := n.MakeConnection(clientID)
 	if err != nil {
 		return nil, err
 	}

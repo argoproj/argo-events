@@ -29,7 +29,7 @@ func NewEventSourceValidator(client kubernetes.Interface, ebClient eventsclient.
 
 func (es *eventsource) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
 	if err := eventsourcecontroller.ValidateEventSource(es.newes); err != nil {
-		return DeniedResponse(err.Error())
+		return DeniedResponse("invalid EventSource: %s", err.Error())
 	}
 	return AllowedResponse()
 }

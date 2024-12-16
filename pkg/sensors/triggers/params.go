@@ -64,7 +64,7 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 
 // ApplyTemplateParameters applies parameters to trigger template
 func ApplyTemplateParameters(events map[string]*v1alpha1.Event, trigger *v1alpha1.Trigger) error {
-	if trigger.Parameters != nil && len(trigger.Parameters) > 0 {
+	if len(trigger.Parameters) > 0 {
 		templateBytes, err := json.Marshal(trigger.Template)
 		if err != nil {
 			return err

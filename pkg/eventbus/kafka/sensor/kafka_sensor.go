@@ -160,8 +160,8 @@ func (s *KafkaSensor) Initialize() error {
 }
 
 func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpression string, dependencies []eventbuscommon.Dependency, atLeastOnce bool) (eventbuscommon.TriggerConnection, error) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 
 	// connect only if disconnected, if ever the connection is lost
 	// the connected boolean will flip and the sensor listener will
@@ -231,15 +231,15 @@ func (s *KafkaSensor) Listen(ctx context.Context) {
 }
 
 func (s *KafkaSensor) Disconnect() {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 
 	s.connected = false
 }
 
 func (s *KafkaSensor) Close() error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 
 	// protect against being called multiple times
 	if s.IsClosed() {
