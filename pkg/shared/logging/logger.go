@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	zap "go.uber.org/zap"
-	"k8s.io/klog/v2"
+	klog "k8s.io/klog/v2"
 )
 
 // Logger constants

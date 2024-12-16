@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/eventsources/events"
-	"github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"
 	"go.uber.org/zap"

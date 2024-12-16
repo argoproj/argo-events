@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	nats "github.com/nats-io/nats.go"
-	"github.com/nats-io/stan.go"
+	stan "github.com/nats-io/stan.go"
 	"go.uber.org/zap"
 
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"

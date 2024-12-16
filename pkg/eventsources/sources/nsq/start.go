@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/nsqio/go-nsq"
+	nsq "github.com/nsqio/go-nsq"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
