@@ -141,7 +141,7 @@ func (c *KafkaTriggerConnection) satisfied() (interface{}, error) {
 		}
 	}
 
-	c.KafkaConnection.Logger.Infow("Evaluating", zap.String("expr", c.depExpression.String()), zap.Any("parameters", parameters))
+	c.Logger.Infow("Evaluating", zap.String("expr", c.depExpression.String()), zap.Any("parameters", parameters))
 
 	return c.depExpression.Eval(parameters)
 }
