@@ -37,12 +37,12 @@ func (jsc *JetstreamSourceConn) Publish(ctx context.Context,
 }
 
 func (conn *JetstreamSourceConn) IsClosed() bool {
-	return conn == nil || conn.IsClosed()
+	return conn == nil || conn.JetstreamConnection.IsClosed()
 }
 
 func (conn *JetstreamSourceConn) Close() error {
 	if conn == nil {
 		return fmt.Errorf("can't close Jetstream source connection, JetstreamSourceConn is nil")
 	}
-	return conn.Close()
+	return conn.JetstreamConnection.Close()
 }
