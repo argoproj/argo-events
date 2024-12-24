@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
@@ -41,7 +40,7 @@ func TestLeaderElectionWithEventBusElector(t *testing.T) {
 func TestLeaderElectionWithKubernetesElector(t *testing.T) {
 	eventBusAuthFileMountPath = "test"
 
-	os.Setenv(v1alpha1.EnvVarLeaderElection, "k8s")
+	os.Setenv(aev1.EnvVarLeaderElection, "k8s")
 
 	for _, config := range configs {
 		elector, err := NewElector(context.TODO(), config, "", 0, "", "", "")
