@@ -120,7 +120,7 @@ type natsEventBusElector struct {
 func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCallbacks) {
 	log := logging.FromContext(ctx)
 	ci := graft.ClusterInfo{Name: e.clusterName, Size: e.size}
-	opts := &nats.DefaultOptions
+	opts := nats.GetDefaultOptions()
 	// Will never give up
 	opts.MaxReconnect = -1
 	opts.Url = e.url
@@ -143,7 +143,7 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 		}
 	}
 
-	rpc, err := graft.NewNatsRpc(opts)
+	rpc, err := graft.NewNatsRpc(&opts)
 	if err != nil {
 		log.Fatalw("failed to new Nats Rpc", zap.Error(err))
 	}
