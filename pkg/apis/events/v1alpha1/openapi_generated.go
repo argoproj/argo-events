@@ -3236,11 +3236,23 @@ func schema_pkg_apis_events_v1alpha1_EventSourceStatus(ref common.ReferenceCallb
 							},
 						},
 					},
+					"lastUpdated": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"observedGeneration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The generation observed by the controller.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Condition"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Condition", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -7285,11 +7297,23 @@ func schema_pkg_apis_events_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							},
 						},
 					},
+					"lastUpdated": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"observedGeneration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The generation observed by the controller.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Condition"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Condition", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
