@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -120,6 +122,14 @@ func (e EventSourceSpec) GetReplicas() int32 {
 		replicas = 1
 	}
 	return replicas
+}
+
+func (es EventSource) GetDeploymentName() string {
+	return fmt.Sprintf("%s-es", es.Name)
+}
+
+func (es EventSource) GetServiceName() string {
+	return fmt.Sprintf("%s-es-svc", es.Name)
 }
 
 // Service holds the service information eventsource exposes
@@ -1497,6 +1507,11 @@ const (
 // EventSourceStatus holds the status of the event-source resource
 type EventSourceStatus struct {
 	Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
+	// +optional
+	LastUpdated metav1.Time `json:"lastUpdated,omitempty" protobuf:"bytes,2,opt,name=lastUpdated"`
+	// The generation observed by the controller.
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty" protobuf:"varint,3,opt,name=observedGeneration"`
 }
 
 // InitConditions sets conditions to Unknown state.
@@ -1522,4 +1537,9 @@ func (es *EventSourceStatus) MarkDeployed() {
 // MarkDeployFailed set the eventsource deploy failed
 func (es *EventSourceStatus) MarkDeployFailed(reason, message string) {
 	es.MarkFalse(EventSourceConditionDeployed, reason, message)
+}
+
+// SetObservedGeneration sets the Status ObservedGeneration
+func (pls *EventSourceStatus) SetObservedGeneration(value int64) {
+	pls.ObservedGeneration = value
 }

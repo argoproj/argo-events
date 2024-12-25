@@ -8252,6 +8252,41 @@ Status </a> </em>
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>lastUpdated</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta">
+Kubernetes meta/v1.Time </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>observedGeneration</code></br> <em> int64 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+The generation observed by the controller.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -18455,6 +18490,41 @@ Status </a> </em>
 <p>
 
 (Members of <code>Status</code> are embedded into this type.)
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>lastUpdated</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta">
+Kubernetes meta/v1.Time </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>observedGeneration</code></br> <em> int64 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+The generation observed by the controller.
 </p>
 
 </td>

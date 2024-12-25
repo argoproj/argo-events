@@ -33,13 +33,11 @@ func ValidateEventSource(eventSource *aev1.EventSource) error {
 				eventNames[eName] = true
 			} else {
 				// Duplicated event name not allowed in one EventSource, even they are in different EventSourceType.
-				eventSource.Status.MarkSourcesNotProvided("InvalidEventSource", fmt.Sprintf("more than one \"%s\" found", eName))
 				return fmt.Errorf("more than one %q found in the spec", eName)
 			}
 
 			err := server.ValidateEventSource(ctx)
 			if err != nil {
-				eventSource.Status.MarkSourcesNotProvided("InvalidEventSource", fmt.Sprintf("Invalid spec: %s - %s", server.GetEventSourceName(), server.GetEventName()))
 				return err
 			}
 		}
@@ -47,10 +45,8 @@ func ValidateEventSource(eventSource *aev1.EventSource) error {
 
 	if rollingUpdates > 0 && recreates > 0 {
 		// We don't allow this as if we use recreate strategy for the deployment it will have downtime
-		eventSource.Status.MarkSourcesNotProvided("InvalidEventSource", "Some types of event sources can not be put in one spec")
 		return fmt.Errorf("event sources with rolling update and recreate update strategy can not be put together")
 	}
 
-	eventSource.Status.MarkSourcesProvided()
 	return nil
 }
