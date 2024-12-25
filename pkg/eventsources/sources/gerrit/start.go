@@ -26,7 +26,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/andygrunwald/go-gerrit"
+	gerrit "github.com/andygrunwald/go-gerrit"
 	"go.uber.org/zap"
 
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"

@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7/pkg/notification"
-	"github.com/stripe/stripe-go"
+	stripe "github.com/stripe/stripe-go"
 
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
 )

@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/stripe/stripe-go"
+	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/webhookendpoint"
 	"go.uber.org/zap"
 

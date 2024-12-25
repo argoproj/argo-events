@@ -16,6 +16,7 @@ import (
 type Jetstream struct {
 	url  string
 	auth *eventbuscommon.Auth
+	tls  *v1alpha1.TLSConfig
 
 	MgmtConnection JetstreamConnection
 
@@ -24,10 +25,11 @@ type Jetstream struct {
 	Logger *zap.SugaredLogger
 }
 
-func NewJetstream(url string, streamSettings string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger) (*Jetstream, error) {
+func NewJetstream(url string, streamSettings string, auth *eventbuscommon.Auth, logger *zap.SugaredLogger, tls *v1alpha1.TLSConfig) (*Jetstream, error) {
 	js := &Jetstream{
 		url:            url,
 		auth:           auth,
+		tls:            tls,
 		Logger:         logger,
 		streamSettings: streamSettings,
 	}
@@ -38,9 +40,7 @@ func NewJetstream(url string, streamSettings string, auth *eventbuscommon.Auth, 
 func (stream *Jetstream) Init() error {
 	mgmtConnection, err := stream.MakeConnection()
 	if err != nil {
-		errStr := fmt.Sprintf("error creating Management Connection for Jetstream stream %+v: %v", stream, err)
-		stream.Logger.Error(errStr)
-		return fmt.Errorf(errStr)
+		return fmt.Errorf("error creating Management Connection for Jetstream stream %+v: %w", stream, err)
 	}
 	err = stream.CreateStream(mgmtConnection)
 	if err != nil {
@@ -67,9 +67,19 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 			conn.NATSConnected = true
 			log.Info("Reconnected to NATS server")
 		}),
-		nats.Secure(&tls.Config{
+	}
+
+	if stream.tls != nil {
+		tlsConfig, err := sharedutil.GetTLSConfig(stream.tls)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, nats.Secure(tlsConfig))
+		log.Info("Client-side TLS configuration enabled on the NATS connection")
+	} else {
+		opts = append(opts, nats.Secure(&tls.Config{
 			InsecureSkipVerify: true,
-		}),
+		}))
 	}
 
 	switch stream.auth.Strategy {
@@ -158,9 +168,7 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	connectErr := sharedutil.DoWithRetry(nil, func() error { // exponential backoff if it fails the first time
 		_, err = conn.JSContext.AddStream(&streamConfig)
 		if err != nil {
-			errStr := fmt.Sprintf(`Failed to add Jetstream stream '%s'for connection %+v: err=%v`,
-				v1alpha1.JetStreamStreamName, conn, err)
-			return fmt.Errorf(errStr)
+			return fmt.Errorf("failed to add Jetstream stream %q for connection %+v: %w", v1alpha1.JetStreamStreamName, conn, err)
 		} else {
 			return nil
 		}

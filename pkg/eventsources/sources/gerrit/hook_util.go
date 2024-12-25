@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/andygrunwald/go-gerrit"
+	gerrit "github.com/andygrunwald/go-gerrit"
 )
 
 func newGerritWebhookService(client *gerrit.Client) *gerritWebhookService {

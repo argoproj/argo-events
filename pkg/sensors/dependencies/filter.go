@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
-	"github.com/Masterminds/sprig/v3"
+	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	"github.com/tidwall/gjson"
@@ -227,7 +227,7 @@ filterData:
 			}
 		}
 
-		if f.Value == nil || len(f.Value) == 0 {
+		if len(f.Value) == 0 {
 			errMsg := "no values specified"
 			if operator == v1alpha1.OrLogicalOperator {
 				errMessages = append(errMessages, errMsg)

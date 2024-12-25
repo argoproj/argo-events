@@ -17,7 +17,7 @@ limitations under the License.
 package gerrit
 
 import (
-	"github.com/andygrunwald/go-gerrit"
+	gerrit "github.com/andygrunwald/go-gerrit"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"

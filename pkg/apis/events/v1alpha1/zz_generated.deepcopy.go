@@ -2283,6 +2283,11 @@ func (in *JetStreamConfig) DeepCopyInto(out *JetStreamConfig) {
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.TLS != nil {
+		in, out := &in.TLS, &out.TLS
+		*out = new(TLSConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
