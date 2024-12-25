@@ -363,7 +363,6 @@ func Test_BuildDeployment(t *testing.T) {
 	})
 
 	t.Run("test jetstream eventbus secrets attached", func(t *testing.T) {
-
 		deployment, err := r.buildDeployment(fakeEventBusJetstreamWithTLS.DeepCopy(), testEventSource)
 		assert.Nil(t, err)
 		assert.NotNil(t, deployment)
