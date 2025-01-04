@@ -26,7 +26,7 @@ require (
 	github.com/argoproj/pkg v0.13.6
 	github.com/aws/aws-sdk-go v1.47.11
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
-	github.com/bradleyfalzon/ghinstallation/v2 v2.12.0
+	github.com/bradleyfalzon/ghinstallation/v2 v2.13.0
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/doublerebel/bellows v0.0.0-20160303004610-f177d92a03d3
@@ -184,7 +184,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-github/v41 v41.0.0 // indirect
-	github.com/google/go-github/v66 v66.0.0 // indirect
+	github.com/google/go-github/v68 v68.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
