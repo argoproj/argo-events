@@ -2199,28 +2199,28 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 <ol>
 <li>
 <p>The HTTP server simply prints the request body as follows.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">package</span><span class="w"> </span><span class="n">main</span>
+<div class="codehilite"><pre><span></span><code><span class="n">package</span> <span class="n">main</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-<span class="w"> </span><span class="s2">&quot;fmt&quot;</span>
-<span class="w"> </span><span class="s2">&quot;io&quot;</span>
-<span class="w"> </span><span class="s2">&quot;net/http&quot;</span>
+ <span class="s2">&quot;fmt&quot;</span>
+ <span class="s2">&quot;io&quot;</span>
+ <span class="s2">&quot;net/http&quot;</span>
 <span class="p">)</span>
 
-<span class="n">func</span><span class="w"> </span><span class="n">hello</span><span class="p">(</span><span class="n">w</span><span class="w"> </span><span class="n">http</span><span class="o">.</span><span class="n">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="w"> </span><span class="o">*</span><span class="n">http</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w"> </span><span class="n">body</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">io</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span>
-<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">nil</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&quot;%+v</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">)</span>
-<span class="w">  </span><span class="k">return</span>
-<span class="w"> </span><span class="p">}</span>
-<span class="w"> </span><span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">body</span><span class="p">))</span>
-<span class="w"> </span><span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;hello</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">func</span> <span class="n">hello</span><span class="p">(</span><span class="n">w</span> <span class="n">http</span><span class="o">.</span><span class="n">ResponseWriter</span><span class="p">,</span> <span class="n">req</span> <span class="o">*</span><span class="n">http</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span> <span class="p">{</span>
+ <span class="n">body</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">io</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span>
+ <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
+  <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&quot;%+v</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+  <span class="k">return</span>
+ <span class="p">}</span>
+ <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">body</span><span class="p">))</span>
+ <span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="s2">&quot;hello</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="n">func</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w"> </span><span class="n">http</span><span class="o">.</span><span class="n">HandleFunc</span><span class="p">(</span><span class="s2">&quot;/hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">hello</span><span class="p">)</span>
-<span class="w"> </span><span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;server is listening on 8090&quot;</span><span class="p">)</span>
-<span class="w"> </span><span class="n">http</span><span class="o">.</span><span class="n">ListenAndServe</span><span class="p">(</span><span class="s2">&quot;:8090&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">nil</span><span class="p">)</span>
+<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+ <span class="n">http</span><span class="o">.</span><span class="n">HandleFunc</span><span class="p">(</span><span class="s2">&quot;/hello&quot;</span><span class="p">,</span> <span class="n">hello</span><span class="p">)</span>
+ <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;server is listening on 8090&quot;</span><span class="p">)</span>
+ <span class="n">http</span><span class="o">.</span><span class="n">ListenAndServe</span><span class="p">(</span><span class="s2">&quot;:8090&quot;</span><span class="p">,</span> <span class="n">nil</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -2338,16 +2338,16 @@ to invoke OpenFaaS function.</p>
 <li>
 <p>Let's create a basic function. You can follow the <a href="https://blog.alexellis.io/serverless-golang-with-openfaas/">steps</a>.
     to set up the function.</p>
-<div class="codehilite"><pre><span></span><code><span class="w"> </span><span class="n">package</span><span class="w"> </span><span class="n">function</span>
+<div class="codehilite"><pre><span></span><code> <span class="n">package</span> <span class="n">function</span>
 
-<span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-<span class="w">  </span><span class="s2">&quot;fmt&quot;</span>
-<span class="w"> </span><span class="p">)</span>
+ <span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+  <span class="s2">&quot;fmt&quot;</span>
+ <span class="p">)</span>
 
-<span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">Handle</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">serverless</span><span class="w"> </span><span class="n">request</span>
-<span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="n">Handle</span><span class="p">(</span><span class="n">req</span><span class="w"> </span><span class="p">[]</span><span class="n">byte</span><span class="p">)</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s2">&quot;Hello, Go. You said: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">string</span><span class="p">(</span><span class="n">req</span><span class="p">))</span>
-<span class="w"> </span><span class="p">}</span>
+ <span class="o">//</span> <span class="n">Handle</span> <span class="n">a</span> <span class="n">serverless</span> <span class="n">request</span>
+ <span class="n">func</span> <span class="n">Handle</span><span class="p">(</span><span class="n">req</span> <span class="p">[]</span><span class="n">byte</span><span class="p">)</span> <span class="n">string</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s2">&quot;Hello, Go. You said: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(</span><span class="n">req</span><span class="p">))</span>
+ <span class="p">}</span>
 </code></pre></div>
 
 </li>

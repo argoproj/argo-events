@@ -2220,11 +2220,11 @@
 <li>
 <p>Open a python REPL and run following code to publish a message on <code>exchange</code> called <code>test</code>.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pika</span>
-<span class="n">connection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span>
-<span class="n">channel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
 <span class="n">channel</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span>
-<span class="w">                      </span><span class="n">routing_key</span><span class="o">=</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span>
-<span class="w">                      </span><span class="n">body</span><span class="o">=</span><span class="s1">&#39;{&quot;message&quot;: &quot;hello&quot;}&#39;</span><span class="p">)</span>
+                      <span class="n">routing_key</span><span class="o">=</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+                      <span class="n">body</span><span class="o">=</span><span class="s1">&#39;{&quot;message&quot;: &quot;hello&quot;}&#39;</span><span class="p">)</span>
 </code></pre></div>
 
 </li>

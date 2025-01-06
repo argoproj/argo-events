@@ -2177,13 +2177,13 @@
 <p>Before running the code, make sure you have the <code>SERVICE_BUS_CONNECTION_STRING</code> environment variable set.
 This is the connection string for your Azure Service Bus.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">azure.servicebus</span><span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="n">ServiceBusClient</span><span class="p">,</span><span class="w"> </span><span class="n">ServiceBusMessage</span>
-<span class="n">servicebus_client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ServiceBusClient</span><span class="o">.</span><span class="n">from_connection_string</span><span class="p">(</span><span class="n">conn_str</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SERVICE_BUS_CONNECTION_STRING&#39;</span><span class="p">])</span>
-<span class="k">with</span><span class="w"> </span><span class="n">servicebus_client</span><span class="p">:</span>
-<span class="w">    </span><span class="n">sender</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">servicebus_client</span><span class="o">.</span><span class="n">get_queue_sender</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="k">with</span><span class="w"> </span><span class="n">sender</span><span class="p">:</span>
-<span class="w">        </span><span class="n">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ServiceBusMessage</span><span class="p">(</span><span class="s1">&#39;{&quot;hello&quot;: &quot;world&quot;}&#39;</span><span class="p">)</span>
-<span class="w">        </span><span class="n">sender</span><span class="o">.</span><span class="n">send_messages</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">azure.servicebus</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServiceBusClient</span><span class="p">,</span> <span class="n">ServiceBusMessage</span>
+<span class="n">servicebus_client</span> <span class="o">=</span> <span class="n">ServiceBusClient</span><span class="o">.</span><span class="n">from_connection_string</span><span class="p">(</span><span class="n">conn_str</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SERVICE_BUS_CONNECTION_STRING&#39;</span><span class="p">])</span>
+<span class="k">with</span> <span class="n">servicebus_client</span><span class="p">:</span>
+    <span class="n">sender</span> <span class="o">=</span> <span class="n">servicebus_client</span><span class="o">.</span><span class="n">get_queue_sender</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">sender</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">ServiceBusMessage</span><span class="p">(</span><span class="s1">&#39;{&quot;hello&quot;: &quot;world&quot;}&#39;</span><span class="p">)</span>
+        <span class="n">sender</span><span class="o">.</span><span class="n">send_messages</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 </code></pre></div>
 
 </li>
