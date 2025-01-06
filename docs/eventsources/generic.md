@@ -34,7 +34,7 @@ implement following gRPC contract.
             bytes payload = 2;
         }
 
-The proto file is available [here](https://github.com/argoproj/argo-events/blob/master/eventsources/sources/generic/generic.proto).
+The proto file is available [here](https://github.com/argoproj/argo-events/blob/master/pkg/eventsources/sources/generic/generic.proto).
 
 ## Architecture
 
