@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hamba/avro"
+	avro "github.com/hamba/avro/v2"
 	"github.com/riferrei/srclient"
 
 	"github.com/IBM/sarama"
