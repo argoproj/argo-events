@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.9.4 (2025-01-07)
+
+ * [11ee09d0](https://github.com/argoproj/argo-events/commit/11ee09d045e86babce0fcdb5c5e4b447e08710cb) Update manifests to v1.9.4
+ * [49b02df5](https://github.com/argoproj/argo-events/commit/49b02df5dc0ebb0ba9212b5bfe4c231670a572d6) move fuzz tests upstream from cncf-fuzzing (#3414)
+ * [840f4558](https://github.com/argoproj/argo-events/commit/840f455859e6ce35c6726604aef42c3be10d2c8d) fix: CVE-2023-37475 (#3416)
+ * [4ce7782c](https://github.com/argoproj/argo-events/commit/4ce7782caad52fade84d179784e4ad9466760a5f) Fix broken link to generic proto (#3408)
+ * [65cdac39](https://github.com/argoproj/argo-events/commit/65cdac39ec738d27279efcbd12db8541f0df31c7) chore(deps): bump github.com/bradleyfalzon/ghinstallation/v2 from 2.12.0 to 2.13.0 (#3410)
+ * [0d77e006](https://github.com/argoproj/argo-events/commit/0d77e006a40f000be2142ce14c02fed31b3c64e0) chore(deps): bump github.com/go-git/go-git/v5 from 5.12.0 to 5.13.1 (#3411)
+ * [71fd2ce3](https://github.com/argoproj/argo-events/commit/71fd2ce341eaf1599157890bfa5303e04c9921ed) chore(deps): bump google.golang.org/grpc from 1.69.0 to 1.69.2 (#3400)
+ * [4e2bc607](https://github.com/argoproj/argo-events/commit/4e2bc6072c679ed4badce2c958820a9a2734ee82) chore(deps): bump google.golang.org/api from 0.181.0 to 0.214.0 (#3402)
+ * [ff5f916c](https://github.com/argoproj/argo-events/commit/ff5f916cedace2f4ca0652232bd5a1b9cb691e60)  chore: upgrade dependencies and fix lint (#3396)
+ * [abe84da4](https://github.com/argoproj/argo-events/commit/abe84da4aed88b790967a624f9fdcf0cbd5c13c1) feat: adds support for TLS configuration options in exotic jetstream EventBus settings (#3381)
+ * [bbc7a979](https://github.com/argoproj/argo-events/commit/bbc7a9799ed9fb1b09d7c97dc53017b2fc8bc5f0) fix: wrap JS_KEY in quotes in nats-cluster.conf and nats.conf (#3388)
+ * [5640d0df](https://github.com/argoproj/argo-events/commit/5640d0df0b3e6146f561ce5540d1ab0cbf12e37a) chore(deps): bump golang.org/x/crypto from 0.30.0 to 0.31.0 (#3390)
+ * [f81842ba](https://github.com/argoproj/argo-events/commit/f81842baea0a8855b74b455e0adda1d5abc99fc5) chore(deps): bump golang.org/x/crypto from 0.29.0 to 0.30.0 (#3384)
+ * [febce3c1](https://github.com/argoproj/argo-events/commit/febce3c1ef7f9e475de2b54452426124bc0efeac) chore(deps): bump github.com/itchyny/gojq from 0.12.16 to 0.12.17 (#3385)
+ * [bcce6f97](https://github.com/argoproj/argo-events/commit/bcce6f976403c66e149b2514907251ad9225b47d) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.80 to 7.0.81 (#3379)
+ * [9eccf66f](https://github.com/argoproj/argo-events/commit/9eccf66f07d317ff6b1b4e31d1ee7e9f538aa097) chore(deps): bump github.com/riferrei/srclient from 0.5.4 to 0.7.1 (#3378)
+
+### Contributors
+
+ * AdamKorcz
+ * Derek Wang
+ * Francesco Calcavecchia
+ * Jack Langston
+ * Kevin Huber
+ * dependabot[bot]
+
 ## v1.9.3 (2024-11-26)
 
  * [9c8bda9a](https://github.com/argoproj/argo-events/commit/9c8bda9ad1d46bf75e91b851d2265acbf704efbc) Update manifests to v1.9.3
