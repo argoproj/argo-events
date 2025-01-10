@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.9.5 (2025-01-10)
+
+ * [7fc4271d](https://github.com/argoproj/argo-events/commit/7fc4271d91d0d1e693a722822907e6463699ba3d) Update manifests to v1.9.5
+ * [3ed9ab7e](https://github.com/argoproj/argo-events/commit/3ed9ab7e84c0ec64024a86f03980b836e08492ad) fix: adjust connection for custom gRPC trigger (#3421)
+
+### Contributors
+
+ * Derek Wang
+ * Michael Weibel
+
 ## v1.9.4 (2025-01-07)
 
  * [11ee09d0](https://github.com/argoproj/argo-events/commit/11ee09d045e86babce0fcdb5c5e4b447e08710cb) Update manifests to v1.9.4
