@@ -97,21 +97,25 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		opt...,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to trigger server: %w", err)
 	}
 
 	backoff, err := sharedutil.Convert2WaitBackoff(&sharedutil.DefaultBackoff)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to convert wait backoff: %w", err)
 	}
 
 	if err = wait.ExponentialBackoff(*backoff, func() (done bool, err error) {
+		logger.Debugw("waiting for trigger client connection...", "server-url", ct.ServerURL, "err", err, "state", conn.GetState().String())
+		if conn.GetState() == connectivity.Idle {
+			conn.Connect()
+		}
 		if conn.GetState() == connectivity.Ready {
 			return true, nil
 		}
 		return false, nil
 	}); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to trigger server: %w", err)
 	}
 
 	customTrigger.triggerClient = triggers.NewTriggerClient(conn)
