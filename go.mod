@@ -39,7 +39,7 @@ require (
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/go-openapi/inflect v0.21.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-resty/resty/v2 v2.16.2
+	github.com/go-resty/resty/v2 v2.16.3
 	github.com/go-swagger/go-swagger v0.31.0
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
 	github.com/gogo/protobuf v1.3.2
