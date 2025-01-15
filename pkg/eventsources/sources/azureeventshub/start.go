@@ -19,10 +19,11 @@ package azureeventshub
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
-	eventhub "github.com/Azure/azure-event-hubs-go/v3"
+	eventhub "github.com/Azure/azure-sdk-for-go/sdk/messaging/azeventhubs"
 	"go.uber.org/zap"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -61,7 +62,8 @@ func (el *EventListener) GetEventSourceType() aev1.EventSourceType {
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
-	log.Info("started processing the Azure Events Hub event source...")
+
+	log.Info("started processing the Azure Event Hub event source...")
 	defer sources.Recover(el.GetEventName())
 
 	hubEventSource := &el.AzureEventsHubEventSource
@@ -77,71 +79,73 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return fmt.Errorf("failed to retrieve the shared access key from secret %s, %w", hubEventSource.SharedAccessKey.Name, err)
 	}
 
+	log.Info("connecting to event hub...")
 	endpoint := fmt.Sprintf("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", hubEventSource.FQDN, sharedAccessKeyName, sharedAccessKey, hubEventSource.HubName)
-
-	log.Info("connecting to the hub...")
-	hub, err := eventhub.NewHubFromConnectionString(endpoint)
+	consumerClient, err := eventhub.NewConsumerClientFromConnectionString(endpoint, "", eventhub.DefaultConsumerGroup, nil)
 	if err != nil {
 		return fmt.Errorf("failed to connect to the hub %s, %w", hubEventSource.HubName, err)
 	}
 
-	handler := func(c context.Context, event *eventhub.Event) error {
-		defer func(start time.Time) {
-			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
-		}(time.Now())
-
-		log.Info("received an event from eventshub...")
-
-		eventData := &events.AzureEventsHubEventData{
-			Id:       event.ID,
-			Body:     event.Data,
-			Metadata: hubEventSource.Metadata,
-		}
-		if event.PartitionKey != nil {
-			eventData.PartitionKey = *event.PartitionKey
-		}
-
-		eventBytes, err := json.Marshal(eventData)
-		if err != nil {
-			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-			return fmt.Errorf("failed to marshal the event data for event source %s and message id %s, %w", el.GetEventName(), event.ID, err)
-		}
-
-		log.Info("dispatching the event to eventbus...")
-		if err = dispatch(eventBytes); err != nil {
-			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
-			log.Errorw("failed to dispatch Azure EventHub event", zap.Error(err))
-			return err
-		}
-		return nil
-	}
-
-	// listen to each partition of the Event Hub
-	log.Info("gathering the hub runtime information...")
-	runtimeInfo, err := hub.GetRuntimeInformation(ctx)
+	log.Info("retrieving event hub partitions...")
+	hubProps, err := consumerClient.GetEventHubProperties(context.Background(), nil)
 	if err != nil {
-		return fmt.Errorf("failed to get the hub runtime information for %s, %w", el.GetEventName(), err)
+		return fmt.Errorf("failed to get event hub properties: %w", err)
 	}
 
-	if runtimeInfo == nil {
-		return fmt.Errorf("runtime information is not available for %s, %w", el.GetEventName(), err)
-	}
+	for _, partitionID := range hubProps.PartitionIDs {
+		go func(partitionID string) {
+			log.Infow("connecting to partition", "partitionID", partitionID)
+			partitionClient, err := consumerClient.NewPartitionClient(partitionID, nil)
+			if err != nil {
+				log.Errorw("failed to create receiver for partition", "partitionID", partitionID, zap.Error(err))
+				return
+			}
+			defer partitionClient.Close(context.TODO())
 
-	if runtimeInfo.PartitionIDs == nil {
-		return fmt.Errorf("no partition ids are available for %s, %w", el.GetEventName(), err)
-	}
+			for {
+				receiveCtx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+				receivedEvents, err := partitionClient.ReceiveEvents(receiveCtx, 100, nil)
+				cancel()
 
-	log.Info("handling the partitions...")
-	for _, partitionID := range runtimeInfo.PartitionIDs {
-		if _, err := hub.Receive(ctx, partitionID, handler, eventhub.ReceiveWithLatestOffset()); err != nil {
-			return fmt.Errorf("failed to receive events from partition %s, %w", partitionID, err)
-		}
+				if err != nil && !errors.Is(err, context.DeadlineExceeded) {
+					log.Errorw("failed to receive events from partition", "partitionID", partitionID, zap.Error(err))
+					return
+				}
+
+				for _, event := range receivedEvents {
+					log.Infow("received event from partition", "eventID", string(*event.MessageID), "partitionID", partitionID)
+					eventData := &events.AzureEventsHubEventData{
+						Id:       *event.MessageID,
+						Body:     event.Body,
+						Metadata: hubEventSource.Metadata,
+					}
+
+					if event.PartitionKey != nil {
+						eventData.PartitionKey = *event.PartitionKey
+					}
+
+					eventBytes, err := json.Marshal(eventData)
+					if err != nil {
+						el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+						log.Errorw("failed to marshal the event data", "eventSource", el.GetEventName(), "messageID", *event.MessageID, zap.Error(err))
+						return
+					}
+
+					log.Info("dispatching the event to eventbus...")
+					if err = dispatch(eventBytes); err != nil {
+						el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+						log.Errorw("failed to dispatch Azure EventHub event", zap.Error(err))
+						return
+					}
+				}
+			}
+		}(partitionID)
 	}
 
 	<-ctx.Done()
-	log.Info("stopping listener handlers")
+	log.Info("stopping listener")
 
-	hub.Close(context.Background())
+	consumerClient.Close(context.Background())
 
 	return nil
 }
