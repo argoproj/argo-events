@@ -6,7 +6,7 @@ spec:
   azureEventsHub:
     example:
       # FQDN of the EventsHub namespace you created
-      # More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string
+      # More info at https://docs.microsoft.com/azure/event-hubs/event-hubs-get-connection-string
       fqdn: your_fqdn
       sharedAccessKeyName:
         name: secret_containing_shared_access_key_name
@@ -16,3 +16,22 @@ spec:
         key: key_within_the_secret_which_holds_the_value_of_shared_access_key
       # Event Hub path/name
       hubName: hub_name
+    
+# example-using-managed-identity
+# Be sure to the service account you use here has been federated with AAD and has the correct permissions to access the Event Hub
+# More info at https://learn.microsoft.com/azure/aks/workload-identity-overview?tabs=go#service-account-labels-and-annotations
+# 
+# apiVersion: argoproj.io/v1alpha1
+# kind: EventSource
+# metadata:
+#   name: azure-event-hub
+# spec:
+#   template:
+#     serviceAccountName: your_service_account_name
+#     metadata:
+#       labels:
+#         azure.workload.identity/use: "true"
+#   azureEventsHub:
+#     example:
+#       fqdn: your_azure_eventhub_name.servicebus.windows.net
+#       hubName: your_eventhub_name

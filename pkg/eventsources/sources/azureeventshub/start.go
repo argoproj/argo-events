@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	eventhub "github.com/Azure/azure-sdk-for-go/sdk/messaging/azeventhubs"
 	"go.uber.org/zap"
 
@@ -67,23 +68,39 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	defer sources.Recover(el.GetEventName())
 
 	hubEventSource := &el.AzureEventsHubEventSource
-	log.Info("retrieving the shared access key name...")
-	sharedAccessKeyName, err := sharedutil.GetSecretFromVolume(hubEventSource.SharedAccessKeyName)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve the shared access key name from secret %s, %w", hubEventSource.SharedAccessKeyName.Name, err)
-	}
+	var consumerClient *eventhub.ConsumerClient
 
-	log.Info("retrieving the shared access key...")
-	sharedAccessKey, err := sharedutil.GetSecretFromVolume(hubEventSource.SharedAccessKey)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve the shared access key from secret %s, %w", hubEventSource.SharedAccessKey.Name, err)
-	}
+	if hubEventSource.SharedAccessKeyName != nil && hubEventSource.SharedAccessKey != nil {
+		log.Info("retrieving the shared access key name...")
+		sharedAccessKeyName, err := sharedutil.GetSecretFromVolume(hubEventSource.SharedAccessKeyName)
+		if err != nil {
+			return fmt.Errorf("failed to retrieve the shared access key name from secret %s, %w", hubEventSource.SharedAccessKeyName.Name, err)
+		}
 
-	log.Info("connecting to event hub...")
-	endpoint := fmt.Sprintf("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", hubEventSource.FQDN, sharedAccessKeyName, sharedAccessKey, hubEventSource.HubName)
-	consumerClient, err := eventhub.NewConsumerClientFromConnectionString(endpoint, "", eventhub.DefaultConsumerGroup, nil)
-	if err != nil {
-		return fmt.Errorf("failed to connect to the hub %s, %w", hubEventSource.HubName, err)
+		log.Info("retrieving the shared access key...")
+		sharedAccessKey, err := sharedutil.GetSecretFromVolume(hubEventSource.SharedAccessKey)
+		if err != nil {
+			return fmt.Errorf("failed to retrieve the shared access key from secret %s, %w", hubEventSource.SharedAccessKey.Name, err)
+		}
+
+		log.Info("connecting to event hub using connection string...")
+		endpoint := fmt.Sprintf("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", hubEventSource.FQDN, sharedAccessKeyName, sharedAccessKey, hubEventSource.HubName)
+		consumerClient, err = eventhub.NewConsumerClientFromConnectionString(endpoint, "", eventhub.DefaultConsumerGroup, nil)
+		if err != nil {
+			return fmt.Errorf("failed to connect to the hub %s, %w", hubEventSource.HubName, err)
+		}
+	} else {
+		credentials, err := azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			log.Errorw("failed to create DefaultAzureCredential", zap.Error(err))
+			return err
+		}
+
+		log.Info("connecting to event hub using AAD credentials...")
+		consumerClient, err = eventhub.NewConsumerClient(hubEventSource.FQDN, hubEventSource.HubName, eventhub.DefaultConsumerGroup, credentials, nil)
+		if err != nil {
+			return fmt.Errorf("failed to connect to the hub %s, %w", hubEventSource.HubName, err)
+		}
 	}
 
 	log.Info("retrieving event hub partitions...")
@@ -113,7 +130,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 				}
 
 				for _, event := range receivedEvents {
-					log.Infow("received event from partition", "eventID", string(*event.MessageID), "partitionID", partitionID)
+					log.Infow("received event from partition", "eventID", *event.MessageID, "partitionID", partitionID)
 					eventData := &events.AzureEventsHubEventData{
 						Id:       *event.MessageID,
 						Body:     event.Body,

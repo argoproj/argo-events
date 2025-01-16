@@ -1174,9 +1174,13 @@ type AzureEventsHubEventSource struct {
 	// FQDN of the EventHubs namespace you created
 	// More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string
 	FQDN string `json:"fqdn" protobuf:"bytes,1,opt,name=fqdn"`
-	// SharedAccessKeyName is the name you chose for your application's SAS keys
+	// SharedAccessKeyName is the name you chose for your application's SAS keys. If both this field and SharedAccessKey are not provided
+	// it will try to access via Azure AD with DefaultAzureCredential, FQDN and HubName.
+	// +optional
 	SharedAccessKeyName *corev1.SecretKeySelector `json:"sharedAccessKeyName,omitempty" protobuf:"bytes,2,opt,name=sharedAccessKeyName"`
-	// SharedAccessKey is the generated value of the key
+	// SharedAccessKey is the generated value of the key. If both this field and SharedAccessKeyName are not provided
+	// it will try to access via Azure AD with DefaultAzureCredential, FQDN and HubName.
+	// +optional
 	SharedAccessKey *corev1.SecretKeySelector `json:"sharedAccessKey,omitempty" protobuf:"bytes,3,opt,name=sharedAccessKey"`
 	// Event Hub path/name
 	HubName string `json:"hubName" protobuf:"bytes,4,opt,name=hubName"`
