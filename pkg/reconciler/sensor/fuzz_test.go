@@ -95,3 +95,20 @@ func FuzzSensorControllerReconcile(f *testing.F) {
 		_ = Reconcile(cl, nil, args, logging.NewArgoEventsLogger())
 	})
 }
+
+func FuzzValidateSensor(f *testing.F) {
+	f.Fuzz(func(t *testing.T, data []byte) {
+		fdp := fuzz.NewConsumer(data)
+		eventBus := &eventbusv1alpha1.EventBus{}
+		err := fdp.GenerateStruct(eventBus)
+		if err != nil {
+			return
+		}
+		sensor := &eventbusv1alpha1.Sensor{}
+		err = fdp.GenerateStruct(sensor)
+		if err != nil {
+			return
+		}
+		_ = ValidateSensor(sensor, eventBus)
+	})
+}
