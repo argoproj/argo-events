@@ -197,7 +197,7 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 		// call Fetch with timeout
 		msgs, fetchErr := subscription.Fetch(1, nats.MaxWait(time.Second*1))
 		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
-			if previousErr != fetchErr || time.Since(previousErrTime) > 10*time.Second {
+			if (previousErr != nil && previousErr.Error() != fetchErr.Error()) || time.Since(previousErrTime) > 10*time.Second {
 				// avoid log spew - only log error every 10 seconds
 				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, fetchErr, previousErr, previousErrTime)
 			}
