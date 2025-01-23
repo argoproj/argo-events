@@ -57,3 +57,4 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [WooliesX](https://wooliesx.com.au/)
 1. [Woolworths Group](https://www.woolworthsgroup.com.au/)
 1. [Zillow Group](https://www.zillow.com)
+1. [AlpacaTech](https://www.alpaca-tech.ai)
