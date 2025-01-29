@@ -50,10 +50,23 @@ func NewRoute(hookContext *v1alpha1.WebhookContext, logger *zap.SugaredLogger, e
 		EventSourceName: eventSourceName,
 		EventName:       eventName,
 		Active:          false,
-		DataCh:          make(chan []byte),
+		DispatchChan:    make(chan *Dispatch),
 		StartCh:         make(chan struct{}),
 		StopChan:        make(chan struct{}),
 		Metrics:         metrics,
+	}
+}
+
+func DispatchEvent(route *Route, data []byte, logger *zap.SugaredLogger, writer http.ResponseWriter) {
+	logger.Info("dispatching event on route's dispatch channel...")
+	successChan := make(chan bool)
+	route.DispatchChan <- &Dispatch{Data: data, SuccessChan: successChan}
+	if <-successChan {
+		logger.Info("successfully dispatched the request to the event bus")
+		sharedutil.SendSuccessResponse(writer, "success")
+	} else {
+		logger.Error("failed to dispatch the request to the event bus")
+		sharedutil.SendInternalErrorResponse(writer, "failed to record event")
 	}
 }
 
@@ -183,13 +196,15 @@ func manageRouteChannels(router Router, dispatch func([]byte, ...eventsourcecomm
 	logger := route.Logger
 	for {
 		select {
-		case data := <-route.DataCh:
+		case dispatchStruct := <-route.DispatchChan:
 			logger.Info("new event received, dispatching it...")
-			if err := dispatch(data); err != nil {
+			if err := dispatch(dispatchStruct.Data); err != nil {
 				logger.Errorw("failed to send event", zap.Error(err))
+				dispatchStruct.SuccessChan <- false
 				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				continue
 			}
+			dispatchStruct.SuccessChan <- true
 
 		case <-route.StopChan:
 			logger.Info("event source is stopped")
