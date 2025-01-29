@@ -22,12 +22,14 @@ func TestHandleRoute(t *testing.T) {
 
 		convey.Convey("Test Get method with query parameters", func() {
 			url, _ := url.Parse("http://example.com/fake?aaa=b%20b&ccc=d%20d")
-			out := make(chan []byte)
+			out := make(chan *webhook.Dispatch)
 			router.route.Active = true
 			router.route.Context.Method = http.MethodGet
 
 			go func() {
-				out <- <-router.route.DataCh
+				temp := <-router.route.DispatchChan
+				temp.SuccessChan <- true
+				out <- temp
 			}()
 
 			router.HandleRoute(writer, &http.Request{
@@ -36,16 +38,18 @@ func TestHandleRoute(t *testing.T) {
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
-			convey.So(string(result), convey.ShouldContainSubstring, `"body":{"aaa":["b b"],"ccc":["d d"]}`)
+			convey.So(string(result.Data), convey.ShouldContainSubstring, `"body":{"aaa":["b b"],"ccc":["d d"]}`)
 		})
 		convey.Convey("Test Get method without query parameter", func() {
 			url, _ := url.Parse("http://example.com/fake")
-			out := make(chan []byte)
+			out := make(chan *webhook.Dispatch)
 			router.route.Active = true
 			router.route.Context.Method = http.MethodGet
 
 			go func() {
-				out <- <-router.route.DataCh
+				temp := <-router.route.DispatchChan
+				temp.SuccessChan <- true
+				out <- temp
 			}()
 
 			router.HandleRoute(writer, &http.Request{
@@ -54,17 +58,19 @@ func TestHandleRoute(t *testing.T) {
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
-			convey.So(string(result), convey.ShouldContainSubstring, `"body":{}`)
+			convey.So(string(result.Data), convey.ShouldContainSubstring, `"body":{}`)
 		})
 		convey.Convey("Test POST method with form-urlencoded", func() {
 			payload := []byte(`aaa=b%20b&ccc=d%20d`)
 
-			out := make(chan []byte)
+			out := make(chan webhook.Dispatch)
 			router.route.Active = true
 			router.route.Context.Method = http.MethodPost
 
 			go func() {
-				out <- <-router.route.DataCh
+				temp := <-router.route.DispatchChan
+				temp.SuccessChan <- true
+				out <- *temp
 			}()
 
 			var buf bytes.Buffer
@@ -80,17 +86,19 @@ func TestHandleRoute(t *testing.T) {
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
-			convey.So(string(result), convey.ShouldContainSubstring, `"body":{"aaa":["b b"],"ccc":["d d"]}`)
+			convey.So(string(result.Data), convey.ShouldContainSubstring, `"body":{"aaa":["b b"],"ccc":["d d"]}`)
 		})
 		convey.Convey("Test POST method with json", func() {
 			payload := []byte(`{"aaa":["b b"],"ccc":["d d"]}`)
 
-			out := make(chan []byte)
+			out := make(chan webhook.Dispatch)
 			router.route.Active = true
 			router.route.Context.Method = http.MethodPost
 
 			go func() {
-				out <- <-router.route.DataCh
+				temp := <-router.route.DispatchChan
+				temp.SuccessChan <- true
+				out <- *temp
 			}()
 
 			var buf bytes.Buffer
@@ -106,7 +114,7 @@ func TestHandleRoute(t *testing.T) {
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
-			convey.So(string(result), convey.ShouldContainSubstring, `"body":{"aaa":["b b"],"ccc":["d d"]}`)
+			convey.So(string(result.Data), convey.ShouldContainSubstring, `"body":{"aaa":["b b"],"ccc":["d d"]}`)
 		})
 	})
 }

@@ -132,10 +132,7 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	logger.Info("dispatching event on route's data channel...")
-	route.DataCh <- data
-	logger.Info("request successfully processed")
-	sharedutil.SendSuccessResponse(writer, "success")
+	webhook.DispatchEvent(route, data, logger, writer)
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests

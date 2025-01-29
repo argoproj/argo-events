@@ -168,7 +168,6 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		router.subscriptionArn = response.SubscriptionArn
 
 	case messageTypeNotification:
-		logger.Info("dispatching notification on route's data channel")
 
 		eventData := &events.SNSEventData{
 			Header:   request.Header,
@@ -183,7 +182,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
-		route.DataCh <- eventBytes
+		webhook.DispatchEvent(route, eventBytes, logger, writer)
 	}
 
 	logger.Info("request has been successfully processed")

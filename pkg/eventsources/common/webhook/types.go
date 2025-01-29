@@ -44,6 +44,16 @@ type Router interface {
 	PostInactivate() error
 }
 
+// Dispatch is sent by RouteHandler function through
+// the Route's DispatchChan and is used to coordinate writing to the
+// event bus
+type Dispatch struct {
+	// Data contains the webhook data to dispatch to the event bus
+	Data []byte
+	// SuccessChan contains true iff the dispatch of the Data was successful
+	SuccessChan chan bool
+}
+
 // Route contains general information about a route
 type Route struct {
 	// WebhookContext refers to the webhook context
@@ -60,7 +70,7 @@ type Route struct {
 	// or it is an inactive route
 	Active bool
 	// data channel to receive data on this endpoint
-	DataCh chan []byte
+	DispatchChan chan *Dispatch
 	// Stop channel to signal the end of the event source.
 	StopChan chan struct{}
 

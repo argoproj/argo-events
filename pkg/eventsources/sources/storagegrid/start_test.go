@@ -110,9 +110,9 @@ func TestRouteActiveHandler(t *testing.T) {
 		convey.Convey("Active route should return success", func() {
 			router.route.Active = true
 			router.storageGridEventSource = storageGridEventSource
-			dataCh := make(chan []byte)
+			dataCh := make(chan *webhook.Dispatch)
 			go func() {
-				resp := <-router.route.DataCh
+				resp := <-router.route.DispatchChan
 				dataCh <- resp
 			}()
 

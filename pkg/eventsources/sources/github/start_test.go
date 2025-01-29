@@ -41,7 +41,7 @@ var (
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		route := router.route
-		route.DataCh = make(chan []byte)
+		route.DispatchChan = make(chan *webhook.Dispatch)
 
 		convey.Convey("Inactive route should return error", func() {
 			writer := &webhook.FakeHttpWriter{}
@@ -94,7 +94,7 @@ func TestRouteActiveHandler(t *testing.T) {
 func TestRouteActiveHandlerDeprecated(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		route := router.route
-		route.DataCh = make(chan []byte)
+		route.DispatchChan = make(chan *webhook.Dispatch)
 
 		convey.Convey("Inactive route should return error", func() {
 			writer := &webhook.FakeHttpWriter{}
