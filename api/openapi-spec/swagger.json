@@ -1656,6 +1656,14 @@
           },
           "x-kubernetes-patch-merge-key": "type",
           "x-kubernetes-patch-strategy": "merge"
+        },
+        "lastUpdated": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        },
+        "observedGeneration": {
+          "description": "The generation observed by the controller.",
+          "type": "integer",
+          "format": "int64"
         }
       }
     },
@@ -3888,6 +3896,14 @@
           },
           "x-kubernetes-patch-merge-key": "type",
           "x-kubernetes-patch-strategy": "merge"
+        },
+        "lastUpdated": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        },
+        "observedGeneration": {
+          "description": "The generation observed by the controller.",
+          "type": "integer",
+          "format": "int64"
         }
       }
     },

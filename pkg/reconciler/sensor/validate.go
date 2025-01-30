@@ -35,21 +35,13 @@ func ValidateSensor(s *v1alpha1.Sensor, b *v1alpha1.EventBus) error {
 	if s == nil {
 		return fmt.Errorf("nil sensor")
 	}
-	if b == nil {
-		s.Status.MarkDependenciesNotProvided("InvalidEventBus", "nil eventbus")
-		return fmt.Errorf("nil eventbus")
-	}
 	if err := validateDependencies(s.Spec.Dependencies, b); err != nil {
-		s.Status.MarkDependenciesNotProvided("InvalidDependencies", err.Error())
-		return err
+		return fmt.Errorf("invalid dependencies, %w", err)
 	}
-	s.Status.MarkDependenciesProvided()
 	err := validateTriggers(s.Spec.Triggers)
 	if err != nil {
-		s.Status.MarkTriggersNotProvided("InvalidTriggers", err.Error())
-		return err
+		return fmt.Errorf("invalid triggers, %w", err)
 	}
-	s.Status.MarkTriggersProvided()
 	return nil
 }
 

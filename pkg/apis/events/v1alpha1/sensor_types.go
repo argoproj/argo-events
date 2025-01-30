@@ -869,15 +869,18 @@ func (in *StatusPolicy) GetAllow() []int {
 // SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
 	Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
+	// +optional
+	LastUpdated metav1.Time `json:"lastUpdated,omitempty" protobuf:"bytes,2,opt,name=lastUpdated"`
+	// The generation observed by the controller.
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty" protobuf:"varint,3,opt,name=observedGeneration"`
 }
 
 const (
-	// SensorConditionDepencencyProvided has the status True when the
-	// Sensor has valid dependencies provided.
-	SensorConditionDepencencyProvided ConditionType = "DependenciesProvided"
-	// SensorConditionTriggersProvided has the status True when the
-	// Sensor has valid triggers provided.
-	SensorConditionTriggersProvided ConditionType = "TriggersProvided"
+	// SensorConditionConfigured has the status True when the Sensor
+	// has valid configuration.
+	SensorConditionConfigured ConditionType = "Configured"
+
 	// SensorConditionDeployed has the status True when the Sensor
 	// has its Deployment created.
 	SensorConditionDeployed ConditionType = "Deployed"
@@ -885,27 +888,17 @@ const (
 
 // InitConditions sets conditions to Unknown state.
 func (s *SensorStatus) InitConditions() {
-	s.InitializeConditions(SensorConditionDepencencyProvided, SensorConditionTriggersProvided, SensorConditionDeployed)
+	s.InitializeConditions(SensorConditionConfigured, SensorConditionDeployed)
 }
 
 // MarkDependenciesProvided set the sensor has valid dependencies provided.
-func (s *SensorStatus) MarkDependenciesProvided() {
-	s.MarkTrue(SensorConditionDepencencyProvided)
+func (s *SensorStatus) MarkSensorConfigured() {
+	s.MarkTrue(SensorConditionConfigured)
 }
 
 // MarkDependenciesNotProvided set the sensor has invalid dependencies provided.
-func (s *SensorStatus) MarkDependenciesNotProvided(reason, message string) {
-	s.MarkFalse(SensorConditionDepencencyProvided, reason, message)
-}
-
-// MarkTriggersProvided set the sensor has valid triggers provided.
-func (s *SensorStatus) MarkTriggersProvided() {
-	s.MarkTrue(SensorConditionTriggersProvided)
-}
-
-// MarkTriggersNotProvided set the sensor has invalid triggers provided.
-func (s *SensorStatus) MarkTriggersNotProvided(reason, message string) {
-	s.MarkFalse(SensorConditionTriggersProvided, reason, message)
+func (s *SensorStatus) MarkSensorNotConfigured(reason, message string) {
+	s.MarkFalse(SensorConditionConfigured, reason, message)
 }
 
 // MarkDeployed set the sensor has been deployed.
@@ -916,6 +909,10 @@ func (s *SensorStatus) MarkDeployed() {
 // MarkDeployFailed set the sensor deploy failed
 func (s *SensorStatus) MarkDeployFailed(reason, message string) {
 	s.MarkFalse(SensorConditionDeployed, reason, message)
+}
+
+func (s *SensorStatus) SetObservedGeneration(value int64) {
+	s.ObservedGeneration = value
 }
 
 // ArtifactLocation describes the source location for an external artifact
