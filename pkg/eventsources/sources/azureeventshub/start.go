@@ -126,7 +126,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 				if err != nil && !errors.Is(err, context.DeadlineExceeded) {
 					log.Errorw("failed to receive events from partition", "partitionID", partitionID, zap.Error(err))
-					return
+					continue
 				}
 
 				for _, event := range receivedEvents {
@@ -145,14 +145,14 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					if err != nil {
 						el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 						log.Errorw("failed to marshal the event data", "eventSource", el.GetEventName(), "messageID", *event.MessageID, zap.Error(err))
-						return
+						continue
 					}
 
 					log.Info("dispatching the event to eventbus...")
 					if err = dispatch(eventBytes); err != nil {
 						el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 						log.Errorw("failed to dispatch Azure EventHub event", zap.Error(err))
-						return
+						continue
 					}
 				}
 			}

@@ -42,7 +42,46 @@ following command for code regeneration.
 make codegen
 ```
 
-### Deploying and testing your changes on a cluster
+### Deploying and testing your changes on a local dev cluster
+
+Make sure you have a local dev cluster running and have the current kubeconfig context set to the local cluster as the following steps will use that to load the images and deploy the controller. The local dev cluster can be Minikube, Kind, or K3D.
+
+#### 1. Building images
+
+If you want a fresh build before building the container image, run the following commands to delete any existing binaries.
+
+```
+rm -rf dist
+```
+
+The following command will build the images and load/import it into the local cluster.
+
+```
+make image
+```
+
+#### 2. Make the manifests
+
+To generate the manifests, run the following command:
+
+```
+make manifests
+```
+
+#### 3. Deploy the custom resource definitions (CRDs) and custom build of the controller
+
+Run the following command to deploy the CRDs and controller:
+
+```
+make start
+```
+
+> ![NOTE]
+> This command will build the images so you don't need to run `make image` before running `make start`.
+
+### Deploying and testing your changes on managed clusters in the cloud
+
+You might want to test certain changes on a managed cluster in the cloud. For example, testing Microsoft Entra ID Workload Identity on AKS. The following steps will guide you through that process.
 
 #### 1. Building images
 
