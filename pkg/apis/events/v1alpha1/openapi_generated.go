@@ -754,13 +754,13 @@ func schema_pkg_apis_events_v1alpha1_AzureEventsHubEventSource(ref common.Refere
 					},
 					"sharedAccessKeyName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SharedAccessKeyName is the name you chose for your application's SAS keys",
+							Description: "SharedAccessKeyName is the name you chose for your application's SAS keys. If both this field and SharedAccessKey are not provided it will try to access via Azure AD with DefaultAzureCredential, FQDN and HubName.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 					"sharedAccessKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "SharedAccessKey is the generated value of the key",
+							Description: "SharedAccessKey is the generated value of the key. If both this field and SharedAccessKeyName are not provided it will try to access via Azure AD with DefaultAzureCredential, FQDN and HubName.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},

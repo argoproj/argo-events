@@ -38,11 +38,9 @@ func validate(eventSource *v1alpha1.AzureEventsHubEventSource) error {
 	if eventSource.HubName == "" {
 		return fmt.Errorf("hub name/path is not specified")
 	}
-	if eventSource.SharedAccessKey == nil {
-		return fmt.Errorf("SharedAccessKey is not specified")
-	}
-	if eventSource.SharedAccessKeyName == nil {
-		return fmt.Errorf("SharedAccessKeyName is not specified")
+	// these fields can both be empty but if one is set then the other must be set
+	if (eventSource.SharedAccessKey == nil) != (eventSource.SharedAccessKeyName == nil) {
+		return fmt.Errorf("SharedAccessKey or SharedAccessKeyName is not specified. If one is set then both must be set")
 	}
 	return nil
 }
