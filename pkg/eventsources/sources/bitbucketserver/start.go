@@ -161,8 +161,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			return
 		}
 
-		logger.Info("dispatching event on route's data channel")
-		route.DataCh <- eventBody
+		webhook.DispatchEvent(route, eventBody, logger, writer)
 	}
 
 	logger.Info("request successfully processed")
