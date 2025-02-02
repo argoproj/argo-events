@@ -1997,9 +1997,84 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changing-types" class="md-nav__link">
-    Changing Types
+  <a href="#4-changing-types" class="md-nav__link">
+    4. Changing Types
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploying-and-testing-your-changes-on-a-local-dev-cluster" class="md-nav__link">
+    Deploying and testing your changes on a local dev cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploying and testing your changes on a local dev cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-building-images" class="md-nav__link">
+    1. Building images
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-make-the-manifests" class="md-nav__link">
+    2. Make the manifests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller" class="md-nav__link">
+    3. Deploy the custom resource definitions (CRDs) and custom build of the controller
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploying-and-testing-your-changes-on-managed-clusters-in-the-cloud" class="md-nav__link">
+    Deploying and testing your changes on managed clusters in the cloud
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploying and testing your changes on managed clusters in the cloud">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-building-images_1" class="md-nav__link">
+    1. Building images
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-make-the-manifests_1" class="md-nav__link">
+    2. Make the manifests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller_1" class="md-nav__link">
+    3. Deploy the custom resource definitions (CRDs) and custom build of the controller
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-uninstalling-custom-deployment-of-argo-events" class="md-nav__link">
+    4. Uninstalling custom deployment of Argo Events
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2158,9 +2233,84 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changing-types" class="md-nav__link">
-    Changing Types
+  <a href="#4-changing-types" class="md-nav__link">
+    4. Changing Types
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploying-and-testing-your-changes-on-a-local-dev-cluster" class="md-nav__link">
+    Deploying and testing your changes on a local dev cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploying and testing your changes on a local dev cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-building-images" class="md-nav__link">
+    1. Building images
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-make-the-manifests" class="md-nav__link">
+    2. Make the manifests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller" class="md-nav__link">
+    3. Deploy the custom resource definitions (CRDs) and custom build of the controller
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploying-and-testing-your-changes-on-managed-clusters-in-the-cloud" class="md-nav__link">
+    Deploying and testing your changes on managed clusters in the cloud
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploying and testing your changes on managed clusters in the cloud">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-building-images_1" class="md-nav__link">
+    1. Building images
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-make-the-manifests_1" class="md-nav__link">
+    2. Make the manifests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller_1" class="md-nav__link">
+    3. Deploy the custom resource definitions (CRDs) and custom build of the controller
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-uninstalling-custom-deployment-of-argo-events" class="md-nav__link">
+    4. Uninstalling custom deployment of Argo Events
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2209,10 +2359,89 @@ eval $(minikube docker-env)
 <h4 id="3-build-the-project">3. Build the project<a class="headerlink" href="#3-build-the-project" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code>make build
 </code></pre></div>
-<h3 id="changing-types">Changing Types<a class="headerlink" href="#changing-types" title="Permanent link">&para;</a></h3>
+<h3 id="4-changing-types">4. Changing Types<a class="headerlink" href="#4-changing-types" title="Permanent link">&para;</a></h3>
 <p>If you're making a change to the <code>pkg/apis</code> package, please ensure you re-run
 following command for code regeneration.</p>
 <div class="highlight"><pre><span></span><code>make codegen
+</code></pre></div>
+<h3 id="deploying-and-testing-your-changes-on-a-local-dev-cluster">Deploying and testing your changes on a local dev cluster<a class="headerlink" href="#deploying-and-testing-your-changes-on-a-local-dev-cluster" title="Permanent link">&para;</a></h3>
+<p>Make sure you have a local dev cluster running and have the current kubeconfig context set to the local cluster as the following steps will use that to load the images and deploy the controller. The local dev cluster can be Minikube, Kind, or K3D.</p>
+<h4 id="1-building-images">1. Building images<a class="headerlink" href="#1-building-images" title="Permanent link">&para;</a></h4>
+<p>If you want a fresh build before building the container image, run the following commands to delete any existing binaries.</p>
+<div class="highlight"><pre><span></span><code>rm -rf dist
+</code></pre></div>
+<p>The following command will build the images and load/import it into the local cluster.</p>
+<div class="highlight"><pre><span></span><code>make image
+</code></pre></div>
+<h4 id="2-make-the-manifests">2. Make the manifests<a class="headerlink" href="#2-make-the-manifests" title="Permanent link">&para;</a></h4>
+<p>To generate the manifests, run the following command:</p>
+<div class="highlight"><pre><span></span><code>make manifests
+</code></pre></div>
+<h4 id="3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller">3. Deploy the custom resource definitions (CRDs) and custom build of the controller<a class="headerlink" href="#3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller" title="Permanent link">&para;</a></h4>
+<p>Run the following command to deploy the CRDs and controller:</p>
+<div class="highlight"><pre><span></span><code>make start
+</code></pre></div>
+<blockquote>
+<p>![NOTE]
+This command will build the images so you don't need to run <code>make image</code> before running <code>make start</code>.</p>
+</blockquote>
+<h3 id="deploying-and-testing-your-changes-on-managed-clusters-in-the-cloud">Deploying and testing your changes on managed clusters in the cloud<a class="headerlink" href="#deploying-and-testing-your-changes-on-managed-clusters-in-the-cloud" title="Permanent link">&para;</a></h3>
+<p>You might want to test certain changes on a managed cluster in the cloud. For example, testing Microsoft Entra ID Workload Identity on AKS. The following steps will guide you through that process.</p>
+<h4 id="1-building-images_1">1. Building images<a class="headerlink" href="#1-building-images_1" title="Permanent link">&para;</a></h4>
+<p>We can use ephemeral containers for quick testing with images hosted by friends at <a href="https://ttl.sh/">ttl.sh</a>. </p>
+<p>If you want a fresh build before building the container image, run the following commands to delete any existing binaries.</p>
+<div class="highlight"><pre><span></span><code>rm -rf dist
+</code></pre></div>
+<p>The ephemeral container image repository must be unique and the tag is used to determine how long the image is kept.</p>
+<p>Run the following commands to generate a unique repository name and tag it so the image will be kept for 1 hour.</p>
+<div class="highlight"><pre><span></span><code>IMG_REPO=$(uuidgen | tr &#39;[:upper:]&#39; &#39;[:lower:]&#39;)
+IMG_VERSION=1h
+</code></pre></div>
+<p>Using the ephemeral image repository and version, run the following command to build and push a multi-arch image to ttl.sh.</p>
+<div class="highlight"><pre><span></span><code>DOCKER_PUSH=true IMAGE_NAMESPACE=ttl.sh/$IMG_REPO VERSION=$IMG_VERSION make image-multi
+</code></pre></div>
+<h4 id="2-make-the-manifests_1">2. Make the manifests<a class="headerlink" href="#2-make-the-manifests_1" title="Permanent link">&para;</a></h4>
+<p>To generate the manifests, run the following command:</p>
+<div class="highlight"><pre><span></span><code>make manifests
+</code></pre></div>
+<h4 id="3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller_1">3. Deploy the custom resource definitions (CRDs) and custom build of the controller<a class="headerlink" href="#3-deploy-the-custom-resource-definitions-crds-and-custom-build-of-the-controller_1" title="Permanent link">&para;</a></h4>
+<p>To deploy the CRDs and controller, we can create a kustomization.yaml file for the cluster based installation and customize it to use the custom image.</p>
+<p>Run the following command to create a kustomization.yaml file for the cluster based installation.</p>
+<div class="highlight"><pre><span></span><code>kustomize create --resources manifests/install.yaml
+</code></pre></div>
+<p>Add the image to the kustomization.yaml file by running the following command:</p>
+<div class="highlight"><pre><span></span><code>cat &lt;&lt;EOF &gt;&gt; kustomization.yaml
+images:
+  - name: quay.io/argoproj/argo-events
+    newName: ttl.sh/${IMG_REPO}/argo-events
+    newTag: ${IMG_VERSION}
+patches:
+  - target:
+      kind: Deployment
+      name: controller-manager
+      namespace: argo-events
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/containers/0/env/0
+      - op: add
+        path: /spec/template/spec/containers/0/env/0
+        value:
+          name: ARGO_EVENTS_IMAGE
+          value: ttl.sh/${IMG_REPO}/argo-events:${IMG_VERSION}
+EOF
+</code></pre></div>
+<p>Make sure you are connected to the cluster you want to deploy to then run the following command to create a namespace for Argo Events.</p>
+<div class="highlight"><pre><span></span><code>kubectl create namespace argo-events
+</code></pre></div>
+<p>Deploy Argo Events with the custom container image to the cluster.</p>
+<div class="highlight"><pre><span></span><code>kustomize build . | kubectl apply -f -
+</code></pre></div>
+<p>Now you can test your changes.</p>
+<h4 id="4-uninstalling-custom-deployment-of-argo-events">4. Uninstalling custom deployment of Argo Events<a class="headerlink" href="#4-uninstalling-custom-deployment-of-argo-events" title="Permanent link">&para;</a></h4>
+<p>To uninstall Argo Events, run the following commands:</p>
+<div class="highlight"><pre><span></span><code>kustomize build . | kubectl delete -f -
+kubectl delete namespace argo-events --wait=false
+rm kustomization.yaml
 </code></pre></div>
 
               
