@@ -188,7 +188,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			route.Metrics.EventProcessingDuration(route.EventSourceName, route.EventName, float64(time.Since(start)/time.Millisecond))
 		}(time.Now())
 
-		logger.Info("new event received, dispatching event on route's data channel")
+		logger.Info("new event received")
 		eventData := &events.StorageGridEventData{
 			Notification: notification,
 			Metadata:     router.storageGridEventSource.Metadata,
@@ -199,7 +199,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 			return
 		}
-		route.DataCh <- eventBody
+		webhook.DispatchEvent(route, eventBody, logger, writer)
 		return
 	}
 

@@ -98,7 +98,8 @@ func TestSlackSignature(t *testing.T) {
 			router.route.Active = true
 
 			go func() {
-				<-router.route.DataCh
+				temp := <-router.route.DispatchChan
+				temp.SuccessChan <- true
 			}()
 
 			router.HandleRoute(writer, &http.Request{
@@ -122,11 +123,13 @@ func TestInteractionHandler(t *testing.T) {
 			writer := &webhook.FakeHttpWriter{}
 			actionString := `{"type":"block_actions","team":{"id":"T9TK3CUKW","domain":"example"},"user":{"id":"UA8RXUSPL","username":"jtorrance","team_id":"T9TK3CUKW"},"api_app_id":"AABA1ABCD","token":"9s8d9as89d8as9d8as989","container":{"type":"message_attachment","message_ts":"1548261231.000200","attachment_id":1,"channel_id":"CBR2V3XEX","is_ephemeral":false,"is_app_unfurl":false},"trigger_id":"12321423423.333649436676.d8c1bb837935619ccad0f624c448ffb3","channel":{"id":"CBR2V3XEX","name":"review-updates"},"message":{"bot_id":"BAH5CA16Z","type":"message","text":"This content can't be displayed.","user":"UAJ2RU415","ts":"1548261231.000200"},"response_url":"https://hooks.slack.com/actions/AABA1ABCD/1232321423432/D09sSasdasdAS9091209","actions":[{"action_id":"WaXA","block_id":"=qXel","text":{"type":"plain_text","text":"View","emoji":true},"value":"click_me_123","type":"button","action_ts":"1548426417.840180"}]}`
 			payload := []byte(`payload=` + actionString)
-			out := make(chan []byte)
+			out := make(chan *webhook.Dispatch)
 			router.route.Active = true
 
 			go func() {
-				out <- <-router.route.DataCh
+				temp := <-router.route.DispatchChan
+				temp.SuccessChan <- true
+				out <- temp
 			}()
 
 			var buf bytes.Buffer
@@ -141,8 +144,8 @@ func TestInteractionHandler(t *testing.T) {
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
-			convey.So(string(result), convey.ShouldContainSubstring, "\"type\":\"block_actions\"")
-			convey.So(string(result), convey.ShouldContainSubstring, "\"token\":\"9s8d9as89d8as9d8as989\"")
+			convey.So(string(result.Data), convey.ShouldContainSubstring, "\"type\":\"block_actions\"")
+			convey.So(string(result.Data), convey.ShouldContainSubstring, "\"token\":\"9s8d9as89d8as9d8as989\"")
 		})
 	})
 }
@@ -158,11 +161,13 @@ func TestSlackCommandHandler(t *testing.T) {
 			writer := &webhook.FakeHttpWriter{}
 			// Test values pulled from example here: https://api.slack.com/interactivity/slash-commands#app_command_handling
 			payload := []byte(`token=gIkuvaNzQIHg97ATvDxqgjtO&team_id=T0001&team_domain=example&enterprise_id=E0001&enterprise_name=Globular%20Construct%20Inc&channel_id=C2147483705&channel_name=test&user_id=U2147483697&user_name=Steve&command=/weather&text=94070&response_url=https://hooks.slack.com/commands/1234/5678&trigger_id=13345224609.738474920.8088930838d88f008e0&api_app_id=A123456`)
-			out := make(chan []byte)
+			out := make(chan *webhook.Dispatch)
 			router.route.Active = true
 
 			go func() {
-				out <- <-router.route.DataCh
+				temp := <-router.route.DispatchChan
+				temp.SuccessChan <- true
+				out <- temp
 			}()
 
 			var buf bytes.Buffer
@@ -177,8 +182,8 @@ func TestSlackCommandHandler(t *testing.T) {
 			})
 			result := <-out
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
-			convey.So(string(result), convey.ShouldContainSubstring, "\"command\":\"/weather\"")
-			convey.So(string(result), convey.ShouldContainSubstring, "\"token\":\"gIkuvaNzQIHg97ATvDxqgjtO\"")
+			convey.So(string(result.Data), convey.ShouldContainSubstring, "\"command\":\"/weather\"")
+			convey.So(string(result.Data), convey.ShouldContainSubstring, "\"token\":\"gIkuvaNzQIHg97ATvDxqgjtO\"")
 		})
 	})
 }
@@ -219,7 +224,7 @@ func TestEventHandler(t *testing.T) {
 			router.route.Active = true
 
 			go func() {
-				<-router.route.DataCh
+				<-router.route.DispatchChan
 			}()
 
 			router.HandleRoute(writer, &http.Request{
