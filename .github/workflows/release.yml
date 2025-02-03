@@ -3,7 +3,7 @@ name: release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
     branches:
       - master
       - dev-*
@@ -36,19 +36,19 @@ jobs:
       - name: Make checksums
         run: make checksums
       - name: store artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: binaries
           path: dist
 
   build-push-linux-multi:
     name: Build & push linux/amd64 and linux/arm64
-    needs: [ build-binaries ]
+    needs: [build-binaries]
     runs-on: ubuntu-20.04
     if: github.repository == 'argoproj/argo-events'
     strategy:
       matrix:
-        target: [ argo-events ]
+        target: [argo-events]
     steps:
       - uses: actions/checkout@v4
 
@@ -84,7 +84,7 @@ jobs:
   bom:
     runs-on: ubuntu-latest
     if: github.repository == 'argoproj/argo-events'
-    needs: [ build-push-linux-multi ]
+    needs: [build-push-linux-multi]
     steps:
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
       - run: |
@@ -104,17 +104,17 @@ jobs:
       - run: bom generate --image quay.io/argoproj/argo-events:$VERSION -o /tmp/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: cd /tmp && tar -zcf sbom.tar.gz *.spdx
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: sbom.tar.gz
           path: /tmp/sbom.tar.gz
 
   release:
     permissions:
-      contents: write  # for softprops/action-gh-release to create GitHub release
+      contents: write # for softprops/action-gh-release to create GitHub release
     runs-on: ubuntu-latest
     if: github.repository == 'argoproj/argo-events'
-    needs: [ build-push-linux-multi, bom ]
+    needs: [build-push-linux-multi, bom]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -148,7 +148,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
         with:
-          cosign-release: 'v1.13.1'
+          cosign-release: "v1.13.1"
 
       - name: Install crane to get digest of image
         uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
