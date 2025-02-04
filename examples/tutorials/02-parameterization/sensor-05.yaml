@@ -41,16 +41,17 @@ spec:
                 dependencyName: THIS_WILL_BE_REPLACED
                 dataKey: THIS_WILL_BE_REPLACED
               dest: THIS_WILL_BE_REPLACED
-        parameters:
-          - src:
-              dependencyName: test-dep
-              dataKey: body.dependencyName
-            dest: argoWorkflow.parameters.0.src.dependencyName
-          - src:
-              dependencyName: test-dep
-              dataKey: body.dataKey
-            dest: argoWorkflow.parameters.0.src.dataKey
-          - src:
-              dependencyName: test-dep
-              dataKey: body.dest
-            dest: argoWorkflow.parameters.0.dest
+      # Apply parameters at the template level.              
+      parameters:
+        - src:
+            dependencyName: test-dep
+            dataKey: body.dependencyName
+          dest: argoWorkflow.parameters.0.src.dependencyName
+        - src:
+            dependencyName: test-dep
+            dataKey: body.dataKey
+          dest: argoWorkflow.parameters.0.src.dataKey
+        - src:
+            dependencyName: test-dep
+            dataKey: body.dest
+          dest: argoWorkflow.parameters.0.dest
