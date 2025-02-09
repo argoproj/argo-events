@@ -1670,6 +1670,7 @@ func (in *EventSourceSpec) DeepCopy() *EventSourceSpec {
 func (in *EventSourceStatus) DeepCopyInto(out *EventSourceStatus) {
 	*out = *in
 	in.Status.DeepCopyInto(&out.Status)
+	in.LastUpdated.DeepCopyInto(&out.LastUpdated)
 	return
 }
 
@@ -3779,6 +3780,7 @@ func (in *SensorSpec) DeepCopy() *SensorSpec {
 func (in *SensorStatus) DeepCopyInto(out *SensorStatus) {
 	*out = *in
 	in.Status.DeepCopyInto(&out.Status)
+	in.LastUpdated.DeepCopyInto(&out.LastUpdated)
 	return
 }
 

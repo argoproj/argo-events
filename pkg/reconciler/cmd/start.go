@@ -133,7 +133,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	// EventSource controller
-	eventSourceController, err := controller.New(eventsource.ControllerName, mgr, controller.Options{
+	eventSourceController, err := controller.New(aev1.ControllerEventSource, mgr, controller.Options{
 		Reconciler: eventsource.NewReconciler(mgr.GetClient(), mgr.GetScheme(), imageName, logger),
 	})
 	if err != nil {
