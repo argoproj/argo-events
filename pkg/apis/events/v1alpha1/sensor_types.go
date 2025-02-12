@@ -1052,7 +1052,7 @@ type EventContext struct {
 }
 
 func (e EventContext) String() string {
-	return fmt.Sprintf(`{"id:" "%s", "source": "%s", "specversion": "%s", "type": "%s", "datacontenttype": "%s", "subject": "%s", "time": "%s"}`, e.ID, e.Source, e.SpecVersion, e.Type, e.DataContentType, e.Subject, e.Time)
+	return fmt.Sprintf(`{"id": "%s", "source": "%s", "specversion": "%s", "type": "%s", "datacontenttype": "%s", "subject": "%s", "time": "%s"}`, e.ID, e.Source, e.SpecVersion, e.Type, e.DataContentType, e.Subject, e.Time)
 }
 
 // HasLocation whether or not an artifact has a location defined
