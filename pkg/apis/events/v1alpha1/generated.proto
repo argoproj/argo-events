@@ -1990,6 +1990,10 @@ message NATSTrigger {
   // TLS configuration for the NATS producer.
   // +optional
   optional TLSConfig tls = 5;
+
+  // AuthInformation
+  // +optional
+  optional NATSAuth auth = 6;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub

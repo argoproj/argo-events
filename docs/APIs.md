@@ -12845,7 +12845,8 @@ NATSAuth
 <p>
 
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>)
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
+<a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>)
 </p>
 
 <p>
@@ -13520,6 +13521,26 @@ TLSConfig </a> </em>
 <p>
 
 TLS configuration for the NATS producer.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>auth</code></br> <em> <a href="#argoproj.io/v1alpha1.NATSAuth">
+NATSAuth </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+AuthInformation
 </p>
 
 </td>

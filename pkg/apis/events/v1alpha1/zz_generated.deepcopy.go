@@ -2765,6 +2765,11 @@ func (in *NATSTrigger) DeepCopyInto(out *NATSTrigger) {
 		*out = new(TLSConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Auth != nil {
+		in, out := &in.Auth, &out.Auth
+		*out = new(NATSAuth)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

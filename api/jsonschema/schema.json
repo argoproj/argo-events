@@ -2785,6 +2785,10 @@
     "io.argoproj.events.v1alpha1.NATSTrigger": {
       "description": "NATSTrigger refers to the specification of the NATS trigger.",
       "properties": {
+        "auth": {
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.NATSAuth",
+          "description": "AuthInformation"
+        },
         "parameters": {
           "items": {
             "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"

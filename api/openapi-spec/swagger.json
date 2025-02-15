@@ -2774,6 +2774,10 @@
         "payload"
       ],
       "properties": {
+        "auth": {
+          "description": "AuthInformation",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.NATSAuth"
+        },
         "parameters": {
           "type": "array",
           "items": {
