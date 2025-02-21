@@ -1149,6 +1149,13 @@ message EventSourceSpec {
 // EventSourceStatus holds the status of the event-source resource
 message EventSourceStatus {
   optional Status status = 1;
+
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastUpdated = 2;
+
+  // The generation observed by the controller.
+  // +optional
+  optional int64 observedGeneration = 3;
 }
 
 message ExprFilter {
@@ -2786,6 +2793,13 @@ message SensorSpec {
 // SensorStatus contains information about the status of a sensor.
 message SensorStatus {
   optional Status status = 1;
+
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastUpdated = 2;
+
+  // The generation observed by the controller.
+  // +optional
+  optional int64 observedGeneration = 3;
 }
 
 // Service holds the service information eventsource exposes
