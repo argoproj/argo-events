@@ -2090,7 +2090,7 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 <ol>
 <li>
 <p>Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &amp;
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events port-forward svc/webhook-eventsource-svc 12000:12000
 </code></pre></div>
 
 </li>
