@@ -46,7 +46,7 @@ The Argo Workflow controller will need to be configured to listen for Workflow o
 
 1. Expose the event-source pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.
 
-        kubectl -n argo-events port-forward $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
+        kubectl -n argo-events port-forward svc/webhook-eventsource-svc 12000:12000
 
 1. Use either Curl or Postman to send a post request to the <http://localhost:12000/example>.
 
