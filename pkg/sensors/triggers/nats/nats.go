@@ -48,20 +48,55 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 	conn, ok := natsConnections.Load(trigger.Template.Name)
 	if !ok {
 		var err error
-		opts := natslib.GetDefaultOptions()
-		opts.Url = natstrigger.URL
+
+		var opt []natslib.Option
 
 		if natstrigger.TLS != nil {
 			tlsConfig, err := sharedutil.GetTLSConfig(natstrigger.TLS)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get the tls configuration, %w", err)
 			}
-			tlsConfig.InsecureSkipVerify = true
-			opts.Secure = true
-			opts.TLSConfig = tlsConfig
+			opt = append(opt, natslib.Secure(tlsConfig))
 		}
 
-		conn, err = opts.Connect()
+		if natstrigger.Auth != nil {
+			switch {
+			case natstrigger.Auth.Basic != nil:
+				username, err := sharedutil.GetSecretFromVolume(natstrigger.Auth.Basic.Username)
+				if err != nil {
+					return nil, err
+				}
+				password, err := sharedutil.GetSecretFromVolume(natstrigger.Auth.Basic.Password)
+				if err != nil {
+					return nil, err
+				}
+				opt = append(opt, natslib.UserInfo(username, password))
+			case natstrigger.Auth.Token != nil:
+				token, err := sharedutil.GetSecretFromVolume(natstrigger.Auth.Token)
+				if err != nil {
+					return nil, err
+				}
+				opt = append(opt, natslib.Token(token))
+			case natstrigger.Auth.NKey != nil:
+				nkeyFile, err := sharedutil.GetSecretVolumePath(natstrigger.Auth.NKey)
+				if err != nil {
+					return nil, err
+				}
+				o, err := natslib.NkeyOptionFromSeed(nkeyFile)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get NKey, %w", err)
+				}
+				opt = append(opt, o)
+			case natstrigger.Auth.Credential != nil:
+				cFile, err := sharedutil.GetSecretVolumePath(natstrigger.Auth.Credential)
+				if err != nil {
+					return nil, err
+				}
+				opt = append(opt, natslib.UserCredentials(cFile))
+			}
+		}
+
+		conn, err = natslib.Connect(natstrigger.URL, opt...)
 		if err != nil {
 			return nil, err
 		}

@@ -5310,12 +5310,18 @@ func schema_pkg_apis_events_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"),
 						},
 					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AuthInformation",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSAuth"),
+						},
+					},
 				},
 				Required: []string{"url", "subject", "payload"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSAuth", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"},
 	}
 }
 
