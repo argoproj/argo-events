@@ -64,5 +64,5 @@ set up the AWS SNS event-source.
 
 **Q. Where can I find the event structure for a particular event-source?**
 
-**A.** Please refer to [this file](https://github.com/argoproj/argo-events/blob/master/pkg/apis/eventsource/v1alpha1/types.go) to understand the structure
+**A.** Please refer to [this file](https://github.com/argoproj/argo-events/blob/master/pkg/apis/events/v1alpha1/eventsource_types.go) to understand the structure
 of different types of events dispatched by the event-source pod.
