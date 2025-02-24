@@ -632,6 +632,9 @@ type NATSTrigger struct {
 	// TLS configuration for the NATS producer.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// AuthInformation
+	// +optional
+	Auth *NATSAuth `json:"auth,omitempty" protobuf:"bytes,6,opt,name=auth"`
 }
 
 // CustomTrigger refers to the specification of the custom trigger.
