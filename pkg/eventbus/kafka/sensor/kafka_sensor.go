@@ -221,7 +221,7 @@ func (s *KafkaSensor) Listen(ctx context.Context) {
 
 			// Fail fast if the server returns an incomplete response 
 			if err == sarama.ErrIncompleteResponse {
-				s.Logger.Fatalf("Kafka error: %s", zap.Error(err))
+				s.Logger.Fatalw("Kafka error", zap.Error(err))
 			}
 
 			s.Logger.Errorw("Failed to consume", zap.Error(err))
