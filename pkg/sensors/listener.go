@@ -58,9 +58,9 @@ func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
 	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
 
-	// sensor for kafka eventbus can be scaled horizontally,
+	// sensor for kafka/jetstream eventbus can be scaled horizontally,
 	// therefore does not require an elector
-	if sensorCtx.eventBusConfig.Kafka != nil {
+	if sensorCtx.eventBusConfig.Kafka != nil || sensorCtx.eventBusConfig.JetStream != nil {
 		return sensorCtx.listenEvents(ctx)
 	}
 
