@@ -78,7 +78,7 @@ require (
 	github.com/tidwall/sjson v1.2.4
 	github.com/xdg-go/scram v1.1.2
 	github.com/yuin/gopher-lua v1.1.1
-	gitlab.com/gitlab-org/api/client-go v0.123.0
+	gitlab.com/gitlab-org/api/client-go v0.124.0
 	go.uber.org/ratelimit v0.3.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.34.0
