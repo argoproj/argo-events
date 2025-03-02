@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	zap "go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	klog "k8s.io/klog/v2"
 )
 
@@ -33,6 +34,7 @@ func NewArgoEventsLogger() *zap.SugaredLogger {
 	logLevel, _ := os.LookupEnv("LOG_LEVEL")
 	config := ConfigureLogLevelLogger(logLevel)
 	// Config customization goes here if any
+	config.EncoderConfig.EncodeTime = zapcore.RFC3339NanoTimeEncoder
 	config.OutputPaths = []string{"stdout"}
 	logger, err := config.Build()
 	if err != nil {
