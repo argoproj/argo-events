@@ -365,6 +365,9 @@ func getEventTime(obj *unstructured.Unstructured, eventType v1alpha1.ResourceEve
 	case v1alpha1.UPDATE:
 		t := obj.GetCreationTimestamp()
 		for _, f := range obj.GetManagedFields() {
+			if f.Time == nil {
+				continue
+			}
 			if f.Operation == metav1.ManagedFieldsOperationUpdate && f.Time.UTC().After(t.UTC()) {
 				t = *f.Time
 			}
