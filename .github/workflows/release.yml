@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build-binaries:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.repository == 'argoproj/argo-events'
     name: Build binaries
     steps:
@@ -44,7 +44,7 @@ jobs:
   build-push-linux-multi:
     name: Build & push linux/amd64 and linux/arm64
     needs: [build-binaries]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.repository == 'argoproj/argo-events'
     strategy:
       matrix:
