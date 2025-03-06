@@ -1,18 +1,16 @@
 package expr
 
 import (
+	"encoding/json"
 	"fmt"
-
 	"sort"
 	"strings"
 
-	"encoding/json"
-
+	"github.com/Masterminds/sprig/v3"
 	"github.com/antonmedv/expr"
+	"github.com/antonmedv/expr/builtin"
 	"github.com/doublerebel/bellows"
-
-	sprig "github.com/Masterminds/sprig/v3"
-	exprpkg "github.com/argoproj/pkg/expr"
+	"github.com/evilmonkeyinc/jsonpath"
 )
 
 func EvalBool(input string, env interface{}) (bool, error) {
@@ -36,9 +34,11 @@ func init() {
 
 func GetFuncMap(m map[string]interface{}) map[string]interface{} {
 	env := Expand(m)
-	for k, v := range exprpkg.GetExprEnvFunctionMap() {
-		env[k] = v
-	}
+	// Alias for the built-in `int` function, for backwards compatibility.
+	env["asInt"] = builtin.Int
+	// Alias for the built-in `float` function, for backwards compatibility.
+	env["asFloat"] = builtin.Float
+	env["jsonpath"] = jsonPath
 	env["toJson"] = toJson
 	env["sprig"] = sprigFuncMap
 	return env
@@ -50,6 +50,19 @@ func toJson(v interface{}) string {
 		return ""
 	}
 	return string(output)
+}
+
+func jsonPath(jsonStr string, path string) interface{} {
+	var jsonMap interface{}
+	err := json.Unmarshal([]byte(jsonStr), &jsonMap)
+	if err != nil {
+		panic(err)
+	}
+	value, err := jsonpath.Query(path, jsonMap)
+	if err != nil {
+		panic(err)
+	}
+	return value
 }
 
 func Expand(m map[string]interface{}) map[string]interface{} {
