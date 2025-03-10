@@ -859,6 +859,7 @@ type GitlabEventSource struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
 	// List of project IDs or project namespace paths like "whynowy/test".
+	// If neither a project nor a group is defined, the EventSource will not manage webhooks.
 	// +optional
 	Projects []string `json:"projects,omitempty" protobuf:"bytes,10,rep,name=projects"`
 	// SecretToken references to k8 secret which holds the Secret Token used by webhook config
