@@ -24,7 +24,6 @@ require (
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/apache/pulsar-client-go v0.12.0
 	github.com/argoproj/notifications-engine v0.4.0
-	github.com/argoproj/pkg v0.13.6
 	github.com/aws/aws-sdk-go v1.47.11
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.14.0
@@ -33,6 +32,7 @@ require (
 	github.com/doublerebel/bellows v0.0.0-20160303004610-f177d92a03d3
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/emitter-io/go/v2 v2.0.9
+	github.com/evilmonkeyinc/jsonpath v0.8.1
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/gfleury/go-bitbucket-v1 v0.0.0-20210707202713-7d616f7c18ac
@@ -248,7 +248,6 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nicksnyder/go-i18n v1.10.1-0.20190510212457-b280125b035a // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
 	github.com/opsgenie/opsgenie-go-sdk-v2 v1.0.5 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
