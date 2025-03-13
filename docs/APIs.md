@@ -10099,8 +10099,9 @@ event payload.
 <em>(Optional)</em>
 <p>
 
-List of project IDs or project namespace paths like “whynowy/test”.
-Projects and groups cannot be empty at the same time.
+List of project IDs or project namespace paths like “whynowy/test”. If
+neither a project nor a group is defined, the EventSource will not
+manage webhooks.
 </p>
 
 </td>
