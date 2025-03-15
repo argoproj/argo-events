@@ -1,6 +1,7 @@
 module github.com/argoproj/argo-events
 
 go 1.23.4
+toolchain go1.24.1
 
 retract v1.15.1 // Contains retractions only.
 
@@ -62,7 +63,7 @@ require (
 	github.com/nats-io/nats.go v1.39.1
 	github.com/nats-io/stan.go v0.10.4
 	github.com/nsqio/go-nsq v1.1.0
-	github.com/pkg/sftp v1.13.7
+	github.com/pkg/sftp v1.13.8
 	github.com/prometheus/client_golang v1.21.1
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/radovskyb/watcher v1.0.7
